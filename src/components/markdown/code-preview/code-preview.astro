@@ -1,0 +1,32 @@
+---
+import { Code } from "@astrojs/starlight/components"
+import fs from "node:fs/promises"
+import {
+  type Demo,
+  CodePreviewInternal,
+} from "@/components/markdown/code-preview/_code-preview-internal"
+
+type Props = { demo: Demo }
+
+const { demo } = Astro.props
+const componentName = demo?.split("/")[0] ?? ""
+const fileContents = (
+  await fs.readFile(`./src/registry/new-york/examples/${demo}.tsx`, "utf-8")
+).replace(
+  new RegExp(
+    `from "@\\/registry\\/new-york\\/items\\/${componentName}\\/components\\/${componentName}"`,
+    "g",
+  ),
+  `from "@/components/ui/${componentName}"`,
+)
+---
+
+<div>
+  <CodePreviewInternal demo={demo} client:load>
+    <Code
+      code={fileContents}
+      lang="tsx"
+      class="h-full rounded-none [&>figure.frame]:h-full [&>figure.frame>pre]:h-full"
+    />
+  </CodePreviewInternal>
+</div>

@@ -1,0 +1,364 @@
+---
+title: Virtualization Table
+description: Handle large datasets efficiently with virtual scrolling.
+---
+
+import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
+import CollapsiblePreview from "@/components/markdown/collapsible-preview.astro"
+
+<CodePreview demo="data-table/virtualization-table" />
+
+<CollapsiblePreview>
+  <CodePreview demo="data-table/virtualization-table-state" />
+</CollapsiblePreview>
+
+## Introduction
+
+The Virtualization Table uses virtual scrolling to efficiently render large datasets (1000+ rows) by only rendering visible rows. This provides smooth performance even with 10,000+ rows.
+
+## Installation
+
+1. Add the required components:
+
+```bash
+npx shadcn@latest add table input button dropdown-menu scroll-area
+```
+
+2. Add dependencies:
+
+```bash
+npm install @tanstack/react-table @tanstack/react-virtual
+```
+
+3. Copy the DataTable components into your project. See the [Installation Guide](/getting-started/installation) for detailed instructions.
+
+## Prerequisites
+
+We are going to build a table to show products with virtualization. Here's what our data looks like:
+
+```tsx showLineNumbers
+type Product = {
+  id: string
+  name: string
+  category: string
+  price: number
+  stock: number
+  status: "in-stock" | "low-stock" | "out-of-stock"
+}
+
+// Generate large dataset
+const largeData: Product[] = Array.from({ length: 10000 }, (_, i) => ({
+  id: `product-${i + 1}`,
+  name: `Product ${i + 1}`,
+  category: "Electronics",
+  price: Math.floor(Math.random() * 500) + 10,
+  stock: Math.floor(Math.random() * 150),
+  status: "in-stock",
+}))
+```
+
+## Basic Table with Virtualization
+
+Let's start by building a virtualized table.
+
+### Column Definitions
+
+First, we'll define our columns.
+
+```tsx showLineNumbers title="columns.tsx"
+"use client"
+
+import { TableColumnHeader } from "@/components/data-table/components"
+import type { DataTableColumnDef } from "@/components/data-table/types"
+
+export type Product = {
+  id: string
+  name: string
+  category: string
+  price: number
+  stock: number
+  status: "in-stock" | "low-stock" | "out-of-stock"
+}
+
+export const columns: DataTableColumnDef<Product>[] = [
+  {
+    accessorKey: "name",
+    header: ({ column }) => <TableColumnHeader column={column} title="Name" />,
+    cell: ({ row }) => (
+      <div className="font-medium">{row.getValue("name")}</div>
+    ),
+  },
+  {
+    accessorKey: "category",
+    header: ({ column }) => (
+      <TableColumnHeader column={column} title="Category" />
+    ),
+  },
+  {
+    accessorKey: "price",
+    header: ({ column }) => <TableColumnHeader column={column} title="Price" />,
+    cell: ({ row }) => {
+      const price = row.getValue("price") as number
+      return <div className="font-mono">${price.toFixed(2)}</div>
+    },
+  },
+  {
+    accessorKey: "stock",
+    header: ({ column }) => <TableColumnHeader column={column} title="Stock" />,
+  },
+  {
+    accessorKey: "status",
+    header: ({ column }) => (
+      <TableColumnHeader column={column} title="Status" />
+    ),
+  },
+]
+```
+
+### `<DataTable />` component
+
+Next, we'll create a virtualized table.
+
+```tsx showLineNumbers title="virtualization-table.tsx"
+"use client"
+
+import {
+  DataTableRoot,
+  DataTableToolbarSection,
+  DataTable,
+  DataTableVirtualizedHeader,
+  DataTableVirtualizedBody,
+  DataTablePagination,
+  DataTableSearchFilter,
+  DataTableViewMenu,
+  DataTableVirtualizedEmptyBody,
+  DataTableVirtualizedSkeleton,
+} from "@/components/data-table"
+import { TableColumnHeader } from "@/components/data-table/components"
+import type { DataTableColumnDef } from "@/components/data-table/types"
+
+type Product = {
+  id: string
+  name: string
+  category: string
+  price: number
+  stock: number
+  status: "in-stock" | "low-stock" | "out-of-stock"
+}
+
+const columns: DataTableColumnDef<Product>[] = [
+  {
+    accessorKey: "name",
+    header: ({ column }) => <TableColumnHeader column={column} title="Name" />,
+    cell: ({ row }) => (
+      <div className="font-medium">{row.getValue("name")}</div>
+    ),
+  },
+  {
+    accessorKey: "category",
+    header: ({ column }) => (
+      <TableColumnHeader column={column} title="Category" />
+    ),
+  },
+  {
+    accessorKey: "price",
+    header: ({ column }) => <TableColumnHeader column={column} title="Price" />,
+    cell: ({ row }) => {
+      const price = row.getValue("price") as number
+      return <div className="font-mono">${price.toFixed(2)}</div>
+    },
+  },
+  {
+    accessorKey: "stock",
+    header: ({ column }) => <TableColumnHeader column={column} title="Stock" />,
+  },
+  {
+    accessorKey: "status",
+    header: ({ column }) => (
+      <TableColumnHeader column={column} title="Status" />
+    ),
+  },
+]
+
+export function VirtualizationTable({ data }: { data: Product[] }) {
+  return (
+    <DataTableRoot
+      data={data}
+      columns={columns}
+      config={{
+        enablePagination: true,
+        enableSorting: true,
+        enableFilters: true,
+      }}
+    >
+      <DataTableToolbarSection>
+        <DataTableSearchFilter placeholder="Search products..." />
+        <DataTableViewMenu />
+      </DataTableToolbarSection>
+
+      <DataTable height={600} className="rounded-lg border">
+        <DataTableVirtualizedHeader />
+        <DataTableVirtualizedBody>
+          <DataTableVirtualizedSkeleton rows={5} />
+          <DataTableVirtualizedEmptyBody />
+        </DataTableVirtualizedBody>
+      </DataTable>
+
+      <DataTablePagination pageSizeOptions={[50, 100, 200, 500]} />
+    </DataTableRoot>
+  )
+}
+```
+
+## Virtualized Components
+
+### DataTableVirtualizedHeader
+
+Virtualized version of the table header.
+
+```tsx
+<DataTableVirtualizedHeader />
+```
+
+### DataTableVirtualizedBody
+
+Virtualized version of the table body. Only renders visible rows.
+
+```tsx
+<DataTableVirtualizedBody>
+  <DataTableVirtualizedEmptyBody />
+</DataTableVirtualizedBody>
+```
+
+### DataTableVirtualizedEmptyBody
+
+Empty state component for virtualized tables.
+
+```tsx
+<DataTableVirtualizedEmptyBody />
+```
+
+### DataTableVirtualizedSkeleton
+
+Skeleton loading state for virtualized tables. Shows skeleton rows during data fetching.
+
+```tsx
+<DataTableVirtualizedBody>
+  <DataTableVirtualizedSkeleton rows={5} />
+  <DataTableVirtualizedEmptyBody />
+</DataTableVirtualizedBody>
+```
+
+### DataTableVirtualizedLoading
+
+Simple loading spinner for virtualized tables. Shows a centered loading indicator.
+
+```tsx
+<DataTableVirtualizedBody>
+  <DataTableVirtualizedLoading />
+  <DataTableVirtualizedEmptyBody />
+</DataTableVirtualizedBody>
+```
+
+**Note:** Use `DataTableVirtualizedSkeleton` for a more detailed loading state that mimics the table structure, or `DataTableVirtualizedLoading` for a simple spinner.
+
+## Required: Fixed Height
+
+Virtualization requires a fixed height on the `DataTable` component:
+
+```tsx showLineNumbers
+<DataTable height={600} className="rounded-lg border">
+  <DataTableVirtualizedHeader />
+  <DataTableVirtualizedBody>
+    <DataTableVirtualizedSkeleton rows={5} />
+    <DataTableVirtualizedEmptyBody />
+  </DataTableVirtualizedBody>
+</DataTable>
+```
+
+## Controlled State
+
+Manage table state externally for full control:
+
+```tsx showLineNumbers
+import { useState } from "react"
+import type {
+  SortingState,
+  ColumnFiltersState,
+  PaginationState,
+} from "@tanstack/react-table"
+
+export function ControlledVirtualizationTable({ data }: { data: Product[] }) {
+  const [sorting, setSorting] = useState<SortingState>([])
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 50,
+  })
+  const [globalFilter, setGlobalFilter] = useState("")
+
+  return (
+    <DataTableRoot
+      data={data}
+      columns={columns}
+      config={{
+        enablePagination: true,
+        enableSorting: true,
+        enableFilters: true,
+      }}
+      state={{
+        sorting,
+        columnFilters,
+        pagination,
+        globalFilter,
+      }}
+      onSortingChange={setSorting}
+      onColumnFiltersChange={setColumnFilters}
+      onPaginationChange={setPagination}
+      onGlobalFilterChange={setGlobalFilter}
+    >
+      <DataTableToolbarSection>
+        <DataTableSearchFilter placeholder="Search products..." />
+        <DataTableViewMenu />
+      </DataTableToolbarSection>
+
+      <DataTable height={600} className="rounded-lg border">
+        <DataTableVirtualizedHeader />
+        <DataTableVirtualizedBody>
+          <DataTableVirtualizedSkeleton rows={5} />
+          <DataTableVirtualizedEmptyBody />
+        </DataTableVirtualizedBody>
+      </DataTable>
+
+      <DataTablePagination pageSizeOptions={[50, 100, 200, 500]} />
+    </DataTableRoot>
+  )
+}
+```
+
+## When to Use
+
+**✅ Use Virtualization Table when:**
+
+- You have 1000+ rows
+- Performance is critical
+- Users need smooth scrolling
+- Dataset is too large for regular pagination
+
+**❌ Don't use Virtualization Table when:**
+
+- You have < 1000 rows (use [Basic Table](/data-table/basic-table))
+- You need variable row heights (virtualization works best with fixed heights)
+- You need complex row interactions (virtualization has limitations)
+
+## Performance Tips
+
+1. **Fixed height required**: Always set a fixed height on `DataTable`
+2. **Consistent row heights**: Virtualization works best with uniform row heights
+3. **Memoize columns**: Wrap column definitions in `useMemo`
+4. **Large page sizes**: Use larger page sizes (50-500) for better virtualization
+
+## Next Steps
+
+- [Basic Table](/data-table/basic-table) - For smaller datasets
+- [Advanced Table](/data-table/advanced-table) - Combine with other features

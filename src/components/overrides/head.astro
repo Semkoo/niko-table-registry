@@ -1,0 +1,28 @@
+---
+const { head } = Astro.locals.starlightRoute
+
+// By default, Astro renders the default favicon before the media specific favicons which results in the media specific favicons not being used.
+// This code forces the default favicon to only be used when the user has no preference for light or dark mode instead of always being used.
+const sortedHead = head.map(h => {
+  if (h.tag !== "link") return h
+  if (
+    typeof h.attrs !== "object" ||
+    typeof h.attrs.rel !== "string" ||
+    !h.attrs.rel.includes("icon") ||
+    h.attrs.media
+  ) {
+    return h
+  }
+
+  return {
+    ...h,
+    attrs: { ...h.attrs, media: "(prefers-color-scheme: no-preference)" },
+  }
+})
+---
+
+{
+  sortedHead.map(({ tag: Tag, attrs, content }) => (
+    <Tag {...attrs} set:html={content} />
+  ))
+}

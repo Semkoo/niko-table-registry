@@ -1,0 +1,583 @@
+---
+title: Installation
+description: How to install and set up the DataTable component in your project.
+---
+
+import { Steps } from "@astrojs/starlight/components"
+import Installation from "@/components/markdown/installation-tabs/installation-tabs.astro"
+import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
+
+## Prerequisites
+
+Before installing the DataTable component, make sure you have:
+
+1. **A React project** (Next.js, Vite, etc.)
+2. **Shadcn UI** set up in your project ([Installation Guide](https://ui.shadcn.com/docs/installation))
+3. **TailwindCSS** configured
+4. **TypeScript** (recommended)
+
+## Architecture Note
+
+The DataTable components use a two-layer architecture for maximum flexibility:
+
+- **Actions** (`data-table-*.tsx` in `/actions` folder) - Context-aware wrapper components that use `useDataTable()` hook to automatically get the table from `DataTableRoot` context. These eliminate prop drilling and are the recommended way to use components:
+  - `DataTableSearchFilter`, `DataTableFilterMenu`, `DataTableSortMenu`, `DataTablePagination`, etc.
+- **Filters** (`table-*.tsx` in `/filters` folder) - Core implementation components that accept a `table` prop directly and use TanStack Table hooks (like `table.getState()`, `table.setGlobalFilter()`, etc.). These can be used standalone:
+  - `TableSearchFilter`, `TableFilterMenu`, `TableSortMenu`, etc.
+
+**Why this architecture?**
+
+- Use `DataTable*` components from actions when you want context-based, zero-config usage
+- Use `Table*` components from filters when you want to build custom components or manage the table instance yourself
+- All filter components use TanStack Table hooks directly, giving you full control
+
+Learn more in the [Introduction](/getting-started/introduction#state-management-with-react-context).
+
+## Update Shadcn Table Component First
+
+**Important**: Before installing DataTable, you must update your Shadcn `table` component. This is required for DataTable to work properly.
+
+<Steps>
+  1. **Add the Shadcn table component** (if you haven't already)
+
+     <CliCommandCode
+       action="run"
+       command="npx shadcn@latest add table"
+     />
+
+2. **Update `components/ui/table.tsx`**
+
+   Replace the entire contents with this updated version:
+
+   ```tsx title="components/ui/table.tsx"
+   "use client"
+
+   import * as React from "react"
+
+   import { cn } from "@/lib/utils"
+
+   function TableComponent({ className, ...props }: React.ComponentProps<"table">) {
+     return (
+       <table
+         data-slot="table"
+         className={cn("w-full caption-bottom text-sm", className)}
+         {...props}
+       />
+     )
+   }
+
+   function Table({ className, ...props }: React.ComponentProps<"table">) {
+     return (
+       <div
+         data-slot="table-container"
+         className="relative w-full overflow-x-auto"
+       >
+         <TableComponent className={className} {...props} />
+       </div>
+     )
+   }
+
+   function TableHeader({ className, ...props }: React.ComponentProps<"thead">) {
+     return (
+       <thead
+         data-slot="table-header"
+         className={cn("[&_tr]:border-b", className)}
+         {...props}
+       />
+     )
+   }
+
+   function TableBody({ className, ...props }: React.ComponentProps<"tbody">) {
+     return (
+       <tbody
+         data-slot="table-body"
+         className={cn("[&_tr:last-child]:border-0", className)}
+         {...props}
+       />
+     )
+   }
+
+   function TableFooter({ className, ...props }: React.ComponentProps<"tfoot">) {
+     return (
+       <tfoot
+         data-slot="table-footer"
+         className={cn(
+           "border-t bg-muted/50 font-medium [&>tr]:last:border-b-0",
+           className,
+         )}
+         {...props}
+       />
+     )
+   }
+
+   function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
+     return (
+       <tr
+         data-slot="table-row"
+         className={cn(
+           "border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted",
+           className,
+         )}
+         {...props}
+       />
+     )
+   }
+
+   function TableHead({ className, ...props }: React.ComponentProps<"th">) {
+     return (
+       <th
+         data-slot="table-head"
+         className={cn(
+           "h-10 px-2 text-left align-middle font-medium whitespace-nowrap text-foreground [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
+           className,
+         )}
+         {...props}
+       />
+     )
+   }
+
+   function TableCell({ className, ...props }: React.ComponentProps<"td">) {
+     return (
+       <td
+         data-slot="table-cell"
+         className={cn(
+           "p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
+           className,
+         )}
+         {...props}
+       />
+     )
+   }
+
+   function TableCaption({
+     className,
+     ...props
+   }: React.ComponentProps<"caption">) {
+     return (
+       <caption
+         data-slot="table-caption"
+         className={cn("mt-4 text-sm text-muted-foreground", className)}
+         {...props}
+       />
+     )
+   }
+
+   export {
+     TableComponent,
+     Table,
+     TableHeader,
+     TableBody,
+     TableFooter,
+     TableHead,
+     TableRow,
+     TableCell,
+     TableCaption,
+   }
+   ```
+
+   **What changed?**
+   - Added `TableComponent` export (used internally by DataTable)
+   - Added `data-slot` attributes to all elements
+   - Wrapped table in a container div for overflow handling
+
+   > **Note**: These changes are **100% backward compatible** - your existing Shadcn tables will continue to work exactly as before.
+
+</Steps>
+
+## Installation
+
+Now you can install the DataTable components:
+
+<Installation registryItem="data-table" />
+
+## Manual Installation
+
+Prefer to copy and paste all components manually? Check out our [Manual Installation Guide](/getting-started/manual-installation) page where you can copy all the component files at once.
+
+## Your First Table
+
+Let's build your first table. We'll start with a simple table and progressively add features.
+
+<Steps>
+  1. **Start by defining your data**
+
+     The following data represents a list of users with their names and emails.
+
+     ```tsx title="components/example-table.tsx"
+     type User = {
+       id: string
+       name: string
+       email: string
+       status: "active" | "inactive"
+     }
+
+     const data: User[] = [
+       { id: "1", name: "John Doe", email: "john@example.com", status: "active" },
+       { id: "2", name: "Jane Smith", email: "jane@example.com", status: "active" },
+       { id: "3", name: "Bob Johnson", email: "bob@example.com", status: "inactive" },
+     ]
+     ```
+
+2. **Define your columns**
+
+   Columns define how your data is displayed in the table.
+
+   ```tsx title="components/example-table.tsx"
+   import type { DataTableColumnDef } from "@/components/data-table/types"
+
+   const columns: DataTableColumnDef<User>[] = [
+     {
+       accessorKey: "name",
+       header: "Name",
+     },
+     {
+       accessorKey: "email",
+       header: "Email",
+     },
+     {
+       accessorKey: "status",
+       header: "Status",
+       cell: ({ row }) => (
+         <span
+           className={
+             row.original.status === "active"
+               ? "text-green-600"
+               : "text-gray-400"
+           }
+         >
+           {row.original.status}
+         </span>
+       ),
+     },
+   ]
+   ```
+
+3. **Build your table**
+
+   You can now build your table using DataTable components.
+
+   ```tsx title="components/example-table.tsx"
+   import {
+     DataTableRoot,
+     DataTable,
+     DataTableHeader,
+     DataTableBody,
+   } from "@/components/data-table"
+
+   export function ExampleTable() {
+     return (
+       <DataTableRoot data={data} columns={columns}>
+         <DataTable>
+           <DataTableHeader />
+           <DataTableBody />
+         </DataTable>
+       </DataTableRoot>
+     )
+   }
+   ```
+
+</Steps>
+
+## Dependencies by Example
+
+Different examples require different dependencies. Here's what you need for each:
+
+### Simple Table
+
+- `@tanstack/react-table`
+- Shadcn: `table`
+
+### Basic Table
+
+- `@tanstack/react-table`
+- Shadcn: `table`, `button`, `dropdown-menu`
+
+### Search Table
+
+- `@tanstack/react-table`
+- Shadcn: `table`, `button`, `input`, `dropdown-menu`
+
+### Faceted Filter Table
+
+- `@tanstack/react-table`
+- Shadcn: `table`, `button`, `input`, `dropdown-menu`, `popover`, `command`, `checkbox`, `select`
+
+### Row Selection Table
+
+- `@tanstack/react-table`
+- Shadcn: `table`, `button`, `checkbox`, `dropdown-menu`
+
+### Row Expansion Table
+
+- `@tanstack/react-table`
+- Shadcn: `table`, `button`, `input`, `dropdown-menu`
+
+### Tree Table
+
+- `@tanstack/react-table`
+- Shadcn: `table`, `button`, `input`, `dropdown-menu`
+
+### Virtualization Table
+
+- `@tanstack/react-table`
+- `@tanstack/react-virtual`
+- Shadcn: `table`, `button`, `input`, `dropdown-menu`, `scroll-area`
+
+### Advanced Table (All Features)
+
+- `@tanstack/react-table`
+- Shadcn: `table`, `button`, `input`, `dropdown-menu`, `popover`, `command`, `checkbox`, `select`, `scroll-area`, `separator`, `skeleton`, `tooltip`
+- **Inline Filters**: Included in DataTable components (no additional dependencies)
+- **Sortable Rows** (optional): [DiceUI Sortable](https://www.diceui.com/docs/components/sortable) - `@dnd-kit/core`, `@dnd-kit/modifiers`, `@dnd-kit/sortable`, `@dnd-kit/utilities`, `@radix-ui/react-slot`
+
+### Advanced Table with URL State (nuqs)
+
+- `@tanstack/react-table`
+- `nuqs` ([nuqs.dev](https://nuqs.dev/)) - Type-safe search params state manager for URL state management
+- Shadcn: All components from Advanced Table
+- **Inline Filters**: Included in DataTable components (no additional dependencies)
+- **Sortable Rows** (optional): [DiceUI Sortable](https://www.diceui.com/docs/components/sortable) - `@dnd-kit/core`, `@dnd-kit/modifiers`, `@dnd-kit/sortable`, `@dnd-kit/utilities`, `@radix-ui/react-slot`
+
+## Optional Dependencies
+
+Some advanced features may require additional dependencies:
+
+### URL State Management (nuqs)
+
+For URL state persistence in tables, install [nuqs](https://nuqs.dev/):
+
+```bash
+npm install nuqs
+```
+
+nuqs provides type-safe search params state management, perfect for syncing table filters, pagination, and sorting with the URL.
+
+### Sortable/Draggable Rows
+
+For drag-and-drop row reordering, follow the [DiceUI Sortable installation guide](https://www.diceui.com/docs/components/sortable).
+
+## Quick Install All Dependencies
+
+If you want to install everything upfront:
+
+<CliCommandCode
+  action="install"
+  command="npm install @tanstack/react-table @tanstack/react-virtual nuqs @dnd-kit/core @dnd-kit/modifiers @dnd-kit/sortable @dnd-kit/utilities @radix-ui/react-slot"
+/>
+
+<CliCommandCode
+  action="run"
+  command="npx shadcn@latest add table button input dropdown-menu popover command checkbox select scroll-area separator skeleton tooltip"
+/>
+
+<CliCommandCode
+  action="run"
+  command='npx shadcn@latest add "https://diceui.com/r/sortable"'
+/>
+
+## Update Shadcn Table Component
+
+**Important**: The default shadcn `table` component needs to be updated to work properly with DataTable. After installing the table component, update your `components/ui/table.tsx` file.
+
+> **Note**: These changes are **backward compatible** and won't break any existing shadcn UI table usage. The updated component maintains all the same functionality and API, just adds the `TableComponent` export and `data-slot` attributes needed by DataTable.
+
+```tsx title="components/ui/table.tsx"
+"use client"
+
+import * as React from "react"
+
+import { cn } from "@/lib/utils"
+
+function TableComponent({
+  className,
+  ...props
+}: React.ComponentProps<"table">) {
+  return (
+    <table
+      data-slot="table"
+      className={cn("w-full caption-bottom text-sm", className)}
+      {...props}
+    />
+  )
+}
+
+function Table({ className, ...props }: React.ComponentProps<"table">) {
+  return (
+    <div
+      data-slot="table-container"
+      className="relative w-full overflow-x-auto"
+    >
+      <TableComponent className={className} {...props} />
+    </div>
+  )
+}
+
+function TableHeader({ className, ...props }: React.ComponentProps<"thead">) {
+  return (
+    <thead
+      data-slot="table-header"
+      className={cn("[&_tr]:border-b", className)}
+      {...props}
+    />
+  )
+}
+
+function TableBody({ className, ...props }: React.ComponentProps<"tbody">) {
+  return (
+    <tbody
+      data-slot="table-body"
+      className={cn("[&_tr:last-child]:border-0", className)}
+      {...props}
+    />
+  )
+}
+
+function TableFooter({ className, ...props }: React.ComponentProps<"tfoot">) {
+  return (
+    <tfoot
+      data-slot="table-footer"
+      className={cn(
+        "border-t bg-muted/50 font-medium [&>tr]:last:border-b-0",
+        className,
+      )}
+      {...props}
+    />
+  )
+}
+
+function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
+  return (
+    <tr
+      data-slot="table-row"
+      className={cn(
+        "border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted",
+        className,
+      )}
+      {...props}
+    />
+  )
+}
+
+function TableHead({ className, ...props }: React.ComponentProps<"th">) {
+  return (
+    <th
+      data-slot="table-head"
+      className={cn(
+        "h-10 px-2 text-left align-middle font-medium whitespace-nowrap text-foreground [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
+        className,
+      )}
+      {...props}
+    />
+  )
+}
+
+function TableCell({ className, ...props }: React.ComponentProps<"td">) {
+  return (
+    <td
+      data-slot="table-cell"
+      className={cn(
+        "p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
+        className,
+      )}
+      {...props}
+    />
+  )
+}
+
+function TableCaption({
+  className,
+  ...props
+}: React.ComponentProps<"caption">) {
+  return (
+    <caption
+      data-slot="table-caption"
+      className={cn("mt-4 text-sm text-muted-foreground", className)}
+      {...props}
+    />
+  )
+}
+
+export {
+  TableComponent,
+  Table,
+  TableHeader,
+  TableBody,
+  TableFooter,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableCaption,
+}
+```
+
+The key changes are:
+
+- Added `TableComponent` export (used internally by DataTable)
+- Added `data-slot` attributes to all table elements
+- Updated `Table` to wrap `TableComponent` in a container div
+
+## Project Structure
+
+After installation, your project structure should look like:
+
+```
+src/
+├── components/
+│   ├── ui/          # Shadcn UI components
+│   └── data-table/  # DataTable components
+│       ├── core/
+│       ├── types/
+│       ├── hooks/
+│       ├── components/
+│       ├── filters/
+│       ├── actions/
+│       ├── config/
+│       ├── lib/
+│       └── index.tsx
+└── lib/
+    └── utils.ts
+```
+
+## Verify Installation
+
+Create a simple test to verify everything is working:
+
+```tsx
+import {
+  DataTableRoot,
+  DataTable,
+  DataTableHeader,
+  DataTableBody,
+} from "@/components/data-table"
+
+const columns = [
+  { accessorKey: "name", header: "Name" },
+  { accessorKey: "email", header: "Email" },
+]
+
+const data = [
+  { id: "1", name: "John Doe", email: "john@example.com" },
+  { id: "2", name: "Jane Smith", email: "jane@example.com" },
+]
+
+export function TestTable() {
+  return (
+    <DataTableRoot data={data} columns={columns}>
+      <DataTable>
+        <DataTableHeader />
+        <DataTableBody />
+      </DataTable>
+    </DataTableRoot>
+  )
+}
+```
+
+## Next Steps
+
+Now that you have the DataTable installed, check out the examples:
+
+- [Simple Table](/data-table/simple-table) - Basic table with no pagination
+- [Basic Table](/data-table/basic-table) - Add pagination and sorting
+- [Search Table](/data-table/search-table) - Add search functionality
+- [Faceted Filter Table](/data-table/faceted-filter-table) - Add advanced filtering
+- [Advanced Table](/data-table/advanced-table) - All features combined

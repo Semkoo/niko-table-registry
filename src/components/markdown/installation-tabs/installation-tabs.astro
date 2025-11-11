@@ -1,0 +1,136 @@
+---
+import { Code } from "@astrojs/starlight/components"
+import { InstallationTabsInternal } from "@/components/markdown/installation-tabs/_installation-tabs-internal"
+import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
+import type {
+  RegistryFileType,
+  RegistryItemSchema,
+} from "@/types/shadcn-registry"
+import { SERVER_URL } from "@/data/env"
+import { ManualInstallCodeCard } from "@/components/manual-install-code-card"
+
+type RegistryItem = "data-table" | never
+
+type Props = { registryItem: RegistryItem }
+
+const { registryItem } = Astro.props
+
+const module = (await import(`../../../../public/r/${registryItem}.json`))
+  .default as RegistryItemSchema
+
+const filesToCopy = module.files?.map(file => {
+  const pathFromType = getFileLocationFromType(file.type)
+  return {
+    path:
+      file.target ??
+      `${pathFromType}/${registryItem}.${file.path.split(".").pop()}`,
+    // TODO: In what cases is content undefined?
+    content: file.content ?? "",
+  }
+})
+
+const npmModulesToInstall = module.dependencies
+const registryDependencies = module.registryDependencies
+  ?.map(dep => {
+    if (dep.startsWith("http")) {
+      // This is a non-shadcn/ui dependency that is hosted on our registry.
+      // Currently other registry dependencies are not supported.
+      const name = dep.split("/").pop()?.split(".")[0]?.replace("-", " ")
+      return {
+        name,
+        href: `${SERVER_URL}/components/${name}`,
+      }
+    } else {
+      // This is a shadcn/ui dependency.
+      return {
+        name: dep.replace("-", " "),
+        href: `https://ui.shadcn.com/docs/components/${dep}`,
+      }
+    }
+  })
+  .filter(d => d.name != null)
+
+function getFileLocationFromType(type: RegistryFileType) {
+  switch (type) {
+    case "registry:ui":
+      return "components/ui"
+    case "registry:page":
+    case "registry:file":
+      throw new Error("Page and file types require a target")
+    case "registry:component":
+      return "src/components"
+    case "registry:lib":
+      return "src/lib"
+    case "registry:hook":
+      return "src/hooks"
+    case "registry:block":
+    case "registry:style":
+    case "registry:theme":
+      // Not sure what to do with these types yet
+      throw new Error("Block, style, and theme types are not supported yet")
+    default:
+      throw new Error(`Unknown file type: ${type satisfies never}`)
+  }
+}
+---
+
+<div>
+  <!-- @ts-expect-error: This component takes a cliSteps prop but the only way to pass that in with Astro is with a slot -->
+  <InstallationTabsInternal client:load>
+    <CliCommandCode
+      slot="cliSteps"
+      action="run"
+      command={`shadcn@latest add @wds/${registryItem}`}
+    />
+    <div class="flex flex-col gap-8">
+      {
+        registryDependencies != null && registryDependencies.length > 0 && (
+          <div class="flex flex-col gap-4">
+            <p>
+              This component relies on other items which must be installed
+              first.
+            </p>
+            <ul class="list-disc pl-10">
+              {registryDependencies.map(dep => (
+                <li>
+                  <a
+                    href={dep.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="capitalize underline underline-offset-3"
+                  >
+                    {dep.name}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )
+      }
+      {
+        npmModulesToInstall != null && npmModulesToInstall.length > 0 && (
+          <div class="flex flex-col gap-4">
+            <p>Install the following dependencies.</p>
+            <CliCommandCode
+              action="install"
+              command={npmModulesToInstall.join(" ")}
+            />
+          </div>
+        )
+      }
+      {
+        filesToCopy != null && filesToCopy.length > 0 && (
+          <div class="flex flex-col gap-4">
+            <p>Copy and paste the following code into your project.</p>
+            {filesToCopy.map(file => (
+              <ManualInstallCodeCard client:load filePath={file.path}>
+                <Code code={file.content} lang={file.path?.split(".").pop()} />
+              </ManualInstallCodeCard>
+            ))}
+          </div>
+        )
+      }
+      <p>Update the import paths to match your project setup.</p>
+    </div>
+  </InstallationTabsInternal>
+</div>

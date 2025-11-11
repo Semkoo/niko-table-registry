@@ -1,0 +1,9 @@
+---
+import { Toaster } from "../ui/sonner"
+
+// This is broken out into its own file to prevent TS errors from client:load since it is not a React prop and TS doesn't know how to handle it inside mdx files.
+---
+
+<div class="not-content m-0">
+  <Toaster client:load />
+</div>

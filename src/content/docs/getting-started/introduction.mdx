@@ -1,0 +1,287 @@
+---
+title: Introduction
+description: A powerful, flexible DataTable component built with TanStack Table and Shadcn UI.
+---
+
+import { GITHUB_REPO_URL } from "@/data/env"
+
+## What is Shadcn Advanced DataTable?
+
+Just like Shadcn, this is **not a component library**. Instead, it's a comprehensive **DataTable component** that you copy into your project and customize to your needs. It's built with TanStack Table and Shadcn UI, providing enterprise-grade features while remaining fully under your control.
+
+## Why Use This DataTable?
+
+### 🚀 Production-Ready
+
+Built for real-world applications with features like:
+
+- Sorting (single and multi-column)
+- Filtering (global search and column filters)
+- Pagination (client and server-side)
+- Row selection and bulk actions
+- Column visibility and reordering
+- Virtual scrolling for large datasets
+- Export to CSV/Excel
+
+### 🎯 Progressive Complexity
+
+Start simple and add features as you need them:
+
+1. **Simple Table** - Just render data (< 5 minutes)
+2. **Basic Table** - Add pagination and sorting (+ 5 minutes)
+3. **Search Table** - Add global search (+ 5 minutes)
+4. **Filter Table** - Add column filters (+ 10 minutes)
+5. **Advanced Table** - Add virtualization, sidebars, etc. (+ 15 minutes)
+
+### 🛠️ Fully Customizable
+
+Since you own the code, you can:
+
+- Modify any component
+- Add custom features
+- Change styling
+- Integrate with your backend
+- No version lock-in
+
+### ♿ Accessible by Default
+
+- WCAG 2.1 compliant
+- Full keyboard navigation
+- Screen reader support
+- Semantic HTML
+- ARIA labels and roles
+
+### 📱 Mobile-Friendly
+
+- Responsive design
+- Touch-friendly controls
+- Mobile-optimized filters
+- Collapsible sidebars
+
+## How It Works
+
+The DataTable uses a **two-layer architecture** for maximum flexibility:
+
+**Actions** (`data-table-*.tsx` in `/actions` folder) - Context-aware wrapper components that use `useDataTable()` hook to automatically get the table from `DataTableRoot` context. These eliminate prop drilling and are the recommended way to use components:
+
+- `DataTableSearchFilter`, `DataTableFilterMenu`, `DataTableSortMenu`, `DataTablePagination`, etc.
+
+**Filters** (`table-*.tsx` in `/filters` folder) - Core implementation components that accept a `table` prop directly and use TanStack Table hooks (like `table.getState()`, `table.setGlobalFilter()`, etc.). These can be used standalone:
+
+- `TableSearchFilter`, `TableFilterMenu`, `TableSortMenu`, etc.
+
+**Why this architecture?**
+
+- Use `DataTable*` components from actions when you want context-based, zero-config usage
+- Use `Table*` components from filters when you want to build custom components or manage the table instance yourself
+- All filter components use TanStack Table hooks directly, giving you full control
+
+```tsx
+// Recommended: Use context-based Action components
+<DataTableRoot data={data} columns={columns}>
+  <DataTableSearchFilter />   {/* Automatically gets table from context */}
+  <DataTable>
+    <DataTableHeader />
+    <DataTableBody />
+  </DataTable>
+  <DataTablePagination />
+</DataTableRoot>
+
+// Advanced: Use Filter components directly
+const table = useReactTable({ data, columns, ... })
+<TableSearchFilter table={table} />  {/* Pass table prop directly */}
+```
+
+Build tables by composing components - start simple and add features as needed:
+
+```tsx
+<DataTableRoot data={data} columns={columns}>
+  <DataTableToolbarSection>
+    <DataTableSearchFilter />
+    <DataTableFilterMenu />
+  </DataTableToolbarSection>
+
+  <DataTable>
+    <DataTableHeader />
+    <DataTableBody />
+  </DataTable>
+
+  <DataTablePagination />
+</DataTableRoot>
+```
+
+## What's Included
+
+This DataTable provides you with:
+
+- **TanStack Table integration** - Built on the powerful headless table library
+- **Composable components** - Build complex UIs from simple, reusable pieces
+- **State management** - Context-based state sharing with hook-based flexibility
+- **Performance optimization** - Virtual scrolling, memoization, and efficient rendering
+- **Accessibility** - WCAG 2.1 compliant with full keyboard navigation and screen reader support
+- **TypeScript** - Fully typed with comprehensive type definitions
+
+## Philosophy
+
+This project follows the Shadcn philosophy:
+
+### Copy, Don't Install
+
+You copy the DataTable component code into your project (not install it as a package). However, you still need to install the required dependencies:
+
+**Required Dependencies:**
+
+- `@tanstack/react-table` - Core table library
+- Shadcn UI components (via `npx shadcn@latest add ...`) - UI primitives
+- Optional: `@tanstack/react-virtual`, `nuqs`, `@dnd-kit/*` for advanced features
+
+**What You Copy:**
+
+- All DataTable component files from `/components/data-table/`
+- Full source code that you can read, modify, and customize
+
+**Benefits:**
+
+- ✅ No black box - See exactly how everything works
+- ✅ Full control - Modify any component to fit your needs
+- ✅ Easy to customize - Change styling, behavior, or add features
+- ✅ No version lock-in - You control when to update
+- ✅ Learn by reading - Understand the implementation
+
+### Composition Over Configuration
+
+Build complex tables by composing simple components:
+
+```tsx
+// Start simple
+<DataTableRoot data={data} columns={columns}>
+  <DataTable>
+    <DataTableHeader />
+    <DataTableBody />
+  </DataTable>
+</DataTableRoot>
+
+// Add features incrementally
+<DataTableRoot data={data} columns={columns} config={{ enablePagination: true }}>
+  <DataTableToolbarSection>
+    <DataTableSearchFilter />
+  </DataTableToolbarSection>
+
+  <DataTable>
+    <DataTableHeader />
+    <DataTableBody />
+  </DataTable>
+
+  <DataTablePagination />
+</DataTableRoot>
+
+// Go advanced
+<DataTableRoot
+  data={data}
+  columns={columns}
+  config={{
+    enablePagination: true,
+    enableFilters: true,
+    enableRowSelection: true,
+  }}
+>
+  <DataTableToolbarSection className="justify-between">
+    <div className="flex gap-2">
+      <DataTableSearchFilter />
+      <DataTableFilterMenu />
+    </div>
+    <div className="flex gap-2">
+      <DataTableViewMenu />
+      <DataTableSortMenu />
+    </div>
+  </DataTableToolbarSection>
+
+  <DataTable>
+    <DataTableHeader />
+    <DataTableBody>
+      <DataTableSkeleton />
+      <DataTableEmptyBody />
+    </DataTableBody>
+  </DataTable>
+
+  <DataTablePagination />
+</DataTableRoot>
+```
+
+### Type-Safe by Default
+
+Full TypeScript support throughout:
+
+```tsx
+type User = {
+  id: string
+  name: string
+  email: string
+}
+
+const columns: DataTableColumnDef<User>[] = [
+  {
+    accessorKey: "name", // ✅ Type-safe
+    header: "Name",
+    cell: ({ row }) => row.original.email, // ✅ Autocomplete
+  },
+]
+```
+
+## Comparison
+
+### vs Component Libraries
+
+| Feature        | This DataTable        | Component Libraries |
+| -------------- | --------------------- | ------------------- |
+| Customization  | ✅ Full control       | ❌ Limited          |
+| Bundle size    | ✅ Copy what you need | ❌ Entire library   |
+| Learning curve | ✅ See the source     | ❌ Read docs        |
+| Dependencies   | ✅ Standard deps only | ❌ Library-specific |
+| Updates        | ✅ Copy new features  | ❌ Breaking changes |
+
+### vs Building from Scratch
+
+| Feature           | This DataTable | From Scratch        |
+| ----------------- | -------------- | ------------------- |
+| Time to implement | ✅ Minutes     | ❌ Days/weeks       |
+| Accessibility     | ✅ Built-in    | ❌ Must implement   |
+| Mobile support    | ✅ Ready       | ❌ Must build       |
+| Advanced features | ✅ Available   | ❌ Complex to build |
+| Best practices    | ✅ Included    | ❌ Must learn       |
+
+## Next Steps
+
+Ready to get started?
+
+1. **[Installation](/getting-started/installation)** - Set up your project
+2. **[Simple Table](/data-table/simple-table)** - Your first table
+3. **[Basic Table](/data-table/basic-table)** - Add common features
+4. **[Search Table](/data-table/search-table)** - Add search
+5. **[Filter Table](/data-table/filter-table)** - Advanced filtering
+6. **[Advanced Table](/data-table/advanced-table)** - Master level
+
+## Community
+
+Questions? Ideas? Contributions?
+
+- <a href={GITHUB_REPO_URL}>GitHub Repository</a> - Star us!
+- [Contributing Guide](/contributing) - How to contribute
+- [Feature Requests](/contributing/feature-request) - Request features
+- [Component Requests](/contributing/component-request) - Request components
+
+## Credits
+
+Built on top of:
+
+- [TanStack Table](https://tanstack.com/table) by Tanner Linsley - The headless table library that powers everything
+- [Shadcn UI](https://ui.shadcn.com) by Shadcn - Beautiful, accessible component primitives
+- [sadmann7's work](https://github.com/sadmann7) - Major inspiration for filter components and table patterns:
+  - [TableCN](https://github.com/sadmann7/tablecn) - Inspired our filter menu, inline filter, faceted filter, and slider filter implementations
+  - [DiceUI Sortable](https://www.diceui.com/docs/components/sortable) - Drag and drop sortable for row reordering
+- [nuqs](https://nuqs.dev/) by François Best - Type-safe search params state manager for URL state management
+- [Web Dev Simplified Registry](https://github.com/WebDevSimplified/wds-shadcn-registry) by Kyle Cook - Registry implementation pattern
+
+## License
+
+MIT License - use it freely in your projects!

@@ -1,0 +1,44 @@
+---
+import { z } from "zod"
+
+const contentSchema = z.object({
+  frontmatter: z.object({
+    title: z.string().min(1),
+  }),
+})
+const components = Object.entries(
+  import.meta.glob("../../../content/docs/components/*.mdx", { eager: true }),
+)
+  .map(([filePath, unsafeContent]) => {
+    const { success, data: content } = contentSchema.safeParse(unsafeContent)
+    if (!success) return null
+
+    const fileName = filePath.split("/").pop()?.split(".").shift()
+    if (fileName == null) return null
+
+    return {
+      fileName,
+      title: content.frontmatter.title,
+    }
+  })
+  .filter(f => f != null)
+---
+
+<ul
+  class="m-0 grid list-none grid-cols-1 gap-4 text-lg text-foreground/80 md:grid-cols-2 lg:grid-cols-3 lg:text-base"
+>
+  {
+    components.map(({ fileName, title }) => {
+      return (
+        <li>
+          <a
+            class="block w-full no-underline hover:underline"
+            href={`/components/${fileName}`}
+          >
+            {title}
+          </a>
+        </li>
+      )
+    })
+  }
+</ul>

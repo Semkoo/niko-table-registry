@@ -1,0 +1,343 @@
+---
+title: Advanced Inline Filter Table
+description: Build custom inline filter UIs directly in the table toolbar.
+---
+
+import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
+import CollapsiblePreview from "@/components/markdown/collapsible-preview.astro"
+
+<CodePreview demo="data-table/advanced-inline" />
+
+<CollapsiblePreview>
+  <CodePreview demo="data-table/advanced-inline-state" />
+</CollapsiblePreview>
+
+## Introduction
+
+The Advanced Inline Filter Table demonstrates inline filtering with `DataTableInlineFilter` for building custom filter UIs directly in the table. This approach gives you full control over the filter interface while leveraging the DataTable's filtering system.
+
+## Installation
+
+1. Add the required components:
+
+```bash
+npx shadcn@latest add table input button dropdown-menu popover command checkbox select scroll-area separator skeleton tooltip
+```
+
+2. Add `tanstack/react-table` dependency:
+
+```bash
+npm install @tanstack/react-table
+```
+
+3. Copy the DataTable components into your project. See the [Installation Guide](/getting-started/installation) for detailed instructions.
+
+## Prerequisites
+
+We are going to build a table to show products with inline filters. Here's what our data looks like:
+
+```tsx showLineNumbers
+type Product = {
+  id: string
+  name: string
+  category: string
+  brand: string
+  price: number
+  stock: number
+  rating: number
+  inStock: boolean
+  releaseDate: Date
+}
+
+const categoryOptions = [
+  { label: "Electronics", value: "electronics" },
+  { label: "Clothing", value: "clothing" },
+  { label: "Sports", value: "sports" },
+]
+```
+
+## Basic Table with Inline Filters
+
+Let's start by building a table with inline filter components.
+
+### Column Definitions
+
+First, we'll define our columns with filter metadata.
+
+```tsx showLineNumbers title="columns.tsx"
+"use client"
+
+import { TableColumnHeader } from "@/components/data-table/components"
+import type { DataTableColumnDef } from "@/components/data-table/types"
+
+export type Product = {
+  id: string
+  name: string
+  category: string
+  brand: string
+  price: number
+  stock: number
+  rating: number
+  inStock: boolean
+  releaseDate: Date
+}
+
+export const columns: DataTableColumnDef<Product>[] = [
+  {
+    accessorKey: "name",
+    header: ({ column }) => <TableColumnHeader column={column} />,
+    meta: {
+      label: "Product Name",
+      variant: "text",
+    },
+    enableColumnFilter: true,
+  },
+  {
+    accessorKey: "category",
+    header: ({ column }) => <TableColumnHeader column={column} />,
+    meta: {
+      label: "Category",
+      variant: "select",
+      options: [
+        { label: "Electronics", value: "electronics" },
+        { label: "Clothing", value: "clothing" },
+      ],
+    },
+    enableColumnFilter: true,
+  },
+  {
+    accessorKey: "price",
+    header: ({ column }) => <TableColumnHeader column={column} />,
+    meta: {
+      label: "Price",
+      variant: "number",
+      unit: "$",
+    },
+    enableColumnFilter: true,
+  },
+]
+```
+
+### `<DataTable />` component
+
+Next, we'll add the inline filter component.
+
+```tsx showLineNumbers title="advanced-inline-table.tsx"
+"use client"
+
+import {
+  DataTableRoot,
+  DataTableToolbarSection,
+  DataTable,
+  DataTableHeader,
+  DataTableBody,
+  DataTablePagination,
+  DataTableSearchFilter,
+  DataTableViewMenu,
+  DataTableInlineFilter,
+  DataTableEmptyBody,
+} from "@/components/data-table"
+import { TableColumnHeader } from "@/components/data-table/components"
+import type { DataTableColumnDef } from "@/components/data-table/types"
+
+type Product = {
+  id: string
+  name: string
+  category: string
+  price: number
+}
+
+const columns: DataTableColumnDef<Product>[] = [
+  {
+    accessorKey: "name",
+    header: ({ column }) => <TableColumnHeader column={column} />,
+    meta: {
+      label: "Product Name",
+      variant: "text",
+    },
+    enableColumnFilter: true,
+  },
+  {
+    accessorKey: "category",
+    header: ({ column }) => <TableColumnHeader column={column} />,
+    meta: {
+      label: "Category",
+      variant: "select",
+      options: [
+        { label: "Electronics", value: "electronics" },
+        { label: "Clothing", value: "clothing" },
+      ],
+    },
+    enableColumnFilter: true,
+  },
+  {
+    accessorKey: "price",
+    header: ({ column }) => <TableColumnHeader column={column} />,
+    meta: {
+      label: "Price",
+      variant: "number",
+      unit: "$",
+    },
+    enableColumnFilter: true,
+  },
+]
+
+function FilterToolbar() {
+  return (
+    <DataTableToolbarSection>
+      <DataTableToolbarSection className="px-0">
+        <DataTableSearchFilter placeholder="Search products..." />
+        <DataTableViewMenu />
+      </DataTableToolbarSection>
+      <DataTableToolbarSection className="px-0">
+        <DataTableInlineFilter />
+      </DataTableToolbarSection>
+    </DataTableToolbarSection>
+  )
+}
+
+export function AdvancedInlineTable({ data }: { data: Product[] }) {
+  return (
+    <DataTableRoot
+      data={data}
+      columns={columns}
+      config={{
+        enablePagination: true,
+        enableSorting: true,
+        enableFilters: true,
+      }}
+    >
+      <FilterToolbar />
+      <DataTable>
+        <DataTableHeader />
+        <DataTableBody>
+          <DataTableEmptyBody />
+        </DataTableBody>
+      </DataTable>
+      <DataTablePagination />
+    </DataTableRoot>
+  )
+}
+```
+
+## Inline Filter Component
+
+### DataTableInlineFilter
+
+The inline filter component automatically generates filter inputs based on your column definitions' `meta` properties.
+
+**Props:**
+
+- `className?`: Additional CSS classes
+
+```tsx showLineNumbers
+<DataTableInlineFilter />
+```
+
+The component reads filter configuration from column `meta`:
+
+- `variant`: Filter type (`"text"`, `"select"`, `"number"`, `"boolean"`, `"date"`)
+- `label`: Display label for the filter
+- `options`: Array of options for `select` variant
+- `unit`: Unit display for `number` variant
+
+## Column Meta for Inline Filters
+
+Define filter metadata in your column definitions:
+
+```tsx showLineNumbers
+{
+  accessorKey: "category",
+  meta: {
+    label: "Category",
+    variant: "select",
+    options: [
+      { label: "Electronics", value: "electronics" },
+      { label: "Clothing", value: "clothing" },
+    ],
+  },
+  enableColumnFilter: true,
+}
+```
+
+## Controlled State
+
+Full control over table state with inline filters:
+
+```tsx showLineNumbers
+import { useState } from "react"
+import type {
+  PaginationState,
+  SortingState,
+  ColumnFiltersState,
+} from "@tanstack/react-table"
+
+export function ControlledInlineTable({ data }: { data: Product[] }) {
+  const [globalFilter, setGlobalFilter] = useState<string | object>("")
+  const [sorting, setSorting] = useState<SortingState>([])
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 10,
+  })
+
+  return (
+    <DataTableRoot
+      data={data}
+      columns={columns}
+      config={{
+        enablePagination: true,
+        enableSorting: true,
+        enableFilters: true,
+      }}
+      state={{
+        globalFilter,
+        sorting,
+        columnFilters,
+        pagination,
+      }}
+      onGlobalFilterChange={setGlobalFilter}
+      onSortingChange={setSorting}
+      onColumnFiltersChange={setColumnFilters}
+      onPaginationChange={setPagination}
+    >
+      <DataTableToolbarSection>
+        <DataTableToolbarSection className="px-0">
+          <DataTableSearchFilter placeholder="Search products..." />
+          <DataTableViewMenu />
+        </DataTableToolbarSection>
+        <DataTableToolbarSection className="px-0">
+          <DataTableInlineFilter />
+        </DataTableToolbarSection>
+      </DataTableToolbarSection>
+      <DataTable>
+        <DataTableHeader />
+        <DataTableBody>
+          <DataTableEmptyBody />
+        </DataTableBody>
+      </DataTable>
+      <DataTablePagination />
+    </DataTableRoot>
+  )
+}
+```
+
+## When to Use
+
+**✅ Use Advanced Inline Filter Table when:**
+
+- You want filters visible directly in the toolbar
+- You prefer a simpler, more direct filtering interface
+- You need custom filter layouts
+- Filters should be always visible (not in a menu)
+
+**❌ Consider other options when:**
+
+- You need complex rule-based filtering (use [Advanced Filter Table](/data-table/advanced-table))
+- You want filter menus (use [Advanced Filter Table](/data-table/advanced-table))
+- You need URL state persistence (use [Advanced Nuqs Table](/data-table/advanced-nuqs-table))
+
+## Next Steps
+
+- [Advanced Filter Table](/data-table/advanced-table) - Add rule-based filter menus
+- [Advanced Nuqs Table](/data-table/advanced-nuqs-table) - Add URL state persistence

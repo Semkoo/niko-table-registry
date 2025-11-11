@@ -1,0 +1,221 @@
+---
+title: Simple Table
+description: A basic data table with no pagination - perfect for small datasets.
+---
+
+import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
+
+<CodePreview demo="data-table/simple" />
+
+## Introduction
+
+The Simple Table is the most basic implementation. It displays your data in a clean, accessible table format without pagination, filtering, or sorting. Perfect for small datasets (< 50 rows) or when you just need to display data.
+
+## Installation
+
+1. Add the `<Table />` component to your project:
+
+```bash
+npx shadcn@latest add table
+```
+
+2. Add `tanstack/react-table` dependency:
+
+```bash
+npm install @tanstack/react-table
+```
+
+3. Copy the DataTable components into your project. See the [Installation Guide](/getting-started/installation) for detailed instructions.
+
+## Prerequisites
+
+We are going to build a table to show users. Here's what our data looks like:
+
+```tsx showLineNumbers
+type User = {
+  id: string
+  name: string
+  email: string
+  status: "active" | "inactive"
+}
+
+const data: User[] = [
+  { id: "1", name: "John Doe", email: "john@example.com", status: "active" },
+  { id: "2", name: "Jane Smith", email: "jane@example.com", status: "active" },
+  {
+    id: "3",
+    name: "Bob Johnson",
+    email: "bob@example.com",
+    status: "inactive",
+  },
+]
+```
+
+## Basic Table
+
+Let's start by building a basic table.
+
+### Column Definitions
+
+First, we'll define our columns.
+
+```tsx showLineNumbers title="columns.tsx"
+"use client"
+
+import type { DataTableColumnDef } from "@/components/data-table/types"
+
+export type User = {
+  id: string
+  name: string
+  email: string
+  status: "active" | "inactive"
+}
+
+export const columns: DataTableColumnDef<User>[] = [
+  {
+    accessorKey: "name",
+    header: "Name",
+  },
+  {
+    accessorKey: "email",
+    header: "Email",
+  },
+  {
+    accessorKey: "status",
+    header: "Status",
+  },
+]
+```
+
+### `<DataTable />` component
+
+Next, we'll create a `<DataTable />` component to render our table.
+
+```tsx showLineNumbers title="simple-table.tsx"
+"use client"
+
+import {
+  DataTableRoot,
+  DataTable,
+  DataTableHeader,
+  DataTableBody,
+  DataTableSkeleton,
+  DataTableEmptyBody,
+} from "@/components/data-table"
+import type { DataTableColumnDef } from "@/components/data-table/types"
+
+type User = {
+  id: string
+  name: string
+  email: string
+  status: "active" | "inactive"
+}
+
+const columns: DataTableColumnDef<User>[] = [
+  {
+    accessorKey: "name",
+    header: "Name",
+  },
+  {
+    accessorKey: "email",
+    header: "Email",
+  },
+  {
+    accessorKey: "status",
+    header: "Status",
+  },
+]
+
+export function SimpleTable({ data }: { data: User[] }) {
+  return (
+    <DataTableRoot data={data} columns={columns}>
+      <DataTable>
+        <DataTableHeader />
+        <DataTableBody>
+          <DataTableSkeleton />
+          <DataTableEmptyBody />
+        </DataTableBody>
+      </DataTable>
+    </DataTableRoot>
+  )
+}
+```
+
+## Cell Formatting
+
+Let's format the status cell to display with colors.
+
+```tsx showLineNumbers title="columns.tsx"
+export const columns: DataTableColumnDef<User>[] = [
+  {
+    accessorKey: "status",
+    header: "Status",
+    cell: ({ row }) => {
+      const status = row.getValue("status") as string
+      return (
+        <span
+          className={status === "active" ? "text-green-600" : "text-gray-400"}
+        >
+          {status}
+        </span>
+      )
+    },
+  },
+]
+```
+
+You can use the same approach to format other cells.
+
+## Loading State
+
+Show a loading skeleton while data is being fetched:
+
+```tsx showLineNumbers
+export function SimpleTable({
+  data,
+  isLoading,
+}: {
+  data: User[]
+  isLoading?: boolean
+}) {
+  return (
+    <DataTableRoot data={data} columns={columns} isLoading={isLoading}>
+      <DataTable>
+        <DataTableHeader />
+        <DataTableBody>
+          <DataTableSkeleton />
+          <DataTableEmptyBody />
+        </DataTableBody>
+      </DataTable>
+    </DataTableRoot>
+  )
+}
+```
+
+The `DataTableSkeleton` component will automatically show when `isLoading` is `true`.
+
+## Empty State
+
+The `DataTableEmptyBody` component automatically shows when there's no data or when filters return no results.
+
+## When to Use
+
+**✅ Use Simple Table when:**
+
+- You have a small dataset (< 50 rows)
+- You don't need user interactions (sorting, filtering)
+- You want the fastest, simplest implementation
+- You're building a prototype or MVP
+
+**❌ Don't use Simple Table when:**
+
+- You have more than 50 rows (use [Basic Table](/data-table/basic-table) with pagination)
+- Users need to search or filter data (use [Search Table](/data-table/search-table))
+- Users need to sort columns (use [Basic Table](/data-table/basic-table))
+
+## Next Steps
+
+Once you're comfortable with the Simple Table, try adding more features:
+
+- [Basic Table](/data-table/basic-table) - Add pagination and sorting
+- [Search Table](/data-table/search-table) - Add search functionality

@@ -1,0 +1,396 @@
+---
+title: Faceted Filter Table
+description: Add inline faceted filters that show available options and counts.
+---
+
+import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
+import CollapsiblePreview from "@/components/markdown/collapsible-preview.astro"
+
+<CodePreview demo="data-table/faceted" />
+
+<CollapsiblePreview>
+  <CodePreview demo="data-table/faceted-state" />
+</CollapsiblePreview>
+
+## Introduction
+
+The Faceted Filter Table adds inline filter components that show available options with counts. Users can quickly see what filters are available and how many items match each option.
+
+## Installation
+
+1. Add the required components:
+
+```bash
+npx shadcn@latest add table input button dropdown-menu popover command badge scroll-area separator
+```
+
+2. Add `tanstack/react-table` dependency:
+
+```bash
+npm install @tanstack/react-table
+```
+
+3. Copy the DataTable components into your project. See the [Installation Guide](/getting-started/installation) for detailed instructions.
+
+## Prerequisites
+
+We are going to build a table to show products with faceted filters. Here's what our data looks like:
+
+```tsx showLineNumbers
+type Product = {
+  id: string
+  name: string
+  category: string
+  brand: string
+  price: number
+  stock: number
+  rating: number
+  inStock: boolean
+  releaseDate: Date
+}
+
+const categoryOptions = [
+  { label: "Electronics", value: "electronics" },
+  { label: "Clothing", value: "clothing" },
+  { label: "Sports", value: "sports" },
+]
+```
+
+## Basic Table with Faceted Filters
+
+Let's start by building a table with faceted filters.
+
+### Column Definitions
+
+First, we'll define our columns with filter functions.
+
+```tsx showLineNumbers title="columns.tsx"
+"use client"
+
+import { TableColumnHeader } from "@/components/data-table/components"
+import type { DataTableColumnDef } from "@/components/data-table/types"
+
+export type Product = {
+  id: string
+  name: string
+  category: string
+  brand: string
+  price: number
+  stock: number
+  rating: number
+  inStock: boolean
+  releaseDate: Date
+}
+
+export const columns: DataTableColumnDef<Product>[] = [
+  {
+    accessorKey: "name",
+    header: ({ column }) => <TableColumnHeader column={column} />,
+    meta: { label: "Product Name" },
+  },
+  {
+    accessorKey: "category",
+    header: ({ column }) => <TableColumnHeader column={column} />,
+    meta: {
+      label: "Category",
+      options: categoryOptions,
+      mergeStrategy: "augment",
+      dynamicCounts: true,
+      showCounts: true,
+    },
+    enableColumnFilter: true,
+    filterFn: (row, id, filterValue: string[]) => {
+      if (!filterValue?.length) return true
+      const rowValue = String(row.getValue(id))
+      return filterValue.includes(rowValue)
+    },
+  },
+  {
+    accessorKey: "brand",
+    header: ({ column }) => <TableColumnHeader column={column} />,
+    meta: {
+      label: "Brand",
+      autoOptions: true,
+      dynamicCounts: true,
+      showCounts: true,
+    },
+    enableColumnFilter: true,
+    filterFn: (row, id, filterValue: string[]) => {
+      if (!filterValue?.length) return true
+      const rowValue = String(row.getValue(id))
+      return filterValue.includes(rowValue)
+    },
+  },
+  {
+    accessorKey: "price",
+    header: ({ column }) => <TableColumnHeader column={column} />,
+    meta: { label: "Price", unit: "$" },
+    enableColumnFilter: true,
+    filterFn: (row, id, filterValue: [number, number]) => {
+      if (!filterValue) return true
+      const value = row.getValue(id) as number
+      return value >= filterValue[0] && value <= filterValue[1]
+    },
+  },
+]
+```
+
+### `<DataTable />` component
+
+Next, we'll add faceted filter components.
+
+```tsx showLineNumbers title="faceted-filter-table.tsx"
+"use client"
+
+import {
+  DataTableRoot,
+  DataTableToolbarSection,
+  DataTable,
+  DataTableHeader,
+  DataTableBody,
+  DataTablePagination,
+  DataTableSearchFilter,
+  DataTableViewMenu,
+  DataTableFacetedFilter,
+  DataTableClearFilter,
+  DataTableEmptyBody,
+} from "@/components/data-table"
+import { TableColumnHeader } from "@/components/data-table/components"
+import type { DataTableColumnDef } from "@/components/data-table/types"
+
+type Product = {
+  id: string
+  name: string
+  category: string
+  brand: string
+  price: number
+  stock: number
+  rating: number
+  inStock: boolean
+  releaseDate: Date
+}
+
+const categoryOptions = [
+  { label: "Electronics", value: "electronics" },
+  { label: "Clothing", value: "clothing" },
+  { label: "Sports", value: "sports" },
+]
+
+const brandOptions = [
+  { label: "Apple", value: "apple" },
+  { label: "Samsung", value: "samsung" },
+  { label: "Nike", value: "nike" },
+]
+
+const columns: DataTableColumnDef<Product>[] = [
+  {
+    accessorKey: "name",
+    header: ({ column }) => <TableColumnHeader column={column} />,
+    meta: { label: "Product Name" },
+  },
+  {
+    accessorKey: "category",
+    header: ({ column }) => <TableColumnHeader column={column} />,
+    meta: { label: "Category" },
+    enableColumnFilter: true,
+    filterFn: (row, id, filterValue: string[]) => {
+      if (!filterValue?.length) return true
+      return filterValue.includes(String(row.getValue(id)))
+    },
+  },
+  {
+    accessorKey: "brand",
+    header: ({ column }) => <TableColumnHeader column={column} />,
+    meta: { label: "Brand" },
+    enableColumnFilter: true,
+    filterFn: (row, id, filterValue: string[]) => {
+      if (!filterValue?.length) return true
+      return filterValue.includes(String(row.getValue(id)))
+    },
+  },
+  {
+    accessorKey: "price",
+    header: ({ column }) => <TableColumnHeader column={column} />,
+    meta: { label: "Price", unit: "$" },
+  },
+]
+
+export function FacetedFilterTable({ data }: { data: Product[] }) {
+  return (
+    <DataTableRoot
+      data={data}
+      columns={columns}
+      config={{
+        enablePagination: true,
+        enableSorting: true,
+        enableFilters: true,
+      }}
+    >
+      <DataTableToolbarSection className="w-full flex-col justify-between gap-2">
+        <DataTableToolbarSection className="px-0">
+          <DataTableSearchFilter placeholder="Search products..." />
+          <DataTableViewMenu />
+        </DataTableToolbarSection>
+        <DataTableToolbarSection className="flex-wrap px-0">
+          {/* Category: static list + dynamic counts; Brand: auto-generated options */}
+          <DataTableFacetedFilter accessorKey="category" multiple />
+          <DataTableFacetedFilter accessorKey="brand" multiple />
+          <DataTableClearFilter />
+        </DataTableToolbarSection>
+      </DataTableToolbarSection>
+
+      <DataTable>
+        <DataTableHeader />
+        <DataTableBody>
+          <DataTableEmptyBody />
+        </DataTableBody>
+      </DataTable>
+
+      <DataTablePagination />
+    </DataTableRoot>
+  )
+}
+```
+
+## Faceted Filter Component
+
+### DataTableFacetedFilter
+
+The faceted filter component shows available options with counts.
+
+**Props (common):**
+
+- `accessorKey`: The column key to filter
+- `title?`: Optional override (defaults to column meta.label or accessor name)
+- `options?`: Static options; if omitted and column meta allows, options are auto-generated
+- `multiple?`: Allow multiple selections (default: `false`)
+- `showCounts?`: Show counts next to options (default: `true`)
+- `dynamicCounts?`: Counts reflect filtered rows (default: `true`)
+
+```tsx showLineNumbers
+// Auto-generated when meta.autoOptions or meta.options are set appropriately
+<DataTableFacetedFilter accessorKey="category" multiple />
+```
+
+### DataTableClearFilter
+
+Button to clear all active filters.
+
+```tsx
+<DataTableClearFilter />
+```
+
+## Filter Functions
+
+Define custom filter functions in your column definitions:
+
+```tsx showLineNumbers
+{
+  accessorKey: "category",
+  enableColumnFilter: true,
+  filterFn: (row, id, filterValue: string[]) => {
+    if (!filterValue?.length) return true
+    const rowValue = String(row.getValue(id))
+    return filterValue.includes(rowValue)
+  },
+}
+```
+
+## Multiple Selection
+
+Enable multiple selections with the `multiple` prop:
+
+```tsx showLineNumbers
+<DataTableFacetedFilter
+  accessorKey="category"
+  title="Category"
+  options={categoryOptions}
+  multiple // Allow selecting multiple categories
+/>
+```
+
+## Controlled State
+
+Manage filter state externally for full control:
+
+```tsx showLineNumbers
+import { useState } from "react"
+import type { SortingState, ColumnFiltersState } from "@tanstack/react-table"
+
+export function ControlledFacetedFilterTable({ data }: { data: Product[] }) {
+  const [sorting, setSorting] = useState<SortingState>([])
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+  const [globalFilter, setGlobalFilter] = useState("")
+
+  return (
+    <DataTableRoot
+      data={data}
+      columns={columns}
+      config={{
+        enablePagination: true,
+        enableSorting: true,
+        enableFilters: true,
+      }}
+      state={{
+        sorting,
+        columnFilters,
+        globalFilter,
+      }}
+      onSortingChange={setSorting}
+      onColumnFiltersChange={setColumnFilters}
+      onGlobalFilterChange={setGlobalFilter}
+    >
+      <DataTableToolbarSection className="w-full flex-col justify-between gap-2">
+        <DataTableToolbarSection className="px-0">
+          <DataTableSearchFilter placeholder="Search products..." />
+          <DataTableViewMenu />
+        </DataTableToolbarSection>
+        <DataTableToolbarSection className="flex-wrap px-0">
+          <DataTableFacetedFilter
+            accessorKey="category"
+            title="Category"
+            options={categoryOptions}
+            multiple
+          />
+          <DataTableFacetedFilter
+            accessorKey="brand"
+            title="Brand"
+            options={brandOptions}
+            multiple
+          />
+          <DataTableClearFilter />
+        </DataTableToolbarSection>
+      </DataTableToolbarSection>
+
+      <DataTable>
+        <DataTableHeader />
+        <DataTableBody>
+          <DataTableEmptyBody />
+        </DataTableBody>
+      </DataTable>
+
+      <DataTablePagination />
+    </DataTableRoot>
+  )
+}
+```
+
+## When to Use
+
+**✅ Use Faceted Filter Table when:**
+
+- You have categorical data (categories, tags, statuses)
+- Users need to see available options and counts
+- You want inline, visible filters
+- Multiple filter options are common
+
+**❌ Consider other options when:**
+
+- You need complex rule-based filtering (use [Advanced Table](/data-table/advanced-table))
+- You prefer dropdown filters (use [Advanced Table](/data-table/advanced-table))
+- You only need search (use [Search Table](/data-table/search-table))
+
+## Next Steps
+
+- [Advanced Table](/data-table/advanced-table) - Add advanced filtering menus
+- [Search Table](/data-table/search-table) - Add global search

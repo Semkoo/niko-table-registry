@@ -1,0 +1,40 @@
+---
+import { CliCommandCodeInternal } from "./_cli-command-code-internal"
+
+type Action = "install" | "run"
+const packageManagers = ["pnpm", "npm", "yarn", "bun"] as const
+type PackageManager = (typeof packageManagers)[number]
+
+const ACTION_PACKAGE_MANAGER_MAP: Record<
+  Action,
+  Record<PackageManager, string>
+> = {
+  install: {
+    pnpm: `pnpm add`,
+    npm: `npm install`,
+    yarn: `yarn add`,
+    bun: `bun add`,
+  },
+  run: {
+    pnpm: `pnpm dlx`,
+    npm: `npx`,
+    yarn: `yarn`,
+    bun: `bunx --bun`,
+  },
+}
+
+type Props = {
+  command: string
+  action: Action
+}
+
+const { command, action } = Astro.props
+const commands = packageManagers.map(packageManager => ({
+  label: packageManager,
+  code: `${ACTION_PACKAGE_MANAGER_MAP[action][packageManager]} ${command}`,
+}))
+---
+
+<div>
+  <CliCommandCodeInternal client:load commands={commands} />
+</div>

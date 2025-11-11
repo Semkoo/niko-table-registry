@@ -1,0 +1,409 @@
+---
+title: Advanced Nuqs Table
+description: Rule-based filtering with URL state persistence for shareable and bookmarkable table views.
+---
+
+import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
+import CollapsiblePreview from "@/components/markdown/collapsible-preview.astro"
+
+<CodePreview demo="data-table/advanced-nuqs-state" />
+
+## Introduction
+
+The Advanced Nuqs Table demonstrates rule-based filtering with URL state persistence using [nuqs](https://nuqs.dev/). This example shows how to sync table state (filters, pagination, sorting) with URL parameters for shareable and bookmarkable table views.
+
+## Installation
+
+1. Add the required components:
+
+```bash
+npx shadcn@latest add table input button dropdown-menu popover command checkbox select scroll-area separator skeleton tooltip
+```
+
+2. Add dependencies:
+
+```bash
+npm install @tanstack/react-table nuqs
+```
+
+**Note:** [nuqs](https://nuqs.dev/) is a type-safe search params state manager that syncs table state (filters, pagination, sorting) with the URL, making it shareable and bookmarkable.
+
+**Required: Sortable Component**
+
+This example uses `DataTableSortMenu` and `DataTableFilterMenu` which require the Sortable component for drag-and-drop reordering. Follow the [DiceUI Sortable installation guide](https://www.diceui.com/docs/components/sortable).
+
+3. Copy the DataTable components into your project. See the [Installation Guide](/getting-started/installation) for detailed instructions.
+
+## Setup
+
+Before using the Advanced Nuqs Table, you need to wrap your app with `NuqsAdapter`. Follow the [official Nuqs adapters documentation](https://nuqs.dev/docs/adapters) for setup instructions based on your framework:
+
+- **Next.js App Router** - Wrap `{children}` in `app/layout.tsx`
+- **Next.js Pages Router** - Wrap `<Component>` in `pages/_app.tsx`
+- **React SPA (Vite, CRA, etc.)** - Wrap `<App />` in `src/main.tsx`
+- **Remix** - Wrap `<Outlet />` in `app/root.tsx`
+- **React Router v6/v7** - See adapter-specific instructions
+- **TanStack Router** - Wrap `<Outlet />` in your root route
+
+See the [Nuqs adapters documentation](https://nuqs.dev/docs/adapters) for complete setup instructions and code examples for your specific framework.
+
+## Prerequisites
+
+We are going to build a table to show products with URL state persistence. Here's what our data looks like:
+
+```tsx showLineNumbers
+type Product = {
+  id: string
+  name: string
+  category: string
+  brand: string
+  price: number
+  stock: number
+  rating: number
+  inStock: boolean
+  releaseDate: Date
+}
+```
+
+## Basic Table with URL State
+
+Let's start by building a table with URL state persistence.
+
+### Column Definitions
+
+First, we'll define our columns with filter metadata.
+
+```tsx showLineNumbers title="columns.tsx"
+"use client"
+
+import { TableColumnHeader } from "@/components/data-table/components"
+import type { DataTableColumnDef } from "@/components/data-table/types"
+
+export type Product = {
+  id: string
+  name: string
+  category: string
+  brand: string
+  price: number
+}
+
+const categoryOptions = [
+  { label: "Electronics", value: "electronics" },
+  { label: "Clothing", value: "clothing" },
+]
+
+export const columns: DataTableColumnDef<Product>[] = [
+  {
+    accessorKey: "name",
+    header: ({ column }) => <TableColumnHeader column={column} />,
+    meta: {
+      label: "Product Name",
+      variant: "text",
+    },
+    enableColumnFilter: true,
+  },
+  {
+    accessorKey: "category",
+    header: ({ column }) => <TableColumnHeader column={column} />,
+    meta: {
+      label: "Category",
+      variant: "select",
+      options: categoryOptions,
+    },
+    enableColumnFilter: true,
+  },
+  {
+    accessorKey: "price",
+    header: ({ column }) => <TableColumnHeader column={column} />,
+    meta: {
+      label: "Price",
+      variant: "number",
+      unit: "$",
+    },
+    enableColumnFilter: true,
+  },
+]
+```
+
+### URL State Parsers
+
+Define parsers for URL state using nuqs:
+
+```tsx showLineNumbers
+import { parseAsInteger, parseAsJson, parseAsString } from "nuqs"
+import type { SortingState } from "@tanstack/react-table"
+import type { ExtendedColumnFilter } from "@/components/data-table/types"
+
+const tableStateParsers = {
+  pageIndex: parseAsInteger.withDefault(0),
+  pageSize: parseAsInteger.withDefault(10),
+  sort: parseAsJson<SortingState>(value => value as SortingState).withDefault(
+    [],
+  ),
+  filters: parseAsJson<ExtendedColumnFilter<Product>[]>(
+    value => value as ExtendedColumnFilter<Product>[],
+  ).withDefault([]),
+  search: parseAsString.withDefault(""),
+}
+```
+
+### `<DataTable />` component
+
+Next, we'll connect the table state to URL parameters.
+
+```tsx showLineNumbers title="advanced-nuqs-table.tsx"
+"use client"
+
+import { useMemo } from "react"
+import { NuqsAdapter } from "nuqs/adapters/react"
+import {
+  parseAsInteger,
+  parseAsJson,
+  parseAsString,
+  useQueryStates,
+} from "nuqs"
+import type {
+  PaginationState,
+  SortingState,
+  ColumnFiltersState,
+} from "@tanstack/react-table"
+import {
+  DataTableRoot,
+  DataTableToolbarSection,
+  DataTable,
+  DataTableHeader,
+  DataTableBody,
+  DataTablePagination,
+  DataTableSearchFilter,
+  DataTableViewMenu,
+  DataTableSortMenu,
+  DataTableFilterMenu,
+  DataTableEmptyBody,
+} from "@/components/data-table"
+import { TableColumnHeader } from "@/components/data-table/components"
+import type {
+  DataTableColumnDef,
+  ExtendedColumnFilter,
+} from "@/components/data-table/types"
+import type { SortingState } from "@tanstack/react-table"
+
+type Product = {
+  id: string
+  name: string
+  category: string
+  price: number
+}
+
+const columns: DataTableColumnDef<Product>[] = [
+  {
+    accessorKey: "name",
+    header: ({ column }) => <TableColumnHeader column={column} />,
+    meta: {
+      label: "Product Name",
+      variant: "text",
+    },
+    enableColumnFilter: true,
+  },
+  {
+    accessorKey: "category",
+    header: ({ column }) => <TableColumnHeader column={column} />,
+    meta: {
+      label: "Category",
+      variant: "select",
+      options: [
+        { label: "Electronics", value: "electronics" },
+        { label: "Clothing", value: "clothing" },
+      ],
+    },
+    enableColumnFilter: true,
+  },
+  {
+    accessorKey: "price",
+    header: ({ column }) => <TableColumnHeader column={column} />,
+    meta: {
+      label: "Price",
+      variant: "number",
+      unit: "$",
+    },
+    enableColumnFilter: true,
+  },
+]
+
+const tableStateParsers = {
+  pageIndex: parseAsInteger.withDefault(0),
+  pageSize: parseAsInteger.withDefault(10),
+  sort: parseAsJson<SortingState>(value => value as SortingState).withDefault(
+    [],
+  ),
+  filters: parseAsJson<ExtendedColumnFilter<Product>[]>(
+    value => value as ExtendedColumnFilter<Product>[],
+  ).withDefault([]),
+  search: parseAsString.withDefault(""),
+}
+
+function FilterToolbar({
+  filters,
+  onFiltersChange,
+}: {
+  filters: ExtendedColumnFilter<Product>[]
+  onFiltersChange: (filters: ExtendedColumnFilter<Product>[] | null) => void
+}) {
+  return (
+    <DataTableToolbarSection>
+      <DataTableToolbarSection className="px-0">
+        <DataTableSearchFilter placeholder="Search products..." />
+        <DataTableViewMenu />
+      </DataTableToolbarSection>
+      <DataTableToolbarSection className="px-0">
+        <DataTableSortMenu className="ml-auto" />
+        <DataTableFilterMenu
+          filters={filters}
+          onFiltersChange={onFiltersChange}
+        />
+      </DataTableToolbarSection>
+    </DataTableToolbarSection>
+  )
+}
+
+function AdvancedNuqsTableContent({ data }: { data: Product[] }) {
+  // URL state management with nuqs
+  const [urlParams, setUrlParams] = useQueryStates(tableStateParsers, {
+    history: "replace",
+  })
+
+  // Convert URL state to TanStack Table format
+  const pagination: PaginationState = useMemo(
+    () => ({
+      pageIndex: urlParams.pageIndex,
+      pageSize: urlParams.pageSize,
+    }),
+    [urlParams.pageIndex, urlParams.pageSize],
+  )
+
+  const sorting: SortingState = useMemo(
+    () => urlParams.sort || [],
+    [urlParams.sort],
+  )
+
+  const columnFilters: ColumnFiltersState = useMemo(
+    () => urlParams.filters.map(filter => ({ id: filter.id, value: filter })),
+    [urlParams.filters],
+  )
+
+  const handleFiltersChange = (
+    filters: ExtendedColumnFilter<Product>[] | null,
+  ) => {
+    setUrlParams({ filters: filters || [] })
+  }
+
+  return (
+    <DataTableRoot
+      data={data}
+      columns={columns}
+      config={{
+        enablePagination: true,
+        enableSorting: true,
+        enableMultiSort: true,
+        enableFilters: true,
+      }}
+      state={{
+        globalFilter: urlParams.search,
+        sorting,
+        columnFilters,
+        pagination,
+      }}
+      onGlobalFilterChange={search =>
+        setUrlParams({ search: search as string })
+      }
+      onSortingChange={sort => setUrlParams({ sort })}
+      onColumnFiltersChange={filters => {
+        const extendedFilters = filters.map(
+          f => f.value as ExtendedColumnFilter<Product>,
+        )
+        setUrlParams({ filters: extendedFilters })
+      }}
+      onPaginationChange={pagination => {
+        setUrlParams({
+          pageIndex: pagination.pageIndex,
+          pageSize: pagination.pageSize,
+        })
+      }}
+    >
+      <FilterToolbar
+        filters={urlParams.filters}
+        onFiltersChange={handleFiltersChange}
+      />
+      <DataTable>
+        <DataTableHeader />
+        <DataTableBody>
+          <DataTableEmptyBody />
+        </DataTableBody>
+      </DataTable>
+      <DataTablePagination />
+    </DataTableRoot>
+  )
+}
+
+export function AdvancedNuqsTable({ data }: { data: Product[] }) {
+  return (
+    <NuqsAdapter>
+      <AdvancedNuqsTableContent data={data} />
+    </NuqsAdapter>
+  )
+}
+```
+
+## URL State Management
+
+### useQueryStates
+
+Use `useQueryStates` to sync table state with URL parameters:
+
+```tsx showLineNumbers
+import { useQueryStates } from "nuqs"
+
+const [urlParams, setUrlParams] = useQueryStates(tableStateParsers, {
+  history: "replace",
+})
+```
+
+### State Parsers
+
+Define parsers for each piece of state:
+
+```tsx showLineNumbers
+import { parseAsInteger, parseAsJson, parseAsString } from "nuqs"
+
+const tableStateParsers = {
+  pageIndex: parseAsInteger.withDefault(0),
+  pageSize: parseAsInteger.withDefault(10),
+  sort: parseAsJson<SortingState>(value => value as SortingState).withDefault(
+    [],
+  ),
+  filters: parseAsJson<ExtendedColumnFilter<Product>[]>(
+    value => value as ExtendedColumnFilter<Product>[],
+  ).withDefault([]),
+  search: parseAsString.withDefault(""),
+}
+```
+
+## When to Use
+
+**✅ Use Advanced Nuqs Table when:**
+
+- You need shareable URLs with table state
+- Users should be able to bookmark filtered/sorted views
+- You want browser back/forward navigation support
+- Table state should persist across page refreshes
+- You need to sync state with server-side rendering
+
+**❌ Consider other options when:**
+
+- URL state is not needed (use [Advanced Filter Table](/data-table/advanced-table))
+- You prefer simpler state management
+- You don't need shareable/bookmarkable views
+
+## Next Steps
+
+- [Advanced Filter Table](/data-table/advanced-table) - Rule-based filtering without URL state
+- [Advanced Inline Filter Table](/data-table/advanced-inline-table) - Custom inline filter UIs

@@ -1,0 +1,305 @@
+---
+title: Search Table
+description: Add global search functionality to quickly find data across all columns.
+---
+
+import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
+import CollapsiblePreview from "@/components/markdown/collapsible-preview.astro"
+
+<CodePreview demo="data-table/search" />
+
+<CollapsiblePreview>
+  <CodePreview demo="data-table/search-state" />
+</CollapsiblePreview>
+
+## Introduction
+
+The Search Table adds a global search input that filters data across all columns. Users can quickly find what they're looking for without complex filters.
+
+## Installation
+
+1. Add the required components:
+
+```bash
+npx shadcn@latest add table input button dropdown-menu
+```
+
+2. Add `tanstack/react-table` dependency:
+
+```bash
+npm install @tanstack/react-table
+```
+
+3. Copy the DataTable components into your project. See the [Installation Guide](/getting-started/installation) for detailed instructions.
+
+## Prerequisites
+
+We are going to build a table to show customers. Here's what our data looks like:
+
+```tsx showLineNumbers
+type Customer = {
+  id: string
+  name: string
+  email: string
+  company: string
+  phone: string
+}
+
+const data: Customer[] = [
+  {
+    id: "1",
+    name: "John Doe",
+    email: "john@example.com",
+    company: "Acme Corp",
+    phone: "+1 234-567-8900",
+  },
+  // ...
+]
+```
+
+## Basic Table with Search
+
+Let's start by building a table with global search.
+
+### Column Definitions
+
+First, we'll define our columns.
+
+```tsx showLineNumbers title="columns.tsx"
+"use client"
+
+import { TableColumnHeader } from "@/components/data-table/components"
+import type { DataTableColumnDef } from "@/components/data-table/types"
+
+export type Customer = {
+  id: string
+  name: string
+  email: string
+  company: string
+  phone: string
+}
+
+export const columns: DataTableColumnDef<Customer>[] = [
+  {
+    accessorKey: "name",
+    header: ({ column }) => <TableColumnHeader column={column} />,
+    meta: {
+      label: "Name",
+    },
+  },
+  {
+    accessorKey: "email",
+    header: ({ column }) => <TableColumnHeader column={column} />,
+    meta: {
+      label: "Email",
+    },
+  },
+  {
+    accessorKey: "company",
+    header: ({ column }) => <TableColumnHeader column={column} />,
+    meta: {
+      label: "Company",
+    },
+  },
+  {
+    accessorKey: "phone",
+    header: ({ column }) => <TableColumnHeader column={column} />,
+    meta: {
+      label: "Phone",
+    },
+  },
+]
+```
+
+### `<DataTable />` component
+
+Next, we'll add the search filter component.
+
+```tsx showLineNumbers title="search-table.tsx"
+"use client"
+
+import {
+  DataTableRoot,
+  DataTableToolbarSection,
+  DataTable,
+  DataTableHeader,
+  DataTableBody,
+  DataTablePagination,
+  DataTableSearchFilter,
+} from "@/components/data-table"
+import { TableColumnHeader } from "@/components/data-table/components"
+import type { DataTableColumnDef } from "@/components/data-table/types"
+
+type Customer = {
+  id: string
+  name: string
+  email: string
+  company: string
+  phone: string
+}
+
+const columns: DataTableColumnDef<Customer>[] = [
+  {
+    accessorKey: "name",
+    header: ({ column }) => <TableColumnHeader column={column} />,
+    meta: { label: "Name" },
+  },
+  {
+    accessorKey: "email",
+    header: ({ column }) => <TableColumnHeader column={column} />,
+    meta: { label: "Email" },
+  },
+  {
+    accessorKey: "company",
+    header: ({ column }) => <TableColumnHeader column={column} />,
+    meta: { label: "Company" },
+  },
+  {
+    accessorKey: "phone",
+    header: ({ column }) => <TableColumnHeader column={column} />,
+    meta: { label: "Phone" },
+  },
+]
+
+export function SearchTable({ data }: { data: Customer[] }) {
+  return (
+    <DataTableRoot
+      data={data}
+      columns={columns}
+      config={{
+        enablePagination: true,
+        enableSorting: true,
+        enableFilters: true,
+        initialPageSize: 10,
+      }}
+    >
+      <DataTableToolbarSection>
+        <DataTableSearchFilter placeholder="Search customers..." />
+      </DataTableToolbarSection>
+
+      <DataTable>
+        <DataTableHeader />
+        <DataTableBody />
+      </DataTable>
+
+      <DataTablePagination />
+    </DataTableRoot>
+  )
+}
+```
+
+## How Search Works
+
+The global search filter works by:
+
+1. Converting all searchable column values to strings
+2. Searching for the query across all columns
+3. Returning rows where ANY column matches
+4. Case-insensitive matching by default
+
+### Controlling Searchable Columns
+
+By default, all columns are searchable. To exclude columns:
+
+```tsx showLineNumbers
+{
+  accessorKey: "id",
+  header: "ID",
+  enableColumnFilter: false, // Not searchable
+}
+```
+
+## Controlled Search State
+
+Manage search state externally:
+
+```tsx showLineNumbers
+import { useState } from "react"
+
+export function ControlledSearchTable({ data }: { data: Customer[] }) {
+  const [searchValue, setSearchValue] = useState("")
+
+  return (
+    <DataTableRoot
+      data={data}
+      columns={columns}
+      config={{
+        enableFilters: true,
+      }}
+      onGlobalFilterChange={setSearchValue}
+    >
+      <DataTableToolbarSection>
+        <DataTableSearchFilter
+          placeholder="Search customers..."
+          value={searchValue}
+          onChange={setSearchValue}
+        />
+      </DataTableToolbarSection>
+
+      <DataTable>
+        <DataTableHeader />
+        <DataTableBody />
+      </DataTable>
+
+      <DataTablePagination />
+    </DataTableRoot>
+  )
+}
+```
+
+## Custom Search Input
+
+Build your own search UI using the context:
+
+```tsx showLineNumbers
+import { useDataTable } from "@/components/data-table/core"
+import { Input } from "@/components/ui/input"
+import { Search, X } from "lucide-react"
+import { Button } from "@/components/ui/button"
+
+function CustomSearchInput() {
+  const { table } = useDataTable<Customer>()
+  const globalFilter = table.getState().globalFilter
+
+  return (
+    <div className="relative">
+      <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+      <Input
+        value={(globalFilter as string) ?? ""}
+        onChange={e => table.setGlobalFilter(e.target.value)}
+        placeholder="Search..."
+        className="pr-9 pl-9"
+      />
+      {globalFilter && (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="absolute top-1/2 right-1 h-7 w-7 -translate-y-1/2 p-0"
+          onClick={() => table.setGlobalFilter("")}
+        >
+          <X className="h-4 w-4" />
+        </Button>
+      )}
+    </div>
+  )
+}
+```
+
+## When to Use
+
+**✅ Use Search Table when:**
+
+- Users need quick, simple searching
+- Data is text-heavy (names, descriptions, etc.)
+- You want a clean, minimal UI
+- Dataset is < 1000 rows (client-side)
+
+**❌ Consider other options when:**
+
+- You need column-specific filters (use [Advanced Table](/data-table/advanced-table))
+- Dataset is > 1000 rows (implement server-side filtering)
+- Search is not the primary use case (use [Basic Table](/data-table/basic-table))
+
+## Next Steps
+
+- [Advanced Table](/data-table/advanced-table) - Add advanced filtering and sorting menus

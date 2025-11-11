@@ -1,0 +1,362 @@
+---
+title: Manual Installation
+description: Copy and paste all DataTable components into your project manually.
+---
+
+import { Steps } from "@astrojs/starlight/components"
+import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
+import ManualInstallationCode from "@/components/markdown/manual-installation-code/manual-installation-code.astro"
+
+## Prerequisites
+
+Before copying the components, make sure you have:
+
+1. **A React project** (Next.js, Vite, etc.)
+2. **Shadcn UI** set up in your project ([Installation Guide](https://ui.shadcn.com/docs/installation))
+3. **TailwindCSS** configured
+4. **TypeScript** (recommended)
+
+## Architecture Note
+
+The DataTable components use a two-layer architecture for maximum flexibility:
+
+- **Actions** (`data-table-*.tsx` in `/actions` folder) - Context-aware wrapper components that use `useDataTable()` hook to automatically get the table from `DataTableRoot` context. These eliminate prop drilling and are the recommended way to use components:
+  - `DataTableSearchFilter`, `DataTableFilterMenu`, `DataTableSortMenu`, `DataTablePagination`, etc.
+- **Filters** (`table-*.tsx` in `/filters` folder) - Core implementation components that accept a `table` prop directly and use TanStack Table hooks (like `table.getState()`, `table.setGlobalFilter()`, etc.). These can be used standalone:
+  - `TableSearchFilter`, `TableFilterMenu`, `TableSortMenu`, etc.
+
+**Why this architecture?**
+
+- Use `DataTable*` components from actions when you want context-based, zero-config usage
+- Use `Table*` components from filters when you want to build custom components or manage the table instance yourself
+- All filter components use TanStack Table hooks directly, giving you full control
+
+## Installation Steps
+
+<Steps>
+  1. **Install the required dependencies**
+
+     <CliCommandCode action="install" command="@tanstack/react-table" />
+
+2. **Install the required Shadcn UI components**
+
+   <CliCommandCode
+     action="run"
+     command="npx shadcn@latest add table button input dropdown-menu"
+   />
+
+3. **Update `components/ui/table.tsx`**
+
+   Replace the entire contents with this updated version:
+
+   ```tsx title="components/ui/table.tsx"
+   "use client"
+
+   import * as React from "react"
+
+   import { cn } from "@/lib/utils"
+
+   function TableComponent({
+     className,
+     ...props
+   }: React.ComponentProps<"table">) {
+     return (
+       <table
+         data-slot="table"
+         className={cn("w-full caption-bottom text-sm", className)}
+         {...props}
+       />
+     )
+   }
+
+   function Table({ className, ...props }: React.ComponentProps<"table">) {
+     return (
+       <div
+         data-slot="table-container"
+         className="relative w-full overflow-x-auto"
+       >
+         <TableComponent className={className} {...props} />
+       </div>
+     )
+   }
+
+   function TableHeader({
+     className,
+     ...props
+   }: React.ComponentProps<"thead">) {
+     return (
+       <thead
+         data-slot="table-header"
+         className={cn("[&_tr]:border-b", className)}
+         {...props}
+       />
+     )
+   }
+
+   function TableBody({ className, ...props }: React.ComponentProps<"tbody">) {
+     return (
+       <tbody
+         data-slot="table-body"
+         className={cn("[&_tr:last-child]:border-0", className)}
+         {...props}
+       />
+     )
+   }
+
+   function TableFooter({
+     className,
+     ...props
+   }: React.ComponentProps<"tfoot">) {
+     return (
+       <tfoot
+         data-slot="table-footer"
+         className={cn(
+           "border-t bg-muted/50 font-medium [&>tr]:last:border-b-0",
+           className,
+         )}
+         {...props}
+       />
+     )
+   }
+
+   function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
+     return (
+       <tr
+         data-slot="table-row"
+         className={cn(
+           "border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted",
+           className,
+         )}
+         {...props}
+       />
+     )
+   }
+
+   function TableHead({ className, ...props }: React.ComponentProps<"th">) {
+     return (
+       <th
+         data-slot="table-head"
+         className={cn(
+           "h-10 px-2 text-left align-middle font-medium whitespace-nowrap text-foreground [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
+           className,
+         )}
+         {...props}
+       />
+     )
+   }
+
+   function TableCell({ className, ...props }: React.ComponentProps<"td">) {
+     return (
+       <td
+         data-slot="table-cell"
+         className={cn(
+           "p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
+           className,
+         )}
+         {...props}
+       />
+     )
+   }
+
+   function TableCaption({
+     className,
+     ...props
+   }: React.ComponentProps<"caption">) {
+     return (
+       <caption
+         data-slot="table-caption"
+         className={cn("mt-4 text-sm text-muted-foreground", className)}
+         {...props}
+       />
+     )
+   }
+
+   export {
+     TableComponent,
+     Table,
+     TableHeader,
+     TableBody,
+     TableFooter,
+     TableHead,
+     TableRow,
+     TableCell,
+     TableCaption,
+   }
+   ```
+
+   **What changed?**
+   - Added `TableComponent` export (used internally by DataTable)
+   - Added `data-slot` attributes to all elements
+   - Wrapped table in a container div for overflow handling
+
+   > **Note**: These changes are **100% backward compatible** - your existing Shadcn tables will continue to work exactly as before.
+
+4. **Copy all DataTable components**
+
+   Copy [all the files below](#all-components) into your project, maintaining the directory structure shown.
+
+5. **Update import paths**
+
+   Update the import paths in the copied files to match your project structure. The components use:
+   - `@/components/ui/` for Shadcn UI components
+   - `@/components/data-table/` for DataTable components
+   - `@/lib/` for utility functions
+
+6. **Verify installation**
+
+   Create a simple test to verify everything is working:
+
+   ```tsx
+   import {
+     DataTableRoot,
+     DataTable,
+     DataTableHeader,
+     DataTableBody,
+   } from "@/components/data-table"
+
+   const columns = [
+     { accessorKey: "name", header: "Name" },
+     { accessorKey: "email", header: "Email" },
+   ]
+
+   const data = [
+     { id: "1", name: "John Doe", email: "john@example.com" },
+     { id: "2", name: "Jane Smith", email: "jane@example.com" },
+   ]
+
+   export function TestTable() {
+     return (
+       <DataTableRoot data={data} columns={columns}>
+         <DataTable>
+           <DataTableHeader />
+           <DataTableBody />
+         </DataTable>
+       </DataTableRoot>
+     )
+   }
+   ```
+
+</Steps>
+
+## Project Structure
+
+After copying all files, your project structure should look like this:
+
+```
+your-project/
+├── src/
+│   ├── components/
+│   │   ├── ui/
+│   │   │   ├── table.tsx          # Updated Shadcn table component
+│   │   │   ├── button.tsx
+│   │   │   ├── input.tsx
+│   │   │   ├── dropdown-menu.tsx
+│   │   │   └── ...                # Other Shadcn components
+│   │   │
+│   │   └── data-table/
+│   │       ├── index.tsx                    # Main exports
+│   │       │
+│   │       ├── core/                        # Core table components
+│   │       │   ├── data-table-root.tsx
+│   │       │   ├── data-table.tsx
+│   │       │   ├── data-table-context.tsx
+│   │       │   ├── data-table-structure.tsx  # Header, Body, EmptyBody, Skeleton, Loading (consolidated)
+│   │       │   ├── data-table-toolbar-section.tsx
+│   │       │   ├── data-table-virtualized-structure.tsx  # VirtualizedHeader, VirtualizedBody, VirtualizedEmptyBody, VirtualizedSkeleton, VirtualizedLoading (consolidated)
+│   │       │   └── index.tsx
+│   │       │
+│   │       ├── actions/                     # Action components
+│   │       │   ├── data-table-search-filter.tsx
+│   │       │   ├── data-table-view-menu.tsx
+│   │       │   ├── data-table-filter-menu.tsx
+│   │       │   ├── data-table-sort-menu.tsx
+│   │       │   ├── data-table-clear-filter.tsx
+│   │       │   ├── data-table-faceted-filter.tsx
+│   │       │   ├── data-table-slider-filter.tsx
+│   │       │   ├── data-table-date-filter.tsx
+│   │       │   ├── data-table-inline-filter.tsx
+│   │       │   ├── data-table-pagination.tsx
+│   │       │   ├── data-table-export-button.tsx
+│   │       │   └── index.tsx
+│   │       │
+│   │       ├── filters/                     # Filter components
+│   │       │   ├── table-search-filter.tsx
+│   │       │   ├── table-faceted-filter.tsx
+│   │       │   ├── table-slider-filter.tsx
+│   │       │   ├── table-date-filter.tsx
+│   │       │   ├── table-inline-filter.tsx
+│   │       │   ├── table-filter-menu.tsx
+│   │       │   ├── table-view-menu.tsx
+│   │       │   ├── table-sort-menu.tsx
+│   │       │   ├── table-range-filter.tsx
+│   │       │   ├── table-pagination.tsx
+│   │       │   ├── table-export-button.tsx
+│   │       │   └── index.tsx
+│   │       │
+│   │       ├── components/                  # Utility components
+│   │       │   ├── table-column-header.tsx
+│   │       │   ├── data-table-aside.tsx
+│   │       │   ├── data-table-selection-bar.tsx
+│   │       │   └── index.tsx
+│   │       │
+│   │       ├── config/                      # Configuration
+│   │       │   ├── data-table.ts
+│   │       │   ├── feature-detection.ts
+│   │       │   └── index.tsx
+│   │       │
+│   │       ├── hooks/                       # Custom React hooks
+│   │       │   ├── use-derived-column-title.ts
+│   │       │   ├── use-keyboard-shortcut.ts
+│   │       │   └── index.ts
+│   │       │
+│   │       ├── lib/                         # Utility functions
+│   │       │   ├── constants.ts
+│   │       │   ├── data-table.ts
+│   │       │   ├── filter-functions.ts
+│   │       │   ├── format.ts
+│   │       │   └── index.ts
+│   │       │
+│   │       └── types/                       # TypeScript types
+│   │           └── index.ts
+│   │
+│   └── lib/
+│       └── utils.ts                         # cn() utility (already in your project)
+│
+└── package.json
+```
+
+## All Components
+
+Browse and copy individual files below:
+
+<ManualInstallationCode />
+
+## Additional Dependencies
+
+For advanced features, you may need additional dependencies:
+
+### URL State Management (nuqs)
+
+For URL state persistence in tables:
+
+<CliCommandCode action="install" command="nuqs" />
+
+### Virtualization
+
+For virtualized tables:
+
+<CliCommandCode action="install" command="@tanstack/react-virtual" />
+
+### Sortable Rows
+
+For drag-and-drop row reordering, follow the [DiceUI Sortable installation guide](https://www.diceui.com/docs/components/sortable).
+
+## Next Steps
+
+Now that you have all the components installed, check out the examples:
+
+- [Simple Table](/data-table/simple-table) - Basic table with no pagination
+- [Basic Table](/data-table/basic-table) - Add pagination and sorting
+- [Search Table](/data-table/search-table) - Add search functionality
+- [Faceted Filter Table](/data-table/faceted-filter-table) - Add advanced filtering
+- [Advanced Table](/data-table/advanced-table) - All features combined

@@ -1,0 +1,89 @@
+"use client"
+
+import React from "react"
+import { useDataTable } from "../core"
+import {
+  TableInline,
+  type TableInlineProps,
+} from "../filters/table-inline-filter"
+import { useGeneratedOptions } from "../hooks/use-generated-options"
+import type { Option } from "../types"
+
+type BaseInlineProps<TData> = Omit<TableInlineProps<TData>, "table">
+
+interface AutoOptionProps {
+  autoOptions?: boolean
+  showCounts?: boolean
+  dynamicCounts?: boolean
+  includeColumns?: string[]
+  excludeColumns?: string[]
+  limitPerColumn?: number
+  mergeStrategy?: "preserve" | "augment" | "replace"
+}
+
+type DataTableInlineFilterProps<TData> = BaseInlineProps<TData> &
+  AutoOptionProps
+
+export function DataTableInlineFilter<TData>({
+  autoOptions = true,
+  showCounts = true,
+  dynamicCounts = true,
+  includeColumns,
+  excludeColumns,
+  limitPerColumn,
+  mergeStrategy = "preserve",
+  ...props
+}: DataTableInlineFilterProps<TData>) {
+  const { table } = useDataTable<TData>()
+
+  const generatedOptions = useGeneratedOptions(table, {
+    showCounts,
+    dynamicCounts,
+    includeColumns,
+    excludeColumns,
+    limitPerColumn,
+  })
+
+  // Mutate meta.options for select/multiSelect columns similar to menu wrapper
+  // This keeps TableInline copy-paste friendly without extra props.
+  // Memo to avoid repeated mutation on every render.
+  React.useMemo(() => {
+    if (!autoOptions) return null
+    table.getAllColumns().forEach(column => {
+      const meta = (column.columnDef.meta ||= {})
+      const variant = meta.variant ?? "text"
+      if (variant !== "select" && variant !== "multiSelect") return
+      const gen = generatedOptions[column.id]
+      if (!gen || gen.length === 0) return
+
+      if (!meta.options) {
+        meta.options = gen
+        return
+      }
+
+      if (mergeStrategy === "replace") {
+        meta.options = gen
+        return
+      }
+
+      if (mergeStrategy === "augment") {
+        const countMap = new Map(gen.map(o => [o.value, o.count]))
+        meta.options = meta.options.map((opt: Option) => ({
+          ...opt,
+          count: showCounts
+            ? (countMap.get(opt.value) ?? opt.count)
+            : undefined,
+        }))
+      }
+    })
+  }, [autoOptions, generatedOptions, mergeStrategy, showCounts, table])
+
+  return <TableInline table={table} {...props} />
+}
+
+/**
+ * @required displayName is required for auto feature detection
+ * @see "feature-detection.ts"
+ */
+
+DataTableInlineFilter.displayName = "DataTableInlineFilter"

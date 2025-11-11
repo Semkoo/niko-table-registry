@@ -1,0 +1,495 @@
+---
+title: Aside Table
+description: Add sidebar panels to display additional content alongside your table.
+---
+
+import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
+import CollapsiblePreview from "@/components/markdown/collapsible-preview.astro"
+
+<CodePreview demo="data-table/aside" />
+
+<CollapsiblePreview>
+  <CodePreview demo="data-table/aside-state" />
+</CollapsiblePreview>
+
+## Introduction
+
+The Aside Table adds sidebar panels (left and/or right) to display additional content alongside your table. This is useful for showing filters, details, or other contextual information without cluttering the main table view.
+
+## Installation
+
+1. Add the required components:
+
+```bash
+npx shadcn@latest add table input button dropdown-menu scroll-area
+```
+
+2. Add `tanstack/react-table` dependency:
+
+```bash
+npm install @tanstack/react-table
+```
+
+3. Copy the DataTable components into your project. See the [Installation Guide](/getting-started/installation) for detailed instructions.
+
+## Prerequisites
+
+We are going to build a table with sidebars to show customer details. Here's what our data looks like:
+
+```tsx showLineNumbers
+type Customer = {
+  id: string
+  name: string
+  email: string
+  company: string
+  phone: string
+}
+
+const data: Customer[] = [
+  {
+    id: "1",
+    name: "John Doe",
+    email: "john@example.com",
+    company: "Acme Corp",
+    phone: "555-0100",
+  },
+  // ...
+]
+```
+
+## Basic Table with Sidebars
+
+Let's start by building a table with left and right sidebars.
+
+### Column Definitions
+
+First, we'll define our columns.
+
+```tsx showLineNumbers title="columns.tsx"
+"use client"
+
+import { TableColumnHeader } from "@/components/data-table/components"
+import type { DataTableColumnDef } from "@/components/data-table/types"
+
+export type Customer = {
+  id: string
+  name: string
+  email: string
+  company: string
+  phone: string
+}
+
+export const columns: DataTableColumnDef<Customer>[] = [
+  {
+    accessorKey: "name",
+    header: ({ column }) => <TableColumnHeader column={column} />,
+    meta: { label: "Name" },
+  },
+  {
+    accessorKey: "email",
+    header: ({ column }) => <TableColumnHeader column={column} />,
+    meta: { label: "Email" },
+  },
+  {
+    accessorKey: "company",
+    header: ({ column }) => <TableColumnHeader column={column} />,
+    meta: { label: "Company" },
+  },
+  {
+    accessorKey: "phone",
+    header: ({ column }) => <TableColumnHeader column={column} />,
+    meta: { label: "Phone" },
+  },
+]
+```
+
+### `<DataTable />` component with Sidebars
+
+Next, we'll add the sidebar components.
+
+```tsx showLineNumbers title="aside-table.tsx"
+"use client"
+
+import { useState } from "react"
+import {
+  DataTableRoot,
+  DataTableToolbarSection,
+  DataTable,
+  DataTableHeader,
+  DataTableBody,
+  DataTablePagination,
+  DataTableSearchFilter,
+  DataTableViewMenu,
+  DataTableEmptyBody,
+} from "@/components/data-table"
+import {
+  TableColumnHeader,
+  DataTableAside,
+  DataTableAsideTrigger,
+  DataTableAsideContent,
+  DataTableAsideHeader,
+  DataTableAsideTitle,
+  DataTableAsideClose,
+} from "@/components/data-table/components"
+import type { DataTableColumnDef } from "@/components/data-table/types"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Filter, Eye } from "lucide-react"
+
+type Customer = {
+  id: string
+  name: string
+  email: string
+  company: string
+  phone: string
+}
+
+const columns: DataTableColumnDef<Customer>[] = [
+  {
+    accessorKey: "name",
+    header: ({ column }) => <TableColumnHeader column={column} />,
+    meta: { label: "Name" },
+  },
+  {
+    accessorKey: "email",
+    header: ({ column }) => <TableColumnHeader column={column} />,
+    meta: { label: "Email" },
+  },
+  {
+    accessorKey: "company",
+    header: ({ column }) => <TableColumnHeader column={column} />,
+    meta: { label: "Company" },
+  },
+  {
+    accessorKey: "phone",
+    header: ({ column }) => <TableColumnHeader column={column} />,
+    meta: { label: "Phone" },
+  },
+  {
+    id: "actions",
+    header: () => <div className="text-right">Actions</div>,
+    cell: ({ row }) => (
+      <div className="flex justify-end">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={e => {
+            e.stopPropagation()
+            // Handle view action
+          }}
+        >
+          <Eye className="mr-2 h-4 w-4" />
+          View
+        </Button>
+      </div>
+    ),
+  },
+]
+
+export function AsideTable({ data }: { data: Customer[] }) {
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(
+    null,
+  )
+  const [showFilters, setShowFilters] = useState(false)
+
+  return (
+    <DataTableRoot data={data} columns={columns}>
+      <DataTableToolbarSection className="justify-between">
+        <div className="flex items-center gap-2">
+          {/* Left Sidebar Trigger */}
+          <DataTableAside
+            side="left"
+            open={showFilters}
+            onOpenChange={setShowFilters}
+          >
+            <DataTableAsideTrigger asChild>
+              <Button variant="outline" size="sm">
+                <Filter className="mr-2 h-4 w-4" />
+                Filters
+              </Button>
+            </DataTableAsideTrigger>
+          </DataTableAside>
+          <DataTableSearchFilter placeholder="Search customers..." />
+        </div>
+        <DataTableViewMenu />
+      </DataTableToolbarSection>
+
+      {/* Layout with Sidebars */}
+      <div className="flex min-h-[600px] gap-4">
+        {/* Left Sidebar - Filters */}
+        <DataTableAside
+          side="left"
+          open={showFilters}
+          onOpenChange={setShowFilters}
+        >
+          <DataTableAsideContent width="w-80">
+            <DataTableAsideHeader>
+              <div className="flex items-center justify-between">
+                <DataTableAsideTitle>Filters</DataTableAsideTitle>
+                <DataTableAsideClose />
+              </div>
+            </DataTableAsideHeader>
+            <div className="mt-4 space-y-4">
+              <h4 className="text-sm font-medium">Company</h4>
+              <ScrollArea className="h-[400px]">
+                <div className="space-y-2 pr-4">
+                  {Array.from(new Set(data.map(c => c.company))).map(
+                    company => (
+                      <label
+                        key={company}
+                        className="flex cursor-pointer items-center space-x-2"
+                      >
+                        <input type="checkbox" className="rounded" />
+                        <span className="text-sm">{company}</span>
+                      </label>
+                    ),
+                  )}
+                </div>
+              </ScrollArea>
+            </div>
+          </DataTableAsideContent>
+        </DataTableAside>
+
+        {/* Main Table */}
+        <DataTable className="flex-1">
+          <DataTableHeader />
+          <DataTableBody
+            onRowClick={row => {
+              setSelectedCustomer(row)
+              setShowFilters(false)
+            }}
+          >
+            <DataTableEmptyBody />
+          </DataTableBody>
+        </DataTable>
+
+        {/* Right Sidebar - Customer Details */}
+        <DataTableAside
+          side="right"
+          open={!!selectedCustomer}
+          onOpenChange={open => {
+            if (!open) setSelectedCustomer(null)
+          }}
+        >
+          <DataTableAsideContent width="w-96">
+            {selectedCustomer && (
+              <>
+                <DataTableAsideHeader>
+                  <div className="flex items-center justify-between">
+                    <DataTableAsideTitle>
+                      {selectedCustomer.name}
+                    </DataTableAsideTitle>
+                    <DataTableAsideClose />
+                  </div>
+                  <Badge className="mt-2 w-fit">
+                    Customer ID: {selectedCustomer.id}
+                  </Badge>
+                </DataTableAsideHeader>
+                <ScrollArea className="mt-4 h-[500px]">
+                  <div className="space-y-3 pr-4">
+                    <div className="flex flex-col gap-1">
+                      <span className="text-sm font-medium text-muted-foreground">
+                        Email
+                      </span>
+                      <span className="text-sm">{selectedCustomer.email}</span>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <span className="text-sm font-medium text-muted-foreground">
+                        Company
+                      </span>
+                      <span className="text-sm">
+                        {selectedCustomer.company}
+                      </span>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <span className="text-sm font-medium text-muted-foreground">
+                        Phone
+                      </span>
+                      <span className="text-sm">{selectedCustomer.phone}</span>
+                    </div>
+                  </div>
+                </ScrollArea>
+              </>
+            )}
+          </DataTableAsideContent>
+        </DataTableAside>
+      </div>
+
+      <DataTablePagination />
+    </DataTableRoot>
+  )
+}
+```
+
+## Sidebar Components
+
+### DataTableAside
+
+The main sidebar container component.
+
+**Props:**
+
+- `side`: `"left" | "right"` - Which side to show the sidebar
+- `open`: `boolean` - Controlled open state
+- `onOpenChange`: `(open: boolean) => void` - Callback when open state changes
+- `children`: Sidebar content components
+
+### DataTableAsideTrigger
+
+Button to trigger opening the sidebar.
+
+```tsx
+<DataTableAside side="left" open={showFilters} onOpenChange={setShowFilters}>
+  <DataTableAsideTrigger asChild>
+    <Button variant="outline" size="sm">
+      <Filter className="mr-2 h-4 w-4" />
+      Filters
+    </Button>
+  </DataTableAsideTrigger>
+</DataTableAside>
+```
+
+### DataTableAsideContent
+
+Container for sidebar content.
+
+**Props:**
+
+- `width?`: Tailwind width class (e.g., `"w-80"`, `"w-96"`)
+- `children`: Sidebar content
+
+### DataTableAsideHeader, DataTableAsideTitle, DataTableAsideClose
+
+Header components for the sidebar.
+
+```tsx
+<DataTableAsideHeader>
+  <div className="flex items-center justify-between">
+    <DataTableAsideTitle>Filters</DataTableAsideTitle>
+    <DataTableAsideClose />
+  </div>
+</DataTableAsideHeader>
+```
+
+## Row Click Handler
+
+Use `onRowClick` on `DataTableBody` to open the right sidebar:
+
+```tsx showLineNumbers
+<DataTableBody
+  onRowClick={row => {
+    setSelectedCustomer(row)
+    setShowFilters(false) // Close left sidebar when opening right
+  }}
+>
+  <DataTableEmptyBody />
+</DataTableBody>
+```
+
+## Controlled State
+
+Manage sidebar state externally for full control:
+
+```tsx showLineNumbers
+import { useState } from "react"
+import type { SortingState, ColumnFiltersState } from "@tanstack/react-table"
+
+export function ControlledAsideTable({ data }: { data: Customer[] }) {
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(
+    null,
+  )
+  const [showFilters, setShowFilters] = useState(false)
+  const [sorting, setSorting] = useState<SortingState>([])
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+
+  return (
+    <DataTableRoot
+      data={data}
+      columns={columns}
+      state={{
+        sorting,
+        columnFilters,
+      }}
+      onSortingChange={setSorting}
+      onColumnFiltersChange={setColumnFilters}
+    >
+      <DataTableToolbarSection className="justify-between">
+        <div className="flex items-center gap-2">
+          <DataTableAside
+            side="left"
+            open={showFilters}
+            onOpenChange={setShowFilters}
+          >
+            <DataTableAsideTrigger asChild>
+              <Button variant="outline" size="sm">
+                <Filter className="mr-2 h-4 w-4" />
+                Filters
+              </Button>
+            </DataTableAsideTrigger>
+          </DataTableAside>
+          <DataTableSearchFilter placeholder="Search customers..." />
+        </div>
+        <DataTableViewMenu />
+      </DataTableToolbarSection>
+
+      <div className="flex min-h-[600px] gap-4">
+        <DataTableAside
+          side="left"
+          open={showFilters}
+          onOpenChange={setShowFilters}
+        >
+          <DataTableAsideContent width="w-80">
+            {/* Filter content */}
+          </DataTableAsideContent>
+        </DataTableAside>
+
+        <DataTable className="flex-1">
+          <DataTableHeader />
+          <DataTableBody
+            onRowClick={row => {
+              setSelectedCustomer(row)
+              setShowFilters(false)
+            }}
+          >
+            <DataTableEmptyBody />
+          </DataTableBody>
+        </DataTable>
+
+        <DataTableAside
+          side="right"
+          open={!!selectedCustomer}
+          onOpenChange={open => {
+            if (!open) setSelectedCustomer(null)
+          }}
+        >
+          <DataTableAsideContent width="w-96">
+            {/* Customer details */}
+          </DataTableAsideContent>
+        </DataTableAside>
+      </div>
+
+      <DataTablePagination />
+    </DataTableRoot>
+  )
+}
+```
+
+## When to Use
+
+**✅ Use Aside Table when:**
+
+- You need to show additional details without cluttering the table
+- You want to display filters in a dedicated panel
+- You need contextual information that's not part of the main table
+- You want a clean, organized layout
+
+**❌ Consider other options when:**
+
+- You don't need additional panels (use [Basic Table](/data-table/basic-table))
+- You prefer inline expansion (use [Row Expansion Table](/data-table/row-expansion-table))
+
+## Next Steps
+
+- [Row Expansion Table](/data-table/row-expansion-table) - Expand rows inline
+- [Advanced Table](/data-table/advanced-table) - Combine all features

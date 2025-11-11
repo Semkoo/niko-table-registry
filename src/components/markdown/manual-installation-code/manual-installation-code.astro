@@ -1,0 +1,118 @@
+---
+import fs from "node:fs/promises"
+import path from "node:path"
+import { codeToHtml } from "shiki"
+import { ManualInstallationCodeInternal } from "./_manual-installation-code-internal"
+
+// Directories to exclude (only README)
+const excludedFiles = ["README.md"]
+
+// Recursively read all component files
+async function getAllComponentFiles(
+  dir: string,
+  baseDir: string = dir,
+): Promise<Array<{ path: string; content: string }>> {
+  const entries = await fs.readdir(dir, { withFileTypes: true })
+  const files: Array<{ path: string; content: string }> = []
+
+  for (const entry of entries) {
+    // Skip excluded files
+    if (excludedFiles.includes(entry.name)) {
+      continue
+    }
+
+    const fullPath = path.join(dir, entry.name)
+    if (entry.isDirectory()) {
+      const subFiles = await getAllComponentFiles(fullPath, baseDir)
+      files.push(...subFiles)
+    } else if (
+      entry.isFile() &&
+      (entry.name.endsWith(".tsx") || entry.name.endsWith(".ts"))
+    ) {
+      const content = await fs.readFile(fullPath, "utf-8")
+      const relativePath = path.relative(baseDir, fullPath).replace(/\\/g, "/")
+      files.push({ path: relativePath, content })
+    }
+  }
+
+  return files
+}
+
+// Read all DataTable components
+const dataTableFiles = await getAllComponentFiles("./src/components/data-table")
+
+// Combine all files (no root lib/ files needed - users should already have utils.ts)
+const allFiles = dataTableFiles.map(file => ({
+  path: `components/data-table/${file.path}`,
+  content: file.content,
+}))
+
+// Group files by directory
+const filesByDirectory = allFiles.reduce(
+  (acc, file) => {
+    const dir = path.dirname(file.path)
+    if (!acc[dir]) {
+      acc[dir] = []
+    }
+    acc[dir].push(file)
+    return acc
+  },
+  {} as Record<string, Array<{ path: string; content: string }>>,
+)
+
+// Pre-render syntax highlighted HTML for each file with line numbers (light + dark)
+const highlightedCode: Record<string, string> = {}
+for (const file of allFiles) {
+  try {
+    // Generate both light and dark theme versions
+    const darkHtml = await codeToHtml(file.content, {
+      lang: file.path.endsWith(".ts") ? "typescript" : "tsx",
+      theme: "github-dark",
+    })
+
+    const lightHtml = await codeToHtml(file.content, {
+      lang: file.path.endsWith(".ts") ? "typescript" : "tsx",
+      theme: "github-light",
+    })
+
+    // Extract highlighted lines from both themes
+    const darkMatch = darkHtml.match(/<code[^>]*>([\s\S]*?)<\/code>/)
+    const lightMatch = lightHtml.match(/<code[^>]*>([\s\S]*?)<\/code>/)
+    const darkLines = darkMatch
+      ? darkMatch[1].split("\n")
+      : file.content.split("\n")
+    const lightLines = lightMatch
+      ? lightMatch[1].split("\n")
+      : file.content.split("\n")
+
+    // Build HTML with line numbers
+    const lines = file.content.split("\n")
+    const lnWidth = Math.max(2, String(lines.length).length)
+
+    const withLineNumbers = `
+<div class="expressive-code">
+  <figure class="frame not-content" style="--lnWidth: ${lnWidth}ch">
+    <pre data-language="tsx"><code>${lines
+      .map((line, i) => {
+        const lineNum = i + 1
+        const darkLine = darkLines[i] || line
+        const lightLine = lightLines[i] || line
+        return `<div class="ec-line"><div class="gutter"><div class="ln" aria-hidden="true">${lineNum}</div></div><div class="code"><span class="dark-only">${darkLine}</span><span class="light-only">${lightLine}</span></div></div>`
+      })
+      .join("")}</code></pre>
+  </figure>
+</div>`
+
+    highlightedCode[file.path] = withLineNumbers
+  } catch (error) {
+    console.error(`Failed to highlight ${file.path}:`, error)
+    highlightedCode[file.path] = `<pre><code>${file.content}</code></pre>`
+  }
+}
+---
+
+<ManualInstallationCodeInternal
+  filesByDirectory={filesByDirectory}
+  highlightedCode={highlightedCode}
+  client:load
+/>

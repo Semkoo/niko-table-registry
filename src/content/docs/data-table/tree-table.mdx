@@ -1,0 +1,472 @@
+---
+title: Tree Table
+description: Display hierarchical data with expandable parent and child rows.
+---
+
+import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
+import CollapsiblePreview from "@/components/markdown/collapsible-preview.astro"
+
+<CodePreview demo="data-table/tree-table" />
+
+<CollapsiblePreview>
+  <CodePreview demo="data-table/tree-table-state" />
+</CollapsiblePreview>
+
+## Introduction
+
+The Tree Table displays hierarchical data with parent and child relationships. Rows can be expanded to show nested data, and selection can cascade to children.
+
+## Installation
+
+1. Add the required components:
+
+```bash
+npx shadcn@latest add table input button dropdown-menu checkbox tooltip
+```
+
+2. Add `tanstack/react-table` dependency:
+
+```bash
+npm install @tanstack/react-table
+```
+
+3. Copy the DataTable components into your project. See the [Installation Guide](/getting-started/installation) for detailed instructions.
+
+## Prerequisites
+
+We are going to build a table to show projects with sub-projects. Here's what our data looks like:
+
+```tsx showLineNumbers
+type Project = {
+  id: string
+  name: string
+  status: "active" | "completed" | "on-hold"
+  budget: number
+  subRows?: Project[]
+}
+
+const data: Project[] = [
+  {
+    id: "1",
+    name: "Website Redesign",
+    status: "active",
+    budget: 50000,
+    subRows: [
+      {
+        id: "1-1",
+        name: "UI/UX Design",
+        status: "completed",
+        budget: 15000,
+      },
+      {
+        id: "1-2",
+        name: "Frontend Development",
+        status: "active",
+        budget: 25000,
+      },
+    ],
+  },
+  // ...
+]
+```
+
+## Basic Tree Table
+
+Let's start by building a tree table.
+
+### Column Definitions
+
+First, we'll define our columns with tree visualization.
+
+```tsx showLineNumbers title="columns.tsx"
+"use client"
+
+import { TableColumnHeader } from "@/components/data-table/components"
+import type { DataTableColumnDef } from "@/components/data-table/types"
+import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
+import { ChevronRight, ChevronDown } from "lucide-react"
+
+export type Project = {
+  id: string
+  name: string
+  status: "active" | "completed" | "on-hold"
+  budget: number
+  subRows?: Project[]
+}
+
+export const columns: DataTableColumnDef<Project>[] = [
+  {
+    accessorKey: "name",
+    header: ({ column }) => (
+      <TableColumnHeader column={column} title="Project Name" />
+    ),
+    cell: ({ row }) => {
+      const { depth, original: project } = row
+      const canExpand = row.getCanExpand()
+      const isExpanded = row.getIsExpanded()
+
+      return (
+        <div className="flex items-center gap-2">
+          {/* Tree visualization */}
+          <div className="flex items-center">
+            {depth > 0 && (
+              <div className="flex h-6 w-6 items-center justify-center">
+                {/* Tree lines would go here */}
+              </div>
+            )}
+            {canExpand && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={row.getToggleExpandedHandler()}
+                className="h-4 w-4 p-0"
+              >
+                {isExpanded ? (
+                  <ChevronDown className="h-3.5 w-3.5" />
+                ) : (
+                  <ChevronRight className="h-3.5 w-3.5" />
+                )}
+              </Button>
+            )}
+          </div>
+          <div className="font-medium">{row.getValue("name")}</div>
+        </div>
+      )
+    },
+  },
+  {
+    accessorKey: "status",
+    header: ({ column }) => (
+      <TableColumnHeader column={column} title="Status" />
+    ),
+  },
+  {
+    accessorKey: "budget",
+    header: ({ column }) => (
+      <TableColumnHeader column={column} title="Budget" />
+    ),
+    cell: ({ row }) => {
+      const budget = row.getValue("budget") as number
+      return <div className="font-mono">${budget.toLocaleString()}</div>
+    },
+  },
+]
+```
+
+### `<DataTable />` component
+
+Next, we'll create the tree table with `getSubRows`.
+
+```tsx showLineNumbers title="tree-table.tsx"
+"use client"
+
+import * as React from "react"
+import {
+  DataTableRoot,
+  DataTableToolbarSection,
+  DataTable,
+  DataTableHeader,
+  DataTableBody,
+  DataTablePagination,
+  DataTableSearchFilter,
+  DataTableViewMenu,
+  DataTableEmptyBody,
+} from "@/components/data-table"
+import { TableColumnHeader } from "@/components/data-table/components"
+import type { DataTableColumnDef } from "@/components/data-table/types"
+import { Button } from "@/components/ui/button"
+import {
+  ChevronRight,
+  ChevronDown,
+  ChevronsDownUp,
+  ChevronsUpDown,
+} from "lucide-react"
+
+type Project = {
+  id: string
+  name: string
+  status: "active" | "completed" | "on-hold"
+  budget: number
+  subRows?: Project[]
+}
+
+const columns: DataTableColumnDef<Project>[] = [
+  {
+    accessorKey: "name",
+    header: ({ column }) => (
+      <TableColumnHeader column={column} title="Project Name" />
+    ),
+    cell: ({ row }) => {
+      const canExpand = row.getCanExpand()
+      const isExpanded = row.getIsExpanded()
+
+      return (
+        <div className="flex items-center gap-2">
+          {canExpand && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={row.getToggleExpandedHandler()}
+              className="h-4 w-4 p-0"
+            >
+              {isExpanded ? (
+                <ChevronDown className="h-3.5 w-3.5" />
+              ) : (
+                <ChevronRight className="h-3.5 w-3.5" />
+              )}
+            </Button>
+          )}
+          <div className="font-medium">{row.getValue("name")}</div>
+        </div>
+      )
+    },
+  },
+  {
+    accessorKey: "status",
+    header: ({ column }) => (
+      <TableColumnHeader column={column} title="Status" />
+    ),
+  },
+  {
+    accessorKey: "budget",
+    header: ({ column }) => (
+      <TableColumnHeader column={column} title="Budget" />
+    ),
+    cell: ({ row }) => {
+      const budget = row.getValue("budget") as number
+      return <div className="font-mono">${budget.toLocaleString()}</div>
+    },
+  },
+]
+
+export function TreeTable({ data }: { data: Project[] }) {
+  const [expanded, setExpanded] = React.useState<Record<string, boolean>>({})
+
+  const expandAll = () => {
+    const expandedRows: Record<string, boolean> = {}
+    const expandProjects = (projects: Project[]) => {
+      for (const project of projects) {
+        if (project.subRows?.length) {
+          expandedRows[project.id] = true
+          expandProjects(project.subRows)
+        }
+      }
+    }
+    expandProjects(data)
+    setExpanded(expandedRows)
+  }
+
+  const collapseAll = () => {
+    setExpanded({})
+  }
+
+  return (
+    <DataTableRoot
+      data={data}
+      columns={columns}
+      config={{
+        enableExpanding: true,
+        enableFilters: true,
+      }}
+      state={{
+        expanded,
+      }}
+      onExpandedChange={setExpanded}
+      getSubRows={row => row.subRows}
+      getRowCanExpand={row => Boolean(row.original.subRows?.length)}
+      getRowId={row => row.id}
+    >
+      <DataTableToolbarSection>
+        <DataTableSearchFilter placeholder="Search projects..." />
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={expandAll}>
+            <ChevronsDownUp className="mr-2 h-4 w-4" />
+            Expand All
+          </Button>
+          <Button variant="outline" size="sm" onClick={collapseAll}>
+            <ChevronsUpDown className="mr-2 h-4 w-4" />
+            Collapse All
+          </Button>
+          <DataTableViewMenu />
+        </div>
+      </DataTableToolbarSection>
+
+      <DataTable>
+        <DataTableHeader />
+        <DataTableBody>
+          <DataTableEmptyBody />
+        </DataTableBody>
+      </DataTable>
+
+      <DataTablePagination />
+    </DataTableRoot>
+  )
+}
+```
+
+## Tree Structure
+
+### getSubRows
+
+Tell TanStack Table how to access child rows:
+
+```tsx showLineNumbers
+<DataTableRoot
+  data={data}
+  columns={columns}
+  getSubRows={row => row.subRows}
+  getRowCanExpand={row => Boolean(row.original.subRows?.length)}
+  getRowId={row => row.id}
+>
+  {/* ... */}
+</DataTableRoot>
+```
+
+### Row Depth
+
+Access row depth in cell renderers:
+
+```tsx showLineNumbers
+cell: ({ row }) => {
+  const { depth } = row
+  // depth: 0 = top level, 1 = first child, 2 = second level child, etc.
+  return <div style={{ paddingLeft: `${depth * 20}px` }}>...</div>
+}
+```
+
+## Expand/Collapse All
+
+Control expansion state:
+
+```tsx showLineNumbers
+const [expanded, setExpanded] = useState<Record<string, boolean>>({})
+
+const expandAll = () => {
+  const expandedRows: Record<string, boolean> = {}
+  const expandProjects = (projects: Project[]) => {
+    for (const project of projects) {
+      if (project.subRows?.length) {
+        expandedRows[project.id] = true
+        expandProjects(project.subRows)
+      }
+    }
+  }
+  expandProjects(data)
+  setExpanded(expandedRows)
+}
+
+const collapseAll = () => {
+  setExpanded({})
+}
+```
+
+## Controlled State
+
+Manage all table state externally for full control:
+
+```tsx showLineNumbers
+import { useState } from "react"
+import type {
+  ExpandedState,
+  SortingState,
+  ColumnFiltersState,
+} from "@tanstack/react-table"
+
+export function ControlledTreeTable({ data }: { data: Project[] }) {
+  const [expanded, setExpanded] = useState<ExpandedState>({})
+  const [sorting, setSorting] = useState<SortingState>([])
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+  const [globalFilter, setGlobalFilter] = useState("")
+
+  const expandAll = () => {
+    const expandedRows: Record<string, boolean> = {}
+    const expandProjects = (projects: Project[]) => {
+      for (const project of projects) {
+        if (project.subRows?.length) {
+          expandedRows[project.id] = true
+          expandProjects(project.subRows)
+        }
+      }
+    }
+    expandProjects(data)
+    setExpanded(expandedRows)
+  }
+
+  const collapseAll = () => {
+    setExpanded({})
+  }
+
+  return (
+    <DataTableRoot
+      data={data}
+      columns={columns}
+      config={{
+        enableExpanding: true,
+        enableFilters: true,
+      }}
+      state={{
+        expanded,
+        sorting,
+        columnFilters,
+        globalFilter,
+      }}
+      onExpandedChange={setExpanded}
+      onSortingChange={setSorting}
+      onColumnFiltersChange={setColumnFilters}
+      onGlobalFilterChange={setGlobalFilter}
+      getSubRows={row => row.subRows}
+      getRowCanExpand={row => Boolean(row.original.subRows?.length)}
+      getRowId={row => row.id}
+    >
+      <DataTableToolbarSection>
+        <DataTableSearchFilter placeholder="Search projects..." />
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={expandAll}>
+            <ChevronsDownUp className="mr-2 h-4 w-4" />
+            Expand All
+          </Button>
+          <Button variant="outline" size="sm" onClick={collapseAll}>
+            <ChevronsUpDown className="mr-2 h-4 w-4" />
+            Collapse All
+          </Button>
+          <DataTableViewMenu />
+        </div>
+      </DataTableToolbarSection>
+
+      <DataTable>
+        <DataTableHeader />
+        <DataTableBody>
+          <DataTableEmptyBody />
+        </DataTableBody>
+      </DataTable>
+
+      <DataTablePagination />
+    </DataTableRoot>
+  )
+}
+```
+
+## Tree Selection
+
+For hierarchical selection (selecting a parent selects all children), you'll need custom selection logic. See the [Tree Table example](/examples/tree-table) for a complete implementation.
+
+## When to Use
+
+**✅ Use Tree Table when:**
+
+- You have hierarchical data (parent-child relationships)
+- You need to show nested structures
+- Users need to expand/collapse sections
+- Data has multiple levels of nesting
+
+**❌ Don't use Tree Table when:**
+
+- Data is flat (use [Basic Table](/data-table/basic-table))
+- You don't need hierarchical structure
+- You prefer sidebars for details (use [Aside Table](/data-table/aside-table))
+
+## Next Steps
+
+- [Row Expansion Table](/data-table/row-expansion-table) - Simple row expansion
+- [Advanced Table](/data-table/advanced-table) - Combine with other features

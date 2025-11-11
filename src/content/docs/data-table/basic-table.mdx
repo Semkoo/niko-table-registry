@@ -1,0 +1,325 @@
+---
+title: Basic Table
+description: Add pagination, sorting, and column visibility controls to your data table.
+---
+
+import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
+import CollapsiblePreview from "@/components/markdown/collapsible-preview.astro"
+
+<CodePreview demo="data-table/basic" />
+
+<CollapsiblePreview>
+  <CodePreview demo="data-table/basic-state" />
+</CollapsiblePreview>
+
+## Introduction
+
+The Basic Table builds on the Simple Table by adding pagination, sorting, and column visibility. This is the most common table implementation and suitable for most use cases.
+
+## Installation
+
+1. Add the `<Table />` component to your project:
+
+```bash
+npx shadcn@latest add table button dropdown-menu
+```
+
+2. Add `tanstack/react-table` dependency:
+
+```bash
+npm install @tanstack/react-table
+```
+
+3. Copy the DataTable components into your project. See the [Installation Guide](/getting-started/installation) for detailed instructions.
+
+## Prerequisites
+
+We are going to build a table to show products. Here's what our data looks like:
+
+```tsx showLineNumbers
+type Product = {
+  id: string
+  name: string
+  category: string
+  price: number
+  stock: number
+}
+
+const data: Product[] = [
+  { id: "1", name: "Laptop", category: "Electronics", price: 999, stock: 50 },
+  { id: "2", name: "Mouse", category: "Electronics", price: 29, stock: 150 },
+  // ...
+]
+```
+
+## Basic Table
+
+Let's start by building a basic table with pagination and sorting.
+
+### Column Definitions
+
+First, we'll define our columns with sortable headers.
+
+```tsx showLineNumbers title="columns.tsx"
+"use client"
+
+import { TableColumnHeader } from "@/components/data-table/components"
+import type { DataTableColumnDef } from "@/components/data-table/types"
+
+export type Product = {
+  id: string
+  name: string
+  category: string
+  price: number
+  stock: number
+}
+
+export const columns: DataTableColumnDef<Product>[] = [
+  {
+    accessorKey: "name",
+    header: ({ column }) => (
+      <TableColumnHeader column={column} title="Product" />
+    ),
+  },
+  {
+    accessorKey: "category",
+    header: ({ column }) => (
+      <TableColumnHeader column={column} title="Category" />
+    ),
+  },
+  {
+    accessorKey: "price",
+    header: ({ column }) => <TableColumnHeader column={column} title="Price" />,
+    cell: ({ row }) => {
+      const price = parseFloat(row.getValue("price"))
+      return <div className="font-medium">${price.toFixed(2)}</div>
+    },
+  },
+  {
+    accessorKey: "stock",
+    header: ({ column }) => <TableColumnHeader column={column} title="Stock" />,
+  },
+]
+```
+
+### `<DataTable />` component
+
+Next, we'll create a `<DataTable />` component with pagination and sorting enabled.
+
+```tsx showLineNumbers title="basic-table.tsx"
+"use client"
+
+import {
+  DataTableRoot,
+  DataTableToolbarSection,
+  DataTable,
+  DataTableHeader,
+  DataTableBody,
+  DataTablePagination,
+  DataTableViewMenu,
+} from "@/components/data-table"
+import { TableColumnHeader } from "@/components/data-table/components"
+import type { DataTableColumnDef } from "@/components/data-table/types"
+
+type Product = {
+  id: string
+  name: string
+  category: string
+  price: number
+  stock: number
+}
+
+const columns: DataTableColumnDef<Product>[] = [
+  {
+    accessorKey: "name",
+    header: ({ column }) => (
+      <TableColumnHeader column={column} title="Product" />
+    ),
+  },
+  {
+    accessorKey: "category",
+    header: ({ column }) => (
+      <TableColumnHeader column={column} title="Category" />
+    ),
+  },
+  {
+    accessorKey: "price",
+    header: ({ column }) => <TableColumnHeader column={column} title="Price" />,
+    cell: ({ row }) => {
+      const price = parseFloat(row.getValue("price"))
+      return <div className="font-medium">${price.toFixed(2)}</div>
+    },
+  },
+  {
+    accessorKey: "stock",
+    header: ({ column }) => <TableColumnHeader column={column} title="Stock" />,
+  },
+]
+
+export function BasicTable({ data }: { data: Product[] }) {
+  return (
+    <DataTableRoot
+      data={data}
+      columns={columns}
+      config={{
+        enablePagination: true,
+        enableSorting: true,
+        enableMultiSort: true,
+        initialPageSize: 10,
+      }}
+    >
+      <DataTableToolbarSection className="justify-between">
+        <h2 className="text-lg font-semibold">Products</h2>
+        <DataTableViewMenu />
+      </DataTableToolbarSection>
+
+      <DataTable>
+        <DataTableHeader />
+        <DataTableBody />
+      </DataTable>
+
+      <DataTablePagination pageSizeOptions={[5, 10, 20]} />
+    </DataTableRoot>
+  )
+}
+```
+
+## Pagination
+
+Pagination is automatically enabled when you set `enablePagination: true` in the config. The `DataTablePagination` component provides:
+
+- Page navigation (Previous/Next)
+- Page size selector
+- Current page info (e.g., "1-10 of 100")
+
+### Custom Page Sizes
+
+You can customize the available page sizes:
+
+```tsx showLineNumbers
+<DataTablePagination pageSizeOptions={[10, 25, 50, 100]} />
+```
+
+## Sorting
+
+Sorting is enabled by using `TableColumnHeader` in your column definitions. Click any column header to sort by that column.
+
+### Multi-Column Sorting
+
+Hold `Shift` and click multiple column headers to sort by multiple columns:
+
+```tsx showLineNumbers
+<DataTableRoot
+  data={data}
+  columns={columns}
+  config={{
+    enableMultiSort: true, // Enable multi-column sorting
+  }}
+>
+  {/* ... */}
+</DataTableRoot>
+```
+
+### Disable Sorting
+
+To disable sorting for a specific column:
+
+```tsx showLineNumbers
+{
+  accessorKey: "id",
+  header: "ID",
+  enableSorting: false, // This column cannot be sorted
+}
+```
+
+## Column Visibility
+
+The `DataTableViewMenu` component adds a dropdown to show/hide columns:
+
+```tsx showLineNumbers
+<DataTableToolbarSection className="justify-between">
+  <h2 className="text-lg font-semibold">Products</h2>
+  <DataTableViewMenu />
+</DataTableToolbarSection>
+```
+
+### Disable Column Hiding
+
+To prevent specific columns from being hidden:
+
+```tsx showLineNumbers
+{
+  accessorKey: "id",
+  header: "ID",
+  enableHiding: false, // This column cannot be hidden
+}
+```
+
+## Controlled State
+
+Full control over table state:
+
+```tsx showLineNumbers
+import { useState } from "react"
+import type {
+  PaginationState,
+  SortingState,
+  VisibilityState,
+} from "@tanstack/react-table"
+
+export function ControlledBasicTable({ data }: { data: Product[] }) {
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 10,
+  })
+  const [sorting, setSorting] = useState<SortingState>([])
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
+
+  return (
+    <DataTableRoot
+      data={data}
+      columns={columns}
+      state={{
+        pagination,
+        sorting,
+        columnVisibility,
+      }}
+      onPaginationChange={setPagination}
+      onSortingChange={setSorting}
+      onColumnVisibilityChange={setColumnVisibility}
+    >
+      <DataTableToolbarSection className="justify-between">
+        <h2 className="text-lg font-semibold">Products</h2>
+        <DataTableViewMenu />
+      </DataTableToolbarSection>
+
+      <DataTable>
+        <DataTableHeader />
+        <DataTableBody />
+      </DataTable>
+
+      <DataTablePagination />
+    </DataTableRoot>
+  )
+}
+```
+
+## When to Use
+
+**✅ Use Basic Table when:**
+
+- You have 50+ rows that need pagination
+- Users need to sort data
+- You want column visibility controls
+- You don't need search or filtering
+
+**❌ Consider other options when:**
+
+- Dataset is < 50 rows (use [Simple Table](/data-table/simple-table))
+- Users need to search (use [Search Table](/data-table/search-table))
+- You need advanced filters (use [Advanced Table](/data-table/advanced-table))
+
+## Next Steps
+
+- [Search Table](/data-table/search-table) - Add global search
+- [Advanced Table](/data-table/advanced-table) - Add advanced filtering

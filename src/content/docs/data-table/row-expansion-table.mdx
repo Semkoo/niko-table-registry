@@ -1,0 +1,529 @@
+---
+title: Row Expansion Table
+description: Add expandable rows to show additional details inline.
+---
+
+import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
+import CollapsiblePreview from "@/components/markdown/collapsible-preview.astro"
+
+<CodePreview demo="data-table/row-expansion" />
+
+<CollapsiblePreview>
+  <CodePreview demo="data-table/row-expansion-state" />
+</CollapsiblePreview>
+
+## Introduction
+
+The Row Expansion Table allows users to expand rows to view more details inline. This is useful for showing additional information without navigating away or opening a modal.
+
+## Installation
+
+1. Add the required components:
+
+```bash
+npx shadcn@latest add table input button dropdown-menu card separator
+```
+
+2. Add `tanstack/react-table` dependency:
+
+```bash
+npm install @tanstack/react-table
+```
+
+3. Copy the DataTable components into your project. See the [Installation Guide](/getting-started/installation) for detailed instructions.
+
+## Prerequisites
+
+We are going to build a table to show orders with expandable items. Here's what our data looks like:
+
+```tsx showLineNumbers
+type OrderItem = {
+  id: string
+  productName: string
+  category: string
+  price: number
+  quantity: number
+}
+
+type Order = {
+  id: string
+  orderNumber: string
+  customer: string
+  email: string
+  total: number
+  status: "pending" | "processing" | "shipped" | "delivered" | "cancelled"
+  date: string
+  items: OrderItem[]
+}
+```
+
+## Basic Table with Row Expansion
+
+Let's start by building a table with expandable rows.
+
+### Column Definitions
+
+First, we'll define our columns with an expand column.
+
+```tsx showLineNumbers title="columns.tsx"
+"use client"
+
+import { TableColumnHeader } from "@/components/data-table/components"
+import type { DataTableColumnDef } from "@/components/data-table/types"
+import { Button } from "@/components/ui/button"
+import { ChevronRight, ChevronDown } from "lucide-react"
+
+export type Order = {
+  id: string
+  orderNumber: string
+  customer: string
+  email: string
+  total: number
+  status: string
+  date: string
+  items: OrderItem[]
+}
+
+// Expanded content component
+function OrderDetails({ order }: { order: Order }) {
+  return (
+    <div className="bg-muted/30 p-6">
+      <h3 className="font-semibold">Order Items</h3>
+      <div className="space-y-2">
+        {order.items.map(item => (
+          <div key={item.id} className="flex justify-between">
+            <span>{item.productName}</span>
+            <span>${item.price.toFixed(2)}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+export const columns: DataTableColumnDef<Order>[] = [
+  {
+    id: "expand",
+    header: () => null,
+    cell: ({ row }) => {
+      if (!row.getCanExpand()) return null
+      return (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={row.getToggleExpandedHandler()}
+          className="h-6 w-6 p-0"
+        >
+          {row.getIsExpanded() ? (
+            <ChevronDown className="h-3.5 w-3.5" />
+          ) : (
+            <ChevronRight className="h-3.5 w-3.5" />
+          )}
+        </Button>
+      )
+    },
+    size: 50,
+    enableSorting: false,
+    enableHiding: false,
+    meta: {
+      expandedContent: (order: Order) => <OrderDetails order={order} />,
+    },
+  },
+  {
+    accessorKey: "orderNumber",
+    header: ({ column }) => (
+      <TableColumnHeader column={column} title="Order #" />
+    ),
+  },
+  {
+    accessorKey: "customer",
+    header: ({ column }) => (
+      <TableColumnHeader column={column} title="Customer" />
+    ),
+  },
+  {
+    accessorKey: "total",
+    header: ({ column }) => <TableColumnHeader column={column} title="Total" />,
+    cell: ({ row }) => {
+      const total = row.getValue("total") as number
+      return <div className="font-mono">${total.toFixed(2)}</div>
+    },
+  },
+  {
+    accessorKey: "status",
+    header: ({ column }) => (
+      <TableColumnHeader column={column} title="Status" />
+    ),
+  },
+]
+```
+
+### `<DataTable />` component
+
+Next, we'll create the table with row expansion enabled.
+
+```tsx showLineNumbers title="row-expansion-table.tsx"
+"use client"
+
+import {
+  DataTableRoot,
+  DataTableToolbarSection,
+  DataTable,
+  DataTableHeader,
+  DataTableBody,
+  DataTablePagination,
+  DataTableSearchFilter,
+  DataTableViewMenu,
+  DataTableEmptyBody,
+} from "@/components/data-table"
+import { TableColumnHeader } from "@/components/data-table/components"
+import type { DataTableColumnDef } from "@/components/data-table/types"
+import { Button } from "@/components/ui/button"
+import { ChevronRight, ChevronDown } from "lucide-react"
+
+type Order = {
+  id: string
+  orderNumber: string
+  customer: string
+  email: string
+  total: number
+  status: string
+  date: string
+  items: OrderItem[]
+}
+
+// Expanded content component
+function OrderDetails({ order }: { order: Order }) {
+  return (
+    <div className="bg-muted/30 p-6">
+      <h3 className="font-semibold">Order Items</h3>
+      <div className="space-y-2">
+        {order.items.map(item => (
+          <div key={item.id} className="flex justify-between">
+            <span>{item.productName}</span>
+            <span>${item.price.toFixed(2)}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+const columns: DataTableColumnDef<Order>[] = [
+  {
+    id: "expand",
+    header: () => null,
+    cell: ({ row }) => {
+      if (!row.getCanExpand()) return null
+      return (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={row.getToggleExpandedHandler()}
+          className="h-6 w-6 p-0"
+        >
+          {row.getIsExpanded() ? (
+            <ChevronDown className="h-3.5 w-3.5" />
+          ) : (
+            <ChevronRight className="h-3.5 w-3.5" />
+          )}
+        </Button>
+      )
+    },
+    size: 50,
+    enableSorting: false,
+    enableHiding: false,
+    meta: {
+      expandedContent: (order: Order) => <OrderDetails order={order} />,
+    },
+  },
+  {
+    accessorKey: "orderNumber",
+    header: ({ column }) => (
+      <TableColumnHeader column={column} title="Order #" />
+    ),
+  },
+  {
+    accessorKey: "customer",
+    header: ({ column }) => (
+      <TableColumnHeader column={column} title="Customer" />
+    ),
+  },
+  {
+    accessorKey: "total",
+    header: ({ column }) => <TableColumnHeader column={column} title="Total" />,
+    cell: ({ row }) => {
+      const total = row.getValue("total") as number
+      return <div className="font-mono">${total.toFixed(2)}</div>
+    },
+  },
+  {
+    accessorKey: "status",
+    header: ({ column }) => (
+      <TableColumnHeader column={column} title="Status" />
+    ),
+  },
+]
+
+export function RowExpansionTable({ data }: { data: Order[] }) {
+  return (
+    <DataTableRoot
+      data={data}
+      columns={columns}
+      config={{
+        enableExpanding: true,
+      }}
+      getRowCanExpand={row => row.original.items.length > 0}
+    >
+      <DataTableToolbarSection>
+        <DataTableSearchFilter placeholder="Search orders..." />
+        <DataTableViewMenu />
+      </DataTableToolbarSection>
+
+      <DataTable>
+        <DataTableHeader />
+        <DataTableBody>
+          <DataTableEmptyBody />
+        </DataTableBody>
+      </DataTable>
+
+      <DataTablePagination />
+    </DataTableRoot>
+  )
+}
+```
+
+## How Row Expansion Works
+
+Row expansion is enabled by:
+
+1. Adding a column with `id: "expand"` or setting `meta.expandedContent` on any column
+2. Setting `enableExpanding: true` in the config
+3. Providing `expandedContent` in the column's `meta` property
+
+### Expanded Content
+
+The expanded content is defined in the column's `meta.expandedContent`:
+
+```tsx showLineNumbers
+{
+  id: "expand",
+  meta: {
+    expandedContent: (order: Order) => <OrderDetails order={order} />,
+  },
+}
+```
+
+### Conditional Expansion
+
+Control which rows can be expanded:
+
+```tsx showLineNumbers
+<DataTableRoot
+  data={data}
+  columns={columns}
+  config={{
+    enableExpanding: true,
+  }}
+  getRowCanExpand={row => row.original.items.length > 0}
+>
+  {/* ... */}
+</DataTableRoot>
+```
+
+## Controlled Expansion State
+
+Full control over which rows are expanded:
+
+```tsx showLineNumbers
+import { useState } from "react"
+import type { ExpandedState } from "@tanstack/react-table"
+
+export function ControlledExpansionTable({ data }: { data: Order[] }) {
+  const [expanded, setExpanded] = useState<ExpandedState>({})
+
+  return (
+    <DataTableRoot
+      data={data}
+      columns={columns}
+      config={{
+        enableExpanding: true,
+      }}
+      state={{
+        expanded,
+      }}
+      onExpandedChange={setExpanded}
+    >
+      <DataTable>
+        <DataTableHeader />
+        <DataTableBody>
+          <DataTableEmptyBody />
+        </DataTableBody>
+      </DataTable>
+    </DataTableRoot>
+  )
+}
+```
+
+## Exporting Data
+
+You can export table data to CSV format. When exporting row expansion tables, keep in mind:
+
+- **Expanded content is not exported** - Only the main row data is included in the CSV
+- **Exclude the expand column** - The expand column should be excluded from exports as it's just a UI control
+- **Export respects filters** - Only visible/filtered rows are exported
+
+### Using DataTableExportButton
+
+The simplest way to add export functionality:
+
+```tsx showLineNumbers
+import { DataTableExportButton } from "@/components/data-table"
+
+export function RowExpansionTableWithExport({ data }: { data: Order[] }) {
+  return (
+    <DataTableRoot
+      data={data}
+      columns={columns}
+      config={{
+        enableExpanding: true,
+      }}
+      getRowCanExpand={row => row.original.items.length > 0}
+    >
+      <DataTableToolbarSection>
+        <DataTableSearchFilter placeholder="Search orders..." />
+        <DataTableExportButton
+          filename="orders"
+          excludeColumns={["expand"] as unknown as (keyof Order)[]}
+        />
+        <DataTableViewMenu />
+      </DataTableToolbarSection>
+
+      <DataTable>
+        <DataTableHeader />
+        <DataTableBody />
+        <DataTableEmptyBody />
+      </DataTable>
+
+      <DataTablePagination />
+    </DataTableRoot>
+  )
+}
+```
+
+### Using exportTableToCSV Directly
+
+For more control, use the `exportTableToCSV` function directly:
+
+```tsx showLineNumbers
+import { useDataTable } from "@/components/data-table/core"
+import { exportTableToCSV } from "@/components/data-table/filters"
+import { Button } from "@/components/ui/button"
+import { Download } from "lucide-react"
+
+function ExportButton() {
+  const { table } = useDataTable<Order>()
+
+  const handleExport = () => {
+    exportTableToCSV(table, {
+      filename: "orders",
+      excludeColumns: ["expand"] as unknown as (keyof Order)[],
+    })
+  }
+
+  return (
+    <Button size="sm" variant="outline" onClick={handleExport}>
+      <Download className="mr-2 h-4 w-4" />
+      Export CSV
+    </Button>
+  )
+}
+
+export function RowExpansionTableWithCustomExport({ data }: { data: Order[] }) {
+  return (
+    <DataTableRoot
+      data={data}
+      columns={columns}
+      config={{
+        enableExpanding: true,
+      }}
+      getRowCanExpand={row => row.original.items.length > 0}
+    >
+      <DataTableToolbarSection>
+        <DataTableSearchFilter placeholder="Search orders..." />
+        <ExportButton />
+        <DataTableViewMenu />
+      </DataTableToolbarSection>
+
+      <DataTable>
+        <DataTableHeader />
+        <DataTableBody />
+        <DataTableEmptyBody />
+      </DataTable>
+
+      <DataTablePagination />
+    </DataTableRoot>
+  )
+}
+```
+
+### Exporting Only Selected Rows
+
+If you have row selection enabled, you can export only the selected rows:
+
+```tsx showLineNumbers
+function ExportSelectedButton() {
+  const { table } = useDataTable<Order>()
+
+  const handleExport = () => {
+    exportTableToCSV(table, {
+      filename: "selected-orders",
+      excludeColumns: ["expand", "select"] as unknown as (keyof Order)[],
+      onlySelected: true,
+    })
+  }
+
+  const selectedCount = table.getFilteredSelectedRowModel().rows.length
+
+  if (selectedCount === 0) return null
+
+  return (
+    <Button size="sm" variant="outline" onClick={handleExport}>
+      <Download className="mr-2 h-4 w-4" />
+      Export Selected ({selectedCount})
+    </Button>
+  )
+}
+```
+
+### Important Notes
+
+1. **Expanded content is not included**: The CSV export only includes the main row data. Expanded content (like order items) is not exported. If you need to export nested data, you'll need to flatten it into additional columns or create a custom export function.
+
+2. **Always exclude the expand column**: The expand column (`id: "expand"`) should be excluded from exports as it's purely a UI control:
+
+```tsx
+excludeColumns={["expand"] as unknown as (keyof Order)[]}
+```
+
+3. **Export respects current filters**: The export function respects all active filters, sorting, and pagination. Only the currently visible/filtered rows are exported.
+
+## When to Use
+
+**✅ Use Row Expansion Table when:**
+
+- You need to show additional details for specific rows
+- You want to keep users in context (no navigation)
+- The expanded content is directly related to the row
+- You prefer inline expansion over sidebars
+
+**❌ Consider other options when:**
+
+- You need to show details for all rows (use [Aside Table](/data-table/aside-table))
+- Expanded content is very large (use [Aside Table](/data-table/aside-table))
+- You don't need additional details (use [Basic Table](/data-table/basic-table))
+
+## Next Steps
+
+- [Aside Table](/data-table/aside-table) - Show details in sidebars
+- [Tree Table](/data-table/tree-table) - Hierarchical data with expansion

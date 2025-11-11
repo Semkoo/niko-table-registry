@@ -1,0 +1,8 @@
+{
+  "name": "data-table",
+  "type": "registry:component",
+  "description": "Advanced React DataTable component built with TanStack Table and Shadcn UI",
+  "dependencies": ["@tanstack/react-table"],
+  "registryDependencies": ["table", "button", "input", "dropdown-menu"],
+  "files": []
+}

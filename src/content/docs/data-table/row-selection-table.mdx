@@ -1,0 +1,405 @@
+---
+title: Row Selection Table
+description: Add row selection with checkboxes for bulk actions.
+---
+
+import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
+import CollapsiblePreview from "@/components/markdown/collapsible-preview.astro"
+
+<CodePreview demo="data-table/row-selection" />
+
+<CollapsiblePreview>
+  <CodePreview demo="data-table/row-selection-state" />
+</CollapsiblePreview>
+
+## Introduction
+
+The Row Selection Table adds checkboxes to each row, allowing users to select individual or multiple rows for bulk actions like delete, export, or update.
+
+## Installation
+
+1. Add the required components:
+
+```bash
+npx shadcn@latest add table input button dropdown-menu checkbox tooltip
+```
+
+2. Add `tanstack/react-table` dependency:
+
+```bash
+npm install @tanstack/react-table
+```
+
+3. Copy the DataTable components into your project. See the [Installation Guide](/getting-started/installation) for detailed instructions.
+
+## Prerequisites
+
+We are going to build a table to show customers with row selection. Here's what our data looks like:
+
+```tsx showLineNumbers
+type Customer = {
+  id: string
+  name: string
+  email: string
+  company: string
+  phone: string
+}
+
+const data: Customer[] = [
+  {
+    id: "1",
+    name: "John Doe",
+    email: "john@example.com",
+    company: "Acme Corp",
+    phone: "555-0100",
+  },
+  // ...
+]
+```
+
+## Basic Table with Row Selection
+
+Let's start by building a table with row selection.
+
+### Column Definitions
+
+First, we'll add a select column to our definitions.
+
+```tsx showLineNumbers title="columns.tsx"
+"use client"
+
+import { TableColumnHeader } from "@/components/data-table/components"
+import type { DataTableColumnDef } from "@/components/data-table/types"
+import { Checkbox } from "@/components/ui/checkbox"
+
+export type Customer = {
+  id: string
+  name: string
+  email: string
+  company: string
+  phone: string
+}
+
+export const columns: DataTableColumnDef<Customer>[] = [
+  {
+    id: "select",
+    header: ({ table }) => (
+      <Checkbox
+        checked={
+          table.getIsAllPageRowsSelected() ||
+          (table.getIsSomePageRowsSelected() && "indeterminate")
+        }
+        onCheckedChange={value => table.toggleAllPageRowsSelected(!!value)}
+        aria-label="Select all"
+      />
+    ),
+    cell: ({ row }) => (
+      <Checkbox
+        checked={row.getIsSelected()}
+        onCheckedChange={value => row.toggleSelected(!!value)}
+        aria-label="Select row"
+      />
+    ),
+    enableSorting: false,
+    enableHiding: false,
+  },
+  {
+    accessorKey: "name",
+    header: ({ column }) => <TableColumnHeader column={column} />,
+    meta: { label: "Name" },
+  },
+  {
+    accessorKey: "email",
+    header: ({ column }) => <TableColumnHeader column={column} />,
+    meta: { label: "Email" },
+  },
+  {
+    accessorKey: "company",
+    header: ({ column }) => <TableColumnHeader column={column} />,
+    meta: { label: "Company" },
+  },
+  {
+    accessorKey: "phone",
+    header: ({ column }) => <TableColumnHeader column={column} />,
+    meta: { label: "Phone" },
+  },
+]
+```
+
+### `<DataTable />` component
+
+Next, we'll create the table with row selection enabled.
+
+```tsx showLineNumbers title="row-selection-table.tsx"
+"use client"
+
+import { useState, useMemo } from "react"
+import {
+  DataTableRoot,
+  DataTableToolbarSection,
+  DataTable,
+  DataTableHeader,
+  DataTableBody,
+  DataTablePagination,
+  DataTableSearchFilter,
+  DataTableViewMenu,
+  DataTableEmptyBody,
+} from "@/components/data-table"
+import { TableColumnHeader } from "@/components/data-table/components"
+import type { DataTableColumnDef } from "@/components/data-table/types"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Trash2, X } from "lucide-react"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
+
+type Customer = {
+  id: string
+  name: string
+  email: string
+  company: string
+  phone: string
+}
+
+const columns: DataTableColumnDef<Customer>[] = [
+  {
+    id: "select",
+    header: ({ table }) => (
+      <Checkbox
+        checked={
+          table.getIsAllPageRowsSelected() ||
+          (table.getIsSomePageRowsSelected() && "indeterminate")
+        }
+        onCheckedChange={value => table.toggleAllPageRowsSelected(!!value)}
+        aria-label="Select all"
+      />
+    ),
+    cell: ({ row }) => (
+      <Checkbox
+        checked={row.getIsSelected()}
+        onCheckedChange={value => row.toggleSelected(!!value)}
+        aria-label="Select row"
+      />
+    ),
+    enableSorting: false,
+    enableHiding: false,
+  },
+  {
+    accessorKey: "name",
+    header: ({ column }) => <TableColumnHeader column={column} />,
+    meta: { label: "Name" },
+  },
+  {
+    accessorKey: "email",
+    header: ({ column }) => <TableColumnHeader column={column} />,
+    meta: { label: "Email" },
+  },
+  {
+    accessorKey: "company",
+    header: ({ column }) => <TableColumnHeader column={column} />,
+    meta: { label: "Company" },
+  },
+  {
+    accessorKey: "phone",
+    header: ({ column }) => <TableColumnHeader column={column} />,
+    meta: { label: "Phone" },
+  },
+]
+
+export function RowSelectionTable({ data }: { data: Customer[] }) {
+  const [rowSelection, setRowSelection] = useState({})
+
+  // Get selected rows
+  const selectedRows = useMemo(() => {
+    return Object.keys(rowSelection)
+      .filter(key => rowSelection[key as keyof typeof rowSelection])
+      .map(key => data.find(row => row.id === key))
+      .filter(Boolean) as Customer[]
+  }, [rowSelection, data])
+
+  const clearSelection = () => {
+    setRowSelection({})
+  }
+
+  return (
+    <DataTableRoot
+      data={data}
+      columns={columns}
+      state={{
+        rowSelection,
+      }}
+      onRowSelectionChange={setRowSelection}
+    >
+      <DataTableToolbarSection className="justify-between">
+        <div className="flex items-center gap-2">
+          <DataTableSearchFilter placeholder="Search customers..." />
+          {selectedRows.length > 0 && (
+            <>
+              <Badge variant="secondary">{selectedRows.length} selected</Badge>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={clearSelection}
+                      className="h-8 px-2"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Clear selection</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
+          {selectedRows.length > 0 && (
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => {
+                console.log("Delete selected:", selectedRows)
+              }}
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete ({selectedRows.length})
+            </Button>
+          )}
+          <DataTableViewMenu />
+        </div>
+      </DataTableToolbarSection>
+
+      <DataTable>
+        <DataTableHeader />
+        <DataTableBody>
+          <DataTableEmptyBody />
+        </DataTableBody>
+      </DataTable>
+
+      <DataTablePagination />
+    </DataTableRoot>
+  )
+}
+```
+
+## Row Selection Column
+
+The select column is automatically detected when you use `id: "select"`:
+
+```tsx showLineNumbers
+{
+  id: "select",
+  header: ({ table }) => (
+    <Checkbox
+      checked={
+        table.getIsAllPageRowsSelected() ||
+        (table.getIsSomePageRowsSelected() && "indeterminate")
+      }
+      onCheckedChange={value => table.toggleAllPageRowsSelected(!!value)}
+      aria-label="Select all"
+    />
+  ),
+  cell: ({ row }) => (
+    <Checkbox
+      checked={row.getIsSelected()}
+      onCheckedChange={value => row.toggleSelected(!!value)}
+      aria-label="Select row"
+    />
+  ),
+  enableSorting: false,
+  enableHiding: false,
+}
+```
+
+## Getting Selected Rows
+
+Access selected rows using the table instance:
+
+```tsx showLineNumbers
+import { useDataTable } from "@/components/data-table/core"
+
+function BulkActions() {
+  const { table } = useDataTable<Customer>()
+  const selectedRows = table.getFilteredSelectedRowModel().rows
+
+  if (selectedRows.length === 0) return null
+
+  return (
+    <div className="flex items-center gap-2">
+      <span>{selectedRows.length} selected</span>
+      <Button onClick={() => handleDelete(selectedRows)}>
+        Delete Selected
+      </Button>
+    </div>
+  )
+}
+```
+
+## Selection Bar
+
+Use `DataTableSelectionBar` to show a persistent selection bar:
+
+```tsx showLineNumbers
+import { DataTableSelectionBar } from "@/components/data-table/components"
+;<DataTableSelectionBar
+  selectedCount={selectedRows.length}
+  onClear={clearSelection}
+>
+  <Button variant="destructive" size="sm" onClick={handleDelete}>
+    <Trash2 className="mr-2 h-4 w-4" />
+    Delete Selected
+  </Button>
+</DataTableSelectionBar>
+```
+
+## Controlled Selection State
+
+Full control over row selection:
+
+```tsx showLineNumbers
+import { useState } from "react"
+import type { RowSelectionState } from "@tanstack/react-table"
+
+export function ControlledSelectionTable({ data }: { data: Customer[] }) {
+  const [rowSelection, setRowSelection] = useState<RowSelectionState>({})
+
+  return (
+    <DataTableRoot
+      data={data}
+      columns={columns}
+      state={{
+        rowSelection,
+      }}
+      onRowSelectionChange={setRowSelection}
+    >
+      {/* ... */}
+    </DataTableRoot>
+  )
+}
+```
+
+## When to Use
+
+**✅ Use Row Selection Table when:**
+
+- Users need to perform bulk actions (delete, export, update)
+- You want to show selection count
+- Multiple rows need to be selected at once
+- You need to track selected state
+
+**❌ Consider other options when:**
+
+- You don't need bulk actions (use [Basic Table](/data-table/basic-table))
+- Only single selection is needed (use row click handlers)
+
+## Next Steps
+
+- [Advanced Table](/data-table/advanced-table) - Combine selection with filters
+- [Tree Table](/data-table/tree-table) - Hierarchical selection
