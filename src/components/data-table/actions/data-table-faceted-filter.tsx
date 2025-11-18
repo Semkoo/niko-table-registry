@@ -98,6 +98,9 @@ export function DataTableFacetedFilter<TData, TValue = unknown>({
   const fallbackGenerated = React.useMemo((): Option[] => {
     if (!column) return []
 
+    const meta = column.columnDef.meta
+    const autoOptionsFormat = meta?.autoOptionsFormat ?? true
+
     const rows = dynamicCounts
       ? table.getFilteredRowModel().rows
       : table.getCoreRowModel().rows
@@ -117,7 +120,7 @@ export function DataTableFacetedFilter<TData, TValue = unknown>({
 
     return Array.from(valueCounts.entries())
       .map(([value, count]) => ({
-        label: formatLabel(value),
+        label: autoOptionsFormat ? formatLabel(value) : value,
         value,
         count: showCounts ? count : undefined,
       }))

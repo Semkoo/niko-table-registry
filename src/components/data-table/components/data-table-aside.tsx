@@ -44,6 +44,17 @@ function DataTableAside({
   const open = controlledOpen ?? internalOpen
   const onOpenChange = controlledOnOpenChange ?? setInternalOpen
 
+  /**
+   * PERFORMANCE: Memoize context value to prevent unnecessary consumer re-renders
+   *
+   * WHY: Without memoization, a new context value object is created on every render.
+   * React Context uses Object.is() to compare values - new object = all consumers re-render.
+   *
+   * IMPACT: Prevents unnecessary re-renders of DataTableAsideTrigger, DataTableAsideContent, etc.
+   * when aside state hasn't changed.
+   *
+   * WHAT: Only creates new context value when open, onOpenChange, or side actually change.
+   */
   const contextValue = React.useMemo<DataTableAsideContextValue>(
     () => ({
       open,

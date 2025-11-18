@@ -196,6 +196,7 @@ export default function VirtualizedTableExample() {
       columns={columns}
       config={{
         enableExpanding: true,
+        initialPageSize: 50,
       }}
       getRowCanExpand={row => row.original.stock > 0}
     >

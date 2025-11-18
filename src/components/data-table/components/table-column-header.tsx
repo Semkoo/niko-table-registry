@@ -124,7 +124,7 @@ export function TableColumnHeader<TData, TValue>({
                   handleReset()
                 }}
               >
-                <X className="size-4" />
+                <X className="size-4 mr-2" />
                 Reset
               </DropdownMenuItem>
             )}

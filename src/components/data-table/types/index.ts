@@ -30,6 +30,8 @@ declare module "@tanstack/react-table" {
      * When true and no static `options` exist, generation logic (wrappers / hooks) may supply them.
      */
     autoOptions?: boolean
+    /** Whether to automatically rename option labels using formatLabel. When false, uses raw value as label. */
+    autoOptionsFormat?: boolean
     /** Per-column override for showing counts (falls back to wrapper prop). */
     showCounts?: boolean
     /** Per-column override for using filtered rows for counts (falls back to wrapper prop). */

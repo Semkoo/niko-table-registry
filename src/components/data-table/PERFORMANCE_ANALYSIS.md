@@ -5,6 +5,7 @@
 Overall, the data-table component is well-structured with good performance foundations. However, there are **5 critical optimizations** and **several moderate improvements** that can significantly reduce CPU usage and memory consumption, especially for large datasets (1,000+ rows) and frequent filter/search operations.
 
 **Performance Impact Scale:**
+
 - 🔴 **Critical** - Can cause noticeable lag or jank (>100ms operations)
 - 🟡 **Moderate** - Minor impact but accumulates (10-50ms operations)
 - 🟢 **Minor** - Negligible impact but good practice (<10ms operations)
@@ -18,6 +19,7 @@ Overall, the data-table component is well-structured with good performance found
 **Location:** `core/data-table-context.tsx` (lines 110-116)
 
 **Issue:**
+
 ```typescript
 const value = {
   table: state.table,
@@ -36,6 +38,7 @@ return (
 **Problem:** A new `value` object is created on every render, causing **all consumers** to re-render even when data hasn't changed. With 10+ filter/action components, this triggers 100+ unnecessary renders per user interaction.
 
 **Impact:**
+
 - 🔴 **Critical** - Affects every component using `useDataTable()`
 - Large tables (1000+ rows): ~200-500ms per keystroke
 - Small tables (100 rows): ~50-100ms per keystroke
@@ -64,6 +67,7 @@ const value = React.useMemo(
 **Location:** `core/data-table-root.tsx` (lines 148-186)
 
 **Issue:**
+
 ```typescript
 const detectFeatures = React.useMemo(() => {
   const detectedFeatures = detectFeaturesFromChildren(children, columns)
@@ -77,7 +81,7 @@ const detectFeatures = React.useMemo(() => {
 // config/feature-detection.ts (lines 62-98)
 const searchRecursively = (children: ReactNode) => {
   const childrenArray = Children.toArray(children)
-  
+
   for (const child of childrenArray) {
     if (isValidElement(child)) {
       // Checks displayName
@@ -89,6 +93,7 @@ const searchRecursively = (children: ReactNode) => {
 ```
 
 **Impact:**
+
 - 🔴 **Critical** - Runs on mount and when columns/config change
 - Deep component trees: ~50-150ms
 - Shallow trees: ~10-30ms
@@ -104,11 +109,11 @@ function useFeatureDetection(
 ) {
   // Only detect once on mount
   const detectedFeatures = React.useRef<FeatureRequirements | null>(null)
-  
+
   if (detectedFeatures.current === null) {
     detectedFeatures.current = detectFeaturesFromChildren(children, columns)
   }
-  
+
   return React.useMemo(
     () => ({
       enablePagination: config.enablePagination ?? detectedFeatures.current?.enablePagination ?? false,
@@ -134,10 +139,10 @@ export function detectFeaturesFromChildren(
   if (detectionCache.has(children)) {
     return detectionCache.get(children)!
   }
-  
+
   const requirements: FeatureRequirements = {}
   // ... existing logic
-  
+
   detectionCache.set(children, requirements)
   return requirements
 }
@@ -152,6 +157,7 @@ export function detectFeaturesFromChildren(
 **Location:** `lib/filter-functions.ts` (lines 180-189, 219-227, 399-404)
 
 **Issue:**
+
 ```typescript
 // Called for EVERY cell in EVERY row on EVERY filter change
 try {
@@ -165,11 +171,13 @@ try {
 ```
 
 **Problem:** For a table with 1,000 rows and 10 columns:
+
 - **10,000 regex creations** per search keystroke
 - Each `new RegExp()` is ~0.01-0.05ms
 - Total: **100-500ms per keystroke**
 
 **Impact:**
+
 - 🔴 **Critical** - Directly causes search lag
 - 1000 rows × 10 columns: ~300ms
 - 5000 rows × 15 columns: ~1.5s (unusable)
@@ -183,17 +191,17 @@ const MAX_CACHE_SIZE = 100
 
 function getOrCreateRegex(pattern: string, flags: string): RegExp {
   const key = `${pattern}:${flags}`
-  
+
   if (regexCache.has(key)) {
     return regexCache.get(key)!
   }
-  
+
   // Limit cache size to prevent memory leaks
   if (regexCache.size >= MAX_CACHE_SIZE) {
     const firstKey = regexCache.keys().next().value
     regexCache.delete(firstKey)
   }
-  
+
   const regex = new RegExp(pattern, flags)
   regexCache.set(key, regex)
   return regex
@@ -219,6 +227,7 @@ try {
 **Location:** `core/data-table-root.tsx` (lines 228-263)
 
 **Issue:**
+
 ```typescript
 const handleRowSelectionChange = React.useCallback(
   (valueFn: Updater<RowSelectionState>) => {
@@ -249,11 +258,13 @@ const handleRowSelectionChange = React.useCallback(
 ```
 
 **Problem:**
+
 - For 10,000 rows with 50 selected: Iterates 10,000 rows to find 50
 - Uses `Array.find()` which is O(n) for each selected row
 - **Worst case: O(n × m)** where n=data.length, m=selection.length
 
 **Impact:**
+
 - 🔴 **Critical** - Affects row selection performance
 - 100 rows, 10 selected: ~2ms (acceptable)
 - 10,000 rows, 100 selected: ~500ms (laggy)
@@ -265,8 +276,8 @@ const handleRowSelectionChange = React.useCallback(
 const rowIdMap = React.useMemo(() => {
   const map = new Map<string, TData>()
   data?.forEach((row, idx) => {
-    const rowId = getRowId?.(row, idx) ?? 
-                  (row as { id?: string | number }).id?.toString() ?? 
+    const rowId = getRowId?.(row, idx) ??
+                  (row as { id?: string | number }).id?.toString() ??
                   String(idx)
     map.set(rowId, row)
   })
@@ -301,6 +312,7 @@ const handleRowSelectionChange = React.useCallback(
 **Location:** `core/data-table-structure.tsx` (lines 275-302)
 
 **Issue:**
+
 ```typescript
 export function DataTableEmptyBody({ children, colSpan, className }: DataTableEmptyBodyProps) {
   const { table, columns, isLoading } = useDataTable() // 🔴 Re-renders on any table state change
@@ -309,7 +321,7 @@ export function DataTableEmptyBody({ children, colSpan, className }: DataTableEm
   // Check filters on every render
   const globalFilter = table.getState().globalFilter
   const columnFilters = table.getState().columnFilters
-  const isFiltered = 
+  const isFiltered =
     (globalFilter && globalFilter.length > 0) ||
     (columnFilters && columnFilters.length > 0)
 
@@ -319,11 +331,13 @@ export function DataTableEmptyBody({ children, colSpan, className }: DataTableEm
 ```
 
 **Problem:**
+
 - Uses `useDataTable()` which re-renders on **every table state change**
 - Calls `getRowModel()` and `getState()` on every render
 - Even when empty state isn't visible, it still runs these checks
 
 **Impact:**
+
 - 🟡 **Moderate** - Only visible impact when table is empty
 - But adds ~5-10ms to every table state change
 
@@ -332,17 +346,17 @@ export function DataTableEmptyBody({ children, colSpan, className }: DataTableEm
 ```typescript
 export function DataTableEmptyBody({ children, colSpan, className }: DataTableEmptyBodyProps) {
   const { table, columns, isLoading } = useDataTable()
-  
+
   // Memoize rows length check
   const rowCount = table.getRowModel().rows.length
-  
+
   // Early return before expensive operations
   if (isLoading || rowCount > 0) return null
 
   // Only compute filter state when actually rendering
   const tableState = table.getState()
   const isFiltered = React.useMemo(
-    () => 
+    () =>
       (tableState.globalFilter && tableState.globalFilter.length > 0) ||
       (tableState.columnFilters && tableState.columnFilters.length > 0),
     [tableState.globalFilter, tableState.columnFilters]
@@ -371,6 +385,7 @@ export function DataTableEmptyBody({ children, colSpan, className }: DataTableEm
 **Location:** `core/data-table-root.tsx` (lines 266-281)
 
 **Current Code:**
+
 ```typescript
 const processedColumns = React.useMemo(
   () =>
@@ -396,7 +411,7 @@ const processedColumns = React.useMemo(
   () =>
     columns.map(col => {
       const dataTableCol = col as DataTableColumnDef<TData, TValue>
-      
+
       // Only modify if needed
       if (
         dataTableCol.enableSorting !== undefined &&
@@ -405,7 +420,7 @@ const processedColumns = React.useMemo(
       ) {
         return col // Return original reference if no changes needed
       }
-      
+
       return {
         ...col,
         enableSorting: dataTableCol.enableSorting ?? true,
@@ -424,6 +439,7 @@ const processedColumns = React.useMemo(
 **Location:** `core/data-table-structure.tsx` (lines 119-151)
 
 **Issue:**
+
 ```typescript
 React.useEffect(() => {
   const container = containerRef.current?.closest('[data-slot="table-container"]') as HTMLDivElement
@@ -489,7 +505,8 @@ React.useEffect(() => {
 
 ### 8. Missing React.memo on UI Components
 
-**Locations:** 
+**Locations:**
+
 - `components/data-table-selection-bar.tsx`
 - `components/data-table-empty-state.tsx` (all sub-components)
 - `components/data-table-toolbar-section.tsx`
@@ -525,7 +542,7 @@ export const DataTableEmptyIcon = React.memo(function DataTableEmptyIcon({
   )
 })
 
-// Apply to all: DataTableEmptyMessage, DataTableEmptyFilteredMessage, 
+// Apply to all: DataTableEmptyMessage, DataTableEmptyFilteredMessage,
 // DataTableEmptyActions, DataTableEmptyTitle, DataTableEmptyDescription
 ```
 
@@ -543,12 +560,12 @@ For extremely large datasets (10,000+ rows), consider moving filter logic to a W
 // lib/filter-worker.ts
 self.addEventListener('message', (e) => {
   const { data, filters, globalFilter } = e.data
-  
+
   const filtered = data.filter(row => {
     // Apply filter logic
     return true // or false
   })
-  
+
   self.postMessage(filtered)
 })
 
@@ -557,57 +574,60 @@ const filterWorker = React.useRef<Worker>()
 
 React.useEffect(() => {
   filterWorker.current = new Worker(new URL('./filter-worker.ts', import.meta.url))
-  
+
   filterWorker.current.onmessage = (e) => {
     setFilteredData(e.data)
   }
-  
+
   return () => filterWorker.current?.terminate()
 }, [])
 ```
 
 ---
 
-### 10. Virtualize Column Headers (For Wide Tables)
+### 10. ~~Virtualize Column Headers (For Wide Tables)~~ ❌ Not Recommended
 
-For tables with 50+ columns:
+**Status: Not implemented and not recommended**
 
-```typescript
-import { useVirtualizer } from '@tanstack/react-virtual'
+**Why not needed:**
 
-export function DataTableVirtualizedHeader({ className, sticky = true }: DataTableHeaderProps) {
-  const { table } = useDataTable()
-  const parentRef = React.useRef<HTMLDivElement>(null)
-  
-  const columnVirtualizer = useVirtualizer({
-    horizontal: true,
-    count: table.getVisibleFlatColumns().length,
-    getScrollElement: () => parentRef.current,
-    estimateSize: () => 150, // Adjust based on column width
-    overscan: 5,
-  })
-  
-  // ... render virtualized headers
-}
-```
+- Native browser scrolling (`overflow-auto`) handles horizontal scrolling efficiently
+- Most tables have <20 columns, making this optimization unnecessary
+- Horizontal virtualization adds significant complexity:
+  - Requires syncing scroll between header and body
+  - Can cause alignment issues
+  - May break sticky header behavior
+  - Adds maintenance burden
+
+**When it might be useful:**
+
+- Only for extremely wide tables (100+ columns) - very rare edge case
+- If native scrolling becomes a bottleneck (unlikely with modern browsers)
+
+**Recommendation:** Use native scrolling. If you have 100+ columns, consider:
+
+1. Column grouping/hierarchical headers
+2. Column visibility controls (already implemented)
+3. Separate views for different column sets
 
 ---
 
 ## 📊 Performance Benchmarks (Estimated Impact)
 
-| Scenario | Before | After Critical Fixes | Improvement |
-|----------|--------|---------------------|-------------|
-| **Search in 1000 rows** | 300-500ms | 50-100ms | **70-85%** |
-| **Filter in 5000 rows** | 1.5s | 200-300ms | **80-86%** |
-| **Row selection (100 rows)** | 500ms | 25-50ms | **90-95%** |
-| **Initial render (100 rows)** | 200ms | 80-120ms | **40-60%** |
-| **Re-render on state change** | 100ms | 20-40ms | **60-80%** |
+| Scenario                      | Before    | After Critical Fixes | Improvement |
+| ----------------------------- | --------- | -------------------- | ----------- |
+| **Search in 1000 rows**       | 300-500ms | 50-100ms             | **70-85%**  |
+| **Filter in 5000 rows**       | 1.5s      | 200-300ms            | **80-86%**  |
+| **Row selection (100 rows)**  | 500ms     | 25-50ms              | **90-95%**  |
+| **Initial render (100 rows)** | 200ms     | 80-120ms             | **40-60%**  |
+| **Re-render on state change** | 100ms     | 20-40ms              | **60-80%**  |
 
 ---
 
 ## 🎯 Implementation Priority
 
 ### Phase 1 (Highest Impact - Implement First)
+
 1. ✅ Memoize DataTableContext value (#1)
 2. ✅ Cache regex patterns in filter functions (#3)
 3. ✅ Optimize row selection with Map (#4)
@@ -615,6 +635,7 @@ export function DataTableVirtualizedHeader({ className, sticky = true }: DataTab
 **Expected Total Improvement:** 70-85% reduction in lag for most operations
 
 ### Phase 2 (Medium Impact)
+
 4. ✅ Optimize feature detection (#2)
 5. ✅ Add React.memo to UI components (#8)
 6. ✅ Memoize scroll handlers (#7)
@@ -622,6 +643,7 @@ export function DataTableVirtualizedHeader({ className, sticky = true }: DataTab
 **Expected Total Improvement:** Additional 10-20% improvement
 
 ### Phase 3 (Nice to Have)
+
 7. ✅ Optimize column processing (#6)
 8. ✅ Optimize empty state checks (#5)
 9. ✅ Consider Web Workers for huge datasets (#9)
@@ -655,6 +677,7 @@ function DataTableRoot() {
 ```
 
 Use React DevTools Profiler to measure before/after:
+
 1. Record profile with "Record why each component rendered"
 2. Perform actions (search, filter, sort)
 3. Compare render times and counts
@@ -665,6 +688,7 @@ Use React DevTools Profiler to measure before/after:
 
 1. **Limit filter cache size** (already shown in regex solution)
 2. **Clear virtualizer cache** when table unmounts:
+
    ```typescript
    React.useEffect(() => {
      return () => {
@@ -674,10 +698,11 @@ Use React DevTools Profiler to measure before/after:
    ```
 
 3. **Avoid storing entire table state in local storage**:
+
    ```typescript
    // Bad
    localStorage.setItem('tableState', JSON.stringify(table.getState()))
-   
+
    // Good - only store minimal state
    localStorage.setItem('tableState', JSON.stringify({
      pageIndex: table.getState().pagination.pageIndex,
@@ -691,6 +716,7 @@ Use React DevTools Profiler to measure before/after:
 ## 🎨 Copy-Paste Ready Implementations
 
 All fixes above are designed to be copy-paste friendly while maintaining the shadcn/ui philosophy. They:
+
 - ✅ Don't require external dependencies
 - ✅ Preserve TypeScript safety
 - ✅ Maintain existing API surface
@@ -709,4 +735,3 @@ The data-table component has a solid foundation but can benefit significantly fr
 - Complex column configurations
 
 All recommendations maintain the copy-paste philosophy and require no breaking changes.
-
