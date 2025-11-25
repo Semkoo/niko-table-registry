@@ -135,6 +135,7 @@ export function DataTableProvider<TData>({
   const columnVisibility = tableState.columnVisibility
   const expanded = tableState.expanded
   const rowSelection = tableState.rowSelection
+  const pagination = tableState.pagination
 
   /**
    * PERFORMANCE: Create lightweight state hash instead of JSON.stringify
@@ -165,6 +166,8 @@ export function DataTableProvider<TData>({
       return `${keyCount}:${keyPrefix}`
     }
 
+    const paginationKey = `${pagination.pageIndex ?? 0}:${pagination.pageSize ?? 0}`
+
     return {
       globalFilter: typeof globalFilter === "string" ? globalFilter : "",
       sortingLength: sorting?.length ?? 0,
@@ -178,6 +181,7 @@ export function DataTableProvider<TData>({
       rowSelectionHash: getObjectHash(
         rowSelection as Record<string, unknown> | undefined,
       ),
+      paginationKey,
     }
   }, [
     globalFilter,
@@ -186,6 +190,7 @@ export function DataTableProvider<TData>({
     columnVisibility,
     expanded,
     rowSelection,
+    pagination,
   ])
 
   /**
