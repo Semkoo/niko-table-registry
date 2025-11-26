@@ -159,11 +159,11 @@
   }
 
   .entry-title:not(a) {
-    @apply !font-normal text-muted-foreground;
+    @apply font-normal! text-muted-foreground;
   }
 
   .container-sidebar-entry > a {
-    @apply !text-foreground;
+    @apply text-foreground!;
   }
 
   .container-wrapper,
@@ -172,7 +172,7 @@
   }
 
   .container-wrapper > .container > .hero {
-    @apply !pb-0 text-center;
+    @apply pb-0! text-center;
 
     & > .title,
     & > .tagline {
@@ -180,16 +180,16 @@
     }
 
     & > .actions {
-      @apply !justify-center;
+      @apply justify-center!;
     }
   }
 
   .logo-size {
-    @apply !size-10;
+    @apply size-10!;
   }
 
   .sl-link-card a {
-    @apply !no-underline;
+    @apply no-underline!;
   }
 }
 

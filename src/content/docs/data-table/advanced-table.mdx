@@ -222,8 +222,13 @@ function FilterToolbar() {
         <DataTableViewMenu />
       </DataTableToolbarSection>
       <DataTableToolbarSection className="px-0">
-  <DataTableSortMenu className="ml-auto" />
-  <DataTableFilterMenu autoOptions dynamicCounts showCounts mergeStrategy="augment" />
+        <DataTableSortMenu className="ml-auto" />
+        <DataTableFilterMenu
+          autoOptions
+          dynamicCounts
+          showCounts
+          mergeStrategy="augment"
+        />
       </DataTableToolbarSection>
     </DataTableToolbarSection>
   )
@@ -266,7 +271,12 @@ The filter menu component allows users to create rule-based filters with multipl
 - `onFiltersChange?`: Callback when filters change `(filters: ExtendedColumnFilter[] | null) => void`
 
 ```tsx showLineNumbers
-<DataTableFilterMenu autoOptions dynamicCounts showCounts mergeStrategy="augment" />
+<DataTableFilterMenu
+  autoOptions
+  dynamicCounts
+  showCounts
+  mergeStrategy="augment"
+/>
 ```
 
 ### DataTableSortMenu
