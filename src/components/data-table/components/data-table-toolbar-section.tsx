@@ -76,4 +76,3 @@ export const DataTableToolbarSection = React.memo(
 )
 
 DataTableToolbarSection.displayName = "DataTableToolbarSection"
-

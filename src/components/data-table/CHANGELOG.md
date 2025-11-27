@@ -4,7 +4,7 @@ All notable changes to the data-table component.
 
 ---
 
-## [2.1.0] - November 10, 2025
+## v2.1.0 - November 10, 2025
 
 ### 🧹 Code Cleanup
 
@@ -19,6 +19,7 @@ All notable changes to the data-table component.
 #### Migration Guide
 
 **Before (Legacy):**
+
 ```tsx
 <DataTableEmptyBody
   icon={PackageOpen}
@@ -30,6 +31,7 @@ All notable changes to the data-table component.
 ```
 
 **After (Composition):**
+
 ```tsx
 <DataTableEmptyBody>
   <DataTableEmptyIcon>
@@ -56,6 +58,7 @@ All notable changes to the data-table component.
 #### Simplified API
 
 The new `DataTableEmptyBody` and `DataTableVirtualizedEmptyBody` now only accept:
+
 - `children`: React.ReactNode
 - `colSpan`: number (optional)
 - `className`: string (optional)
@@ -64,7 +67,7 @@ This makes the API cleaner and follows the composition pattern consistently acro
 
 ---
 
-## [2.0.0] - November 10, 2025
+## v2.0.0 - November 10, 2025
 
 ### 🎉 Major Improvements
 
@@ -133,7 +136,7 @@ This makes the API cleaner and follows the composition pattern consistently acro
 
 2. **Feature Detection Registry**
    - Fixed inconsistent registration of `DataTableSearchFilter`
-   - Now consistent between DataTable* and Table* components
+   - Now consistent between DataTable*and Table* components
 
 3. **README Documentation**
    - Fixed directory structure inaccuracies
@@ -149,11 +152,13 @@ This makes the API cleaner and follows the composition pattern consistently acro
 #### DataTableToolbarSection Location Change
 
 **Before:**
+
 ```tsx
 import { DataTableToolbarSection } from "@/components/data-table/core"
 ```
 
 **After:**
+
 ```tsx
 import { DataTableToolbarSection } from "@/components/data-table"
 // OR
@@ -202,12 +207,14 @@ All other changes are **backward compatible**:
 ## New Exports
 
 ### From `core/`
+
 ```tsx
 export { DataTableErrorBoundary } from "./core"
 export type { DataTableErrorBoundaryProps } from "./core"
 ```
 
 ### From `components/`
+
 ```tsx
 export { DataTableToolbarSection } from "./components"
 export type { DataTableToolbarSectionProps } from "./components"
@@ -222,6 +229,7 @@ export {
 ```
 
 ### From `hooks/`
+
 ```tsx
 export { useDebounce } from "./hooks"
 ```
@@ -231,12 +239,14 @@ export { useDebounce } from "./hooks"
 ## Updated Documentation
 
 ### New Files
+
 - `ANALYSIS_REPORT.md` - Comprehensive analysis and recommendations
 - `UPDATES.md` - Detailed implementation guide
 - `EMPTY_STATE_COMPOSITION.md` - Empty state composition pattern guide
 - `CHANGELOG.md` - This file
 
 ### Updated Files
+
 - `README.md` - Updated directory structure, added new components
 - Directory structure now accurately reflects actual layout
 - All component locations updated
@@ -246,6 +256,7 @@ export { useDebounce } from "./hooks"
 ## Component Location Reference
 
 ### Core Components
+
 - `DataTableRoot` - `core/data-table-root.tsx`
 - `DataTable` - `core/data-table.tsx`
 - `DataTableContext` - `core/data-table-context.tsx`
@@ -254,12 +265,14 @@ export { useDebounce } from "./hooks"
 - `DataTableVirtualized*` - `core/data-table-virtualized-structure.tsx`
 
 ### Action Components (Toolbar Actions)
+
 - All `DataTable*Filter` - `actions/`
 - `DataTablePagination` - `actions/data-table-pagination.tsx`
 - `DataTableSortMenu` - `actions/data-table-sort-menu.tsx`
 - `DataTableViewMenu` - `actions/data-table-view-menu.tsx`
 
 ### Reusable UI Components
+
 - `TableColumnHeader` - `components/table-column-header.tsx`
 - `DataTableToolbarSection` - `components/data-table-toolbar-section.tsx` ⭐ **MOVED**
 - `DataTableAside` - `components/data-table-aside.tsx`
@@ -270,13 +283,13 @@ export { useDebounce } from "./hooks"
 
 ## Performance Metrics
 
-| Metric | Before | After | Improvement |
-|--------|--------|-------|-------------|
-| **Type Safety** | 92% | 99% | +7% |
-| **Accessibility Score** | 75% | 95% | +20% |
-| **Error Resilience** | Low | High | +100% |
-| **Customization** | Medium | High | +40% |
-| **Developer Experience** | Good | Excellent | +25% |
+| Metric                   | Before | After     | Improvement |
+| ------------------------ | ------ | --------- | ----------- |
+| **Type Safety**          | 92%    | 99%       | +7%         |
+| **Accessibility Score**  | 75%    | 95%       | +20%        |
+| **Error Resilience**     | Low    | High      | +100%       |
+| **Customization**        | Medium | High      | +40%        |
+| **Developer Experience** | Good   | Excellent | +25%        |
 
 ---
 
@@ -298,10 +311,11 @@ export { useDebounce } from "./hooks"
 ## Upgrade Steps
 
 1. **Update imports** (if importing from `core/` directly):
+
    ```tsx
    // Change this:
    import { DataTableToolbarSection } from "@/components/data-table/core"
-   
+
    // To this:
    import { DataTableToolbarSection } from "@/components/data-table"
    ```
@@ -311,11 +325,10 @@ export { useDebounce } from "./hooks"
    - See `EMPTY_STATE_COMPOSITION.md` for guide
 
 3. **Add error boundary** (recommended):
+
    ```tsx
    <DataTableErrorBoundary>
-     <DataTableRoot {...props}>
-       {/* your table */}
-     </DataTableRoot>
+     <DataTableRoot {...props}>{/* your table */}</DataTableRoot>
    </DataTableErrorBoundary>
    ```
 
@@ -355,4 +368,3 @@ See `ANALYSIS_REPORT.md` for detailed roadmap including:
 **Release Date**: November 10, 2025  
 **Status**: ✅ Stable  
 **Breaking Changes**: 1 (DataTableToolbarSection location)
-

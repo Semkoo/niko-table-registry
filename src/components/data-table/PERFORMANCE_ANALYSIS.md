@@ -48,13 +48,14 @@ return (
 ```typescript
 // Memoize the context value
 const value = React.useMemo(
-  () => ({
-    table: state.table,
-    columns: state.columns,
-    isLoading: state.isLoading,
-    setIsLoading,
-  }) as DataTableContextProps<TData>,
-  [state.table, state.columns, state.isLoading, setIsLoading]
+  () =>
+    ({
+      table: state.table,
+      columns: state.columns,
+      isLoading: state.isLoading,
+      setIsLoading,
+    }) as DataTableContextProps<TData>,
+  [state.table, state.columns, state.isLoading, setIsLoading],
 )
 ```
 
@@ -105,7 +106,7 @@ const searchRecursively = (children: ReactNode) => {
 function useFeatureDetection(
   children: React.ReactNode,
   columns: DataTableColumnDef<TData, TValue>[],
-  config: DataTableConfig
+  config: DataTableConfig,
 ) {
   // Only detect once on mount
   const detectedFeatures = React.useRef<FeatureRequirements | null>(null)
@@ -116,11 +117,17 @@ function useFeatureDetection(
 
   return React.useMemo(
     () => ({
-      enablePagination: config.enablePagination ?? detectedFeatures.current?.enablePagination ?? false,
-      enableFilters: config.enableFilters ?? detectedFeatures.current?.enableFilters ?? false,
+      enablePagination:
+        config.enablePagination ??
+        detectedFeatures.current?.enablePagination ??
+        false,
+      enableFilters:
+        config.enableFilters ??
+        detectedFeatures.current?.enableFilters ??
+        false,
       // ... rest of features
     }),
-    [config]
+    [config],
   )
 }
 ```
@@ -276,9 +283,10 @@ const handleRowSelectionChange = React.useCallback(
 const rowIdMap = React.useMemo(() => {
   const map = new Map<string, TData>()
   data?.forEach((row, idx) => {
-    const rowId = getRowId?.(row, idx) ??
-                  (row as { id?: string | number }).id?.toString() ??
-                  String(idx)
+    const rowId =
+      getRowId?.(row, idx) ??
+      (row as { id?: string | number }).id?.toString() ??
+      String(idx)
     map.set(rowId, row)
   })
   return map
@@ -314,7 +322,11 @@ const handleRowSelectionChange = React.useCallback(
 **Issue:**
 
 ```typescript
-export function DataTableEmptyBody({ children, colSpan, className }: DataTableEmptyBodyProps) {
+export function DataTableEmptyBody({
+  children,
+  colSpan,
+  className,
+}: DataTableEmptyBodyProps) {
   const { table, columns, isLoading } = useDataTable() // 🔴 Re-renders on any table state change
   const { rows } = table.getRowModel()
 
@@ -442,7 +454,9 @@ const processedColumns = React.useMemo(
 
 ```typescript
 React.useEffect(() => {
-  const container = containerRef.current?.closest('[data-slot="table-container"]') as HTMLDivElement
+  const container = containerRef.current?.closest(
+    '[data-slot="table-container"]',
+  ) as HTMLDivElement
   if (!container || !onScroll) return
 
   const handleScroll = (event: Event) => {
@@ -469,7 +483,9 @@ const handleScrollBottom = React.useCallback(() => {
 }, [onScrolledBottom])
 
 React.useEffect(() => {
-  const container = containerRef.current?.closest('[data-slot="table-container"]') as HTMLDivElement
+  const container = containerRef.current?.closest(
+    '[data-slot="table-container"]',
+  ) as HTMLDivElement
   if (!container || !onScroll) return
 
   const handleScroll = (event: Event) => {
@@ -485,9 +501,10 @@ React.useEffect(() => {
       clientHeight,
       isTop,
       isBottom,
-      percentage: scrollHeight - clientHeight > 0
-        ? (scrollTop / (scrollHeight - clientHeight)) * 100
-        : 0,
+      percentage:
+        scrollHeight - clientHeight > 0
+          ? (scrollTop / (scrollHeight - clientHeight)) * 100
+          : 0,
     }
 
     onScroll(scrollEvent)
@@ -558,7 +575,7 @@ For extremely large datasets (10,000+ rows), consider moving filter logic to a W
 
 ```typescript
 // lib/filter-worker.ts
-self.addEventListener('message', (e) => {
+self.addEventListener("message", e => {
   const { data, filters, globalFilter } = e.data
 
   const filtered = data.filter(row => {
@@ -573,9 +590,11 @@ self.addEventListener('message', (e) => {
 const filterWorker = React.useRef<Worker>()
 
 React.useEffect(() => {
-  filterWorker.current = new Worker(new URL('./filter-worker.ts', import.meta.url))
+  filterWorker.current = new Worker(
+    new URL("./filter-worker.ts", import.meta.url),
+  )
 
-  filterWorker.current.onmessage = (e) => {
+  filterWorker.current.onmessage = e => {
     setFilteredData(e.data)
   }
 
@@ -658,7 +677,7 @@ Add these utilities to measure performance:
 ```typescript
 // utils/perf.ts
 export function measureRender(componentName: string, callback: () => void) {
-  if (process.env.NODE_ENV === 'development') {
+  if (process.env.NODE_ENV === "development") {
     const start = performance.now()
     callback()
     const end = performance.now()
@@ -670,7 +689,7 @@ export function measureRender(componentName: string, callback: () => void) {
 
 // Usage in components
 function DataTableRoot() {
-  measureRender('DataTableRoot', () => {
+  measureRender("DataTableRoot", () => {
     // Component logic
   })
 }
@@ -701,14 +720,17 @@ Use React DevTools Profiler to measure before/after:
 
    ```typescript
    // Bad
-   localStorage.setItem('tableState', JSON.stringify(table.getState()))
+   localStorage.setItem("tableState", JSON.stringify(table.getState()))
 
    // Good - only store minimal state
-   localStorage.setItem('tableState', JSON.stringify({
-     pageIndex: table.getState().pagination.pageIndex,
-     pageSize: table.getState().pagination.pageSize,
-     sorting: table.getState().sorting,
-   }))
+   localStorage.setItem(
+     "tableState",
+     JSON.stringify({
+       pageIndex: table.getState().pagination.pageIndex,
+       pageSize: table.getState().pagination.pageSize,
+       sorting: table.getState().sorting,
+     }),
+   )
    ```
 
 ---

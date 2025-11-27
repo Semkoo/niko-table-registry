@@ -80,7 +80,7 @@ export function TableFacetedFilter<TData, TValue>({
         setOpen(false)
       }
     },
-    [column, multiple, selectedValues, onValueChange],
+    [column, multiple, selectedValues, onValueChange, setOpen],
   )
 
   const onReset = React.useCallback(

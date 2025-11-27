@@ -13,14 +13,16 @@ export function ManualInstallCodeCard({
   filePath: string
   children: ReactNode
 }) {
-  const Icon = getIcon(filePath)
   const [isExpanded, setIsExpanded] = useState(false)
 
   return (
     <Card className="not-content overflow-hidden bg-code p-0">
       <CardContent className="p-0">
         <div className="flex items-center border-b border-input px-3 py-1">
-          <Icon className="mr-2 size-4 text-muted-foreground" />
+          <Icon
+            filePath={filePath}
+            className="mr-2 size-4 text-muted-foreground"
+          />
           <div className="font-mono text-muted-foreground">{filePath}</div>
           <Button
             variant="ghost"
@@ -41,7 +43,7 @@ export function ManualInstallCodeCard({
           {!isExpanded && (
             <button
               onClick={() => setIsExpanded(true)}
-              className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-code via-code/70 via-70% to-transparent text-sm text-muted-foreground"
+              className="absolute inset-x-0 bottom-0 h-16 bg-linear-to-t from-code via-code/70 via-70% to-transparent text-sm text-muted-foreground"
             >
               Expand
             </button>
@@ -52,12 +54,17 @@ export function ManualInstallCodeCard({
   )
 }
 
-function getIcon(filePath: string) {
+type IconProps = React.ComponentProps<"svg"> & { filePath: string }
+function Icon({ filePath, ...props }: IconProps) {
   if (filePath.endsWith(".ts") || filePath.endsWith(".tsx")) {
-    return TypeScriptIcon
+    return <TypeScriptIcon {...props} />
   }
+
   if (filePath.endsWith(".css")) {
-    return CSSIcon
+    return <CSSIcon {...props} />
   }
-  return CodeIcon
+
+  return <CodeIcon {...props} />
 }
+
+export default Icon

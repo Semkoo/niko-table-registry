@@ -100,4 +100,3 @@ export function TableClearFilter<TData>({
 }
 
 TableClearFilter.displayName = "TableClearFilter"
-

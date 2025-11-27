@@ -200,7 +200,8 @@ export default function SearchTableExample() {
                 </DataTableEmptyIcon>
                 <DataTableEmptyTitle>No matches found</DataTableEmptyTitle>
                 <DataTableEmptyDescription>
-                  Try adjusting your search to find what you're looking for.
+                  Try adjusting your search to find what you&apos;re looking
+                  for.
                 </DataTableEmptyDescription>
               </DataTableEmptyFilteredMessage>
             </DataTableEmptyBody>

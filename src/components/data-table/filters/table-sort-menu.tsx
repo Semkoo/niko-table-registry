@@ -133,7 +133,7 @@ function TableSortItem({
           </PopoverTrigger>
           <PopoverContent
             id={fieldListboxId}
-            className="w-[var(--radix-popover-trigger-width)] origin-[var(--radix-popover-content-transform-origin)] p-0"
+            className="w-(--radix-popover-trigger-width) origin-(--radix-popover-content-transform-origin) p-0"
           >
             <Command>
               <CommandInput placeholder="Search fields..." />
@@ -164,13 +164,13 @@ function TableSortItem({
         >
           <SelectTrigger
             aria-controls={directionListboxId}
-            className="h-8 w-24 rounded [&[data-size]]:h-8"
+            className="h-8 w-24 rounded data-size:h-8"
           >
             <SelectValue />
           </SelectTrigger>
           <SelectContent
             id={directionListboxId}
-            className="min-w-[var(--radix-select-trigger-width)] origin-[var(--radix-select-content-transform-origin)]"
+            className="min-w-(--radix-select-trigger-width) origin-(--radix-select-content-transform-origin)"
           >
             <SelectItem value="asc">{labels.asc}</SelectItem>
             <SelectItem value="desc">{labels.desc}</SelectItem>
@@ -222,6 +222,7 @@ export function TableSortMenu<TData>({
   // Expose table instance globally for TableSortItem variant detection
   // (This is a workaround for passing table to deeply nested TableSortItem)
   // @ts-expect-error: Assigning table instance to window for deep sort label access
+  // eslint-disable-next-line react-hooks/immutability
   if (typeof window !== "undefined") window.__tableSortMenuTable = table
   // ============================================================================
   // State & Refs
@@ -375,7 +376,7 @@ export function TableSortMenu<TData>({
         <PopoverContent
           aria-labelledby={labelId}
           aria-describedby={descriptionId}
-          className="flex w-full max-w-[var(--radix-popover-content-available-width)] origin-[var(--radix-popover-content-transform-origin)] flex-col gap-3.5 p-4 sm:min-w-[380px]"
+          className="flex w-full max-w-(--radix-popover-content-available-width) origin-(--radix-popover-content-transform-origin) flex-col gap-3.5 p-4 sm:min-w-[380px]"
           {...props}
         >
           <div className="flex flex-col gap-1">

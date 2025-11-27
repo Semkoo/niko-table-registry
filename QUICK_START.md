@@ -57,7 +57,7 @@ pnpm preview
 
 ## 📁 Key Directories
 
-```
+```plaintext
 src/
 ├── registry/new-york/
 │   ├── items/          # Component implementations (what users install)

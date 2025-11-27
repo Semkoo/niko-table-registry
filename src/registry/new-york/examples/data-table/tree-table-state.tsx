@@ -160,18 +160,24 @@ export default function TreeTableStateExample() {
   // Selection Helper Functions
   // ============================================================================
 
+  // TODO: duplicated code with tree-table.tsx
+
   /**
    * Gets all descendant IDs recursively (including the parent itself)
    */
   const getAllDescendantIds = React.useCallback(
     (project: Project): string[] => {
-      const ids: string[] = [project.id]
-      if (project.subRows) {
-        project.subRows.forEach(child => {
-          ids.push(...getAllDescendantIds(child))
-        })
+      const collectDescentantIds = (node: Project): string[] => {
+        const ids: string[] = [node.id]
+        if (node.subRows) {
+          node.subRows.forEach(child => {
+            ids.push(...collectDescentantIds(child))
+          })
+        }
+        return ids
       }
-      return ids
+
+      return collectDescentantIds(project)
     },
     [],
   )
@@ -199,14 +205,18 @@ export default function TreeTableStateExample() {
    */
   const areAllChildrenSelected = React.useCallback(
     (project: Project): boolean => {
-      if (!project.subRows?.length) return false
+      const collectChildrenSelected = (node: Project): boolean => {
+        if (!node.subRows?.length) return false
 
-      return project.subRows.every(child => {
-        if (child.subRows?.length) {
-          return areAllChildrenSelected(child)
-        }
-        return rowSelection[child.id]
-      })
+        return node.subRows.every(child => {
+          if (child.subRows?.length) {
+            return collectChildrenSelected(child)
+          }
+          return rowSelection[child.id]
+        })
+      }
+
+      return collectChildrenSelected(project)
     },
     [rowSelection],
   )
@@ -216,14 +226,18 @@ export default function TreeTableStateExample() {
    */
   const areSomeChildrenSelected = React.useCallback(
     (project: Project): boolean => {
-      if (!project.subRows?.length) return false
+      const recurse = (node: Project): boolean => {
+        if (!node.subRows?.length) return false
 
-      return project.subRows.some(child => {
-        if (child.subRows?.length) {
-          return areAllChildrenSelected(child) || areSomeChildrenSelected(child)
-        }
-        return rowSelection[child.id]
-      })
+        return node.subRows.some(child => {
+          if (child.subRows?.length) {
+            return areAllChildrenSelected(child) || recurse(child)
+          }
+          return rowSelection[child.id]
+        })
+      }
+
+      return recurse(project)
     },
     [rowSelection, areAllChildrenSelected],
   )

@@ -727,7 +727,9 @@ function useSyncFiltersWithTable<TData>(
   // This is safe because we're only mutating table.options.meta, not triggering re-renders
   // Custom filter logic can read this meta to apply correct join operators
   if (table.options.meta) {
+    // eslint-disable-next-line react-hooks/immutability
     table.options.meta.hasIndividualJoinOperators = true
+    // eslint-disable-next-line react-hooks/immutability
     table.options.meta.joinOperator = joinOperatorForMeta
   }
 

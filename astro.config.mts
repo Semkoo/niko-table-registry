@@ -16,12 +16,17 @@ const { GITHUB_REPO_URL, DEPLOY_PRIME_URL, URL } = loadEnv(
 const SERVER_URL =
   process.env.NODE_ENV === "production" ? URL : DEPLOY_PRIME_URL
 
+if (SERVER_URL === undefined) throw new Error("SERVER_URL is not set.")
+
 // https://astro.build/config
 export default defineConfig({
   site: SERVER_URL,
   env: {
     schema: {
-      GITHUB_REPO_URL: envField.string({ context: "client", access: "public" }),
+      GITHUB_REPO_URL: envField.string({
+        context: "client",
+        access: "public",
+      }),
       DEPLOY_PRIME_URL: envField.string({
         context: "client",
         access: "public",
