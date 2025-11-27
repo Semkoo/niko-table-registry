@@ -7,6 +7,7 @@ The data table now supports a **composition-based API** for empty states, giving
 ## 🎯 Why Composition?
 
 **The Pattern**:
+
 ```tsx
 <DataTableEmptyBody>
   <DataTableEmptyIcon>
@@ -28,6 +29,7 @@ The data table now supports a **composition-based API** for empty states, giving
 ```
 
 **Benefits**:
+
 - ✅ More flexible and composable
 - ✅ Cleaner code structure
 - ✅ Follows shadcn/ui philosophy
@@ -42,6 +44,7 @@ The data table now supports a **composition-based API** for empty states, giving
 ### Core Components
 
 #### `DataTableEmptyIcon`
+
 Displays an icon above the empty message.
 
 ```tsx
@@ -51,6 +54,7 @@ Displays an icon above the empty message.
 ```
 
 #### `DataTableEmptyMessage`
+
 Message shown when table is truly empty (no filters active).
 
 ```tsx
@@ -61,6 +65,7 @@ Message shown when table is truly empty (no filters active).
 ```
 
 #### `DataTableEmptyFilteredMessage`
+
 Message shown when filters are active but no results match.
 
 ```tsx
@@ -70,18 +75,22 @@ Message shown when filters are active but no results match.
 ```
 
 #### `DataTableEmptyActions`
+
 Container for action buttons (Add, Clear Filters, etc.).
 
 ```tsx
 <DataTableEmptyActions>
   <Button onClick={handleAdd}>Add Item</Button>
-  <Button variant="outline" onClick={handleClear}>Clear Filters</Button>
+  <Button variant="outline" onClick={handleClear}>
+    Clear Filters
+  </Button>
 </DataTableEmptyActions>
 ```
 
 ### Convenience Components
 
 #### `DataTableEmptyTitle`
+
 Consistent styling for titles.
 
 ```tsx
@@ -89,6 +98,7 @@ Consistent styling for titles.
 ```
 
 #### `DataTableEmptyDescription`
+
 Consistent styling for descriptions.
 
 ```tsx
@@ -113,8 +123,7 @@ import {
   DataTableEmptyDescription,
 } from "@/components/data-table"
 import { PackageOpen } from "lucide-react"
-
-<DataTableBody>
+;<DataTableBody>
   <DataTableEmptyBody>
     <DataTableEmptyIcon>
       <PackageOpen className="size-12" />
@@ -137,7 +146,7 @@ import { PackageOpen } from "lucide-react"
     <DataTableEmptyIcon>
       <PackageOpen className="size-12" />
     </DataTableEmptyIcon>
-    
+
     {/* Shown when NOT filtered */}
     <DataTableEmptyMessage>
       <DataTableEmptyTitle>No products found</DataTableEmptyTitle>
@@ -145,7 +154,7 @@ import { PackageOpen } from "lucide-react"
         Get started by adding your first product
       </DataTableEmptyDescription>
     </DataTableEmptyMessage>
-    
+
     {/* Shown when FILTERED */}
     <DataTableEmptyFilteredMessage>
       <p className="font-semibold">No matches found</p>
@@ -161,8 +170,7 @@ import { PackageOpen } from "lucide-react"
 
 ```tsx
 import { Button } from "@/components/ui/button"
-
-<DataTableBody>
+;<DataTableBody>
   <DataTableEmptyBody>
     <DataTableEmptyIcon>
       <PackageOpen className="size-12" />
@@ -174,9 +182,7 @@ import { Button } from "@/components/ui/button"
       </DataTableEmptyDescription>
     </DataTableEmptyMessage>
     <DataTableEmptyActions>
-      <Button onClick={handleAddProduct}>
-        Add Product
-      </Button>
+      <Button onClick={handleAddProduct}>Add Product</Button>
     </DataTableEmptyActions>
   </DataTableEmptyBody>
 </DataTableBody>
@@ -259,8 +265,7 @@ import {
   DataTableEmptyDescription,
 } from "@/components/data-table"
 import { Database } from "lucide-react"
-
-<DataTableVirtualizedBody height={600}>
+;<DataTableVirtualizedBody height={600}>
   <DataTableVirtualizedEmptyBody>
     <DataTableEmptyIcon>
       <Database className="size-12" />
@@ -302,8 +307,7 @@ All components accept `className` for custom styling:
 
 ```tsx
 import { PackageOpen, SearchX } from "lucide-react"
-
-<DataTableBody>
+;<DataTableBody>
   <DataTableEmptyBody>
     {/* You can conditionally render different icons */}
     <DataTableEmptyIcon>
@@ -313,11 +317,11 @@ import { PackageOpen, SearchX } from "lucide-react"
         <PackageOpen className="size-12" />
       )}
     </DataTableEmptyIcon>
-    
+
     <DataTableEmptyMessage>
       <DataTableEmptyTitle>No products</DataTableEmptyTitle>
     </DataTableEmptyMessage>
-    
+
     <DataTableEmptyFilteredMessage>
       <DataTableEmptyTitle>No matches</DataTableEmptyTitle>
     </DataTableEmptyFilteredMessage>
@@ -329,8 +333,8 @@ import { useDataTable } from "@/components/data-table"
 
 function CustomEmptyState() {
   const { table } = useDataTable()
-  const isFiltered = table.getState().globalFilter || 
-                     table.getState().columnFilters.length > 0
+  const isFiltered =
+    table.getState().globalFilter || table.getState().columnFilters.length > 0
 
   return (
     <DataTableEmptyBody>
@@ -382,14 +386,16 @@ function CustomEmptyState() {
     <DataTableEmptyTitle className="text-3xl text-primary">
       Your Store Awaits
     </DataTableEmptyTitle>
-    <DataTableEmptyDescription className="text-base mt-2">
+    <DataTableEmptyDescription className="mt-2 text-base">
       Create amazing products and start selling today
     </DataTableEmptyDescription>
   </DataTableEmptyMessage>
 
   {/* Vertical actions */}
   <DataTableEmptyActions className="flex-col">
-    <Button size="lg" className="w-full">Primary Action</Button>
+    <Button size="lg" className="w-full">
+      Primary Action
+    </Button>
     <Button size="lg" variant="outline" className="w-full">
       Secondary Action
     </Button>
@@ -401,7 +407,7 @@ function CustomEmptyState() {
 
 ## 🧩 Component Hierarchy
 
-```
+```plaintext
 DataTableBody / DataTableVirtualizedBody
 └── DataTableEmptyBody / DataTableVirtualizedEmptyBody
     └── [Composition Mode]
@@ -560,6 +566,7 @@ Each component accepts `className` for full customization:
 ## 🎯 Summary
 
 The composition pattern gives you:
+
 - ✅ **More control** - Fine-grained customization
 - ✅ **Better DX** - Cleaner, more readable code
 - ✅ **Flexibility** - Mix and match as needed
@@ -573,4 +580,3 @@ The composition pattern gives you:
 **Last Updated**: November 10, 2025  
 **Pattern**: Composition over Configuration  
 **Philosophy**: Copy-paste friendly, shadcn/ui style
-
