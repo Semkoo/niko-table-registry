@@ -189,17 +189,23 @@ function useInitialFilters<TData>(
 
     const columnFilters = table.getState().columnFilters
     if (columnFilters && columnFilters.length > 0) {
+      // IMPORTANT: Exclude columns that have faceted filter values (arrays)
+      // Faceted filters store values as arrays, inline filters store as ExtendedColumnFilter objects
       const extractedFilters = columnFilters
         .map(cf => cf.value)
         .filter(
           (v): v is FilterWithoutId<TData> | ExtendedColumnFilter<TData> =>
-            v !== null && typeof v === "object" && "id" in v,
+            v !== null &&
+            typeof v === "object" &&
+            "id" in v &&
+            "operator" in v &&
+            !Array.isArray(v), // Exclude faceted filters (arrays)
         )
       if (extractedFilters.length > 0) {
         const normalized = normalizeFiltersFromUrl(extractedFilters)
         if (process.env.NODE_ENV === "development") {
           console.log(
-            "[TableInline useInitialFilters] Extracted from columnFilters:",
+            "[TableInline useInitialFilters] Extracted from columnFilters (excluding faceted filters):",
             normalized,
           )
         }
@@ -272,24 +278,39 @@ function useSyncFiltersWithTable<TData>(
 
     // Use core utility to determine routing
     if (filterLogic.shouldUseGlobalFilter) {
-      table.resetColumnFilters()
+      // For OR logic, preserve faceted filters (array values) when resetting
+      const currentColumnFilters = table.getState().columnFilters
+      const facetedFilters = currentColumnFilters.filter(cf => {
+        const value = cf.value
+        return Array.isArray(value) // Faceted filters are arrays
+      })
 
+      // Reset and set only inline filters in globalFilter
+      table.setColumnFilters(facetedFilters) // Preserve faceted filters
       table.setGlobalFilter({
         filters: filterLogic.processedFilters,
         joinOperator: filterLogic.joinOperator,
       })
       if (process.env.NODE_ENV === "development") {
         console.log(
-          "[TableInline useSyncFiltersWithTable] Set globalFilter (OR/MIXED logic)",
+          "[TableInline useSyncFiltersWithTable] Set globalFilter (OR/MIXED logic), preserved faceted filters:",
           {
             hasOrFilters: filterLogic.hasOrFilters,
             hasSameColumnFilters: filterLogic.hasSameColumnFilters,
+            preservedFacetedFilters: facetedFilters.length,
           },
         )
       }
     } else {
+      // For AND logic, merge inline filters with existing faceted filters
+      const currentColumnFilters = table.getState().columnFilters
+      const facetedFilters = currentColumnFilters.filter(cf => {
+        const value = cf.value
+        return Array.isArray(value) // Faceted filters are arrays
+      })
+
       table.setGlobalFilter("")
-      const columnFilters = filterLogic.processedFilters.map(filter => ({
+      const inlineFilters = filterLogic.processedFilters.map(filter => ({
         id: filter.id,
         value: {
           operator: filter.operator,
@@ -299,10 +320,16 @@ function useSyncFiltersWithTable<TData>(
           joinOperator: filter.joinOperator,
         },
       }))
-      table.setColumnFilters(columnFilters)
+
+      // Combine faceted filters with inline filters
+      table.setColumnFilters([...facetedFilters, ...inlineFilters])
       if (process.env.NODE_ENV === "development") {
         console.log(
-          "[TableInline useSyncFiltersWithTable] Set columnFilters (AND logic)",
+          "[TableInline useSyncFiltersWithTable] Set columnFilters (preserved faceted filters):",
+          {
+            facetedFiltersCount: facetedFilters.length,
+            inlineFiltersCount: inlineFilters.length,
+          },
         )
       }
     }
@@ -357,9 +384,48 @@ export function TableInline<TData>({
     [controlledOnFiltersChange],
   )
 
+  // Get current column filters to check for faceted filters
+  // Create a stable key from faceted filter column IDs for reactivity
+  const columnFilters = table.getState().columnFilters
+
+  // Extract faceted filter dependency key (must be extracted for ESLint)
+  const facetedFilterDependencyKey = React.useMemo(
+    () =>
+      columnFilters
+        .filter(cf => Array.isArray(cf.value))
+        .map(cf => `${cf.id}:${Array.isArray(cf.value) ? cf.value.length : 0}`)
+        .sort()
+        .join("|"),
+    [columnFilters],
+  )
+
+  const facetedFilterColumnIds = React.useMemo(
+    () =>
+      columnFilters
+        .filter(cf => {
+          const value = cf.value
+          // Faceted filters are arrays (e.g., ["electronics", "clothing"])
+          // Inline filters are ExtendedColumnFilter objects with "operator" property
+          return Array.isArray(value)
+        })
+        .map(cf => cf.id)
+        .sort()
+        .join(","),
+    [columnFilters, facetedFilterDependencyKey],
+  )
+
+  const columnsWithFacetedFilters = React.useMemo(
+    () => new Set(facetedFilterColumnIds.split(",").filter(Boolean)),
+    [facetedFilterColumnIds],
+  )
+
   const columns = React.useMemo(
-    () => table.getAllColumns().filter(column => column.getCanFilter()),
-    [table],
+    () =>
+      table.getAllColumns().filter(
+        column =>
+          column.getCanFilter() && !columnsWithFacetedFilters.has(column.id), // Exclude columns with faceted filters
+      ),
+    [table, columnsWithFacetedFilters],
   )
 
   const [open, setOpen] = React.useState(false)

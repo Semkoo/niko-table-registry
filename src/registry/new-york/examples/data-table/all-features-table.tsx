@@ -567,30 +567,63 @@ export default function AllFeaturesTableExample() {
       )
   }, [globalFilter, columnFilters])
 
-  // Handler for filter menu
+  // Handler for filter menu - merges with existing faceted filters
+  //
+  // IMPORTANT: This handler preserves faceted filter values when filter menu filters change.
+  // Faceted filters store values as arrays: { id: "category", value: ["electronics"] }
+  // Filter menu filters store values as ExtendedColumnFilter objects: { id: "brand", value: { id: "brand", operator: "equals", ... } }
+  // This allows both filter types to work together without overwriting each other.
   const handleFiltersChange = useCallback(
     (filters: ExtendedColumnFilter<Product>[] | null) => {
+      // Helper to identify if a column filter is from filter menu (ExtendedColumnFilter) or faceted (array)
+      const isFilterMenuFilter = (cf: { id: string; value: unknown }) => {
+        const value = cf.value
+        return (
+          value &&
+          typeof value === "object" &&
+          "id" in value &&
+          "operator" in value &&
+          !Array.isArray(value)
+        )
+      }
+
       if (!filters || filters.length === 0) {
-        setColumnFilters([])
-        setGlobalFilter("")
+        // Only clear filter menu filters, preserve faceted filters
+        setColumnFilters(prev => prev.filter(cf => !isFilterMenuFilter(cf)))
+        // Only clear globalFilter if it's from filter menu (has filters object)
+        setGlobalFilter(prev => {
+          if (typeof prev === "object" && prev && "filters" in prev) {
+            return ""
+          }
+          return prev
+        })
       } else {
         const hasOrFilters = filters.some(
           (filter, index) => index > 0 && filter.joinOperator === "or",
         )
         if (hasOrFilters) {
-          setColumnFilters([])
+          // For OR logic, use globalFilter but preserve faceted filters in columnFilters
+          setColumnFilters(prev => prev.filter(cf => !isFilterMenuFilter(cf)))
           setGlobalFilter({
             filters,
             joinOperator: "mixed",
           })
         } else {
+          // For AND logic, merge filter menu filters with existing faceted filters
           setGlobalFilter("")
-          setColumnFilters(
-            filters.map(filter => ({
+          setColumnFilters(prev => {
+            // Get current faceted filters (not ExtendedColumnFilter objects)
+            const facetedFilters = prev.filter(cf => !isFilterMenuFilter(cf))
+
+            // Add filter menu filters
+            const filterMenuFilters = filters.map(filter => ({
               id: filter.id,
               value: filter,
-            })),
-          )
+            }))
+
+            // Combine both - faceted filters first, then filter menu filters
+            return [...facetedFilters, ...filterMenuFilters]
+          })
         }
       }
     },
