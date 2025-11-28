@@ -637,20 +637,6 @@ function AdvancedNuqsTableContent() {
     shallow: true,
   })
 
-  // Cache normalized filters to prevent unnecessary re-normalization
-  // This helps maintain stable references and prevent focus loss
-  const normalizedFiltersCacheRef = useRef<{
-    standard: ExtendedColumnFilter<Product>[]
-    inline: ExtendedColumnFilter<Product>[]
-    standardKey: string
-    inlineKey: string
-  }>({
-    standard: [],
-    inline: [],
-    standardKey: "",
-    inlineKey: "",
-  })
-
   // Get filter mode from URL
   const filterMode = (urlParams.filterMode || "standard") as
     | "standard"
@@ -1021,24 +1007,13 @@ function AdvancedNuqsTableContent() {
     return urlParams.filters
   }, [urlParams.filters, urlParams.globalFilter, filterMode])
 
-  // Memoize normalized filters with stable references to prevent focus loss
-  // Use a cache ref to maintain stable filter objects when content hasn't meaningfully changed
-  const normalizedStandardFilters = useMemo(() => {
-    const currentKey = JSON.stringify(currentStandardFilters)
-    // If filters haven't changed (by content), return cached version
-    if (
-      normalizedFiltersCacheRef.current.standardKey === currentKey &&
-      normalizedFiltersCacheRef.current.standard.length ===
-        currentStandardFilters.length
-    ) {
-      return normalizedFiltersCacheRef.current.standard
-    }
-    // Normalize and cache
-    const normalized = normalizeFiltersWithUniqueIds(currentStandardFilters)
-    normalizedFiltersCacheRef.current.standard = normalized
-    normalizedFiltersCacheRef.current.standardKey = currentKey
-    return normalized
-  }, [currentStandardFilters])
+  // Normalize filters to ensure they have unique filterIds
+  // The normalization function is deterministic (uses index-based IDs), so it produces
+  // stable results when filters haven't changed, preventing unnecessary re-renders
+  const normalizedStandardFilters = useMemo(
+    () => normalizeFiltersWithUniqueIds(currentStandardFilters),
+    [currentStandardFilters],
+  )
 
   // Extract current inline filters from URL state (handles both inlineFilters param and globalFilter)
   const currentInlineFilters = useMemo(() => {
@@ -1058,22 +1033,13 @@ function AdvancedNuqsTableContent() {
     return urlParams.inlineFilters
   }, [urlParams.inlineFilters, urlParams.globalFilter, filterMode])
 
-  const normalizedInlineFilters = useMemo(() => {
-    const currentKey = JSON.stringify(currentInlineFilters)
-    // If filters haven't changed (by content), return cached version
-    if (
-      normalizedFiltersCacheRef.current.inlineKey === currentKey &&
-      normalizedFiltersCacheRef.current.inline.length ===
-        currentInlineFilters.length
-    ) {
-      return normalizedFiltersCacheRef.current.inline
-    }
-    // Normalize and cache
-    const normalized = normalizeFiltersWithUniqueIds(currentInlineFilters)
-    normalizedFiltersCacheRef.current.inline = normalized
-    normalizedFiltersCacheRef.current.inlineKey = currentKey
-    return normalized
-  }, [currentInlineFilters])
+  // Normalize filters to ensure they have unique filterIds
+  // The normalization function is deterministic (uses index-based IDs), so it produces
+  // stable results when filters haven't changed, preventing unnecessary re-renders
+  const normalizedInlineFilters = useMemo(
+    () => normalizeFiltersWithUniqueIds(currentInlineFilters),
+    [currentInlineFilters],
+  )
 
   // Get current URL for display and monitor length
   const currentURL = useMemo(() => {
