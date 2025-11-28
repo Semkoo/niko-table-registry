@@ -327,6 +327,7 @@ function ServerSideTable() {
             sorting,
             globalFilter,
             columnFilters,
+            filterMode, // Include filterMode if you have filter modes
           ],
           queryFn: () =>
             fetchProducts({
@@ -367,6 +368,7 @@ function ServerSideTable() {
             sorting,
             globalFilter,
             columnFilters,
+            filterMode, // Include filterMode if you have filter modes
           ],
           queryFn: () =>
             fetchProducts({
@@ -402,6 +404,7 @@ function ServerSideTable() {
     sorting,
     globalFilter,
     columnFilters,
+    filterMode, // Add filterMode to dependencies if you use it
   ])
 
   return (
