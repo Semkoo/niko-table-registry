@@ -64,7 +64,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { getDefaultFilterOperator, getFilterOperators } from "../lib/data-table"
+import {
+  getDefaultFilterOperator,
+  getFilterOperators,
+  processFiltersForLogic,
+} from "../lib/data-table"
 import { formatDate } from "../lib/format"
 import { useKeyboardShortcut } from "../hooks"
 import { cn } from "@/lib/utils"
@@ -232,17 +236,10 @@ function useSyncFiltersWithTable<TData>(
   filters: ExtendedColumnFilter<TData>[],
   isControlled: boolean,
 ) {
-  const hasOrFilters = React.useMemo(
-    () =>
-      filters.some(
-        (filter, index) => index > 0 && filter.joinOperator === "or",
-      ),
+  // Use core utility to process filters and determine logic
+  const filterLogic = React.useMemo(
+    () => processFiltersForLogic(filters),
     [filters],
-  )
-
-  const joinOperatorForMeta = React.useMemo(
-    () => (hasOrFilters ? JOIN_OPERATORS.MIXED : JOIN_OPERATORS.AND),
-    [hasOrFilters],
   )
 
   // Update table meta (happens during render, safe mutation)
@@ -250,7 +247,7 @@ function useSyncFiltersWithTable<TData>(
     // eslint-disable-next-line react-hooks/immutability
     table.options.meta.hasIndividualJoinOperators = true
     // eslint-disable-next-line react-hooks/immutability
-    table.options.meta.joinOperator = joinOperatorForMeta
+    table.options.meta.joinOperator = filterLogic.joinOperator
   }
 
   // Sync with table state only when filters change (and not in controlled mode)
@@ -267,25 +264,32 @@ function useSyncFiltersWithTable<TData>(
     if (process.env.NODE_ENV === "development") {
       console.log("[TableInline useSyncFiltersWithTable] Syncing filters:", {
         filterCount: filters.length,
-        hasOrFilters,
-        joinOperator: joinOperatorForMeta,
+        hasOrFilters: filterLogic.hasOrFilters,
+        hasSameColumnFilters: filterLogic.hasSameColumnFilters,
+        joinOperator: filterLogic.joinOperator,
       })
     }
 
-    if (hasOrFilters) {
+    // Use core utility to determine routing
+    if (filterLogic.shouldUseGlobalFilter) {
       table.resetColumnFilters()
+
       table.setGlobalFilter({
-        filters,
-        joinOperator: JOIN_OPERATORS.MIXED,
+        filters: filterLogic.processedFilters,
+        joinOperator: filterLogic.joinOperator,
       })
       if (process.env.NODE_ENV === "development") {
         console.log(
           "[TableInline useSyncFiltersWithTable] Set globalFilter (OR/MIXED logic)",
+          {
+            hasOrFilters: filterLogic.hasOrFilters,
+            hasSameColumnFilters: filterLogic.hasSameColumnFilters,
+          },
         )
       }
     } else {
       table.setGlobalFilter("")
-      const columnFilters = filters.map(filter => ({
+      const columnFilters = filterLogic.processedFilters.map(filter => ({
         id: filter.id,
         value: {
           operator: filter.operator,
@@ -302,7 +306,7 @@ function useSyncFiltersWithTable<TData>(
         )
       }
     }
-  }, [filters, hasOrFilters, table, isControlled, joinOperatorForMeta])
+  }, [filters, filterLogic, table, isControlled])
 }
 
 export interface TableInlineProps<TData> extends React.ComponentProps<"div"> {

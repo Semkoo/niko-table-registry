@@ -6,7 +6,6 @@ import type {
   SortingState,
   ColumnFiltersState,
   VisibilityState,
-  Updater,
 } from "@tanstack/react-table"
 import {
   DataTableRoot,
@@ -21,12 +20,15 @@ import {
   DataTableEmptyBody,
 } from "@/components/data-table"
 import { TableColumnHeader } from "@/components/data-table/components"
-import { daysAgo } from "@/components/data-table/lib"
+import {
+  daysAgo,
+  JOIN_OPERATORS,
+  processFiltersForLogic,
+} from "@/components/data-table/lib"
 import type {
   DataTableColumnDef,
   ExtendedColumnFilter,
 } from "@/components/data-table/types"
-import { JOIN_OPERATORS } from "@/components/data-table/lib"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -388,42 +390,140 @@ export default function AdvancedInlineStateTableExample() {
     pageSize: 10,
   })
 
-  // Enhanced filter state for individual join operators
-  const [filters, setFilters] = useState<ExtendedColumnFilter<Product>[]>([])
+  // Extract current filters from table state (like advanced-state.tsx)
+  const currentFilters = useMemo(() => {
+    // Check if filters are in globalFilter (OR/MIXED logic)
+    if (
+      typeof globalFilter === "object" &&
+      globalFilter &&
+      "filters" in globalFilter
+    ) {
+      const filterObj = globalFilter as {
+        filters: ExtendedColumnFilter<Product>[]
+      }
+      return filterObj.filters || []
+    }
 
-  // Controlled filter handlers with useCallback for performance
+    // Otherwise extract from columnFilters (AND logic)
+    return columnFilters
+      .map(cf => cf.value)
+      .filter(
+        (v): v is ExtendedColumnFilter<Product> =>
+          v !== null && typeof v === "object" && "id" in v,
+      )
+  }, [globalFilter, columnFilters])
+
+  // Extract actual filter data for display - handles both columnFilters and OR filters in globalFilter
+  const displayFilters = useMemo(() => {
+    // For OR logic: filters are stored in globalFilter object
+    if (
+      typeof globalFilter === "object" &&
+      globalFilter &&
+      "filters" in globalFilter
+    ) {
+      const filterObj = globalFilter as {
+        filters: unknown[]
+        joinOperator: string
+      }
+      return filterObj.filters || []
+    }
+
+    // For AND logic: filters should be in columnFilters
+    return columnFilters
+  }, [columnFilters, globalFilter])
+
+  // Handler for filter changes - routes filters to globalFilter or columnFilters
+  // Uses the core utility function for consistent behavior
   const handleFiltersChange = useCallback(
-    (updater: Updater<ExtendedColumnFilter<Product>[] | null>) => {
-      if (typeof updater === "function") {
-        setFilters(current => updater(current) || [])
+    (filters: ExtendedColumnFilter<Product>[]) => {
+      if (!filters || filters.length === 0) {
+        // Clear all filters
+        setColumnFilters([])
+        setGlobalFilter("")
       } else {
-        setFilters(updater || [])
+        // Use core utility to process filters and determine routing
+        const result = processFiltersForLogic(filters)
+
+        if (result.shouldUseGlobalFilter) {
+          // Use globalFilter for OR/MIXED logic
+          setColumnFilters([])
+          setGlobalFilter({
+            filters: result.processedFilters,
+            joinOperator: result.joinOperator,
+          })
+        } else {
+          // Use columnFilters for AND logic
+          setGlobalFilter("")
+          setColumnFilters(
+            result.processedFilters.map(filter => ({
+              id: filter.id,
+              value: filter,
+            })),
+          )
+        }
       }
     },
     [],
   )
 
-  // Memoize current filter stats for performance
+  // Memoize current filter stats for performance (matches advanced-state.tsx logic)
   const filterStats = useMemo(() => {
-    const hasAndFilters = filters.some(
-      (filter, index) =>
-        index === 0 || filter.joinOperator === JOIN_OPERATORS.AND,
+    // Check if using OR logic (stored in globalFilter as object)
+    if (
+      typeof globalFilter === "object" &&
+      globalFilter &&
+      "filters" in globalFilter
+    ) {
+      const filterObj = globalFilter as {
+        filters: Array<{
+          joinOperator?: string
+          value?: unknown
+        }>
+        joinOperator: string
+      }
+      const filters = filterObj.filters || []
+
+      const hasAndFilters = filters.some(
+        (filter, index) =>
+          index === 0 || filter.joinOperator === JOIN_OPERATORS.AND,
+      )
+      const hasOrFilters = filters.some(
+        (filter, index) =>
+          index > 0 && filter.joinOperator === JOIN_OPERATORS.OR,
+      )
+
+      return {
+        totalFilters: filters.length,
+        hasAndFilters,
+        hasOrFilters,
+        effectiveJoinOperator: hasOrFilters
+          ? JOIN_OPERATORS.MIXED
+          : JOIN_OPERATORS.AND,
+        activeFilters: filters.filter(f => f.value && f.value !== "").length,
+      }
+    }
+
+    // For AND logic (stored in columnFilters)
+    const hasAndFilters = columnFilters.length > 0
+    const hasOrFilters = columnFilters.some(
+      filter =>
+        typeof filter.value === "object" &&
+        filter.value &&
+        "joinOperator" in filter.value &&
+        filter.value.joinOperator === "or",
     )
-    const hasOrFilters = filters.some(
-      (filter, index) => index > 0 && filter.joinOperator === JOIN_OPERATORS.OR,
-    )
-    const effectiveJoinOperator = hasOrFilters
-      ? JOIN_OPERATORS.MIXED
-      : JOIN_OPERATORS.AND
 
     return {
-      totalFilters: filters.length,
+      totalFilters: columnFilters.length,
       hasAndFilters,
       hasOrFilters,
-      effectiveJoinOperator,
-      activeFilters: filters.filter(f => f.value && f.value !== "").length,
+      effectiveJoinOperator: hasOrFilters
+        ? JOIN_OPERATORS.MIXED
+        : JOIN_OPERATORS.AND,
+      activeFilters: columnFilters.filter(f => f.value && f.value !== "")
+        .length,
     }
-  }, [filters])
+  }, [columnFilters, globalFilter])
 
   const resetAllState = () => {
     setGlobalFilter("")
@@ -431,7 +531,6 @@ export default function AdvancedInlineStateTableExample() {
     setColumnFilters([])
     setColumnVisibility({})
     setPagination({ pageIndex: 0, pageSize: 10 })
-    setFilters([])
   }
 
   return (
@@ -455,8 +554,8 @@ export default function AdvancedInlineStateTableExample() {
         onPaginationChange={setPagination}
       >
         <FilterToolbar
-          filters={filters}
-          onFiltersChange={filters => handleFiltersChange(filters)}
+          filters={currentFilters}
+          onFiltersChange={handleFiltersChange}
         />
         <DataTable>
           <DataTableHeader />
@@ -563,7 +662,9 @@ export default function AdvancedInlineStateTableExample() {
               <div>
                 <strong>Enhanced Filters:</strong>
                 <pre className="mt-1 overflow-auto rounded bg-muted p-2">
-                  {JSON.stringify(filters, null, 2)}
+                  {displayFilters.length > 0
+                    ? JSON.stringify(displayFilters, null, 2)
+                    : "No enhanced filters"}
                 </pre>
               </div>
               <div>

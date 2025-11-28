@@ -22,7 +22,11 @@ import {
   DataTableEmptyBody,
 } from "@/components/data-table"
 import { TableColumnHeader } from "@/components/data-table/components"
-import { daysAgo, JOIN_OPERATORS } from "@/components/data-table/lib"
+import {
+  daysAgo,
+  JOIN_OPERATORS,
+  processFiltersForLogic,
+} from "@/components/data-table/lib"
 import type {
   DataTableColumnDef,
   ExtendedColumnFilter,
@@ -577,6 +581,7 @@ export default function AdvancedStateTableExample() {
   }, [globalFilter, columnFilters])
 
   // Handler for filter menu - converts between ExtendedColumnFilter and table state
+  // Uses the core utility function for consistent behavior
   const handleFiltersChange = useCallback(
     (filters: ExtendedColumnFilter<Product>[] | null) => {
       if (!filters || filters.length === 0) {
@@ -584,23 +589,21 @@ export default function AdvancedStateTableExample() {
         setColumnFilters([])
         setGlobalFilter("")
       } else {
-        // Check if any filter has OR joinOperator
-        const hasOrFilters = filters.some(
-          (filter, index) => index > 0 && filter.joinOperator === "or",
-        )
+        // Use core utility to process filters and determine routing
+        const result = processFiltersForLogic(filters)
 
-        if (hasOrFilters) {
+        if (result.shouldUseGlobalFilter) {
           // Use globalFilter for OR/MIXED logic
           setColumnFilters([])
           setGlobalFilter({
-            filters,
-            joinOperator: "mixed",
+            filters: result.processedFilters,
+            joinOperator: result.joinOperator,
           })
         } else {
           // Use columnFilters for AND logic
           setGlobalFilter("")
           setColumnFilters(
-            filters.map(filter => ({
+            result.processedFilters.map(filter => ({
               id: filter.id,
               value: filter,
             })),
