@@ -173,7 +173,7 @@ export function DataTableProvider<TData>({
       typeof globalFilter === "string"
         ? globalFilter
         : globalFilter && typeof globalFilter === "object"
-          ? getObjectHash(globalFilter as Record<string, unknown>)
+          ? getObjectHash(globalFilter)
           : ""
 
     return {

@@ -99,6 +99,9 @@ export interface ExtendedColumnFilter<TData> {
   // You can extend with additional properties if needed
 }
 
+/** Global filter type */
+export type GlobalFilter = string | Record<string, unknown>
+
 /**
  * Extended column sort (for URL state management)
  */
