@@ -17,6 +17,17 @@
  * - Join operator in URL (?joinOperator=and)
  * - Browser back/forward navigation support
  * - React transitions for smooth updates
+ * - URL length monitoring with warnings (alerts at 1,500+ chars, critical at 1,900+ chars)
+ *
+ * URL Length Limits:
+ * - Chrome: ~2 MB (practical limit ~2,000 characters)
+ * - Firefox: ~65,000 characters
+ * - Safari: ~80,000 characters (more restrictive)
+ * - Social media/messaging apps may have much lower limits
+ *
+ * The component automatically monitors URL length and displays warnings when
+ * approaching limits. Consider reducing filters or simplifying state if URLs
+ * exceed 2,000 characters.
  *
  * IMPORTANT SETUP REQUIRED:
  * This component requires NuqsAdapter to be set up in your app:
@@ -66,7 +77,7 @@
  * Try it: Add filters, sort, paginate, then refresh the page or share the URL!
  */
 
-import { useState, useCallback, useMemo, useRef } from "react"
+import { useState, useCallback, useMemo, useRef, useEffect } from "react"
 import { NuqsAdapter } from "nuqs/adapters/react"
 import {
   parseAsInteger,
@@ -96,7 +107,11 @@ import {
   DataTableEmptyBody,
 } from "@/components/data-table"
 import { TableColumnHeader } from "@/components/data-table/components"
-import { daysAgo, JOIN_OPERATORS } from "@/components/data-table/lib"
+import {
+  daysAgo,
+  JOIN_OPERATORS,
+  processFiltersForLogic,
+} from "@/components/data-table/lib"
 import { serializeFiltersForUrl } from "@/components/data-table/filters/table-filter-menu"
 import type {
   DataTableColumnDef,
@@ -113,6 +128,8 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { AlertTriangle, Info } from "lucide-react"
 
 type Product = {
   id: string
@@ -522,6 +539,93 @@ const tableStateUrlKeys = {
   filterMode: "mode",
 }
 
+/**
+ * Normalize filters to ensure they have unique filterIds
+ * This is critical when loading filters from URL, as they may not have filterIds
+ * or may have duplicate IDs when multiple filters share the same column
+ */
+/**
+ * Normalize filters to ensure they have unique filterIds
+ * This is critical when loading filters from URL, as they may not have filterIds
+ * or may have duplicate IDs when multiple filters share the same column
+ *
+ * IMPORTANT: This function preserves filter object references when possible
+ * to prevent unnecessary re-renders and focus loss in input fields.
+ */
+function normalizeFiltersWithUniqueIds<TData>(
+  filters: (
+    | Omit<ExtendedColumnFilter<TData>, "filterId">
+    | ExtendedColumnFilter<TData>
+  )[],
+): ExtendedColumnFilter<TData>[] {
+  // Quick check: if all filters already have unique filterIds, return as-is
+  // This preserves object references and prevents unnecessary re-renders
+  const hasAllIds = filters.every(
+    (f): f is ExtendedColumnFilter<TData> => "filterId" in f && !!f.filterId,
+  )
+  if (hasAllIds) {
+    const ids = new Set(
+      filters.map(f => (f as ExtendedColumnFilter<TData>).filterId),
+    )
+    // If all IDs are unique, return filters unchanged (preserve references)
+    if (ids.size === filters.length) {
+      return filters as ExtendedColumnFilter<TData>[]
+    }
+  }
+
+  // Need to normalize - some filters missing IDs or have duplicates
+  const seenIds = new Set<string>()
+
+  return filters.map((filter, index) => {
+    // If filter already has a filterId, check if it's unique
+    if ("filterId" in filter && filter.filterId) {
+      // If this ID was already seen, regenerate it to ensure uniqueness
+      if (seenIds.has(filter.filterId)) {
+        // Generate a new unique ID based on index (not value) to keep it stable
+        const uniqueId = `filter-${filter.id}-${index}-dup${seenIds.size}`
+          .toLowerCase()
+          .replace(/[^a-z0-9-]/g, "-")
+          .replace(/-+/g, "-")
+          .substring(0, 100)
+
+        seenIds.add(uniqueId)
+        return {
+          ...filter,
+          filterId: uniqueId,
+        } as ExtendedColumnFilter<TData>
+      }
+
+      // ID is unique, preserve it (and the filter object reference)
+      seenIds.add(filter.filterId)
+      return filter as ExtendedColumnFilter<TData>
+    }
+
+    // Filter doesn't have a filterId, generate one
+    // IMPORTANT: Use index as the primary uniqueness factor, not value
+    // This ensures filterId stays stable when only the value changes,
+    // preventing React from treating it as a new filter and losing focus
+    const uniqueId = `filter-${filter.id}-${index}`
+      .toLowerCase()
+      .replace(/[^a-z0-9-]/g, "-")
+      .replace(/-+/g, "-")
+      .substring(0, 100)
+
+    // Ensure the generated ID is unique (in case of collisions)
+    let finalId = uniqueId
+    let counter = 0
+    while (seenIds.has(finalId)) {
+      finalId = `${uniqueId}-${counter}`
+      counter++
+    }
+
+    seenIds.add(finalId)
+    return {
+      ...filter,
+      filterId: finalId,
+    } as ExtendedColumnFilter<TData>
+  })
+}
+
 function AdvancedNuqsTableContent() {
   const [data] = useState<Product[]>(initialData)
 
@@ -533,32 +637,40 @@ function AdvancedNuqsTableContent() {
     shallow: true,
   })
 
+  // Cache normalized filters to prevent unnecessary re-normalization
+  // This helps maintain stable references and prevent focus loss
+  const normalizedFiltersCacheRef = useRef<{
+    standard: ExtendedColumnFilter<Product>[]
+    inline: ExtendedColumnFilter<Product>[]
+    standardKey: string
+    inlineKey: string
+  }>({
+    standard: [],
+    inline: [],
+    standardKey: "",
+    inlineKey: "",
+  })
+
   // Get filter mode from URL
   const filterMode = (urlParams.filterMode || "standard") as
     | "standard"
     | "inline"
 
   // Global filter from URL - handle both search string and OR filters
+  // Follow the same pattern as advanced-state.tsx: let filter components handle OR/MIXED detection
   const globalFilter = useMemo(() => {
-    // Check if current mode has OR filters
-    const currentFilters =
-      filterMode === "inline" ? urlParams.inlineFilters : urlParams.filters
-    const hasOrFilters = currentFilters.some(
-      (filter: ExtendedColumnFilter<Product>, index: number) =>
-        index > 0 && filter.joinOperator === JOIN_OPERATORS.OR,
-    )
-
-    // If we have OR filters, return the filters object for globalFilter
-    if (hasOrFilters && currentFilters.length > 0) {
-      return {
-        filters: currentFilters,
-        joinOperator: JOIN_OPERATORS.MIXED,
-      }
+    // If globalFilter is stored in URL as object (OR/MIXED logic), use it
+    if (
+      urlParams.globalFilter &&
+      typeof urlParams.globalFilter === "object" &&
+      "filters" in urlParams.globalFilter
+    ) {
+      return urlParams.globalFilter
     }
 
     // Otherwise return search string
     return urlParams.search
-  }, [filterMode, urlParams.filters, urlParams.inlineFilters, urlParams.search])
+  }, [urlParams.globalFilter, urlParams.search])
 
   // Convert URL state to TanStack Table format (using pageIndex from URL)
   const pagination: PaginationState = useMemo(
@@ -575,8 +687,7 @@ function AdvancedNuqsTableContent() {
   }, [urlParams.sort])
 
   // Standard mode filters - convert from URL format to ColumnFiltersState
-  // IMPORTANT: When filters are in globalFilter (OR/mixed logic), do NOT put them in columnFilters
-  // The globalFilterFn will handle them. columnFilters would apply AND logic and break OR filtering.
+  // Follow the same pattern as advanced-state.tsx
   const standardColumnFilters: ColumnFiltersState = useMemo(() => {
     // If globalFilter has OR/mixed filters, keep columnFilters EMPTY
     // The globalFilterFn will process the filters from globalFilter object
@@ -596,8 +707,7 @@ function AdvancedNuqsTableContent() {
   }, [urlParams.filters, globalFilter, filterMode])
 
   // Inline mode filters - convert from URL format to ColumnFiltersState
-  // IMPORTANT: When filters are in globalFilter (OR/mixed logic), do NOT put them in columnFilters
-  // The globalFilterFn will handle them. columnFilters would apply AND logic and break OR filtering.
+  // Follow the same pattern as advanced-state.tsx
   const inlineColumnFilters: ColumnFiltersState = useMemo(() => {
     // If globalFilter has OR/mixed filters, keep columnFilters EMPTY
     // The globalFilterFn will process the filters from globalFilter object
@@ -733,7 +843,7 @@ function AdvancedNuqsTableContent() {
   )
 
   // Direct filter change handlers - sync filter UI changes directly to URL
-  // These bypass table state and update URL immediately for better UX
+  // Follow the same pattern as advanced-state.tsx: check for OR operators and same-column filters
   const handleStandardFiltersChange = useCallback(
     (filters: ExtendedColumnFilter<Product>[] | null) => {
       // When clearing filters (null or empty array), also clear globalFilter and search
@@ -744,11 +854,27 @@ function AdvancedNuqsTableContent() {
           search: "",
         })
       } else {
+        // Use core utility to process filters and determine routing
+        const result = processFiltersForLogic(filters)
+
         // Exclude filterId from URL to keep URLs shorter
         const urlFilters = serializeFiltersForUrl(
-          filters,
+          result.processedFilters,
         ) as ExtendedColumnFilter<Product>[]
-        void setUrlParams({ filters: urlFilters })
+
+        if (result.shouldUseGlobalFilter) {
+          // Use globalFilter for OR/MIXED logic
+          void setUrlParams({
+            filters: [],
+            globalFilter: {
+              filters: urlFilters,
+              joinOperator: result.joinOperator,
+            },
+          })
+        } else {
+          // Use filters param for AND logic
+          void setUrlParams({ filters: urlFilters, globalFilter: "" })
+        }
       }
     },
     [setUrlParams],
@@ -764,11 +890,27 @@ function AdvancedNuqsTableContent() {
           search: "",
         })
       } else {
+        // Use core utility to process filters and determine routing
+        const result = processFiltersForLogic(filters)
+
         // Exclude filterId from URL to keep URLs shorter
         const urlFilters = serializeFiltersForUrl(
-          filters,
+          result.processedFilters,
         ) as ExtendedColumnFilter<Product>[]
-        void setUrlParams({ inlineFilters: urlFilters })
+
+        if (result.shouldUseGlobalFilter) {
+          // Use globalFilter for OR/MIXED logic
+          void setUrlParams({
+            inlineFilters: [],
+            globalFilter: {
+              filters: urlFilters,
+              joinOperator: result.joinOperator,
+            },
+          })
+        } else {
+          // Use inlineFilters param for AND logic
+          void setUrlParams({ inlineFilters: urlFilters, globalFilter: "" })
+        }
       }
     },
     [setUrlParams],
@@ -861,16 +1003,193 @@ function AdvancedNuqsTableContent() {
     })
   }, [setUrlParams])
 
-  // Get current URL for display
+  // Extract current filters from URL state (handles both filters param and globalFilter)
+  const currentStandardFilters = useMemo(() => {
+    // Check if filters are in globalFilter (OR/MIXED logic)
+    if (
+      urlParams.globalFilter &&
+      typeof urlParams.globalFilter === "object" &&
+      "filters" in urlParams.globalFilter &&
+      filterMode === "standard"
+    ) {
+      const filterObj = urlParams.globalFilter as {
+        filters: ExtendedColumnFilter<Product>[]
+      }
+      return filterObj.filters || []
+    }
+    // Otherwise use regular filters (AND logic)
+    return urlParams.filters
+  }, [urlParams.filters, urlParams.globalFilter, filterMode])
+
+  // Memoize normalized filters with stable references to prevent focus loss
+  // Use a cache ref to maintain stable filter objects when content hasn't meaningfully changed
+  const normalizedStandardFilters = useMemo(() => {
+    const currentKey = JSON.stringify(currentStandardFilters)
+    // If filters haven't changed (by content), return cached version
+    if (
+      normalizedFiltersCacheRef.current.standardKey === currentKey &&
+      normalizedFiltersCacheRef.current.standard.length ===
+        currentStandardFilters.length
+    ) {
+      return normalizedFiltersCacheRef.current.standard
+    }
+    // Normalize and cache
+    const normalized = normalizeFiltersWithUniqueIds(currentStandardFilters)
+    normalizedFiltersCacheRef.current.standard = normalized
+    normalizedFiltersCacheRef.current.standardKey = currentKey
+    return normalized
+  }, [currentStandardFilters])
+
+  // Extract current inline filters from URL state (handles both inlineFilters param and globalFilter)
+  const currentInlineFilters = useMemo(() => {
+    // Check if filters are in globalFilter (OR/MIXED logic)
+    if (
+      urlParams.globalFilter &&
+      typeof urlParams.globalFilter === "object" &&
+      "filters" in urlParams.globalFilter &&
+      filterMode === "inline"
+    ) {
+      const filterObj = urlParams.globalFilter as {
+        filters: ExtendedColumnFilter<Product>[]
+      }
+      return filterObj.filters || []
+    }
+    // Otherwise use regular inline filters (AND logic)
+    return urlParams.inlineFilters
+  }, [urlParams.inlineFilters, urlParams.globalFilter, filterMode])
+
+  const normalizedInlineFilters = useMemo(() => {
+    const currentKey = JSON.stringify(currentInlineFilters)
+    // If filters haven't changed (by content), return cached version
+    if (
+      normalizedFiltersCacheRef.current.inlineKey === currentKey &&
+      normalizedFiltersCacheRef.current.inline.length ===
+        currentInlineFilters.length
+    ) {
+      return normalizedFiltersCacheRef.current.inline
+    }
+    // Normalize and cache
+    const normalized = normalizeFiltersWithUniqueIds(currentInlineFilters)
+    normalizedFiltersCacheRef.current.inline = normalized
+    normalizedFiltersCacheRef.current.inlineKey = currentKey
+    return normalized
+  }, [currentInlineFilters])
+
+  // Get current URL for display and monitor length
   const currentURL = useMemo(() => {
     if (typeof window !== "undefined") {
       return window.location.href
     }
     return ""
-  }, [])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [urlParams])
+
+  // Calculate URL length (full URL including query params)
+  const urlLength = useMemo(() => {
+    return currentURL.length
+  }, [currentURL])
+
+  // URL length thresholds
+  const URL_LENGTH_WARNING = 1500 // Warning threshold (75% of 2000)
+  const URL_LENGTH_CRITICAL = 1900 // Critical threshold (95% of 2000)
+
+  // Determine alert state
+  const urlLengthStatus = useMemo(() => {
+    if (urlLength >= URL_LENGTH_CRITICAL) {
+      return "critical" as const
+    }
+    if (urlLength >= URL_LENGTH_WARNING) {
+      return "warning" as const
+    }
+    return "ok" as const
+  }, [urlLength])
+
+  // Track previous status to show/hide alert with delay
+  const prevStatusRef = useRef<typeof urlLengthStatus>("ok")
+  const [showUrlLengthAlert, setShowUrlLengthAlert] = useState(false)
+
+  useEffect(() => {
+    // Show alert immediately when status becomes warning/critical
+    if (urlLengthStatus !== "ok" && prevStatusRef.current === "ok") {
+      setShowUrlLengthAlert(true)
+    }
+    // Hide alert with delay when status returns to ok
+    if (urlLengthStatus === "ok" && prevStatusRef.current !== "ok") {
+      const timer = setTimeout(() => {
+        setShowUrlLengthAlert(false)
+      }, 3000)
+      prevStatusRef.current = urlLengthStatus
+      return () => clearTimeout(timer)
+    }
+    prevStatusRef.current = urlLengthStatus
+  }, [urlLengthStatus])
 
   return (
     <div className="w-full space-y-4">
+      {/* URL Length Warning Alert */}
+      {showUrlLengthAlert && urlLengthStatus !== "ok" && (
+        <Alert
+          variant={urlLengthStatus === "critical" ? "destructive" : "default"}
+          className={
+            urlLengthStatus === "critical"
+              ? "border-orange-500 bg-orange-50 dark:bg-orange-950"
+              : "border-yellow-500 bg-yellow-50 dark:bg-yellow-950"
+          }
+        >
+          {urlLengthStatus === "critical" ? (
+            <AlertTriangle className="text-orange-600 dark:text-orange-400" />
+          ) : (
+            <Info className="text-yellow-600 dark:text-yellow-400" />
+          )}
+          <AlertTitle className="text-orange-900 dark:text-orange-100">
+            {urlLengthStatus === "critical"
+              ? "URL Length Approaching Limit"
+              : "URL Length Warning"}
+          </AlertTitle>
+          <AlertDescription
+            className={
+              urlLengthStatus === "critical"
+                ? "text-orange-800 dark:text-orange-200"
+                : "text-yellow-800 dark:text-yellow-200"
+            }
+          >
+            <p className="mb-2">
+              Your URL is currently <strong>{urlLength} characters</strong>{" "}
+              long.
+              {urlLengthStatus === "critical" ? (
+                <>
+                  {" "}
+                  You&apos;re approaching the practical limit of ~2,000
+                  characters. Some browsers or sharing platforms may truncate or
+                  break the URL.
+                </>
+              ) : (
+                <>
+                  {" "}
+                  Consider reducing the number of filters or simplifying your
+                  search criteria to keep URLs shareable.
+                </>
+              )}
+            </p>
+            <div className="mt-2 space-y-1 text-xs">
+              <p>
+                <strong>Browser Limits:</strong>
+              </p>
+              <ul className="list-inside list-disc space-y-0.5">
+                <li>Chrome: ~2 MB (practical limit ~2,000 chars)</li>
+                <li>Firefox: ~65,000 characters</li>
+                <li>Safari: ~80,000 characters (more restrictive)</li>
+              </ul>
+              <p className="mt-2">
+                <strong>Tip:</strong> Remove some filters or clear the search to
+                shorten the URL. Not all application state should be stored in
+                URLs.
+              </p>
+            </div>
+          </AlertDescription>
+        </Alert>
+      )}
+
       <div className="space-y-4">
         <Tabs
           value={filterMode}
@@ -918,7 +1237,7 @@ function AdvancedNuqsTableContent() {
               onPaginationChange={handlePaginationChange}
             >
               <StandardFilterToolbar
-                filters={urlParams.filters}
+                filters={normalizedStandardFilters}
                 onFiltersChange={handleStandardFiltersChange}
               />
               <DataTable>
@@ -949,7 +1268,7 @@ function AdvancedNuqsTableContent() {
               onPaginationChange={handlePaginationChange}
             >
               <InlineFilterToolbar
-                filters={urlParams.inlineFilters}
+                filters={normalizedInlineFilters}
                 onFiltersChange={handleInlineFiltersChange}
               />
               <DataTable>
@@ -984,6 +1303,25 @@ function AdvancedNuqsTableContent() {
               <code className="rounded bg-muted px-2 py-1 text-xs">
                 {currentURL.split("?")[1] || "No query params"}
               </code>
+            </div>
+
+            <div className="flex justify-between">
+              <span className="font-medium">URL Length:</span>
+              <span
+                className={`text-foreground ${
+                  urlLength >= URL_LENGTH_CRITICAL
+                    ? "font-bold text-orange-600 dark:text-orange-400"
+                    : urlLength >= URL_LENGTH_WARNING
+                      ? "font-semibold text-yellow-600 dark:text-yellow-400"
+                      : ""
+                }`}
+              >
+                {urlLength} chars
+                {urlLength >= URL_LENGTH_CRITICAL && " ⚠️ Critical"}
+                {urlLength >= URL_LENGTH_WARNING &&
+                  urlLength < URL_LENGTH_CRITICAL &&
+                  " ⚠️ Warning"}
+              </span>
             </div>
 
             <div className="flex justify-between">

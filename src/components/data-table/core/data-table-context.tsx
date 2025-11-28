@@ -168,8 +168,16 @@ export function DataTableProvider<TData>({
 
     const paginationKey = `${pagination.pageIndex ?? 0}:${pagination.pageSize ?? 0}`
 
+    // Handle globalFilter - can be string or object (for complex filters)
+    const globalFilterHash =
+      typeof globalFilter === "string"
+        ? globalFilter
+        : globalFilter && typeof globalFilter === "object"
+          ? getObjectHash(globalFilter as Record<string, unknown>)
+          : ""
+
     return {
-      globalFilter: typeof globalFilter === "string" ? globalFilter : "",
+      globalFilter: globalFilterHash,
       sortingLength: sorting?.length ?? 0,
       columnFiltersLength: columnFilters?.length ?? 0,
       columnVisibilityHash: getObjectHash(

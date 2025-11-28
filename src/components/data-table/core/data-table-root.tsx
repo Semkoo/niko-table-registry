@@ -263,7 +263,7 @@ function DataTableRootInternal<TData, TValue>({
   }, [finalConfig])
 
   // State management
-  const [globalFilter, setGlobalFilter] = React.useState<string>(
+  const [globalFilter, setGlobalFilter] = React.useState<string | object>(
     rest.initialState?.globalFilter ?? "",
   )
   const [rowSelection, setRowSelection] = React.useState<RowSelectionState>(
@@ -306,8 +306,8 @@ function DataTableRootInternal<TData, TValue>({
   const handleGlobalFilterChange = React.useCallback(
     (value: string | object) => {
       // Always update local state to keep it in sync with table
-      const filterValue = typeof value === "string" ? value : ""
-      setGlobalFilter(filterValue)
+      // Preserve both string and object values (object values are used for complex filters)
+      setGlobalFilter(value)
 
       // Also call external handler if provided
       onGlobalFilterChange?.(value)
