@@ -21,6 +21,26 @@ export interface TablePaginationProps<TData> {
    * External loading state (e.g., from API)
    */
   isLoading?: boolean
+  /**
+   * External fetching state (e.g., from TanStack Query).
+   * Used for displaying loading indicators, but doesn't disable pagination by default.
+   */
+  isFetching?: boolean
+  /**
+   * Explicitly disable the next page button.
+   * Useful when you want to prevent navigation during initial load but allow it during background fetching.
+   */
+  disableNextPage?: boolean
+  /**
+   * Explicitly disable the previous page button.
+   * Useful when you want to prevent navigation during initial load but allow it during background fetching.
+   */
+  disablePreviousPage?: boolean
+  /**
+   * Total count of items from server (for server-side pagination).
+   * If provided, this will be used instead of table.getFilteredRowModel().rows.length
+   */
+  totalCount?: number
   onPageSizeChange?: (pageSize: number, pageIndex: number) => void
   onPageChange?: (pageIndex: number) => void
   onNextPage?: (pageIndex: number) => void
@@ -35,6 +55,9 @@ export function TablePagination<TData>({
   pageSizeOptions = [10, 25, 50, 100],
   defaultPageSize = pageSizeOptions[0],
   isLoading,
+  disableNextPage,
+  disablePreviousPage,
+  totalCount,
   onPageSizeChange,
   onPageChange,
   onNextPage,
@@ -43,11 +66,18 @@ export function TablePagination<TData>({
 }: TablePaginationProps<TData>) {
   const { pageIndex, pageSize } = table.getState().pagination
 
-  const totalRows = table.getFilteredRowModel().rows.length
+  // Use totalCount if provided (server-side), otherwise use filtered row model (client-side)
+  const totalRows = totalCount ?? table.getFilteredRowModel().rows.length
   const startItem = totalRows === 0 ? 0 : pageIndex * pageSize + 1
   const endItem = Math.min((pageIndex + 1) * pageSize, totalRows)
   const totalPages = table.getPageCount()
   const currentPage = pageIndex + 1
+
+  // Determine if buttons should be disabled
+  // Default to isLoading for initial load, but allow explicit overrides
+  const canGoNext = !disableNextPage && !isLoading && table.getCanNextPage()
+  const canGoPrevious =
+    !disablePreviousPage && !isLoading && table.getCanPreviousPage()
 
   // Set default page size on initial render
   React.useEffect(() => {
@@ -160,8 +190,10 @@ export function TablePagination<TData>({
                 }
               }
             }}
-            className="w-12"
-            // inputClassName="h-8 text-center px-1"
+            className="h-8 min-w-12 text-center"
+            style={{
+              width: `${Math.max(String(totalPages).length, 2) + 1}ch`,
+            }}
             disabled={totalPages === 0 || isLoading}
             aria-label={`Page ${currentPage} of ${totalPages}`}
           />
@@ -178,7 +210,7 @@ export function TablePagination<TData>({
               table.previousPage()
               onPreviousPage?.(newPageIndex)
             }}
-            disabled={!table.getCanPreviousPage() || isLoading}
+            disabled={!canGoPrevious}
             aria-label={`Go to previous page, page ${pageIndex}`}
             title="Go to previous page"
           >
@@ -193,7 +225,7 @@ export function TablePagination<TData>({
               table.nextPage()
               onNextPage?.(newPageIndex)
             }}
-            disabled={!table.getCanNextPage() || isLoading}
+            disabled={!canGoNext}
             aria-label={`Go to next page, page ${pageIndex + 2}`}
             title="Go to next page"
           >

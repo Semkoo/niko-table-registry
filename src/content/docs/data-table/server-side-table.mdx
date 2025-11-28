@@ -1,0 +1,591 @@
+---
+title: Server-Side Table
+description: Server-side pagination, sorting, and filtering with TanStack Query for efficient data fetching and caching.
+---
+
+import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
+
+<CodePreview demo="data-table/server-side-state" />
+
+## Introduction
+
+The Server-Side Table demonstrates server-side pagination, sorting, and filtering using [TanStack Query](https://tanstack.com/query/latest) for efficient data fetching, caching, and state management. This example shows how to handle large datasets by fetching data from a server with automatic caching, background updates, and request deduplication. State is managed with React `useState` and does NOT persist across page refreshes.
+
+## Installation
+
+1. Add the required components:
+
+```bash
+npx shadcn@latest add table input button dropdown-menu popover command checkbox select scroll-area separator skeleton tooltip
+```
+
+2. Add dependencies:
+
+```bash
+npm install @tanstack/react-table @tanstack/react-query
+```
+
+**Note:** [TanStack Query](https://tanstack.com/query/latest) provides powerful asynchronous state management, server-state utilities, and data fetching capabilities. It handles caching, background updates, and stale data out of the box with zero-configuration.
+
+**Required: Sortable Component**
+
+This example uses `DataTableSortMenu` and `DataTableFilterMenu` which require the Sortable component for drag-and-drop reordering. Follow the [DiceUI Sortable installation guide](https://www.diceui.com/docs/components/sortable).
+
+3. Copy the DataTable components into your project. See the [Installation Guide](/getting-started/installation) for detailed instructions.
+
+## Setup
+
+Before using the Server-Side Table, you need to wrap your app with `QueryClientProvider`. Follow the setup instructions based on your framework:
+
+### Next.js App Router
+
+Wrap `{children}` in `app/layout.tsx`:
+
+```tsx
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 60 * 1000, // 1 minute
+      refetchOnWindowFocus: false,
+    },
+  },
+})
+
+export default function RootLayout({ children }) {
+  return (
+    <html>
+      <body>
+        <QueryClientProvider client={queryClient}>
+          {children}
+        </QueryClientProvider>
+      </body>
+    </html>
+  )
+}
+```
+
+### Next.js Pages Router
+
+Wrap `<Component>` in `pages/_app.tsx`:
+
+```tsx
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 60 * 1000,
+      refetchOnWindowFocus: false,
+    },
+  },
+})
+
+export default function App({ Component, pageProps }) {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <Component {...pageProps} />
+    </QueryClientProvider>
+  )
+}
+```
+
+### React SPA (Vite, CRA, etc.)
+
+Wrap `<App />` in `src/main.tsx`:
+
+```tsx
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 60 * 1000,
+      refetchOnWindowFocus: false,
+    },
+  },
+})
+
+createRoot(document.getElementById("root")!).render(
+  <QueryClientProvider client={queryClient}>
+    <App />
+  </QueryClientProvider>,
+)
+```
+
+## Prerequisites
+
+We are going to build a table with server-side data fetching. Here's what our data structure looks like:
+
+```tsx showLineNumbers
+type Product = {
+  id: string
+  name: string
+  category: string
+  brand: string
+  price: number
+  stock: number
+  rating: number
+  inStock: boolean
+  releaseDate: Date
+}
+```
+
+## Server-Side Data Fetching
+
+The example uses TanStack Query's `useQuery` hook to fetch data from a server. The query automatically refetches when pagination, sorting, or filters change.
+
+### API Function
+
+First, create a function that fetches data from your server:
+
+```tsx showLineNumbers title="api.ts"
+type ServerResponse<T> = {
+  data: T[]
+  total: number
+  page: number
+  pageSize: number
+}
+
+type FetchParams = {
+  page: number
+  pageSize: number
+  sorting: SortingState
+  globalFilter: string | object
+  columnFilters: ColumnFiltersState
+}
+
+async function fetchProducts(
+  params: FetchParams,
+): Promise<ServerResponse<Product>> {
+  // Build query string from params
+  const queryParams = new URLSearchParams({
+    page: params.page.toString(),
+    pageSize: params.pageSize.toString(),
+    sort: JSON.stringify(params.sorting),
+    filters: JSON.stringify(params.columnFilters),
+    search: typeof params.globalFilter === "string" ? params.globalFilter : "",
+  })
+
+  const response = await fetch(`/api/products?${queryParams}`)
+  if (!response.ok) {
+    throw new Error("Failed to fetch products")
+  }
+
+  return response.json()
+}
+```
+
+### Using TanStack Query
+
+Use `useQuery` to fetch data with automatic caching and refetching:
+
+```tsx showLineNumbers title="server-side-state.tsx"
+import { useState } from "react"
+import { useQuery, keepPreviousData } from "@tanstack/react-query"
+import type { SortingState, ColumnFiltersState } from "@tanstack/react-table"
+
+function ServerSideTable() {
+  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 })
+  const [sorting, setSorting] = useState<SortingState>([])
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+  const [globalFilter, setGlobalFilter] = useState<string | object>("")
+
+  const { data, isLoading, error } = useQuery({
+    queryKey: [
+      "products",
+      pagination.pageIndex,
+      pagination.pageSize,
+      sorting,
+      globalFilter,
+      columnFilters,
+    ],
+    queryFn: () =>
+      fetchProducts({
+        page: pagination.pageIndex,
+        pageSize: pagination.pageSize,
+        sorting,
+        globalFilter,
+        columnFilters,
+      }),
+    staleTime: 30000, // Consider data fresh for 30 seconds
+    gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
+    placeholderData: keepPreviousData, // Keep previous data visible during pagination
+  })
+
+  const products = data?.data ?? []
+  const totalCount = data?.total ?? 0
+
+  return (
+    <DataTableRoot
+      data={products}
+      columns={columns}
+      isLoading={isLoading}
+      config={{
+        manualPagination: true,
+        manualFiltering: true,
+        manualSorting: true,
+        pageCount: Math.ceil(totalCount / pagination.pageSize),
+      }}
+      state={{
+        pagination,
+        sorting,
+        columnFilters,
+        globalFilter,
+      }}
+      onPaginationChange={setPagination}
+      onSortingChange={setSorting}
+      onColumnFiltersChange={setColumnFilters}
+      onGlobalFilterChange={setGlobalFilter}
+    >
+      {/* Table components */}
+    </DataTableRoot>
+  )
+}
+```
+
+## Key Features
+
+### Automatic Caching
+
+TanStack Query automatically caches query results. When you navigate between pages and come back, the data is served from cache instantly.
+
+### Background Refetching
+
+Data is automatically refetched in the background when it becomes stale, keeping your UI up-to-date without user intervention.
+
+### Request Deduplication
+
+Multiple components requesting the same data will share a single request, reducing server load.
+
+### Loading States
+
+TanStack Query provides `isLoading` and `isFetching` states:
+
+- `isLoading`: True on initial load (no cached data)
+- `isFetching`: True whenever a request is in progress (including background refetches)
+
+```tsx showLineNumbers
+const { data, isLoading, isFetching } = useQuery({ ... })
+
+// Show skeleton on initial load
+{isLoading && <DataTableSkeleton rows={10} />}
+
+// Show subtle indicator during background refetch
+{isFetching && !isLoading && <LoadingIndicator />}
+```
+
+### Prefetching Next/Previous Pages
+
+To improve navigation performance, you can prefetch adjacent pages in the background. This makes page transitions feel instant when users navigate. You can also track prefetching state to show visual feedback to users:
+
+```tsx showLineNumbers
+import { useQueryClient } from "@tanstack/react-query"
+import { useEffect, useState, useRef } from "react"
+import { Loader2 } from "lucide-react"
+
+function ServerSideTable() {
+  const queryClient = useQueryClient()
+  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 })
+  // ... other state
+
+  // Track prefetching state for UI feedback
+  const [prefetchingState, setPrefetchingState] = useState<{
+    next: boolean
+    previous: boolean
+  }>({ next: false, previous: false })
+  const effectRunRef = useRef(0)
+
+  // Prefetch next and previous pages
+  useEffect(() => {
+    const totalPages = Math.ceil(totalCount / pagination.pageSize)
+    const currentPage = pagination.pageIndex
+    const currentRun = ++effectRunRef.current
+
+    // Reset prefetching state at the start of each effect run
+    setTimeout(() => {
+      if (currentRun === effectRunRef.current) {
+        setPrefetchingState({ next: false, previous: false })
+      }
+    }, 0)
+
+    // Prefetch next page if it exists
+    if (currentPage + 1 < totalPages) {
+      setTimeout(() => {
+        if (currentRun === effectRunRef.current) {
+          setPrefetchingState(prev => ({ ...prev, next: true }))
+        }
+      }, 0)
+
+      queryClient
+        .prefetchQuery({
+          queryKey: [
+            "products",
+            currentPage + 1,
+            pagination.pageSize,
+            sorting,
+            globalFilter,
+            columnFilters,
+            filterMode, // Include filterMode if you have filter modes
+          ],
+          queryFn: () =>
+            fetchProducts({
+              page: currentPage + 1,
+              pageSize: pagination.pageSize,
+              sorting,
+              globalFilter,
+              columnFilters,
+            }),
+          staleTime: 30000,
+        })
+        .then(() => {
+          if (currentRun === effectRunRef.current) {
+            setPrefetchingState(prev => ({ ...prev, next: false }))
+          }
+        })
+        .catch(() => {
+          if (currentRun === effectRunRef.current) {
+            setPrefetchingState(prev => ({ ...prev, next: false }))
+          }
+        })
+    }
+
+    // Prefetch previous page if it exists
+    if (currentPage > 0) {
+      setTimeout(() => {
+        if (currentRun === effectRunRef.current) {
+          setPrefetchingState(prev => ({ ...prev, previous: true }))
+        }
+      }, 0)
+
+      queryClient
+        .prefetchQuery({
+          queryKey: [
+            "products",
+            currentPage - 1,
+            pagination.pageSize,
+            sorting,
+            globalFilter,
+            columnFilters,
+            filterMode, // Include filterMode if you have filter modes
+          ],
+          queryFn: () =>
+            fetchProducts({
+              page: currentPage - 1,
+              pageSize: pagination.pageSize,
+              sorting,
+              globalFilter,
+              columnFilters,
+            }),
+          staleTime: 30000,
+        })
+        .then(() => {
+          if (currentRun === effectRunRef.current) {
+            setPrefetchingState(prev => ({ ...prev, previous: false }))
+          }
+        })
+        .catch(() => {
+          if (currentRun === effectRunRef.current) {
+            setPrefetchingState(prev => ({ ...prev, previous: false }))
+          }
+        })
+    }
+
+    // Cleanup function: reset state if effect re-runs
+    return () => {
+      setPrefetchingState({ next: false, previous: false })
+    }
+  }, [
+    queryClient,
+    pagination.pageIndex,
+    pagination.pageSize,
+    totalCount,
+    sorting,
+    globalFilter,
+    columnFilters,
+    filterMode, // Add filterMode to dependencies if you use it
+  ])
+
+  return (
+    <div>
+      {/* Show prefetching indicators */}
+      {prefetchingState.next && (
+        <div className="flex items-center gap-2 rounded-lg border bg-muted/30 p-2 text-xs">
+          <Loader2 className="h-3 w-3 animate-spin" />
+          <span className="text-muted-foreground">
+            Prefetching next page...
+          </span>
+        </div>
+      )}
+      {prefetchingState.previous && (
+        <div className="flex items-center gap-2 rounded-lg border bg-muted/30 p-2 text-xs">
+          <Loader2 className="h-3 w-3 animate-spin" />
+          <span className="text-muted-foreground">
+            Prefetching previous page...
+          </span>
+        </div>
+      )}
+
+      {/* Table components */}
+    </div>
+  )
+}
+```
+
+**Key points about prefetching:**
+
+- **State tracking**: Use a ref (`effectRunRef`) to track effect runs and prevent state updates from stale prefetch operations
+- **State reset**: Reset prefetching state at the start of each effect run to prevent stuck indicators
+- **Error handling**: Always reset state in `.catch()` handlers to prevent stuck indicators on errors
+- **Cleanup**: Reset state in the cleanup function when dependencies change
+
+With prefetching enabled, navigation between pages feels instant because the data is already cached. The pagination buttons remain enabled during background fetching, allowing users to navigate to prefetched pages immediately. The prefetching indicators provide visual feedback so users know when background loading is happening.
+
+### Error Handling
+
+TanStack Query provides error states and retry logic:
+
+```tsx showLineNumbers
+const { data, error, isError } = useQuery({
+  queryKey: ['products', ...],
+  queryFn: fetchProducts,
+  retry: 1, // Retry failed requests once
+})
+
+if (isError) {
+  return <ErrorDisplay error={error} />
+}
+```
+
+## State Management
+
+This example uses React `useState` for state management. State does NOT persist across page refreshes. If you need URL state persistence, see the [Server-Side Nuqs Table](/data-table/server-side-nuqs-table) example.
+
+```tsx showLineNumbers
+function ServerSideTable() {
+  // State management with useState
+  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 })
+  const [sorting, setSorting] = useState<SortingState>([])
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+  const [globalFilter, setGlobalFilter] = useState<string | object>('')
+
+  // Use TanStack Query for data fetching
+  const { data, isLoading } = useQuery({
+    queryKey: ['products', pagination, sorting, globalFilter, columnFilters],
+    queryFn: () => fetchProducts({ ... }),
+  })
+
+  // ... rest of component
+}
+```
+
+## Manual Pagination, Sorting, and Filtering
+
+When using server-side operations, you need to enable manual modes:
+
+```tsx showLineNumbers
+<DataTableRoot
+  config={{
+    manualPagination: true, // Server handles pagination
+    manualSorting: true, // Server handles sorting
+    manualFiltering: true, // Server handles filtering
+    pageCount: totalPages, // Total pages from server
+  }}
+/>
+```
+
+## Query Key Strategy
+
+The query key should include all parameters that affect the data:
+
+```tsx showLineNumbers
+const queryKey = [
+  "products", // Resource name
+  pagination.pageIndex, // Page number
+  pagination.pageSize, // Page size
+  sorting, // Sort configuration
+  globalFilter, // Search query
+  columnFilters, // Column filters
+]
+```
+
+This ensures that:
+
+- Different pages have separate cache entries
+- Changing filters invalidates and refetches data
+- Browser back/forward navigation uses cached data
+
+## Optimistic Updates
+
+You can use TanStack Query mutations for optimistic updates:
+
+```tsx showLineNumbers
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+
+function useUpdateProduct() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: updateProduct,
+    onMutate: async newProduct => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ["products"] })
+
+      // Snapshot previous value
+      const previousProducts = queryClient.getQueryData(["products"])
+
+      // Optimistically update
+      queryClient.setQueryData(["products"], old => ({
+        ...old,
+        data: old.data.map(p => (p.id === newProduct.id ? newProduct : p)),
+      }))
+
+      return { previousProducts }
+    },
+    onError: (err, newProduct, context) => {
+      // Rollback on error
+      queryClient.setQueryData(["products"], context.previousProducts)
+    },
+    onSettled: () => {
+      // Refetch after mutation
+      queryClient.invalidateQueries({ queryKey: ["products"] })
+    },
+  })
+}
+```
+
+## When to Use
+
+**✅ Use Server-Side Table when:**
+
+- Working with large datasets (thousands+ rows)
+- Data needs to be fetched from an API
+- You want automatic caching and background updates
+- You need request deduplication
+- You want optimistic updates
+- You need error handling and retry logic
+- You don't need URL state persistence
+
+**❌ Consider other options when:**
+
+- Working with small datasets (< 1000 rows) - use client-side filtering
+- Data is static or rarely changes - simple state management may suffice
+- You need URL state persistence - use [Server-Side Nuqs Table](/data-table/server-side-nuqs-table)
+- You need bookmarkable/shareable table views - use [Server-Side Nuqs Table](/data-table/server-side-nuqs-table)
+
+## Best Practices
+
+1. **Set appropriate stale times**: Balance freshness with performance
+2. **Use query invalidation**: Invalidate queries after mutations
+3. **Implement proper error handling**: Show user-friendly error messages
+4. **Optimize query keys**: Include all parameters that affect data
+5. **Use loading states**: Show skeletons during initial load
+6. **Handle pagination**: Reset to page 1 when filters change
+7. **Use `placeholderData: keepPreviousData`**: Prevents UI jumps during pagination
+
+## Next Steps
+
+- [Advanced Table](/data-table/advanced-table) - Learn about advanced filtering
+- [Server-Side Nuqs Table](/data-table/server-side-nuqs-table) - Add URL state persistence
+- [TanStack Query Docs](https://tanstack.com/query/latest) - Learn more about TanStack Query
