@@ -31,6 +31,9 @@ importers:
       "@expressive-code/plugin-line-numbers":
         specifier: ^0.41.3
         version: 0.41.3
+      "@faker-js/faker":
+        specifier: ^9.9.0
+        version: 9.9.0
       "@fontsource/geist-mono":
         specifier: ^5.2.7
         version: 5.2.7
@@ -121,6 +124,9 @@ importers:
       "@tailwindcss/vite":
         specifier: ^4.1.17
         version: 4.1.17(vite@7.2.4(@types/node@24.10.1)(jiti@2.6.1)(lightningcss@1.30.2)(yaml@2.8.1))
+      "@tanstack/react-query":
+        specifier: ^5.90.11
+        version: 5.90.11(react@19.2.0)
       "@tanstack/react-table":
         specifier: ^8.21.3
         version: 8.21.3(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
@@ -1113,6 +1119,13 @@ packages:
       {
         integrity: sha512-SN8tkIzDpA0HLAscEYD2IVrfLiid6qEdE9QLlGVSxO1KEw7qYvjpbNBQjUjMr5/jvTJ7ys6zysU2vLPHE0sb2g==,
       }
+
+  "@faker-js/faker@9.9.0":
+    resolution:
+      {
+        integrity: sha512-OEl393iCOoo/z8bMezRlJu+GlRGlsKbUAN7jKB6LhnKoqKve5DXRpalbItIIcwnCjs1k/FOPjFzcA6Qn+H+YbA==,
+      }
+    engines: { node: ">=18.0.0", npm: ">=9.0.0" }
 
   "@floating-ui/core@1.7.3":
     resolution:
@@ -2879,6 +2892,20 @@ packages:
       }
     peerDependencies:
       vite: ^5.2.0 || ^6 || ^7
+
+  "@tanstack/query-core@5.90.11":
+    resolution:
+      {
+        integrity: sha512-f9z/nXhCgWDF4lHqgIE30jxLe4sYv15QodfdPDKYAk7nAEjNcndy4dHz3ezhdUaR23BpWa4I2EH4/DZ0//Uf8A==,
+      }
+
+  "@tanstack/react-query@5.90.11":
+    resolution:
+      {
+        integrity: sha512-3uyzz01D1fkTLXuxF3JfoJoHQMU2fxsfJwE+6N5hHy0dVNoZOvwKP8Z2k7k1KDeD54N20apcJnG75TBAStIrBA==,
+      }
+    peerDependencies:
+      react: ^18 || ^19
 
   "@tanstack/react-table@8.21.3":
     resolution:
@@ -10026,6 +10053,8 @@ snapshots:
     dependencies:
       "@expressive-code/core": 0.41.3
 
+  "@faker-js/faker@9.9.0": {}
+
   "@floating-ui/core@1.7.3":
     dependencies:
       "@floating-ui/utils": 0.2.10
@@ -11192,6 +11221,13 @@ snapshots:
       "@tailwindcss/oxide": 4.1.17
       tailwindcss: 4.1.17
       vite: 7.2.4(@types/node@24.10.1)(jiti@2.6.1)(lightningcss@1.30.2)(yaml@2.8.1)
+
+  "@tanstack/query-core@5.90.11": {}
+
+  "@tanstack/react-query@5.90.11(react@19.2.0)":
+    dependencies:
+      "@tanstack/query-core": 5.90.11
+      react: 19.2.0
 
   "@tanstack/react-table@8.21.3(react-dom@19.2.0(react@19.2.0))(react@19.2.0)":
     dependencies:

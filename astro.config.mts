@@ -181,6 +181,14 @@ export default defineConfig({
               label: "Advanced Nuqs Table",
               slug: "data-table/advanced-nuqs-table",
             },
+            {
+              label: "Server-Side Table",
+              slug: "data-table/server-side-table",
+            },
+            {
+              label: "Server-Side Nuqs Table",
+              slug: "data-table/server-side-nuqs-table",
+            },
           ],
         },
         {
