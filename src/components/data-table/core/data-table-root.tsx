@@ -24,7 +24,7 @@ import {
 } from "@tanstack/react-table"
 import { DataTableProvider } from "./data-table-context"
 import { cn } from "@/lib/utils"
-import { type DataTableColumnDef } from "../types"
+import { type DataTableColumnDef, type GlobalFilter } from "../types"
 import { detectFeaturesFromChildren } from "../config/feature-detection"
 import {
   extendedFilter,
@@ -75,7 +75,7 @@ interface TableRootProps<TData, TValue> extends Partial<TableOptions<TData>> {
   isLoading?: boolean
 
   // Event handlers
-  onGlobalFilterChange?: (value: string | object) => void
+  onGlobalFilterChange?: (value: GlobalFilter) => void
   onPaginationChange?: (updater: Updater<PaginationState>) => void
   onSortingChange?: (updater: Updater<SortingState>) => void
   onColumnVisibilityChange?: (updater: Updater<VisibilityState>) => void
@@ -263,7 +263,7 @@ function DataTableRootInternal<TData, TValue>({
   }, [finalConfig])
 
   // State management
-  const [globalFilter, setGlobalFilter] = React.useState<string>(
+  const [globalFilter, setGlobalFilter] = React.useState<GlobalFilter>(
     rest.initialState?.globalFilter ?? "",
   )
   const [rowSelection, setRowSelection] = React.useState<RowSelectionState>(
@@ -304,10 +304,10 @@ function DataTableRootInternal<TData, TValue>({
    * WHAT: Only creates new function when onGlobalFilterChange prop changes.
    */
   const handleGlobalFilterChange = React.useCallback(
-    (value: string | object) => {
+    (value: GlobalFilter) => {
       // Always update local state to keep it in sync with table
-      const filterValue = typeof value === "string" ? value : ""
-      setGlobalFilter(filterValue)
+      // Preserve both string and object values (object values are used for complex filters)
+      setGlobalFilter(value)
 
       // Also call external handler if provided
       onGlobalFilterChange?.(value)
@@ -487,7 +487,7 @@ function DataTableRootInternal<TData, TValue>({
       autoResetPageIndex: config?.autoResetPageIndex ?? false,
       autoResetExpanded: config?.autoResetExpanded ?? false,
       onGlobalFilterChange: value => {
-        handleGlobalFilterChange(value as string | object)
+        handleGlobalFilterChange(value)
       },
       onRowSelectionChange: onRowSelectionChange ?? handleRowSelectionChange,
       onSortingChange: onSortingChange ?? setSorting,
