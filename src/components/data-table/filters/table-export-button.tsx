@@ -28,6 +28,7 @@ export function exportTableToCSV<TData>(
   // Retrieve headers
   const headers = table
     .getAllLeafColumns()
+    .filter(column => column.accessorFn)
     .map(column => column.id)
     .filter(id => !excludeColumns.includes(id as keyof TData))
 

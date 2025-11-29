@@ -137,6 +137,7 @@ export function DataTableVirtualizedBody<TData>({
     [],
   )
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const rowVirtualizer = useVirtualizer({
     count: rows.length,
     getScrollElement: () => scrollElement,

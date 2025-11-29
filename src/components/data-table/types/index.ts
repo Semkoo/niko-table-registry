@@ -1,9 +1,9 @@
 import * as React from "react"
 import {
   type Table,
-  type ColumnDef,
   type Row,
   type RowData,
+  type ColumnDef,
 } from "@tanstack/react-table"
 import {
   JOIN_OPERATORS,
@@ -128,28 +128,31 @@ export interface QueryKeys {
 // ============================================================================
 
 /**
- * Extended column definition for data table
- * Inherits all TanStack Table ColumnDef properties
+ * Data Table Column Definition Type
+ *
+ * Alias for TanStack Table `ColumnDef`
  */
-export type DataTableColumnDef<TData, TValue = unknown> = ColumnDef<
-  TData,
-  TValue
-> & {
-  // You can extend with additional properties if needed
-}
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type DataTableColumnDef<TData> = ColumnDef<TData, any>
 
 // ============================================================================
 // ROW TYPES
 // ============================================================================
 
 /**
- * Data table row type
- * Alias for TanStack Table Row
+ * Data Table Row Type
+ *
+ * Alias for TanStack Table `Row`
  */
 export type DataTableRow<TData> = Row<TData> & {
   // You can extend with additional properties if needed
 }
 
+/**
+ * Data Table Type
+ *
+ * Alias for TanStack Table `Table`
+ */
 export type DataTable<TData> = Table<TData> & {
   // You can extend with additional properties if needed
 }

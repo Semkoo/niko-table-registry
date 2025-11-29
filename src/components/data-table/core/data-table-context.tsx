@@ -68,7 +68,7 @@ function deriveInitialState<TData>(
 ): DataTableContextState<TData> {
   return {
     table,
-    columns: columns || (table.options.columns as DataTableColumnDef<TData>[]),
+    columns: columns || table.options.columns,
     isLoading: isLoading ?? false,
   }
 }

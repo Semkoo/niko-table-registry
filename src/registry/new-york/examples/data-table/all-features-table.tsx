@@ -17,13 +17,14 @@
  */
 
 import { useState, useCallback, useMemo } from "react"
-import type {
-  PaginationState,
-  SortingState,
-  ColumnFiltersState,
-  VisibilityState,
-  RowSelectionState,
-  ExpandedState,
+import {
+  type PaginationState,
+  type SortingState,
+  type ColumnFiltersState,
+  type VisibilityState,
+  type RowSelectionState,
+  type ExpandedState,
+  createColumnHelper,
 } from "@tanstack/react-table"
 import {
   DataTableRoot,
@@ -346,6 +347,8 @@ function ExpandedRowContent({ product }: { product: Product }) {
   )
 }
 
+const columnHelper = createColumnHelper<Product>()
+
 // Product details component for sidebar
 function ProductDetails({ product }: { product: Product }) {
   return (
@@ -440,11 +443,6 @@ function BulkActions() {
   const handleBulkExport = () => {
     exportTableToCSV(table, {
       filename: "selected-products",
-      excludeColumns: [
-        "select",
-        "expand",
-        "actions",
-      ] as unknown as (keyof Product)[],
       onlySelected: true,
     })
   }
@@ -598,9 +596,10 @@ export default function AllFeaturesTableExample() {
   )
 
   // Define columns with all features
+  // ColumnDef<Product, any>[] or DataTableColumnDef<Product>[]
   const columns: DataTableColumnDef<Product>[] = useMemo(
     () => [
-      {
+      columnHelper.display({
         id: "select",
         header: ({ table }) => (
           <Checkbox
@@ -621,8 +620,8 @@ export default function AllFeaturesTableExample() {
         ),
         enableSorting: false,
         enableHiding: false,
-      },
-      {
+      }),
+      columnHelper.display({
         id: "expand",
         header: () => null,
         cell: ({ row }) => {
@@ -650,15 +649,9 @@ export default function AllFeaturesTableExample() {
             <ExpandedRowContent product={product} />
           ),
         },
-      },
-      {
-        accessorKey: "name",
+      }),
+      columnHelper.accessor("name", {
         header: ({ column }) => <TableColumnHeader column={column} />,
-        meta: {
-          label: "Product Name",
-          variant: "text",
-        },
-        enableColumnFilter: true,
         cell: ({ row }) => (
           <div
             className="cursor-pointer font-medium hover:underline"
@@ -669,24 +662,27 @@ export default function AllFeaturesTableExample() {
             {row.getValue("name")}
           </div>
         ),
-      },
-      {
-        accessorKey: "category",
-        header: ({ column }) => <TableColumnHeader column={column} />,
         meta: {
-          label: "Category",
-          variant: "select",
-          options: categoryOptions,
+          label: "Product Name",
+          variant: "text",
         },
+        enableColumnFilter: true,
+      }),
+      columnHelper.accessor("category", {
+        header: ({ column }) => <TableColumnHeader column={column} />,
         cell: ({ row }) => {
           const category = row.getValue("category") as string
           const option = categoryOptions.find(opt => opt.value === category)
           return <span>{option?.label || category}</span>
         },
+        meta: {
+          label: "Category",
+          variant: "select",
+          options: categoryOptions,
+        },
         enableColumnFilter: true,
-      },
-      {
-        accessorKey: "brand",
+      }),
+      columnHelper.accessor("brand", {
         header: ({ column }) => <TableColumnHeader column={column} />,
         meta: {
           label: "Brand",
@@ -694,28 +690,22 @@ export default function AllFeaturesTableExample() {
           options: brandOptions,
         },
         enableColumnFilter: true,
-      },
-      {
-        accessorKey: "price",
+      }),
+      columnHelper.accessor("price", {
         header: ({ column }) => <TableColumnHeader column={column} />,
+        cell: ({ row }) => {
+          const price = parseFloat(row.getValue("price"))
+          return <div className="font-medium">${price.toFixed(2)}</div>
+        },
         meta: {
           label: "Price",
           unit: "$",
           variant: "number",
         },
-        cell: ({ row }) => {
-          const price = parseFloat(row.getValue("price"))
-          return <div className="font-medium">${price.toFixed(2)}</div>
-        },
         enableColumnFilter: true,
-      },
-      {
-        accessorKey: "stock",
+      }),
+      columnHelper.accessor("stock", {
         header: ({ column }) => <TableColumnHeader column={column} />,
-        meta: {
-          label: "Stock",
-          variant: "number",
-        },
         cell: ({ row }) => {
           const stock = Number(row.getValue("stock"))
           return (
@@ -724,15 +714,14 @@ export default function AllFeaturesTableExample() {
             </div>
           )
         },
-        enableColumnFilter: true,
-      },
-      {
-        accessorKey: "rating",
-        header: ({ column }) => <TableColumnHeader column={column} />,
         meta: {
-          label: "Rating",
+          label: "Stock",
           variant: "number",
         },
+        enableColumnFilter: true,
+      }),
+      columnHelper.accessor("rating", {
+        header: ({ column }) => <TableColumnHeader column={column} />,
         cell: ({ row }) => {
           const rating = Number(row.getValue("rating"))
           return (
@@ -742,15 +731,14 @@ export default function AllFeaturesTableExample() {
             </div>
           )
         },
-        enableColumnFilter: true,
-      },
-      {
-        accessorKey: "inStock",
-        header: ({ column }) => <TableColumnHeader column={column} />,
         meta: {
-          label: "In Stock",
-          variant: "boolean",
+          label: "Rating",
+          variant: "number",
         },
+        enableColumnFilter: true,
+      }),
+      columnHelper.accessor("inStock", {
+        header: ({ column }) => <TableColumnHeader column={column} />,
         cell: ({ row }) => {
           const inStock = Boolean(row.getValue("inStock"))
           return (
@@ -759,22 +747,25 @@ export default function AllFeaturesTableExample() {
             </Badge>
           )
         },
-        enableColumnFilter: true,
-      },
-      {
-        accessorKey: "releaseDate",
-        header: ({ column }) => <TableColumnHeader column={column} />,
         meta: {
-          label: "Release Date",
-          variant: "date",
+          label: "In Stock",
+          variant: "boolean",
         },
+        enableColumnFilter: true,
+      }),
+      columnHelper.accessor("releaseDate", {
+        header: ({ column }) => <TableColumnHeader column={column} />,
         cell: ({ row }) => {
           const date = row.getValue("releaseDate") as Date
           return <span>{date.toLocaleDateString()}</span>
         },
+        meta: {
+          label: "Release Date",
+          variant: "date",
+        },
         enableColumnFilter: true,
-      },
-      {
+      }),
+      columnHelper.display({
         id: "actions",
         header: () => <div className="text-right">Actions</div>,
         cell: ({ row }) => {
@@ -811,9 +802,9 @@ export default function AllFeaturesTableExample() {
             </div>
           )
         },
-        enableSorting: false,
-        enableHiding: false,
-      },
+        // enableSorting: false,
+        // enableHiding: false,
+      }),
     ],
     [],
   )
@@ -857,7 +848,7 @@ export default function AllFeaturesTableExample() {
         <BulkActions />
 
         {/* Sidebar Layout */}
-        <div className="flex min-h-[600px] gap-4">
+        <div className="flex gap-4">
           {/* Main Table Area */}
           <DataTable className="flex-1" height="100%">
             <DataTableHeader />
@@ -953,9 +944,7 @@ export default function AllFeaturesTableExample() {
               <span className="font-medium">Expanded Rows:</span>
               <span className="text-foreground">
                 {typeof expanded === "object" && expanded !== null
-                  ? Object.keys(expanded).filter(
-                      key => (expanded as Record<string, boolean>)[key],
-                    ).length
+                  ? Object.keys(expanded).filter(key => expanded[key]).length
                   : 0}
               </span>
             </div>

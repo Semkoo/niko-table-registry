@@ -56,12 +56,12 @@ export interface DataTableConfig {
   autoResetExpanded?: boolean
 }
 
-interface TableRootProps<TData, TValue> extends Partial<TableOptions<TData>> {
+interface TableRootProps<TData> extends Partial<TableOptions<TData>> {
   // Option 1: Pass a pre-configured table instance
   table?: Table<TData>
 
   // Option 2: Let DataTableRoot create its own table
-  columns?: DataTableColumnDef<TData, TValue>[]
+  columns?: DataTableColumnDef<TData>[]
   data?: TData[]
 
   children: React.ReactNode
@@ -86,7 +86,7 @@ interface TableRootProps<TData, TValue> extends Partial<TableOptions<TData>> {
 }
 
 // Internal component that handles hooks for direct props mode
-function DataTableRootInternal<TData, TValue>({
+function DataTableRootInternal<TData>({
   columns,
   data,
   children,
@@ -103,8 +103,8 @@ function DataTableRootInternal<TData, TValue>({
   onExpandedChange,
   onRowSelection,
   ...rest
-}: Omit<TableRootProps<TData, TValue>, "table"> & {
-  columns: DataTableColumnDef<TData, TValue>[]
+}: Omit<TableRootProps<TData>, "table"> & {
+  columns: DataTableColumnDef<TData>[]
   data: TData[]
 }) {
   /**
@@ -403,13 +403,13 @@ function DataTableRootInternal<TData, TValue>({
   const processedColumns = React.useMemo(
     () =>
       columns.map(col => {
-        const dataTableCol = col as DataTableColumnDef<TData, TValue>
+        // const dataTableCol = col as DataTableColumnDef<TData>
 
         // Check if we need to add default values
         // Only process if column is missing values we want to set
-        const needsEnableSorting = dataTableCol.enableSorting === undefined
-        const needsEnableHiding = dataTableCol.enableHiding === undefined
-        const needsFilterFn = !dataTableCol.filterFn
+        const needsEnableSorting = col.enableSorting === undefined
+        const needsEnableHiding = col.enableHiding === undefined
+        const needsFilterFn = !col.filterFn
 
         // If no processing needed, return original reference
         if (!needsEnableSorting && !needsEnableHiding && !needsFilterFn) {
@@ -425,7 +425,7 @@ function DataTableRootInternal<TData, TValue>({
           // Only set if falsy (preserve custom filter functions)
           ...(needsFilterFn && { filterFn: "extended" as const }),
         }
-      }) as DataTableColumnDef<TData, TValue>[],
+      }) as DataTableColumnDef<TData>[],
     [columns],
   )
 
@@ -583,6 +583,7 @@ function DataTableRootInternal<TData, TValue>({
 
   // Create table instance - TanStack Table automatically updates when options change
   // The table instance reference stays the same, but internal state updates
+  // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable<TData>(tableOptions)
 
   // Debug: Log state changes in development
@@ -618,7 +619,7 @@ function DataTableRootInternal<TData, TValue>({
 }
 
 // Main wrapper component
-export function DataTableRoot<TData, TValue>({
+export function DataTableRoot<TData>({
   table: externalTable,
   columns,
   data,
@@ -626,13 +627,14 @@ export function DataTableRoot<TData, TValue>({
   className,
   isLoading,
   ...rest
-}: TableRootProps<TData, TValue>) {
+}: TableRootProps<TData>) {
   // If a table instance is provided, use it directly (no hooks needed)
   if (externalTable) {
     return (
       <DataTableProvider
         table={externalTable}
-        columns={columns as DataTableColumnDef<TData>[]}
+        columns={columns}
+        // as DataTableColumnDef<TData>[]
         isLoading={isLoading}
       >
         <div className={cn("w-full space-y-4", className)}>{children}</div>
