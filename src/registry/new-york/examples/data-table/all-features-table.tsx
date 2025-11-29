@@ -618,8 +618,8 @@ export default function AllFeaturesTableExample() {
             aria-label="Select row"
           />
         ),
-        enableSorting: false,
-        enableHiding: false,
+        // enableSorting: false,
+        // enableHiding: false,
       }),
       columnHelper.display({
         id: "expand",
@@ -642,8 +642,8 @@ export default function AllFeaturesTableExample() {
           )
         },
         size: 50,
-        enableSorting: false,
-        enableHiding: false,
+        // enableSorting: false,
+        // enableHiding: false,
         meta: {
           expandedContent: (product: Product) => (
             <ExpandedRowContent product={product} />
@@ -943,9 +943,9 @@ export default function AllFeaturesTableExample() {
             <div className="flex justify-between">
               <span className="font-medium">Expanded Rows:</span>
               <span className="text-foreground">
-                {typeof expanded === "object" && expanded !== null
-                  ? Object.keys(expanded).filter(key => expanded[key]).length
-                  : 0}
+                {typeof expanded === "boolean"
+                  ? expanded
+                  : Object.keys(expanded).filter(key => expanded[key]).length}
               </span>
             </div>
             <div className="flex justify-between">

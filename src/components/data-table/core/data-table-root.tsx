@@ -403,8 +403,6 @@ function DataTableRootInternal<TData>({
   const processedColumns = React.useMemo(
     () =>
       columns.map(col => {
-        // const dataTableCol = col as DataTableColumnDef<TData>
-
         // Check if we need to add default values
         // Only process if column is missing values we want to set
         const needsEnableSorting = col.enableSorting === undefined
@@ -423,6 +421,7 @@ function DataTableRootInternal<TData>({
           ...(needsEnableSorting && { enableSorting: true }),
           ...(needsEnableHiding && { enableHiding: true }),
           // Only set if falsy (preserve custom filter functions)
+          // FIXME: This is a temporary workaround for the filterFn type issue
           ...(needsFilterFn && { filterFn: "extended" as const }),
         }
       }) as DataTableColumnDef<TData>[],
@@ -634,7 +633,6 @@ export function DataTableRoot<TData>({
       <DataTableProvider
         table={externalTable}
         columns={columns}
-        // as DataTableColumnDef<TData>[]
         isLoading={isLoading}
       >
         <div className={cn("w-full space-y-4", className)}>{children}</div>
