@@ -229,8 +229,9 @@ function useFacetedContext(name: string) {
   return context
 }
 
-interface FacetedProps<Multiple extends boolean = false>
-  extends React.ComponentProps<typeof Popover> {
+interface FacetedProps<
+  Multiple extends boolean = false,
+> extends React.ComponentProps<typeof Popover> {
   value?: FacetedValue<Multiple>
   onValueChange?: (value: FacetedValue<Multiple> | undefined) => void
   children?: React.ReactNode
@@ -804,8 +805,9 @@ function useSyncFiltersWithTable<TData>(
   }, [filters, filterLogic, table, isControlled])
 }
 
-interface TableFilterMenuProps<TData>
-  extends React.ComponentProps<typeof PopoverContent> {
+interface TableFilterMenuProps<TData> extends React.ComponentProps<
+  typeof PopoverContent
+> {
   table: Table<TData>
   filters?: ExtendedColumnFilter<TData>[]
   onFiltersChange?: (filters: ExtendedColumnFilter<TData>[] | null) => void

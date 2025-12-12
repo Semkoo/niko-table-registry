@@ -3,8 +3,7 @@
 import React from "react"
 import { cn } from "@/lib/utils"
 
-export interface DataTableToolbarSectionProps
-  extends React.ComponentProps<"div"> {
+export interface DataTableToolbarSectionProps extends React.ComponentProps<"div"> {
   children?: React.ReactNode
 }
 

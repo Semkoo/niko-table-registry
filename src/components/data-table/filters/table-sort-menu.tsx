@@ -199,8 +199,9 @@ function TableSortItem({
   )
 }
 
-export interface TableSortMenuProps<TData>
-  extends React.ComponentProps<typeof PopoverContent> {
+export interface TableSortMenuProps<TData> extends React.ComponentProps<
+  typeof PopoverContent
+> {
   table: Table<TData>
   debounceMs?: number
   throttleMs?: number

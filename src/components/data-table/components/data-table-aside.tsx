@@ -73,8 +73,7 @@ function DataTableAside({
 
 DataTableAside.displayName = "DataTableAside"
 
-interface DataTableAsideTriggerProps
-  extends React.ComponentPropsWithoutRef<"button"> {
+interface DataTableAsideTriggerProps extends React.ComponentPropsWithoutRef<"button"> {
   asChild?: boolean
   children?: React.ReactNode
 }
@@ -114,8 +113,7 @@ function DataTableAsideTrigger({
 
 DataTableAsideTrigger.displayName = "DataTableAsideTrigger"
 
-interface DataTableAsideContentProps
-  extends React.ComponentPropsWithoutRef<"aside"> {
+interface DataTableAsideContentProps extends React.ComponentPropsWithoutRef<"aside"> {
   width?: string
   sticky?: boolean
 }
@@ -198,8 +196,7 @@ function DataTableAsideDescription({
 
 DataTableAsideDescription.displayName = "DataTableAsideDescription"
 
-interface DataTableAsideCloseProps
-  extends React.ComponentPropsWithoutRef<"button"> {
+interface DataTableAsideCloseProps extends React.ComponentPropsWithoutRef<"button"> {
   showIcon?: boolean
 }
 

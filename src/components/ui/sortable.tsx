@@ -530,8 +530,10 @@ const dropAnimation: DropAnimation = {
   }),
 }
 
-interface SortableOverlayProps
-  extends Omit<React.ComponentProps<typeof DragOverlay>, "children"> {
+interface SortableOverlayProps extends Omit<
+  React.ComponentProps<typeof DragOverlay>,
+  "children"
+> {
   container?: Element | DocumentFragment | null
   children?:
     | ((params: { value: UniqueIdentifier }) => React.ReactNode)

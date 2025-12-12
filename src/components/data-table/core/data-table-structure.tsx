@@ -65,12 +65,11 @@ export const DataTableHeader = React.memo(function DataTableHeader({
       {table.getHeaderGroups().map(headerGroup => (
         <TableRow key={headerGroup.id}>
           {headerGroup.headers.map(header => {
-            const hasSize = header.column.columnDef.size !== undefined
+            const size = header.column.columnDef.size
+            const headerStyle = size ? { width: `${size}px` } : undefined
+
             return (
-              <TableHead
-                key={header.id}
-                style={hasSize ? { width: header.getSize() } : undefined}
-              >
+              <TableHead key={header.id} style={headerStyle}>
                 {header.isPlaceholder
                   ? null
                   : flexRender(
@@ -228,14 +227,11 @@ export function DataTableBody<TData>({
                   className={cn(isClickable && "cursor-pointer")}
                 >
                   {row.getVisibleCells().map(cell => {
-                    const hasSize = cell.column.columnDef.size !== undefined
+                    const size = cell.column.columnDef.size
+                    const cellStyle = size ? { width: `${size}px` } : undefined
+
                     return (
-                      <TableCell
-                        key={cell.id}
-                        style={
-                          hasSize ? { width: cell.column.getSize() } : undefined
-                        }
-                      >
+                      <TableCell key={cell.id} style={cellStyle}>
                         {flexRender(
                           cell.column.columnDef.cell,
                           cell.getContext(),
@@ -380,11 +376,13 @@ export function DataTableSkeleton({
   cellClassName,
   skeletonClassName,
 }: DataTableSkeletonProps) {
-  const { columns, isLoading } = useDataTable()
+  const { table, columns, isLoading } = useDataTable()
 
   // Show skeleton only when loading
   if (!isLoading) return null
 
+  // Get visible columns from table to match actual structure
+  const visibleColumns = table.getVisibleLeafColumns()
   const numColumns = colSpan ?? columns.length
 
   // If custom children provided, show single row with custom content
@@ -406,11 +404,20 @@ export function DataTableSkeleton({
     <>
       {Array.from({ length: rows }).map((_, rowIndex) => (
         <TableRow key={rowIndex}>
-          {Array.from({ length: numColumns }).map((_, colIndex) => (
-            <TableCell key={colIndex} className={cellClassName}>
-              <Skeleton className={cn("h-4 w-full", skeletonClassName)} />
-            </TableCell>
-          ))}
+          {visibleColumns.map((column, colIndex) => {
+            const size = column.columnDef.size
+            const cellStyle = size ? { width: `${size}px` } : undefined
+
+            return (
+              <TableCell
+                key={colIndex}
+                className={cellClassName}
+                style={cellStyle}
+              >
+                <Skeleton className={cn("h-4 w-full", skeletonClassName)} />
+              </TableCell>
+            )
+          })}
         </TableRow>
       ))}
     </>
