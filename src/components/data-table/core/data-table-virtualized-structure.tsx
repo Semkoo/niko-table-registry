@@ -59,18 +59,21 @@ export const DataTableVirtualizedHeader = React.memo(
         className={cn(
           "block",
           sticky && "sticky top-0 z-10 bg-background",
+          // Ensure border is visible when sticky using pseudo-element
           className,
         )}
       >
         {table.getHeaderGroups().map(headerGroup => (
           <TableRow key={headerGroup.id} className="flex w-full border-b">
             {headerGroup.headers.map(header => {
-              const hasSize = header.column.columnDef.size !== undefined
+              const size = header.column.columnDef.size
+              const headerStyle = size ? { width: `${size}px` } : undefined
+
               return (
                 <TableHead
                   key={header.id}
-                  className="flex items-center"
-                  style={hasSize ? { width: header.getSize() } : undefined}
+                  className={cn(size ? "" : "w-full", "flex items-center")}
+                  style={headerStyle}
                 >
                   {header.isPlaceholder
                     ? null
@@ -300,15 +303,16 @@ export function DataTableVirtualizedBody<TData>({
               className={cn("flex w-full", isClickable && "cursor-pointer")}
             >
               {row.getVisibleCells().map(cell => {
-                const hasSize = cell.column.columnDef.size !== undefined
+                const size = cell.column.columnDef.size
+                const cellStyle = size
+                  ? { width: `${size}px`, minHeight: `${estimateSize}px` }
+                  : { minHeight: `${estimateSize}px` }
+
                 return (
                   <TableCell
                     key={cell.id}
-                    className="flex items-center"
-                    style={{
-                      ...(hasSize ? { width: cell.column.getSize() } : {}),
-                      minHeight: `${estimateSize}px`,
-                    }}
+                    className={cn(size ? "" : "w-full", "flex items-center")}
+                    style={cellStyle}
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
@@ -497,15 +501,20 @@ export function DataTableVirtualizedSkeleton({
       {Array.from({ length: rows }).map((_, rowIndex) => (
         <TableRow key={rowIndex} className="flex w-full">
           {visibleColumns.map((column, colIndex) => {
-            const hasSize = column.columnDef.size !== undefined
+            const size = column.columnDef.size
+            const cellStyle = size
+              ? { width: `${size}px`, minHeight: `${estimateSize}px` }
+              : { minHeight: `${estimateSize}px` }
+
             return (
               <TableCell
                 key={colIndex}
-                className={cn("flex items-center", cellClassName)}
-                style={{
-                  ...(hasSize ? { width: column.getSize() } : {}),
-                  minHeight: `${estimateSize}px`,
-                }}
+                className={cn(
+                  size ? "" : "w-full",
+                  "flex items-center",
+                  cellClassName,
+                )}
+                style={cellStyle}
               >
                 <Skeleton className={cn("h-4 w-full", skeletonClassName)} />
               </TableCell>
