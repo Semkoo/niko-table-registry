@@ -511,9 +511,10 @@ function DataTableRootInternal<TData, TValue>({
       getSortedRowModel: detectFeatures.enableSorting
         ? getSortedRowModel()
         : undefined,
-      getPaginationRowModel: detectFeatures.enablePagination
-        ? getPaginationRowModel()
-        : undefined,
+      getPaginationRowModel:
+        detectFeatures.enablePagination && !detectFeatures.manualPagination
+          ? getPaginationRowModel()
+          : undefined,
       getExpandedRowModel: detectFeatures.enableExpanding
         ? getExpandedRowModel()
         : undefined,
