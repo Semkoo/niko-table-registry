@@ -92,6 +92,25 @@ export const extendedFilter: FilterFn<any> = (row, columnId, filterValue) => {
     )
   }
 
+  // Handle raw array filter values (from TableFacetedFilter with multiple selection)
+  // When filterValue is an array like ["electronics", "clothing"], check if cell value is in the array
+  if (Array.isArray(filterValue)) {
+    const cellValue = row.getValue(columnId)
+    if (cellValue == null) return false
+
+    // Case-insensitive comparison for strings
+    if (typeof cellValue === "string") {
+      const cellLower = cellValue.toLowerCase()
+      return filterValue.some(val =>
+        typeof val === "string"
+          ? val.toLowerCase() === cellLower
+          : String(val) === cellValue,
+      )
+    }
+    // For non-string types, convert to string for comparison
+    return filterValue.some(val => String(val) === String(cellValue))
+  }
+
   // Fallback to default string contains behavior for simple values
   const cellValue = row.getValue(columnId)
   if (cellValue == null) return false
