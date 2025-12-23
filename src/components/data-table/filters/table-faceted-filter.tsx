@@ -29,7 +29,12 @@ import {
 } from "@/components/ui/popover"
 import { Separator } from "@/components/ui/separator"
 import { cn } from "@/lib/utils"
-import type { Option } from "../types"
+import type { ExtendedColumnFilter, Option } from "../types"
+import {
+  FILTER_OPERATORS,
+  FILTER_VARIANTS,
+  JOIN_OPERATORS,
+} from "../lib/constants"
 
 export interface TableFacetedFilterProps<TData, TValue> {
   column?: Column<TData, TValue>
@@ -53,10 +58,25 @@ export function TableFacetedFilter<TData, TValue>({
   const [open, setOpen] = React.useState(false)
 
   const columnFilterValue = column?.getFilterValue()
-  const selectedValues = React.useMemo(
-    () => new Set(Array.isArray(columnFilterValue) ? columnFilterValue : []),
-    [columnFilterValue],
-  )
+
+  // Handle both ExtendedColumnFilter format (new) and legacy array format
+  const selectedValues = React.useMemo(() => {
+    // Handle ExtendedColumnFilter format (from filter menu or new faceted filter)
+    if (
+      columnFilterValue &&
+      typeof columnFilterValue === "object" &&
+      !Array.isArray(columnFilterValue) &&
+      "value" in columnFilterValue
+    ) {
+      const filterValue = (columnFilterValue as ExtendedColumnFilter<TData>)
+        .value
+      return new Set(
+        Array.isArray(filterValue) ? filterValue : [String(filterValue)],
+      )
+    }
+    // Handle legacy array format (backward compatibility)
+    return new Set(Array.isArray(columnFilterValue) ? columnFilterValue : [])
+  }, [columnFilterValue])
 
   const onItemSelect = React.useCallback(
     (option: Option, isSelected: boolean) => {
@@ -70,13 +90,43 @@ export function TableFacetedFilter<TData, TValue>({
           newSelectedValues.add(option.value)
         }
         const filterValues = Array.from(newSelectedValues)
-        const finalValue = filterValues.length ? filterValues : undefined
-        column.setFilterValue(finalValue)
-        onValueChange?.(finalValue)
+
+        if (filterValues.length === 0) {
+          column.setFilterValue(undefined)
+          onValueChange?.(undefined)
+        } else {
+          // Create ExtendedColumnFilter format for interoperability with filter menu
+          // FORCE variant to multiSelect when using IN_ARRAY operator to ensure it shows up in the menu
+          const extendedFilter: ExtendedColumnFilter<TData> = {
+            id: column.id as Extract<keyof TData, string>,
+            value: filterValues,
+            variant: FILTER_VARIANTS.MULTI_SELECT,
+            operator: FILTER_OPERATORS.IN_ARRAY,
+            filterId: `faceted-${column.id}`,
+            joinOperator: JOIN_OPERATORS.AND,
+          }
+          column.setFilterValue(extendedFilter)
+          onValueChange?.(filterValues)
+        }
       } else {
-        const finalValue = isSelected ? undefined : [option.value]
-        column.setFilterValue(finalValue)
-        onValueChange?.(finalValue)
+        // Single selection
+        if (isSelected) {
+          column.setFilterValue(undefined)
+          onValueChange?.(undefined)
+        } else {
+          // Create ExtendedColumnFilter format for single selection
+          // Use EQUAL operator for single select
+          const extendedFilter: ExtendedColumnFilter<TData> = {
+            id: column.id as Extract<keyof TData, string>,
+            value: option.value, // Single value, not array
+            variant: FILTER_VARIANTS.SELECT,
+            operator: FILTER_OPERATORS.EQUAL,
+            filterId: `faceted-${column.id}`,
+            joinOperator: JOIN_OPERATORS.AND,
+          }
+          column.setFilterValue(extendedFilter)
+          onValueChange?.([option.value])
+        }
         setOpen(false)
       }
     },
