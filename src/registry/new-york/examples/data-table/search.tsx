@@ -185,10 +185,10 @@ export default function SearchTableExample() {
           <DataTableBody>
             <DataTableSkeleton rows={5} />
             <DataTableEmptyBody>
-              <DataTableEmptyIcon>
-                <UserSearch className="size-12" />
-              </DataTableEmptyIcon>
               <DataTableEmptyMessage>
+                <DataTableEmptyIcon>
+                  <UserSearch className="size-12" />
+                </DataTableEmptyIcon>
                 <DataTableEmptyTitle>No customers found</DataTableEmptyTitle>
                 <DataTableEmptyDescription>
                   There are no customers to display at this time.

@@ -19,6 +19,11 @@ import {
   DataTableSearchFilter,
   DataTableViewMenu,
   DataTableEmptyBody,
+  DataTableEmptyFilteredMessage,
+  DataTableEmptyTitle,
+  DataTableEmptyDescription,
+  DataTableEmptyIcon,
+  DataTableEmptyMessage,
 } from "@/components/data-table"
 import {
   TableColumnHeader,
@@ -30,7 +35,7 @@ import type { DataTableColumnDef } from "@/components/data-table/types"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Download, Trash2 } from "lucide-react"
+import { Download, Trash2, UserSearch, SearchX } from "lucide-react"
 import {
   Card,
   CardAction,
@@ -312,8 +317,29 @@ export default function RowSelectionStateExample() {
         />
         <DataTable>
           <DataTableHeader />
-          <DataTableBody />
-          <DataTableEmptyBody />
+          <DataTableBody>
+            <DataTableEmptyBody>
+              <DataTableEmptyMessage>
+                <DataTableEmptyIcon>
+                  <UserSearch className="size-12" />
+                </DataTableEmptyIcon>
+                <DataTableEmptyTitle>No customers found</DataTableEmptyTitle>
+                <DataTableEmptyDescription>
+                  There are no customers to display at this time.
+                </DataTableEmptyDescription>
+              </DataTableEmptyMessage>
+              <DataTableEmptyFilteredMessage>
+                <DataTableEmptyIcon>
+                  <SearchX className="size-12" />
+                </DataTableEmptyIcon>
+                <DataTableEmptyTitle>No matches found</DataTableEmptyTitle>
+                <DataTableEmptyDescription>
+                  Try adjusting your filters or search to find what you&apos;re
+                  looking for.
+                </DataTableEmptyDescription>
+              </DataTableEmptyFilteredMessage>
+            </DataTableEmptyBody>
+          </DataTableBody>
         </DataTable>
         <DataTablePagination pageSizeOptions={[5, 10, 20]} />
       </DataTableRoot>

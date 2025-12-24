@@ -18,10 +18,16 @@ import {
   DataTableViewMenu,
   DataTableEmptyBody,
   DataTableSkeleton,
+  DataTableEmptyIcon,
+  DataTableEmptyMessage,
+  DataTableEmptyFilteredMessage,
+  DataTableEmptyTitle,
+  DataTableEmptyDescription,
 } from "@/components/data-table"
 import { TableColumnHeader } from "@/components/data-table/components"
 import type { DataTableColumnDef } from "@/components/data-table/types"
 import { Button } from "@/components/ui/button"
+import { UserSearch, SearchX } from "lucide-react"
 import {
   Card,
   CardAction,
@@ -243,9 +249,15 @@ export default function SearchTableStateExample() {
           columnVisibility,
           pagination,
         }}
-        onGlobalFilterChange={setGlobalFilter}
+        onGlobalFilterChange={value => {
+          setGlobalFilter(value)
+          setPagination(prev => ({ ...prev, pageIndex: 0 }))
+        }}
         onSortingChange={setSorting}
-        onColumnFiltersChange={setColumnFilters}
+        onColumnFiltersChange={filters => {
+          setColumnFilters(filters)
+          setPagination(prev => ({ ...prev, pageIndex: 0 }))
+        }}
         onColumnVisibilityChange={setColumnVisibility}
         onPaginationChange={setPagination}
       >
@@ -257,7 +269,27 @@ export default function SearchTableStateExample() {
           <DataTableHeader />
           <DataTableBody>
             <DataTableSkeleton rows={5} />
-            <DataTableEmptyBody />
+            <DataTableEmptyBody>
+              <DataTableEmptyMessage>
+                <DataTableEmptyIcon>
+                  <UserSearch className="size-12" />
+                </DataTableEmptyIcon>
+                <DataTableEmptyTitle>No customers found</DataTableEmptyTitle>
+                <DataTableEmptyDescription>
+                  There are no customers to display at this time.
+                </DataTableEmptyDescription>
+              </DataTableEmptyMessage>
+              <DataTableEmptyFilteredMessage>
+                <DataTableEmptyIcon>
+                  <SearchX className="size-12" />
+                </DataTableEmptyIcon>
+                <DataTableEmptyTitle>No matches found</DataTableEmptyTitle>
+                <DataTableEmptyDescription>
+                  Try adjusting your search to find what you&apos;re looking
+                  for.
+                </DataTableEmptyDescription>
+              </DataTableEmptyFilteredMessage>
+            </DataTableEmptyBody>
           </DataTableBody>
         </DataTable>
         <DataTablePagination pageSizeOptions={[5, 10, 20]} />

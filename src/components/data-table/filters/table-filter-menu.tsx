@@ -162,6 +162,15 @@ type FilterWithoutId<TData> = Omit<ExtendedColumnFilter<TData>, "filterId">
 function normalizeFiltersFromUrl<TData>(
   filters: (FilterWithoutId<TData> | ExtendedColumnFilter<TData>)[],
 ): ExtendedColumnFilter<TData>[] {
+  // Quick check: if all filters already have filterIds, return as-is
+  // This preserves object and array references
+  const hasAllIds = filters.every(
+    (f): f is ExtendedColumnFilter<TData> => "filterId" in f && !!f.filterId,
+  )
+  if (hasAllIds) {
+    return filters as ExtendedColumnFilter<TData>[]
+  }
+
   return filters.map((filter, index) => {
     // If filterId is missing, generate it
     if (!("filterId" in filter) || !filter.filterId) {

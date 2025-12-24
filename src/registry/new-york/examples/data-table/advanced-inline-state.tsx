@@ -18,6 +18,11 @@ import {
   DataTableViewMenu,
   DataTableInlineFilter,
   DataTableEmptyBody,
+  DataTableEmptyFilteredMessage,
+  DataTableEmptyTitle,
+  DataTableEmptyDescription,
+  DataTableEmptyIcon,
+  DataTableEmptyMessage,
 } from "@/components/data-table"
 import { TableColumnHeader } from "@/components/data-table/components"
 import {
@@ -31,6 +36,7 @@ import type {
 } from "@/components/data-table/types"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { UserSearch, SearchX } from "lucide-react"
 import {
   Card,
   CardAction,
@@ -440,6 +446,7 @@ export default function AdvancedInlineStateTableExample() {
         // Clear all filters
         setColumnFilters([])
         setGlobalFilter("")
+        setPagination(prev => ({ ...prev, pageIndex: 0 }))
       } else {
         // Use core utility to process filters and determine routing
         const result = processFiltersForLogic(filters)
@@ -451,6 +458,7 @@ export default function AdvancedInlineStateTableExample() {
             filters: result.processedFilters,
             joinOperator: result.joinOperator,
           })
+          setPagination(prev => ({ ...prev, pageIndex: 0 }))
         } else {
           // Use columnFilters for AND logic
           setGlobalFilter("")
@@ -460,6 +468,7 @@ export default function AdvancedInlineStateTableExample() {
               value: filter,
             })),
           )
+          setPagination(prev => ({ ...prev, pageIndex: 0 }))
         }
       }
     },
@@ -547,7 +556,10 @@ export default function AdvancedInlineStateTableExample() {
           pagination,
         }}
         // Pass state updaters
-        onGlobalFilterChange={setGlobalFilter}
+        onGlobalFilterChange={value => {
+          setGlobalFilter(value)
+          setPagination(prev => ({ ...prev, pageIndex: 0 }))
+        }}
         onSortingChange={setSorting}
         onColumnFiltersChange={setColumnFilters}
         onColumnVisibilityChange={setColumnVisibility}
@@ -560,7 +572,27 @@ export default function AdvancedInlineStateTableExample() {
         <DataTable>
           <DataTableHeader />
           <DataTableBody>
-            <DataTableEmptyBody />
+            <DataTableEmptyBody>
+              <DataTableEmptyMessage>
+                <DataTableEmptyIcon>
+                  <UserSearch className="size-12" />
+                </DataTableEmptyIcon>
+                <DataTableEmptyTitle>No products found</DataTableEmptyTitle>
+                <DataTableEmptyDescription>
+                  There are no products to display at this time.
+                </DataTableEmptyDescription>
+              </DataTableEmptyMessage>
+              <DataTableEmptyFilteredMessage>
+                <DataTableEmptyIcon>
+                  <SearchX className="size-12" />
+                </DataTableEmptyIcon>
+                <DataTableEmptyTitle>No matches found</DataTableEmptyTitle>
+                <DataTableEmptyDescription>
+                  Try adjusting your filters or search to find what you&apos;re
+                  looking for.
+                </DataTableEmptyDescription>
+              </DataTableEmptyFilteredMessage>
+            </DataTableEmptyBody>
           </DataTableBody>
         </DataTable>
         <DataTablePagination />

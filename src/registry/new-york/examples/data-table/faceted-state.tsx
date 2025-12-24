@@ -21,11 +21,17 @@ import {
   DataTableSliderFilter,
   DataTableDateFilter,
   DataTableEmptyBody,
+  DataTableEmptyFilteredMessage,
+  DataTableEmptyTitle,
+  DataTableEmptyDescription,
+  DataTableEmptyIcon,
+  DataTableEmptyMessage,
 } from "@/components/data-table"
 import { TableColumnHeader } from "@/components/data-table/components"
 import { daysAgo } from "@/components/data-table/lib"
 import type { DataTableColumnDef } from "@/components/data-table/types"
 import { Badge } from "@/components/ui/badge"
+import { UserSearch, SearchX } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -437,9 +443,15 @@ export default function FacetedStateTableExample() {
           pagination,
         }}
         // Pass state updaters
-        onGlobalFilterChange={setGlobalFilter}
+        onGlobalFilterChange={value => {
+          setGlobalFilter(value)
+          setPagination(prev => ({ ...prev, pageIndex: 0 }))
+        }}
         onSortingChange={setSorting}
-        onColumnFiltersChange={setColumnFilters}
+        onColumnFiltersChange={filters => {
+          setColumnFilters(filters)
+          setPagination(prev => ({ ...prev, pageIndex: 0 }))
+        }}
         onColumnVisibilityChange={setColumnVisibility}
         onPaginationChange={setPagination}
       >
@@ -447,7 +459,27 @@ export default function FacetedStateTableExample() {
         <DataTable>
           <DataTableHeader />
           <DataTableBody>
-            <DataTableEmptyBody />
+            <DataTableEmptyBody>
+              <DataTableEmptyMessage>
+                <DataTableEmptyIcon>
+                  <UserSearch className="size-12" />
+                </DataTableEmptyIcon>
+                <DataTableEmptyTitle>No products found</DataTableEmptyTitle>
+                <DataTableEmptyDescription>
+                  Get started by adding your first product.
+                </DataTableEmptyDescription>
+              </DataTableEmptyMessage>
+              <DataTableEmptyFilteredMessage>
+                <DataTableEmptyIcon>
+                  <SearchX className="size-12" />
+                </DataTableEmptyIcon>
+                <DataTableEmptyTitle>No matches found</DataTableEmptyTitle>
+                <DataTableEmptyDescription>
+                  Try adjusting your filters or search to find what you&apos;re
+                  looking for.
+                </DataTableEmptyDescription>
+              </DataTableEmptyFilteredMessage>
+            </DataTableEmptyBody>
           </DataTableBody>
         </DataTable>
         <DataTablePagination />

@@ -259,10 +259,10 @@ export default function PaginationLoadingExample() {
             */}
             <DataTableSkeleton rows={defaultPageSize} />
             <DataTableEmptyBody>
-              <DataTableEmptyIcon>
-                <ShoppingCart className="size-12" />
-              </DataTableEmptyIcon>
               <DataTableEmptyMessage>
+                <DataTableEmptyIcon>
+                  <ShoppingCart className="size-12" />
+                </DataTableEmptyIcon>
                 <DataTableEmptyTitle>No orders found</DataTableEmptyTitle>
                 <DataTableEmptyDescription>
                   There are no orders to display at this time.

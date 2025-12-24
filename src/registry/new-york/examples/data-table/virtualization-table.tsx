@@ -21,7 +21,7 @@ import { TableColumnHeader } from "@/components/data-table/components"
 import type { DataTableColumnDef } from "@/components/data-table/types"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { ChevronRight, ChevronDown, PackageOpen, SearchX } from "lucide-react"
+import { ChevronRight, ChevronDown, UserSearch, SearchX } from "lucide-react"
 
 // Example data type
 interface Product {
@@ -208,10 +208,10 @@ export default function VirtualizedTableExample() {
         <DataTableVirtualizedHeader />
         <DataTableVirtualizedBody>
           <DataTableVirtualizedEmptyBody>
-            <DataTableEmptyIcon>
-              <PackageOpen className="size-12" />
-            </DataTableEmptyIcon>
             <DataTableEmptyMessage>
+              <DataTableEmptyIcon>
+                <UserSearch className="size-12" />
+              </DataTableEmptyIcon>
               <DataTableEmptyTitle>No products found</DataTableEmptyTitle>
               <DataTableEmptyDescription>
                 There are no products to display at this time.

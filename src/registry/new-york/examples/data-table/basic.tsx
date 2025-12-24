@@ -158,7 +158,7 @@ export default function BasicTableExample() {
         <DataTableHeader />
         <DataTableBody />
       </DataTable>
-      <DataTablePagination pageSizeOptions={[5, 10, 20]} />
+      <DataTablePagination />
     </DataTableRoot>
   )
 }

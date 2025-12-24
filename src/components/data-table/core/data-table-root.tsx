@@ -21,6 +21,7 @@ import {
   type ExpandedState,
   type Updater,
   type FilterFn,
+  type FilterFnOption,
 } from "@tanstack/react-table"
 import { DataTableProvider } from "./data-table-context"
 import { cn } from "@/lib/utils"
@@ -170,6 +171,8 @@ function DataTableRootInternal<TData, TValue>({
       pageCount: config?.pageCount,
       initialPageSize: config?.initialPageSize,
       initialPageIndex: config?.initialPageIndex,
+      autoResetPageIndex: config?.autoResetPageIndex ?? true,
+      autoResetExpanded: config?.autoResetExpanded ?? false,
     }),
     [
       config?.enablePagination,
@@ -187,6 +190,8 @@ function DataTableRootInternal<TData, TValue>({
       config?.pageCount,
       config?.initialPageSize,
       config?.initialPageIndex,
+      config?.autoResetPageIndex,
+      config?.autoResetExpanded,
     ],
   )
 
@@ -378,55 +383,19 @@ function DataTableRootInternal<TData, TValue>({
   )
 
   /**
-   * PERFORMANCE: Memoize processed columns - preserve object references when possible
+   * PERFORMANCE: defaultColumn for TanStack Table
    *
-   * WHY: TanStack Table uses object reference equality to detect column changes.
-   * Without this optimization:
-   * - New column objects created on every render (even when unchanged)
-   * - TanStack Table thinks columns changed → recalculates everything
-   * - Causes unnecessary re-renders and performance degradation
-   *
-   * WITH optimization:
-   * - Columns with all values already set → return original reference
-   * - Only create new objects when defaults need to be added
-   * - TanStack Table correctly detects when columns actually change
-   *
-   * IMPACT: 50-90% reduction in unnecessary object creation.
-   * Prevents cascading recalculations in TanStack Table internals.
-   *
-   * EXAMPLE:
-   * - Column with enableSorting: true already set → returns original (no new object)
-   * - Column missing enableSorting → creates new object with default
-   *
-   * WHAT: Only processes columns when they need default values added.
+   * WHY: Instead of manually mapping over columns to add defaults, we use TanStack Table's
+   * defaultColumn option. This is more efficient and follows their recommended pattern.
+   * Individual column definitions will still override these defaults.
    */
-  const processedColumns = React.useMemo(
-    () =>
-      columns.map(col => {
-        const dataTableCol = col as DataTableColumnDef<TData, TValue>
-
-        // Check if we need to add default values
-        // Only process if column is missing values we want to set
-        const needsEnableSorting = dataTableCol.enableSorting === undefined
-        const needsEnableHiding = dataTableCol.enableHiding === undefined
-        const needsFilterFn = !dataTableCol.filterFn
-
-        // If no processing needed, return original reference
-        if (!needsEnableSorting && !needsEnableHiding && !needsFilterFn) {
-          return col
-        }
-
-        // Create new object only when we need to add default values
-        return {
-          ...col,
-          // Only set if undefined (preserve explicit false values)
-          ...(needsEnableSorting && { enableSorting: true }),
-          ...(needsEnableHiding && { enableHiding: true }),
-          // Only set if falsy (preserve custom filter functions)
-          ...(needsFilterFn && { filterFn: "extended" as const }),
-        }
-      }) as DataTableColumnDef<TData, TValue>[],
-    [columns],
+  const defaultColumn = React.useMemo<Partial<DataTableColumnDef<TData>>>(
+    () => ({
+      enableSorting: true,
+      enableHiding: true,
+      filterFn: "extended" as FilterFnOption<TData>,
+    }),
+    [],
   )
 
   /**
@@ -457,7 +426,8 @@ function DataTableRootInternal<TData, TValue>({
     () => ({
       ...rest,
       data,
-      columns: processedColumns,
+      columns,
+      defaultColumn,
       state: {
         ...rest.state,
         // Always use our local state as the source of truth
@@ -482,10 +452,10 @@ function DataTableRootInternal<TData, TValue>({
       manualSorting: detectFeatures.manualSorting,
       manualPagination: detectFeatures.manualPagination,
       manualFiltering: detectFeatures.manualFiltering,
-      // Disable auto-reset behaviors by default to prevent state updates during render
+      // Enable auto-reset behaviors by default (standard TanStack Table behavior)
       // Can be overridden via config
-      autoResetPageIndex: config?.autoResetPageIndex ?? false,
-      autoResetExpanded: config?.autoResetExpanded ?? false,
+      autoResetPageIndex: finalConfig.autoResetPageIndex,
+      autoResetExpanded: finalConfig.autoResetExpanded,
       onGlobalFilterChange: value => {
         handleGlobalFilterChange(value)
       },
@@ -547,7 +517,7 @@ function DataTableRootInternal<TData, TValue>({
     // Consumers should memoize rest props if they change frequently
     [
       data,
-      processedColumns,
+      columns,
       sorting,
       columnVisibility,
       rowSelection,
@@ -566,8 +536,8 @@ function DataTableRootInternal<TData, TValue>({
       detectFeatures.manualPagination,
       detectFeatures.manualFiltering,
       detectFeatures.pageCount,
-      config?.autoResetPageIndex,
-      config?.autoResetExpanded,
+      finalConfig.autoResetPageIndex,
+      finalConfig.autoResetExpanded,
       handleGlobalFilterChange,
       handleRowSelectionChange,
       onRowSelectionChange,
@@ -577,6 +547,7 @@ function DataTableRootInternal<TData, TValue>({
       onExpandedChange,
       onPaginationChange,
       getRowId,
+      defaultColumn,
       rest,
     ],
   )

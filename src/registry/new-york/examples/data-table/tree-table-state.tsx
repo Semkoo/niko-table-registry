@@ -21,6 +21,11 @@ import {
   DataTableSearchFilter,
   DataTableViewMenu,
   DataTableEmptyBody,
+  DataTableEmptyFilteredMessage,
+  DataTableEmptyTitle,
+  DataTableEmptyDescription,
+  DataTableEmptyIcon,
+  DataTableEmptyMessage,
 } from "@/components/data-table"
 import {
   TableColumnHeader,
@@ -35,6 +40,8 @@ import {
   Trash2,
   ChevronsDownUp,
   ChevronsUpDown,
+  SearchX,
+  UserSearch,
 } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
@@ -724,9 +731,15 @@ export default function TreeTableStateExample() {
           pagination,
         }}
         onRowSelectionChange={setRowSelection}
-        onGlobalFilterChange={setGlobalFilter}
+        onGlobalFilterChange={value => {
+          setGlobalFilter(value)
+          setPagination(prev => ({ ...prev, pageIndex: 0 }))
+        }}
         onSortingChange={setSorting}
-        onColumnFiltersChange={setColumnFilters}
+        onColumnFiltersChange={filters => {
+          setColumnFilters(filters)
+          setPagination(prev => ({ ...prev, pageIndex: 0 }))
+        }}
         onColumnVisibilityChange={setColumnVisibility}
         onPaginationChange={setPagination}
         onExpandedChange={updater => {
@@ -795,8 +808,29 @@ export default function TreeTableStateExample() {
 
         <DataTable>
           <DataTableHeader />
-          <DataTableBody />
-          <DataTableEmptyBody />
+          <DataTableBody>
+            <DataTableEmptyBody>
+              <DataTableEmptyMessage>
+                <DataTableEmptyIcon>
+                  <UserSearch className="size-12" />
+                </DataTableEmptyIcon>
+                <DataTableEmptyTitle>No projects found</DataTableEmptyTitle>
+                <DataTableEmptyDescription>
+                  Get started by creating your first project here.
+                </DataTableEmptyDescription>
+              </DataTableEmptyMessage>
+              <DataTableEmptyFilteredMessage>
+                <DataTableEmptyIcon>
+                  <SearchX className="size-12" />
+                </DataTableEmptyIcon>
+                <DataTableEmptyTitle>No matches found</DataTableEmptyTitle>
+                <DataTableEmptyDescription>
+                  Try adjusting your filters or search to find what you&apos;re
+                  looking for.
+                </DataTableEmptyDescription>
+              </DataTableEmptyFilteredMessage>
+            </DataTableEmptyBody>
+          </DataTableBody>
         </DataTable>
 
         <DataTablePagination />

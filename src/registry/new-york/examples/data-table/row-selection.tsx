@@ -245,10 +245,10 @@ export default function RowSelectionExample() {
         <DataTableHeader />
         <DataTableBody>
           <DataTableEmptyBody>
-            <DataTableEmptyIcon>
-              <UserSearch className="size-12" />
-            </DataTableEmptyIcon>
             <DataTableEmptyMessage>
+              <DataTableEmptyIcon>
+                <UserSearch className="size-12" />
+              </DataTableEmptyIcon>
               <DataTableEmptyTitle>No customers found</DataTableEmptyTitle>
               <DataTableEmptyDescription>
                 There are no customers to display at this time.

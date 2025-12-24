@@ -19,6 +19,11 @@ import {
   DataTableSearchFilter,
   DataTableViewMenu,
   DataTableEmptyBody,
+  DataTableEmptyFilteredMessage,
+  DataTableEmptyTitle,
+  DataTableEmptyDescription,
+  DataTableEmptyIcon,
+  DataTableEmptyMessage,
 } from "@/components/data-table"
 import { TableColumnHeader } from "@/components/data-table/components"
 import type { DataTableColumnDef } from "@/components/data-table/types"
@@ -33,7 +38,7 @@ import {
   CardDescription,
 } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
-import { ChevronRight, ChevronDown } from "lucide-react"
+import { ChevronRight, ChevronDown, UserSearch, SearchX } from "lucide-react"
 
 type OrderItem = {
   id: string
@@ -445,8 +450,29 @@ export default function RowExpansionStateExample() {
 
         <DataTable>
           <DataTableHeader />
-          <DataTableBody />
-          <DataTableEmptyBody />
+          <DataTableBody>
+            <DataTableEmptyBody>
+              <DataTableEmptyMessage>
+                <DataTableEmptyIcon>
+                  <UserSearch className="size-12" />
+                </DataTableEmptyIcon>
+                <DataTableEmptyTitle>No orders found</DataTableEmptyTitle>
+                <DataTableEmptyDescription>
+                  There are no orders to display at this time.
+                </DataTableEmptyDescription>
+              </DataTableEmptyMessage>
+              <DataTableEmptyFilteredMessage>
+                <DataTableEmptyIcon>
+                  <SearchX className="size-12" />
+                </DataTableEmptyIcon>
+                <DataTableEmptyTitle>No matches found</DataTableEmptyTitle>
+                <DataTableEmptyDescription>
+                  Try adjusting your filters or search to find what you&apos;re
+                  looking for.
+                </DataTableEmptyDescription>
+              </DataTableEmptyFilteredMessage>
+            </DataTableEmptyBody>
+          </DataTableBody>
         </DataTable>
         <DataTablePagination />
       </DataTableRoot>

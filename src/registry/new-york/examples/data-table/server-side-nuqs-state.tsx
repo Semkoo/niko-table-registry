@@ -150,6 +150,11 @@ import {
   DataTableFilterMenu,
   DataTableInlineFilter,
   DataTableEmptyBody,
+  DataTableEmptyFilteredMessage,
+  DataTableEmptyTitle,
+  DataTableEmptyDescription,
+  DataTableEmptyIcon,
+  DataTableEmptyMessage,
   DataTableSkeleton,
 } from "@/components/data-table"
 import { TableColumnHeader } from "@/components/data-table/components"
@@ -175,7 +180,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Loader2, AlertCircle } from "lucide-react"
+import { Loader2, AlertCircle, UserSearch, SearchX } from "lucide-react"
 
 type Product = {
   id: string
@@ -1711,7 +1716,31 @@ function ServerSideStateTableContent() {
                 <DataTableHeader />
                 <DataTableBody>
                   <DataTableSkeleton rows={pagination.pageSize} />
-                  <DataTableEmptyBody />
+                  <DataTableEmptyBody>
+                    <DataTableEmptyMessage>
+                      <DataTableEmptyIcon>
+                        <UserSearch className="size-12" />
+                      </DataTableEmptyIcon>
+                      <DataTableEmptyTitle>
+                        No products found
+                      </DataTableEmptyTitle>
+                      <DataTableEmptyDescription>
+                        There are no products to display at this time.
+                      </DataTableEmptyDescription>
+                    </DataTableEmptyMessage>
+                    <DataTableEmptyFilteredMessage>
+                      <DataTableEmptyIcon>
+                        <SearchX className="size-12" />
+                      </DataTableEmptyIcon>
+                      <DataTableEmptyTitle>
+                        No matches found
+                      </DataTableEmptyTitle>
+                      <DataTableEmptyDescription>
+                        Try adjusting your filters or search to find what
+                        you&apos;re looking for.
+                      </DataTableEmptyDescription>
+                    </DataTableEmptyFilteredMessage>
+                  </DataTableEmptyBody>
                 </DataTableBody>
               </DataTable>
               <DataTablePagination
@@ -1756,7 +1785,31 @@ function ServerSideStateTableContent() {
                 <DataTableHeader />
                 <DataTableBody>
                   <DataTableSkeleton rows={pagination.pageSize} />
-                  <DataTableEmptyBody />
+                  <DataTableEmptyBody>
+                    <DataTableEmptyMessage>
+                      <DataTableEmptyIcon>
+                        <UserSearch className="size-12" />
+                      </DataTableEmptyIcon>
+                      <DataTableEmptyTitle>
+                        No products found
+                      </DataTableEmptyTitle>
+                      <DataTableEmptyDescription>
+                        There are no products to display at this time.
+                      </DataTableEmptyDescription>
+                    </DataTableEmptyMessage>
+                    <DataTableEmptyFilteredMessage>
+                      <DataTableEmptyIcon>
+                        <SearchX className="size-12" />
+                      </DataTableEmptyIcon>
+                      <DataTableEmptyTitle>
+                        No matches found
+                      </DataTableEmptyTitle>
+                      <DataTableEmptyDescription>
+                        Try adjusting your filters or search to find what
+                        you&apos;re looking for.
+                      </DataTableEmptyDescription>
+                    </DataTableEmptyFilteredMessage>
+                  </DataTableEmptyBody>
                 </DataTableBody>
               </DataTable>
               <DataTablePagination

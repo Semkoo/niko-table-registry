@@ -17,6 +17,11 @@ import {
   DataTableBody,
   DataTableSearchFilter,
   DataTableEmptyBody,
+  DataTableEmptyFilteredMessage,
+  DataTableEmptyTitle,
+  DataTableEmptyDescription,
+  DataTableEmptyIcon,
+  DataTableEmptyMessage,
 } from "@/components/data-table"
 import {
   TableColumnHeader,
@@ -39,7 +44,8 @@ import {
 } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Filter } from "lucide-react"
+import { Filter, UserSearch, SearchX } from "lucide-react"
+import { Checkbox } from "@/components/ui/checkbox"
 
 type Customer = {
   id: string
@@ -326,18 +332,66 @@ export default function AsideTableStateExample() {
               <div className="mt-4 space-y-4">
                 <h4 className="text-sm font-medium">Company</h4>
                 <ScrollArea className="h-[400px]">
-                  <div className="space-y-2 pr-4">
-                    {Array.from(
-                      new Set(data.map(customer => customer.company)),
-                    ).map(company => (
-                      <label
-                        key={company}
-                        className="flex cursor-pointer items-center space-x-2"
-                      >
-                        <input type="checkbox" className="rounded" />
-                        <span className="text-sm">{company}</span>
-                      </label>
-                    ))}
+                  <div className="space-y-4 pr-4">
+                    {customerMetrics.companyList.map(company => {
+                      const isChecked = columnFilters.some(
+                        f =>
+                          f.id === "company" &&
+                          Array.isArray(f.value) &&
+                          f.value.includes(company),
+                      )
+
+                      return (
+                        <div
+                          key={company}
+                          className="flex items-center space-x-2"
+                        >
+                          <Checkbox
+                            id={`company-state-${company}`}
+                            checked={isChecked}
+                            onCheckedChange={checked => {
+                              const existing = columnFilters.find(
+                                f => f.id === "company",
+                              )
+                              const currentValues =
+                                (existing?.value as string[]) || []
+
+                              let newValues: string[]
+                              if (checked) {
+                                newValues = [...currentValues, company]
+                              } else {
+                                newValues = currentValues.filter(
+                                  v => v !== company,
+                                )
+                              }
+
+                              if (newValues.length === 0) {
+                                setColumnFilters(
+                                  columnFilters.filter(f => f.id !== "company"),
+                                )
+                              } else {
+                                const newFilter = {
+                                  id: "company",
+                                  value: newValues,
+                                }
+                                setColumnFilters([
+                                  ...columnFilters.filter(
+                                    f => f.id !== "company",
+                                  ),
+                                  newFilter,
+                                ])
+                              }
+                            }}
+                          />
+                          <label
+                            htmlFor={`company-state-${company}`}
+                            className="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                          >
+                            {company}
+                          </label>
+                        </div>
+                      )
+                    })}
                   </div>
                 </ScrollArea>
               </div>
@@ -353,7 +407,27 @@ export default function AsideTableStateExample() {
                 setShowFilters(false) // Close filters when customer is selected
               }}
             >
-              <DataTableEmptyBody />
+              <DataTableEmptyBody>
+                <DataTableEmptyMessage>
+                  <DataTableEmptyIcon>
+                    <UserSearch className="size-12" />
+                  </DataTableEmptyIcon>
+                  <DataTableEmptyTitle>No customers found</DataTableEmptyTitle>
+                  <DataTableEmptyDescription>
+                    There are no customers to display at this time.
+                  </DataTableEmptyDescription>
+                </DataTableEmptyMessage>
+                <DataTableEmptyFilteredMessage>
+                  <DataTableEmptyIcon>
+                    <SearchX className="size-12" />
+                  </DataTableEmptyIcon>
+                  <DataTableEmptyTitle>No matches found</DataTableEmptyTitle>
+                  <DataTableEmptyDescription>
+                    Try adjusting your filters or search to find what
+                    you&apos;re looking for.
+                  </DataTableEmptyDescription>
+                </DataTableEmptyFilteredMessage>
+              </DataTableEmptyBody>
             </DataTableBody>
           </DataTable>
 

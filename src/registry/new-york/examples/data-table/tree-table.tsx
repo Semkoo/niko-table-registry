@@ -12,6 +12,11 @@ import {
   DataTableSearchFilter,
   DataTableViewMenu,
   DataTableEmptyBody,
+  DataTableEmptyFilteredMessage,
+  DataTableEmptyTitle,
+  DataTableEmptyDescription,
+  DataTableEmptyIcon,
+  DataTableEmptyMessage,
 } from "@/components/data-table"
 import {
   TableColumnHeader,
@@ -26,6 +31,8 @@ import {
   Trash2,
   ChevronsDownUp,
   ChevronsUpDown,
+  SearchX,
+  UserSearch,
 } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
 
@@ -711,7 +718,27 @@ export default function TreeTable() {
       <DataTable>
         <DataTableHeader />
         <DataTableBody>
-          <DataTableEmptyBody />
+          <DataTableEmptyBody>
+            <DataTableEmptyMessage>
+              <DataTableEmptyIcon>
+                <UserSearch className="size-12" />
+              </DataTableEmptyIcon>
+              <DataTableEmptyTitle>No projects found</DataTableEmptyTitle>
+              <DataTableEmptyDescription>
+                Get started by creating your first project here.
+              </DataTableEmptyDescription>
+            </DataTableEmptyMessage>
+            <DataTableEmptyFilteredMessage>
+              <DataTableEmptyIcon>
+                <SearchX className="size-12" />
+              </DataTableEmptyIcon>
+              <DataTableEmptyTitle>No matches found</DataTableEmptyTitle>
+              <DataTableEmptyDescription>
+                Try adjusting your filters or search to find what you&apos;re
+                looking for.
+              </DataTableEmptyDescription>
+            </DataTableEmptyFilteredMessage>
+          </DataTableEmptyBody>
         </DataTableBody>
       </DataTable>
 

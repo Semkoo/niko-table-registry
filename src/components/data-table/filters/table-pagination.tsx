@@ -197,7 +197,7 @@ export function TablePagination<TData>({
             disabled={totalPages === 0 || isLoading}
             aria-label={`Page ${currentPage} of ${totalPages}`}
           />
-          <span aria-hidden="true">of {totalPages} pages</span>
+          <span aria-hidden="true">of {Math.max(1, totalPages)} pages</span>
         </div>
 
         <div className="flex items-center space-x-1">
