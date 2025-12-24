@@ -30,8 +30,8 @@ export function getDefaultFilterOperator(filterVariant: FilterVariant) {
   return (
     operators[0]?.value ??
     (filterVariant === FILTER_VARIANTS.TEXT
-      ? FILTER_OPERATORS.I_LIKE
-      : FILTER_OPERATORS.EQUAL)
+      ? FILTER_OPERATORS.ILIKE
+      : FILTER_OPERATORS.EQ)
   )
 }
 
@@ -41,8 +41,8 @@ export function getValidFilters<TData>(
   return filters.filter(filter => {
     // isEmpty and isNotEmpty don't need values
     if (
-      filter.operator === FILTER_OPERATORS.IS_EMPTY ||
-      filter.operator === FILTER_OPERATORS.IS_NOT_EMPTY
+      filter.operator === FILTER_OPERATORS.EMPTY ||
+      filter.operator === FILTER_OPERATORS.NOT_EMPTY
     ) {
       return true
     }

@@ -4,6 +4,7 @@ import React from "react"
 import { useDataTable } from "../core"
 import { TableFilterMenu } from "../filters/table-filter-menu"
 import { useGeneratedOptions } from "../hooks/use-generated-options"
+import { FILTER_VARIANTS } from "../lib/constants"
 import type { Option } from "../types"
 
 type BaseTableFilterMenuProps<TData> = Omit<
@@ -79,8 +80,12 @@ export function DataTableFilterMenu<TData>({
     if (!autoOptions) return
     table.getAllColumns().forEach(column => {
       const meta = (column.columnDef.meta ||= {})
-      const variant = meta.variant ?? "text"
-      if (variant !== "select" && variant !== "multiSelect") return
+      const variant = meta.variant ?? FILTER_VARIANTS.TEXT
+      if (
+        variant !== FILTER_VARIANTS.SELECT &&
+        variant !== FILTER_VARIANTS.MULTI_SELECT
+      )
+        return
       const gen = generatedOptions[column.id]
       if (!gen || gen.length === 0) return
 

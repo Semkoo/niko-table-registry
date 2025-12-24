@@ -69,22 +69,15 @@ export interface Option {
 // FILTER TYPES
 // ============================================================================
 
-/**
- * Filter variants supported by the data table
- */
-export type FilterVariant =
-  (typeof FILTER_VARIANTS)[keyof typeof FILTER_VARIANTS]
+import type {
+  FilterVariant as _FilterVariant,
+  FilterOperator as _FilterOperator,
+  JoinOperator as _JoinOperator,
+} from "../lib/constants"
 
-/**
- * Filter operators supported by the data table
- */
-export type FilterOperator =
-  (typeof FILTER_OPERATORS)[keyof typeof FILTER_OPERATORS]
-
-/**
- * Join operators for combining multiple filters
- */
-export type JoinOperator = (typeof JOIN_OPERATORS)[keyof typeof JOIN_OPERATORS]
+export type FilterVariant = _FilterVariant
+export type FilterOperator = _FilterOperator
+export type JoinOperator = _JoinOperator
 
 /**
  * Extended column filter with additional metadata

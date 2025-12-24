@@ -286,9 +286,9 @@ function applyFilterOperator(
   // Handle null/undefined cell values
   if (cellValue == null) {
     switch (operator) {
-      case FILTER_OPERATORS.IS_EMPTY:
+      case FILTER_OPERATORS.EMPTY:
         return true
-      case FILTER_OPERATORS.IS_NOT_EMPTY:
+      case FILTER_OPERATORS.NOT_EMPTY:
         return false
       default:
         return false
@@ -301,7 +301,7 @@ function applyFilterOperator(
 
   switch (operator) {
     // Text operators
-    case FILTER_OPERATORS.I_LIKE:
+    case FILTER_OPERATORS.ILIKE:
       try {
         // Escape special regex characters in the filter string
         const escapedFilter = filterStr.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
@@ -312,7 +312,7 @@ function applyFilterOperator(
         return cellStr.includes(filterStr)
       }
 
-    case FILTER_OPERATORS.NOT_I_LIKE:
+    case FILTER_OPERATORS.NOT_ILIKE:
       try {
         // Escape special regex characters in the filter string
         const escapedFilter = filterStr.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
@@ -323,7 +323,7 @@ function applyFilterOperator(
         return !cellStr.includes(filterStr)
       }
 
-    case FILTER_OPERATORS.EQUAL:
+    case FILTER_OPERATORS.EQ:
       // Case-insensitive comparison for strings
       if (typeof cellValue === "string" && typeof filterValue === "string") {
         return cellStr === filterStr
@@ -354,7 +354,7 @@ function applyFilterOperator(
       }
       return cellValue === filterValue
 
-    case FILTER_OPERATORS.NOT_EQUAL:
+    case FILTER_OPERATORS.NEQ:
       // Case-insensitive comparison for strings
       if (typeof cellValue === "string" && typeof filterValue === "string") {
         return cellStr !== filterStr
@@ -385,14 +385,14 @@ function applyFilterOperator(
       }
       return cellValue !== filterValue
 
-    case FILTER_OPERATORS.IS_EMPTY:
+    case FILTER_OPERATORS.EMPTY:
       // Check for empty strings and whitespace-only strings
       if (typeof cellValue === "string") {
         return cellValue.trim() === ""
       }
       return cellValue == null
 
-    case FILTER_OPERATORS.IS_NOT_EMPTY:
+    case FILTER_OPERATORS.NOT_EMPTY:
       // Check for non-empty strings (excluding whitespace-only)
       if (typeof cellValue === "string") {
         return cellValue.trim() !== ""
@@ -400,7 +400,7 @@ function applyFilterOperator(
       return cellValue != null
 
     // Numeric operators
-    case FILTER_OPERATORS.LESS_THAN: {
+    case FILTER_OPERATORS.LT: {
       const numCell = Number(cellValue)
       const numFilter = Number(filterValue)
       // Check for valid numbers (NaN would make comparison false)
@@ -408,28 +408,28 @@ function applyFilterOperator(
       return numCell < numFilter
     }
 
-    case FILTER_OPERATORS.LESS_THAN_OR_EQUAL: {
+    case FILTER_OPERATORS.LTE: {
       const numCell = Number(cellValue)
       const numFilter = Number(filterValue)
       if (isNaN(numCell) || isNaN(numFilter)) return false
       return numCell <= numFilter
     }
 
-    case FILTER_OPERATORS.GREATER_THAN: {
+    case FILTER_OPERATORS.GT: {
       const numCell = Number(cellValue)
       const numFilter = Number(filterValue)
       if (isNaN(numCell) || isNaN(numFilter)) return false
       return numCell > numFilter
     }
 
-    case FILTER_OPERATORS.GREATER_THAN_OR_EQUAL: {
+    case FILTER_OPERATORS.GTE: {
       const numCell = Number(cellValue)
       const numFilter = Number(filterValue)
       if (isNaN(numCell) || isNaN(numFilter)) return false
       return numCell >= numFilter
     }
 
-    case FILTER_OPERATORS.IS_BETWEEN:
+    case FILTER_OPERATORS.BETWEEN:
       if (Array.isArray(filterValue) && filterValue.length === 2) {
         const [min, max] = filterValue
         const numValue = Number(cellValue)
@@ -442,7 +442,7 @@ function applyFilterOperator(
       return false
 
     // Array operators
-    case FILTER_OPERATORS.IN_ARRAY:
+    case FILTER_OPERATORS.IN:
       if (Array.isArray(filterValue)) {
         // Handle case-insensitive string comparison
         if (typeof cellValue === "string") {
@@ -458,7 +458,7 @@ function applyFilterOperator(
       }
       return false
 
-    case FILTER_OPERATORS.NOT_IN_ARRAY:
+    case FILTER_OPERATORS.NOT_IN:
       if (Array.isArray(filterValue)) {
         // Handle case-insensitive string comparison
         if (typeof cellValue === "string") {
@@ -475,7 +475,7 @@ function applyFilterOperator(
       return true
 
     // Date operators (basic implementation)
-    case FILTER_OPERATORS.IS_RELATIVE_TO_TODAY:
+    case FILTER_OPERATORS.RELATIVE:
       // This would need more complex implementation based on requirements
       return true
 

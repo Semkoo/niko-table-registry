@@ -5,6 +5,7 @@ import type { Table } from "@tanstack/react-table"
 
 import type { Option } from "../types"
 import { formatLabel } from "../lib/format"
+import { FILTER_VARIANTS } from "../lib/constants"
 
 export interface GenerateOptionsConfig {
   /**
@@ -97,7 +98,11 @@ export function useGeneratedOptions<TData>(
       const variant = meta.variant ?? "text"
 
       // Only generate for select-like variants
-      if (variant !== "select" && variant !== "multiSelect") continue
+      if (
+        variant !== FILTER_VARIANTS.SELECT &&
+        variant !== FILTER_VARIANTS.MULTI_SELECT
+      )
+        continue
 
       const colId = column.id
 

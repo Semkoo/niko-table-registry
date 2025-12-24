@@ -101,7 +101,7 @@ export function TableFacetedFilter<TData, TValue>({
             id: column.id as Extract<keyof TData, string>,
             value: filterValues,
             variant: FILTER_VARIANTS.MULTI_SELECT,
-            operator: FILTER_OPERATORS.IN_ARRAY,
+            operator: FILTER_OPERATORS.IN,
             filterId: `faceted-${column.id}`,
             joinOperator: JOIN_OPERATORS.AND,
           }
@@ -120,7 +120,7 @@ export function TableFacetedFilter<TData, TValue>({
             id: column.id as Extract<keyof TData, string>,
             value: option.value, // Single value, not array
             variant: FILTER_VARIANTS.SELECT,
-            operator: FILTER_OPERATORS.EQUAL,
+            operator: FILTER_OPERATORS.EQ,
             filterId: `faceted-${column.id}`,
             joinOperator: JOIN_OPERATORS.AND,
           }
