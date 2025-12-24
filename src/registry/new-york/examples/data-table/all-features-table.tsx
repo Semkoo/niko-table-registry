@@ -66,7 +66,7 @@ import type {
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
-import { PackageOpen, SearchX } from "lucide-react"
+import { SearchX, UserSearch } from "lucide-react"
 import {
   Card,
   CardAction,
@@ -573,6 +573,7 @@ export default function AllFeaturesTableExample() {
       if (!filters || filters.length === 0) {
         setColumnFilters([])
         setGlobalFilter("")
+        setPagination(prev => ({ ...prev, pageIndex: 0 }))
       } else {
         const hasOrFilters = filters.some(
           (filter, index) => index > 0 && filter.joinOperator === "or",
@@ -583,6 +584,7 @@ export default function AllFeaturesTableExample() {
             filters,
             joinOperator: "mixed",
           })
+          setPagination(prev => ({ ...prev, pageIndex: 0 }))
         } else {
           setGlobalFilter("")
           setColumnFilters(
@@ -591,6 +593,7 @@ export default function AllFeaturesTableExample() {
               value: filter,
             })),
           )
+          setPagination(prev => ({ ...prev, pageIndex: 0 }))
         }
       }
     },
@@ -842,7 +845,10 @@ export default function AllFeaturesTableExample() {
           expanded,
           pagination,
         }}
-        onGlobalFilterChange={setGlobalFilter}
+        onGlobalFilterChange={value => {
+          setGlobalFilter(value)
+          setPagination(prev => ({ ...prev, pageIndex: 0 }))
+        }}
         onSortingChange={setSorting}
         onColumnFiltersChange={setColumnFilters}
         onColumnVisibilityChange={setColumnVisibility}
@@ -868,10 +874,10 @@ export default function AllFeaturesTableExample() {
               }}
             >
               <DataTableEmptyBody>
-                <DataTableEmptyIcon>
-                  <PackageOpen className="size-12" />
-                </DataTableEmptyIcon>
                 <DataTableEmptyMessage>
+                  <DataTableEmptyIcon>
+                    <UserSearch className="size-12" />
+                  </DataTableEmptyIcon>
                   <DataTableEmptyTitle>No products found</DataTableEmptyTitle>
                   <DataTableEmptyDescription>
                     Get started by adding your first product to the inventory.

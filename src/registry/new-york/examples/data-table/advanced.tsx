@@ -22,7 +22,7 @@ import { TableColumnHeader } from "@/components/data-table/components"
 import { daysAgo } from "@/components/data-table/lib"
 import type { DataTableColumnDef } from "@/components/data-table/types"
 import { Badge } from "@/components/ui/badge"
-import { PackageOpen, SearchX } from "lucide-react"
+import { UserSearch, SearchX } from "lucide-react"
 
 type Product = {
   id: string
@@ -365,10 +365,10 @@ export default function AdvancedTableExample() {
         <DataTableHeader />
         <DataTableBody>
           <DataTableEmptyBody>
-            <DataTableEmptyIcon>
-              <PackageOpen className="size-12" />
-            </DataTableEmptyIcon>
             <DataTableEmptyMessage>
+              <DataTableEmptyIcon>
+                <UserSearch className="size-12" />
+              </DataTableEmptyIcon>
               <DataTableEmptyTitle>No products found</DataTableEmptyTitle>
               <DataTableEmptyDescription>
                 Get started by adding your first product.

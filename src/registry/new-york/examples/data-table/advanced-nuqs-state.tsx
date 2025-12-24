@@ -105,6 +105,11 @@ import {
   DataTableFilterMenu,
   DataTableInlineFilter,
   DataTableEmptyBody,
+  DataTableEmptyFilteredMessage,
+  DataTableEmptyTitle,
+  DataTableEmptyDescription,
+  DataTableEmptyIcon,
+  DataTableEmptyMessage,
 } from "@/components/data-table"
 import { TableColumnHeader } from "@/components/data-table/components"
 import {
@@ -129,7 +134,7 @@ import {
 } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { AlertTriangle, Info } from "lucide-react"
+import { AlertTriangle, Info, UserSearch, SearchX } from "lucide-react"
 
 type Product = {
   id: string
@@ -806,7 +811,7 @@ function AdvancedNuqsTableContent() {
           return
         }
 
-        void setUrlParams({ globalFilter: value, search: value })
+        void setUrlParams({ globalFilter: value, search: value, pageIndex: 0 })
       } else {
         // OR filter object - store in globalFilter
         // Exclude filterId from filters to keep URLs shorter
@@ -822,6 +827,7 @@ function AdvancedNuqsTableContent() {
             filters: serializedFilters,
             joinOperator: filterObj.joinOperator,
           },
+          pageIndex: 0,
         })
       }
     },
@@ -838,6 +844,7 @@ function AdvancedNuqsTableContent() {
           filters: [],
           globalFilter: "",
           search: "",
+          pageIndex: 0,
         })
       } else {
         // Use core utility to process filters and determine routing
@@ -856,10 +863,15 @@ function AdvancedNuqsTableContent() {
               filters: urlFilters,
               joinOperator: result.joinOperator,
             },
+            pageIndex: 0,
           })
         } else {
           // Use filters param for AND logic
-          void setUrlParams({ filters: urlFilters, globalFilter: "" })
+          void setUrlParams({
+            filters: urlFilters,
+            globalFilter: "",
+            pageIndex: 0,
+          })
         }
       }
     },
@@ -874,6 +886,7 @@ function AdvancedNuqsTableContent() {
           inlineFilters: [],
           globalFilter: "",
           search: "",
+          pageIndex: 0,
         })
       } else {
         // Use core utility to process filters and determine routing
@@ -892,10 +905,15 @@ function AdvancedNuqsTableContent() {
               filters: urlFilters,
               joinOperator: result.joinOperator,
             },
+            pageIndex: 0,
           })
         } else {
           // Use inlineFilters param for AND logic
-          void setUrlParams({ inlineFilters: urlFilters, globalFilter: "" })
+          void setUrlParams({
+            inlineFilters: urlFilters,
+            globalFilter: "",
+            pageIndex: 0,
+          })
         }
       }
     },
@@ -1209,7 +1227,31 @@ function AdvancedNuqsTableContent() {
               <DataTable>
                 <DataTableHeader />
                 <DataTableBody>
-                  <DataTableEmptyBody />
+                  <DataTableEmptyBody>
+                    <DataTableEmptyMessage>
+                      <DataTableEmptyIcon>
+                        <UserSearch className="size-12" />
+                      </DataTableEmptyIcon>
+                      <DataTableEmptyTitle>
+                        No customers found
+                      </DataTableEmptyTitle>
+                      <DataTableEmptyDescription>
+                        There are no customers to display at this time.
+                      </DataTableEmptyDescription>
+                    </DataTableEmptyMessage>
+                    <DataTableEmptyFilteredMessage>
+                      <DataTableEmptyIcon>
+                        <SearchX className="size-12" />
+                      </DataTableEmptyIcon>
+                      <DataTableEmptyTitle>
+                        No matches found
+                      </DataTableEmptyTitle>
+                      <DataTableEmptyDescription>
+                        Try adjusting your filters or search to find what
+                        you&apos;re looking for.
+                      </DataTableEmptyDescription>
+                    </DataTableEmptyFilteredMessage>
+                  </DataTableEmptyBody>
                 </DataTableBody>
               </DataTable>
               <DataTablePagination />
@@ -1240,7 +1282,31 @@ function AdvancedNuqsTableContent() {
               <DataTable>
                 <DataTableHeader />
                 <DataTableBody>
-                  <DataTableEmptyBody />
+                  <DataTableEmptyBody>
+                    <DataTableEmptyMessage>
+                      <DataTableEmptyIcon>
+                        <UserSearch className="size-12" />
+                      </DataTableEmptyIcon>
+                      <DataTableEmptyTitle>
+                        No customers found
+                      </DataTableEmptyTitle>
+                      <DataTableEmptyDescription>
+                        There are no customers to display at this time.
+                      </DataTableEmptyDescription>
+                    </DataTableEmptyMessage>
+                    <DataTableEmptyFilteredMessage>
+                      <DataTableEmptyIcon>
+                        <SearchX className="size-12" />
+                      </DataTableEmptyIcon>
+                      <DataTableEmptyTitle>
+                        No matches found
+                      </DataTableEmptyTitle>
+                      <DataTableEmptyDescription>
+                        Try adjusting your filters or search to find what
+                        you&apos;re looking for.
+                      </DataTableEmptyDescription>
+                    </DataTableEmptyFilteredMessage>
+                  </DataTableEmptyBody>
                 </DataTableBody>
               </DataTable>
               <DataTablePagination />

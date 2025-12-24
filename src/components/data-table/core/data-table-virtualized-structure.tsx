@@ -63,7 +63,7 @@ export const DataTableVirtualizedHeader = React.memo(
           className,
         )}
       >
-        {table.getHeaderGroups().map(headerGroup => (
+        {headerGroups.map(headerGroup => (
           <TableRow key={headerGroup.id} className="flex w-full border-b">
             {headerGroup.headers.map(header => {
               const size = header.column.columnDef.size

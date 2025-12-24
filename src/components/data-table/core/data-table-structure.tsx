@@ -62,7 +62,7 @@ export const DataTableHeader = React.memo(function DataTableHeader({
         className,
       )}
     >
-      {table.getHeaderGroups().map(headerGroup => (
+      {headerGroups.map(headerGroup => (
         <TableRow key={headerGroup.id}>
           {headerGroup.headers.map(header => {
             const size = header.column.columnDef.size

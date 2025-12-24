@@ -20,6 +20,11 @@ import {
   DataTableSortMenu,
   DataTableFilterMenu,
   DataTableEmptyBody,
+  DataTableEmptyFilteredMessage,
+  DataTableEmptyTitle,
+  DataTableEmptyDescription,
+  DataTableEmptyIcon,
+  DataTableEmptyMessage,
 } from "@/components/data-table"
 import { TableColumnHeader } from "@/components/data-table/components"
 import {
@@ -41,6 +46,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import { UserSearch, SearchX } from "lucide-react"
 
 type Product = {
   id: string
@@ -530,6 +536,7 @@ export default function AdvancedStateTableExample() {
   // Memoized handlers for better performance
   const handleGlobalFilterChange = useCallback((value: string | object) => {
     setGlobalFilter(value)
+    setPagination(prev => ({ ...prev, pageIndex: 0 }))
   }, [])
 
   const handleSortingChange = useCallback((updater: Updater<SortingState>) => {
@@ -588,6 +595,7 @@ export default function AdvancedStateTableExample() {
         // Clear all filters
         setColumnFilters([])
         setGlobalFilter("")
+        setPagination(prev => ({ ...prev, pageIndex: 0 }))
       } else {
         // Use core utility to process filters and determine routing
         const result = processFiltersForLogic(filters)
@@ -599,6 +607,7 @@ export default function AdvancedStateTableExample() {
             filters: result.processedFilters,
             joinOperator: result.joinOperator,
           })
+          setPagination(prev => ({ ...prev, pageIndex: 0 }))
         } else {
           // Use columnFilters for AND logic
           setGlobalFilter("")
@@ -608,6 +617,7 @@ export default function AdvancedStateTableExample() {
               value: filter,
             })),
           )
+          setPagination(prev => ({ ...prev, pageIndex: 0 }))
         }
       }
     },
@@ -641,7 +651,27 @@ export default function AdvancedStateTableExample() {
         <DataTable>
           <DataTableHeader />
           <DataTableBody>
-            <DataTableEmptyBody />
+            <DataTableEmptyBody>
+              <DataTableEmptyMessage>
+                <DataTableEmptyIcon>
+                  <UserSearch className="size-12" />
+                </DataTableEmptyIcon>
+                <DataTableEmptyTitle>No customers found</DataTableEmptyTitle>
+                <DataTableEmptyDescription>
+                  There are no customers to display at this time.
+                </DataTableEmptyDescription>
+              </DataTableEmptyMessage>
+              <DataTableEmptyFilteredMessage>
+                <DataTableEmptyIcon>
+                  <SearchX className="size-12" />
+                </DataTableEmptyIcon>
+                <DataTableEmptyTitle>No matches found</DataTableEmptyTitle>
+                <DataTableEmptyDescription>
+                  Try adjusting your filters or search to find what you&apos;re
+                  looking for.
+                </DataTableEmptyDescription>
+              </DataTableEmptyFilteredMessage>
+            </DataTableEmptyBody>
           </DataTableBody>
         </DataTable>
         <DataTablePagination />

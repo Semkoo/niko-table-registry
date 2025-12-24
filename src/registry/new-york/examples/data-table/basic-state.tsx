@@ -235,7 +235,7 @@ export default function BasicTableStateExample() {
           <DataTableHeader />
           <DataTableBody />
         </DataTable>
-        <DataTablePagination pageSizeOptions={[5, 10, 20]} />
+        <DataTablePagination />
       </DataTableRoot>
 
       {/* State Display for demonstration */}

@@ -10,6 +10,11 @@ import {
   DataTablePagination,
   DataTableSearchFilter,
   DataTableViewMenu,
+  DataTableEmptyFilteredMessage,
+  DataTableEmptyTitle,
+  DataTableEmptyDescription,
+  DataTableEmptyIcon,
+  DataTableEmptyMessage,
   DataTableEmptyBody,
 } from "@/components/data-table"
 import {
@@ -21,11 +26,13 @@ import {
   DataTableAsideTitle,
   DataTableAsideClose,
 } from "@/components/data-table/components"
+import { useDataTable } from "@/components/data-table/core"
 import type { DataTableColumnDef } from "@/components/data-table/types"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Filter, Eye } from "lucide-react"
+import { Filter, Eye, UserSearch, SearchX } from "lucide-react"
+import { Checkbox } from "@/components/ui/checkbox"
 
 type Customer = {
   id: string
@@ -107,6 +114,52 @@ const data: Customer[] = [
     phone: "555-0109",
   },
 ]
+
+function AsideFilters({ data }: { data: Customer[] }) {
+  const { table } = useDataTable<Customer>()
+  const column = table.getColumn("company")
+  const filterValue = (column?.getFilterValue() as string[]) || []
+
+  const toggleCompany = (company: string, checked: boolean) => {
+    if (checked) {
+      column?.setFilterValue([...filterValue, company])
+    } else {
+      column?.setFilterValue(filterValue.filter(v => v !== company))
+    }
+  }
+
+  const companies = React.useMemo(
+    () => Array.from(new Set(data.map(c => c.company))).sort(),
+    [data],
+  )
+
+  return (
+    <div className="mt-4 space-y-4">
+      <h4 className="text-sm font-medium">Company</h4>
+      <ScrollArea className="h-[400px]">
+        <div className="space-y-4 pr-4">
+          {companies.map(company => (
+            <div key={company} className="flex items-center space-x-2">
+              <Checkbox
+                id={`company-${company}`}
+                checked={filterValue.includes(company)}
+                onCheckedChange={checked =>
+                  toggleCompany(company, checked === true)
+                }
+              />
+              <label
+                htmlFor={`company-${company}`}
+                className="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                {company}
+              </label>
+            </div>
+          ))}
+        </div>
+      </ScrollArea>
+    </div>
+  )
+}
 
 export default function AsideTableExample() {
   const [selectedCustomer, setSelectedCustomer] =
@@ -217,24 +270,7 @@ export default function AsideTableExample() {
                 <DataTableAsideClose />
               </div>
             </DataTableAsideHeader>
-            <div className="mt-4 space-y-4">
-              <h4 className="text-sm font-medium">Company</h4>
-              <ScrollArea className="h-[400px]">
-                <div className="space-y-2 pr-4">
-                  {Array.from(new Set(data.map(c => c.company))).map(
-                    company => (
-                      <label
-                        key={company}
-                        className="flex cursor-pointer items-center space-x-2"
-                      >
-                        <input type="checkbox" className="rounded" />
-                        <span className="text-sm">{company}</span>
-                      </label>
-                    ),
-                  )}
-                </div>
-              </ScrollArea>
-            </div>
+            <AsideFilters data={data} />
           </DataTableAsideContent>
         </DataTableAside>
 
@@ -247,7 +283,27 @@ export default function AsideTableExample() {
               setShowFilters(false) // Close filters when customer is selected
             }}
           >
-            <DataTableEmptyBody />
+            <DataTableEmptyBody>
+              <DataTableEmptyMessage>
+                <DataTableEmptyIcon>
+                  <UserSearch className="size-12" />
+                </DataTableEmptyIcon>
+                <DataTableEmptyTitle>No customers found</DataTableEmptyTitle>
+                <DataTableEmptyDescription>
+                  There are no customers to display at this time.
+                </DataTableEmptyDescription>
+              </DataTableEmptyMessage>
+              <DataTableEmptyFilteredMessage>
+                <DataTableEmptyIcon>
+                  <SearchX className="size-12" />
+                </DataTableEmptyIcon>
+                <DataTableEmptyTitle>No matches found</DataTableEmptyTitle>
+                <DataTableEmptyDescription>
+                  Try adjusting your filters or search to find what you&apos;re
+                  looking for.
+                </DataTableEmptyDescription>
+              </DataTableEmptyFilteredMessage>
+            </DataTableEmptyBody>
           </DataTableBody>
         </DataTable>
 

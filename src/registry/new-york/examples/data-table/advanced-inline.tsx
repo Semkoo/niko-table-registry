@@ -11,11 +11,17 @@ import {
   DataTableViewMenu,
   DataTableInlineFilter,
   DataTableEmptyBody,
+  DataTableEmptyFilteredMessage,
+  DataTableEmptyTitle,
+  DataTableEmptyDescription,
+  DataTableEmptyIcon,
+  DataTableEmptyMessage,
 } from "@/components/data-table"
 import { TableColumnHeader } from "@/components/data-table/components"
 import { daysAgo } from "@/components/data-table/lib"
 import type { DataTableColumnDef } from "@/components/data-table/types"
 import { Badge } from "@/components/ui/badge"
+import { UserSearch, SearchX } from "lucide-react"
 
 type Product = {
   id: string
@@ -350,7 +356,27 @@ export default function AdvanceInlineTableExample() {
       <DataTable>
         <DataTableHeader />
         <DataTableBody>
-          <DataTableEmptyBody />
+          <DataTableEmptyBody>
+            <DataTableEmptyMessage>
+              <DataTableEmptyIcon>
+                <UserSearch className="size-12" />
+              </DataTableEmptyIcon>
+              <DataTableEmptyTitle>No products found</DataTableEmptyTitle>
+              <DataTableEmptyDescription>
+                There are no products to display at this time.
+              </DataTableEmptyDescription>
+            </DataTableEmptyMessage>
+            <DataTableEmptyFilteredMessage>
+              <DataTableEmptyIcon>
+                <SearchX className="size-12" />
+              </DataTableEmptyIcon>
+              <DataTableEmptyTitle>No matches found</DataTableEmptyTitle>
+              <DataTableEmptyDescription>
+                Try adjusting your filters or search to find what you&apos;re
+                looking for.
+              </DataTableEmptyDescription>
+            </DataTableEmptyFilteredMessage>
+          </DataTableEmptyBody>
         </DataTableBody>
       </DataTable>
       <DataTablePagination />

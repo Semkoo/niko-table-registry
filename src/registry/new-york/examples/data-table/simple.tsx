@@ -68,10 +68,10 @@ export default function SimpleTableExample() {
         <DataTableBody>
           <DataTableSkeleton />
           <DataTableEmptyBody>
-            <DataTableEmptyIcon>
-              <Inbox className="size-12" />
-            </DataTableEmptyIcon>
             <DataTableEmptyMessage>
+              <DataTableEmptyIcon>
+                <Inbox className="size-12" />
+              </DataTableEmptyIcon>
               <DataTableEmptyTitle>No users found</DataTableEmptyTitle>
               <DataTableEmptyDescription>
                 There are no users to display at this time.
