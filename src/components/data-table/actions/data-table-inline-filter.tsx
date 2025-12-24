@@ -7,6 +7,7 @@ import {
   type TableInlineProps,
 } from "../filters/table-inline-filter"
 import { useGeneratedOptions } from "../hooks/use-generated-options"
+import { FILTER_VARIANTS } from "../lib/constants"
 import type { Option } from "../types"
 
 type BaseInlineProps<TData> = Omit<TableInlineProps<TData>, "table">
@@ -51,8 +52,12 @@ export function DataTableInlineFilter<TData>({
     if (!autoOptions) return null
     table.getAllColumns().forEach(column => {
       const meta = (column.columnDef.meta ||= {})
-      const variant = meta.variant ?? "text"
-      if (variant !== "select" && variant !== "multiSelect") return
+      const variant = meta.variant ?? FILTER_VARIANTS.TEXT
+      if (
+        variant !== FILTER_VARIANTS.SELECT &&
+        variant !== FILTER_VARIANTS.MULTI_SELECT
+      )
+        return
       const gen = generatedOptions[column.id]
       if (!gen || gen.length === 0) return
 

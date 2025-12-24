@@ -418,8 +418,8 @@ function fetchProducts(
 
           // Handle empty value filters
           if (
-            filter.operator === FILTER_OPERATORS.IS_EMPTY ||
-            filter.operator === FILTER_OPERATORS.IS_NOT_EMPTY
+            filter.operator === FILTER_OPERATORS.EMPTY ||
+            filter.operator === FILTER_OPERATORS.NOT_EMPTY
           ) {
             // These don't need a value
           } else if (!filterValue || filterValue === "") {
@@ -427,45 +427,45 @@ function fetchProducts(
           }
 
           switch (filter.operator) {
-            case FILTER_OPERATORS.EQUAL:
+            case FILTER_OPERATORS.EQ:
               return (
                 String(productValue).toLowerCase() ===
                 String(filterValue).toLowerCase()
               )
-            case FILTER_OPERATORS.NOT_EQUAL:
+            case FILTER_OPERATORS.NEQ:
               return (
                 String(productValue).toLowerCase() !==
                 String(filterValue).toLowerCase()
               )
-            case FILTER_OPERATORS.I_LIKE:
+            case FILTER_OPERATORS.ILIKE:
               return String(productValue)
                 .toLowerCase()
                 .includes(String(filterValue).toLowerCase())
-            case FILTER_OPERATORS.NOT_I_LIKE:
+            case FILTER_OPERATORS.NOT_ILIKE:
               return !String(productValue)
                 .toLowerCase()
                 .includes(String(filterValue).toLowerCase())
-            case FILTER_OPERATORS.GREATER_THAN:
+            case FILTER_OPERATORS.GT:
               return Number(productValue) > Number(filterValue)
-            case FILTER_OPERATORS.LESS_THAN:
+            case FILTER_OPERATORS.LT:
               return Number(productValue) < Number(filterValue)
-            case FILTER_OPERATORS.GREATER_THAN_OR_EQUAL:
+            case FILTER_OPERATORS.GTE:
               return Number(productValue) >= Number(filterValue)
-            case FILTER_OPERATORS.LESS_THAN_OR_EQUAL:
+            case FILTER_OPERATORS.LTE:
               return Number(productValue) <= Number(filterValue)
-            case FILTER_OPERATORS.IS_EMPTY:
+            case FILTER_OPERATORS.EMPTY:
               return (
                 productValue === null ||
                 productValue === undefined ||
                 String(productValue).trim() === ""
               )
-            case FILTER_OPERATORS.IS_NOT_EMPTY:
+            case FILTER_OPERATORS.NOT_EMPTY:
               return (
                 productValue !== null &&
                 productValue !== undefined &&
                 String(productValue).trim() !== ""
               )
-            case FILTER_OPERATORS.IN_ARRAY:
+            case FILTER_OPERATORS.IN:
               if (Array.isArray(filterValue)) {
                 return filterValue.some(
                   v =>
@@ -474,7 +474,7 @@ function fetchProducts(
                 )
               }
               return false
-            case FILTER_OPERATORS.NOT_IN_ARRAY:
+            case FILTER_OPERATORS.NOT_IN:
               if (Array.isArray(filterValue)) {
                 return !filterValue.some(
                   v =>

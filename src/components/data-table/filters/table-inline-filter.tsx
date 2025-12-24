@@ -72,7 +72,12 @@ import {
 import { formatDate } from "../lib/format"
 import { useKeyboardShortcut } from "../hooks"
 import { cn } from "@/lib/utils"
-import { JOIN_OPERATORS, KEYBOARD_SHORTCUTS } from "../lib/constants"
+import {
+  FILTER_OPERATORS,
+  FILTER_VARIANTS,
+  JOIN_OPERATORS,
+  KEYBOARD_SHORTCUTS,
+} from "../lib/constants"
 import { dataTableConfig } from "../config/data-table"
 import type {
   ExtendedColumnFilter,
@@ -100,7 +105,7 @@ function createFilterId<TData>(
       : JSON.stringify(filter.value)
 
   // Include index as a fallback to ensure uniqueness for URL sharing
-  const indexSuffix = typeof index === "number" ? `-${index}` : ""
+  const indexSuffix = typeof index === FILTER_VARIANTS.NUMBER ? `-${index}` : ""
 
   return `${filter.id}-${filter.operator}-${filter.variant}-${valueStr}${indexSuffix}`
     .toLowerCase()
@@ -382,19 +387,24 @@ export function TableInline<TData>({
 
   const onFilterAdd = React.useCallback(
     (column: Column<TData>, value: string) => {
-      if (!value.trim() && column.columnDef.meta?.variant !== "boolean") {
+      if (
+        !value.trim() &&
+        column.columnDef.meta?.variant !== FILTER_VARIANTS.BOOLEAN
+      ) {
         return
       }
 
       const filterValue =
-        column.columnDef.meta?.variant === "multiSelect" ? [value] : value
+        column.columnDef.meta?.variant === FILTER_VARIANTS.MULTI_SELECT
+          ? [value]
+          : value
 
       const filterWithoutId = {
         id: column.id as Extract<keyof TData, string>,
         value: filterValue,
-        variant: column.columnDef.meta?.variant ?? "text",
+        variant: column.columnDef.meta?.variant ?? FILTER_VARIANTS.TEXT,
         operator: getDefaultFilterOperator(
-          column.columnDef.meta?.variant ?? "text",
+          column.columnDef.meta?.variant ?? FILTER_VARIANTS.TEXT,
         ),
         joinOperator: JOIN_OPERATORS.AND, // Default to AND for new filters
       }
@@ -740,9 +750,12 @@ function TableInlineFilterItem<TData>({
                     onSelect={() => {
                       onFilterUpdate(filter.filterId, {
                         id: column.id as Extract<keyof TData, string>,
-                        variant: column.columnDef.meta?.variant ?? "text",
+                        variant:
+                          column.columnDef.meta?.variant ??
+                          FILTER_VARIANTS.TEXT,
                         operator: getDefaultFilterOperator(
-                          column.columnDef.meta?.variant ?? "text",
+                          column.columnDef.meta?.variant ??
+                            FILTER_VARIANTS.TEXT,
                         ),
                         value: "",
                       })
@@ -777,7 +790,10 @@ function TableInlineFilterItem<TData>({
           onFilterUpdate(filter.filterId, {
             operator: value,
             value:
-              value === "isEmpty" || value === "isNotEmpty" ? "" : filter.value,
+              value === FILTER_OPERATORS.EMPTY ||
+              value === FILTER_OPERATORS.NOT_EMPTY
+                ? ""
+                : filter.value,
           })
         }
       >
@@ -837,10 +853,10 @@ function FilterValueSelector<TData>({
   value,
   onSelect,
 }: FilterValueSelectorProps<TData>) {
-  const variant = column.columnDef.meta?.variant ?? "text"
+  const variant = column.columnDef.meta?.variant ?? FILTER_VARIANTS.TEXT
 
   switch (variant) {
-    case "boolean":
+    case FILTER_VARIANTS.BOOLEAN:
       return (
         <CommandGroup>
           <CommandItem value="true" onSelect={() => onSelect("true")}>
@@ -852,8 +868,8 @@ function FilterValueSelector<TData>({
         </CommandGroup>
       )
 
-    case "select":
-    case "multiSelect":
+    case FILTER_VARIANTS.SELECT:
+    case FILTER_VARIANTS.MULTI_SELECT:
       return (
         <CommandGroup>
           {column.columnDef.meta?.options?.map((option: Option) => (
@@ -874,8 +890,8 @@ function FilterValueSelector<TData>({
         </CommandGroup>
       )
 
-    case "date":
-    case "dateRange":
+    case FILTER_VARIANTS.DATE:
+    case FILTER_VARIANTS.DATE_RANGE:
       return (
         <Calendar
           mode="single"
@@ -932,13 +948,16 @@ function onFilterInputRender<TData>({
   showValueSelector: boolean
   setShowValueSelector: (value: boolean) => void
 }) {
-  if (filter.operator === "isEmpty" || filter.operator === "isNotEmpty") {
+  if (
+    filter.operator === FILTER_OPERATORS.EMPTY ||
+    filter.operator === FILTER_OPERATORS.NOT_EMPTY
+  ) {
     return (
       <div
         id={inputId}
         role="status"
         aria-label={`${column.columnDef.meta?.label} filter is ${
-          filter.operator === "isEmpty" ? "empty" : "not empty"
+          filter.operator === FILTER_OPERATORS.EMPTY ? "empty" : "not empty"
         }`}
         aria-live="polite"
         className="h-full w-16 rounded-none border bg-transparent px-1.5 py-0.5 text-muted-foreground dark:bg-input/30"
@@ -947,12 +966,13 @@ function onFilterInputRender<TData>({
   }
 
   switch (filter.variant) {
-    case "text":
-    case "number":
-    case "range": {
+    case FILTER_VARIANTS.TEXT:
+    case FILTER_VARIANTS.NUMBER:
+    case FILTER_VARIANTS.RANGE: {
       if (
-        (filter.variant === "range" && filter.operator === "isBetween") ||
-        filter.operator === "isBetween"
+        (filter.variant === FILTER_VARIANTS.RANGE &&
+          filter.operator === FILTER_OPERATORS.BETWEEN) ||
+        filter.operator === FILTER_OPERATORS.BETWEEN
       ) {
         return (
           <TableRangeFilter
@@ -965,12 +985,14 @@ function onFilterInputRender<TData>({
         )
       }
 
-      const isNumber = filter.variant === "number" || filter.variant === "range"
+      const isNumber =
+        filter.variant === FILTER_VARIANTS.NUMBER ||
+        filter.variant === FILTER_VARIANTS.RANGE
 
       return (
         <Input
           id={inputId}
-          type={isNumber ? "number" : "text"}
+          type={isNumber ? FILTER_VARIANTS.NUMBER : FILTER_VARIANTS.TEXT}
           inputMode={isNumber ? "numeric" : undefined}
           placeholder={column.columnDef.meta?.placeholder ?? "Enter value..."}
           className="h-full w-24 rounded-none px-1.5"
@@ -982,7 +1004,7 @@ function onFilterInputRender<TData>({
       )
     }
 
-    case "boolean": {
+    case FILTER_VARIANTS.BOOLEAN: {
       const inputListboxId = `${inputId}-listbox`
 
       return (
@@ -1009,8 +1031,8 @@ function onFilterInputRender<TData>({
       )
     }
 
-    case "select":
-    case "multiSelect": {
+    case FILTER_VARIANTS.SELECT:
+    case FILTER_VARIANTS.MULTI_SELECT: {
       const inputListboxId = `${inputId}-listbox`
 
       const options = column.columnDef.meta?.options ?? []
@@ -1033,7 +1055,7 @@ function onFilterInputRender<TData>({
               className="h-full min-w-16 rounded-none border px-1.5 font-normal dark:bg-input/30"
             >
               {selectedOptions.length === 0 ? (
-                filter.variant === "multiSelect" ? (
+                filter.variant === FILTER_VARIANTS.MULTI_SELECT ? (
                   "Select options..."
                 ) : (
                   "Select option..."
@@ -1077,7 +1099,7 @@ function onFilterInputRender<TData>({
                       value={option.value}
                       onSelect={() => {
                         const value =
-                          filter.variant === "multiSelect"
+                          filter.variant === FILTER_VARIANTS.MULTI_SELECT
                             ? selectedValues.includes(option.value)
                               ? selectedValues.filter(v => v !== option.value)
                               : [...selectedValues, option.value]
@@ -1087,7 +1109,7 @@ function onFilterInputRender<TData>({
                     >
                       {option.icon && <option.icon />}
                       <span className="truncate">{option.label}</span>
-                      {filter.variant === "multiSelect" && (
+                      {filter.variant === FILTER_VARIANTS.MULTI_SELECT && (
                         <Check
                           className={cn(
                             "ml-auto",
@@ -1107,8 +1129,8 @@ function onFilterInputRender<TData>({
       )
     }
 
-    case "date":
-    case "dateRange": {
+    case FILTER_VARIANTS.DATE:
+    case FILTER_VARIANTS.DATE_RANGE: {
       const inputListboxId = `${inputId}-listbox`
 
       const dateValue = Array.isArray(filter.value)
@@ -1116,7 +1138,7 @@ function onFilterInputRender<TData>({
         : [filter.value, filter.value].filter(Boolean)
 
       const displayValue =
-        filter.operator === "isBetween" && dateValue.length === 2
+        filter.operator === FILTER_OPERATORS.BETWEEN && dateValue.length === 2
           ? `${formatDate(new Date(Number(dateValue[0])))} - ${formatDate(
               new Date(Number(dateValue[1])),
             )}`
@@ -1146,9 +1168,9 @@ function onFilterInputRender<TData>({
             align="start"
             className="w-auto origin-(--radix-popover-content-transform-origin) p-0"
           >
-            {filter.operator === "isBetween" ? (
+            {filter.operator === FILTER_OPERATORS.BETWEEN ? (
               <Calendar
-                mode="range"
+                mode={FILTER_VARIANTS.RANGE}
                 captionLayout="dropdown"
                 selected={
                   dateValue.length === 2

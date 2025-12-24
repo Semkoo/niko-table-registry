@@ -92,6 +92,8 @@ import { formatDate } from "../lib/format"
 import { useKeyboardShortcut } from "../hooks"
 import { cn } from "@/lib/utils"
 import {
+  FILTER_OPERATORS,
+  FILTER_VARIANTS,
   JOIN_OPERATORS,
   ERROR_MESSAGES,
   KEYBOARD_SHORTCUTS,
@@ -121,7 +123,7 @@ function createFilterId<TData>(
       : JSON.stringify(filter.value)
 
   // Include index as a fallback to ensure uniqueness for URL sharing
-  const indexSuffix = typeof index === "number" ? `-${index}` : ""
+  const indexSuffix = typeof index === FILTER_VARIANTS.NUMBER ? `-${index}` : ""
 
   return `${filter.id}-${filter.operator}-${filter.variant}-${valueStr}${indexSuffix}`
     .toLowerCase()
@@ -886,9 +888,9 @@ export function TableFilterMenu<TData>({
     const filterWithoutId = {
       id: column.id as Extract<keyof TData, string>,
       value: "",
-      variant: column.columnDef.meta?.variant ?? "text",
+      variant: column.columnDef.meta?.variant ?? FILTER_VARIANTS.TEXT,
       operator: getDefaultFilterOperator(
-        column.columnDef.meta?.variant ?? "text",
+        column.columnDef.meta?.variant ?? FILTER_VARIANTS.TEXT,
       ),
       joinOperator: JOIN_OPERATORS.AND, // Default to AND for new filters
     }
@@ -1234,7 +1236,7 @@ function FilterEmptyInput<TData>({
       id={inputId}
       role="status"
       aria-label={`${columnMeta?.label} filter is ${
-        filter.operator === "isEmpty" ? "empty" : "not empty"
+        filter.operator === FILTER_OPERATORS.EMPTY ? "empty" : "not empty"
       }`}
       aria-live="polite"
       className="h-8 w-full rounded border bg-transparent dark:bg-input/30"
@@ -1255,12 +1257,14 @@ function FilterTextNumberInput<TData>({
   FilterInputProps<TData>,
   "filter" | "inputId" | "columnMeta" | "onFilterUpdate"
 >) {
-  const isNumber = filter.variant === "number" || filter.variant === "range"
+  const isNumber =
+    filter.variant === FILTER_VARIANTS.NUMBER ||
+    filter.variant === FILTER_VARIANTS.RANGE
 
   return (
     <Input
       id={inputId}
-      type={isNumber ? "number" : "text"}
+      type={isNumber ? FILTER_VARIANTS.NUMBER : FILTER_VARIANTS.TEXT}
       aria-label={`${columnMeta?.label} filter value`}
       aria-describedby={`${inputId}-description`}
       inputMode={isNumber ? "numeric" : undefined}
@@ -1332,7 +1336,7 @@ function FilterFacetedSelect<TData>({
   setShowValueSelector,
 }: FilterInputProps<TData>) {
   const inputListboxId = `${inputId}-listbox`
-  const multiple = filter.variant === "multiSelect"
+  const multiple = filter.variant === FILTER_VARIANTS.MULTI_SELECT
   const selectedValues = multiple
     ? Array.isArray(filter.value)
       ? filter.value
@@ -1419,7 +1423,7 @@ function FilterDatePicker<TData>({
     : [filter.value, filter.value].filter(Boolean)
 
   const displayValue =
-    filter.operator === "isBetween" && dateValue.length === 2
+    filter.operator === FILTER_OPERATORS.BETWEEN && dateValue.length === 2
       ? `${formatDate(new Date(Number(dateValue[0])))} - ${formatDate(
           new Date(Number(dateValue[1])),
         )}`
@@ -1440,7 +1444,7 @@ function FilterDatePicker<TData>({
             "w-full justify-start rounded text-left font-normal",
             !filter.value && "text-muted-foreground",
           )}
-          title={`Select ${columnMeta?.label?.toLowerCase() ?? "date"}${filter.operator === "isBetween" ? " range" : ""}`}
+          title={`Select ${columnMeta?.label?.toLowerCase() ?? FILTER_VARIANTS.DATE}${filter.operator === FILTER_OPERATORS.BETWEEN ? " range" : ""}`}
         >
           <CalendarIcon />
           <span className="truncate">{displayValue}</span>
@@ -1451,10 +1455,10 @@ function FilterDatePicker<TData>({
         align="start"
         className="w-auto origin-(--radix-popover-content-transform-origin) p-0"
       >
-        {filter.operator === "isBetween" ? (
+        {filter.operator === FILTER_OPERATORS.BETWEEN ? (
           <Calendar
             aria-label={`Select ${columnMeta?.label} date range`}
-            mode="range"
+            mode={FILTER_VARIANTS.RANGE}
             captionLayout="dropdown"
             selected={
               dateValue.length === 2
@@ -1503,19 +1507,23 @@ function FilterValueInput<TData>(props: FilterInputProps<TData>) {
   const { filter, column, inputId, onFilterUpdate } = props
 
   // Empty state for isEmpty/isNotEmpty operators
-  if (filter.operator === "isEmpty" || filter.operator === "isNotEmpty") {
+  if (
+    filter.operator === FILTER_OPERATORS.EMPTY ||
+    filter.operator === FILTER_OPERATORS.NOT_EMPTY
+  ) {
     return <FilterEmptyInput {...props} />
   }
 
   // Variant-specific inputs
   switch (filter.variant) {
-    case "text":
-    case "number":
-    case "range": {
+    case FILTER_VARIANTS.TEXT:
+    case FILTER_VARIANTS.NUMBER:
+    case FILTER_VARIANTS.RANGE: {
       // Range filter for isBetween operator
       if (
-        (filter.variant === "range" && filter.operator === "isBetween") ||
-        filter.operator === "isBetween"
+        (filter.variant === FILTER_VARIANTS.RANGE &&
+          filter.operator === FILTER_OPERATORS.BETWEEN) ||
+        filter.operator === FILTER_OPERATORS.BETWEEN
       ) {
         return (
           <TableRangeFilter
@@ -1530,15 +1538,15 @@ function FilterValueInput<TData>(props: FilterInputProps<TData>) {
       return <FilterTextNumberInput {...props} />
     }
 
-    case "boolean":
+    case FILTER_VARIANTS.BOOLEAN:
       return <FilterBooleanSelect {...props} />
 
-    case "select":
-    case "multiSelect":
+    case FILTER_VARIANTS.SELECT:
+    case FILTER_VARIANTS.MULTI_SELECT:
       return <FilterFacetedSelect {...props} />
 
-    case "date":
-    case "dateRange":
+    case FILTER_VARIANTS.DATE:
+    case FILTER_VARIANTS.DATE_RANGE:
       return <FilterDatePicker {...props} />
 
     default:
@@ -1667,9 +1675,10 @@ function FilterFieldSelector<TData>({
                   onSelect={value => {
                     onFilterUpdate(filter.filterId, {
                       id: value as Extract<keyof TData, string>,
-                      variant: column.columnDef.meta?.variant ?? "text",
+                      variant:
+                        column.columnDef.meta?.variant ?? FILTER_VARIANTS.TEXT,
                       operator: getDefaultFilterOperator(
-                        column.columnDef.meta?.variant ?? "text",
+                        column.columnDef.meta?.variant ?? FILTER_VARIANTS.TEXT,
                       ),
                       value: "",
                     })
@@ -1728,7 +1737,10 @@ function FilterOperatorSelector<TData>({
         onFilterUpdate(filter.filterId, {
           operator: value,
           value:
-            value === "isEmpty" || value === "isNotEmpty" ? "" : filter.value,
+            value === FILTER_OPERATORS.EMPTY ||
+            value === FILTER_OPERATORS.NOT_EMPTY
+              ? ""
+              : filter.value,
         })
       }
     >
