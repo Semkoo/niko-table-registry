@@ -165,6 +165,7 @@ import {
   processFiltersForLogic,
 } from "@/components/data-table/lib"
 import { serializeFiltersForUrl } from "@/components/data-table/filters/table-filter-menu"
+import { formatQueryString } from "@/components/data-table/lib/format"
 import type {
   DataTableColumnDef,
   ExtendedColumnFilter,
@@ -747,14 +748,22 @@ const columns: DataTableColumnDef<Product>[] = [
 function StandardFilterToolbar({
   filters,
   onFiltersChange,
+  search,
+  onSearchChange,
 }: {
   filters: ExtendedColumnFilter<Product>[]
   onFiltersChange: (filters: ExtendedColumnFilter<Product>[] | null) => void
+  search: string
+  onSearchChange: (value: string) => void
 }) {
   return (
     <DataTableToolbarSection>
       <DataTableToolbarSection className="px-0">
-        <DataTableSearchFilter placeholder="Search products..." />
+        <DataTableSearchFilter
+          placeholder="Search products..."
+          value={search}
+          onChange={onSearchChange}
+        />
         <DataTableViewMenu />
       </DataTableToolbarSection>
       <DataTableToolbarSection className="px-0">
@@ -771,14 +780,22 @@ function StandardFilterToolbar({
 function InlineFilterToolbar({
   filters,
   onFiltersChange,
+  search,
+  onSearchChange,
 }: {
   filters: ExtendedColumnFilter<Product>[]
   onFiltersChange: (filters: ExtendedColumnFilter<Product>[]) => void
+  search: string
+  onSearchChange: (value: string) => void
 }) {
   return (
     <DataTableToolbarSection>
       <DataTableToolbarSection className="px-0">
-        <DataTableSearchFilter placeholder="Search products..." />
+        <DataTableSearchFilter
+          placeholder="Search products..."
+          value={search}
+          onChange={onSearchChange}
+        />
         <DataTableViewMenu />
       </DataTableToolbarSection>
       <DataTableToolbarSection className="px-0">
@@ -884,19 +901,25 @@ const tableStateParsers = {
     value => value as ExtendedColumnFilter<Product>[],
   ).withDefault([]),
   search: parseAsString.withDefault(""),
-  globalFilter: parseAsJson<
-    string | { filters: unknown[]; joinOperator: string }
-  >(value => {
-    // If it's already parsed as object with filters, return it
-    if (value && typeof value === "object" && "filters" in value) {
-      return value as { filters: unknown[]; joinOperator: string }
-    }
-    // If it's a string, return it
-    if (typeof value === "string") {
-      return value
-    }
-    return ""
-  }).withDefault(""),
+  // globalFilter should only be used for complex filter objects (OR/MIXED logic)
+  // Simple text search uses the "search" param instead
+  // When null/empty, nuqs will remove it from the URL
+  globalFilter: parseAsJson<{ filters: unknown[]; joinOperator: string }>(
+    value => {
+      // Only accept objects with filters (complex filter logic)
+      if (value && typeof value === "object" && "filters" in value) {
+        return value as { filters: unknown[]; joinOperator: string }
+      }
+      // Reject everything else (strings, empty strings, etc.)
+      // Return undefined to trigger default, which will be null
+      return undefined as unknown as {
+        filters: unknown[]
+        joinOperator: string
+      }
+    },
+  ).withDefault(
+    null as unknown as { filters: unknown[]; joinOperator: string },
+  ),
   columnVisibility: parseAsJson<VisibilityState>(
     value => value as VisibilityState,
   ).withDefault({}),
@@ -1183,8 +1206,8 @@ function ServerSideStateTableContent() {
       pageSize: 10,
       sort: null,
       filters: [],
-      search: "",
-      globalFilter: "",
+      search: null,
+      globalFilter: null,
       columnVisibility: {},
       inlineFilters: [],
       filterMode: "standard",
@@ -1397,20 +1420,15 @@ function ServerSideStateTableContent() {
       prevGlobalFilterRef.current = value
 
       if (typeof value === "string") {
-        // Simple search string
-        // Don't clear globalFilter with empty string if we already have OR filters
-        if (
-          value === "" &&
-          urlParams.globalFilter &&
-          typeof urlParams.globalFilter === "object"
-        ) {
-          // Empty string received but globalFilter has OR filters - ignore to prevent clearing
-          return
-        }
-
-        void setUrlParams({ globalFilter: value, search: value, pageIndex: 0 })
+        // Simple search string - only set search param
+        // Keep globalFilter independent - both can coexist
+        void setUrlParams({
+          search: value || null, // null removes from URL if empty
+          pageIndex: 0,
+        })
       } else {
         // OR filter object - store in globalFilter
+        // Keep search param independent - both can coexist
         // Exclude filterId from filters to keep URLs shorter
         const filterObj = value as {
           filters: ExtendedColumnFilter<Product>[]
@@ -1425,6 +1443,7 @@ function ServerSideStateTableContent() {
             joinOperator: filterObj.joinOperator,
           },
           pageIndex: 0,
+          // Don't clear search - it's independent from globalFilter
         })
       }
     },
@@ -1497,6 +1516,12 @@ function ServerSideStateTableContent() {
     [currentInlineFilters],
   )
 
+  // Prettify query string for display - decode and format JSON values
+  const prettifiedQueryString = useMemo(
+    () => formatQueryString(urlParams, tableStateUrlKeys),
+    [urlParams],
+  )
+
   // Direct filter change handlers - sync filter UI changes directly to URL
   const handleStandardFiltersChange = useCallback(
     (filters: ExtendedColumnFilter<Product>[] | null) => {
@@ -1504,8 +1529,8 @@ function ServerSideStateTableContent() {
       if (!filters || filters.length === 0) {
         void setUrlParams({
           filters: [],
-          globalFilter: "",
-          search: "",
+          globalFilter: null, // null removes from URL
+          search: null, // null removes from URL
           pageIndex: 0,
         })
       } else {
@@ -1529,15 +1554,24 @@ function ServerSideStateTableContent() {
           })
         } else {
           // Use filters param for AND logic
-          void setUrlParams({
+          // Only clear globalFilter if it exists in URL (don't set it if it doesn't exist)
+          const params: Record<string, unknown> = {
             filters: urlFilters,
-            globalFilter: "",
             pageIndex: 0,
-          })
+          }
+          // Check if globalFilter exists in URL (not just default value)
+          if (
+            urlParams.globalFilter !== null &&
+            typeof urlParams.globalFilter === "object" &&
+            "filters" in urlParams.globalFilter
+          ) {
+            params.globalFilter = null
+          }
+          void setUrlParams(params)
         }
       }
     },
-    [setUrlParams],
+    [setUrlParams, urlParams.globalFilter],
   )
 
   const handleInlineFiltersChange = useCallback(
@@ -1546,8 +1580,8 @@ function ServerSideStateTableContent() {
       if (filters.length === 0) {
         void setUrlParams({
           inlineFilters: [],
-          globalFilter: "",
-          search: "",
+          globalFilter: null, // null removes from URL
+          search: null, // null removes from URL
           pageIndex: 0,
         })
       } else {
@@ -1568,18 +1602,28 @@ function ServerSideStateTableContent() {
               joinOperator: result.joinOperator,
             },
             pageIndex: 0,
+            // Don't clear search - it's independent from globalFilter
           })
         } else {
           // Use inlineFilters param for AND logic
-          void setUrlParams({
+          // Only clear globalFilter if it exists in URL (don't set it if it doesn't exist)
+          const params: Record<string, unknown> = {
             inlineFilters: urlFilters,
-            globalFilter: "",
             pageIndex: 0,
-          })
+          }
+          // Check if globalFilter exists in URL (not just default value)
+          if (
+            urlParams.globalFilter !== null &&
+            typeof urlParams.globalFilter === "object" &&
+            "filters" in urlParams.globalFilter
+          ) {
+            params.globalFilter = null
+          }
+          void setUrlParams(params)
         }
       }
     },
-    [setUrlParams],
+    [setUrlParams, urlParams.globalFilter],
   )
 
   // Manual refresh function - TanStack Query handles refetching automatically
@@ -1711,6 +1755,13 @@ function ServerSideStateTableContent() {
               <StandardFilterToolbar
                 filters={normalizedStandardFilters}
                 onFiltersChange={handleStandardFiltersChange}
+                search={urlParams.search}
+                onSearchChange={value => {
+                  void setUrlParams({
+                    search: value || null, // null removes from URL if empty
+                    pageIndex: 0,
+                  })
+                }}
               />
               <DataTable>
                 <DataTableHeader />
@@ -1780,6 +1831,13 @@ function ServerSideStateTableContent() {
               <InlineFilterToolbar
                 filters={normalizedInlineFilters}
                 onFiltersChange={handleInlineFiltersChange}
+                search={urlParams.search}
+                onSearchChange={value => {
+                  void setUrlParams({
+                    search: value || null, // null removes from URL if empty
+                    pageIndex: 0,
+                  })
+                }}
               />
               <DataTable>
                 <DataTableHeader />
@@ -1857,12 +1915,10 @@ function ServerSideStateTableContent() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-2 text-xs text-muted-foreground">
-            <div className="flex justify-between">
+            <div className="flex flex-col gap-1">
               <span className="font-medium">Current URL:</span>
-              <code className="rounded bg-muted px-2 py-1 text-xs">
-                {typeof window !== "undefined"
-                  ? window.location.href.split("?")[1] || "No query params"
-                  : "No query params"}
+              <code className="overflow-wrap-anywhere block rounded bg-muted px-2 py-1 font-mono text-xs break-all whitespace-pre-wrap">
+                {prettifiedQueryString}
               </code>
             </div>
 

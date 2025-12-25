@@ -77,7 +77,14 @@
  * Try it: Add filters, sort, paginate, then refresh the page or share the URL!
  */
 
-import { useState, useCallback, useMemo, useRef, useEffect } from "react"
+import {
+  useState,
+  useCallback,
+  useMemo,
+  useRef,
+  useEffect,
+  startTransition,
+} from "react"
 import { NuqsAdapter } from "nuqs/adapters/react"
 import {
   parseAsInteger,
@@ -118,6 +125,7 @@ import {
   processFiltersForLogic,
 } from "@/components/data-table/lib"
 import { serializeFiltersForUrl } from "@/components/data-table/filters/table-filter-menu"
+import { formatQueryString } from "@/components/data-table/lib/format"
 import type {
   DataTableColumnDef,
   ExtendedColumnFilter,
@@ -454,14 +462,22 @@ const initialData: Product[] = [
 function StandardFilterToolbar({
   filters,
   onFiltersChange,
+  search,
+  onSearchChange,
 }: {
   filters: ExtendedColumnFilter<Product>[]
   onFiltersChange: (filters: ExtendedColumnFilter<Product>[] | null) => void
+  search: string
+  onSearchChange: (value: string) => void
 }) {
   return (
     <DataTableToolbarSection>
       <DataTableToolbarSection className="px-0">
-        <DataTableSearchFilter placeholder="Search products..." />
+        <DataTableSearchFilter
+          placeholder="Search products..."
+          value={search}
+          onChange={onSearchChange}
+        />
         <DataTableViewMenu />
       </DataTableToolbarSection>
       <DataTableToolbarSection className="px-0">
@@ -478,14 +494,22 @@ function StandardFilterToolbar({
 function InlineFilterToolbar({
   filters,
   onFiltersChange,
+  search,
+  onSearchChange,
 }: {
   filters: ExtendedColumnFilter<Product>[]
   onFiltersChange: (filters: ExtendedColumnFilter<Product>[]) => void
+  search: string
+  onSearchChange: (value: string) => void
 }) {
   return (
     <DataTableToolbarSection>
       <DataTableToolbarSection className="px-0">
-        <DataTableSearchFilter placeholder="Search products..." />
+        <DataTableSearchFilter
+          placeholder="Search products..."
+          value={search}
+          onChange={onSearchChange}
+        />
         <DataTableViewMenu />
       </DataTableToolbarSection>
       <DataTableToolbarSection className="px-0">
@@ -509,19 +533,25 @@ const tableStateParsers = {
     value => value as ExtendedColumnFilter<Product>[],
   ).withDefault([]),
   search: parseAsString.withDefault(""),
-  globalFilter: parseAsJson<
-    string | { filters: unknown[]; joinOperator: string }
-  >(value => {
-    // If it's already parsed as object with filters, return it
-    if (value && typeof value === "object" && "filters" in value) {
-      return value as { filters: unknown[]; joinOperator: string }
-    }
-    // If it's a string, return it
-    if (typeof value === "string") {
-      return value
-    }
-    return ""
-  }).withDefault(""),
+  // globalFilter should only be used for complex filter objects (OR/MIXED logic)
+  // Simple text search uses the "search" param instead
+  // When null/empty, nuqs will remove it from the URL
+  globalFilter: parseAsJson<{ filters: unknown[]; joinOperator: string }>(
+    value => {
+      // Only accept objects with filters (complex filter logic)
+      if (value && typeof value === "object" && "filters" in value) {
+        return value as { filters: unknown[]; joinOperator: string }
+      }
+      // Reject everything else (strings, empty strings, etc.)
+      // Return undefined to trigger default, which will be null
+      return undefined as unknown as {
+        filters: unknown[]
+        joinOperator: string
+      }
+    },
+  ).withDefault(
+    null as unknown as { filters: unknown[]; joinOperator: string },
+  ),
   columnVisibility: parseAsJson<VisibilityState>(
     value => value as VisibilityState,
   ).withDefault({}),
@@ -642,13 +672,22 @@ function AdvancedNuqsTableContent() {
     shallow: true,
   })
 
+  // Check if global param actually exists in URL (not just default value)
+  // If globalFilter is an object with filters, it exists in URL
+  // If it's null, it might be default or was removed
+  const hasGlobalParam =
+    urlParams.globalFilter !== null &&
+    typeof urlParams.globalFilter === "object" &&
+    "filters" in urlParams.globalFilter
+
   // Get filter mode from URL
   const filterMode = (urlParams.filterMode || "standard") as
     | "standard"
     | "inline"
 
-  // Global filter from URL - handle both search string and OR filters
-  // Follow the same pattern as advanced-state.tsx: let filter components handle OR/MIXED detection
+  // Global filter from URL - separate search (text) from globalFilter (complex filters)
+  // - search: simple text search string
+  // - globalFilter: complex filter object (OR/MIXED logic)
   const globalFilter = useMemo(() => {
     // If globalFilter is stored in URL as object (OR/MIXED logic), use it
     if (
@@ -659,8 +698,9 @@ function AdvancedNuqsTableContent() {
       return urlParams.globalFilter
     }
 
-    // Otherwise return search string
-    return urlParams.search
+    // Otherwise use search string (simple text search)
+    // Don't fall back to globalFilter if it's a string - that's a legacy format
+    return urlParams.search || ""
   }, [urlParams.globalFilter, urlParams.search])
 
   // Convert URL state to TanStack Table format (using pageIndex from URL)
@@ -800,18 +840,18 @@ function AdvancedNuqsTableContent() {
       prevGlobalFilterRef.current = value
 
       if (typeof value === "string") {
-        // Simple search string
-        // Don't clear globalFilter with empty string if we already have OR filters
-        if (
-          value === "" &&
-          urlParams.globalFilter &&
-          typeof urlParams.globalFilter === "object"
-        ) {
-          // Empty string received but globalFilter has OR filters - ignore to prevent clearing
-          return
+        // Simple search string - only set search param
+        // Build params conditionally to omit globalFilter entirely
+        const params: Record<string, unknown> = {
+          search: value || null, // null removes from URL if empty
+          pageIndex: 0,
         }
-
-        void setUrlParams({ globalFilter: value, search: value, pageIndex: 0 })
+        // Only include globalFilter: null if it actually exists in URL
+        // This ensures it gets removed, but we don't add it if it wasn't there
+        if (hasGlobalParam) {
+          params.globalFilter = null
+        }
+        void setUrlParams(params)
       } else {
         // OR filter object - store in globalFilter
         // Exclude filterId from filters to keep URLs shorter
@@ -822,16 +862,19 @@ function AdvancedNuqsTableContent() {
         const serializedFilters = serializeFiltersForUrl(
           filterObj.filters,
         ) as ExtendedColumnFilter<Product>[]
+        // OR filter object - store in globalFilter
+        // Keep search param independent - both can coexist
         void setUrlParams({
           globalFilter: {
             filters: serializedFilters,
             joinOperator: filterObj.joinOperator,
           },
           pageIndex: 0,
+          // Don't clear search - it's independent from globalFilter
         })
       }
     },
-    [setUrlParams, urlParams.globalFilter],
+    [setUrlParams, hasGlobalParam],
   )
 
   // Direct filter change handlers - sync filter UI changes directly to URL
@@ -842,8 +885,8 @@ function AdvancedNuqsTableContent() {
       if (!filters || filters.length === 0) {
         void setUrlParams({
           filters: [],
-          globalFilter: "",
-          search: "",
+          globalFilter: null, // null removes from URL
+          search: null, // null removes from URL
           pageIndex: 0,
         })
       } else {
@@ -867,15 +910,19 @@ function AdvancedNuqsTableContent() {
           })
         } else {
           // Use filters param for AND logic
-          void setUrlParams({
+          // Only include globalFilter: null if it actually exists in URL to remove it
+          const params: Record<string, unknown> = {
             filters: urlFilters,
-            globalFilter: "",
             pageIndex: 0,
-          })
+          }
+          if (hasGlobalParam) {
+            params.globalFilter = null
+          }
+          void setUrlParams(params)
         }
       }
     },
-    [setUrlParams],
+    [setUrlParams, hasGlobalParam],
   )
 
   const handleInlineFiltersChange = useCallback(
@@ -884,8 +931,8 @@ function AdvancedNuqsTableContent() {
       if (filters.length === 0) {
         void setUrlParams({
           inlineFilters: [],
-          globalFilter: "",
-          search: "",
+          globalFilter: null, // null removes from URL
+          search: null, // null removes from URL
           pageIndex: 0,
         })
       } else {
@@ -909,15 +956,19 @@ function AdvancedNuqsTableContent() {
           })
         } else {
           // Use inlineFilters param for AND logic
-          void setUrlParams({
+          // Only include globalFilter: null if it actually exists in URL to remove it
+          const params: Record<string, unknown> = {
             inlineFilters: urlFilters,
-            globalFilter: "",
             pageIndex: 0,
-          })
+          }
+          if (hasGlobalParam) {
+            params.globalFilter = null
+          }
+          void setUrlParams(params)
         }
       }
     },
-    [setUrlParams],
+    [setUrlParams, hasGlobalParam],
   )
 
   // Handlers for column visibility
@@ -999,8 +1050,8 @@ function AdvancedNuqsTableContent() {
       pageSize: 10,
       sort: null,
       filters: [],
-      search: "",
-      globalFilter: "",
+      search: null,
+      globalFilter: null,
       columnVisibility: {},
       inlineFilters: [],
       filterMode: "standard",
@@ -1059,19 +1110,76 @@ function AdvancedNuqsTableContent() {
     [currentInlineFilters],
   )
 
-  // Get current URL for display and monitor length
-  const currentURL = useMemo(() => {
-    if (typeof window !== "undefined") {
-      return window.location.href
+  // Construct query string from urlParams (nuqs handles URL state)
+  // This prevents hydration mismatch by deriving from state instead of reading window
+  const queryString = useMemo(() => {
+    const params = new URLSearchParams()
+
+    // Add all non-empty params using the URL key mapping
+    if (urlParams.pageIndex !== 0) {
+      params.set(tableStateUrlKeys.pageIndex, String(urlParams.pageIndex))
     }
-    return ""
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    if (urlParams.pageSize !== 10) {
+      params.set(tableStateUrlKeys.pageSize, String(urlParams.pageSize))
+    }
+    if (urlParams.sort && urlParams.sort.length > 0) {
+      params.set(tableStateUrlKeys.sort, JSON.stringify(urlParams.sort))
+    }
+    if (urlParams.filters && urlParams.filters.length > 0) {
+      params.set(tableStateUrlKeys.filters, JSON.stringify(urlParams.filters))
+    }
+    if (urlParams.search) {
+      params.set(tableStateUrlKeys.search, urlParams.search)
+    }
+    // Only include globalFilter if it's an object (complex filters)
+    // Don't include it if it's a string (that's legacy - use search instead)
+    if (
+      urlParams.globalFilter &&
+      typeof urlParams.globalFilter === "object" &&
+      "filters" in urlParams.globalFilter
+    ) {
+      params.set(
+        tableStateUrlKeys.globalFilter,
+        JSON.stringify(urlParams.globalFilter),
+      )
+    }
+    if (
+      urlParams.columnVisibility &&
+      Object.keys(urlParams.columnVisibility).length > 0
+    ) {
+      params.set(
+        tableStateUrlKeys.columnVisibility,
+        JSON.stringify(urlParams.columnVisibility),
+      )
+    }
+    if (urlParams.inlineFilters && urlParams.inlineFilters.length > 0) {
+      params.set(
+        tableStateUrlKeys.inlineFilters,
+        JSON.stringify(urlParams.inlineFilters),
+      )
+    }
+    if (urlParams.filterMode !== "standard") {
+      params.set(tableStateUrlKeys.filterMode, urlParams.filterMode)
+    }
+
+    return params.toString()
   }, [urlParams])
 
-  // Calculate URL length (full URL including query params)
+  // Prettify query string for display - decode and format JSON values
+  const prettifiedQueryString = useMemo(
+    () => formatQueryString(urlParams, tableStateUrlKeys),
+    [urlParams],
+  )
+
+  // Calculate URL length (query string + base URL estimate)
+  // We estimate base URL length to avoid reading window.location during render
+  // This prevents hydration mismatch while still providing accurate length warnings
   const urlLength = useMemo(() => {
-    return currentURL.length
-  }, [currentURL])
+    // Base URL estimate: protocol (7) + domain (~20) + path (~10) + "?" (1) = ~38
+    // This is conservative - actual base URLs are typically 30-50 chars
+    const baseUrlEstimate = 40
+    return baseUrlEstimate + queryString.length
+  }, [queryString])
 
   // URL length thresholds
   const URL_LENGTH_WARNING = 1500 // Warning threshold (75% of 2000)
@@ -1094,8 +1202,11 @@ function AdvancedNuqsTableContent() {
 
   useEffect(() => {
     // Show alert immediately when status becomes warning/critical
+    // Using startTransition to batch updates and satisfy React Compiler
     if (urlLengthStatus !== "ok" && prevStatusRef.current === "ok") {
-      setShowUrlLengthAlert(true)
+      startTransition(() => {
+        setShowUrlLengthAlert(true)
+      })
     }
     // Hide alert with delay when status returns to ok
     if (urlLengthStatus === "ok" && prevStatusRef.current !== "ok") {
@@ -1223,6 +1334,13 @@ function AdvancedNuqsTableContent() {
               <StandardFilterToolbar
                 filters={normalizedStandardFilters}
                 onFiltersChange={handleStandardFiltersChange}
+                search={urlParams.search}
+                onSearchChange={value => {
+                  void setUrlParams({
+                    search: value || null, // null removes from URL if empty
+                    pageIndex: 0,
+                  })
+                }}
               />
               <DataTable>
                 <DataTableHeader />
@@ -1278,6 +1396,13 @@ function AdvancedNuqsTableContent() {
               <InlineFilterToolbar
                 filters={normalizedInlineFilters}
                 onFiltersChange={handleInlineFiltersChange}
+                search={urlParams.search}
+                onSearchChange={value => {
+                  void setUrlParams({
+                    search: value || null, // null removes from URL if empty
+                    pageIndex: 0,
+                  })
+                }}
               />
               <DataTable>
                 <DataTableHeader />
@@ -1330,10 +1455,10 @@ function AdvancedNuqsTableContent() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-2 text-xs text-muted-foreground">
-            <div className="flex justify-between">
+            <div className="flex flex-col gap-1">
               <span className="font-medium">Current URL:</span>
-              <code className="rounded bg-muted px-2 py-1 text-xs">
-                {currentURL.split("?")[1] || "No query params"}
+              <code className="overflow-wrap-anywhere block rounded bg-muted px-2 py-1 font-mono text-xs break-all whitespace-pre-wrap">
+                {prettifiedQueryString}
               </code>
             </div>
 

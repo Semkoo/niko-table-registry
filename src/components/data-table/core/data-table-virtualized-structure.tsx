@@ -262,8 +262,8 @@ export function DataTableVirtualizedBody<TData>({
               ref={node => {
                 // Measure element for dynamic height when expanded/collapsed
                 if (node) {
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  rowVirtualizer.measureElement(node as any)
+                  // TableRow ref provides HTMLTableRowElement
+                  rowVirtualizer.measureElement(node)
                 }
               }}
               data-index={virtualRow.index}

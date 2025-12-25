@@ -264,8 +264,7 @@ export const globalFilter: FilterFn<RowData> = (
 
       // Evaluate each OR group (AND logic within each group)
       const groupResults = orGroups.map(andGroup => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        return andGroup.every((filter: any) => {
+        return andGroup.every((filter: ExtendedColumnFilter<RowData>) => {
           const cellValue = row.getValue(filter.id)
           return applyFilterOperator(
             cellValue as string | number | boolean | null | undefined,
@@ -280,8 +279,7 @@ export const globalFilter: FilterFn<RowData> = (
     }
 
     // Default to AND logic for other cases
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return filters.every((filter: any) => {
+    return filters.every((filter: ExtendedColumnFilter<RowData>) => {
       const cellValue = row.getValue(filter.id)
       return applyFilterOperator(
         cellValue as string | number | boolean | null | undefined,
@@ -553,7 +551,7 @@ export const numberRangeFilter: FilterFn<RowData> = (
   row,
   columnId,
   filterValue,
-   
+
   addMeta,
 ) => {
   if (!filterValue) return true
@@ -595,7 +593,7 @@ export const dateRangeFilter: FilterFn<RowData> = (
   row,
   columnId,
   filterValue,
-   
+
   addMeta,
 ) => {
   if (!filterValue) return true
@@ -666,13 +664,12 @@ export const dateRangeFilter: FilterFn<RowData> = (
  * @param value - The value to filter by
  * @returns ExtendedColumnFilter object with default properties
  */
-export const createFilterValue = (
+export const createFilterValue = <TData extends RowData = RowData>(
   operator: FilterOperator,
   value: string | number | boolean | null | undefined | string[],
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): ExtendedColumnFilter<any> => {
+): ExtendedColumnFilter<TData> => {
   return {
-    id: "", // Will be set by the column
+    id: "" as Extract<keyof TData, string>, // Will be set by the column
     filterId: "", // Will be set by the filter system
     operator,
     value: value as string | string[],

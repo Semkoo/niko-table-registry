@@ -594,6 +594,10 @@ function DataTableRootInternal<TData, TValue>({
 
   // Create table instance - TanStack Table automatically updates when options change
   // The table instance reference stays the same, but internal state updates
+  //
+  // Note: React Compiler will show a warning here about incompatible library.
+  // This is expected and safe - TanStack Table manages its own memoization internally.
+  // React Compiler correctly skips memoization for this hook, which is the intended behavior.
   const table = useReactTable<TData>(tableOptions)
 
   // Debug: Log state changes in development
