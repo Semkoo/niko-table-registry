@@ -6,6 +6,25 @@ description: A composable, themeable and customizable data table component.
 import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
 import { Steps } from "@astrojs/starlight/components"
 
+<div className="mb-6 flex gap-2">
+  <a
+    href="https://tanstack.com/table/latest/docs/introduction"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="inline-flex items-center gap-1 rounded-md bg-zinc-800 px-3 py-1.5 text-sm font-medium text-zinc-100 no-underline transition-colors hover:bg-zinc-700"
+  >
+    Docs ↗
+  </a>
+  <a
+    href="https://tanstack.com/table/latest/docs/api/core/table"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="inline-flex items-center gap-1 rounded-md bg-zinc-800 px-3 py-1.5 text-sm font-medium text-zinc-100 no-underline transition-colors hover:bg-zinc-700"
+  >
+    API Reference ↗
+  </a>
+</div>
+
 <figure className="flex flex-col gap-4">
   <CodePreview
     demo="data-table/all-features-table"
