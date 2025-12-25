@@ -4,24 +4,27 @@ description: Detailed documentation for all DataTable components.
 ---
 
 import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
+import { Button } from "@/components/ui/button"
 
 <div className="mb-6 flex gap-2">
-  <a
-    href="https://tanstack.com/table/latest/docs/introduction"
-    target="_blank"
-    rel="noopener noreferrer"
-    className="inline-flex items-center gap-1 rounded-md bg-zinc-800 px-3 py-1.5 text-sm font-medium text-zinc-100 no-underline transition-colors hover:bg-zinc-700"
-  >
-    Docs ↗
-  </a>
-  <a
-    href="https://tanstack.com/table/latest/docs/api/core/table"
-    target="_blank"
-    rel="noopener noreferrer"
-    className="inline-flex items-center gap-1 rounded-md bg-zinc-800 px-3 py-1.5 text-sm font-medium text-zinc-100 no-underline transition-colors hover:bg-zinc-700"
-  >
-    API Reference ↗
-  </a>
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href="https://tanstack.com/table/latest/docs/introduction"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Docs ↗
+    </a>
+  </Button>
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href="https://tanstack.com/table/latest/docs/api/core/table"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      API Reference ↗
+    </a>
+  </Button>
 </div>
 
 The components in `data-table` are built to be composable. You build your table by putting the provided components together. They also compose well with other shadcn/ui components.
