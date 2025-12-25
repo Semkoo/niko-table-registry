@@ -1,9 +1,11 @@
 "use client"
 
+import * as React from "react"
 import { useDataTable } from "../core"
 import type { TableDateFilterProps } from "../filters/table-date-filter"
 import { TableDateFilter } from "../filters/table-date-filter"
 import { useDerivedColumnTitle } from "../hooks/use-derived-column-title"
+import { FILTER_VARIANTS } from "../lib/constants"
 
 type DataTableDateFilterProps<TData> = Omit<
   TableDateFilterProps<TData>,
@@ -50,12 +52,26 @@ type DataTableDateFilterProps<TData> = Omit<
 export function DataTableDateFilter<TData>({
   accessorKey,
   title,
+  multiple,
   ...props
 }: DataTableDateFilterProps<TData>) {
   const { table } = useDataTable<TData>()
   const column = table.getColumn(String(accessorKey))
 
   const derivedTitle = useDerivedColumnTitle(column, String(accessorKey), title)
+
+  // Auto-set variant in column meta if not already set
+  // This allows the auto-filterFn to be applied based on variant
+  React.useMemo(() => {
+    if (!column) return
+    const meta = (column.columnDef.meta ||= {})
+    // Only set variant if not already set (respects manual configuration)
+    if (!meta.variant) {
+      meta.variant = multiple
+        ? FILTER_VARIANTS.DATE_RANGE
+        : FILTER_VARIANTS.DATE
+    }
+  }, [column, multiple])
 
   // Early return if column not found
   if (!column) {
@@ -65,7 +81,14 @@ export function DataTableDateFilter<TData>({
     return null
   }
 
-  return <TableDateFilter column={column} title={derivedTitle} {...props} />
+  return (
+    <TableDateFilter
+      column={column}
+      title={derivedTitle}
+      multiple={multiple}
+      {...props}
+    />
+  )
 }
 
 /**

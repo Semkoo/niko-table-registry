@@ -22,6 +22,13 @@ interface AutoOptionProps {
   showCounts?: boolean
   /** Recompute counts based on currently filtered rows */
   dynamicCounts?: boolean
+  /**
+   * If true, only generate options from filtered rows. If false, generate from all rows.
+   * This controls which rows are used to generate the option list itself.
+   * Note: This is separate from dynamicCounts which controls count calculation.
+   * @default true
+   */
+  limitToFilteredRows?: boolean
   /** Only generate options for these column ids */
   includeColumns?: string[]
   /** Exclude these column ids from generation */
@@ -57,6 +64,7 @@ export function DataTableFilterMenu<TData>({
   autoOptions = true,
   showCounts = true,
   dynamicCounts = true,
+  limitToFilteredRows = true,
   includeColumns,
   excludeColumns,
   limitPerColumn,
@@ -69,6 +77,7 @@ export function DataTableFilterMenu<TData>({
   const generatedOptions = useGeneratedOptions(table, {
     showCounts,
     dynamicCounts,
+    limitToFilteredRows,
     includeColumns,
     excludeColumns,
     limitPerColumn,
