@@ -123,11 +123,6 @@ export default defineConfig({
           label: "GitHub",
           href: GITHUB_REPO_URL,
         },
-        {
-          icon: "linkedin",
-          label: "LinkedIn",
-          href: "https://linkedin.com/in/semir-n",
-        },
       ],
       customCss: ["./src/styles/global.css"],
       sidebar: [
