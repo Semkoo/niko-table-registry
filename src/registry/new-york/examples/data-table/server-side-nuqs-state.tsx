@@ -1767,7 +1767,6 @@ function ServerSideStateTableContent() {
                 manualFiltering: true,
                 manualSorting: true,
                 pageCount,
-                autoResetPageIndex: false,
               }}
               state={{
                 globalFilter,
@@ -1844,7 +1843,6 @@ function ServerSideStateTableContent() {
                 manualFiltering: true,
                 manualSorting: true,
                 pageCount,
-                autoResetPageIndex: false,
               }}
               state={{
                 globalFilter,
