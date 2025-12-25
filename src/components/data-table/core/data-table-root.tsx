@@ -442,6 +442,28 @@ function DataTableRootInternal<TData, TValue>({
   )
 
   /**
+   * PERFORMANCE: Extract controlled state values for dependency tracking
+   *
+   * WHY: When using controlled state (rest.state), we need to track those values
+   * in the dependency array. Extracting them here makes the dependency array cleaner
+   * and ensures the table updates when external state changes.
+   *
+   * IMPORTANT: Memoize pagination to prevent infinite loops when the object reference
+   * changes but values are the same. Use deep comparison for pagination state.
+   */
+  const controlledSorting = rest.state?.sorting ?? sorting
+  const controlledColumnVisibility =
+    rest.state?.columnVisibility ?? columnVisibility
+  const controlledRowSelection = rest.state?.rowSelection ?? rowSelection
+  const controlledColumnFilters = rest.state?.columnFilters ?? columnFilters
+  const controlledGlobalFilter =
+    rest.state?.globalFilter !== undefined
+      ? rest.state.globalFilter
+      : globalFilter
+  const controlledExpanded = rest.state?.expanded ?? expanded
+  const controlledPagination = rest.state?.pagination ?? pagination
+
+  /**
    * PERFORMANCE: Memoize table options - critical for TanStack Table reactivity
    *
    * WHY: TanStack Table's useReactTable hook needs stable option references.
@@ -475,16 +497,13 @@ function DataTableRootInternal<TData, TValue>({
         ...rest.state,
         // Always use our local state as the source of truth
         // External state (rest.state) takes precedence only if explicitly provided
-        sorting: rest.state?.sorting ?? sorting,
-        columnVisibility: rest.state?.columnVisibility ?? columnVisibility,
-        rowSelection: rest.state?.rowSelection ?? rowSelection,
-        columnFilters: rest.state?.columnFilters ?? columnFilters,
-        globalFilter:
-          rest.state?.globalFilter !== undefined
-            ? rest.state.globalFilter
-            : globalFilter,
-        expanded: rest.state?.expanded ?? expanded,
-        pagination: rest.state?.pagination ?? pagination,
+        sorting: controlledSorting,
+        columnVisibility: controlledColumnVisibility,
+        rowSelection: controlledRowSelection,
+        columnFilters: controlledColumnFilters,
+        globalFilter: controlledGlobalFilter,
+        expanded: controlledExpanded,
+        pagination: controlledPagination,
       },
       enableRowSelection: detectFeatures.enableRowSelection,
       enableFilters: detectFeatures.enableFilters,
@@ -551,9 +570,14 @@ function DataTableRootInternal<TData, TValue>({
           // Fallback to index
           return String(index)
         }),
-      pageCount: detectFeatures.manualPagination
-        ? (detectFeatures.pageCount ?? -1)
-        : undefined,
+      pageCount: (() => {
+        if (!detectFeatures.manualPagination) return undefined
+        return finalConfig.pageCount !== undefined
+          ? finalConfig.pageCount
+          : detectFeatures.pageCount !== undefined
+            ? detectFeatures.pageCount
+            : -1
+      })(),
     }),
     // Dependencies: state values and stable callbacks
     // Note: processedColumns is already memoized, so it's safe to include here
@@ -561,6 +585,8 @@ function DataTableRootInternal<TData, TValue>({
     // External callbacks (onSortingChange, etc.) should be memoized by consumer
     // Note: 'rest' is included because it's spread into tableOptions
     // Consumers should memoize rest props if they change frequently
+    // IMPORTANT: When using controlled state (rest.state), we need to include those values
+    // in the dependency array so the table updates when external state changes
     [
       rest,
       data,
@@ -582,13 +608,14 @@ function DataTableRootInternal<TData, TValue>({
       setPagination,
       onPaginationChange,
       getRowId,
-      sorting,
-      columnVisibility,
-      rowSelection,
-      columnFilters,
-      globalFilter,
-      expanded,
-      pagination,
+      // Use controlled state values - these update when either external or local state changes
+      controlledSorting,
+      controlledColumnVisibility,
+      controlledRowSelection,
+      controlledColumnFilters,
+      controlledGlobalFilter,
+      controlledExpanded,
+      controlledPagination,
     ],
   )
 
@@ -599,27 +626,6 @@ function DataTableRootInternal<TData, TValue>({
   // This is expected and safe - TanStack Table manages its own memoization internally.
   // React Compiler correctly skips memoization for this hook, which is the intended behavior.
   const table = useReactTable<TData>(tableOptions)
-
-  // Debug: Log state changes in development
-  React.useEffect(() => {
-    if (process.env.NODE_ENV === "development") {
-      const tableState = table.getState()
-      const rows = table.getRowModel().rows
-      const coreRows = table.getCoreRowModel().rows
-      const filteredRows = table.getFilteredRowModel?.()?.rows ?? []
-      console.log("[DataTableRoot] State update:", {
-        globalFilter: tableState.globalFilter,
-        sorting: tableState.sorting,
-        expanded: tableState.expanded,
-        columnFilters: tableState.columnFilters,
-        rowCount: rows.length,
-        coreRowCount: coreRows.length,
-        filteredRowCount: filteredRows.length,
-        enableFilters: table.options.enableFilters,
-        hasGlobalFilterFn: !!table.options.globalFilterFn,
-      })
-    }
-  }, [table, globalFilter, sorting, expanded, columnFilters])
 
   return (
     <DataTableProvider

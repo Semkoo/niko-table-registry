@@ -55,6 +55,7 @@ export function TablePagination<TData>({
   pageSizeOptions = [10, 25, 50, 100],
   defaultPageSize = pageSizeOptions[0],
   isLoading,
+  isFetching,
   disableNextPage,
   disablePreviousPage,
   totalCount,
@@ -75,9 +76,12 @@ export function TablePagination<TData>({
 
   // Determine if buttons should be disabled
   // Default to isLoading for initial load, but allow explicit overrides
-  const canGoNext = !disableNextPage && !isLoading && table.getCanNextPage()
+  // Also disable during fetching to prevent navigation while data is loading
+  const canNextPage = table.getCanNextPage()
+  const isDisabled = isLoading || isFetching
+  const canGoNext = !disableNextPage && !isDisabled && canNextPage
   const canGoPrevious =
-    !disablePreviousPage && !isLoading && table.getCanPreviousPage()
+    !disablePreviousPage && !isDisabled && table.getCanPreviousPage()
 
   // Set default page size on initial render
   React.useEffect(() => {
@@ -194,7 +198,7 @@ export function TablePagination<TData>({
             style={{
               width: `${Math.max(String(totalPages).length, 2) + 1}ch`,
             }}
-            disabled={totalPages === 0 || isLoading}
+            disabled={totalPages === 0 || isLoading || isFetching}
             aria-label={`Page ${currentPage} of ${totalPages}`}
           />
           <span aria-hidden="true">of {Math.max(1, totalPages)} pages</span>
