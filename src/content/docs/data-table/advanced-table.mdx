@@ -267,14 +267,32 @@ The filter menu component allows users to create rule-based filters with multipl
 
 **Props:**
 
-- `filters?`: Array of `ExtendedColumnFilter` (for controlled mode)
-- `onFiltersChange?`: Callback when filters change `(filters: ExtendedColumnFilter[] | null) => void`
+| Name                  | Type                                                | Default      | Description                                            |
+| --------------------- | --------------------------------------------------- | ------------ | ------------------------------------------------------ |
+| `autoOptions`         | `boolean`                                           | `true`       | Auto-generate options for select/multiSelect columns   |
+| `showCounts`          | `boolean`                                           | `true`       | Show counts beside each option                         |
+| `dynamicCounts`       | `boolean`                                           | `true`       | Recompute counts based on currently filtered rows      |
+| `limitToFilteredRows` | `boolean`                                           | `true`       | Generate options from filtered rows only (vs all rows) |
+| `includeColumns`      | `string[]`                                          | -            | Only generate options for these column ids             |
+| `excludeColumns`      | `string[]`                                          | -            | Exclude these column ids from generation               |
+| `limitPerColumn`      | `number`                                            | -            | Limit number of generated options per column           |
+| `mergeStrategy`       | `"preserve" \| "augment" \| "replace"`              | `"preserve"` | How to handle existing static options                  |
+| `filters?`            | `ExtendedColumnFilter[]`                            | -            | Array of filters (for controlled mode)                 |
+| `onFiltersChange?`    | `(filters: ExtendedColumnFilter[] \| null) => void` | -            | Callback when filters change                           |
+| `className`           | `string`                                            | -            | Additional CSS classes                                 |
+
+**Merge Strategy:**
+
+- **`preserve`**: Keep user-defined options untouched (default)
+- **`augment`**: Add counts to matching values from static options
+- **`replace`**: Override static options with generated options
 
 ```tsx showLineNumbers
 <DataTableFilterMenu
   autoOptions
   dynamicCounts
   showCounts
+  limitToFilteredRows={true}
   mergeStrategy="augment"
 />
 ```
@@ -285,7 +303,9 @@ The sort menu component provides a visual interface for managing column sorting.
 
 **Props:**
 
-- `className?`: Additional CSS classes
+| Name        | Type     | Description            |
+| ----------- | -------- | ---------------------- |
+| `className` | `string` | Additional CSS classes |
 
 ```tsx showLineNumbers
 <DataTableSortMenu className="ml-auto" />
@@ -310,13 +330,25 @@ Define filter metadata in your column definitions:
 }
 ```
 
-Supported variants:
+**Supported variants:**
 
-- `"text"` - Text input filter
-- `"select"` - Dropdown select filter (requires `options`)
-- `"number"` - Number input filter (optional `unit` for display)
-- `"boolean"` - Boolean checkbox filter
-- `"date"` - Date picker filter
+- **`"text"`** - Text input filter
+- **`"select"`** - Dropdown select filter (requires `options`)
+- **`"multiSelect"`** - Multiple selection dropdown
+- **`"number"`** - Number input filter (optional `unit` for display)
+- **`"range"`** - Numeric range slider (auto-applied for `number` variant with `meta.range`)
+- **`"boolean"`** - Boolean checkbox filter
+- **`"date"`** - Single date picker filter
+- **`"date_range"`** - Date range picker (auto-applied when `DataTableDateFilter` has `multiple={true}`)
+
+**Auto-applied filter functions:**
+
+When you specify `meta.variant` in your column definition, the appropriate `filterFn` is automatically applied:
+
+- **`variant: "range"`** → `numberRangeFilter` (for numeric ranges like price)
+- **`variant: "date"`** or **`variant: "date_range"`** → `dateRangeFilter` (for date filtering)
+
+You can still provide a custom `filterFn` if needed - it will override the auto-applied function.
 
 ## Controlled State
 

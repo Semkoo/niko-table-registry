@@ -1,0 +1,542 @@
+---
+title: DataTable
+description: A composable, themeable and customizable data table component.
+---
+
+import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
+import { Steps } from "@astrojs/starlight/components"
+
+<figure className="flex flex-col gap-4">
+  <CodePreview
+    demo="data-table/all-features-table"
+    title="DataTable"
+    type="block"
+    description="A composable, themeable and customizable data table component built using TanStack Table and Shadcn UI"
+    className="w-full"
+  />
+  <figcaption className="text-center text-sm text-gray-500">
+    A data table with sorting, filtering, pagination, row selection, and more.
+  </figcaption>
+</figure>
+
+Data tables are one of the most complex components to build. They are central to any application and often contain a lot of moving parts.
+
+I don't like building data tables. So I built 30+ of them. All kinds of configurations. Then I extracted the core components into `data-table`.
+
+We now have a solid foundation to build on top of. Composable. Themeable. Customizable.
+
+[Browse the Examples](/data-table/simple-table).
+
+## Installation
+
+<Steps>
+
+1. **Run the following command to install the required Shadcn components**
+
+   ```bash
+   npx shadcn@latest add table input button dropdown-menu popover command badge scroll-area separator checkbox select skeleton tooltip
+   ```
+
+2. **Add the TanStack Table dependency**
+
+   ```bash
+   npm install @tanstack/react-table
+   ```
+
+3. **Copy the DataTable components into your project**
+
+   See the [Installation Guide](/getting-started/installation) for detailed instructions on copying the DataTable components.
+
+</Steps>
+
+## Structure
+
+A `DataTable` component is composed of the following parts:
+
+- `DataTableRoot` - The root provider that manages table state and context.
+- `DataTableToolbarSection` - Container for filters, search, and actions.
+- `DataTable` - The table container component.
+- `DataTableHeader` - The table header with sortable columns.
+- `DataTableBody` - The table body with rows.
+- `DataTablePagination` - Pagination controls.
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  DataTableRoot                                                  │
+│  ┌───────────────────────────────────────────────────────────┐  │
+│  │  DataTableToolbarSection                                  │  │
+│  │  ┌─────────────────┐ ┌─────────────┐ ┌─────────────────┐  │  │
+│  │  │ SearchFilter    │ │ FilterMenu  │ │ SortMenu/View   │  │  │
+│  │  └─────────────────┘ └─────────────┘ └─────────────────┘  │  │
+│  └───────────────────────────────────────────────────────────┘  │
+│  ┌───────────────────────────────────────────────────────────┐  │
+│  │  DataTable                                                │  │
+│  │  ┌─────────────────────────────────────────────────────┐  │  │
+│  │  │  DataTableHeader (sticky)                           │  │  │
+│  │  │  ┌─────────┬─────────┬─────────┬─────────────────┐  │  │  │
+│  │  │  │ Column  │ Column  │ Column  │ Column          │  │  │  │
+│  │  │  └─────────┴─────────┴─────────┴─────────────────┘  │  │  │
+│  │  └─────────────────────────────────────────────────────┘  │  │
+│  │  ┌─────────────────────────────────────────────────────┐  │  │
+│  │  │  DataTableBody (scrollable)                         │  │  │
+│  │  │  ┌─────────┬─────────┬─────────┬─────────────────┐  │  │  │
+│  │  │  │ Cell    │ Cell    │ Cell    │ Cell            │  │  │  │
+│  │  │  ├─────────┼─────────┼─────────┼─────────────────┤  │  │  │
+│  │  │  │ Cell    │ Cell    │ Cell    │ Cell            │  │  │  │
+│  │  │  └─────────┴─────────┴─────────┴─────────────────┘  │  │  │
+│  │  │                                                     │  │  │
+│  │  │  DataTableSkeleton (when loading)                   │  │  │
+│  │  │  DataTableEmptyBody (when no data)                  │  │  │
+│  │  └─────────────────────────────────────────────────────┘  │  │
+│  └───────────────────────────────────────────────────────────┘  │
+│  ┌───────────────────────────────────────────────────────────┐  │
+│  │  DataTablePagination                                      │  │
+│  │  ┌─────────────┐  ┌───────────────────┐  ┌─────────────┐  │  │
+│  │  │ Page Size   │  │ Page 1 of 10      │  │ Navigation  │  │  │
+│  │  └─────────────┘  └───────────────────┘  └─────────────┘  │  │
+│  └───────────────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+## Usage
+
+```tsx showLineNumbers title="app/layout.tsx"
+import {
+  DataTableRoot,
+  DataTable,
+  DataTableHeader,
+  DataTableBody,
+  DataTableToolbarSection,
+  DataTableSearchFilter,
+  DataTablePagination,
+} from "@/components/data-table"
+```
+
+```tsx showLineNumbers title="components/users-table.tsx"
+import {
+  DataTableRoot,
+  DataTable,
+  DataTableHeader,
+  DataTableBody,
+  DataTableEmptyBody,
+  DataTableSkeleton,
+  DataTableToolbarSection,
+  DataTableSearchFilter,
+  DataTablePagination,
+} from "@/components/data-table"
+import type { DataTableColumnDef } from "@/components/data-table/types"
+
+type User = {
+  id: string
+  name: string
+  email: string
+}
+
+const columns: DataTableColumnDef<User>[] = [
+  { accessorKey: "name", header: "Name" },
+  { accessorKey: "email", header: "Email" },
+]
+
+export function UsersTable({ data }: { data: User[] }) {
+  return (
+    <DataTableRoot data={data} columns={columns}>
+      <DataTableToolbarSection>
+        <DataTableSearchFilter placeholder="Search users..." />
+      </DataTableToolbarSection>
+      <DataTable>
+        <DataTableHeader />
+        <DataTableBody>
+          <DataTableSkeleton />
+          <DataTableEmptyBody />
+        </DataTableBody>
+      </DataTable>
+      <DataTablePagination />
+    </DataTableRoot>
+  )
+}
+```
+
+## Your First Table
+
+Let's start with the most basic table. A simple table with data.
+
+<Steps>
+
+1. **Create your column definitions**
+
+   ```tsx showLineNumbers title="columns.tsx"
+   import type { DataTableColumnDef } from "@/components/data-table/types"
+
+   type User = {
+     id: string
+     name: string
+     email: string
+   }
+
+   export const columns: DataTableColumnDef<User>[] = [
+     {
+       accessorKey: "name",
+       header: "Name",
+     },
+     {
+       accessorKey: "email",
+       header: "Email",
+     },
+   ]
+   ```
+
+2. **Create your table component**
+
+   ```tsx showLineNumbers title="users-table.tsx"
+   import {
+     DataTableRoot,
+     DataTable,
+     DataTableHeader,
+     DataTableBody,
+   } from "@/components/data-table"
+   import { columns } from "./columns"
+
+   export function UsersTable({ data }: { data: User[] }) {
+     return (
+       <DataTableRoot data={data} columns={columns}>
+         <DataTable>
+           <DataTableHeader />
+           <DataTableBody />
+         </DataTable>
+       </DataTableRoot>
+     )
+   }
+   ```
+
+3. **Add loading and empty states**
+
+   ```tsx showLineNumbers title="users-table.tsx"
+   import {
+     DataTableRoot,
+     DataTable,
+     DataTableHeader,
+     DataTableBody,
+     DataTableSkeleton,
+     DataTableEmptyBody,
+   } from "@/components/data-table"
+
+   export function UsersTable({
+     data,
+     isLoading,
+   }: {
+     data: User[]
+     isLoading?: boolean
+   }) {
+     return (
+       <DataTableRoot data={data} columns={columns} isLoading={isLoading}>
+         <DataTable>
+           <DataTableHeader />
+           <DataTableBody>
+             <DataTableSkeleton />
+             <DataTableEmptyBody />
+           </DataTableBody>
+         </DataTable>
+       </DataTableRoot>
+     )
+   }
+   ```
+
+4. **Add search and pagination**
+
+   ```tsx showLineNumbers title="users-table.tsx"
+   import {
+     DataTableRoot,
+     DataTable,
+     DataTableHeader,
+     DataTableBody,
+     DataTableSkeleton,
+     DataTableEmptyBody,
+     DataTableToolbarSection,
+     DataTableSearchFilter,
+     DataTablePagination,
+   } from "@/components/data-table"
+
+   export function UsersTable({
+     data,
+     isLoading,
+   }: {
+     data: User[]
+     isLoading?: boolean
+   }) {
+     return (
+       <DataTableRoot data={data} columns={columns} isLoading={isLoading}>
+         <DataTableToolbarSection>
+           <DataTableSearchFilter placeholder="Search users..." />
+         </DataTableToolbarSection>
+         <DataTable>
+           <DataTableHeader />
+           <DataTableBody>
+             <DataTableSkeleton />
+             <DataTableEmptyBody />
+           </DataTableBody>
+         </DataTable>
+         <DataTablePagination />
+       </DataTableRoot>
+     )
+   }
+   ```
+
+5. **You've created your first table!**
+
+   Your table now has search functionality and pagination. See the [Examples](/data-table/simple-table) for more advanced configurations.
+
+</Steps>
+
+## Components
+
+The components in `data-table` are built to be composable i.e you build your table by putting the provided components together. They also compose well with other shadcn/ui components such as `DropdownMenu`, `Popover` or `Dialog` etc.
+
+**If you need to change the code in `data-table`, you are encouraged to do so. The code is yours. Use `data-table` as a starting point and build your own.**
+
+See the [Components](/data-table/components) page for detailed documentation on each component.
+
+## DataTableRoot
+
+The `DataTableRoot` component is used to provide the table context to all child components. You should always wrap your table in a `DataTableRoot` component.
+
+### Props
+
+| Name                       | Type                                             | Description                                        |
+| -------------------------- | ------------------------------------------------ | -------------------------------------------------- |
+| `data`                     | `TData[]`                                        | The data array to display in the table.            |
+| `columns`                  | `DataTableColumnDef<TData>[]`                    | Column definitions array.                          |
+| `table`                    | `Table<TData>`                                   | Pre-configured TanStack Table instance (optional). |
+| `config`                   | `DataTableConfig`                                | Configuration object for feature toggles.          |
+| `isLoading`                | `boolean`                                        | Loading state for the table.                       |
+| `getRowId`                 | `(row: TData, index: number) => string`          | Custom function to get row IDs.                    |
+| `onGlobalFilterChange`     | `(value: GlobalFilter) => void`                  | Callback when global filter changes.               |
+| `onPaginationChange`       | `(updater: Updater<PaginationState>) => void`    | Callback when pagination changes.                  |
+| `onSortingChange`          | `(updater: Updater<SortingState>) => void`       | Callback when sorting changes.                     |
+| `onColumnFiltersChange`    | `(updater: Updater<ColumnFiltersState>) => void` | Callback when column filters change.               |
+| `onColumnVisibilityChange` | `(updater: Updater<VisibilityState>) => void`    | Callback when column visibility changes.           |
+| `onRowSelectionChange`     | `(updater: Updater<RowSelectionState>) => void`  | Callback when row selection changes.               |
+| `onExpandedChange`         | `(updater: Updater<ExpandedState>) => void`      | Callback when expanded state changes.              |
+
+### Config
+
+The `config` prop accepts a `DataTableConfig` object:
+
+| Name                 | Type      | Default | Description                                                                        |
+| -------------------- | --------- | ------- | ---------------------------------------------------------------------------------- |
+| `enablePagination`   | `boolean` | `true`  | Enable pagination.                                                                 |
+| `enableFilters`      | `boolean` | `true`  | Enable filtering.                                                                  |
+| `enableSorting`      | `boolean` | `true`  | Enable sorting.                                                                    |
+| `enableRowSelection` | `boolean` | `false` | Enable row selection.                                                              |
+| `enableMultiSort`    | `boolean` | `true`  | Enable multi-column sorting.                                                       |
+| `enableGrouping`     | `boolean` | `false` | Enable column grouping.                                                            |
+| `enableExpanding`    | `boolean` | `false` | Enable row expansion.                                                              |
+| `manualSorting`      | `boolean` | `false` | Enable server-side sorting.                                                        |
+| `manualPagination`   | `boolean` | `false` | Enable server-side pagination.                                                     |
+| `manualFiltering`    | `boolean` | `false` | Enable server-side filtering.                                                      |
+| `pageCount`          | `number`  | -       | Total pages (for server-side pagination).                                          |
+| `initialPageSize`    | `number`  | `10`    | Initial page size.                                                                 |
+| `initialPageIndex`   | `number`  | `0`     | Initial page index.                                                                |
+| `autoResetPageIndex` | `boolean` | -       | Auto-reset page on filter/sort. Defaults to `false` when `manualPagination: true`. |
+
+## useDataTable
+
+The `useDataTable` hook is used to access the table instance from any child component.
+
+```tsx showLineNumbers
+import { useDataTable } from "@/components/data-table"
+
+export function CustomComponent() {
+  const { table, isLoading } = useDataTable()
+
+  return (
+    <div>
+      <p>Total rows: {table.getFilteredRowModel().rows.length}</p>
+      <p>Loading: {isLoading ? "Yes" : "No"}</p>
+    </div>
+  )
+}
+```
+
+### Return Values
+
+| Property    | Type           | Description                              |
+| ----------- | -------------- | ---------------------------------------- |
+| `table`     | `Table<TData>` | The TanStack Table instance.             |
+| `isLoading` | `boolean`      | Whether the table is in a loading state. |
+
+## Controlled State
+
+Use the state callbacks to control the table externally:
+
+```tsx showLineNumbers
+import { useState } from "react"
+import type { SortingState, PaginationState } from "@tanstack/react-table"
+
+export function ControlledTable({ data }: { data: User[] }) {
+  const [sorting, setSorting] = useState<SortingState>([])
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 10,
+  })
+
+  return (
+    <DataTableRoot
+      data={data}
+      columns={columns}
+      state={{ sorting, pagination }}
+      onSortingChange={setSorting}
+      onPaginationChange={setPagination}
+    >
+      {/* ... */}
+    </DataTableRoot>
+  )
+}
+```
+
+## Server-Side Data
+
+For server-side pagination, sorting, and filtering:
+
+```tsx showLineNumbers
+export function ServerSideTable() {
+  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 })
+
+  const { data, totalCount, isLoading } = useQuery({
+    queryKey: ["users", pagination],
+    queryFn: () => fetchUsers(pagination),
+  })
+
+  const pageCount = Math.ceil(totalCount / pagination.pageSize)
+
+  return (
+    <DataTableRoot
+      data={data ?? []}
+      columns={columns}
+      config={{
+        manualPagination: true,
+        pageCount,
+      }}
+      isLoading={isLoading}
+      onPaginationChange={setPagination}
+    >
+      <DataTable>
+        <DataTableHeader />
+        <DataTableBody>
+          <DataTableSkeleton />
+          <DataTableEmptyBody />
+        </DataTableBody>
+      </DataTable>
+      <DataTablePagination totalCount={totalCount} />
+    </DataTableRoot>
+  )
+}
+```
+
+## Data Fetching
+
+### React Query
+
+```tsx showLineNumbers
+function UsersTable() {
+  const { data, isLoading } = useQuery({
+    queryKey: ["users"],
+    queryFn: fetchUsers,
+  })
+
+  return (
+    <DataTableRoot data={data ?? []} columns={columns} isLoading={isLoading}>
+      <DataTable>
+        <DataTableHeader />
+        <DataTableBody>
+          <DataTableSkeleton />
+          <DataTableEmptyBody />
+        </DataTableBody>
+      </DataTable>
+    </DataTableRoot>
+  )
+}
+```
+
+### SWR
+
+```tsx showLineNumbers
+function UsersTable() {
+  const { data, isLoading } = useSWR("/api/users", fetcher)
+
+  return (
+    <DataTableRoot data={data ?? []} columns={columns} isLoading={isLoading}>
+      <DataTable>
+        <DataTableHeader />
+        <DataTableBody>
+          <DataTableSkeleton />
+          <DataTableEmptyBody />
+        </DataTableBody>
+      </DataTable>
+    </DataTableRoot>
+  )
+}
+```
+
+## Column Meta
+
+Columns support metadata for advanced filtering, sorting, and display:
+
+```tsx showLineNumbers
+const columns: DataTableColumnDef<Product>[] = [
+  {
+    accessorKey: "name",
+    header: ({ column }) => <TableColumnHeader column={column} />,
+    meta: {
+      label: "Product Name",
+      placeholder: "Search products...",
+      variant: "text",
+    },
+    enableColumnFilter: true,
+    enableSorting: true,
+  },
+  {
+    accessorKey: "category",
+    header: ({ column }) => <TableColumnHeader column={column} />,
+    meta: {
+      label: "Category",
+      variant: "select",
+      options: [
+        { label: "Electronics", value: "electronics" },
+        { label: "Clothing", value: "clothing" },
+      ],
+    },
+    enableColumnFilter: true,
+  },
+  {
+    accessorKey: "price",
+    header: ({ column }) => <TableColumnHeader column={column} />,
+    meta: {
+      label: "Price",
+      variant: "range",
+      unit: "$",
+    },
+    enableColumnFilter: true,
+  },
+]
+```
+
+### Filter Variants
+
+| Variant       | Description                  |
+| ------------- | ---------------------------- |
+| `text`        | Text input filter.           |
+| `number`      | Number input filter.         |
+| `select`      | Single selection dropdown.   |
+| `multiSelect` | Multiple selection dropdown. |
+| `range`       | Numeric range slider.        |
+| `date`        | Single date picker.          |
+| `date_range`  | Date range picker.           |
+| `boolean`     | Boolean toggle.              |
+
+## Next Steps
+
+- [Components](/data-table/components) - Detailed component documentation
+- [Simple Table](/data-table/simple-table) - Basic table example
+- [Basic Table](/data-table/basic-table) - Table with pagination and sorting
+- [Advanced Table](/data-table/advanced-table) - Complex filtering and sorting
+- [Server-Side Table](/data-table/server-side-table) - Server-side data handling

@@ -108,7 +108,7 @@ export default defineConfig({
           },
         },
       ],
-      title: "Shadcn Advanced React Table Registry",
+      title: "NikoTable - Nobody's table, everyone's solution",
       editLink: {
         baseUrl: `${GITHUB_REPO_URL}/tree/main`,
       },
@@ -138,7 +138,14 @@ export default defineConfig({
           ],
         },
         {
-          label: "DataTable Examples",
+          label: "DataTable",
+          items: [
+            { label: "Introduction", slug: "data-table/data-table" },
+            { label: "Components", slug: "data-table/components" },
+          ],
+        },
+        {
+          label: "Examples",
           items: [
             { label: "Simple Table", slug: "data-table/simple-table" },
             { label: "Basic Table", slug: "data-table/basic-table" },

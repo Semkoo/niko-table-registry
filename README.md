@@ -1,4 +1,6 @@
-# Shadcn Advanced React Table Registry
+# NikoTable
+
+**Nobody's table, everyone's solution.**
 
 A collection of advanced React table components built for use with Shadcn.
 

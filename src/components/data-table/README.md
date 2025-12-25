@@ -1,6 +1,8 @@
-# React Data Table Composition System
+# NikoTable - React Data Table Composition System
 
-A modern, flexible composition-based approach to building advanced data tables with hybrid state management. All components are self-contained and designed for maximum flexibility and reusability.
+**Nobody's table, everyone's solution.**
+
+NikoTable provides a modern, flexible composition-based approach to building advanced data tables with hybrid state management. All components are self-contained and designed for maximum flexibility and reusability.
 
 ## Key Benefits
 
@@ -1065,4 +1067,4 @@ When contributing new components or features:
 
 ## License
 
-This component is part of the shadcn-advance-react-table-registry project.
+This component is part of the NikoTable project.
