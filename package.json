@@ -1,8 +1,8 @@
 {
-  "name": "shadcn-advance-react-table-registry",
+  "name": "niko-table",
   "type": "module",
   "version": "0.0.1",
-  "description": "A collection of advanced React table components built for use with Shadcn",
+  "description": "NikoTable - Nobody's table, everyone's solution. Advanced React table components built for use with Shadcn",
   "author": "Semir N. <https://github.com/Semkoo>",
   "repository": {
     "type": "git",

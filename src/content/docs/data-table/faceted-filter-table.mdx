@@ -232,9 +232,18 @@ export function FacetedFilterTable({ data }: { data: Product[] }) {
           <DataTableViewMenu />
         </DataTableToolbarSection>
         <DataTableToolbarSection className="flex-wrap px-0">
-          {/* Category: static list + dynamic counts; Brand: auto-generated options */}
-          <DataTableFacetedFilter accessorKey="category" multiple />
-          <DataTableFacetedFilter accessorKey="brand" multiple />
+          {/* Category: show all options (not limited by other filters) */}
+          <DataTableFacetedFilter
+            accessorKey="category"
+            multiple
+            limitToFilteredRows={false}
+          />
+          {/* Brand: show only brands from filtered rows */}
+          <DataTableFacetedFilter
+            accessorKey="brand"
+            multiple
+            limitToFilteredRows={true}
+          />
           <DataTableClearFilter />
         </DataTableToolbarSection>
       </DataTableToolbarSection>
@@ -258,14 +267,52 @@ export function FacetedFilterTable({ data }: { data: Product[] }) {
 
 The faceted filter component shows available options with counts.
 
-**Props (common):**
+**Props:**
 
-- `accessorKey`: The column key to filter
-- `title?`: Optional override (defaults to column meta.label or accessor name)
-- `options?`: Static options; if omitted and column meta allows, options are auto-generated
-- `multiple?`: Allow multiple selections (default: `false`)
-- `showCounts?`: Show counts next to options (default: `true`)
-- `dynamicCounts?`: Counts reflect filtered rows (default: `true`)
+| Name                  | Type                   | Default | Description                                                                   |
+| --------------------- | ---------------------- | ------- | ----------------------------------------------------------------------------- |
+| `accessorKey`         | `keyof TData & string` | -       | The column key to filter (required)                                           |
+| `title`               | `string`               | -       | Optional override (defaults to column meta.label or accessor name)            |
+| `options`             | `Option[]`             | -       | Static options; if omitted and column meta allows, options are auto-generated |
+| `multiple`            | `boolean`              | -       | Allow multiple selections (defaults based on column variant)                  |
+| `showCounts`          | `boolean`              | `true`  | Show counts next to options                                                   |
+| `dynamicCounts`       | `boolean`              | `true`  | Counts reflect filtered rows                                                  |
+| `limitToFilteredRows` | `boolean`              | `true`  | Show only options from filtered rows (vs all rows)                            |
+
+### limitToFilteredRows
+
+The `limitToFilteredRows` prop controls whether the filter shows options from all data or only from the currently filtered rows.
+
+**When `limitToFilteredRows={true}` (default):**
+
+- Options are generated from rows that match other active filters
+- Useful for filters like "Brand" or "Rating" where you want to see only relevant options
+- Example: If you filter by "Category: Electronics", the Brand filter will only show brands that exist in Electronics
+
+**When `limitToFilteredRows={false}`:**
+
+- Options are generated from all rows, regardless of other filters
+- Useful for filters like "Category" where you want to see all available categories
+- Example: Category filter always shows all categories, even when other filters are active
+
+```tsx showLineNumbers
+// Category: Show all options (not limited by other filters)
+<DataTableFacetedFilter
+  accessorKey="category"
+  title="Category"
+  options={categoryOptions}
+  multiple
+  limitToFilteredRows={false} // Always show all categories
+/>
+
+// Brand: Show only brands from filtered rows
+<DataTableFacetedFilter
+  accessorKey="brand"
+  title="Brand"
+  multiple
+  limitToFilteredRows={true} // Only show brands from current filter results
+/>
+```
 
 ```tsx showLineNumbers
 // Auto-generated when meta.autoOptions or meta.options are set appropriately
@@ -282,17 +329,39 @@ Button to clear all active filters.
 
 ## Filter Functions
 
-Define custom filter functions in your column definitions:
+**Note:** For most use cases, you don't need to define custom `filterFn`. The default `extendedFilter` handles the `ExtendedColumnFilter` format automatically. Only define a custom `filterFn` if you need special filtering logic.
+
+If you do define a custom `filterFn`, it will work as you define it:
 
 ```tsx showLineNumbers
 {
   accessorKey: "category",
   enableColumnFilter: true,
+  // Custom filter function (optional - default works for most cases)
   filterFn: (row, id, filterValue: string[]) => {
     if (!filterValue?.length) return true
     const rowValue = String(row.getValue(id))
     return filterValue.includes(rowValue)
   },
+}
+```
+
+**Auto-applied filter functions:**
+
+When you specify `meta.variant` in your column definition, the appropriate `filterFn` is automatically applied:
+
+- **`variant: "range"`** → `numberRangeFilter` (for numeric ranges like price)
+- **`variant: "date"`** or **`variant: "date_range"`** → `dateRangeFilter` (for date filtering)
+
+```tsx showLineNumbers
+{
+  accessorKey: "price",
+  meta: {
+    label: "Price",
+    variant: "range", // Auto-applies numberRangeFilter
+    unit: "$",
+  },
+  // No need to define filterFn - it's auto-applied!
 }
 ```
 
