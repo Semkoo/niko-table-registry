@@ -1434,6 +1434,10 @@ function ServerSideStateTableContent() {
     refetch()
   }, [refetch])
 
+  // Calculate pageCount for manual pagination
+  const pageCount =
+    totalCount > 0 ? Math.ceil(totalCount / pagination.pageSize) : 1
+
   return (
     <div className="w-full space-y-4">
       {/* Error Display */}
@@ -1532,19 +1536,13 @@ function ServerSideStateTableContent() {
               data={data}
               columns={columns}
               isLoading={isLoading}
-              config={useMemo(
-                () => ({
-                  manualPagination: true,
-                  manualFiltering: true,
-                  manualSorting: true,
-                  pageCount:
-                    totalCount > 0
-                      ? Math.ceil(totalCount / pagination.pageSize)
-                      : 1,
-                  autoResetPageIndex: false, // Disable auto-reset for manual pagination
-                }),
-                [totalCount, pagination.pageSize],
-              )}
+              config={{
+                manualPagination: true,
+                manualFiltering: true,
+                manualSorting: true,
+                pageCount,
+                autoResetPageIndex: false,
+              }}
               state={{
                 globalFilter,
                 sorting,
@@ -1608,19 +1606,13 @@ function ServerSideStateTableContent() {
               data={data}
               columns={columns}
               isLoading={isLoading}
-              config={useMemo(
-                () => ({
-                  manualPagination: true,
-                  manualFiltering: true,
-                  manualSorting: true,
-                  pageCount:
-                    totalCount > 0
-                      ? Math.ceil(totalCount / pagination.pageSize)
-                      : 1,
-                  autoResetPageIndex: false, // Disable auto-reset for manual pagination
-                }),
-                [totalCount, pagination.pageSize],
-              )}
+              config={{
+                manualPagination: true,
+                manualFiltering: true,
+                manualSorting: true,
+                pageCount,
+                autoResetPageIndex: false,
+              }}
               state={{
                 globalFilter,
                 sorting,
