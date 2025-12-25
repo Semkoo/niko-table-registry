@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import type { Table, Row } from "@tanstack/react-table"
 import {
   TableFacetedFilter,
   type TableFacetedFilterProps,
@@ -10,6 +11,71 @@ import type { Option } from "../types"
 import { useDerivedColumnTitle } from "../hooks/use-derived-column-title"
 import { useGeneratedOptionsForColumn } from "../hooks/use-generated-options"
 import { formatLabel } from "../lib/format"
+
+/**
+ * Get filtered rows excluding a specific column's filter.
+ * This is useful when generating options for a column - we want to see
+ * options that exist in the filtered dataset (from other filters) but
+ * not be limited by the current column's own filter.
+ */
+function getFilteredRowsExcludingColumn<TData>(
+  table: Table<TData>,
+  excludeColumnId: string,
+  columnFilters: Array<{ id: string; value: unknown }>,
+  globalFilter: unknown,
+): Row<TData>[] {
+  // Filter out the current column's filter
+  const otherFilters = columnFilters.filter(
+    filter => filter.id !== excludeColumnId,
+  )
+
+  // Get all core rows
+  const coreRows = table.getCoreRowModel().rows
+
+  // If no filters to apply (excluding the current column), return core rows
+  if (otherFilters.length === 0 && !globalFilter) {
+    return coreRows
+  }
+
+  // Filter rows manually, excluding the current column's filter
+  return coreRows.filter(row => {
+    // Apply column filters (excluding the current column)
+    for (const filter of otherFilters) {
+      const column = table.getColumn(filter.id)
+      if (!column) continue
+
+      const filterValue = filter.value
+      const filterFn = column.columnDef.filterFn || "extended"
+
+      // Skip if filter function is a string (built-in) and we don't have access
+      if (typeof filterFn === "string") {
+        // Use the table's filterFns
+        const fn = table.options.filterFns?.[filterFn]
+        if (fn && typeof fn === "function") {
+          if (!fn(row, filter.id, filterValue, () => {})) {
+            return false
+          }
+        }
+      } else if (typeof filterFn === "function") {
+        if (!filterFn(row, filter.id, filterValue, () => {})) {
+          return false
+        }
+      }
+    }
+
+    // Apply global filter if present
+    if (globalFilter) {
+      const globalFilterFn = table.options.globalFilterFn
+      if (globalFilterFn && typeof globalFilterFn === "function") {
+        if (!globalFilterFn(row, "global", globalFilter, () => {})) {
+          return false
+        }
+      }
+    }
+
+    return true
+  })
+}
 
 type DataTableFacetedFilterProps<TData, TValue> = Omit<
   TableFacetedFilterProps<TData, TValue>,
@@ -37,6 +103,13 @@ type DataTableFacetedFilterProps<TData, TValue> = Omit<
    * @default true
    */
   dynamicCounts?: boolean
+  /**
+   * If true, only show options that exist in the currently filtered table rows.
+   * If false, show all options from the entire dataset (useful for multi-select filters
+   * where you want to see all possible options even if they're not in the current filtered results).
+   * @default true
+   */
+  limitToFilteredRows?: boolean
 }
 
 /**
@@ -77,6 +150,7 @@ export function DataTableFacetedFilter<TData, TValue = unknown>({
   options,
   showCounts = true,
   dynamicCounts = true,
+  limitToFilteredRows = true,
   title,
   multiple,
   ...props
@@ -87,11 +161,17 @@ export function DataTableFacetedFilter<TData, TValue = unknown>({
   const derivedTitle = useDerivedColumnTitle(column, String(accessorKey), title)
 
   // Prefer shared generator that respects column meta (autoOptions, mergeStrategy, dynamicCounts, showCounts)
+  // limitToFilteredRows controls whether to generate options from filtered rows (true) or all rows (false)
   const generatedFromMeta = useGeneratedOptionsForColumn(
     table,
     accessorKey as string,
-    { showCounts, dynamicCounts },
+    { showCounts, dynamicCounts, limitToFilteredRows },
   )
+
+  // Get current filter state for reactivity
+  const state = table.getState()
+  const columnFilters = state.columnFilters
+  const globalFilter = state.globalFilter
 
   // Fallback generator that works for any variant (text/boolean/etc.) to preserve
   // the original behavior of faceted filter for quick categorical filtering.
@@ -101,8 +181,16 @@ export function DataTableFacetedFilter<TData, TValue = unknown>({
     const meta = column.columnDef.meta
     const autoOptionsFormat = meta?.autoOptionsFormat ?? true
 
-    const rows = dynamicCounts
-      ? table.getFilteredRowModel().rows
+    // limitToFilteredRows controls whether to generate options from filtered rows (true) or all rows (false)
+    // When generating options, we exclude the current column's filter so we see all options
+    // that exist in the filtered dataset (from other filters)
+    const rows = limitToFilteredRows
+      ? getFilteredRowsExcludingColumn(
+          table,
+          accessorKey as string,
+          columnFilters,
+          globalFilter,
+        )
       : table.getCoreRowModel().rows
 
     const valueCounts = new Map<string, number>()
@@ -125,7 +213,15 @@ export function DataTableFacetedFilter<TData, TValue = unknown>({
         count: showCounts ? count : undefined,
       }))
       .sort((a, b) => a.label.localeCompare(b.label))
-  }, [accessorKey, column, dynamicCounts, showCounts, table])
+  }, [
+    accessorKey,
+    column,
+    limitToFilteredRows,
+    showCounts,
+    table,
+    columnFilters,
+    globalFilter,
+  ])
 
   // Final options selection priority: explicit props.options > meta-driven > fallback
   const dynamicOptions =

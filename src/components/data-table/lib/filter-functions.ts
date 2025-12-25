@@ -328,6 +328,16 @@ function applyFilterOperator(
       if (typeof cellValue === "string" && typeof filterValue === "string") {
         return cellStr === filterStr
       }
+      // Boolean comparison - convert boolean to string for comparison with string filter values
+      // This handles cases where cellValue is boolean (true/false) and filterValue is string ("true"/"false")
+      if (typeof cellValue === "boolean") {
+        const cellBoolStr = String(cellValue)
+        return cellBoolStr === String(filterValue)
+      }
+      if (typeof filterValue === "boolean") {
+        const filterBoolStr = String(filterValue)
+        return filterBoolStr === String(cellValue)
+      }
       // Date comparison - check if cellValue is a Date object
       if (
         typeof cellValue === "object" &&
