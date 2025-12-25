@@ -140,7 +140,7 @@ export default defineConfig({
         {
           label: "DataTable",
           items: [
-            { label: "Introduction", slug: "data-table/data-table" },
+            { label: "Introduction", slug: "data-table/introduction" },
             { label: "Components", slug: "data-table/components" },
           ],
         },
