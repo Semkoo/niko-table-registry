@@ -114,17 +114,14 @@ const columns: DataTableColumnDef<Product>[] = [
     meta: {
       label: "Price",
       unit: "$",
+      variant: "range", // Auto-applies numberRangeFilter
     },
     cell: ({ row }) => {
       const price = parseFloat(row.getValue("price"))
       return <div className="font-medium">${price.toFixed(2)}</div>
     },
     enableColumnFilter: true,
-    filterFn: (row, id, filterValue: [number, number]) => {
-      if (!filterValue) return true
-      const value = row.getValue(id) as number
-      return value >= filterValue[0] && value <= filterValue[1]
-    },
+    // filterFn auto-applied based on variant: "range" -> numberRangeFilter
   },
   {
     accessorKey: "stock",
@@ -186,28 +183,14 @@ const columns: DataTableColumnDef<Product>[] = [
     header: ({ column }) => <TableColumnHeader column={column} />,
     meta: {
       label: "Release Date",
+      variant: "date_range", // Auto-applies dateRangeFilter
     },
     cell: ({ row }) => {
       const date = row.getValue("releaseDate") as Date
       return <span>{date.toLocaleDateString()}</span>
     },
     enableColumnFilter: true,
-    filterFn: (row, id, filterValue: number | [number, number]) => {
-      if (!filterValue) return true
-      const rowValue = (row.getValue(id) as Date).getTime()
-
-      if (Array.isArray(filterValue)) {
-        const [from, to] = filterValue
-        if (from && to) {
-          return rowValue >= from && rowValue <= to
-        }
-        if (from) return rowValue >= from
-        if (to) return rowValue <= to
-        return true
-      }
-
-      return rowValue === filterValue
-    },
+    // filterFn auto-applied based on variant: "date_range" -> dateRangeFilter
   },
 ]
 

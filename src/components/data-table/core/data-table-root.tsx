@@ -30,7 +30,10 @@ import { detectFeaturesFromChildren } from "../config/feature-detection"
 import {
   extendedFilter,
   globalFilter as globalFilterFn,
+  numberRangeFilter,
+  dateRangeFilter,
 } from "../lib/filter-functions"
+import { FILTER_VARIANTS } from "../lib/constants"
 
 export interface DataTableConfig {
   // Feature toggles
@@ -383,6 +386,46 @@ function DataTableRootInternal<TData, TValue>({
   )
 
   /**
+   * Auto-apply filterFn based on meta.variant if not explicitly provided
+   * This allows developers to set variant in meta and get the right filterFn automatically
+   */
+  const processedColumns = React.useMemo(() => {
+    return columns.map(col => {
+      // If filterFn is already defined, use it (manual override)
+      if (col.filterFn) return col
+
+      const meta = col.meta ?? {}
+      const variant = meta.variant
+
+      // Auto-apply filterFn based on variant
+      let autoFilterFn: FilterFnOption<TData> | undefined
+      if (
+        variant === FILTER_VARIANTS.RANGE ||
+        variant === FILTER_VARIANTS.NUMBER
+      ) {
+        // For number/range variants, use numberRangeFilter if no explicit filterFn
+        autoFilterFn = "numberRange" as FilterFnOption<TData>
+      } else if (
+        variant === FILTER_VARIANTS.DATE ||
+        variant === FILTER_VARIANTS.DATE_RANGE
+      ) {
+        // For date variants, use dateRangeFilter if no explicit filterFn
+        autoFilterFn = "dateRange" as FilterFnOption<TData>
+      }
+
+      // Only override if we have an auto filterFn and no explicit one
+      if (autoFilterFn) {
+        return {
+          ...col,
+          filterFn: autoFilterFn,
+        }
+      }
+
+      return col
+    })
+  }, [columns])
+
+  /**
    * PERFORMANCE: defaultColumn for TanStack Table
    *
    * WHY: Instead of manually mapping over columns to add defaults, we use TanStack Table's
@@ -426,7 +469,7 @@ function DataTableRootInternal<TData, TValue>({
     () => ({
       ...rest,
       data,
-      columns,
+      columns: processedColumns,
       defaultColumn,
       state: {
         ...rest.state,
@@ -489,6 +532,8 @@ function DataTableRootInternal<TData, TValue>({
         : undefined,
       filterFns: {
         extended: extendedFilter,
+        numberRange: numberRangeFilter,
+        dateRange: dateRangeFilter,
       },
       // Allow globalFilterFn to be overridden via rest props, otherwise use default
       globalFilterFn:
@@ -511,13 +556,32 @@ function DataTableRootInternal<TData, TValue>({
         : undefined,
     }),
     // Dependencies: state values and stable callbacks
+    // Note: processedColumns is already memoized, so it's safe to include here
     // Note: Callbacks like setSorting, setExpanded are stable from useState
     // External callbacks (onSortingChange, etc.) should be memoized by consumer
     // Note: 'rest' is included because it's spread into tableOptions
     // Consumers should memoize rest props if they change frequently
     [
+      rest,
       data,
-      columns,
+      processedColumns,
+      defaultColumn,
+      detectFeatures,
+      finalConfig,
+      handleGlobalFilterChange,
+      onRowSelectionChange,
+      handleRowSelectionChange,
+      onSortingChange,
+      setSorting,
+      setColumnFilters,
+      onColumnFiltersChange,
+      setColumnVisibility,
+      onColumnVisibilityChange,
+      setExpanded,
+      onExpandedChange,
+      setPagination,
+      onPaginationChange,
+      getRowId,
       sorting,
       columnVisibility,
       rowSelection,
@@ -525,30 +589,6 @@ function DataTableRootInternal<TData, TValue>({
       globalFilter,
       expanded,
       pagination,
-      detectFeatures.enablePagination,
-      detectFeatures.enableRowSelection,
-      detectFeatures.enableFilters,
-      detectFeatures.enableSorting,
-      detectFeatures.enableMultiSort,
-      detectFeatures.enableGrouping,
-      detectFeatures.enableExpanding,
-      detectFeatures.manualSorting,
-      detectFeatures.manualPagination,
-      detectFeatures.manualFiltering,
-      detectFeatures.pageCount,
-      finalConfig.autoResetPageIndex,
-      finalConfig.autoResetExpanded,
-      handleGlobalFilterChange,
-      handleRowSelectionChange,
-      onRowSelectionChange,
-      onSortingChange,
-      onColumnFiltersChange,
-      onColumnVisibilityChange,
-      onExpandedChange,
-      onPaginationChange,
-      getRowId,
-      defaultColumn,
-      rest,
     ],
   )
 
@@ -580,7 +620,7 @@ function DataTableRootInternal<TData, TValue>({
   return (
     <DataTableProvider
       table={table}
-      columns={columns as DataTableColumnDef<TData>[]}
+      columns={processedColumns as DataTableColumnDef<TData>[]}
       isLoading={isLoading}
     >
       <div className={cn("w-full space-y-4", className)}>{children}</div>

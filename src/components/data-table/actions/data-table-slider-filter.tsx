@@ -1,11 +1,13 @@
 "use client"
 
+import * as React from "react"
 import { useDataTable } from "../core"
 import {
   TableSliderFilter,
   type TableSliderFilterProps,
 } from "../filters/table-slider-filter"
 import { useDerivedColumnTitle } from "../hooks/use-derived-column-title"
+import { FILTER_VARIANTS } from "../lib/constants"
 
 type DataTableSliderFilterProps<TData> = Omit<
   TableSliderFilterProps<TData>,
@@ -63,6 +65,17 @@ export function DataTableSliderFilter<TData>({
   const column = table.getColumn(accessorKey as string)
 
   const derivedTitle = useDerivedColumnTitle(column, String(accessorKey), title)
+
+  // Auto-set variant in column meta if not already set
+  // This allows the auto-filterFn to be applied based on variant
+  React.useMemo(() => {
+    if (!column) return
+    const meta = (column.columnDef.meta ||= {})
+    // Only set variant if not already set (respects manual configuration)
+    if (!meta.variant) {
+      meta.variant = FILTER_VARIANTS.RANGE
+    }
+  }, [column])
 
   // Early return if column not found
   if (!column) {

@@ -16,6 +16,13 @@ interface AutoOptionProps {
   autoOptions?: boolean
   showCounts?: boolean
   dynamicCounts?: boolean
+  /**
+   * If true, only generate options from filtered rows. If false, generate from all rows.
+   * This controls which rows are used to generate the option list itself.
+   * Note: This is separate from dynamicCounts which controls count calculation.
+   * @default true
+   */
+  limitToFilteredRows?: boolean
   includeColumns?: string[]
   excludeColumns?: string[]
   limitPerColumn?: number
@@ -29,6 +36,7 @@ export function DataTableInlineFilter<TData>({
   autoOptions = true,
   showCounts = true,
   dynamicCounts = true,
+  limitToFilteredRows = true,
   includeColumns,
   excludeColumns,
   limitPerColumn,
@@ -40,12 +48,13 @@ export function DataTableInlineFilter<TData>({
   const generatedOptions = useGeneratedOptions(table, {
     showCounts,
     dynamicCounts,
+    limitToFilteredRows,
     includeColumns,
     excludeColumns,
     limitPerColumn,
   })
 
-  // Mutate meta.options for select/multiSelect columns similar to menu wrapper
+  // Mutate meta.options for select/multi-select columns similar to menu wrapper
   // This keeps TableInline copy-paste friendly without extra props.
   // Memo to avoid repeated mutation on every render.
   React.useMemo(() => {

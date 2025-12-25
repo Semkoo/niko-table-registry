@@ -1,4 +1,4 @@
-import type { FilterFn } from "@tanstack/react-table"
+import type { FilterFn, RowData } from "@tanstack/react-table"
 import type { ExtendedColumnFilter, FilterOperator } from "../types"
 import { JOIN_OPERATORS, FILTER_OPERATORS } from "./constants"
 
@@ -72,8 +72,13 @@ function getOrCreateRegex(pattern: string, flags: string): RegExp {
 /**
  * Custom filter function that handles our extended filter operators
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const extendedFilter: FilterFn<any> = (row, columnId, filterValue) => {
+export const extendedFilter: FilterFn<RowData> = (
+  row,
+  columnId,
+  filterValue,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  addMeta,
+) => {
   // If no filter value, show all rows
   if (!filterValue) return true
 
@@ -83,8 +88,7 @@ export const extendedFilter: FilterFn<any> = (row, columnId, filterValue) => {
     filterValue.operator &&
     filterValue.value !== undefined
   ) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const filter = filterValue as ExtendedColumnFilter<any>
+    const filter = filterValue as ExtendedColumnFilter<RowData>
     return applyFilterOperator(
       row.getValue(columnId),
       filter.operator,
@@ -92,11 +96,47 @@ export const extendedFilter: FilterFn<any> = (row, columnId, filterValue) => {
     )
   }
 
-  // Handle raw array filter values (from TableFacetedFilter with multiple selection)
-  // When filterValue is an array like ["electronics", "clothing"], check if cell value is in the array
+  // Handle raw array filter values
   if (Array.isArray(filterValue)) {
     const cellValue = row.getValue(columnId)
     if (cellValue == null) return false
+
+    // Handle numeric range arrays [min, max] from slider filters
+    // Check if both values are numbers - if so, treat as range
+    if (
+      filterValue.length === 2 &&
+      typeof filterValue[0] === "number" &&
+      typeof filterValue[1] === "number"
+    ) {
+      const [min, max] = filterValue
+      const value = Number(cellValue)
+      if (isNaN(value)) return false
+      return value >= min && value <= max
+    }
+
+    // Handle date range arrays [from, to] (timestamps)
+    // Check if both values are numbers and look like timestamps (large numbers)
+    if (
+      filterValue.length === 2 &&
+      typeof filterValue[0] === "number" &&
+      typeof filterValue[1] === "number" &&
+      filterValue[0] > 1000000000000 && // Timestamp in ms (year 2001+)
+      filterValue[1] > 1000000000000
+    ) {
+      const rowValue = cellValue
+      const rowTimestamp =
+        rowValue instanceof Date
+          ? rowValue.getTime()
+          : typeof rowValue === "number"
+            ? rowValue
+            : new Date(rowValue as string).getTime()
+      if (isNaN(rowTimestamp)) return false
+      const [from, to] = filterValue
+      return rowTimestamp >= from && rowTimestamp <= to
+    }
+
+    // Handle string arrays (from TableFacetedFilter with multiple selection)
+    // When filterValue is an array like ["electronics", "clothing"], check if cell value is in the array
 
     // Case-insensitive comparison for strings
     if (typeof cellValue === "string") {
@@ -155,8 +195,13 @@ export const extendedFilter: FilterFn<any> = (row, columnId, filterValue) => {
  * 2. Evaluate each AND-group (all conditions must be true)
  * 3. OR all group results together (at least one group must be true)
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const globalFilter: FilterFn<any> = (row, _columnId, filterValue) => {
+export const globalFilter: FilterFn<RowData> = (
+  row,
+  _columnId,
+  filterValue,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  addMeta,
+) => {
   // If no filter value, show all rows
   if (!filterValue) return true
 
@@ -171,8 +216,7 @@ export const globalFilter: FilterFn<any> = (row, _columnId, filterValue) => {
     // Handle different join operator modes
     if (filterValue.joinOperator === "or") {
       // Pure OR logic: at least one filter must match
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return filters.some((filter: any) => {
+      return filters.some((filter: ExtendedColumnFilter<RowData>) => {
         const cellValue = row.getValue(filter.id)
         return applyFilterOperator(
           cellValue as string | number | boolean | null | undefined,
@@ -499,6 +543,120 @@ function applyFilterOperator(
         return cellStr.includes(filterStr)
       }
   }
+}
+
+/**
+ * Filter function for number range (slider) filters
+ * Handles array values [min, max] for range filtering
+ */
+export const numberRangeFilter: FilterFn<RowData> = (
+  row,
+  columnId,
+  filterValue,
+   
+  addMeta,
+) => {
+  if (!filterValue) return true
+
+  // Handle ExtendedColumnFilter format
+  if (
+    typeof filterValue === "object" &&
+    filterValue.operator &&
+    filterValue.value !== undefined
+  ) {
+    const filter = filterValue as ExtendedColumnFilter<RowData>
+    return applyFilterOperator(
+      row.getValue(columnId),
+      filter.operator,
+      filter.value,
+    )
+  }
+
+  // Handle array format [min, max] from slider
+  if (Array.isArray(filterValue) && filterValue.length === 2) {
+    const [min, max] = filterValue
+    const value = Number(row.getValue(columnId))
+    if (isNaN(value)) return false
+    const numMin = Number(min)
+    const numMax = Number(max)
+    if (isNaN(numMin) || isNaN(numMax)) return false
+    return value >= numMin && value <= numMax
+  }
+
+  // Fallback to extendedFilter for other formats
+  return extendedFilter(row, columnId, filterValue, addMeta)
+}
+
+/**
+ * Filter function for date range filters
+ * Handles both single date (timestamp) and date range [from, to] (timestamps)
+ */
+export const dateRangeFilter: FilterFn<RowData> = (
+  row,
+  columnId,
+  filterValue,
+   
+  addMeta,
+) => {
+  if (!filterValue) return true
+
+  // Handle ExtendedColumnFilter format
+  if (
+    typeof filterValue === "object" &&
+    filterValue.operator &&
+    filterValue.value !== undefined
+  ) {
+    const filter = filterValue as ExtendedColumnFilter<RowData>
+    return applyFilterOperator(
+      row.getValue(columnId),
+      filter.operator,
+      filter.value,
+    )
+  }
+
+  const rowValue = row.getValue(columnId)
+  if (!rowValue) return false
+
+  // Handle Date objects - convert to timestamp
+  const rowTimestamp =
+    rowValue instanceof Date
+      ? rowValue.getTime()
+      : typeof rowValue === "number"
+        ? rowValue
+        : new Date(rowValue as string).getTime()
+
+  if (isNaN(rowTimestamp)) return false
+
+  // Handle array format [from, to] from date range picker
+  if (Array.isArray(filterValue)) {
+    if (filterValue.length === 2) {
+      const [from, to] = filterValue
+      const fromTime = Number(from)
+      const toTime = Number(to)
+      if (isNaN(fromTime) || isNaN(toTime)) return false
+      return rowTimestamp >= fromTime && rowTimestamp <= toTime
+    }
+    // Single date in array
+    if (filterValue.length === 1) {
+      const dateTime = Number(filterValue[0])
+      if (isNaN(dateTime)) return false
+      // Compare dates at day level (midnight to midnight)
+      const rowDate = new Date(rowTimestamp).setHours(0, 0, 0, 0)
+      const filterDate = new Date(dateTime).setHours(0, 0, 0, 0)
+      return rowDate === filterDate
+    }
+  }
+
+  // Handle single timestamp
+  if (typeof filterValue === "number") {
+    // Compare dates at day level (midnight to midnight)
+    const rowDate = new Date(rowTimestamp).setHours(0, 0, 0, 0)
+    const filterDate = new Date(filterValue).setHours(0, 0, 0, 0)
+    return rowDate === filterDate
+  }
+
+  // Fallback to extendedFilter for other formats
+  return extendedFilter(row, columnId, filterValue, addMeta)
 }
 
 /**
