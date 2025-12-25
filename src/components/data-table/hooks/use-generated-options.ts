@@ -105,7 +105,7 @@ export interface GenerateOptionsConfig {
 }
 
 /**
- * Generate a map of options for select/multiSelect columns based on table data.
+ * Generate a map of options for select/multi_select columns based on table data.
  * Uses either filtered rows (dynamicCounts) or all core rows.
  */
 export function useGeneratedOptions<TData>(
@@ -145,7 +145,7 @@ export function useGeneratedOptions<TData>(
    *
    * WHY: Option generation is expensive:
    * - Iterates through all columns
-   * - For each select/multiSelect column: iterates through all rows
+   * - For each select/multi_select column: iterates through all rows
    * - Counts occurrences, formats labels, sorts options
    * - With 1,000 rows and 5 select columns: ~50-100ms per generation
    *

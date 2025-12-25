@@ -96,7 +96,7 @@ export function TableFacetedFilter<TData, TValue>({
           onValueChange?.(undefined)
         } else {
           // Create ExtendedColumnFilter format for interoperability with filter menu
-          // FORCE variant to multiSelect when using IN_ARRAY operator to ensure it shows up in the menu
+          // FORCE variant to multi_select when using IN operator to ensure it shows up in the menu
           const extendedFilter: ExtendedColumnFilter<TData> = {
             id: column.id as Extract<keyof TData, string>,
             value: filterValues,

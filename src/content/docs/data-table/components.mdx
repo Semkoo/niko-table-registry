@@ -76,7 +76,6 @@ The main table container component.
 
 ```tsx showLineNumbers
 import { DataTable } from "@/components/data-table"
-
 ;<DataTable className="rounded-md border">
   <DataTableHeader />
   <DataTableBody />
@@ -96,7 +95,6 @@ Renders the table header with sortable columns.
 
 ```tsx showLineNumbers
 import { DataTableHeader } from "@/components/data-table"
-
 ;<DataTableHeader sticky={true} />
 ```
 
@@ -117,7 +115,6 @@ import {
   DataTableSkeleton,
   DataTableEmptyBody,
 } from "@/components/data-table"
-
 ;<DataTableBody>
   <DataTableSkeleton />
   <DataTableEmptyBody />
@@ -170,7 +167,6 @@ Container for organizing filters and actions.
 
 ```tsx showLineNumbers
 import { DataTableToolbarSection } from "@/components/data-table"
-
 ;<DataTableToolbarSection className="flex justify-between">
   <DataTableSearchFilter />
   <DataTableViewMenu />
@@ -190,7 +186,6 @@ Full-featured pagination controls.
 
 ```tsx showLineNumbers
 import { DataTablePagination } from "@/components/data-table"
-
 ;<DataTablePagination pageSizeOptions={[10, 25, 50, 100]} totalCount={500} />
 ```
 
@@ -253,7 +248,6 @@ Command palette-style interface for adding filters.
 
 ```tsx showLineNumbers
 import { DataTableFilterMenu } from "@/components/data-table"
-
 ;<DataTableFilterMenu
   autoOptions
   dynamicCounts
@@ -264,17 +258,17 @@ import { DataTableFilterMenu } from "@/components/data-table"
 
 ### Props
 
-| Name                  | Type                                   | Default      | Description                                           |
-| --------------------- | -------------------------------------- | ------------ | ----------------------------------------------------- |
-| `autoOptions`         | `boolean`                              | `true`       | Auto-generate options for select/multiSelect columns. |
-| `showCounts`          | `boolean`                              | `true`       | Show counts beside each option.                       |
-| `dynamicCounts`       | `boolean`                              | `true`       | Recompute counts based on filtered rows.              |
-| `limitToFilteredRows` | `boolean`                              | `true`       | Generate options from filtered rows only.             |
-| `includeColumns`      | `string[]`                             | -            | Only generate options for these column ids.           |
-| `excludeColumns`      | `string[]`                             | -            | Exclude these column ids from generation.             |
-| `limitPerColumn`      | `number`                               | -            | Limit number of generated options per column.         |
-| `mergeStrategy`       | `"preserve" \| "augment" \| "replace"` | `"preserve"` | How to handle existing static options.                |
-| `className`           | `string`                               | -            | Additional CSS classes.                               |
+| Name                  | Type                                   | Default      | Description                                            |
+| --------------------- | -------------------------------------- | ------------ | ------------------------------------------------------ |
+| `autoOptions`         | `boolean`                              | `true`       | Auto-generate options for select/multi_select columns. |
+| `showCounts`          | `boolean`                              | `true`       | Show counts beside each option.                        |
+| `dynamicCounts`       | `boolean`                              | `true`       | Recompute counts based on filtered rows.               |
+| `limitToFilteredRows` | `boolean`                              | `true`       | Generate options from filtered rows only.              |
+| `includeColumns`      | `string[]`                             | -            | Only generate options for these column ids.            |
+| `excludeColumns`      | `string[]`                             | -            | Exclude these column ids from generation.              |
+| `limitPerColumn`      | `number`                               | -            | Limit number of generated options per column.          |
+| `mergeStrategy`       | `"preserve" \| "augment" \| "replace"` | `"preserve"` | How to handle existing static options.                 |
+| `className`           | `string`                               | -            | Additional CSS classes.                                |
 
 ### Merge Strategy
 
@@ -334,7 +328,6 @@ Menu for managing column sorting with drag-and-drop reordering.
 
 ```tsx showLineNumbers
 import { DataTableSortMenu } from "@/components/data-table"
-
 ;<DataTableSortMenu className="ml-auto" />
 ```
 
@@ -350,7 +343,6 @@ Column visibility toggle menu.
 
 ```tsx showLineNumbers
 import { DataTableViewMenu } from "@/components/data-table"
-
 ;<DataTableViewMenu />
 ```
 
@@ -367,7 +359,6 @@ Inline filter toolbar for managing filters.
 
 ```tsx showLineNumbers
 import { DataTableInlineFilter } from "@/components/data-table"
-
 ;<DataTableInlineFilter autoOptions dynamicCounts showCounts />
 ```
 
@@ -444,7 +435,6 @@ Button to clear all active filters.
 
 ```tsx showLineNumbers
 import { DataTableClearFilter } from "@/components/data-table"
-
 ;<DataTableClearFilter />
 ```
 
@@ -454,7 +444,6 @@ Button to export table data.
 
 ```tsx showLineNumbers
 import { DataTableExportButton } from "@/components/data-table"
-
 ;<DataTableExportButton />
 ```
 
@@ -464,7 +453,6 @@ Shows bulk actions when rows are selected.
 
 ```tsx showLineNumbers
 import { DataTableSelectionBar } from "@/components/data-table"
-
 ;<DataTableSelectionBar onDelete={rows => handleDelete(rows)} />
 ```
 
@@ -527,7 +515,6 @@ import {
   DataTableVirtualizedBody,
   DataTableVirtualizedEmptyBody,
 } from "@/components/data-table"
-
 ;<DataTable>
   <DataTableVirtualizedHeader />
   <DataTableVirtualizedBody height={600}>

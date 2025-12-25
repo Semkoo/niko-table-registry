@@ -26,7 +26,7 @@ declare module "@tanstack/react-table" {
     options?: Option[]
     range?: [number, number]
     /**
-     * Automatically generate options for select/multiSelect columns if not provided.
+     * Automatically generate options for select/multi_select columns if not provided.
      * When true and no static `options` exist, generation logic (wrappers / hooks) may supply them.
      */
     autoOptions?: boolean
