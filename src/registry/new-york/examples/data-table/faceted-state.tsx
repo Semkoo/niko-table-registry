@@ -86,11 +86,6 @@ const columns: DataTableColumnDef<Product>[] = [
       return <span>{option?.label || category}</span>
     },
     enableColumnFilter: true,
-    filterFn: (row, id, filterValue: string[]) => {
-      if (!filterValue?.length) return true
-      const rowValue = String(row.getValue(id))
-      return filterValue.includes(rowValue)
-    },
   },
   {
     accessorKey: "brand",
@@ -102,11 +97,6 @@ const columns: DataTableColumnDef<Product>[] = [
       showCounts: true,
     },
     enableColumnFilter: true,
-    filterFn: (row, id, filterValue: string[]) => {
-      if (!filterValue?.length) return true
-      const rowValue = String(row.getValue(id))
-      return filterValue.includes(rowValue)
-    },
   },
   {
     accessorKey: "price",
@@ -159,11 +149,6 @@ const columns: DataTableColumnDef<Product>[] = [
       )
     },
     enableColumnFilter: true,
-    filterFn: (row, id, filterValue: string[]) => {
-      if (!filterValue?.length) return true
-      const rowValue = String(row.getValue(id))
-      return filterValue.includes(rowValue)
-    },
   },
   {
     accessorKey: "inStock",
@@ -185,11 +170,6 @@ const columns: DataTableColumnDef<Product>[] = [
       )
     },
     enableColumnFilter: true,
-    filterFn: (row, id, filterValue: string[]) => {
-      if (!filterValue?.length) return true
-      const rowValue = row.getValue(id) ? "true" : "false"
-      return filterValue.includes(rowValue)
-    },
   },
   {
     accessorKey: "releaseDate",
@@ -397,10 +377,18 @@ function FilterToolbar() {
         <DataTableViewMenu />
       </DataTableToolbarSection>
       <DataTableToolbarSection className="px-0">
-        <DataTableFacetedFilter accessorKey="category" multiple />
-        <DataTableFacetedFilter accessorKey="brand" />
-        <DataTableFacetedFilter accessorKey="rating" />
-        <DataTableFacetedFilter accessorKey="inStock" />
+        {/* Category: static list + live counts (augment) - show all options from entire dataset */}
+        <DataTableFacetedFilter
+          accessorKey="category"
+          multiple
+          limitToFilteredRows={false}
+        />
+        {/* Brand: fully generated options - show only options in filtered rows */}
+        <DataTableFacetedFilter accessorKey="brand" limitToFilteredRows />
+        {/* Rating: auto-generated (numbers become categorical) - show only options in filtered rows */}
+        <DataTableFacetedFilter accessorKey="rating" limitToFilteredRows />
+        {/* In Stock: preserve static options (no counts) - show only options in filtered rows */}
+        <DataTableFacetedFilter accessorKey="inStock" limitToFilteredRows />
         <DataTableSliderFilter accessorKey="price" />
         <DataTableDateFilter accessorKey="releaseDate" multiple />
         <DataTableClearFilter />

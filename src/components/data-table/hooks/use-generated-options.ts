@@ -1,11 +1,76 @@
 "use client"
 
 import * as React from "react"
-import type { Table } from "@tanstack/react-table"
+import type { Table, Row } from "@tanstack/react-table"
 
 import type { Option } from "../types"
 import { formatLabel } from "../lib/format"
 import { FILTER_VARIANTS } from "../lib/constants"
+
+/**
+ * Get filtered rows excluding a specific column's filter.
+ * This is useful when generating options for a column - we want to see
+ * options that exist in the filtered dataset (from other filters) but
+ * not be limited by the current column's own filter.
+ */
+function getFilteredRowsExcludingColumn<TData>(
+  table: Table<TData>,
+  excludeColumnId: string,
+  columnFilters: Array<{ id: string; value: unknown }>,
+  globalFilter: unknown,
+): Row<TData>[] {
+  // Filter out the current column's filter
+  const otherFilters = columnFilters.filter(
+    filter => filter.id !== excludeColumnId,
+  )
+
+  // Get all core rows
+  const coreRows = table.getCoreRowModel().rows
+
+  // If no filters to apply (excluding the current column), return core rows
+  if (otherFilters.length === 0 && !globalFilter) {
+    return coreRows
+  }
+
+  // Filter rows manually, excluding the current column's filter
+  return coreRows.filter(row => {
+    // Apply column filters (excluding the current column)
+    for (const filter of otherFilters) {
+      const column = table.getColumn(filter.id)
+      if (!column) continue
+
+      const filterValue = filter.value
+      const filterFn = column.columnDef.filterFn || "extended"
+
+      // Skip if filter function is a string (built-in) and we don't have access
+      if (typeof filterFn === "string") {
+        // Use the table's filterFns
+        const fn = table.options.filterFns?.[filterFn]
+        if (fn && typeof fn === "function") {
+          if (!fn(row, filter.id, filterValue, () => {})) {
+            return false
+          }
+        }
+      } else if (typeof filterFn === "function") {
+        if (!filterFn(row, filter.id, filterValue, () => {})) {
+          return false
+        }
+      }
+    }
+
+    // Apply global filter if present
+    if (globalFilter) {
+      const globalFilterFn = table.options.globalFilterFn
+      if (globalFilterFn && typeof globalFilterFn === "function") {
+        if (!globalFilterFn(row, "global", globalFilter, () => {})) {
+          return false
+        }
+      }
+    }
+
+    return true
+  })
+}
 
 export interface GenerateOptionsConfig {
   /**
@@ -18,6 +83,13 @@ export interface GenerateOptionsConfig {
    * @default true
    */
   dynamicCounts?: boolean
+  /**
+   * If true, only generate options from filtered rows. If false, generate from all rows.
+   * This controls which rows are used to generate the option list itself.
+   * Note: This is separate from dynamicCounts which controls count calculation.
+   * @default true
+   */
+  limitToFilteredRows?: boolean
   /**
    * Only generate options for these column ids (if provided)
    */
@@ -43,6 +115,7 @@ export function useGeneratedOptions<TData>(
   const {
     showCounts = true,
     dynamicCounts = true,
+    limitToFilteredRows = true,
     includeColumns,
     excludeColumns,
     limitPerColumn,
@@ -121,14 +194,55 @@ export function useGeneratedOptions<TData>(
         continue
       }
 
-      // If static options are present and merge strategy prefers preserve, we still may augment counts
-      const counts = new Map<string, number>()
-
-      const sourceRows = colDynamicCounts
-        ? table.getFilteredRowModel().rows
+      // limitToFilteredRows controls which rows to use for generating options
+      // dynamicCounts controls which rows to use for calculating counts
+      // When generating options for a column, we want to exclude that column's own filter
+      // so we see all options that exist in the filtered dataset (from other filters)
+      const optionSourceRows = limitToFilteredRows
+        ? getFilteredRowsExcludingColumn(
+            table,
+            colId,
+            columnFilters,
+            globalFilter,
+          )
         : table.getCoreRowModel().rows
 
-      for (const row of sourceRows) {
+      const countSourceRows = colDynamicCounts
+        ? getFilteredRowsExcludingColumn(
+            table,
+            colId,
+            columnFilters,
+            globalFilter,
+          )
+        : table.getCoreRowModel().rows
+
+      // If we have static options with augment strategy, we use static options and only calculate counts
+      if (meta.options && meta.options.length > 0 && colMerge === "augment") {
+        // Calculate counts from countSourceRows for all static options
+        const countMap = new Map<string, number>()
+        for (const row of countSourceRows) {
+          const raw = row.getValue(colId as string) as unknown
+          const values: unknown[] = Array.isArray(raw) ? raw : [raw]
+          for (const v of values) {
+            if (v === null || v === undefined) continue
+            const str = String(v)
+            if (str.trim() === "") continue
+            countMap.set(str, (countMap.get(str) ?? 0) + 1)
+          }
+        }
+        // Return static options with augmented counts
+        result[colId] = meta.options.map(opt => ({
+          ...opt,
+          count: colShowCounts
+            ? (countMap.get(opt.value) ?? opt.count)
+            : undefined,
+        }))
+        continue
+      }
+
+      // For auto-generated options, generate from optionSourceRows
+      const counts = new Map<string, number>()
+      for (const row of optionSourceRows) {
         const raw = row.getValue(colId as string) as unknown
 
         // Support array values (multi-select like arrays on the row)
@@ -161,18 +275,6 @@ export function useGeneratedOptions<TData>(
           ? options.slice(0, limitPerColumn)
           : options
 
-      // If meta.options exist and merge strategy is augment, add counts to existing options
-      if (meta.options && meta.options.length > 0 && colMerge === "augment") {
-        const countMap = new Map(finalOptions.map(o => [o.value, o.count]))
-        result[colId] = meta.options.map(opt => ({
-          ...opt,
-          count: colShowCounts
-            ? (countMap.get(opt.value) ?? opt.count)
-            : undefined,
-        }))
-        continue
-      }
-
       // If static options exist and strategy is preserve, keep as-is
       if (
         meta.options &&
@@ -197,6 +299,7 @@ export function useGeneratedOptions<TData>(
     includeKey,
     excludeKey,
     limitPerColumn,
+    limitToFilteredRows,
     // Recompute when filters/global filter change to keep counts in sync
     columnFilters,
     globalFilter,
