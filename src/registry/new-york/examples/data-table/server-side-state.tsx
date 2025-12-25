@@ -101,7 +101,14 @@
  * - TanStack Query: https://tanstack.com/query/latest
  */
 
-import { useState, useCallback, useMemo, useRef, useEffect } from "react"
+import {
+  useState,
+  useCallback,
+  useMemo,
+  useRef,
+  useEffect,
+  startTransition,
+} from "react"
 import {
   useQuery,
   useQueryClient,
@@ -924,6 +931,7 @@ function ServerSideStateTableContent() {
     previous: boolean
   }>({ next: false, previous: false })
   const effectRunRef = useRef(0)
+  const abortControllerRef = useRef<AbortController | null>(null)
 
   // Prefetch next and previous pages for smoother navigation
   useEffect(() => {
@@ -931,21 +939,39 @@ function ServerSideStateTableContent() {
     const currentPage = pagination.pageIndex
     const currentRun = ++effectRunRef.current
 
-    // Reset prefetching state at the start of each effect run
-    // Use setTimeout to avoid synchronous setState in effect
-    setTimeout(() => {
-      if (currentRun === effectRunRef.current) {
-        setPrefetchingState({ next: false, previous: false })
+    // Abort any previous prefetch operations
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort()
+    }
+
+    // Create new abort controller for this effect run
+    const abortController = new AbortController()
+    abortControllerRef.current = abortController
+
+    // Reset prefetching state immediately when effect runs
+    // Use startTransition to mark as non-urgent and avoid cascading renders
+    startTransition(() => {
+      setPrefetchingState({ next: false, previous: false })
+    })
+
+    // Helper to safely update state only if this effect run is still current
+    const safeSetState = (
+      updater: (prev: { next: boolean; previous: boolean }) => {
+        next: boolean
+        previous: boolean
+      },
+    ) => {
+      if (
+        currentRun === effectRunRef.current &&
+        !abortController.signal.aborted
+      ) {
+        setPrefetchingState(updater)
       }
-    }, 0)
+    }
 
     // Prefetch next page if it exists
-    if (currentPage + 1 < totalPages) {
-      setTimeout(() => {
-        if (currentRun === effectRunRef.current) {
-          setPrefetchingState(prev => ({ ...prev, next: true }))
-        }
-      }, 0)
+    if (currentPage + 1 < totalPages && !abortController.signal.aborted) {
+      safeSetState(prev => ({ ...prev, next: true }))
 
       queryClient
         .prefetchQuery({
@@ -969,26 +995,17 @@ function ServerSideStateTableContent() {
           staleTime: 30000,
         })
         .then(() => {
-          // Only update if this effect run is still current
-          if (currentRun === effectRunRef.current) {
-            setPrefetchingState(prev => ({ ...prev, next: false }))
-          }
+          safeSetState(prev => ({ ...prev, next: false }))
         })
         .catch(() => {
           // Reset on error too
-          if (currentRun === effectRunRef.current) {
-            setPrefetchingState(prev => ({ ...prev, next: false }))
-          }
+          safeSetState(prev => ({ ...prev, next: false }))
         })
     }
 
     // Prefetch previous page if it exists
-    if (currentPage > 0) {
-      setTimeout(() => {
-        if (currentRun === effectRunRef.current) {
-          setPrefetchingState(prev => ({ ...prev, previous: true }))
-        }
-      }, 0)
+    if (currentPage > 0 && !abortController.signal.aborted) {
+      safeSetState(prev => ({ ...prev, previous: true }))
 
       queryClient
         .prefetchQuery({
@@ -1012,24 +1029,25 @@ function ServerSideStateTableContent() {
           staleTime: 30000,
         })
         .then(() => {
-          // Only update if this effect run is still current
-          if (currentRun === effectRunRef.current) {
-            setPrefetchingState(prev => ({ ...prev, previous: false }))
-          }
+          safeSetState(prev => ({ ...prev, previous: false }))
         })
         .catch(() => {
           // Reset on error too
-          if (currentRun === effectRunRef.current) {
-            setPrefetchingState(prev => ({ ...prev, previous: false }))
-          }
+          safeSetState(prev => ({ ...prev, previous: false }))
         })
     }
 
-    // Cleanup function: reset state if effect re-runs before prefetches complete
-    // This ensures state is reset when dependencies change
+    // Cleanup function: reset state and abort operations when effect re-runs
     return () => {
-      // Reset state when effect is cleaned up (new effect run starting)
+      // Reset state immediately (cleanup is safe to do synchronously)
       setPrefetchingState({ next: false, previous: false })
+      // Abort any ongoing prefetch operations
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort()
+        abortControllerRef.current = null
+      }
+      // Note: Don't reset effectRunRef.current here - it's already been incremented
+      // by the new effect run. Setting it to 0 would break the safeSetState checks.
     }
   }, [
     queryClient,
@@ -1179,13 +1197,17 @@ function ServerSideStateTableContent() {
   }
 
   // Handlers for pagination
+  // Use functional update to avoid dependency on pagination state
+  // This prevents stale closures and ensures the latest state is always used
   const handlePaginationChange = useCallback(
     (updater: Updater<PaginationState>) => {
-      const newPagination =
-        typeof updater === "function" ? updater(pagination) : updater
-      setPagination(newPagination)
+      setPagination(prevPagination => {
+        const newPagination =
+          typeof updater === "function" ? updater(prevPagination) : updater
+        return newPagination
+      })
     },
-    [pagination],
+    [], // Empty deps - functional update ensures we always use latest state
   )
 
   // Handlers for sorting
@@ -1510,12 +1532,19 @@ function ServerSideStateTableContent() {
               data={data}
               columns={columns}
               isLoading={isLoading}
-              config={{
-                manualPagination: true,
-                manualFiltering: true,
-                manualSorting: true,
-                pageCount: Math.ceil(totalCount / pagination.pageSize),
-              }}
+              config={useMemo(
+                () => ({
+                  manualPagination: true,
+                  manualFiltering: true,
+                  manualSorting: true,
+                  pageCount:
+                    totalCount > 0
+                      ? Math.ceil(totalCount / pagination.pageSize)
+                      : 1,
+                  autoResetPageIndex: false, // Disable auto-reset for manual pagination
+                }),
+                [totalCount, pagination.pageSize],
+              )}
               state={{
                 globalFilter,
                 sorting,
@@ -1579,12 +1608,19 @@ function ServerSideStateTableContent() {
               data={data}
               columns={columns}
               isLoading={isLoading}
-              config={{
-                manualPagination: true,
-                manualFiltering: true,
-                manualSorting: true,
-                pageCount: Math.ceil(totalCount / pagination.pageSize),
-              }}
+              config={useMemo(
+                () => ({
+                  manualPagination: true,
+                  manualFiltering: true,
+                  manualSorting: true,
+                  pageCount:
+                    totalCount > 0
+                      ? Math.ceil(totalCount / pagination.pageSize)
+                      : 1,
+                  autoResetPageIndex: false, // Disable auto-reset for manual pagination
+                }),
+                [totalCount, pagination.pageSize],
+              )}
               state={{
                 globalFilter,
                 sorting,
