@@ -151,8 +151,8 @@ const columns: DataTableColumnDef<Product>[] = [
         { label: "Inactive", value: "inactive" },
       ],
       range: [0, 100], // Range for numeric/date filters
-      // Dynamic options (select/multiSelect only)
-      // If options are omitted and variant is select/multiSelect, wrappers can auto-generate them
+      // Dynamic options (select/multi_select only)
+      // If options are omitted and variant is select/multi_select, wrappers can auto-generate them
       autoOptions: true, // per-column opt-in/out (defaults to wrapper prop)
       showCounts: true, // show counts next to labels (can be dynamic)
       dynamicCounts: true, // recompute counts from filtered rows
@@ -426,7 +426,7 @@ Menu for managing column sorting.
 Command palette-style interface for adding filters.
 
 - `className?`: Additional CSS classes
-- `autoOptions?`: boolean (default: true) — auto-generate options for select/multiSelect columns lacking static options
+- `autoOptions?`: boolean (default: true) — auto-generate options for select/multi_select columns lacking static options
 - `showCounts?`: boolean (default: true) — show counts for options
 - `dynamicCounts?`: boolean (default: true) — counts reflect currently filtered rows
 - `includeColumns?`: string[] — restrict generation to these column ids
@@ -453,9 +453,9 @@ Inline filter editor with advanced operators.
 - `limitPerColumn?`: number
 - `mergeStrategy?`: "preserve" | "augment" | "replace"
 
-## Dynamic option generation (select/multiSelect)
+## Dynamic option generation (select/multi_select)
 
-You can avoid manually listing options for categorical columns. If a column has `meta.variant = "select" | "multiSelect"` and no `meta.options`, `DataTableFilterMenu` and `DataTableInlineFilter` can auto-generate options from your table’s data.
+You can avoid manually listing options for categorical columns. If a column has `meta.variant = "select" | "multi_select"` and no `meta.options`, `DataTableFilterMenu` and `DataTableInlineFilter` can auto-generate options from your table’s data.
 
 Rules:
 
@@ -500,7 +500,7 @@ const columns: DataTableColumnDef<Product>[] = [
     enableColumnFilter: true,
     meta: {
       label: "Category",
-      variant: "multiSelect",
+      variant: "multi_select",
       autoOptions: true, // no options provided → generate from data
       showCounts: true,
       dynamicCounts: true,
