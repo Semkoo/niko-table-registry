@@ -5,6 +5,25 @@ description: Detailed documentation for all DataTable components.
 
 import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
 
+<div className="mb-6 flex gap-2">
+  <a
+    href="https://tanstack.com/table/latest/docs/introduction"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="inline-flex items-center gap-1 rounded-md bg-zinc-800 px-3 py-1.5 text-sm font-medium text-zinc-100 no-underline transition-colors hover:bg-zinc-700"
+  >
+    Docs ↗
+  </a>
+  <a
+    href="https://tanstack.com/table/latest/docs/api/core/table"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="inline-flex items-center gap-1 rounded-md bg-zinc-800 px-3 py-1.5 text-sm font-medium text-zinc-100 no-underline transition-colors hover:bg-zinc-700"
+  >
+    API Reference ↗
+  </a>
+</div>
+
 The components in `data-table` are built to be composable. You build your table by putting the provided components together. They also compose well with other shadcn/ui components.
 
 **If you need to change the code, you are encouraged to do so. The code is yours.**
@@ -76,7 +95,6 @@ The main table container component.
 
 ```tsx showLineNumbers
 import { DataTable } from "@/components/data-table"
-
 ;<DataTable className="rounded-md border">
   <DataTableHeader />
   <DataTableBody />
@@ -96,7 +114,6 @@ Renders the table header with sortable columns.
 
 ```tsx showLineNumbers
 import { DataTableHeader } from "@/components/data-table"
-
 ;<DataTableHeader sticky={true} />
 ```
 
@@ -117,7 +134,6 @@ import {
   DataTableSkeleton,
   DataTableEmptyBody,
 } from "@/components/data-table"
-
 ;<DataTableBody>
   <DataTableSkeleton />
   <DataTableEmptyBody />
@@ -170,7 +186,6 @@ Container for organizing filters and actions.
 
 ```tsx showLineNumbers
 import { DataTableToolbarSection } from "@/components/data-table"
-
 ;<DataTableToolbarSection className="flex justify-between">
   <DataTableSearchFilter />
   <DataTableViewMenu />
@@ -190,7 +205,6 @@ Full-featured pagination controls.
 
 ```tsx showLineNumbers
 import { DataTablePagination } from "@/components/data-table"
-
 ;<DataTablePagination pageSizeOptions={[10, 25, 50, 100]} totalCount={500} />
 ```
 
@@ -253,7 +267,6 @@ Command palette-style interface for adding filters.
 
 ```tsx showLineNumbers
 import { DataTableFilterMenu } from "@/components/data-table"
-
 ;<DataTableFilterMenu
   autoOptions
   dynamicCounts
@@ -334,7 +347,6 @@ Menu for managing column sorting with drag-and-drop reordering.
 
 ```tsx showLineNumbers
 import { DataTableSortMenu } from "@/components/data-table"
-
 ;<DataTableSortMenu className="ml-auto" />
 ```
 
@@ -350,7 +362,6 @@ Column visibility toggle menu.
 
 ```tsx showLineNumbers
 import { DataTableViewMenu } from "@/components/data-table"
-
 ;<DataTableViewMenu />
 ```
 
@@ -367,7 +378,6 @@ Inline filter toolbar for managing filters.
 
 ```tsx showLineNumbers
 import { DataTableInlineFilter } from "@/components/data-table"
-
 ;<DataTableInlineFilter autoOptions dynamicCounts showCounts />
 ```
 
@@ -444,7 +454,6 @@ Button to clear all active filters.
 
 ```tsx showLineNumbers
 import { DataTableClearFilter } from "@/components/data-table"
-
 ;<DataTableClearFilter />
 ```
 
@@ -454,7 +463,6 @@ Button to export table data.
 
 ```tsx showLineNumbers
 import { DataTableExportButton } from "@/components/data-table"
-
 ;<DataTableExportButton />
 ```
 
@@ -464,7 +472,6 @@ Shows bulk actions when rows are selected.
 
 ```tsx showLineNumbers
 import { DataTableSelectionBar } from "@/components/data-table"
-
 ;<DataTableSelectionBar onDelete={rows => handleDelete(rows)} />
 ```
 
@@ -527,7 +534,6 @@ import {
   DataTableVirtualizedBody,
   DataTableVirtualizedEmptyBody,
 } from "@/components/data-table"
-
 ;<DataTable>
   <DataTableVirtualizedHeader />
   <DataTableVirtualizedBody height={600}>
