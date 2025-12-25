@@ -1,4 +1,10 @@
-import { Children, isValidElement, type ReactNode } from "react"
+import {
+  Children,
+  isValidElement,
+  type ReactNode,
+  type ComponentType,
+  type PropsWithChildren,
+} from "react"
 
 /**
  * Feature requirements that components can declare
@@ -148,9 +154,13 @@ export function detectFeaturesFromChildren(
       if (isValidElement(child)) {
         // Check if this component has feature requirements
         if (typeof child.type === "function") {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const displayName = (child.type as any).displayName
-          const componentFeatures = COMPONENT_FEATURES[displayName]
+          const componentType = child.type as ComponentType<unknown> & {
+            displayName?: string
+          }
+          const displayName = componentType.displayName
+          const componentFeatures = displayName
+            ? COMPONENT_FEATURES[displayName]
+            : undefined
 
           if (componentFeatures) {
             // Merge requirements (any component requiring a feature enables it)
@@ -164,10 +174,9 @@ export function detectFeaturesFromChildren(
         }
 
         // Recursively check nested children
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        if ((child.props as any)?.children) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          searchRecursively((child.props as any).children)
+        const propsWithChildren = child.props as PropsWithChildren<unknown>
+        if (propsWithChildren?.children) {
+          searchRecursively(propsWithChildren.children)
         }
       }
     }
@@ -184,8 +193,11 @@ export function detectFeaturesFromChildren(
       if (column.header && typeof column.header === "function") {
         try {
           // Try to call the header function with mock context to get the rendered component
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const headerResult = (column.header as any)({
+          // Using unknown for the context type since we're creating a minimal mock
+          const headerFn = column.header as (context: {
+            column: Record<string, unknown>
+          }) => ReactNode
+          const headerResult = headerFn({
             column: {
               getCanSort: () => true,
               getIsSorted: () => false,
@@ -200,9 +212,14 @@ export function detectFeaturesFromChildren(
           // Check if the result is a valid React element
           if (isValidElement(headerResult)) {
             if (typeof headerResult.type === "function") {
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              const displayName = (headerResult.type as any).displayName
-              const componentFeatures = COMPONENT_FEATURES[displayName]
+              const componentType =
+                headerResult.type as ComponentType<unknown> & {
+                  displayName?: string
+                }
+              const displayName = componentType.displayName
+              const componentFeatures = displayName
+                ? COMPONENT_FEATURES[displayName]
+                : undefined
 
               if (componentFeatures) {
                 Object.keys(componentFeatures).forEach(key => {
