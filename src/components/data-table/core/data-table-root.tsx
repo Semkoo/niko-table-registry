@@ -174,7 +174,9 @@ function DataTableRootInternal<TData, TValue>({
       pageCount: config?.pageCount,
       initialPageSize: config?.initialPageSize,
       initialPageIndex: config?.initialPageIndex,
-      autoResetPageIndex: config?.autoResetPageIndex ?? true,
+      // Default to false for manual pagination (server-side), true for client-side
+      autoResetPageIndex:
+        config?.autoResetPageIndex ?? (config?.manualPagination ? false : true),
       autoResetExpanded: config?.autoResetExpanded ?? false,
     }),
     [
