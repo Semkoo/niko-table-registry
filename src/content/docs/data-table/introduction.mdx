@@ -133,8 +133,8 @@ import {
   DataTableToolbarSection,
   DataTableSearchFilter,
   DataTablePagination,
-} from "@/components/data-table"
-import type { DataTableColumnDef } from "@/components/data-table/types"
+} from "@/components/niko-table"
+import type { DataTableColumnDef } from "@/components/niko-table/types"
 
 type User = {
   id: string
@@ -175,7 +175,7 @@ Let's start with the most basic table. A simple table with data.
 1. **Create your column definitions**
 
    ```tsx showLineNumbers title="columns.tsx"
-   import type { DataTableColumnDef } from "@/components/data-table/types"
+   import type { DataTableColumnDef } from "@/components/niko-table/types"
 
    type User = {
      id: string
@@ -203,7 +203,7 @@ Let's start with the most basic table. A simple table with data.
      DataTable,
      DataTableHeader,
      DataTableBody,
-   } from "@/components/data-table"
+   } from "@/components/niko-table"
    import { columns } from "./columns"
 
    export function UsersTable({ data }: { data: User[] }) {
@@ -228,7 +228,7 @@ Let's start with the most basic table. A simple table with data.
      DataTableBody,
      DataTableSkeleton,
      DataTableEmptyBody,
-   } from "@/components/data-table"
+   } from "@/components/niko-table"
 
    export function UsersTable({
      data,
@@ -264,7 +264,7 @@ Let's start with the most basic table. A simple table with data.
      DataTableToolbarSection,
      DataTableSearchFilter,
      DataTablePagination,
-   } from "@/components/data-table"
+   } from "@/components/niko-table"
 
    export function UsersTable({
      data,
@@ -353,7 +353,7 @@ The `config` prop accepts a `DataTableConfig` object:
 The `useDataTable` hook is used to access the table instance from any child component.
 
 ```tsx showLineNumbers
-import { useDataTable } from "@/components/data-table"
+import { useDataTable } from "@/components/niko-table"
 
 export function CustomComponent() {
   const { table, isLoading } = useDataTable()

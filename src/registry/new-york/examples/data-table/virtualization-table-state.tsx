@@ -24,9 +24,9 @@ import {
   DataTableEmptyFilteredMessage,
   DataTableEmptyTitle,
   DataTableEmptyDescription,
-} from "@/components/data-table"
-import { TableColumnHeader } from "@/components/data-table/components"
-import type { DataTableColumnDef } from "@/components/data-table/types"
+} from "@/components/niko-table"
+import { TableColumnHeader } from "@/components/niko-table/components"
+import type { DataTableColumnDef } from "@/components/niko-table/types"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ChevronRight, ChevronDown, UserSearch, SearchX } from "lucide-react"

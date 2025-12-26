@@ -22,7 +22,7 @@ import {
   DataTableEmptyDescription,
   DataTableEmptyIcon,
   DataTableEmptyMessage,
-} from "@/components/data-table"
+} from "@/components/niko-table"
 import {
   TableColumnHeader,
   DataTableAside,
@@ -31,8 +31,8 @@ import {
   DataTableAsideHeader,
   DataTableAsideTitle,
   DataTableAsideClose,
-} from "@/components/data-table/components"
-import type { DataTableColumnDef } from "@/components/data-table/types"
+} from "@/components/niko-table/components"
+import type { DataTableColumnDef } from "@/components/niko-table/types"
 import { Button } from "@/components/ui/button"
 import {
   Card,

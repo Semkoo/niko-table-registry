@@ -3,11 +3,8 @@
 // Core components
 export * from "./core"
 
-// Filter components
+// Filter components (core implementation)
 export * from "./filters"
-
-// Action components
-export * from "./actions"
 
 // Configuration and utilities
 export * as config from "./config"
@@ -19,7 +16,7 @@ export * from "./hooks"
 export { DataTable } from "./core"
 export * from "./types"
 
-// Reusable UI components
+// All components (context-aware and reusable UI)
 export * from "./components"
 
 // Re-export types that might be useful

@@ -27,7 +27,7 @@ The DataTable components use a two-layer architecture for maximum flexibility:
 
 **Why this architecture?**
 
-- Use `DataTable*` components from actions when you want context-based, zero-config usage
+- Use `DataTable*` components from "@/components/niko-table/components" when you want context-based, zero-config usage
 - Use `Table*` components from filters when you want to build custom components or manage the table instance yourself
 - All filter components use TanStack Table hooks directly, giving you full control
 
@@ -199,7 +199,7 @@ The DataTable components use a two-layer architecture for maximum flexibility:
 
    Update the import paths in the copied files to match your project structure. The components use:
    - `@/components/ui/` for Shadcn UI components
-   - `@/components/data-table/` for DataTable components
+   - `@/components/niko-table/` for DataTable components
    - `@/lib/` for utility functions
 
 6. **Verify installation**
@@ -212,7 +212,7 @@ The DataTable components use a two-layer architecture for maximum flexibility:
      DataTable,
      DataTableHeader,
      DataTableBody,
-   } from "@/components/data-table"
+   } from "@/components/niko-table"
 
    const columns = [
      { accessorKey: "name", header: "Name" },
@@ -253,7 +253,7 @@ your-project/
 │   │   │   ├── dropdown-menu.tsx
 │   │   │   └── ...                # Other Shadcn components
 │   │   │
-│   │   └── data-table/
+│   │   └── niko-table/
 │   │       ├── index.tsx                    # Main exports
 │   │       │
 │   │       ├── core/                        # Core table components
@@ -261,12 +261,11 @@ your-project/
 │   │       │   ├── data-table.tsx
 │   │       │   ├── data-table-context.tsx
 │   │       │   ├── data-table-structure.tsx  # Header, Body, EmptyBody, Skeleton, Loading (consolidated)
-│   │       │   ├── data-table-toolbar-section.tsx
 │   │       │   ├── data-table-virtualized-structure.tsx  # VirtualizedHeader, VirtualizedBody, VirtualizedEmptyBody, VirtualizedSkeleton, VirtualizedLoading (consolidated)
 │   │       │   └── index.tsx
 │   │       │
-│   │       ├── actions/                     # Action components
-│   │       │   ├── data-table-search-filter.tsx
+│   │       ├── components/                  # All user-facing components
+│   │       │   ├── data-table-search-filter.tsx      # Context-aware components
 │   │       │   ├── data-table-view-menu.tsx
 │   │       │   ├── data-table-filter-menu.tsx
 │   │       │   ├── data-table-sort-menu.tsx
@@ -277,9 +276,14 @@ your-project/
 │   │       │   ├── data-table-inline-filter.tsx
 │   │       │   ├── data-table-pagination.tsx
 │   │       │   ├── data-table-export-button.tsx
+│   │       │   ├── table-column-header.tsx            # Reusable UI components
+│   │       │   ├── data-table-aside.tsx
+│   │       │   ├── data-table-selection-bar.tsx
+│   │       │   ├── data-table-toolbar-section.tsx
+│   │       │   ├── data-table-empty-state.tsx
 │   │       │   └── index.tsx
 │   │       │
-│   │       ├── filters/                     # Filter components
+│   │       ├── filters/                     # Core implementation components
 │   │       │   ├── table-search-filter.tsx
 │   │       │   ├── table-faceted-filter.tsx
 │   │       │   ├── table-slider-filter.tsx
@@ -291,12 +295,6 @@ your-project/
 │   │       │   ├── table-range-filter.tsx
 │   │       │   ├── table-pagination.tsx
 │   │       │   ├── table-export-button.tsx
-│   │       │   └── index.tsx
-│   │       │
-│   │       ├── components/                  # Utility components
-│   │       │   ├── table-column-header.tsx
-│   │       │   ├── data-table-aside.tsx
-│   │       │   ├── data-table-selection-bar.tsx
 │   │       │   └── index.tsx
 │   │       │
 │   │       ├── config/                      # Configuration

@@ -524,16 +524,16 @@ React.useEffect(() => {
 
 **Locations:**
 
-- `components/data-table-selection-bar.tsx`
+- `components/niko-table-selection-bar.tsx`
 - `components/data-table-empty-state.tsx` (all sub-components)
-- `components/data-table-toolbar-section.tsx`
+- `components/niko-table-toolbar-section.tsx`
 
 **Issue:** These components re-render whenever parent re-renders, even if their props haven't changed.
 
 **Solution:**
 
 ```typescript
-// components/data-table-selection-bar.tsx
+// components/niko-table-selection-bar.tsx
 export const DataTableSelectionBar = React.memo(function DataTableSelectionBar({
   selectedCount,
   onClear,
