@@ -219,7 +219,7 @@ import {
   DataTableSkeleton,
   DataTableEmptyBody,
 } from "@/components/niko-data-table"
-;<DataTableRoot data={data} columns={columns}>
+<DataTableRoot data={data} columns={columns}>
   <DataTable>
     <DataTableHeader />
     <DataTableBody>
@@ -242,7 +242,7 @@ import {
   DataTablePagination,
   DataTableViewMenu,
 } from "@/components/niko-data-table"
-;<DataTableRoot data={data} columns={columns}>
+<DataTableRoot data={data} columns={columns}>
   <DataTableToolbarSection className="justify-between">
     <h2 className="text-lg font-semibold">Products</h2>
     <DataTableViewMenu />
@@ -272,7 +272,7 @@ import {
   DataTableFilterMenu,
   DataTableEmptyBody,
 } from "@/components/niko-data-table"
-;<DataTableRoot data={data} columns={columns}>
+<DataTableRoot data={data} columns={columns}>
   <DataTableToolbarSection>
     <DataTableToolbarSection className="px-0">
       <DataTableSearchFilter placeholder="Search..." />
@@ -307,7 +307,7 @@ import {
   DataTableVirtualizedEmptyBody,
   DataTablePagination,
 } from "@/components/niko-data-table"
-;<DataTableRoot data={largeData} columns={columns}>
+<DataTableRoot data={largeData} columns={columns}>
   <DataTableToolbarSection>
     <DataTableSearchFilter placeholder="Search logs..." />
   </DataTableToolbarSection>
@@ -527,7 +527,7 @@ import {
   DataTableVirtualizedBody,
   DataTableVirtualizedEmptyBody,
 } from "@/components/niko-data-table"
-;<DataTableRoot data={largeData} columns={columns}>
+<DataTableRoot data={largeData} columns={columns}>
   <DataTable>
     <DataTableVirtualizedHeader />
     <DataTableVirtualizedBody height={600}>
@@ -604,7 +604,7 @@ function CustomToolbar() {
   )
 }
 
-;<DataTableRoot columns={columns} data={data}>
+<DataTableRoot columns={columns} data={data}>
   <CustomToolbar />
   <DataTable>
     <DataTableHeader />
@@ -663,7 +663,7 @@ import {
   DataTableVirtualizedEmptyBody,
   DataTablePagination,
 } from "@/components/niko-data-table"
-;<DataTableRoot columns={columns} data={data}>
+<DataTableRoot columns={columns} data={data}>
   <CustomToolbar />
   <DataTable>
     <DataTableHeader />
