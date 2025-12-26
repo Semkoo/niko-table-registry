@@ -3,7 +3,7 @@
 /**
  * Table filter menu component
  * @description A filter menu component for DataTable that allows users to manage multiple filtering criteria. Users can add, remove, and reorder filters, select fields, operators, and input values.
- * @inspiration Inspired by and adapted from sadmann7's work - https://github.com/sadmann7/tablecn/blob/main/src/components/data-table/data-table-filter-menu.tsx
+ * @inspiration Inspired by and adapted from sadmann7's work - https://github.com/sadmann7/tablecn/blob/main/src/components/niko-table/data-table-filter-menu.tsx
  *
  * @architecture
  * This file is organized into sections for easy copy-paste:
@@ -1784,6 +1784,6 @@ interface DataTableFilterItemType {
 
 /**
  * @required displayName is required for auto feature detection
- * @see src/components/data-table/config/feature-detection.ts
+ * @see src/components/niko-table/config/feature-detection.ts
  */
 TableFilterMenu.displayName = "TableFilterMenu"

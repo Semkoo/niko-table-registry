@@ -84,7 +84,7 @@ If you deploy to a different URL than the placeholder `shadcn-advance-react-tabl
 
 Consider these additional customizations:
 
-- Replace logos in `src/assets/logo/` (currently using WDS logos)
+- Replace logos in `src/assets/logo/`
 - Update the favicon images in `public/` with your own branding
 - Modify `package.json` with your actual email or website
 - Update LinkedIn URL in `astro.config.mts` if different

@@ -163,20 +163,20 @@ import {
   DataTableEmptyIcon,
   DataTableEmptyMessage,
   DataTableSkeleton,
-} from "@/components/data-table"
-import { TableColumnHeader } from "@/components/data-table/components"
+} from "@/components/niko-table"
+import { TableColumnHeader } from "@/components/niko-table/components"
 import {
   daysAgo,
   JOIN_OPERATORS,
   FILTER_OPERATORS,
   processFiltersForLogic,
-} from "@/components/data-table/lib"
-import { serializeFiltersForUrl } from "@/components/data-table/filters/table-filter-menu"
-import { formatQueryString } from "@/components/data-table/lib/format"
+} from "@/components/niko-table/lib"
+import { serializeFiltersForUrl } from "@/components/niko-table/filters/table-filter-menu"
+import { formatQueryString } from "@/components/niko-table/lib/format"
 import type {
   DataTableColumnDef,
   ExtendedColumnFilter,
-} from "@/components/data-table/types"
+} from "@/components/niko-table/types"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {

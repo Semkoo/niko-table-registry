@@ -62,7 +62,7 @@ First, we'll define our columns.
 ```tsx showLineNumbers title="columns.tsx"
 "use client"
 
-import type { DataTableColumnDef } from "@/components/data-table/types"
+import type { DataTableColumnDef } from "@/components/niko-table/types"
 
 export type User = {
   id: string
@@ -101,8 +101,8 @@ import {
   DataTableBody,
   DataTableSkeleton,
   DataTableEmptyBody,
-} from "@/components/data-table"
-import type { DataTableColumnDef } from "@/components/data-table/types"
+} from "@/components/niko-table"
+import type { DataTableColumnDef } from "@/components/niko-table/types"
 
 type User = {
   id: string

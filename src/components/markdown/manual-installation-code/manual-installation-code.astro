@@ -39,11 +39,11 @@ async function getAllComponentFiles(
 }
 
 // Read all DataTable components
-const dataTableFiles = await getAllComponentFiles("./src/components/data-table")
+const dataTableFiles = await getAllComponentFiles("./src/components/niko-table")
 
 // Combine all files (no root lib/ files needed - users should already have utils.ts)
 const allFiles = dataTableFiles.map(file => ({
-  path: `components/data-table/${file.path}`,
+  path: `components/niko-table/${file.path}`,
   content: file.content,
 }))
 

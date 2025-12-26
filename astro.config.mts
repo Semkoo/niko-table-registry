@@ -113,8 +113,7 @@ export default defineConfig({
         baseUrl: `${GITHUB_REPO_URL}/tree/main`,
       },
       logo: {
-        dark: "./src/assets/logo/dark.png",
-        light: "./src/assets/logo/light.png",
+        src: "./src/assets/logo/logo.svg",
         replacesTitle: true,
       },
       social: [
@@ -228,8 +227,7 @@ export default defineConfig({
               link: "/contributing",
             },
           ],
-          footerText:
-            "Based on [WDS Shadcn Registry](https://github.com/WebDevSimplified/wds-shadcn-registry) by [Web Dev Simplified](https://webdevsimplified.com) • Built for use with [Shadcn](https://ui.shadcn.com)",
+          footerText: "",
         }),
       ],
     }),

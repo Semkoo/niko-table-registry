@@ -4,7 +4,7 @@
  * Table faceted filter component
  * @description A faceted filter component for DataTable that allows users to filter data based on multiple selectable options. It supports both single and multiple selection modes.
  * @inspiration Inspired by and adapted from sadmann7's work - https://github.com/sadmann7
- * @see https://github.com/sadmann7/tablecn/blob/main/src/components/data-table/data-table-faceted-filter.tsx
+ * @see https://github.com/sadmann7/tablecn/blob/main/src/components/niko-table/data-table-faceted-filter.tsx
  */
 
 import type { Column } from "@tanstack/react-table"

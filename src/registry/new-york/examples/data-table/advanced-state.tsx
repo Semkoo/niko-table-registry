@@ -25,17 +25,17 @@ import {
   DataTableEmptyDescription,
   DataTableEmptyIcon,
   DataTableEmptyMessage,
-} from "@/components/data-table"
-import { TableColumnHeader } from "@/components/data-table/components"
+} from "@/components/niko-table"
+import { TableColumnHeader } from "@/components/niko-table/components"
 import {
   daysAgo,
   JOIN_OPERATORS,
   processFiltersForLogic,
-} from "@/components/data-table/lib"
+} from "@/components/niko-table/lib"
 import type {
   DataTableColumnDef,
   ExtendedColumnFilter,
-} from "@/components/data-table/types"
+} from "@/components/niko-table/types"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {

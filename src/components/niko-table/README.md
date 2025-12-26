@@ -19,7 +19,7 @@ NikoTable provides a modern, flexible composition-based approach to building adv
 The composition system is organized into logical directories for better maintainability:
 
 ```bash
-data-table/
+niko-table/
 ├── core/                    # Essential table components
 │   ├── data-table-root.tsx
 │   ├── data-table-context.tsx
@@ -27,8 +27,8 @@ data-table/
 │   ├── data-table-error-boundary.tsx
 │   ├── data-table-structure.tsx              # Header, Body, EmptyBody, Skeleton, Loading (consolidated for easy copy/paste)
 │   └── data-table-virtualized-structure.tsx  # VirtualizedHeader, VirtualizedBody, VirtualizedEmptyBody, VirtualizedSkeleton, VirtualizedLoading (consolidated)
-├── actions/                 # Filter, sort, and view components
-│   ├── data-table-search-filter.tsx
+├── components/              # All user-facing components
+│   ├── data-table-search-filter.tsx          # Context-aware components
 │   ├── data-table-faceted-filter.tsx
 │   ├── data-table-slider-filter.tsx
 │   ├── data-table-date-filter.tsx
@@ -38,8 +38,13 @@ data-table/
 │   ├── data-table-view-menu.tsx
 │   ├── data-table-clear-filter.tsx
 │   ├── data-table-pagination.tsx
-│   └── data-table-export-button.tsx
-├── filters/                 # Advanced filter wrapper components
+│   ├── data-table-export-button.tsx
+│   ├── table-column-header.tsx                # Reusable UI components
+│   ├── data-table-toolbar-section.tsx
+│   ├── data-table-aside.tsx
+│   ├── data-table-selection-bar.tsx
+│   └── data-table-empty-state.tsx
+├── filters/                 # Core implementation components
 │   ├── table-date-filter.tsx
 │   ├── table-faceted-filter.tsx
 │   ├── table-filter-menu.tsx
@@ -48,12 +53,6 @@ data-table/
 │   ├── table-sort-menu.tsx
 │   ├── table-pagination.tsx
 │   └── table-export-button.tsx
-├── components/              # Reusable UI components
-│   ├── table-column-header.tsx
-│   ├── data-table-toolbar-section.tsx
-│   ├── data-table-aside.tsx
-│   ├── data-table-selection-bar.tsx
-│   └── data-table-empty-state.tsx
 ├── config/                  # Configuration and utilities
 │   ├── data-table.ts
 │   └── feature-detection.ts
@@ -132,8 +131,8 @@ The composition system supports comprehensive column configuration with meta pro
 ### Column Meta Properties
 
 ```tsx
-import { TableColumnHeader } from "@/components/data-table/components"
-import type { DataTableColumnDef } from "@/components/data-table/types"
+import { TableColumnHeader } from "@/components/niko-table/components"
+import type { DataTableColumnDef } from "@/components/niko-table/types"
 
 const columns: DataTableColumnDef<Product>[] = [
   {
@@ -219,7 +218,7 @@ import {
   DataTableBody,
   DataTableSkeleton,
   DataTableEmptyBody,
-} from "@/components/data-table"
+} from "@/components/niko-table"
 ;<DataTableRoot data={data} columns={columns}>
   <DataTable>
     <DataTableHeader />
@@ -242,7 +241,7 @@ import {
   DataTableBody,
   DataTablePagination,
   DataTableViewMenu,
-} from "@/components/data-table"
+} from "@/components/niko-table"
 ;<DataTableRoot data={data} columns={columns}>
   <DataTableToolbarSection className="justify-between">
     <h2 className="text-lg font-semibold">Products</h2>
@@ -272,7 +271,7 @@ import {
   DataTableSortMenu,
   DataTableFilterMenu,
   DataTableEmptyBody,
-} from "@/components/data-table"
+} from "@/components/niko-table"
 ;<DataTableRoot data={data} columns={columns}>
   <DataTableToolbarSection>
     <DataTableToolbarSection className="px-0">
@@ -307,7 +306,7 @@ import {
   DataTableVirtualizedBody,
   DataTableVirtualizedEmptyBody,
   DataTablePagination,
-} from "@/components/data-table"
+} from "@/components/niko-table"
 ;<DataTableRoot data={largeData} columns={columns}>
   <DataTableToolbarSection>
     <DataTableSearchFilter placeholder="Search logs..." />
@@ -527,7 +526,7 @@ import {
   DataTableVirtualizedHeader,
   DataTableVirtualizedBody,
   DataTableVirtualizedEmptyBody,
-} from "@/components/data-table"
+} from "@/components/niko-table"
 ;<DataTableRoot data={largeData} columns={columns}>
   <DataTable>
     <DataTableVirtualizedHeader />
@@ -565,7 +564,7 @@ const columns: DataTableColumnDef<Product>[] = [
 Show skeleton loading state during data fetching:
 
 ```tsx
-import { DataTableSkeleton } from "@/components/data-table"
+import { DataTableSkeleton } from "@/components/niko-table"
 
 const [isLoading, setIsLoading] = React.useState(false)
 
@@ -583,7 +582,7 @@ const [isLoading, setIsLoading] = React.useState(false)
 ### Custom Toolbar Actions
 
 ```tsx
-import { useDataTable } from "@/components/data-table"
+import { useDataTable } from "@/components/niko-table"
 
 function CustomToolbar() {
   const { table } = useDataTable()
@@ -617,7 +616,7 @@ function CustomToolbar() {
 ### Accessing Table Instance
 
 ```tsx
-import { useDataTable } from "@/components/data-table"
+import { useDataTable } from "@/components/niko-table"
 
 function CustomComponent() {
   const { table, isLoading } = useDataTable()
@@ -663,7 +662,7 @@ import {
   DataTableVirtualizedBody,
   DataTableVirtualizedEmptyBody,
   DataTablePagination,
-} from "@/components/data-table"
+} from "@/components/niko-table"
 ;<DataTableRoot columns={columns} data={data}>
   <CustomToolbar />
   <DataTable>
@@ -856,9 +855,9 @@ import {
   DataTableSearchFilter,
   DataTableViewMenu,
   DataTablePagination,
-} from "@/components/data-table"
-import { TableColumnHeader } from "@/components/data-table/components"
-import type { DataTableColumnDef } from "@/components/data-table/types"
+} from "@/components/niko-table"
+import { TableColumnHeader } from "@/components/niko-table/components"
+import type { DataTableColumnDef } from "@/components/niko-table/types"
 
 // Define your columns with proper typing
 const columns: DataTableColumnDef<Product>[] = [
@@ -928,7 +927,7 @@ import {
   DataTableBody,
   DataTableSkeleton,
   DataTableEmptyBody,
-} from "@/components/data-table"
+} from "@/components/niko-table"
 
 export function MyTable() {
   const [data, setData] = React.useState([])
@@ -965,7 +964,7 @@ export function MyTable() {
 ### Accessing Loading State in Custom Components
 
 ```tsx
-import { useDataTable } from "@/components/data-table"
+import { useDataTable } from "@/components/niko-table"
 
 function CustomComponent() {
   const { isLoading, setIsLoading } = useDataTable()

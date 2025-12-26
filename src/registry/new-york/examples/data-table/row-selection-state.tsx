@@ -24,14 +24,14 @@ import {
   DataTableEmptyDescription,
   DataTableEmptyIcon,
   DataTableEmptyMessage,
-} from "@/components/data-table"
+} from "@/components/niko-table"
 import {
   TableColumnHeader,
   DataTableSelectionBar,
-} from "@/components/data-table/components"
-import { useDataTable } from "@/components/data-table/core"
-import { exportTableToCSV } from "@/components/data-table/filters"
-import type { DataTableColumnDef } from "@/components/data-table/types"
+} from "@/components/niko-table/components"
+import { useDataTable } from "@/components/niko-table/core"
+import { exportTableToCSV } from "@/components/niko-table/filters"
+import type { DataTableColumnDef } from "@/components/niko-table/types"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"

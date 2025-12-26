@@ -4,7 +4,7 @@
 
 A collection of advanced React table components built for use with Shadcn.
 
-This project is based on [WDS Shadcn Registry](https://github.com/WebDevSimplified/wds-shadcn-registry) by Web Dev Simplified, customized for advanced React table components.
+This project is based on [NikoTable](https://github.com/Semkoo/niko-table), customized for advanced React table components.
 
 ## Documentation
 
