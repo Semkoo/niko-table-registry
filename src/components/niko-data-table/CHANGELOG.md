@@ -121,7 +121,7 @@ This makes the API cleaner and follows the composition pattern consistently acro
 1. **DataTableToolbarSection Moved**
    - **Breaking Change**: Moved from `core/` to `components/`
    - **Reason**: It's a reusable UI component, not a core table function
-   - **Migration**: Import from `@/components/niko-table` (re-exported automatically)
+   - **Migration**: Import from `@/components/niko-data-table` (re-exported automatically)
 
 2. **Enhanced Empty State Support**
    - Both `DataTableEmptyBody` and `DataTableVirtualizedEmptyBody` updated
@@ -154,18 +154,18 @@ This makes the API cleaner and follows the composition pattern consistently acro
 **Before:**
 
 ```tsx
-import { DataTableToolbarSection } from "@/components/niko-table/core"
+import { DataTableToolbarSection } from "@/components/niko-data-table/core"
 ```
 
 **After:**
 
 ```tsx
-import { DataTableToolbarSection } from "@/components/niko-table"
+import { DataTableToolbarSection } from "@/components/niko-data-table"
 // OR
-import { DataTableToolbarSection } from "@/components/niko-table/components"
+import { DataTableToolbarSection } from "@/components/niko-data-table/components"
 ```
 
-**Note**: If you're importing from the main index (`@/components/niko-table`), no changes needed as it's automatically re-exported.
+**Note**: If you're importing from the main index (`@/components/niko-data-table`), no changes needed as it's automatically re-exported.
 
 ### Non-Breaking Changes
 
@@ -274,9 +274,9 @@ export { useDebounce } from "./hooks"
 ### Reusable UI Components
 
 - `TableColumnHeader` - `components/table-column-header.tsx`
-- `DataTableToolbarSection` - `components/niko-table-toolbar-section.tsx` ⭐ **MOVED**
-- `DataTableAside` - `components/niko-table-aside.tsx`
-- `DataTableSelectionBar` - `components/niko-table-selection-bar.tsx`
+- `DataTableToolbarSection` - `components/niko-data-table-toolbar-section.tsx` ⭐ **MOVED**
+- `DataTableAside` - `components/niko-data-table-aside.tsx`
+- `DataTableSelectionBar` - `components/niko-data-table-selection-bar.tsx`
 - `DataTableEmpty*` - `components/data-table-empty-state.tsx` ⭐ **NEW**
 
 ---
@@ -314,10 +314,10 @@ export { useDebounce } from "./hooks"
 
    ```tsx
    // Change this:
-   import { DataTableToolbarSection } from "@/components/niko-table/core"
+   import { DataTableToolbarSection } from "@/components/niko-data-table/core"
 
    // To this:
-   import { DataTableToolbarSection } from "@/components/niko-table"
+   import { DataTableToolbarSection } from "@/components/niko-data-table"
    ```
 
 2. **Review empty states** (optional - old API still works):
@@ -356,10 +356,10 @@ See `ANALYSIS_REPORT.md` for detailed roadmap including:
 
 ## Resources
 
-- **Main README**: `/src/components/niko-table/README.md`
-- **Analysis Report**: `/src/components/niko-table/ANALYSIS_REPORT.md`
-- **Updates Guide**: `/src/components/niko-table/UPDATES.md`
-- **Empty State Guide**: `/src/components/niko-table/EMPTY_STATE_COMPOSITION.md`
+- **Main README**: `/src/components/niko-data-table/README.md`
+- **Analysis Report**: `/src/components/niko-data-table/ANALYSIS_REPORT.md`
+- **Updates Guide**: `/src/components/niko-data-table/UPDATES.md`
+- **Empty State Guide**: `/src/components/niko-data-table/EMPTY_STATE_COMPOSITION.md`
 - **Examples**: `/src/registry/new-york/examples/`
 
 ---

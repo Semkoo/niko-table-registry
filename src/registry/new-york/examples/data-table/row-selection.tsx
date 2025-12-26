@@ -16,14 +16,14 @@ import {
   DataTableEmptyFilteredMessage,
   DataTableEmptyTitle,
   DataTableEmptyDescription,
-} from "@/components/niko-table"
+} from "@/components/niko-data-table"
 import {
   TableColumnHeader,
   DataTableSelectionBar,
-} from "@/components/niko-table/components"
-import { useDataTable } from "@/components/niko-table/core"
-import { exportTableToCSV } from "@/components/niko-table/filters"
-import type { DataTableColumnDef } from "@/components/niko-table/types"
+} from "@/components/niko-data-table/components"
+import { useDataTable } from "@/components/niko-data-table/core"
+import { exportTableToCSV } from "@/components/niko-data-table/filters"
+import type { DataTableColumnDef } from "@/components/niko-data-table/types"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Button } from "@/components/ui/button"
 import { Download, Trash2, UserSearch, SearchX } from "lucide-react"

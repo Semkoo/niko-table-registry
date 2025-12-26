@@ -10,7 +10,7 @@ All high-priority recommendations have been implemented following the **copy-and
 
 ### 1. ✨ DataTableErrorBoundary Component (NEW)
 
-**Location**: `src/components/niko-table/core/data-table-error-boundary.tsx`
+**Location**: `src/components/niko-data-table/core/data-table-error-boundary.tsx`
 
 A self-contained error boundary component that catches runtime errors in the table and displays a user-friendly fallback UI.
 
@@ -64,7 +64,7 @@ A self-contained error boundary component that catches runtime errors in the tab
 
 ### 2. 🎣 useDebounce Hook (NEW)
 
-**Location**: `src/components/niko-table/hooks/use-debounce.ts`
+**Location**: `src/components/niko-data-table/hooks/use-debounce.ts`
 
 A reusable debounce hook for delaying rapid value changes. Perfect for search inputs, filters, and API calls.
 
@@ -79,7 +79,7 @@ A reusable debounce hook for delaying rapid value changes. Perfect for search in
 **Usage**:
 
 ```tsx
-import { useDebounce } from "@/components/niko-table"
+import { useDebounce } from "@/components/niko-data-table"
 
 // Basic usage with search
 function SearchFilter() {
@@ -146,8 +146,8 @@ function ProductSearch() {
 
 **Updated Files**:
 
-- `src/components/niko-table/filters/table-pagination.tsx`
-- `src/components/niko-table/filters/table-search-filter.tsx`
+- `src/components/niko-data-table/filters/table-pagination.tsx`
+- `src/components/niko-data-table/filters/table-search-filter.tsx`
 
 **Changes**:
 
@@ -175,7 +175,7 @@ function ProductSearch() {
 
 ### 4. 🔒 Type Safety Fix
 
-**Updated File**: `src/components/niko-table/core/data-table-root.tsx`
+**Updated File**: `src/components/niko-data-table/core/data-table-root.tsx`
 
 **Problem**: Unsafe type casting when finding selected rows.
 
@@ -223,7 +223,7 @@ const selectedRows = Object.keys(updatedRowSelection)
 
 ### 5. 🎨 Enhanced DataTableEmptyBody
 
-**Updated File**: `src/components/niko-table/core/data-table-structure.tsx`
+**Updated File**: `src/components/niko-data-table/core/data-table-structure.tsx`
 
 **New Props**:
 
@@ -314,21 +314,21 @@ import { Button } from "@/components/ui/button"
 
 #### Fixed DataTableSearchFilter Missing displayName
 
-- **File**: `src/components/niko-table/components/data-table-search-filter.tsx`
+- **File**: `src/components/niko-data-table/components/data-table-search-filter.tsx`
 - **Issue**: Commented-out displayName prevented feature detection
 - **Fix**: Uncommented the displayName assignment
 - **Impact**: Search component now properly enables filters via feature detection
 
 #### Fixed Feature Detection Registry
 
-- **File**: `src/components/niko-table/config/feature-detection.ts`
+- **File**: `src/components/niko-data-table/config/feature-detection.ts`
 - **Issue**: DataTableSearchFilter was commented out in registry
 - **Fix**: Uncommented the entry
 - **Impact**: Consistent feature detection for both DataTable*and Table* components
 
 #### Fixed README Documentation
 
-- **File**: `src/components/niko-table/README.md`
+- **File**: `src/components/niko-data-table/README.md`
 - **Issue**: Referenced non-existent "navigation/" directory
 - **Fix**: Updated directory structure to reflect actual layout
 - **Impact**: Accurate documentation for developers
@@ -369,7 +369,7 @@ import {
   DataTablePagination,
   DataTableErrorBoundary,
   useDebounce,
-} from "@/components/niko-table"
+} from "@/components/niko-data-table"
 import { PackageOpen, AlertCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 

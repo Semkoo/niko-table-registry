@@ -17,10 +17,10 @@ import {
   DataTableEmptyFilteredMessage,
   DataTableEmptyTitle,
   DataTableEmptyDescription,
-} from "@/components/niko-table"
-import { TableColumnHeader } from "@/components/niko-table/components"
-import { daysAgo } from "@/components/niko-table/lib"
-import type { DataTableColumnDef } from "@/components/niko-table/types"
+} from "@/components/niko-data-table"
+import { TableColumnHeader } from "@/components/niko-data-table/components"
+import { daysAgo } from "@/components/niko-data-table/lib"
+import type { DataTableColumnDef } from "@/components/niko-data-table/types"
 import { Badge } from "@/components/ui/badge"
 import { UserSearch, SearchX } from "lucide-react"
 

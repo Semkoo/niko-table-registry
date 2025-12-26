@@ -1,8 +1,8 @@
-# NikoTable - React Data Table Composition System
+# NikoDataTable - React Data Table Composition System
 
 **Nobody's table, everyone's solution.**
 
-NikoTable provides a modern, flexible composition-based approach to building advanced data tables with hybrid state management. All components are self-contained and designed for maximum flexibility and reusability.
+NikoDataTable provides a modern, flexible composition-based approach to building advanced data tables with hybrid state management. All components are self-contained and designed for maximum flexibility and reusability.
 
 ## Key Benefits
 
@@ -19,7 +19,7 @@ NikoTable provides a modern, flexible composition-based approach to building adv
 The composition system is organized into logical directories for better maintainability:
 
 ```bash
-niko-table/
+niko-data-table/
 ├── core/                    # Essential table components
 │   ├── data-table-root.tsx
 │   ├── data-table-context.tsx
@@ -131,8 +131,8 @@ The composition system supports comprehensive column configuration with meta pro
 ### Column Meta Properties
 
 ```tsx
-import { TableColumnHeader } from "@/components/niko-table/components"
-import type { DataTableColumnDef } from "@/components/niko-table/types"
+import { TableColumnHeader } from "@/components/niko-data-table/components"
+import type { DataTableColumnDef } from "@/components/niko-data-table/types"
 
 const columns: DataTableColumnDef<Product>[] = [
   {
@@ -218,7 +218,7 @@ import {
   DataTableBody,
   DataTableSkeleton,
   DataTableEmptyBody,
-} from "@/components/niko-table"
+} from "@/components/niko-data-table"
 ;<DataTableRoot data={data} columns={columns}>
   <DataTable>
     <DataTableHeader />
@@ -241,7 +241,7 @@ import {
   DataTableBody,
   DataTablePagination,
   DataTableViewMenu,
-} from "@/components/niko-table"
+} from "@/components/niko-data-table"
 ;<DataTableRoot data={data} columns={columns}>
   <DataTableToolbarSection className="justify-between">
     <h2 className="text-lg font-semibold">Products</h2>
@@ -271,7 +271,7 @@ import {
   DataTableSortMenu,
   DataTableFilterMenu,
   DataTableEmptyBody,
-} from "@/components/niko-table"
+} from "@/components/niko-data-table"
 ;<DataTableRoot data={data} columns={columns}>
   <DataTableToolbarSection>
     <DataTableToolbarSection className="px-0">
@@ -306,7 +306,7 @@ import {
   DataTableVirtualizedBody,
   DataTableVirtualizedEmptyBody,
   DataTablePagination,
-} from "@/components/niko-table"
+} from "@/components/niko-data-table"
 ;<DataTableRoot data={largeData} columns={columns}>
   <DataTableToolbarSection>
     <DataTableSearchFilter placeholder="Search logs..." />
@@ -526,7 +526,7 @@ import {
   DataTableVirtualizedHeader,
   DataTableVirtualizedBody,
   DataTableVirtualizedEmptyBody,
-} from "@/components/niko-table"
+} from "@/components/niko-data-table"
 ;<DataTableRoot data={largeData} columns={columns}>
   <DataTable>
     <DataTableVirtualizedHeader />
@@ -564,7 +564,7 @@ const columns: DataTableColumnDef<Product>[] = [
 Show skeleton loading state during data fetching:
 
 ```tsx
-import { DataTableSkeleton } from "@/components/niko-table"
+import { DataTableSkeleton } from "@/components/niko-data-table"
 
 const [isLoading, setIsLoading] = React.useState(false)
 
@@ -582,7 +582,7 @@ const [isLoading, setIsLoading] = React.useState(false)
 ### Custom Toolbar Actions
 
 ```tsx
-import { useDataTable } from "@/components/niko-table"
+import { useDataTable } from "@/components/niko-data-table"
 
 function CustomToolbar() {
   const { table } = useDataTable()
@@ -616,7 +616,7 @@ function CustomToolbar() {
 ### Accessing Table Instance
 
 ```tsx
-import { useDataTable } from "@/components/niko-table"
+import { useDataTable } from "@/components/niko-data-table"
 
 function CustomComponent() {
   const { table, isLoading } = useDataTable()
@@ -662,7 +662,7 @@ import {
   DataTableVirtualizedBody,
   DataTableVirtualizedEmptyBody,
   DataTablePagination,
-} from "@/components/niko-table"
+} from "@/components/niko-data-table"
 ;<DataTableRoot columns={columns} data={data}>
   <CustomToolbar />
   <DataTable>
@@ -855,9 +855,9 @@ import {
   DataTableSearchFilter,
   DataTableViewMenu,
   DataTablePagination,
-} from "@/components/niko-table"
-import { TableColumnHeader } from "@/components/niko-table/components"
-import type { DataTableColumnDef } from "@/components/niko-table/types"
+} from "@/components/niko-data-table"
+import { TableColumnHeader } from "@/components/niko-data-table/components"
+import type { DataTableColumnDef } from "@/components/niko-data-table/types"
 
 // Define your columns with proper typing
 const columns: DataTableColumnDef<Product>[] = [
@@ -927,7 +927,7 @@ import {
   DataTableBody,
   DataTableSkeleton,
   DataTableEmptyBody,
-} from "@/components/niko-table"
+} from "@/components/niko-data-table"
 
 export function MyTable() {
   const [data, setData] = React.useState([])
@@ -964,7 +964,7 @@ export function MyTable() {
 ### Accessing Loading State in Custom Components
 
 ```tsx
-import { useDataTable } from "@/components/niko-table"
+import { useDataTable } from "@/components/niko-data-table"
 
 function CustomComponent() {
   const { isLoading, setIsLoading } = useDataTable()
@@ -1066,4 +1066,4 @@ When contributing new components or features:
 
 ## License
 
-This component is part of the NikoTable project.
+This component is part of the NikoDataTable project.

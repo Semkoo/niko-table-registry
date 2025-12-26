@@ -4,7 +4,7 @@
  * It uses a popover to display a list of columns with checkboxes.
  * Users can search for columns and toggle their visibility.
  *
- * @inspiration https://github.com/sadmann7/tablecn/blob/main/src/components/niko-table/data-table-view-options.tsx
+ * @inspiration https://github.com/sadmann7/tablecn/blob/main/src/components/niko-data-table/data-table-view-options.tsx
  */
 
 import type { Table } from "@tanstack/react-table"
