@@ -427,6 +427,32 @@ Virtualized table body for rendering thousands of rows efficiently.
 
 Empty state component for virtualized tables.
 
+```tsx showLineNumbers
+import {
+  DataTableVirtualizedBody,
+  DataTableVirtualizedEmptyBody,
+  DataTableEmptyIcon,
+  DataTableEmptyMessage,
+  DataTableEmptyTitle,
+  DataTableEmptyDescription,
+} from "@/components/niko-data-table"
+import { PackageOpen } from "lucide-react"
+
+;<DataTableVirtualizedBody estimateSize={34}>
+  <DataTableVirtualizedEmptyBody>
+    <DataTableEmptyIcon>
+      <PackageOpen className="size-12" />
+    </DataTableEmptyIcon>
+    <DataTableEmptyMessage>
+      <DataTableEmptyTitle>No data found</DataTableEmptyTitle>
+      <DataTableEmptyDescription>
+        Get started by adding your first item
+      </DataTableEmptyDescription>
+    </DataTableEmptyMessage>
+  </DataTableVirtualizedEmptyBody>
+</DataTableVirtualizedBody>
+```
+
 #### Props
 
 | Name        | Type              | Default | Description                                        |
@@ -438,6 +464,17 @@ Empty state component for virtualized tables.
 #### DataTableVirtualizedSkeleton
 
 Loading skeleton for virtualized tables.
+
+```tsx showLineNumbers
+import {
+  DataTableVirtualizedBody,
+  DataTableVirtualizedSkeleton,
+} from "@/components/niko-data-table"
+
+;<DataTableVirtualizedBody estimateSize={34}>
+  <DataTableVirtualizedSkeleton rows={10} estimateSize={34} />
+</DataTableVirtualizedBody>
+```
 
 #### Props
 
@@ -453,6 +490,23 @@ Loading skeleton for virtualized tables.
 #### DataTableVirtualizedLoading
 
 Loading indicator for virtualized tables.
+
+```tsx showLineNumbers
+import {
+  DataTableVirtualizedBody,
+  DataTableVirtualizedLoading,
+} from "@/components/niko-data-table"
+import { Loader2 } from "lucide-react"
+
+;<DataTableVirtualizedBody estimateSize={34}>
+  <DataTableVirtualizedLoading>
+    <div className="flex items-center justify-center p-8">
+      <Loader2 className="size-6 animate-spin" />
+      <span className="ml-2">Loading...</span>
+    </div>
+  </DataTableVirtualizedLoading>
+</DataTableVirtualizedBody>
+```
 
 #### Props
 

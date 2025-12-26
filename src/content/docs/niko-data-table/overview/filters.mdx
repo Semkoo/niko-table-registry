@@ -57,6 +57,26 @@ Core pagination implementation.
   </Button>
 </div>
 
+```tsx showLineNumbers
+import { TablePagination } from "@/components/niko-data-table/filters"
+
+// Basic usage
+<TablePagination table={table} />
+
+// With custom page size options
+<TablePagination
+  table={table}
+  pageSizeOptions={[10, 25, 50, 100]}
+/>
+
+// With total count for server-side pagination
+<TablePagination
+  table={table}
+  totalCount={500}
+  onPageChange={(pageIndex) => console.log("Page:", pageIndex)}
+/>
+```
+
 #### Props
 
 Same as `DataTablePagination` but requires `table` prop. See DataTablePagination section above.
@@ -76,6 +96,21 @@ Core filter menu implementation with command palette interface.
     </a>
   </Button>
 </div>
+
+```tsx showLineNumbers
+import { TableFilterMenu } from "@/components/niko-data-table/filters"
+import { useState } from "react"
+import type { ExtendedColumnFilter } from "@/components/niko-data-table"
+
+// Controlled mode
+const [filters, setFilters] = useState<ExtendedColumnFilter<Product>[]>([])
+
+<TableFilterMenu
+  table={table}
+  filters={filters}
+  onFiltersChange={setFilters}
+/>
+```
 
 #### Props
 
@@ -102,6 +137,29 @@ Core faceted filter implementation.
   </Button>
 </div>
 
+```tsx showLineNumbers
+import { TableFacetedFilter } from "@/components/niko-data-table/filters"
+
+// Basic usage with static options
+<TableFacetedFilter
+  column={table.getColumn("category")}
+  title="Category"
+  options={[
+    { label: "Electronics", value: "electronics" },
+    { label: "Clothing", value: "clothing" },
+  ]}
+/>
+
+// With multiple selection
+<TableFacetedFilter
+  column={table.getColumn("brand")}
+  title="Brand"
+  options={brandOptions}
+  multiple
+  onValueChange={(value) => console.log("Selected:", value)}
+/>
+```
+
 #### Props
 
 | Name            | Type                                     | Description                       |
@@ -127,6 +185,34 @@ Core slider filter implementation for numeric ranges.
     </a>
   </Button>
 </div>
+
+```tsx showLineNumbers
+import { TableSliderFilter } from "@/components/niko-data-table/filters"
+
+// Basic usage (auto-detects range from data)
+<TableSliderFilter
+  column={table.getColumn("price")}
+  title="Price"
+/>
+
+// With custom range
+<TableSliderFilter
+  column={table.getColumn("rating")}
+  title="Rating"
+  min={1}
+  max={5}
+  step={0.5}
+/>
+
+// With unit and range array
+<TableSliderFilter
+  column={table.getColumn("price")}
+  title="Price Range"
+  range={[0, 1000]}
+  unit="$"
+  onValueChange={(value) => console.log("Range:", value)}
+/>
+```
 
 #### Props
 
@@ -157,6 +243,23 @@ Core date filter implementation.
   </Button>
 </div>
 
+```tsx showLineNumbers
+import { TableDateFilter } from "@/components/niko-data-table/filters"
+
+// Single date selection
+<TableDateFilter
+  column={table.getColumn("releaseDate")}
+  title="Release Date"
+/>
+
+// Date range selection
+<TableDateFilter
+  column={table.getColumn("createdAt")}
+  title="Created Date"
+  multiple
+/>
+```
+
 #### Props
 
 | Name       | Type            | Description                       |
@@ -180,6 +283,27 @@ Core sort menu implementation.
     </a>
   </Button>
 </div>
+
+```tsx showLineNumbers
+import { TableSortMenu } from "@/components/niko-data-table/filters"
+
+// Basic usage
+<TableSortMenu table={table} />
+
+// With debounce for performance
+<TableSortMenu
+  table={table}
+  debounceMs={300}
+  onSortingChange={(sorting) => console.log("Sorting:", sorting)}
+/>
+
+// With throttle instead of debounce
+<TableSortMenu
+  table={table}
+  throttleMs={200}
+  shallow
+/>
+```
 
 #### Props
 
@@ -208,6 +332,21 @@ Core view menu implementation for column visibility.
   </Button>
 </div>
 
+```tsx showLineNumbers
+import { TableViewMenu } from "@/components/niko-data-table/filters"
+
+// Basic usage
+<TableViewMenu table={table} />
+
+// With visibility change callback
+<TableViewMenu
+  table={table}
+  onColumnVisibilityChange={(columnId, isVisible) => {
+    console.log(`Column ${columnId} is now ${isVisible ? "visible" : "hidden"}`)
+  }}
+/>
+```
+
 #### Props
 
 | Name                       | Type                                             | Description                         |
@@ -231,6 +370,21 @@ Core inline filter implementation with advanced operators.
     </a>
   </Button>
 </div>
+
+```tsx showLineNumbers
+import { TableInlineFilter } from "@/components/niko-data-table/filters"
+import { useState } from "react"
+import type { ExtendedColumnFilter } from "@/components/niko-data-table"
+
+// Controlled mode with filters
+const [filters, setFilters] = useState<ExtendedColumnFilter<Product>[]>([])
+
+<TableInlineFilter
+  table={table}
+  filters={filters}
+  onFiltersChange={setFilters}
+/>
+```
 
 #### Props
 
@@ -256,6 +410,31 @@ Core clear filter button implementation.
     </a>
   </Button>
 </div>
+
+```tsx showLineNumbers
+import { TableClearFilter } from "@/components/niko-data-table/filters"
+
+// Basic usage
+<TableClearFilter table={table} />
+
+// With custom styling
+<TableClearFilter
+  table={table}
+  variant="ghost"
+  size="sm"
+/>
+
+// Custom content
+<TableClearFilter table={table}>
+  Reset All
+</TableClearFilter>
+
+// Selective reset (only filters, not sorting)
+<TableClearFilter
+  table={table}
+  enableResetSorting={false}
+/>
+```
 
 #### Props
 
@@ -287,6 +466,33 @@ Core export button implementation.
   </Button>
 </div>
 
+```tsx showLineNumbers
+import { TableExportButton } from "@/components/niko-data-table/filters"
+
+// Basic usage
+<TableExportButton table={table} />
+
+// With custom filename
+<TableExportButton
+  table={table}
+  filename="products-export"
+/>
+
+// Exclude specific columns
+<TableExportButton
+  table={table}
+  filename="products"
+  excludeColumns={["id", "internalNotes"]}
+/>
+
+// Export only selected rows
+<TableExportButton
+  table={table}
+  onlySelected
+  label="Export Selected"
+/>
+```
+
 #### Props
 
 | Name             | Type              | Default        | Description                         |
@@ -316,6 +522,28 @@ Core range filter implementation for numeric inputs.
     </a>
   </Button>
 </div>
+
+```tsx showLineNumbers
+import { TableRangeFilter } from "@/components/niko-data-table/filters"
+import type { ExtendedColumnFilter } from "@/components/niko-data-table"
+
+// Basic usage with filter configuration
+const filter: ExtendedColumnFilter<Product> = {
+  filterId: "price-range",
+  columnId: "price",
+  operator: "between",
+  value: [0, 100],
+}
+
+<TableRangeFilter
+  filter={filter}
+  column={table.getColumn("price")}
+  inputId="price-min"
+  onFilterUpdate={(filterId, updates) => {
+    console.log("Filter updated:", filterId, updates)
+  }}
+/>
+```
 
 #### Props
 
