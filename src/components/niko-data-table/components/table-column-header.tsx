@@ -153,7 +153,7 @@ export function TableColumnHeader<TData, TValue>({
 /**
  * TableColumnHeader component
  * @required displayName is required for auto feature detection
- * @source src/components/niko-table/config/feature-detection.ts
+ * @source src/components/niko-data-table/config/feature-detection.ts
  */
 
 TableColumnHeader.displayName = "TableColumnHeader"

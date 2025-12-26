@@ -34,8 +34,8 @@ import {
 
 **Purpose**: Foundation - generic, reusable code used across the entire project
 
-- ✅ **Can be imported by**: NikoTable layer, Documentation layer, Registry layer
-- ❌ **Cannot import from**: Documentation, Registry, or NikoTable layers
+- ✅ **Can be imported by**: NikoDataTable layer, Documentation layer, Registry layer
+- ❌ **Cannot import from**: Documentation, Registry, or NikoDataTable layers
 
 **Key directories**:
 
@@ -44,7 +44,7 @@ import {
 - `/hooks` - Shared React hooks (`use-mobile.ts`, `useLocalStorage.ts`)
 - `/types` - Shared TypeScript types
 
-### 2️⃣ NikoTable Layer (`/components/niko-table`)
+### 2️⃣ NikoDataTable Layer (`/components/niko-data-table`)
 
 **Purpose**: Core table component library - the main product being documented
 
@@ -53,10 +53,10 @@ import {
 - ❌ **Cannot import from**: Documentation or Registry layers
 - ❌ **Cannot import from**: Other feature components
 
-**Structure within NikoTable**:
+**Structure within NikoDataTable**:
 
 ```
-/components/niko-table/
+/components/niko-data-table/
   /core/          # Core table components (DataTableRoot, DataTable, context)
   /components/    # All user-facing components:
                   #   - Context-aware components (DataTableSearchFilter, DataTablePagination, etc.)
@@ -87,12 +87,12 @@ import {
 
 ### 3️⃣ Documentation Layer (`/content/docs`, `/components/markdown`)
 
-**Purpose**: Astro Starlight documentation site - pages and components that showcase NikoTable
+**Purpose**: Astro Starlight documentation site - pages and components that showcase NikoDataTable
 
-- ✅ **Can import from**: Shared layer, NikoTable layer
+- ✅ **Can import from**: Shared layer, NikoDataTable layer
 - ✅ **Can import from**: Registry examples
 - ❌ **Cannot import from**: Other Documentation routes
-- ❌ **Should NOT contain**: Business logic (delegate to NikoTable)
+- ❌ **Should NOT contain**: Business logic (delegate to NikoDataTable)
 
 **Structure**:
 
@@ -103,15 +103,15 @@ import {
 
 **Purpose**: Example implementations and demos shown in documentation
 
-- ✅ **Can import from**: Shared layer, NikoTable layer
+- ✅ **Can import from**: Shared layer, NikoDataTable layer
 - ✅ **Can be imported by**: Documentation layer
 - ❌ **Cannot import from**: Documentation layer
-- ❌ **Should NOT contain**: Business logic (use NikoTable components)
+- ❌ **Should NOT contain**: Business logic (use NikoDataTable components)
 
 **Structure**:
 
 - `/registry/new-york/examples/data-table/` - Example table implementations
-- Each example demonstrates specific NikoTable features
+- Each example demonstrates specific NikoDataTable features
 
 ## 🔄 Data Flow Rules
 
@@ -121,26 +121,26 @@ import {
      Shared Layer (@/components/ui, @/lib, @/hooks)
               ↓       ↓       ↓
               ↓       ↓       ↓
-         NikoTable → Registry → Documentation
+         NikoDataTable → Registry → Documentation
 ```
 
 1. ✅ **Shared → All Layers**: All layers can import from Shared
-2. ✅ **NikoTable → Registry**: Examples can use NikoTable components
-3. ✅ **NikoTable → Documentation**: Docs can showcase NikoTable
+2. ✅ **NikoDataTable → Registry**: Examples can use NikoDataTable components
+3. ✅ **NikoDataTable → Documentation**: Docs can showcase NikoDataTable
 4. ✅ **Registry → Documentation**: Docs can render registry examples
-5. ❌ **Registry → NikoTable**: Examples cannot modify core library
-6. ❌ **Documentation → NikoTable**: Docs cannot modify core library
+5. ❌ **Registry → NikoDataTable**: Examples cannot modify core library
+6. ❌ **Documentation → NikoDataTable**: Docs cannot modify core library
 7. ❌ **Documentation → Registry**: Docs cannot modify examples (read-only rendering)
 
 ## 📝 Component Patterns
 
-### NikoTable Components vs Filters
+### NikoDataTable Components vs Filters
 
 **Components** (`/components/`) - Context-aware, recommended:
 
 ```typescript
-// ✅ Use DataTable* components from "@/components/niko-table/components"
-import { DataTableSearchFilter } from "@/components/niko-table"
+// ✅ Use DataTable* components from "@/components/niko-data-table/components"
+import { DataTableSearchFilter } from "@/components/niko-data-table"
 
 // Automatically gets table from DataTableRoot context
 <DataTableSearchFilter placeholder="Search..." />
@@ -150,8 +150,8 @@ import { DataTableSearchFilter } from "@/components/niko-table"
 
 ```typescript
 // ✅ Use Table* components from filters when building custom components
-import { TableSearchFilter } from "@/components/niko-table/filters"
-import { useDataTable } from "@/components/niko-table/core"
+import { TableSearchFilter } from "@/components/niko-data-table/filters"
+import { useDataTable } from "@/components/niko-data-table/core"
 
 function CustomSearch() {
   const { table } = useDataTable()
@@ -185,7 +185,7 @@ import { InstallationTabsInternal } from "./_installation-tabs-internal"
 **Example Files** (`/registry/new-york/examples/data-table/`):
 
 - Self-contained example implementations
-- Import from `@/components/niko-table`
+- Import from `@/components/niko-data-table`
 - Should be runnable standalone
 - Used for documentation rendering
 
@@ -198,7 +198,7 @@ import {
   DataTable,
   DataTableHeader,
   DataTableBody,
-} from "@/components/niko-table"
+} from "@/components/niko-data-table"
 
 export function BasicTable() {
   // Example implementation
@@ -218,11 +218,11 @@ export function BasicTable() {
 ### Import Rules
 
 - [ ] Base UI components are imported from `@/components/ui`
-- [ ] NikoTable components are imported from `@/components/niko-table`
+- [ ] NikoDataTable components are imported from `@/components/niko-data-table`
 - [ ] Shared utilities are imported from `@/lib` or `@/hooks`
 - [ ] Documentation doesn't import from Registry (read-only rendering)
 - [ ] Registry examples don't import from Documentation
-- [ ] NikoTable doesn't import from Documentation or Registry
+- [ ] NikoDataTable doesn't import from Documentation or Registry
 
 ### Component Patterns
 
@@ -235,9 +235,9 @@ export function BasicTable() {
 ### Architecture
 
 - [ ] Shared layer doesn't import from other layers
-- [ ] NikoTable only imports from Shared layer
-- [ ] Documentation imports from NikoTable and Registry
-- [ ] Registry examples import from NikoTable and Shared
+- [ ] NikoDataTable only imports from Shared layer
+- [ ] Documentation imports from NikoDataTable and Registry
+- [ ] Registry examples import from NikoDataTable and Shared
 - [ ] One-way data flow is maintained
 
 ### Styling
@@ -248,7 +248,7 @@ export function BasicTable() {
 
 ## 📚 Additional Resources
 
-- [NikoTable Documentation](/getting-started/introduction)
+- [NikoDataTable Documentation](/getting-started/introduction)
 - [Component Architecture](/data-table/components)
 - [Installation Guide](/getting-started/installation)
 - [Contributing Guide](/contributing)

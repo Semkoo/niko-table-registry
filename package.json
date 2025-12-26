@@ -1,8 +1,8 @@
 {
-  "name": "niko-table",
+  "name": "niko-data-table",
   "type": "module",
   "version": "0.0.1",
-  "description": "NikoTable - Nobody's table, everyone's solution. Advanced React table components built for use with Shadcn",
+  "description": "NikoDataTable - Nobody's table, everyone's solution. Advanced React table components built for use with Shadcn",
   "author": "Semir N. <https://github.com/Semkoo>",
   "repository": {
     "type": "git",

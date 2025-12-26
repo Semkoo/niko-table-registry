@@ -11,8 +11,8 @@ import {
   DataTableEmptyMessage,
   DataTableEmptyTitle,
   DataTableEmptyDescription,
-} from "@/components/niko-table"
-import type { DataTableColumnDef } from "@/components/niko-table/types"
+} from "@/components/niko-data-table"
+import type { DataTableColumnDef } from "@/components/niko-data-table/types"
 import { Inbox } from "lucide-react"
 
 type User = {

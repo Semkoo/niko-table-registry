@@ -1,6 +1,6 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry.json",
-  "name": "NikoTable",
+  "name": "NikoDataTable",
   "homepage": "https://wds-shadcn-registry.netlify.app",
   "items": []
 }

@@ -68,8 +68,8 @@ First, we'll add a select column to our definitions.
 ```tsx showLineNumbers title="columns.tsx"
 "use client"
 
-import { TableColumnHeader } from "@/components/niko-table/components"
-import type { DataTableColumnDef } from "@/components/niko-table/types"
+import { TableColumnHeader } from "@/components/niko-data-table/components"
+import type { DataTableColumnDef } from "@/components/niko-data-table/types"
 import { Checkbox } from "@/components/ui/checkbox"
 
 export type Customer = {
@@ -144,9 +144,9 @@ import {
   DataTableSearchFilter,
   DataTableViewMenu,
   DataTableEmptyBody,
-} from "@/components/niko-table"
-import { TableColumnHeader } from "@/components/niko-table/components"
-import type { DataTableColumnDef } from "@/components/niko-table/types"
+} from "@/components/niko-data-table"
+import { TableColumnHeader } from "@/components/niko-data-table/components"
+import type { DataTableColumnDef } from "@/components/niko-data-table/types"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -323,7 +323,7 @@ The select column is automatically detected when you use `id: "select"`:
 Access selected rows using the table instance:
 
 ```tsx showLineNumbers
-import { useDataTable } from "@/components/niko-table/core"
+import { useDataTable } from "@/components/niko-data-table/core"
 
 function BulkActions() {
   const { table } = useDataTable<Customer>()
@@ -347,7 +347,7 @@ function BulkActions() {
 Use `DataTableSelectionBar` to show a persistent selection bar:
 
 ```tsx showLineNumbers
-import { DataTableSelectionBar } from "@/components/niko-table/components"
+import { DataTableSelectionBar } from "@/components/niko-data-table/components"
 ;<DataTableSelectionBar
   selectedCount={selectedRows.length}
   onClear={clearSelection}

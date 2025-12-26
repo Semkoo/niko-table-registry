@@ -26,12 +26,12 @@ import {
   DataTableEmptyDescription,
   DataTableEmptyIcon,
   DataTableEmptyMessage,
-} from "@/components/niko-table"
+} from "@/components/niko-data-table"
 import {
   TableColumnHeader,
   DataTableSelectionBar,
-} from "@/components/niko-table/components"
-import type { DataTableColumnDef } from "@/components/niko-table/types"
+} from "@/components/niko-data-table/components"
+import type { DataTableColumnDef } from "@/components/niko-data-table/types"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {

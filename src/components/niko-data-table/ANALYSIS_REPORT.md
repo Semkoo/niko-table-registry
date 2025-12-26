@@ -1,7 +1,7 @@
 # Data Table Component - Comprehensive Analysis Report
 
 **Date**: November 10, 2025  
-**Component**: `/src/components/niko-table/`  
+**Component**: `/src/components/niko-data-table/`  
 **Overall Grade**: A- (92/100)
 
 ---
@@ -31,7 +31,7 @@ The data-table component is a **well-architected, production-ready** table syste
 ### ✅ Issue #1: DataTableSearchFilter Missing displayName
 
 **Status**: FIXED  
-**Location**: `src/components/niko-table/components/data-table-search-filter.tsx`  
+**Location**: `src/components/niko-data-table/components/data-table-search-filter.tsx`  
 **Impact**: Feature detection now works correctly
 
 **What was fixed**:
@@ -49,7 +49,7 @@ DataTableSearchFilter.displayName = "DataTableSearchFilter"
 ### ✅ Issue #2: Inconsistent Feature Detection Registry
 
 **Status**: FIXED  
-**Location**: `src/components/niko-table/config/feature-detection.ts:31`  
+**Location**: `src/components/niko-data-table/config/feature-detection.ts:31`  
 **Impact**: Consistent component registration
 
 **What was fixed**:
@@ -67,7 +67,7 @@ DataTableSearchFilter: { enableFilters: true }, // ✅ Active
 ### ✅ Issue #3: README Documentation Mismatch
 
 **Status**: FIXED  
-**Location**: `src/components/niko-table/README.md`  
+**Location**: `src/components/niko-data-table/README.md`  
 **Impact**: Accurate documentation
 
 **What was fixed**:
@@ -90,7 +90,7 @@ DataTableSearchFilter: { enableFilters: true }, // ✅ Active
 **Recommendation**: Create an error boundary component:
 
 ```tsx
-// src/components/niko-table/core/data-table-error-boundary.tsx
+// src/components/niko-data-table/core/data-table-error-boundary.tsx
 "use client"
 
 import React from "react"
@@ -216,7 +216,7 @@ Create a `DataTableKeyboardShortcuts` component to show users available shortcut
 **Priority**: MEDIUM  
 **Effort**: Low (30 minutes)
 
-**Location**: `src/components/niko-table/core/data-table-root.tsx:238-242`
+**Location**: `src/components/niko-data-table/core/data-table-root.tsx:238-242`
 
 **Current Code** (unsafe):
 
@@ -270,7 +270,7 @@ const handleRowSelectionChange = React.useCallback(
 **Recommendation**: Create and export a debounce hook:
 
 ```tsx
-// src/components/niko-table/hooks/use-debounce.ts
+// src/components/niko-data-table/hooks/use-debounce.ts
 import { useEffect, useState } from "react"
 
 /**
@@ -412,7 +412,7 @@ const table = useReactTable({
 **Recommendation**: Add a refresh button component
 
 ```tsx
-// src/components/niko-table/components/data-table-refresh-button.tsx
+// src/components/niko-data-table/components/data-table-refresh-button.tsx
 export function DataTableRefreshButton({ onRefresh }: Props) {
   const { setIsLoading } = useDataTable()
 

@@ -108,7 +108,7 @@ export default defineConfig({
           },
         },
       ],
-      title: "NikoTable - Nobody's table, everyone's solution",
+      title: "NikoDataTable - Nobody's table, everyone's solution",
       editLink: {
         baseUrl: `${GITHUB_REPO_URL}/tree/main`,
       },

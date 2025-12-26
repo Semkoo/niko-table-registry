@@ -27,7 +27,7 @@ The DataTable components use a two-layer architecture for maximum flexibility:
 
 **Why this architecture?**
 
-- Use `DataTable*` components from "@/components/niko-table/components" when you want context-based, zero-config usage
+- Use `DataTable*` components from "@/components/niko-data-table/components" when you want context-based, zero-config usage
 - Use `Table*` components from filters when you want to build custom components or manage the table instance yourself
 - All filter components use TanStack Table hooks directly, giving you full control
 
@@ -232,7 +232,7 @@ Let's build your first table. We'll start with a simple table and progressively 
    Columns define how your data is displayed in the table.
 
    ```tsx title="components/example-table.tsx"
-   import type { DataTableColumnDef } from "@/components/niko-table/types"
+   import type { DataTableColumnDef } from "@/components/niko-data-table/types"
 
    const columns: DataTableColumnDef<User>[] = [
      {
@@ -271,7 +271,7 @@ Let's build your first table. We'll start with a simple table and progressively 
      DataTable,
      DataTableHeader,
      DataTableBody,
-   } from "@/components/niko-table"
+   } from "@/components/niko-data-table"
 
    export function ExampleTable() {
      return (
@@ -557,7 +557,7 @@ import {
   DataTable,
   DataTableHeader,
   DataTableBody,
-} from "@/components/niko-table"
+} from "@/components/niko-data-table"
 
 const columns = [
   { accessorKey: "name", header: "Name" },
