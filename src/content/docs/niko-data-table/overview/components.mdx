@@ -750,6 +750,41 @@ Composition components for building custom empty states.
   </Button>
 </div>
 
+```tsx showLineNumbers
+import {
+  DataTableEmptyIcon,
+  DataTableEmptyMessage,
+  DataTableEmptyTitle,
+  DataTableEmptyDescription,
+  DataTableEmptyFilteredMessage,
+  DataTableEmptyActions,
+} from "@/components/niko-data-table"
+import { PackageOpen } from "lucide-react"
+import { Button } from "@/components/ui/button"
+
+// Complete empty state composition
+;<DataTableEmptyBody>
+  <DataTableEmptyIcon>
+    <PackageOpen className="size-12 text-muted-foreground" />
+  </DataTableEmptyIcon>
+  <DataTableEmptyMessage>
+    <DataTableEmptyTitle>No products found</DataTableEmptyTitle>
+    <DataTableEmptyDescription>
+      Get started by adding your first product to the catalog.
+    </DataTableEmptyDescription>
+  </DataTableEmptyMessage>
+  <DataTableEmptyFilteredMessage>
+    No products match your current filters. Try adjusting your search criteria.
+  </DataTableEmptyFilteredMessage>
+  <DataTableEmptyActions>
+    <Button onClick={handleAddProduct}>Add Product</Button>
+    <Button variant="outline" onClick={handleImport}>
+      Import from CSV
+    </Button>
+  </DataTableEmptyActions>
+</DataTableEmptyBody>
+```
+
 #### DataTableEmptyIcon
 
 Icon component for empty state.
