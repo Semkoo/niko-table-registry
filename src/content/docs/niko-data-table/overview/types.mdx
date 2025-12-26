@@ -1,0 +1,245 @@
+---
+title: TypeScript Types
+description: TypeScript type definitions and interfaces for the data table.
+---
+
+import { Button } from "@/components/ui/button"
+import { GITHUB_REPO_URL } from "@/data/env"
+
+The `types/` directory contains all TypeScript type definitions and interfaces used throughout the data table components.
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/types/index.ts`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+</div>
+
+## Core Types
+
+### Option
+
+Option type for select/multi-select filters.
+
+```tsx
+interface Option {
+  label: string
+  value: string
+  count?: number
+  icon?: React.ComponentType<{ className?: string }>
+}
+```
+
+### FilterVariant
+
+Filter variant type defining the UI control type.
+
+```tsx
+type FilterVariant =
+  | "text"
+  | "number"
+  | "range"
+  | "date"
+  | "date_range"
+  | "select"
+  | "multi_select"
+  | "boolean"
+```
+
+### FilterOperator
+
+Filter operator type defining the comparison logic.
+
+```tsx
+type FilterOperator =
+  | "ilike"
+  | "not.ilike"
+  | "eq"
+  | "neq"
+  | "in"
+  | "not.in"
+  | "empty"
+  | "not.empty"
+  | "lt"
+  | "lte"
+  | "gt"
+  | "gte"
+  | "between"
+  | "relative"
+```
+
+### JoinOperator
+
+Join operator type for combining multiple filters.
+
+```tsx
+type JoinOperator = "and" | "or" | "mixed"
+```
+
+## Extended Types
+
+### ExtendedColumnFilter
+
+Extended column filter with additional metadata.
+
+```tsx
+interface ExtendedColumnFilter<TData> {
+  id: Extract<keyof TData, string>
+  value: string | string[]
+  variant: FilterVariant
+  operator: FilterOperator
+  filterId: string
+  joinOperator?: JoinOperator // Individual join operator for each filter
+}
+```
+
+### ExtendedColumnSort
+
+Extended column sort for URL state management.
+
+```tsx
+interface ExtendedColumnSort<TData> {
+  id: Extract<keyof TData, string>
+  desc: boolean
+}
+```
+
+### GlobalFilter
+
+Global filter type.
+
+```tsx
+type GlobalFilter = string | Record<string, unknown>
+```
+
+## Column Definition Types
+
+### DataTableColumnDef
+
+Extended column definition for data table. Inherits all TanStack Table ColumnDef properties.
+
+```tsx
+type DataTableColumnDef<TData, TValue = unknown> = ColumnDef<TData, TValue>
+```
+
+### ColumnMeta
+
+Extended column metadata interface (augments TanStack Table's ColumnMeta).
+
+```tsx
+interface ColumnMeta<TData extends RowData, TValue> {
+  // Display
+  label?: string
+  placeholder?: string
+
+  // Filtering
+  variant?: FilterVariant
+  options?: Option[]
+  range?: [number, number]
+  autoOptions?: boolean
+  autoOptionsFormat?: boolean
+  showCounts?: boolean
+  dynamicCounts?: boolean
+  mergeStrategy?: "preserve" | "augment" | "replace"
+
+  // Formatting
+  unit?: string
+  icon?: React.ComponentType<{ className?: string }>
+
+  // Row Expansion
+  expandedContent?: (row: TData) => React.ReactNode
+}
+```
+
+### TableMeta
+
+Extended table metadata interface (augments TanStack Table's TableMeta).
+
+```tsx
+interface TableMeta<TData extends RowData> {
+  joinOperator?: JoinOperator
+  hasIndividualJoinOperators?: boolean
+}
+```
+
+## Row Types
+
+### DataTableRow
+
+Data table row type. Alias for TanStack Table Row.
+
+```tsx
+type DataTableRow<TData> = Row<TData>
+```
+
+### DataTable
+
+Data table type. Alias for TanStack Table.
+
+```tsx
+type DataTable<TData> = Table<TData>
+```
+
+## Query State Types
+
+### QueryKeys
+
+Query keys for URL state management.
+
+```tsx
+interface QueryKeys {
+  page?: string
+  perPage?: string
+  sort?: string
+  filters?: string
+  joinOperator?: string
+}
+```
+
+## Type Helpers
+
+### ValueOf
+
+Utility type to get the literal values from constant objects.
+
+```tsx
+type ValueOf<T> = T[keyof T]
+```
+
+### JoinOperatorValues
+
+Convenience type for accessing JOIN_OPERATORS constant values.
+
+```tsx
+type JoinOperatorValues = typeof JOIN_OPERATORS
+```
+
+### FilterOperatorValues
+
+Convenience type for accessing FILTER_OPERATORS constant values.
+
+```tsx
+type FilterOperatorValues = typeof FILTER_OPERATORS
+```
+
+### FilterVariantValues
+
+Convenience type for accessing FILTER_VARIANTS constant values.
+
+```tsx
+type FilterVariantValues = typeof FILTER_VARIANTS
+```
+
+## TanStack Table Module Augmentation
+
+The types module augments TanStack Table's type definitions to add custom metadata:
+
+- **ColumnMeta** - Adds label, placeholder, variant, options, and other filter-related metadata
+- **TableMeta** - Adds joinOperator and hasIndividualJoinOperators for filter logic
+
+This allows TypeScript to provide proper type checking and autocomplete for column and table metadata throughout the data table components.

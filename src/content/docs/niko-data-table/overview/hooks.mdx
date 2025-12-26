@@ -1,0 +1,210 @@
+---
+title: Hooks
+description: Custom React hooks for table functionality including useDataTable, useDebounce, and more.
+---
+
+import { Button } from "@/components/ui/button"
+import { GITHUB_REPO_URL } from "@/data/env"
+
+Custom React hooks for table functionality.
+
+### useDataTable
+
+Hook to access the table instance and context from any child component.
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/core/data-table-context.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+</div>
+
+```tsx showLineNumbers
+import { useDataTable } from "@/components/niko-data-table"
+
+export function CustomComponent() {
+  const { table, isLoading, columns } = useDataTable()
+
+  const rowCount = table.getFilteredRowModel().rows.length
+  const pageCount = table.getPageCount()
+
+  return (
+    <div>
+      <p>Showing {rowCount} rows</p>
+      <p>
+        Page {table.getState().pagination.pageIndex + 1} of {pageCount}
+      </p>
+    </div>
+  )
+}
+```
+
+#### Return Values
+
+| Property       | Type                           | Description                              |
+| -------------- | ------------------------------ | ---------------------------------------- |
+| `table`        | `Table<TData>`                 | The TanStack Table instance.             |
+| `columns`      | `DataTableColumnDef<TData>[]`  | Column definitions array.                |
+| `isLoading`    | `boolean`                      | Whether the table is in a loading state. |
+| `setIsLoading` | `(isLoading: boolean) => void` | Function to update loading state.        |
+
+### useDebounce
+
+Hook to debounce a value, useful for search inputs and filters.
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/hooks/use-debounce.ts`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+</div>
+
+```tsx showLineNumbers
+import { useDebounce } from "@/components/niko-data-table/hooks"
+
+function SearchFilter() {
+  const [search, setSearch] = useState("")
+  const debouncedSearch = useDebounce(search, 500)
+
+  useEffect(() => {
+    // This only runs after user stops typing for 500ms
+    console.log("Searching for:", debouncedSearch)
+  }, [debouncedSearch])
+
+  return (
+    <input
+      value={search}
+      onChange={e => setSearch(e.target.value)}
+      placeholder="Search..."
+    />
+  )
+}
+```
+
+#### Parameters
+
+| Name    | Type     | Default | Description                                |
+| ------- | -------- | ------- | ------------------------------------------ |
+| `value` | `T`      | -       | The value to debounce (required).          |
+| `delay` | `number` | `300`   | The delay in milliseconds before updating. |
+
+#### Returns
+
+The debounced value of type `T`.
+
+### useDerivedColumnTitle
+
+Hook that derives the title for a column filter component.
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/hooks/use-derived-column-title.ts`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+</div>
+
+#### Parameters
+
+| Name          | Type            | Description                     |
+| ------------- | --------------- | ------------------------------- |
+| `column`      | `Column<TData>` | The table column.               |
+| `accessorKey` | `string`        | The accessor key of the column. |
+| `title`       | `string`        | Optional title override.        |
+
+#### Returns
+
+The derived title string (priority: title prop → column.meta.label → formatted accessorKey).
+
+### useGeneratedOptions
+
+Hook to generate options for select/multi_select columns from table data.
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/hooks/use-generated-options.ts`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+</div>
+
+#### Parameters
+
+| Name                         | Type                    | Default | Description                                   |
+| ---------------------------- | ----------------------- | ------- | --------------------------------------------- |
+| `table`                      | `Table<TData>`          | -       | TanStack Table instance (required).           |
+| `config`                     | `GenerateOptionsConfig` | -       | Configuration object.                         |
+| `config.showCounts`          | `boolean`               | `true`  | Include counts for each option.               |
+| `config.dynamicCounts`       | `boolean`               | `true`  | Recompute counts based on filtered rows.      |
+| `config.limitToFilteredRows` | `boolean`               | `true`  | Generate options from filtered rows only.     |
+| `config.includeColumns`      | `string[]`              | -       | Only generate options for these column ids.   |
+| `config.excludeColumns`      | `string[]`              | -       | Exclude these column ids from generation.     |
+| `config.limitPerColumn`      | `number`                | -       | Limit number of generated options per column. |
+
+#### Returns
+
+A record mapping column IDs to arrays of `Option` objects.
+
+### useKeyboardShortcut
+
+Hook for managing keyboard shortcuts with fine-grained control.
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/hooks/use-keyboard-shortcut.ts`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+</div>
+
+```tsx showLineNumbers
+import { useKeyboardShortcut } from "@/components/niko-data-table/hooks"
+
+useKeyboardShortcut({
+  key: "f",
+  onTrigger: () => setFilterOpen(true),
+  condition: () => !isInputFocused,
+})
+
+useKeyboardShortcut({
+  key: "f",
+  requireShift: true,
+  onTrigger: () => clearAllFilters(),
+})
+```
+
+#### Parameters
+
+| Name              | Type            | Default | Description                                                 |
+| ----------------- | --------------- | ------- | ----------------------------------------------------------- |
+| `key`             | `string`        | -       | The key to listen for (required).                           |
+| `onTrigger`       | `() => void`    | -       | Function to call when shortcut is triggered.                |
+| `enabled`         | `boolean`       | `true`  | Whether the shortcut is enabled.                            |
+| `requireShift`    | `boolean`       | `false` | Whether to require Shift key.                               |
+| `requireCtrl`     | `boolean`       | `false` | Whether to require Ctrl/Cmd key.                            |
+| `requireAlt`      | `boolean`       | `false` | Whether to require Alt key.                                 |
+| `preventDefault`  | `boolean`       | `true`  | Whether to prevent default browser behavior.                |
+| `stopPropagation` | `boolean`       | `false` | Whether to stop event propagation.                          |
+| `condition`       | `() => boolean` | -       | Condition function to determine if shortcut should trigger. |

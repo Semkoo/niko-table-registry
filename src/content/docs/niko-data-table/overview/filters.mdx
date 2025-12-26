@@ -1,0 +1,328 @@
+---
+title: Filter Components
+description: Core filter implementation components that accept a table prop directly.
+---
+
+import { Button } from "@/components/ui/button"
+import { GITHUB_REPO_URL } from "@/data/env"
+
+Filter components are the core implementation that accept a `table` prop directly. They are used internally by the context-aware components in `components/` but can also be used standalone when building custom components.
+
+### TableSearchFilter
+
+Core search filter implementation.
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/filters/table-search-filter.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+</div>
+
+```tsx showLineNumbers
+import { TableSearchFilter } from "@/components/niko-data-table/filters"
+
+;<TableSearchFilter table={table} placeholder="Search..." />
+```
+
+#### Props
+
+| Name              | Type                      | Default       | Description                             |
+| ----------------- | ------------------------- | ------------- | --------------------------------------- |
+| `table`           | `Table<TData>`            | -             | TanStack Table instance (required).     |
+| `placeholder`     | `string`                  | `"Search..."` | Input placeholder text.                 |
+| `value`           | `string`                  | -             | Controlled value.                       |
+| `onChange`        | `(value: string) => void` | -             | Change handler for controlled mode.     |
+| `showClearButton` | `boolean`                 | `true`        | Show clear button when input has value. |
+| `className`       | `string`                  | -             | Additional CSS classes.                 |
+
+### TablePagination
+
+Core pagination implementation.
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/filters/table-pagination.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+</div>
+
+#### Props
+
+Same as `DataTablePagination` but requires `table` prop. See DataTablePagination section above.
+
+### TableFilterMenu
+
+Core filter menu implementation with command palette interface.
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/filters/table-filter-menu.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+</div>
+
+#### Props
+
+| Name              | Type                                                       | Description                         |
+| ----------------- | ---------------------------------------------------------- | ----------------------------------- |
+| `table`           | `Table<TData>`                                             | TanStack Table instance (required). |
+| `filters`         | `ExtendedColumnFilter<TData>[]`                            | Controlled filters array.           |
+| `onFiltersChange` | `(filters: ExtendedColumnFilter<TData>[] \| null) => void` | Callback when filters change.       |
+| `className`       | `string`                                                   | Additional CSS classes.             |
+
+### TableFacetedFilter
+
+Core faceted filter implementation.
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/filters/table-faceted-filter.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+</div>
+
+#### Props
+
+| Name            | Type                                     | Description                       |
+| --------------- | ---------------------------------------- | --------------------------------- |
+| `column`        | `Column<TData, TValue>`                  | Table column instance (required). |
+| `title`         | `string`                                 | Filter title.                     |
+| `options`       | `Option[]`                               | Static options array.             |
+| `multiple`      | `boolean`                                | Allow multiple selection.         |
+| `onValueChange` | `(value: string[] \| undefined) => void` | Callback when value changes.      |
+
+### TableSliderFilter
+
+Core slider filter implementation for numeric ranges.
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/filters/table-slider-filter.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+</div>
+
+#### Props
+
+| Name            | Type                                             | Description                       |
+| --------------- | ------------------------------------------------ | --------------------------------- |
+| `column`        | `Column<TData>`                                  | Table column instance (required). |
+| `title`         | `string`                                         | Filter title.                     |
+| `range`         | `[number, number]`                               | Manual range `[min, max]`.        |
+| `min`           | `number`                                         | Manual minimum value.             |
+| `max`           | `number`                                         | Manual maximum value.             |
+| `step`          | `number`                                         | Step increment.                   |
+| `unit`          | `string`                                         | Unit label (e.g., "$", "kg").     |
+| `onValueChange` | `(value: [number, number] \| undefined) => void` | Callback when value changes.      |
+
+### TableDateFilter
+
+Core date filter implementation.
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/filters/table-date-filter.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+</div>
+
+#### Props
+
+| Name       | Type            | Description                       |
+| ---------- | --------------- | --------------------------------- |
+| `column`   | `Column<TData>` | Table column instance (required). |
+| `title`    | `string`        | Filter title.                     |
+| `multiple` | `boolean`       | Enable date range selection.      |
+
+### TableSortMenu
+
+Core sort menu implementation.
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/filters/table-sort-menu.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+</div>
+
+#### Props
+
+| Name              | Type                              | Description                            |
+| ----------------- | --------------------------------- | -------------------------------------- |
+| `table`           | `Table<TData>`                    | TanStack Table instance (required).    |
+| `debounceMs`      | `number`                          | Debounce delay for sort updates.       |
+| `throttleMs`      | `number`                          | Throttle delay for sort updates.       |
+| `shallow`         | `boolean`                         | Use shallow comparison for sort state. |
+| `className`       | `string`                          | Additional CSS classes.                |
+| `onSortingChange` | `(sorting: ColumnSort[]) => void` | Callback when sorting changes.         |
+
+### TableViewMenu
+
+Core view menu implementation for column visibility.
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/filters/table-view-menu.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+</div>
+
+#### Props
+
+| Name                       | Type                                             | Description                         |
+| -------------------------- | ------------------------------------------------ | ----------------------------------- |
+| `table`                    | `Table<TData>`                                   | TanStack Table instance (required). |
+| `className`                | `string`                                         | Additional CSS classes.             |
+| `onColumnVisibilityChange` | `(columnId: string, isVisible: boolean) => void` | Callback when visibility changes.   |
+
+### TableInlineFilter
+
+Core inline filter implementation with advanced operators.
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/filters/table-inline-filter.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+</div>
+
+#### Props
+
+| Name              | Type                                               | Description                         |
+| ----------------- | -------------------------------------------------- | ----------------------------------- |
+| `table`           | `Table<TData>`                                     | TanStack Table instance (required). |
+| `filters`         | `ExtendedColumnFilter<TData>[]`                    | Controlled filters array.           |
+| `onFiltersChange` | `(filters: ExtendedColumnFilter<TData>[]) => void` | Callback when filters change.       |
+| `className`       | `string`                                           | Additional CSS classes.             |
+
+### TableClearFilter
+
+Core clear filter button implementation.
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/filters/table-clear-filter.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+</div>
+
+#### Props
+
+| Name                       | Type                                | Default     | Description                              |
+| -------------------------- | ----------------------------------- | ----------- | ---------------------------------------- |
+| `table`                    | `Table<TData>`                      | -           | TanStack Table instance (required).      |
+| `variant`                  | `"default" \| "outline" \| "ghost"` | `"outline"` | Button variant.                          |
+| `size`                     | `"default" \| "sm" \| "lg"`         | `"sm"`      | Button size.                             |
+| `showIcon`                 | `boolean`                           | `true`      | Show clear icon.                         |
+| `children`                 | `React.ReactNode`                   | -           | Button content.                          |
+| `enableResetColumnFilters` | `boolean`                           | `true`      | Enable resetting column filters.         |
+| `enableResetGlobalFilter`  | `boolean`                           | `true`      | Enable resetting global filter (search). |
+| `enableResetSorting`       | `boolean`                           | `true`      | Enable resetting sorting.                |
+| `className`                | `string`                            | -           | Additional CSS classes.                  |
+
+### TableExportButton
+
+Core export button implementation.
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/filters/table-export-button.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+</div>
+
+#### Props
+
+| Name             | Type              | Default        | Description                         |
+| ---------------- | ----------------- | -------------- | ----------------------------------- |
+| `table`          | `Table<TData>`    | -              | TanStack Table instance (required). |
+| `filename`       | `string`          | `"table"`      | Filename for exported CSV.          |
+| `excludeColumns` | `(keyof TData)[]` | -              | Columns to exclude from export.     |
+| `onlySelected`   | `boolean`         | `false`        | Export only selected rows.          |
+| `variant`        | `ButtonVariant`   | `"outline"`    | Button variant.                     |
+| `size`           | `ButtonSize`      | `"sm"`         | Button size.                        |
+| `label`          | `string`          | `"Export CSV"` | Button label.                       |
+| `showIcon`       | `boolean`         | `true`         | Show download icon.                 |
+| `className`      | `string`          | -              | Additional CSS classes.             |
+
+### TableRangeFilter
+
+Core range filter implementation for numeric inputs.
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/filters/table-range-filter.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+</div>
+
+#### Props
+
+| Name             | Type                                                                                          | Description                       |
+| ---------------- | --------------------------------------------------------------------------------------------- | --------------------------------- |
+| `filter`         | `ExtendedColumnFilter<TData>`                                                                 | Filter configuration (required).  |
+| `column`         | `Column<TData>`                                                                               | Table column instance (required). |
+| `inputId`        | `string`                                                                                      | Unique input ID (required).       |
+| `onFilterUpdate` | `(filterId: string, updates: Partial<Omit<ExtendedColumnFilter<TData>, "filterId">>) => void` | Callback when filter updates.     |
+| `className`      | `string`                                                                                      | Additional CSS classes.           |
