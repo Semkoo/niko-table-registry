@@ -137,58 +137,58 @@ export default defineConfig({
           ],
         },
         {
-          label: "DataTable",
+          label: "Niko DataTable",
           items: [
-            { label: "Introduction", slug: "data-table/introduction" },
-            { label: "Components", slug: "data-table/components" },
+            { label: "Introduction", slug: "niko-data-table/introduction" },
+            { label: "Components", slug: "niko-data-table/components" },
           ],
         },
         {
           label: "Examples",
           items: [
-            { label: "Simple Table", slug: "data-table/simple-table" },
-            { label: "Basic Table", slug: "data-table/basic-table" },
-            { label: "Search Table", slug: "data-table/search-table" },
-            { label: "Aside Table", slug: "data-table/aside-table" },
+            { label: "Simple Table", slug: "niko-data-table/simple-table" },
+            { label: "Basic Table", slug: "niko-data-table/basic-table" },
+            { label: "Search Table", slug: "niko-data-table/search-table" },
+            { label: "Aside Table", slug: "niko-data-table/aside-table" },
             {
               label: "Row Selection Table",
-              slug: "data-table/row-selection-table",
+              slug: "niko-data-table/row-selection-table",
             },
             {
               label: "Row Expansion Table",
-              slug: "data-table/row-expansion-table",
+              slug: "niko-data-table/row-expansion-table",
             },
             {
               label: "Tree Table",
-              slug: "data-table/tree-table",
+              slug: "niko-data-table/tree-table",
             },
             {
               label: "Virtualization Table",
-              slug: "data-table/virtualization-table",
+              slug: "niko-data-table/virtualization-table",
             },
             {
               label: "Faceted Filter Table",
-              slug: "data-table/faceted-filter-table",
+              slug: "niko-data-table/faceted-filter-table",
             },
             {
               label: "Advanced Filter Table",
-              slug: "data-table/advanced-table",
+              slug: "niko-data-table/advanced-table",
             },
             {
               label: "Advanced Inline Filter Table",
-              slug: "data-table/advanced-inline-table",
+              slug: "niko-data-table/advanced-inline-table",
             },
             {
               label: "Advanced Nuqs Table",
-              slug: "data-table/advanced-nuqs-table",
+              slug: "niko-data-table/advanced-nuqs-table",
             },
             {
               label: "Server-Side Table",
-              slug: "data-table/server-side-table",
+              slug: "niko-data-table/server-side-table",
             },
             {
               label: "Server-Side Nuqs Table",
-              slug: "data-table/server-side-nuqs-table",
+              slug: "niko-data-table/server-side-nuqs-table",
             },
           ],
         },
@@ -220,7 +220,7 @@ export default defineConfig({
             },
             {
               label: "DataTable Examples",
-              link: "/data-table/simple-table",
+              link: "/niko-data-table/simple-table",
             },
             {
               label: "Contributing",
