@@ -3,7 +3,6 @@
 /**
  * Table inline filter component
  * @description An inline filter component for DataTable that allows users to filter data with operator selection and multiple filter types.
- * @inspiration Inspired by and adapted from sadmann7's work - https://github.com/sadmann7/tablecn/blob/main/src/components/niko-data-table/data-table-filter-menu.tsx
  *
  * @architecture
  * This file is organized into sections for easy copy-paste:

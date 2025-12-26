@@ -3,7 +3,6 @@
 /**
  * Table sort menu component
  * @description A sort menu component for DataTable that allows users to manage multiple sorting criteria. Users can add, remove, and reorder sorting fields, as well as select sort directions.
- * @inspiration Inspired by and adapted from sadmann7's work - https://github.com/sadmann7/tablecn/blob/main/src/components/niko-data-table/data-table-sort-list.tsx
  */
 
 import type { ColumnSort, SortDirection, Table } from "@tanstack/react-table"

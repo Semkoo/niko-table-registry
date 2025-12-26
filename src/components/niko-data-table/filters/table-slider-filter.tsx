@@ -3,7 +3,6 @@
 /**
  * Table slider filter component
  * @description A slider filter component for DataTable that allows users to filter numerical data within a specified range. It supports manual configuration of range, min/max values, step size, and unit labels.
- * @inspiration Inspired by and adapted from sadmann7's work - https://github.com/sadmann7/tablecn/blob/main/src/components/niko-data-table/data-table-slider-filter.tsx
  */
 
 import type { Column } from "@tanstack/react-table"

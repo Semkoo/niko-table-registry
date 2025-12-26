@@ -3,8 +3,6 @@
  * A dropdown menu component that allows users to toggle the visibility of table columns.
  * It uses a popover to display a list of columns with checkboxes.
  * Users can search for columns and toggle their visibility.
- *
- * @credit https://github.com/sadmann7/tablecn/blob/main/src/components/niko-data-table/data-table-slider-filter.tsx
  */
 
 import type { Column } from "@tanstack/react-table"
