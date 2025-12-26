@@ -1,9 +1,8 @@
 "use client"
 
 /**
- * Table faceted filter component
- * @description A faceted filter component for DataTable that allows users to filter data based on multiple selectable options. It supports both single and multiple selection modes.
- * @inspiration Inspired by and adapted from sadmann7's work - https://github.com/sadmann7/tablecn/blob/main/src/components/niko-data-table/data-table-range-filter.tsx
+ * Table range filter component
+ * @description A range filter component for DataTable that allows users to filter data based on numerical ranges.
  */
 
 import type { Column } from "@tanstack/react-table"
