@@ -1,10 +1,10 @@
 ---
 title: Components
-description: Detailed documentation for all DataTable components.
+description: Overview of all DataTable components organized by directory structure.
 ---
 
-import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
 import { Button } from "@/components/ui/button"
+import { GITHUB_REPO_URL } from "@/data/env"
 
 <div className="mb-6 flex gap-2">
   <Button variant="outline" size="sm" asChild>
@@ -31,548 +31,122 @@ The components in `data-table` are built to be composable. You build your table 
 
 **If you need to change the code, you are encouraged to do so. The code is yours.**
 
-## DataTableRoot
-
-The `DataTableRoot` component provides the table context to all child components. You should always wrap your table in a `DataTableRoot`.
-
-```tsx showLineNumbers
-import { DataTableRoot } from "@/components/niko-data-table"
-
-export function MyTable({ data }: { data: User[] }) {
-  return (
-    <DataTableRoot data={data} columns={columns}>
-      {/* child components */}
-    </DataTableRoot>
-  )
-}
-```
-
-### Props
-
-| Name        | Type                                    | Description                                        |
-| ----------- | --------------------------------------- | -------------------------------------------------- |
-| `data`      | `TData[]`                               | The data array to display in the table.            |
-| `columns`   | `DataTableColumnDef<TData>[]`           | Column definitions array.                          |
-| `table`     | `Table<TData>`                          | Pre-configured TanStack Table instance (optional). |
-| `config`    | `DataTableConfig`                       | Configuration object for feature toggles.          |
-| `isLoading` | `boolean`                               | Loading state for the table.                       |
-| `getRowId`  | `(row: TData, index: number) => string` | Custom function to get row IDs.                    |
-| `className` | `string`                                | Additional CSS classes.                            |
-
-### Event Handlers
-
-| Name                       | Type                                             | Description                            |
-| -------------------------- | ------------------------------------------------ | -------------------------------------- |
-| `onGlobalFilterChange`     | `(value: GlobalFilter) => void`                  | Called when global filter changes.     |
-| `onPaginationChange`       | `(updater: Updater<PaginationState>) => void`    | Called when pagination changes.        |
-| `onSortingChange`          | `(updater: Updater<SortingState>) => void`       | Called when sorting changes.           |
-| `onColumnFiltersChange`    | `(updater: Updater<ColumnFiltersState>) => void` | Called when column filters change.     |
-| `onColumnVisibilityChange` | `(updater: Updater<VisibilityState>) => void`    | Called when column visibility changes. |
-| `onRowSelectionChange`     | `(updater: Updater<RowSelectionState>) => void`  | Called when row selection changes.     |
-| `onExpandedChange`         | `(updater: Updater<ExpandedState>) => void`      | Called when expanded state changes.    |
-| `onRowSelection`           | `(selectedRows: TData[]) => void`                | Called with selected row data.         |
-
-### Config Object
-
-| Name                 | Type      | Default | Description                                                                                                 |
-| -------------------- | --------- | ------- | ----------------------------------------------------------------------------------------------------------- |
-| `enablePagination`   | `boolean` | `true`  | Enable pagination.                                                                                          |
-| `enableFilters`      | `boolean` | `true`  | Enable filtering.                                                                                           |
-| `enableSorting`      | `boolean` | `true`  | Enable sorting.                                                                                             |
-| `enableRowSelection` | `boolean` | `false` | Enable row selection.                                                                                       |
-| `enableMultiSort`    | `boolean` | `true`  | Enable multi-column sorting.                                                                                |
-| `enableGrouping`     | `boolean` | `false` | Enable column grouping.                                                                                     |
-| `enableExpanding`    | `boolean` | `false` | Enable row expansion.                                                                                       |
-| `manualSorting`      | `boolean` | `false` | Enable server-side sorting.                                                                                 |
-| `manualPagination`   | `boolean` | `false` | Enable server-side pagination.                                                                              |
-| `manualFiltering`    | `boolean` | `false` | Enable server-side filtering.                                                                               |
-| `pageCount`          | `number`  | -       | Total pages (required for server-side pagination).                                                          |
-| `initialPageSize`    | `number`  | `10`    | Initial page size.                                                                                          |
-| `initialPageIndex`   | `number`  | `0`     | Initial page index.                                                                                         |
-| `autoResetPageIndex` | `boolean` | -       | Auto-reset page on filter/sort change. Defaults to `false` when `manualPagination: true`, otherwise `true`. |
-| `autoResetExpanded`  | `boolean` | `true`  | Auto-reset expanded rows on filter/sort change.                                                             |
-
-## DataTable
-
-The main table container component.
-
-```tsx showLineNumbers
-import { DataTable } from "@/components/niko-data-table"
-;<DataTable className="rounded-md border">
-  <DataTableHeader />
-  <DataTableBody />
-</DataTable>
-```
-
-### Props
-
-| Name        | Type              | Description                      |
-| ----------- | ----------------- | -------------------------------- |
-| `className` | `string`          | Additional CSS classes.          |
-| `children`  | `React.ReactNode` | Child components (Header, Body). |
-
-## DataTableHeader
-
-Renders the table header with sortable columns.
-
-```tsx showLineNumbers
-import { DataTableHeader } from "@/components/niko-data-table"
-;<DataTableHeader sticky={true} />
-```
-
-### Props
-
-| Name        | Type      | Default | Description                                        |
-| ----------- | --------- | ------- | -------------------------------------------------- |
-| `className` | `string`  | -       | Additional CSS classes.                            |
-| `sticky`    | `boolean` | `true`  | Makes the header sticky at the top when scrolling. |
-
-## DataTableBody
-
-Renders the table body with rows.
-
-```tsx showLineNumbers
-import {
-  DataTableBody,
-  DataTableSkeleton,
-  DataTableEmptyBody,
-} from "@/components/niko-data-table"
-;<DataTableBody>
-  <DataTableSkeleton />
-  <DataTableEmptyBody />
-</DataTableBody>
-```
-
-### Props
-
-| Name               | Type                           | Description                                |
-| ------------------ | ------------------------------ | ------------------------------------------ |
-| `className`        | `string`                       | Additional CSS classes.                    |
-| `children`         | `React.ReactNode`              | Child components (Skeleton, EmptyBody).    |
-| `onScroll`         | `(event: ScrollEvent) => void` | Scroll event handler.                      |
-| `onScrolledTop`    | `() => void`                   | Called when scrolled to top.               |
-| `onScrolledBottom` | `() => void`                   | Called when scrolled to bottom.            |
-| `scrollThreshold`  | `number`                       | Threshold for scroll events (default: 10). |
-
-## DataTableSkeleton
-
-Shows a loading skeleton when `isLoading` is `true`.
-
-```tsx showLineNumbers
-<DataTableBody>
-  <DataTableSkeleton rows={5} />
-</DataTableBody>
-```
-
-### Props
-
-| Name   | Type     | Default | Description                         |
-| ------ | -------- | ------- | ----------------------------------- |
-| `rows` | `number` | `5`     | Number of skeleton rows to display. |
-
-## DataTableEmptyBody
-
-Shows an empty state when there's no data.
-
-```tsx showLineNumbers
-<DataTableBody>
-  <DataTableEmptyBody>
-    <DataTableEmptyMessage message="No users found." />
-    <DataTableEmptyFilteredMessage message="No results match your filters." />
-  </DataTableEmptyBody>
-</DataTableBody>
-```
-
-## DataTableToolbarSection
-
-Container for organizing filters and actions.
-
-```tsx showLineNumbers
-import { DataTableToolbarSection } from "@/components/niko-data-table"
-;<DataTableToolbarSection className="flex justify-between">
-  <DataTableSearchFilter />
-  <DataTableViewMenu />
-</DataTableToolbarSection>
-```
-
-### Props
-
-| Name        | Type              | Description                   |
-| ----------- | ----------------- | ----------------------------- |
-| `className` | `string`          | Additional CSS classes.       |
-| `children`  | `React.ReactNode` | Filter and action components. |
-
-## DataTablePagination
-
-Full-featured pagination controls.
-
-```tsx showLineNumbers
-import { DataTablePagination } from "@/components/niko-data-table"
-;<DataTablePagination pageSizeOptions={[10, 25, 50, 100]} totalCount={500} />
-```
-
-### Props
-
-| Name                  | Type       | Default             | Description                                        |
-| --------------------- | ---------- | ------------------- | -------------------------------------------------- |
-| `pageSizeOptions`     | `number[]` | `[10, 25, 50, 100]` | Available page size options.                       |
-| `totalCount`          | `number`   | -                   | Total count of items (for server-side pagination). |
-| `isLoading`           | `boolean`  | -                   | Loading state (overrides context loading).         |
-| `isFetching`          | `boolean`  | -                   | Fetching state (for TanStack Query).               |
-| `disableNextPage`     | `boolean`  | -                   | Explicitly disable next page button.               |
-| `disablePreviousPage` | `boolean`  | -                   | Explicitly disable previous page button.           |
-| `className`           | `string`   | -                   | Additional CSS classes.                            |
-
-### Event Handlers
-
-| Name                | Type                                            | Description                              |
-| ------------------- | ----------------------------------------------- | ---------------------------------------- |
-| `onPageChange`      | `(pageIndex: number) => void`                   | Called when page changes.                |
-| `onNextPage`        | `(pageIndex: number) => void`                   | Called when navigating to next page.     |
-| `onPreviousPage`    | `(pageIndex: number) => void`                   | Called when navigating to previous page. |
-| `onPageSizeChange`  | `(pageSize: number, pageIndex: number) => void` | Called when page size changes.           |
-| `onPaginationReady` | `() => void`                                    | Called when pagination is initialized.   |
-
-**Note:** Pagination buttons are automatically disabled when `isLoading` or `isFetching` is `true`.
-
-## DataTableSearchFilter
-
-Global search input with debouncing.
-
-```tsx showLineNumbers
-import { DataTableSearchFilter } from "@/components/niko-data-table"
-
-// Uncontrolled (manages its own state)
-<DataTableSearchFilter placeholder="Search products..." />
-
-// Controlled (you manage the state)
-const [search, setSearch] = useState("")
-<DataTableSearchFilter
-  value={search}
-  onChange={setSearch}
-  placeholder="Search..."
-/>
-```
-
-### Props
-
-| Name              | Type                      | Default       | Description                             |
-| ----------------- | ------------------------- | ------------- | --------------------------------------- |
-| `placeholder`     | `string`                  | `"Search..."` | Input placeholder text.                 |
-| `value`           | `string`                  | -             | Controlled value.                       |
-| `onChange`        | `(value: string) => void` | -             | Change handler for controlled mode.     |
-| `showClearButton` | `boolean`                 | `true`        | Show clear button when input has value. |
-| `className`       | `string`                  | -             | Additional CSS classes.                 |
-
-## DataTableFilterMenu
-
-Command palette-style interface for adding filters.
-
-```tsx showLineNumbers
-import { DataTableFilterMenu } from "@/components/niko-data-table"
-;<DataTableFilterMenu
-  autoOptions
-  dynamicCounts
-  showCounts
-  mergeStrategy="augment"
-/>
-```
-
-### Props
-
-| Name                  | Type                                   | Default      | Description                                            |
-| --------------------- | -------------------------------------- | ------------ | ------------------------------------------------------ |
-| `autoOptions`         | `boolean`                              | `true`       | Auto-generate options for select/multi_select columns. |
-| `showCounts`          | `boolean`                              | `true`       | Show counts beside each option.                        |
-| `dynamicCounts`       | `boolean`                              | `true`       | Recompute counts based on filtered rows.               |
-| `limitToFilteredRows` | `boolean`                              | `true`       | Generate options from filtered rows only.              |
-| `includeColumns`      | `string[]`                             | -            | Only generate options for these column ids.            |
-| `excludeColumns`      | `string[]`                             | -            | Exclude these column ids from generation.              |
-| `limitPerColumn`      | `number`                               | -            | Limit number of generated options per column.          |
-| `mergeStrategy`       | `"preserve" \| "augment" \| "replace"` | `"preserve"` | How to handle existing static options.                 |
-| `className`           | `string`                               | -            | Additional CSS classes.                                |
-
-### Merge Strategy
-
-| Value      | Description                                        |
-| ---------- | -------------------------------------------------- |
-| `preserve` | Keep user-defined options untouched (default).     |
-| `augment`  | Add counts to matching values from static options. |
-| `replace`  | Override static options with generated options.    |
+## Directory Structure
 
-## DataTableFacetedFilter
-
-Faceted filter component for single or multiple selection.
-
-```tsx showLineNumbers
-import { DataTableFacetedFilter } from "@/components/niko-data-table"
-
-// With static options
-<DataTableFacetedFilter
-  accessorKey="category"
-  title="Category"
-  options={[
-    { label: "Electronics", value: "electronics" },
-    { label: "Clothing", value: "clothing" },
-  ]}
-  multiple
-/>
-
-// Auto-generate options from data
-<DataTableFacetedFilter
-  accessorKey="brand"
-  limitToFilteredRows={true}
-/>
-```
-
-### Props
-
-| Name                  | Type                   | Default | Description                                              |
-| --------------------- | ---------------------- | ------- | -------------------------------------------------------- |
-| `accessorKey`         | `keyof TData & string` | -       | Column accessor key (required).                          |
-| `title`               | `string`               | -       | Custom title (uses `column.meta.label` if not provided). |
-| `options`             | `Option[]`             | -       | Static options array.                                    |
-| `multiple`            | `boolean`              | -       | Allow multiple selection.                                |
-| `showCounts`          | `boolean`              | `true`  | Show counts beside each option.                          |
-| `dynamicCounts`       | `boolean`              | `true`  | Recompute counts based on filtered rows.                 |
-| `limitToFilteredRows` | `boolean`              | `true`  | Show only options from filtered rows.                    |
-
-### limitToFilteredRows
-
-Controls whether the filter shows options from all data or only from filtered rows.
-
-- **`true` (default):** Options are generated from rows that match other active filters. Useful for filters like "Brand" where you want to see only relevant options.
-- **`false`:** Options are generated from all rows, regardless of other filters. Useful for filters like "Category" where you want to see all available options.
-
-## DataTableSortMenu
-
-Menu for managing column sorting with drag-and-drop reordering.
-
-```tsx showLineNumbers
-import { DataTableSortMenu } from "@/components/niko-data-table"
-;<DataTableSortMenu className="ml-auto" />
-```
-
-### Props
-
-| Name        | Type     | Description             |
-| ----------- | -------- | ----------------------- |
-| `className` | `string` | Additional CSS classes. |
-
-## DataTableViewMenu
-
-Column visibility toggle menu.
-
-```tsx showLineNumbers
-import { DataTableViewMenu } from "@/components/niko-data-table"
-;<DataTableViewMenu />
-```
-
-### Props
-
-| Name                       | Type                                             | Description                       |
-| -------------------------- | ------------------------------------------------ | --------------------------------- |
-| `className`                | `string`                                         | Additional CSS classes.           |
-| `onColumnVisibilityChange` | `(columnId: string, isVisible: boolean) => void` | Callback when visibility changes. |
+The NikoDataTable components are organized into logical directories following the file structure in `src/components/niko-data-table`:
 
-## DataTableInlineFilter
-
-Inline filter toolbar for managing filters.
+- **`core/`** - Essential table components (DataTableRoot, DataTable, context, structure components)
+- **`components/`** - User-facing context-aware components (automatically connect to table context via `useDataTable` hook)
+- **`filters/`** - Core filter implementation components (accept `table` prop directly, used by components/)
+- **`hooks/`** - Custom React hooks for table functionality
+- **`lib/`** - Utility functions and constants
+- **`types/`** - TypeScript type definitions
+- **`config/`** - Configuration and feature detection
 
-```tsx showLineNumbers
-import { DataTableInlineFilter } from "@/components/niko-data-table"
-;<DataTableInlineFilter autoOptions dynamicCounts showCounts />
-```
+This documentation follows this structure for easy navigation. Each component section includes links to source code and relevant documentation.
 
-### Props
+## Documentation Sections
 
-Same as `DataTableFilterMenu`. See above for details.
+### [Core Components](/niko-data-table/components/core/)
 
-## DataTableSliderFilter
+Essential building blocks of the data table. They handle table initialization, context management, and basic structure.
 
-Slider filter for numeric ranges.
+**Components:**
 
-```tsx showLineNumbers
-import { DataTableSliderFilter } from "@/components/niko-data-table"
+- `DataTableRoot` - Provides table context and initializes TanStack Table
+- `DataTable` - Main table container with scrolling behavior
+- `DataTableHeader` - Table header with sortable columns
+- `DataTableBody` - Table body with rows and scroll events
+- `DataTableSkeleton` - Loading skeleton
+- `DataTableEmptyBody` - Empty state component
+- `DataTableLoading` - Loading indicator
+- `DataTableErrorBoundary` - Error boundary for table
+- Virtualized components for large datasets
 
-// Auto-detect from column metadata
-<DataTableSliderFilter accessorKey="price" />
+### [User-Facing Components](/niko-data-table/components/components/)
 
-// Custom range
-<DataTableSliderFilter
-  accessorKey="rating"
-  min={1}
-  max={5}
-  step={0.5}
-/>
+Context-aware components that automatically connect to the table via the `useDataTable` hook. These are the recommended components for most use cases.
 
-// With unit
-<DataTableSliderFilter
-  accessorKey="price"
-  range={[0, 1000]}
-  unit="$"
-/>
-```
+**Components:**
 
-### Props
+- `DataTableToolbarSection` - Container for filters and actions
+- `DataTablePagination` - Full-featured pagination controls
+- `DataTableSearchFilter` - Global search input with debouncing
+- `DataTableFilterMenu` - Command palette-style filter interface
+- `DataTableFacetedFilter` - Faceted filter for single/multiple selection
+- `DataTableSortMenu` - Sort management with drag-and-drop
+- `DataTableViewMenu` - Column visibility toggle
+- `DataTableInlineFilter` - Inline filter toolbar
+- `DataTableSliderFilter` - Slider filter for numeric ranges
+- `DataTableDateFilter` - Date filter component
+- `DataTableClearFilter` - Clear all filters button
+- `DataTableExportButton` - Export to CSV button
+- `TableColumnHeader` - Sortable column header
+- `DataTableAside` - Sidebar component
+- `DataTableSelectionBar` - Bulk actions bar
+- `DataTableEmptyState` - Empty state composition components
 
-| Name          | Type                   | Description                                              |
-| ------------- | ---------------------- | -------------------------------------------------------- |
-| `accessorKey` | `keyof TData & string` | Column accessor key (required).                          |
-| `title`       | `string`               | Custom title.                                            |
-| `min`         | `number`               | Minimum value (auto-detected from data if not provided). |
-| `max`         | `number`               | Maximum value (auto-detected from data if not provided). |
-| `step`        | `number`               | Step increment (default: 1).                             |
-| `range`       | `[number, number]`     | Range array `[min, max]`.                                |
-| `unit`        | `string`               | Unit label (e.g., "$", "kg").                            |
-
-## DataTableDateFilter
+### [Filter Components](/niko-data-table/components/filters/)
 
-Date filter component for single dates or date ranges.
+Core filter implementation components that accept a `table` prop directly. They are used internally by the context-aware components but can also be used standalone when building custom components.
 
-```tsx showLineNumbers
-import { DataTableDateFilter } from "@/components/niko-data-table"
+**Components:**
 
-// Single date
-<DataTableDateFilter accessorKey="releaseDate" />
+- `TableSearchFilter` - Core search filter
+- `TablePagination` - Core pagination
+- `TableFilterMenu` - Core filter menu
+- `TableFacetedFilter` - Core faceted filter
+- `TableSliderFilter` - Core slider filter
+- `TableDateFilter` - Core date filter
+- `TableSortMenu` - Core sort menu
+- `TableViewMenu` - Core view menu
+- `TableInlineFilter` - Core inline filter
+- `TableClearFilter` - Core clear filter
+- `TableExportButton` - Core export button
+- `TableRangeFilter` - Core range filter
 
-// Date range
-<DataTableDateFilter
-  accessorKey="releaseDate"
-  multiple
-/>
-```
-
-### Props
-
-| Name          | Type                   | Default | Description                     |
-| ------------- | ---------------------- | ------- | ------------------------------- |
-| `accessorKey` | `keyof TData & string` | -       | Column accessor key (required). |
-| `title`       | `string`               | -       | Custom title.                   |
-| `multiple`    | `boolean`              | `false` | Enable date range selection.    |
-
-## DataTableClearFilter
-
-Button to clear all active filters.
-
-```tsx showLineNumbers
-import { DataTableClearFilter } from "@/components/niko-data-table"
-;<DataTableClearFilter />
-```
-
-## DataTableExportButton
-
-Button to export table data.
-
-```tsx showLineNumbers
-import { DataTableExportButton } from "@/components/niko-data-table"
-;<DataTableExportButton />
-```
-
-## DataTableSelectionBar
-
-Shows bulk actions when rows are selected.
-
-```tsx showLineNumbers
-import { DataTableSelectionBar } from "@/components/niko-data-table"
-;<DataTableSelectionBar onDelete={rows => handleDelete(rows)} />
-```
-
-## useDataTable
-
-The `useDataTable` hook is used to access the table instance from any child component.
-
-```tsx showLineNumbers
-import { useDataTable } from "@/components/niko-data-table"
-
-export function CustomComponent() {
-  const { table, isLoading } = useDataTable()
-
-  const rowCount = table.getFilteredRowModel().rows.length
-  const pageCount = table.getPageCount()
-
-  return (
-    <div>
-      <p>Showing {rowCount} rows</p>
-      <p>
-        Page {table.getState().pagination.pageIndex + 1} of {pageCount}
-      </p>
-    </div>
-  )
-}
-```
-
-### Return Values
-
-| Property    | Type           | Description                              |
-| ----------- | -------------- | ---------------------------------------- |
-| `table`     | `Table<TData>` | The TanStack Table instance.             |
-| `isLoading` | `boolean`      | Whether the table is in a loading state. |
-
-### Custom Components
-
-You can build custom components using the `useDataTable` hook:
-
-```tsx showLineNumbers
-function RowCounter() {
-  const { table } = useDataTable()
-  const total = table.getFilteredRowModel().rows.length
-  const selected = table.getSelectedRowModel().rows.length
-
-  return (
-    <p className="text-sm text-muted-foreground">
-      {selected} of {total} row(s) selected
-    </p>
-  )
-}
-```
-
-## Virtualized Components
-
-For large datasets (1000+ rows), use the virtualized variants:
-
-```tsx showLineNumbers
-import {
-  DataTableVirtualizedHeader,
-  DataTableVirtualizedBody,
-  DataTableVirtualizedEmptyBody,
-} from "@/components/niko-data-table"
-;<DataTable>
-  <DataTableVirtualizedHeader />
-  <DataTableVirtualizedBody height={600}>
-    <DataTableVirtualizedEmptyBody />
-  </DataTableVirtualizedBody>
-</DataTable>
-```
-
-### DataTableVirtualizedBody Props
-
-| Name        | Type     | Description                                                  |
-| ----------- | -------- | ------------------------------------------------------------ |
-| `height`    | `number` | Fixed height for virtualization (required).                  |
-| `className` | `string` | Additional CSS classes.                                      |
-| `overscan`  | `number` | Number of items to render outside visible area (default: 5). |
-
-## TableColumnHeader
-
-Sortable column header component.
-
-```tsx showLineNumbers
-import { TableColumnHeader } from "@/components/niko-data-table/components"
-
-const columns: DataTableColumnDef<User>[] = [
-  {
-    accessorKey: "name",
-    header: ({ column }) => <TableColumnHeader column={column} />,
-    meta: { label: "Name" },
-  },
-]
-```
-
-### Props
-
-| Name        | Type            | Description                                              |
-| ----------- | --------------- | -------------------------------------------------------- |
-| `column`    | `Column<TData>` | The column instance from TanStack Table.                 |
-| `title`     | `string`        | Custom title (uses `column.meta.label` if not provided). |
-| `className` | `string`        | Additional CSS classes.                                  |
+### [Hooks](/niko-data-table/components/hooks/)
+
+Custom React hooks for table functionality.
+
+**Hooks:**
+
+- `useDataTable` - Access table instance and context
+- `useDebounce` - Debounce values for search/filters
+- `useDerivedColumnTitle` - Derive column titles
+- `useGeneratedOptions` - Generate filter options from data
+- `useKeyboardShortcut` - Manage keyboard shortcuts
+
+## Credits and Inspirations
+
+NikoDataTable is built on top of excellent open-source projects and inspired by the work of talented developers in the community.
+
+### Core Dependencies
+
+- **[TanStack Table](https://tanstack.com/table)** by Tanner Linsley - The headless table library that powers everything. Provides the foundation for all table functionality including sorting, filtering, pagination, and more.
+
+- **[Shadcn UI](https://ui.shadcn.com)** by Shadcn - Beautiful, accessible component primitives built on Radix UI. All UI components in NikoDataTable are built using Shadcn UI components.
+
+### Major Inspirations
+
+- **[sadmann7's work](https://github.com/sadmann7)** - Major inspiration for filter components and table patterns:
+  - **[TableCN](https://github.com/sadmann7/tablecn)** - Inspired our filter menu, inline filter, faceted filter, and slider filter implementations. The composition pattern and filter architecture drew heavily from this excellent project.
+  - **[DiceUI Sortable](https://www.diceui.com/docs/components/sortable)** - Drag and drop sortable for row reordering, which inspired the sort menu implementation.
+
+- **[nuqs](https://nuqs.dev/)** by François Best - Type-safe search params state manager for URL state management. Used in server-side examples for managing table state in URLs.
+
+- **[Web Dev Simplified Registry](https://github.com/WebDevSimplified/wds-shadcn-registry)** by Kyle Cook - Registry implementation pattern that inspired the structure and organization of this project.
+
+### Philosophy
+
+Following the Shadcn philosophy: **"Nobody's table, everyone's solution."**
+
+- Copy and paste the code into your project
+- Own the code - modify it as needed
+- No dependencies on external packages (except TanStack Table and Shadcn UI)
+- Fully customizable and themeable
+- Built with TypeScript for type safety
+
+## License
+
+MIT License - use it freely in your projects!

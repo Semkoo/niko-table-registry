@@ -1,0 +1,329 @@
+---
+title: Library Utilities
+description: Utility functions, constants, and helper functions for the data table.
+---
+
+import { Button } from "@/components/ui/button"
+import { GITHUB_REPO_URL } from "@/data/env"
+
+The `lib/` directory contains utility functions, constants, and helper functions used throughout the data table components.
+
+## Constants
+
+Centralized constants for join operators, filter operators, filter variants, and UI configuration.
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/lib/constants.ts`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+</div>
+
+### JOIN_OPERATORS
+
+Join operators for combining multiple filters.
+
+| Constant | Value     | Description                          |
+| -------- | --------- | ------------------------------------ |
+| `AND`    | `"and"`   | Logical AND (all filters must match) |
+| `OR`     | `"or"`    | Logical OR (any filter can match)    |
+| `MIXED`  | `"mixed"` | Mixed logic (combination of AND/OR)  |
+
+### FILTER_OPERATORS
+
+Filter operator constants defining the comparison logic. Naming follows SQL/PostgREST standards.
+
+| Constant    | Value         | Description                               |
+| ----------- | ------------- | ----------------------------------------- |
+| `ILIKE`     | `"ilike"`     | SQL ILIKE (Case-insensitive search)       |
+| `NOT_ILIKE` | `"not.ilike"` | SQL NOT ILIKE                             |
+| `EQ`        | `"eq"`        | SQL EQUAL (=)                             |
+| `NEQ`       | `"neq"`       | SQL NOT EQUAL (!=)                        |
+| `IN`        | `"in"`        | SQL IN (one of)                           |
+| `NOT_IN`    | `"not.in"`    | SQL NOT IN (none of)                      |
+| `EMPTY`     | `"empty"`     | Value is null or empty string             |
+| `NOT_EMPTY` | `"not.empty"` | Value is not null and not empty string    |
+| `LT`        | `"lt"`        | SQL LESS THAN (&lt;)                      |
+| `LTE`       | `"lte"`       | SQL LESS THAN OR EQUAL (&lt;=)            |
+| `GT`        | `"gt"`        | SQL GREATER THAN (&gt;)                   |
+| `GTE`       | `"gte"`       | SQL GREATER THAN OR EQUAL (&gt;=)         |
+| `BETWEEN`   | `"between"`   | SQL BETWEEN (range)                       |
+| `RELATIVE`  | `"relative"`  | Relative date calculation (e.g., "today") |
+
+### FILTER_VARIANTS
+
+Filter variant constants defining the UI control type.
+
+| Constant       | Value            | Description            |
+| -------------- | ---------------- | ---------------------- |
+| `TEXT`         | `"text"`         | Standard text input    |
+| `NUMBER`       | `"number"`       | Numeric input          |
+| `RANGE`        | `"range"`        | Two-value range input  |
+| `DATE`         | `"date"`         | Single date picker     |
+| `DATE_RANGE`   | `"date_range"`   | Date range picker      |
+| `SELECT`       | `"select"`       | Single select dropdown |
+| `MULTI_SELECT` | `"multi_select"` | Multi-select dropdown  |
+| `BOOLEAN`      | `"boolean"`      | Checkbox or toggle     |
+
+### DEFAULT_VALUES
+
+Global default values.
+
+| Property        | Value                | Description           |
+| --------------- | -------------------- | --------------------- |
+| `JOIN_OPERATOR` | `JOIN_OPERATORS.AND` | Default join operator |
+| `PAGE_SIZE`     | `10`                 | Default page size     |
+| `PAGE_INDEX`    | `0`                  | Default page index    |
+
+### UI_CONSTANTS
+
+UI-related constraints and settings.
+
+| Property                    | Value | Description                                              |
+| --------------------------- | ----- | -------------------------------------------------------- |
+| `FILTER_ID_MAX_LENGTH`      | `100` | Max characters allowed for a filter ID                   |
+| `MAX_FILTER_DISPLAY_HEIGHT` | `300` | Default max height for scrollable filter popovers        |
+| `DEBOUNCE_DELAY`            | `300` | Default debounce delay in milliseconds for search inputs |
+
+### KEYBOARD_SHORTCUTS
+
+Default keyboard shortcut key mappings.
+
+| Property        | Value         | Description                       |
+| --------------- | ------------- | --------------------------------- |
+| `FILTER_TOGGLE` | `"f"`         | Open/Toggle filter menu           |
+| `FILTER_REMOVE` | `"f"`         | Remove active filter (with Shift) |
+| `ESCAPE`        | `"escape"`    | Close active UI elements          |
+| `ENTER`         | `"enter"`     | Confirm or submit active action   |
+| `BACKSPACE`     | `"backspace"` | Remove character or navigate back |
+| `DELETE`        | `"delete"`    | Item deletion                     |
+
+## Data Table Utilities
+
+Helper functions for filter operations and validation.
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/lib/data-table.ts`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+</div>
+
+### getFilterOperators
+
+Get available filter operators for a given filter variant.
+
+```tsx showLineNumbers
+import { getFilterOperators } from "@/components/niko-data-table/lib"
+import { FILTER_VARIANTS } from "@/components/niko-data-table/lib/constants"
+
+const textOperators = getFilterOperators(FILTER_VARIANTS.TEXT)
+// Returns: [{ label: "Contains", value: "ilike" }, ...]
+```
+
+#### Parameters
+
+| Name            | Type            | Description             |
+| --------------- | --------------- | ----------------------- |
+| `filterVariant` | `FilterVariant` | The filter variant type |
+
+#### Returns
+
+Array of operator objects with `label` and `value` properties.
+
+**Type:** `Array<{ label: string; value: FilterOperator }>`
+
+### getDefaultFilterOperator
+
+Get the default filter operator for a given filter variant.
+
+```tsx showLineNumbers
+import { getDefaultFilterOperator } from "@/components/niko-data-table/lib"
+import { FILTER_VARIANTS } from "@/components/niko-data-table/lib/constants"
+
+const defaultOp = getDefaultFilterOperator(FILTER_VARIANTS.TEXT)
+// Returns: "ilike"
+```
+
+#### Parameters
+
+| Name            | Type            | Description             |
+| --------------- | --------------- | ----------------------- |
+| `filterVariant` | `FilterVariant` | The filter variant type |
+
+#### Returns
+
+`FilterOperator` - The default operator for the variant.
+
+### getValidFilters
+
+Filter out invalid filters from an array.
+
+```tsx showLineNumbers
+import { getValidFilters } from "@/components/niko-data-table/lib"
+
+const validFilters = getValidFilters(filters)
+// Returns: ExtendedColumnFilter<TData>[] with only valid filters
+```
+
+#### Parameters
+
+| Name      | Type                            | Description                  |
+| --------- | ------------------------------- | ---------------------------- |
+| `filters` | `ExtendedColumnFilter<TData>[]` | Array of filters to validate |
+
+#### Returns
+
+`ExtendedColumnFilter<TData>[]` - Array containing only valid filters.
+
+## Format Utilities
+
+Formatting functions for dates, labels, and query strings.
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/lib/format.ts`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+</div>
+
+### formatDate
+
+Format a date value into a human-readable string.
+
+```tsx showLineNumbers
+import { formatDate } from "@/components/niko-data-table/lib"
+
+formatDate(new Date())
+// Returns: "January 1, 2024"
+
+formatDate(new Date(), { month: "short", day: "numeric" })
+// Returns: "Jan 1"
+```
+
+#### Parameters
+
+| Name   | Type                                    | Default | Description          |
+| ------ | --------------------------------------- | ------- | -------------------- |
+| `date` | `Date \| string \| number \| undefined` | -       | Date value to format |
+| `opts` | `Intl.DateTimeFormatOptions`            | `{}`    | Formatting options   |
+
+#### Returns
+
+`string` - Formatted date string, or empty string if date is invalid.
+
+### formatLabel
+
+Format a value into a human-readable label. Capitalizes first letter of each word and replaces hyphens/underscores with spaces.
+
+```tsx showLineNumbers
+import { formatLabel } from "@/components/niko-data-table/lib"
+
+formatLabel("firstName") // "FirstName"
+formatLabel("first-name") // "First Name"
+formatLabel("first_name") // "First Name"
+formatLabel("true") // "Yes"
+formatLabel("false") // "No"
+```
+
+#### Parameters
+
+| Name    | Type     | Description     |
+| ------- | -------- | --------------- |
+| `value` | `string` | Value to format |
+
+#### Returns
+
+`string` - Formatted label string.
+
+### daysAgo
+
+Create a date relative to the current date by subtracting days.
+
+```tsx showLineNumbers
+import { daysAgo } from "@/components/niko-data-table/lib"
+
+daysAgo(7) // 7 days ago
+daysAgo(30) // 30 days ago (1 month)
+daysAgo(365) // 365 days ago (1 year)
+```
+
+#### Parameters
+
+| Name   | Type     | Description                |
+| ------ | -------- | -------------------------- |
+| `days` | `number` | Number of days to subtract |
+
+#### Returns
+
+`Date` - Date object representing the date N days ago.
+
+### formatQueryString
+
+Format URL query parameters into a human-readable query string for display.
+
+```tsx showLineNumbers
+import { formatQueryString } from "@/components/niko-data-table/lib"
+
+const urlParams = { search: "i", globalFilter: { filters: [...], joinOperator: "mixed" } }
+const urlKeys = { search: "search", globalFilter: "global" }
+formatQueryString(urlParams, urlKeys)
+// Returns: "?search=i&global={"filters":[...], "joinOperator":"mixed"}"
+```
+
+#### Parameters
+
+| Name        | Type                      | Description                                 |
+| ----------- | ------------------------- | ------------------------------------------- |
+| `urlParams` | `Record<string, unknown>` | The parsed URL parameters object            |
+| `urlKeys`   | `Record<string, string>`  | Mapping of parameter keys to URL query keys |
+
+#### Returns
+
+`string` - Formatted query string (e.g., `?search=i&global={"filters":[...]}`).
+
+## Filter Functions
+
+Custom filter functions for TanStack Table with performance optimizations.
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/lib/filter-functions.ts`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+</div>
+
+The filter functions module provides optimized filter implementations for TanStack Table. It includes:
+
+- **Regex caching** - Caches compiled regex patterns for 70-90% faster filter execution
+- **Operator support** - Implements all filter operators (ilike, eq, neq, in, between, etc.)
+- **Performance optimizations** - LRU-style cache eviction to prevent memory leaks
+
+### Performance Notes
+
+The filter functions use regex caching to improve performance:
+
+- **Without caching**: 1,000 rows × 10 columns = 10,000 regex creations per search keystroke (~100-500ms)
+- **With caching**: First search creates regex once, subsequent searches reuse cached regex (~5-20ms)
+
+The cache has a maximum size of 100 entries and uses LRU-like eviction to prevent memory leaks.

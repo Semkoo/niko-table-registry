@@ -1,0 +1,463 @@
+---
+title: Core Components
+description: Essential building blocks of the data table including DataTableRoot, DataTable, and structure components.
+---
+
+import { Button } from "@/components/ui/button"
+import { GITHUB_REPO_URL } from "@/data/env"
+
+Core components are the essential building blocks of the data table. They handle table initialization, context management, and basic structure.
+
+### DataTableRoot
+
+The `DataTableRoot` component provides the table context to all child components. You should always wrap your table in a `DataTableRoot`. It initializes the TanStack Table instance and manages table state.
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/core/data-table-root.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href="https://tanstack.com/table/latest/docs/api/core/table"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      API Reference ↗
+    </a>
+  </Button>
+</div>
+
+```tsx showLineNumbers
+import { DataTableRoot } from "@/components/niko-data-table"
+
+export function MyTable({ data }: { data: User[] }) {
+  return (
+    <DataTableRoot data={data} columns={columns}>
+      {/* child components */}
+    </DataTableRoot>
+  )
+}
+```
+
+#### Props
+
+| Name        | Type                                    | Description                                        |
+| ----------- | --------------------------------------- | -------------------------------------------------- |
+| `data`      | `TData[]`                               | The data array to display in the table.            |
+| `columns`   | `DataTableColumnDef<TData>[]`           | Column definitions array.                          |
+| `table`     | `Table<TData>`                          | Pre-configured TanStack Table instance (optional). |
+| `config`    | `DataTableConfig`                       | Configuration object for feature toggles.          |
+| `isLoading` | `boolean`                               | Loading state for the table.                       |
+| `getRowId`  | `(row: TData, index: number) => string` | Custom function to get row IDs.                    |
+| `className` | `string`                                | Additional CSS classes.                            |
+
+#### Event Handlers
+
+| Name                       | Type                                             | Description                            |
+| -------------------------- | ------------------------------------------------ | -------------------------------------- |
+| `onGlobalFilterChange`     | `(value: GlobalFilter) => void`                  | Called when global filter changes.     |
+| `onPaginationChange`       | `(updater: Updater<PaginationState>) => void`    | Called when pagination changes.        |
+| `onSortingChange`          | `(updater: Updater<SortingState>) => void`       | Called when sorting changes.           |
+| `onColumnFiltersChange`    | `(updater: Updater<ColumnFiltersState>) => void` | Called when column filters change.     |
+| `onColumnVisibilityChange` | `(updater: Updater<VisibilityState>) => void`    | Called when column visibility changes. |
+| `onRowSelectionChange`     | `(updater: Updater<RowSelectionState>) => void`  | Called when row selection changes.     |
+| `onExpandedChange`         | `(updater: Updater<ExpandedState>) => void`      | Called when expanded state changes.    |
+| `onRowSelection`           | `(selectedRows: TData[]) => void`                | Called with selected row data.         |
+
+#### Config Object
+
+The `config` prop accepts a `DataTableConfig` object with the following properties:
+
+| Name                 | Type      | Default | Description                                                                                                 |
+| -------------------- | --------- | ------- | ----------------------------------------------------------------------------------------------------------- |
+| `enablePagination`   | `boolean` | `true`  | Enable pagination.                                                                                          |
+| `enableFilters`      | `boolean` | `true`  | Enable filtering.                                                                                           |
+| `enableSorting`      | `boolean` | `true`  | Enable sorting.                                                                                             |
+| `enableRowSelection` | `boolean` | `false` | Enable row selection.                                                                                       |
+| `enableMultiSort`    | `boolean` | `true`  | Enable multi-column sorting.                                                                                |
+| `enableGrouping`     | `boolean` | `false` | Enable column grouping.                                                                                     |
+| `enableExpanding`    | `boolean` | `false` | Enable row expansion.                                                                                       |
+| `manualSorting`      | `boolean` | `false` | Enable server-side sorting.                                                                                 |
+| `manualPagination`   | `boolean` | `false` | Enable server-side pagination.                                                                              |
+| `manualFiltering`    | `boolean` | `false` | Enable server-side filtering.                                                                               |
+| `pageCount`          | `number`  | -       | Total pages (required for server-side pagination).                                                          |
+| `initialPageSize`    | `number`  | `10`    | Initial page size.                                                                                          |
+| `initialPageIndex`   | `number`  | `0`     | Initial page index.                                                                                         |
+| `autoResetPageIndex` | `boolean` | -       | Auto-reset page on filter/sort change. Defaults to `false` when `manualPagination: true`, otherwise `true`. |
+| `autoResetExpanded`  | `boolean` | `true`  | Auto-reset expanded rows on filter/sort change.                                                             |
+
+### DataTable
+
+The main table container component that wraps the table structure and provides scrolling behavior.
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/core/data-table.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+</div>
+
+```tsx showLineNumbers
+import { DataTable } from "@/components/niko-data-table"
+
+;<DataTable className="rounded-md border" height={600}>
+  <DataTableHeader />
+  <DataTableBody />
+</DataTable>
+```
+
+#### Props
+
+| Name        | Type               | Default | Description                                                                                           |
+| ----------- | ------------------ | ------- | ----------------------------------------------------------------------------------------------------- |
+| `className` | `string`           | -       | Additional CSS classes. Height utilities (e.g., `h-[600px]`) are automatically extracted and applied. |
+| `children`  | `React.ReactNode`  | -       | Child components (Header, Body).                                                                      |
+| `height`    | `number \| string` | -       | Sets the height of the table container. Enables vertical scrolling and scroll event callbacks.        |
+| `maxHeight` | `number \| string` | -       | Sets the maximum height of the table container. Defaults to the height value if not specified.        |
+
+### DataTableHeader
+
+Renders the table header with sortable columns.
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/core/data-table-structure.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+</div>
+
+```tsx showLineNumbers
+import { DataTableHeader } from "@/components/niko-data-table"
+
+;<DataTableHeader sticky={true} />
+```
+
+#### Props
+
+| Name        | Type      | Default | Description                                        |
+| ----------- | --------- | ------- | -------------------------------------------------- |
+| `className` | `string`  | -       | Additional CSS classes.                            |
+| `sticky`    | `boolean` | `true`  | Makes the header sticky at the top when scrolling. |
+
+### DataTableBody
+
+Renders the table body with rows. Supports scroll events and row expansion.
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/core/data-table-structure.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+</div>
+
+```tsx showLineNumbers
+import {
+  DataTableBody,
+  DataTableSkeleton,
+  DataTableEmptyBody,
+} from "@/components/niko-data-table"
+
+;<DataTableBody
+  onScroll={e => console.log(`Scrolled ${e.percentage}%`)}
+  onScrolledBottom={() => loadMore()}
+>
+  <DataTableSkeleton />
+  <DataTableEmptyBody />
+</DataTableBody>
+```
+
+#### Props
+
+| Name               | Type                           | Default | Description                             |
+| ------------------ | ------------------------------ | ------- | --------------------------------------- |
+| `className`        | `string`                       | -       | Additional CSS classes.                 |
+| `children`         | `React.ReactNode`              | -       | Child components (Skeleton, EmptyBody). |
+| `onScroll`         | `(event: ScrollEvent) => void` | -       | Scroll event handler.                   |
+| `onScrolledTop`    | `() => void`                   | -       | Called when scrolled to top.            |
+| `onScrolledBottom` | `() => void`                   | -       | Called when scrolled to bottom.         |
+| `scrollThreshold`  | `number`                       | `50`    | Threshold for scroll events.            |
+| `onRowClick`       | `(row: TData) => void`         | -       | Called when a row is clicked.           |
+
+#### ScrollEvent Type
+
+The `ScrollEvent` object passed to `onScroll` contains:
+
+| Property       | Type      | Description                       |
+| -------------- | --------- | --------------------------------- |
+| `scrollTop`    | `number`  | Current scroll position from top. |
+| `scrollHeight` | `number`  | Total scrollable height.          |
+| `clientHeight` | `number`  | Visible height of the container.  |
+| `isTop`        | `boolean` | Whether scrolled to the top.      |
+| `isBottom`     | `boolean` | Whether scrolled to the bottom.   |
+| `percentage`   | `number`  | Scroll percentage (0-100).        |
+
+### DataTableSkeleton
+
+Shows a loading skeleton when `isLoading` is `true`. Automatically matches the table structure.
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/core/data-table-structure.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+</div>
+
+```tsx showLineNumbers
+<DataTableBody>
+  <DataTableSkeleton rows={5} />
+</DataTableBody>
+```
+
+#### Props
+
+| Name                | Type              | Default | Description                                        |
+| ------------------- | ----------------- | ------- | -------------------------------------------------- |
+| `rows`              | `number`          | `5`     | Number of skeleton rows to display.                |
+| `colSpan`           | `number`          | -       | Number of columns (auto-detected if not provided). |
+| `className`         | `string`          | -       | Additional CSS classes.                            |
+| `cellClassName`     | `string`          | -       | CSS classes for skeleton cells.                    |
+| `skeletonClassName` | `string`          | -       | CSS classes for skeleton elements.                 |
+| `children`          | `React.ReactNode` | -       | Custom skeleton content (replaces rows).           |
+
+### DataTableEmptyBody
+
+Shows an empty state when there's no data. Uses composition pattern with `DataTableEmpty*` components.
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/core/data-table-structure.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+</div>
+
+```tsx showLineNumbers
+<DataTableBody>
+  <DataTableEmptyBody>
+    <DataTableEmptyIcon>
+      <PackageOpen className="size-12" />
+    </DataTableEmptyIcon>
+    <DataTableEmptyMessage>
+      <DataTableEmptyTitle>No products found</DataTableEmptyTitle>
+      <DataTableEmptyDescription>
+        Get started by adding your first product
+      </DataTableEmptyDescription>
+    </DataTableEmptyMessage>
+    <DataTableEmptyFilteredMessage>
+      No results match your filters
+    </DataTableEmptyFilteredMessage>
+    <DataTableEmptyActions>
+      <Button onClick={handleAdd}>Add Product</Button>
+    </DataTableEmptyActions>
+  </DataTableEmptyBody>
+</DataTableBody>
+```
+
+#### Props
+
+| Name        | Type              | Default | Description                                        |
+| ----------- | ----------------- | ------- | -------------------------------------------------- |
+| `children`  | `React.ReactNode` | -       | Empty state composition components.                |
+| `colSpan`   | `number`          | -       | Number of columns (auto-detected if not provided). |
+| `className` | `string`          | -       | Additional CSS classes.                            |
+
+### DataTableLoading
+
+Shows a loading indicator when `isLoading` is `true`.
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/core/data-table-structure.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+</div>
+
+```tsx showLineNumbers
+<DataTableBody>
+  <DataTableLoading>
+    <Spinner />
+  </DataTableLoading>
+</DataTableBody>
+```
+
+#### Props
+
+| Name        | Type              | Default | Description                                        |
+| ----------- | ----------------- | ------- | -------------------------------------------------- |
+| `children`  | `React.ReactNode` | -       | Custom loading content.                            |
+| `colSpan`   | `number`          | -       | Number of columns (auto-detected if not provided). |
+| `className` | `string`          | -       | Additional CSS classes.                            |
+
+### DataTableErrorBoundary
+
+Error boundary component that catches errors in the data table component tree and displays a fallback UI.
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/core/data-table-error-boundary.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+</div>
+
+```tsx showLineNumbers
+import { DataTableErrorBoundary } from "@/components/niko-data-table"
+
+;<DataTableErrorBoundary
+  onError={(error, errorInfo) => {
+    console.error("Table error:", error)
+    trackError(error)
+  }}
+>
+  <DataTableRoot data={data} columns={columns}>
+    {/* table components */}
+  </DataTableRoot>
+</DataTableErrorBoundary>
+```
+
+#### Props
+
+| Name              | Type                                                 | Default       | Description                                      |
+| ----------------- | ---------------------------------------------------- | ------------- | ------------------------------------------------ |
+| `children`        | `React.ReactNode`                                    | -             | The content to render when there's no error.     |
+| `fallback`        | `React.ReactNode`                                    | -             | Custom fallback UI to show when an error occurs. |
+| `onError`         | `(error: Error, errorInfo: React.ErrorInfo) => void` | -             | Callback fired when an error is caught.          |
+| `showResetButton` | `boolean`                                            | `true`        | Whether to show a reset button.                  |
+| `resetButtonText` | `string`                                             | `"Try Again"` | Custom reset button text.                        |
+
+### Virtualized Components
+
+For large datasets (1000+ rows), use the virtualized variants for optimal performance.
+
+#### DataTableVirtualizedHeader
+
+Virtualized table header component.
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/core/data-table-virtualized-structure.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+</div>
+
+```tsx showLineNumbers
+import {
+  DataTableVirtualizedHeader,
+  DataTableVirtualizedBody,
+} from "@/components/niko-data-table"
+
+;<DataTable>
+  <DataTableVirtualizedHeader />
+  <DataTableVirtualizedBody estimateSize={34} overscan={20}>
+    {/* rows */}
+  </DataTableVirtualizedBody>
+</DataTable>
+```
+
+#### Props
+
+| Name        | Type      | Default | Description                                        |
+| ----------- | --------- | ------- | -------------------------------------------------- |
+| `className` | `string`  | -       | Additional CSS classes.                            |
+| `sticky`    | `boolean` | `true`  | Makes the header sticky at the top when scrolling. |
+
+#### DataTableVirtualizedBody
+
+Virtualized table body for rendering thousands of rows efficiently.
+
+#### Props
+
+| Name               | Type                                            | Default | Description                                                   |
+| ------------------ | ----------------------------------------------- | ------- | ------------------------------------------------------------- |
+| `children`         | `React.ReactNode`                               | -       | Child components (VirtualizedSkeleton, VirtualizedEmptyBody). |
+| `estimateSize`     | `number`                                        | `34`    | Estimated row height in pixels.                               |
+| `overscan`         | `number`                                        | `20`    | Number of items to render outside visible area.               |
+| `className`        | `string`                                        | -       | Additional CSS classes.                                       |
+| `onScroll`         | `(event: ScrollEvent) => void`                  | -       | Scroll event handler.                                         |
+| `onScrolledTop`    | `() => void`                                    | -       | Called when scrolled to top.                                  |
+| `onScrolledBottom` | `() => void`                                    | -       | Called when scrolled to bottom.                               |
+| `scrollThreshold`  | `number`                                        | `50`    | Threshold for scroll events.                                  |
+| `onRowClick`       | `(row: TData, event: React.MouseEvent) => void` | -       | Called when a row is clicked.                                 |
+
+#### DataTableVirtualizedEmptyBody
+
+Empty state component for virtualized tables.
+
+#### Props
+
+| Name        | Type              | Default | Description                                        |
+| ----------- | ----------------- | ------- | -------------------------------------------------- |
+| `children`  | `React.ReactNode` | -       | Empty state composition components.                |
+| `colSpan`   | `number`          | -       | Number of columns (auto-detected if not provided). |
+| `className` | `string`          | -       | Additional CSS classes.                            |
+
+#### DataTableVirtualizedSkeleton
+
+Loading skeleton for virtualized tables.
+
+#### Props
+
+| Name                | Type              | Default | Description                                          |
+| ------------------- | ----------------- | ------- | ---------------------------------------------------- |
+| `rows`              | `number`          | `5`     | Number of skeleton rows to display.                  |
+| `estimateSize`      | `number`          | `34`    | Estimated row height (should match VirtualizedBody). |
+| `className`         | `string`          | -       | Additional CSS classes.                              |
+| `cellClassName`     | `string`          | -       | CSS classes for skeleton cells.                      |
+| `skeletonClassName` | `string`          | -       | CSS classes for skeleton elements.                   |
+| `children`          | `React.ReactNode` | -       | Custom skeleton content.                             |
+
+#### DataTableVirtualizedLoading
+
+Loading indicator for virtualized tables.
+
+#### Props
+
+| Name        | Type              | Default | Description                                        |
+| ----------- | ----------------- | ------- | -------------------------------------------------- |
+| `children`  | `React.ReactNode` | -       | Custom loading content.                            |
+| `colSpan`   | `number`          | -       | Number of columns (auto-detected if not provided). |
+| `className` | `string`          | -       | Additional CSS classes.                            |

@@ -1,0 +1,185 @@
+---
+title: Configuration
+description: Configuration settings and feature detection for the data table.
+---
+
+import { Button } from "@/components/ui/button"
+import { GITHUB_REPO_URL } from "@/data/env"
+
+The `config/` directory contains configuration settings and feature detection utilities for the data table.
+
+## Data Table Configuration
+
+Runtime configuration values for filter operators, sort icons, and other constants.
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/config/data-table.ts`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+</div>
+
+### Filter Operators Configuration
+
+The configuration defines which operators are available for each filter variant:
+
+- **Text Operators**: `ilike`, `not.ilike`, `eq`, `neq`, `empty`, `not.empty`
+- **Numeric Operators**: `eq`, `neq`, `lt`, `lte`, `gt`, `gte`, `between`, `empty`, `not.empty`
+- **Date Operators**: `eq`, `neq`, `lt`, `lte`, `gt`, `gte`, `between`, `relative`
+- **Boolean Operators**: `eq`, `neq`
+- **Select Operators**: `eq`, `neq`, `in`, `not.in`, `empty`, `not.empty`
+- **Multi-Select Operators**: `in`, `not.in`, `empty`, `not.empty`
+
+### Sort Icons Configuration
+
+Sort icons are configured per data type variant:
+
+- **Text**: `ArrowDownAZ` (asc), `ArrowDownZA` (desc), `ArrowUpDown` (unsorted)
+- **Number**: `ArrowDown01` (asc), `ArrowDown10` (desc), `ArrowUpDown` (unsorted)
+- **Date**: `Calendar` (asc), `Calendar` (desc), `ArrowUpDown` (unsorted)
+- **Boolean**: `Check` (asc), `XIcon` (desc), `ArrowUpDown` (unsorted)
+
+### Sort Labels
+
+Human-readable labels for sort directions:
+
+- **Ascending**: "A-Z" (text), "0-9" (number), "Old-New" (date), "False-True" (boolean)
+- **Descending**: "Z-A" (text), "9-0" (number), "New-Old" (date), "True-False" (boolean)
+
+## Feature Detection
+
+Automatic feature detection from component tree to enable/disable table features.
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/config/feature-detection.ts`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+</div>
+
+### detectFeaturesFromChildren
+
+Recursively searches for components and aggregates feature requirements. Automatically detects which features should be enabled based on the components used in the table.
+
+```tsx showLineNumbers
+import { detectFeaturesFromChildren } from "@/components/niko-data-table/config"
+
+const requirements = detectFeaturesFromChildren(children, columns)
+// Returns: { enableFilters: true, enablePagination: true, ... }
+```
+
+#### Parameters
+
+| Name       | Type                                                        | Description                 |
+| ---------- | ----------------------------------------------------------- | --------------------------- |
+| `children` | `ReactNode`                                                 | React children to analyze   |
+| `columns`  | `Array<{ header?: unknown; enableColumnFilter?: boolean }>` | Optional column definitions |
+
+#### Returns
+
+`FeatureRequirements` - Object indicating which table features to enable:
+
+```tsx
+interface FeatureRequirements {
+  enableFilters?: boolean
+  enablePagination?: boolean
+  enableRowSelection?: boolean
+  enableSorting?: boolean
+  enableMultiSort?: boolean
+  enableGrouping?: boolean
+  enableExpanding?: boolean
+  manualSorting?: boolean
+  manualPagination?: boolean
+  manualFiltering?: boolean
+  pageCount?: number
+}
+```
+
+#### Performance
+
+The function uses Map caching to improve performance:
+
+- **First detection**: 50-150ms (full tree walk)
+- **Cached detection**: ~0ms (instant lookup)
+- **Cache size**: Maximum 50 entries with LRU-style eviction
+
+Caching is only enabled on the client-side to prevent SSR/CSR hydration mismatches.
+
+### registerComponentFeatures
+
+Register a component's feature requirements. Allows third-party components to declare their needs.
+
+```tsx showLineNumbers
+import { registerComponentFeatures } from "@/components/niko-data-table/config"
+
+registerComponentFeatures("MyCustomFilter", {
+  enableFilters: true,
+})
+```
+
+#### Parameters
+
+| Name          | Type                  | Description                 |
+| ------------- | --------------------- | --------------------------- |
+| `displayName` | `string`              | Component display name      |
+| `features`    | `FeatureRequirements` | Feature requirements object |
+
+### getRegisteredComponents
+
+Get all registered components and their features (for debugging).
+
+```tsx showLineNumbers
+import { getRegisteredComponents } from "@/components/niko-data-table/config"
+
+const registered = getRegisteredComponents()
+// Returns: { DataTablePagination: { enablePagination: true }, ... }
+```
+
+#### Returns
+
+`Record<string, FeatureRequirements>` - Object mapping component names to their feature requirements.
+
+## Registered Components
+
+The following components are automatically registered with their feature requirements:
+
+### Pagination Components
+
+- `DataTablePagination` - `{ enablePagination: true }`
+- `TablePagination` - `{ enablePagination: true }`
+
+### Filtering Components
+
+- `DataTableSearchFilter` - `{ enableFilters: true }`
+- `TableSearchFilter` - `{ enableFilters: true }`
+- `DataTableFacetedFilter` - `{ enableFilters: true }`
+- `TableFacetedFilter` - `{ enableFilters: true }`
+- `DataTableSliderFilter` - `{ enableFilters: true }`
+- `TableSliderFilter` - `{ enableFilters: true }`
+- `DataTableFilterMenu` - `{ enableFilters: true }`
+- `TableFilterMenu` - `{ enableFilters: true }`
+- `DataTableDateFilter` - `{ enableFilters: true }`
+- `DataTableRangeFilter` - `{ enableFilters: true }`
+- `DataTableViewMenu` - `{ enableFilters: true }`
+- `TableViewMenu` - `{ enableFilters: true }`
+
+### Sorting Components
+
+- `DataTableSortMenu` - `{ enableSorting: true }`
+- `TableSortMenu` - `{ enableSorting: true }`
+- `DataTableColumnHeader` - `{ enableSorting: true }`
+- `TableColumnHeader` - `{ enableSorting: true }`
+
+### Selection Components
+
+- `DataTableActionBar` - `{ enableRowSelection: true }`

@@ -1,0 +1,805 @@
+---
+title: User-Facing Components
+description: Context-aware components that automatically connect to the table via the useDataTable hook.
+---
+
+import { Button } from "@/components/ui/button"
+import { GITHUB_REPO_URL } from "@/data/env"
+
+User-facing components are context-aware and automatically connect to the table via the `useDataTable` hook. These are the recommended components for most use cases.
+
+### DataTableToolbarSection
+
+Container for organizing filters and actions in the toolbar.
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/components/data-table-toolbar-section.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+</div>
+
+```tsx showLineNumbers
+import { DataTableToolbarSection } from "@/components/niko-data-table"
+
+;<DataTableToolbarSection className="flex justify-between">
+  <DataTableSearchFilter />
+  <DataTableViewMenu />
+</DataTableToolbarSection>
+```
+
+#### Props
+
+| Name        | Type              | Default | Description                   |
+| ----------- | ----------------- | ------- | ----------------------------- |
+| `className` | `string`          | -       | Additional CSS classes.       |
+| `children`  | `React.ReactNode` | -       | Filter and action components. |
+
+### DataTablePagination
+
+Full-featured pagination controls with page size selection and navigation.
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/components/data-table-pagination.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/filters/table-pagination.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Filter Implementation ↗
+    </a>
+  </Button>
+</div>
+
+```tsx showLineNumbers
+import { DataTablePagination } from "@/components/niko-data-table"
+
+;<DataTablePagination
+  pageSizeOptions={[10, 25, 50, 100]}
+  totalCount={500}
+  onPageChange={pageIndex => console.log("Page:", pageIndex)}
+/>
+```
+
+#### Props
+
+| Name                  | Type       | Default             | Description                                        |
+| --------------------- | ---------- | ------------------- | -------------------------------------------------- |
+| `pageSizeOptions`     | `number[]` | `[10, 25, 50, 100]` | Available page size options.                       |
+| `totalCount`          | `number`   | -                   | Total count of items (for server-side pagination). |
+| `isLoading`           | `boolean`  | -                   | Loading state (overrides context loading).         |
+| `isFetching`          | `boolean`  | -                   | Fetching state (for TanStack Query).               |
+| `disableNextPage`     | `boolean`  | -                   | Explicitly disable next page button.               |
+| `disablePreviousPage` | `boolean`  | -                   | Explicitly disable previous page button.           |
+| `className`           | `string`   | -                   | Additional CSS classes.                            |
+
+#### Event Handlers
+
+| Name                | Type                                            | Description                              |
+| ------------------- | ----------------------------------------------- | ---------------------------------------- |
+| `onPageChange`      | `(pageIndex: number) => void`                   | Called when page changes.                |
+| `onNextPage`        | `(pageIndex: number) => void`                   | Called when navigating to next page.     |
+| `onPreviousPage`    | `(pageIndex: number) => void`                   | Called when navigating to previous page. |
+| `onPageSizeChange`  | `(pageSize: number, pageIndex: number) => void` | Called when page size changes.           |
+| `onPaginationReady` | `() => void`                                    | Called when pagination is initialized.   |
+
+**Note:** Pagination buttons are automatically disabled when `isLoading` or `isFetching` is `true`.
+
+### DataTableSearchFilter
+
+Global search input with debouncing. Supports both controlled and uncontrolled modes.
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/components/data-table-search-filter.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/filters/table-search-filter.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Filter Implementation ↗
+    </a>
+  </Button>
+</div>
+
+```tsx showLineNumbers
+import { DataTableSearchFilter } from "@/components/niko-data-table"
+
+// Uncontrolled (manages its own state)
+<DataTableSearchFilter placeholder="Search products..." />
+
+// Controlled (you manage the state)
+const [search, setSearch] = useState("")
+<DataTableSearchFilter
+  value={search}
+  onChange={setSearch}
+  placeholder="Search..."
+/>
+
+// With nuqs for URL state
+const [search, setSearch] = useQueryState('search')
+<DataTableSearchFilter
+  value={search ?? ""}
+  onChange={setSearch}
+/>
+```
+
+#### Props
+
+| Name              | Type                      | Default       | Description                             |
+| ----------------- | ------------------------- | ------------- | --------------------------------------- |
+| `placeholder`     | `string`                  | `"Search..."` | Input placeholder text.                 |
+| `value`           | `string`                  | -             | Controlled value.                       |
+| `onChange`        | `(value: string) => void` | -             | Change handler for controlled mode.     |
+| `showClearButton` | `boolean`                 | `true`        | Show clear button when input has value. |
+| `className`       | `string`                  | -             | Additional CSS classes.                 |
+
+### DataTableFilterMenu
+
+Command palette-style interface for adding filters with advanced operators and AND/OR logic.
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/components/data-table-filter-menu.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/filters/table-filter-menu.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Filter Implementation ↗
+    </a>
+  </Button>
+</div>
+
+```tsx showLineNumbers
+import { DataTableFilterMenu } from "@/components/niko-data-table"
+
+;<DataTableFilterMenu
+  autoOptions
+  dynamicCounts
+  showCounts
+  mergeStrategy="augment"
+/>
+```
+
+#### Props
+
+| Name                  | Type                                   | Default      | Description                                            |
+| --------------------- | -------------------------------------- | ------------ | ------------------------------------------------------ |
+| `autoOptions`         | `boolean`                              | `true`       | Auto-generate options for select/multi_select columns. |
+| `showCounts`          | `boolean`                              | `true`       | Show counts beside each option.                        |
+| `dynamicCounts`       | `boolean`                              | `true`       | Recompute counts based on filtered rows.               |
+| `limitToFilteredRows` | `boolean`                              | `true`       | Generate options from filtered rows only.              |
+| `includeColumns`      | `string[]`                             | -            | Only generate options for these column ids.            |
+| `excludeColumns`      | `string[]`                             | -            | Exclude these column ids from generation.              |
+| `limitPerColumn`      | `number`                               | -            | Limit number of generated options per column.          |
+| `mergeStrategy`       | `"preserve" \| "augment" \| "replace"` | `"preserve"` | How to handle existing static options.                 |
+| `className`           | `string`                               | -            | Additional CSS classes.                                |
+
+#### Merge Strategy
+
+| Value      | Description                                        |
+| ---------- | -------------------------------------------------- |
+| `preserve` | Keep user-defined options untouched (default).     |
+| `augment`  | Add counts to matching values from static options. |
+| `replace`  | Override static options with generated options.    |
+
+### DataTableFacetedFilter
+
+Faceted filter component for single or multiple selection with dynamic option generation.
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/components/data-table-faceted-filter.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/filters/table-faceted-filter.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Filter Implementation ↗
+    </a>
+  </Button>
+</div>
+
+```tsx showLineNumbers
+import { DataTableFacetedFilter } from "@/components/niko-data-table"
+
+// With static options
+<DataTableFacetedFilter
+  accessorKey="category"
+  title="Category"
+  options={[
+    { label: "Electronics", value: "electronics" },
+    { label: "Clothing", value: "clothing" },
+  ]}
+  multiple
+/>
+
+// Auto-generate options from data
+<DataTableFacetedFilter
+  accessorKey="brand"
+  limitToFilteredRows={true}
+/>
+```
+
+#### Props
+
+| Name                  | Type                   | Default | Description                                              |
+| --------------------- | ---------------------- | ------- | -------------------------------------------------------- |
+| `accessorKey`         | `keyof TData & string` | -       | Column accessor key (required).                          |
+| `title`               | `string`               | -       | Custom title (uses `column.meta.label` if not provided). |
+| `options`             | `Option[]`             | -       | Static options array.                                    |
+| `multiple`            | `boolean`              | -       | Allow multiple selection.                                |
+| `showCounts`          | `boolean`              | `true`  | Show counts beside each option.                          |
+| `dynamicCounts`       | `boolean`              | `true`  | Recompute counts based on filtered rows.                 |
+| `limitToFilteredRows` | `boolean`              | `true`  | Show only options from filtered rows.                    |
+
+#### limitToFilteredRows
+
+Controls whether the filter shows options from all data or only from filtered rows.
+
+- **`true` (default):** Options are generated from rows that match other active filters. Useful for filters like "Brand" where you want to see only relevant options.
+- **`false`:** Options are generated from all rows, regardless of other filters. Useful for filters like "Category" where you want to see all available options.
+
+### DataTableSortMenu
+
+Menu for managing column sorting with drag-and-drop reordering.
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/components/data-table-sort-menu.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/filters/table-sort-menu.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Filter Implementation ↗
+    </a>
+  </Button>
+</div>
+
+```tsx showLineNumbers
+import { DataTableSortMenu } from "@/components/niko-data-table"
+
+;<DataTableSortMenu className="ml-auto" />
+```
+
+#### Props
+
+| Name              | Type                              | Default | Description                            |
+| ----------------- | --------------------------------- | ------- | -------------------------------------- |
+| `className`       | `string`                          | -       | Additional CSS classes.                |
+| `debounceMs`      | `number`                          | -       | Debounce delay for sort updates.       |
+| `throttleMs`      | `number`                          | -       | Throttle delay for sort updates.       |
+| `shallow`         | `boolean`                         | -       | Use shallow comparison for sort state. |
+| `onSortingChange` | `(sorting: ColumnSort[]) => void` | -       | Callback when sorting changes.         |
+
+### DataTableViewMenu
+
+Column visibility toggle menu with search functionality.
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/components/data-table-view-menu.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/filters/table-view-menu.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Filter Implementation ↗
+    </a>
+  </Button>
+</div>
+
+```tsx showLineNumbers
+import { DataTableViewMenu } from "@/components/niko-data-table"
+
+;<DataTableViewMenu />
+```
+
+#### Props
+
+| Name                       | Type                                             | Default | Description                       |
+| -------------------------- | ------------------------------------------------ | ------- | --------------------------------- |
+| `className`                | `string`                                         | -       | Additional CSS classes.           |
+| `onColumnVisibilityChange` | `(columnId: string, isVisible: boolean) => void` | -       | Callback when visibility changes. |
+
+### DataTableInlineFilter
+
+Inline filter toolbar for managing filters with advanced operators and AND/OR logic.
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/components/data-table-inline-filter.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/filters/table-inline-filter.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Filter Implementation ↗
+    </a>
+  </Button>
+</div>
+
+```tsx showLineNumbers
+import { DataTableInlineFilter } from "@/components/niko-data-table"
+
+;<DataTableInlineFilter
+  autoOptions
+  dynamicCounts
+  showCounts
+  mergeStrategy="augment"
+/>
+```
+
+#### Props
+
+Same as `DataTableFilterMenu`. See DataTableFilterMenu section above for details.
+
+### DataTableSliderFilter
+
+Slider filter for numeric ranges with min/max inputs.
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/components/data-table-slider-filter.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/filters/table-slider-filter.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Filter Implementation ↗
+    </a>
+  </Button>
+</div>
+
+```tsx showLineNumbers
+import { DataTableSliderFilter } from "@/components/niko-data-table"
+
+// Auto-detect from column metadata
+<DataTableSliderFilter accessorKey="price" />
+
+// Custom range
+<DataTableSliderFilter
+  accessorKey="rating"
+  min={1}
+  max={5}
+  step={0.5}
+/>
+
+// With unit
+<DataTableSliderFilter
+  accessorKey="price"
+  range={[0, 1000]}
+  unit="$"
+/>
+```
+
+#### Props
+
+| Name          | Type                   | Default | Description                                              |
+| ------------- | ---------------------- | ------- | -------------------------------------------------------- |
+| `accessorKey` | `keyof TData & string` | -       | Column accessor key (required).                          |
+| `title`       | `string`               | -       | Custom title.                                            |
+| `min`         | `number`               | -       | Minimum value (auto-detected from data if not provided). |
+| `max`         | `number`               | -       | Maximum value (auto-detected from data if not provided). |
+| `step`        | `number`               | `1`     | Step increment.                                          |
+| `range`       | `[number, number]`     | -       | Range array `[min, max]` (overrides min/max).            |
+| `unit`        | `string`               | -       | Unit label (e.g., "$", "kg").                            |
+
+### DataTableDateFilter
+
+Date filter component for single dates or date ranges.
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/components/data-table-date-filter.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/filters/table-date-filter.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Filter Implementation ↗
+    </a>
+  </Button>
+</div>
+
+```tsx showLineNumbers
+import { DataTableDateFilter } from "@/components/niko-data-table"
+
+// Single date
+<DataTableDateFilter accessorKey="releaseDate" />
+
+// Date range
+<DataTableDateFilter
+  accessorKey="releaseDate"
+  multiple
+/>
+```
+
+#### Props
+
+| Name          | Type                   | Default | Description                     |
+| ------------- | ---------------------- | ------- | ------------------------------- |
+| `accessorKey` | `keyof TData & string` | -       | Column accessor key (required). |
+| `title`       | `string`               | -       | Custom title.                   |
+| `multiple`    | `boolean`              | `false` | Enable date range selection.    |
+
+### DataTableClearFilter
+
+Button to clear all active filters, sorting, and search.
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/components/data-table-clear-filter.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/filters/table-clear-filter.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Filter Implementation ↗
+    </a>
+  </Button>
+</div>
+
+```tsx showLineNumbers
+import { DataTableClearFilter } from "@/components/niko-data-table"
+
+;<DataTableClearFilter />
+```
+
+#### Props
+
+| Name                       | Type              | Default     | Description                              |
+| -------------------------- | ----------------- | ----------- | ---------------------------------------- |
+| `variant`                  | `ButtonVariant`   | `"outline"` | Button variant.                          |
+| `size`                     | `ButtonSize`      | `"sm"`      | Button size.                             |
+| `showIcon`                 | `boolean`         | `true`      | Show clear icon.                         |
+| `children`                 | `React.ReactNode` | -           | Button content.                          |
+| `enableResetColumnFilters` | `boolean`         | `true`      | Enable resetting column filters.         |
+| `enableResetGlobalFilter`  | `boolean`         | `true`      | Enable resetting global filter (search). |
+| `enableResetSorting`       | `boolean`         | `true`      | Enable resetting sorting.                |
+| `className`                | `string`          | -           | Additional CSS classes.                  |
+
+### DataTableExportButton
+
+Button to export table data to CSV.
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/components/data-table-export-button.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/filters/table-export-button.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Filter Implementation ↗
+    </a>
+  </Button>
+</div>
+
+```tsx showLineNumbers
+import { DataTableExportButton } from "@/components/niko-data-table"
+
+;<DataTableExportButton filename="products" onlySelected={false} />
+```
+
+#### Props
+
+| Name             | Type              | Default        | Description                     |
+| ---------------- | ----------------- | -------------- | ------------------------------- |
+| `filename`       | `string`          | `"table"`      | Filename for exported CSV.      |
+| `excludeColumns` | `(keyof TData)[]` | -              | Columns to exclude from export. |
+| `onlySelected`   | `boolean`         | `false`        | Export only selected rows.      |
+| `variant`        | `ButtonVariant`   | `"outline"`    | Button variant.                 |
+| `size`           | `ButtonSize`      | `"sm"`         | Button size.                    |
+| `label`          | `string`          | `"Export CSV"` | Button label.                   |
+| `showIcon`       | `boolean`         | `true`         | Show download icon.             |
+| `className`      | `string`          | -              | Additional CSS classes.         |
+
+### TableColumnHeader
+
+Sortable column header component with dropdown menu for sorting and visibility controls.
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/components/table-column-header.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+</div>
+
+```tsx showLineNumbers
+import { TableColumnHeader } from "@/components/niko-data-table/components"
+
+const columns: DataTableColumnDef<User>[] = [
+  {
+    accessorKey: "name",
+    header: ({ column }) => <TableColumnHeader column={column} />,
+    meta: { label: "Name" },
+  },
+]
+```
+
+#### Props
+
+| Name                 | Type                                                              | Description                                              |
+| -------------------- | ----------------------------------------------------------------- | -------------------------------------------------------- |
+| `column`             | `Column<TData>`                                                   | The column instance from TanStack Table (required).      |
+| `title`              | `string`                                                          | Custom title (uses `column.meta.label` if not provided). |
+| `variant`            | `"text" \| "number" \| "date" \| "boolean"`                       | Sort icon variant based on data type.                    |
+| `className`          | `string`                                                          | Additional CSS classes.                                  |
+| `onSort`             | `(columnId: string, direction: "asc" \| "desc" \| false) => void` | Callback when sort changes.                              |
+| `onVisibilityChange` | `(columnId: string, isVisible: boolean) => void`                  | Callback when visibility changes.                        |
+
+### DataTableAside
+
+Sidebar component for displaying additional content (filters, details, etc.) alongside the table.
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/components/data-table-aside.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+</div>
+
+```tsx showLineNumbers
+import {
+  DataTableAside,
+  DataTableAsideTrigger,
+  DataTableAsideContent,
+  DataTableAsideHeader,
+  DataTableAsideTitle,
+  DataTableAsideDescription,
+  DataTableAsideClose,
+} from "@/components/niko-data-table"
+
+;<DataTableAside side="right">
+  <DataTableAsideTrigger>Open Filters</DataTableAsideTrigger>
+  <DataTableAsideContent>
+    <DataTableAsideHeader>
+      <DataTableAsideTitle>Filters</DataTableAsideTitle>
+      <DataTableAsideDescription>Filter your data</DataTableAsideDescription>
+      <DataTableAsideClose />
+    </DataTableAsideHeader>
+    {/* filter content */}
+  </DataTableAsideContent>
+</DataTableAside>
+```
+
+#### DataTableAside Props
+
+| Name           | Type                      | Default   | Description                             |
+| -------------- | ------------------------- | --------- | --------------------------------------- |
+| `children`     | `React.ReactNode`         | -         | Aside components (Trigger, Content).    |
+| `side`         | `"left" \| "right"`       | `"right"` | Side of the table to display the aside. |
+| `open`         | `boolean`                 | -         | Controlled open state.                  |
+| `onOpenChange` | `(open: boolean) => void` | -         | Callback when open state changes.       |
+| `defaultOpen`  | `boolean`                 | `false`   | Initial open state (uncontrolled).      |
+
+#### DataTableAsideTrigger Props
+
+| Name        | Type              | Default | Description              |
+| ----------- | ----------------- | ------- | ------------------------ |
+| `children`  | `React.ReactNode` | -       | Trigger content.         |
+| `asChild`   | `boolean`         | `false` | Render as child element. |
+| `className` | `string`          | -       | Additional CSS classes.  |
+
+#### DataTableAsideContent Props
+
+| Name        | Type              | Default   | Description                          |
+| ----------- | ----------------- | --------- | ------------------------------------ |
+| `children`  | `React.ReactNode` | -         | Aside content.                       |
+| `width`     | `string`          | `"w-1/2"` | Width of the aside (Tailwind class). |
+| `sticky`    | `boolean`         | `false`   | Make aside sticky.                   |
+| `className` | `string`          | -         | Additional CSS classes.              |
+
+### DataTableSelectionBar
+
+Shows bulk actions when rows are selected.
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/components/data-table-selection-bar.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+</div>
+
+```tsx showLineNumbers
+import { DataTableSelectionBar } from "@/components/niko-data-table"
+
+;<DataTableSelectionBar
+  selectedCount={table.getSelectedRowModel().rows.length}
+  onClear={() => table.resetRowSelection()}
+>
+  <Button onClick={handleDelete}>Delete Selected</Button>
+  <Button onClick={handleExport}>Export Selected</Button>
+</DataTableSelectionBar>
+```
+
+#### Props
+
+| Name            | Type              | Default | Description                         |
+| --------------- | ----------------- | ------- | ----------------------------------- |
+| `selectedCount` | `number`          | -       | Number of selected rows (required). |
+| `onClear`       | `() => void`      | -       | Callback to clear selection.        |
+| `children`      | `React.ReactNode` | -       | Custom action buttons.              |
+| `className`     | `string`          | -       | Additional CSS classes.             |
+
+### DataTableEmptyState Components
+
+Composition components for building custom empty states.
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/components/data-table-empty-state.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+</div>
+
+#### DataTableEmptyIcon
+
+Icon component for empty state.
+
+| Name        | Type              | Description             |
+| ----------- | ----------------- | ----------------------- |
+| `children`  | `React.ReactNode` | Icon element.           |
+| `className` | `string`          | Additional CSS classes. |
+
+#### DataTableEmptyMessage
+
+Message shown when table is empty (not filtered).
+
+| Name        | Type              | Description             |
+| ----------- | ----------------- | ----------------------- |
+| `children`  | `React.ReactNode` | Message content.        |
+| `className` | `string`          | Additional CSS classes. |
+
+#### DataTableEmptyFilteredMessage
+
+Message shown when filters return no results.
+
+| Name        | Type              | Description             |
+| ----------- | ----------------- | ----------------------- |
+| `children`  | `React.ReactNode` | Message content.        |
+| `className` | `string`          | Additional CSS classes. |
+
+#### DataTableEmptyTitle
+
+Title component for empty state messages.
+
+| Name        | Type              | Description             |
+| ----------- | ----------------- | ----------------------- |
+| `children`  | `React.ReactNode` | Title text.             |
+| `className` | `string`          | Additional CSS classes. |
+
+#### DataTableEmptyDescription
+
+Description component for empty state messages.
+
+| Name        | Type              | Description             |
+| ----------- | ----------------- | ----------------------- |
+| `children`  | `React.ReactNode` | Description text.       |
+| `className` | `string`          | Additional CSS classes. |
+
+#### DataTableEmptyActions
+
+Actions component for empty state (buttons, links, etc.).
+
+| Name        | Type              | Description             |
+| ----------- | ----------------- | ----------------------- |
+| `children`  | `React.ReactNode` | Action buttons/links.   |
+| `className` | `string`          | Additional CSS classes. |

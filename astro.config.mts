@@ -140,7 +140,19 @@ export default defineConfig({
           label: "Niko DataTable",
           items: [
             { label: "Introduction", slug: "niko-data-table/introduction" },
-            { label: "Components", slug: "niko-data-table/components" },
+            {
+              label: "Components",
+              slug: "niko-data-table/overview/components",
+            },
+            { label: "Core", slug: "niko-data-table/overview/core" },
+            {
+              label: "Filters",
+              slug: "niko-data-table/overview/filters",
+            },
+            { label: "Hooks", slug: "niko-data-table/overview/hooks" },
+            { label: "Library", slug: "niko-data-table/overview/lib" },
+            { label: "Types", slug: "niko-data-table/overview/types" },
+            { label: "Config", slug: "niko-data-table/overview/config" },
           ],
         },
         {
