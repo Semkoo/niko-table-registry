@@ -86,7 +86,7 @@
     "react-dom": "^19.2.3",
     "react-hook-form": "^7.69.0",
     "react-resizable-panels": "^4.0.15",
-    "react-virtuoso": "^4.17.0",
+    "react-virtuoso": "^4.18.0",
     "satori": "^0.18.3",
     "sharp": "^0.34.5",
     "shiki": "^3.20.0",
