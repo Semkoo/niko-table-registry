@@ -27,7 +27,7 @@ Container for organizing filters and actions in the toolbar.
 ```tsx showLineNumbers
 import { DataTableToolbarSection } from "@/components/niko-data-table"
 
-<DataTableToolbarSection className="flex justify-between">
+;<DataTableToolbarSection className="flex justify-between">
   <DataTableSearchFilter />
   <DataTableViewMenu />
 </DataTableToolbarSection>
@@ -68,7 +68,7 @@ Full-featured pagination controls with page size selection and navigation.
 ```tsx showLineNumbers
 import { DataTablePagination } from "@/components/niko-data-table"
 
-<DataTablePagination
+;<DataTablePagination
   pageSizeOptions={[10, 25, 50, 100]}
   totalCount={500}
   onPageChange={pageIndex => console.log("Page:", pageIndex)}
@@ -184,7 +184,7 @@ Command palette-style interface for adding filters with advanced operators and A
 ```tsx showLineNumbers
 import { DataTableFilterMenu } from "@/components/niko-data-table"
 
-<DataTableFilterMenu
+;<DataTableFilterMenu
   autoOptions
   dynamicCounts
   showCounts
@@ -307,7 +307,7 @@ Menu for managing column sorting with drag-and-drop reordering.
 ```tsx showLineNumbers
 import { DataTableSortMenu } from "@/components/niko-data-table"
 
-<DataTableSortMenu className="ml-auto" />
+;<DataTableSortMenu className="ml-auto" />
 ```
 
 #### Props
@@ -348,7 +348,7 @@ Column visibility toggle menu with search functionality.
 ```tsx showLineNumbers
 import { DataTableViewMenu } from "@/components/niko-data-table"
 
-<DataTableViewMenu />
+;<DataTableViewMenu />
 ```
 
 #### Props
@@ -386,7 +386,7 @@ Inline filter toolbar for managing filters with advanced operators and AND/OR lo
 ```tsx showLineNumbers
 import { DataTableInlineFilter } from "@/components/niko-data-table"
 
-<DataTableInlineFilter
+;<DataTableInlineFilter
   autoOptions
   dynamicCounts
   showCounts
@@ -531,7 +531,7 @@ Button to clear all active filters, sorting, and search.
 ```tsx showLineNumbers
 import { DataTableClearFilter } from "@/components/niko-data-table"
 
-<DataTableClearFilter />
+;<DataTableClearFilter />
 ```
 
 #### Props
@@ -575,7 +575,7 @@ Button to export table data to CSV.
 ```tsx showLineNumbers
 import { DataTableExportButton } from "@/components/niko-data-table"
 
-<DataTableExportButton filename="products" onlySelected={false} />
+;<DataTableExportButton filename="products" onlySelected={false} />
 ```
 
 #### Props
@@ -630,6 +630,52 @@ const columns: DataTableColumnDef<User>[] = [
 | `onSort`             | `(columnId: string, direction: "asc" \| "desc" \| false) => void` | Callback when sort changes.                              |
 | `onVisibilityChange` | `(columnId: string, isVisible: boolean) => void`                  | Callback when visibility changes.                        |
 
+#### Composition
+
+The `TableColumnHeader` is composable. You can break it down into parts to customize the layout or add custom filters.
+
+```tsx showLineNumbers
+import {
+  TableColumnHeader,
+  TableColumnTitle,
+  TableColumnActions,
+  TableColumnFilter,
+  TableColumnFilterTrigger,
+  TableColumnMenu,
+  DataTableFacetedFilter,
+} from "@/components/niko-data-table"
+
+const columns: DataTableColumnDef<User>[] = [
+  {
+    accessorKey: "status",
+    header: ({ column }) => (
+      <TableColumnHeader column={column}>
+        <TableColumnTitle />
+        <TableColumnActions>
+          <TableColumnFilter>
+            <DataTableFacetedFilter
+              accessorKey="status"
+              options={statusOptions}
+              trigger={<TableColumnFilterTrigger />}
+            />
+          </TableColumnFilter>
+          <TableColumnMenu />
+        </TableColumnActions>
+      </TableColumnHeader>
+    ),
+    meta: { label: "Status" },
+  },
+]
+```
+
+#### Sub-Components
+
+- **`TableColumnTitle`**: Renders the column title (clickable to toggle sort).
+- **`TableColumnActions`**: Container for action icons (Filter, Menu) to ensure proper alignment.
+- **`TableColumnFilter`**: Wrapper for filter components.
+- **`TableColumnFilterTrigger`**: Dedicated filter icon button.
+- **`TableColumnMenu`**: Dropdown menu for Sorting, Pinning, and Visibility.
+
 ### DataTableAside
 
 Sidebar component for displaying additional content (filters, details, etc.) alongside the table.
@@ -657,7 +703,7 @@ import {
   DataTableAsideClose,
 } from "@/components/niko-data-table"
 
-<DataTableAside side="right">
+;<DataTableAside side="right">
   <DataTableAsideTrigger>Open Filters</DataTableAsideTrigger>
   <DataTableAsideContent>
     <DataTableAsideHeader>
@@ -716,7 +762,7 @@ Shows bulk actions when rows are selected.
 ```tsx showLineNumbers
 import { DataTableSelectionBar } from "@/components/niko-data-table"
 
-<DataTableSelectionBar
+;<DataTableSelectionBar
   selectedCount={table.getSelectedRowModel().rows.length}
   onClear={() => table.resetRowSelection()}
 >
@@ -763,7 +809,7 @@ import { PackageOpen } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 // Complete empty state composition
-<DataTableEmptyBody>
+;<DataTableEmptyBody>
   <DataTableEmptyIcon>
     <PackageOpen className="size-12 text-muted-foreground" />
   </DataTableEmptyIcon>

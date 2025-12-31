@@ -53,6 +53,7 @@ export function DataTableDateFilter<TData>({
   accessorKey,
   title,
   multiple,
+  trigger,
   ...props
 }: DataTableDateFilterProps<TData>) {
   const { table } = useDataTable<TData>()
@@ -86,6 +87,7 @@ export function DataTableDateFilter<TData>({
       column={column}
       title={derivedTitle}
       multiple={multiple}
+      trigger={trigger}
       {...props}
     />
   )

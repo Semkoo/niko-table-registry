@@ -153,6 +153,7 @@ export function DataTableFacetedFilter<TData, TValue = unknown>({
   limitToFilteredRows = true,
   title,
   multiple,
+  trigger,
   ...props
 }: DataTableFacetedFilterProps<TData, TValue>) {
   const { table } = useDataTable<TData>()
@@ -276,6 +277,7 @@ export function DataTableFacetedFilter<TData, TValue = unknown>({
       options={dynamicOptions}
       title={derivedTitle}
       multiple={multiple}
+      trigger={trigger}
       {...props}
     />
   )
