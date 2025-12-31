@@ -224,9 +224,43 @@ export function DataTableFacetedFilter<TData, TValue = unknown>({
   ])
 
   // Final options selection priority: explicit props.options > meta-driven > fallback
-  const dynamicOptions =
-    options ??
-    (generatedFromMeta.length ? generatedFromMeta : fallbackGenerated)
+  const dynamicOptions = React.useMemo(() => {
+    // If options are explicitly provided, we still need to respect limitToFilteredRows
+    if (options && options.length > 0) {
+      if (limitToFilteredRows && column) {
+        // Filter options to only include those that exist in the relevant rows
+        // We reuse fallbackGenerated's logic of getting occurrenceMap from rows
+        const rows = getFilteredRowsExcludingColumn(
+          table,
+          accessorKey as string,
+          columnFilters,
+          globalFilter,
+        )
+        const occurrenceMap = new Map<string, boolean>()
+        rows.forEach(row => {
+          const raw = row.getValue(accessorKey as string) as unknown
+          const values: unknown[] = Array.isArray(raw) ? raw : [raw]
+          values.forEach(v => {
+            if (v != null) occurrenceMap.set(String(v), true)
+          })
+        })
+        return options.filter(opt => occurrenceMap.has(opt.value))
+      }
+      return options
+    }
+
+    return generatedFromMeta.length ? generatedFromMeta : fallbackGenerated
+  }, [
+    options,
+    generatedFromMeta,
+    fallbackGenerated,
+    limitToFilteredRows,
+    column,
+    table,
+    accessorKey,
+    columnFilters,
+    globalFilter,
+  ])
 
   // Early return if column not found
   if (!column) {

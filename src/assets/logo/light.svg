@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Grid structure from grid-2x2-check (scaled smaller) -->
+  <g transform="translate(2, 2) scale(0.83)">
+    <path d="M12 3v17a1 1 0 0 1-1 1H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v6a1 1 0 0 1-1 1H3"/>
+  </g>
+  <!-- Shadcn logo (larger, scaled to fit bottom right quadrant) -->
+  <!-- Scale factor: 10/256 = 0.0390625, offset: 13 (centered in 12-24 with less padding) -->
+  <line x1="21.125" y1="17.5" x2="17.5" y2="21.125" fill="none" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+  <line x1="20.75" y1="13.75" x2="13.75" y2="20.75" fill="none" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+</svg>
