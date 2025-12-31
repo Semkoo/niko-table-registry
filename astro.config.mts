@@ -113,7 +113,8 @@ export default defineConfig({
         baseUrl: `${GITHUB_REPO_URL}/tree/main`,
       },
       logo: {
-        src: "./src/assets/logo/logo.svg",
+        dark: "./src/assets/logo/dark.svg",
+        light: "./src/assets/logo/light.svg",
         replacesTitle: true,
       },
       social: [

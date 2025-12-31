@@ -500,6 +500,7 @@ function FilterToolbar({
           accessorKey="brand"
           title="Brand"
           options={brandOptions}
+          limitToFilteredRows
           multiple
         />
         <DataTableSortMenu />

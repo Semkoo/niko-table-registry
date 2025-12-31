@@ -230,8 +230,27 @@ export function useGeneratedOptions<TData>(
             countMap.set(str, (countMap.get(str) ?? 0) + 1)
           }
         }
+
+        // If limitToFilteredRows is true, we should only return static options that have counts > 0
+        // in the optionSourceRows.
+        let filteredStaticOptions = meta.options
+        if (limitToFilteredRows) {
+          const occurrenceMap = new Map<string, boolean>()
+          for (const row of optionSourceRows) {
+            const raw = row.getValue(colId as string) as unknown
+            const values: unknown[] = Array.isArray(raw) ? raw : [raw]
+            for (const v of values) {
+              if (v == null) continue
+              occurrenceMap.set(String(v), true)
+            }
+          }
+          filteredStaticOptions = meta.options.filter(opt =>
+            occurrenceMap.has(opt.value),
+          )
+        }
+
         // Return static options with augmented counts
-        result[colId] = meta.options.map(opt => ({
+        result[colId] = filteredStaticOptions.map(opt => ({
           ...opt,
           count: colShowCounts
             ? (countMap.get(opt.value) ?? opt.count)
@@ -275,13 +294,23 @@ export function useGeneratedOptions<TData>(
           ? options.slice(0, limitPerColumn)
           : options
 
-      // If static options exist and strategy is preserve, keep as-is
+      // If static options exist and strategy is preserve, keep as-is (but respect limitToFilteredRows)
       if (
         meta.options &&
         meta.options.length > 0 &&
         (!colMerge || colMerge === "preserve")
       ) {
-        result[colId] = meta.options
+        if (limitToFilteredRows) {
+          const occurrenceMap = new Map<string, boolean>()
+          // counts map already has keys from optionSourceRows
+          counts.forEach((_, key) => occurrenceMap.set(key, true))
+
+          result[colId] = meta.options.filter(opt =>
+            occurrenceMap.has(opt.value),
+          )
+        } else {
+          result[colId] = meta.options
+        }
         continue
       }
 
