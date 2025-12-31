@@ -136,6 +136,7 @@ export function DataTableProvider<TData>({
   const expanded = tableState.expanded
   const rowSelection = tableState.rowSelection
   const pagination = tableState.pagination
+  const columnPinning = tableState.columnPinning
 
   /**
    * PERFORMANCE: Create lightweight state hash instead of JSON.stringify
@@ -190,6 +191,7 @@ export function DataTableProvider<TData>({
         rowSelection as Record<string, unknown> | undefined,
       ),
       paginationKey,
+      columnPinningHash: JSON.stringify(columnPinning),
     }
   }, [
     globalFilter,
@@ -199,6 +201,7 @@ export function DataTableProvider<TData>({
     expanded,
     rowSelection,
     pagination,
+    columnPinning,
   ])
 
   /**
