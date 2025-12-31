@@ -13,6 +13,11 @@ import {
 import { flexRender } from "@tanstack/react-table"
 import { Skeleton } from "@/components/ui/skeleton"
 import { DataTableEmptyState } from "../components/data-table-empty-state"
+import { getCommonPinningStyles } from "../lib/styles"
+
+// ============================================================================
+// ScrollEvent Type
+// ============================================================================
 
 // ============================================================================
 // ScrollEvent Type
@@ -66,7 +71,10 @@ export const DataTableHeader = React.memo(function DataTableHeader({
         <TableRow key={headerGroup.id}>
           {headerGroup.headers.map(header => {
             const size = header.column.columnDef.size
-            const headerStyle = size ? { width: `${size}px` } : undefined
+            const headerStyle = {
+              width: size ? `${size}px` : undefined,
+              ...getCommonPinningStyles(header.column, true),
+            }
 
             return (
               <TableHead key={header.id} style={headerStyle}>
@@ -228,7 +236,10 @@ export function DataTableBody<TData>({
                 >
                   {row.getVisibleCells().map(cell => {
                     const size = cell.column.columnDef.size
-                    const cellStyle = size ? { width: `${size}px` } : undefined
+                    const cellStyle = {
+                      width: size ? `${size}px` : undefined,
+                      ...getCommonPinningStyles(cell.column, false),
+                    }
 
                     return (
                       <TableCell key={cell.id} style={cellStyle}>

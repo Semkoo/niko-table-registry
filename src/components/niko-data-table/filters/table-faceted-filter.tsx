@@ -44,6 +44,10 @@ export interface TableFacetedFilterProps<TData, TValue> {
    * Useful for server-side filtering or external state management
    */
   onValueChange?: (value: string[] | undefined) => void
+  /**
+   * Optional custom trigger element
+   */
+  trigger?: React.ReactNode
 }
 
 export function TableFacetedFilter<TData, TValue>({
@@ -52,6 +56,7 @@ export function TableFacetedFilter<TData, TValue>({
   options = [],
   multiple,
   onValueChange,
+  trigger,
 }: TableFacetedFilterProps<TData, TValue>) {
   const [open, setOpen] = React.useState(false)
 
@@ -143,64 +148,63 @@ export function TableFacetedFilter<TData, TValue>({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="outline" size="sm" className="border-dashed">
-          {selectedValues?.size > 0 ? (
-            <div
-              role="button"
-              aria-label={`Clear ${title} filter`}
-              tabIndex={0}
-              onClick={onReset}
-              onKeyDown={e => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault()
-                  onReset(e as unknown as React.MouseEvent)
-                }
-              }}
-              className="rounded-sm opacity-70 transition-opacity hover:opacity-100 focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
-            >
-              <XCircle />
-            </div>
-          ) : (
-            <PlusCircle />
-          )}
-          {title}
-          {selectedValues?.size > 0 && (
-            <>
-              <Separator
-                orientation="vertical"
-                className="mx-0.5 data-[orientation=vertical]:h-4"
-              />
-              <Badge
-                variant="secondary"
-                className="rounded-sm px-1 font-normal lg:hidden"
+        {trigger || (
+          <Button variant="outline" size="sm" className="h-8 border-dashed">
+            {selectedValues?.size > 0 ? (
+              <div
+                role="button"
+                aria-label={`Clear ${title} filter`}
+                tabIndex={0}
+                onClick={onReset}
+                onKeyDown={e => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault()
+                    onReset(e as unknown as React.MouseEvent)
+                  }
+                }}
+                className="rounded-sm opacity-70 transition-opacity hover:opacity-100 focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
               >
-                {selectedValues.size}
-              </Badge>
-              <div className="hidden items-center gap-1 lg:flex">
-                {selectedValues.size > 2 ? (
-                  <Badge
-                    variant="secondary"
-                    className="rounded-sm px-1 font-normal"
-                  >
-                    {selectedValues.size} selected
-                  </Badge>
-                ) : (
-                  options
-                    .filter(option => selectedValues.has(option.value))
-                    .map(option => (
-                      <Badge
-                        variant="secondary"
-                        key={option.value}
-                        className="rounded-sm px-1 font-normal"
-                      >
-                        {option.label}
-                      </Badge>
-                    ))
-                )}
+                <XCircle className="size-4" />
               </div>
-            </>
-          )}
-        </Button>
+            ) : (
+              <PlusCircle className="size-4" />
+            )}
+            {title}
+            {selectedValues?.size > 0 && (
+              <>
+                <Separator orientation="vertical" className="mx-2 h-4" />
+                <Badge
+                  variant="secondary"
+                  className="rounded-sm px-1 font-normal lg:hidden"
+                >
+                  {selectedValues.size}
+                </Badge>
+                <div className="hidden items-center gap-1 lg:flex">
+                  {selectedValues.size > 2 ? (
+                    <Badge
+                      variant="secondary"
+                      className="rounded-sm px-1 font-normal"
+                    >
+                      {selectedValues.size} selected
+                    </Badge>
+                  ) : (
+                    options
+                      .filter(option => selectedValues.has(option.value))
+                      .map(option => (
+                        <Badge
+                          variant="secondary"
+                          key={option.value}
+                          className="rounded-sm px-1 font-normal"
+                        >
+                          {option.label}
+                        </Badge>
+                      ))
+                  )}
+                </div>
+              </>
+            )}
+          </Button>
+        )}
       </PopoverTrigger>
       <PopoverContent className="w-50 p-0" align="start">
         <Command>

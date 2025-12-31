@@ -48,6 +48,11 @@ import {
 } from "@/components/niko-data-table"
 import {
   TableColumnHeader,
+  TableColumnTitle,
+  TableColumnActions,
+  TableColumnFilter,
+  TableColumnFilterTrigger,
+  TableColumnMenu,
   DataTableAside,
   DataTableAsideContent,
   DataTableAsideHeader,
@@ -676,7 +681,21 @@ export default function AllFeaturesTableExample() {
       },
       {
         accessorKey: "category",
-        header: ({ column }) => <TableColumnHeader column={column} />,
+        header: ({ column }) => (
+          <TableColumnHeader column={column}>
+            <TableColumnTitle />
+            <TableColumnActions>
+              <TableColumnFilter>
+                <DataTableFacetedFilter
+                  accessorKey="category"
+                  options={categoryOptions}
+                  trigger={<TableColumnFilterTrigger />}
+                />
+              </TableColumnFilter>
+              <TableColumnMenu />
+            </TableColumnActions>
+          </TableColumnHeader>
+        ),
         meta: {
           label: "Category",
           variant: "select",
@@ -691,7 +710,21 @@ export default function AllFeaturesTableExample() {
       },
       {
         accessorKey: "brand",
-        header: ({ column }) => <TableColumnHeader column={column} />,
+        header: ({ column }) => (
+          <TableColumnHeader column={column}>
+            <TableColumnTitle />
+            <TableColumnActions>
+              <TableColumnFilter>
+                <DataTableFacetedFilter
+                  accessorKey="brand"
+                  options={brandOptions}
+                  trigger={<TableColumnFilterTrigger />}
+                />
+              </TableColumnFilter>
+              <TableColumnMenu />
+            </TableColumnActions>
+          </TableColumnHeader>
+        ),
         meta: {
           label: "Brand",
           variant: "select",
