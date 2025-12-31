@@ -26,7 +26,6 @@ Container for organizing filters and actions in the toolbar.
 
 ```tsx showLineNumbers
 import { DataTableToolbarSection } from "@/components/niko-data-table"
-
 ;<DataTableToolbarSection className="flex justify-between">
   <DataTableSearchFilter />
   <DataTableViewMenu />
@@ -67,7 +66,6 @@ Full-featured pagination controls with page size selection and navigation.
 
 ```tsx showLineNumbers
 import { DataTablePagination } from "@/components/niko-data-table"
-
 ;<DataTablePagination
   pageSizeOptions={[10, 25, 50, 100]}
   totalCount={500}
@@ -183,7 +181,6 @@ Command palette-style interface for adding filters with advanced operators and A
 
 ```tsx showLineNumbers
 import { DataTableFilterMenu } from "@/components/niko-data-table"
-
 ;<DataTableFilterMenu
   autoOptions
   dynamicCounts
@@ -306,7 +303,6 @@ Menu for managing column sorting with drag-and-drop reordering.
 
 ```tsx showLineNumbers
 import { DataTableSortMenu } from "@/components/niko-data-table"
-
 ;<DataTableSortMenu className="ml-auto" />
 ```
 
@@ -347,7 +343,6 @@ Column visibility toggle menu with search functionality.
 
 ```tsx showLineNumbers
 import { DataTableViewMenu } from "@/components/niko-data-table"
-
 ;<DataTableViewMenu />
 ```
 
@@ -385,7 +380,6 @@ Inline filter toolbar for managing filters with advanced operators and AND/OR lo
 
 ```tsx showLineNumbers
 import { DataTableInlineFilter } from "@/components/niko-data-table"
-
 ;<DataTableInlineFilter
   autoOptions
   dynamicCounts
@@ -530,7 +524,6 @@ Button to clear all active filters, sorting, and search.
 
 ```tsx showLineNumbers
 import { DataTableClearFilter } from "@/components/niko-data-table"
-
 ;<DataTableClearFilter />
 ```
 
@@ -574,7 +567,6 @@ Button to export table data to CSV.
 
 ```tsx showLineNumbers
 import { DataTableExportButton } from "@/components/niko-data-table"
-
 ;<DataTableExportButton filename="products" onlySelected={false} />
 ```
 
@@ -621,14 +613,12 @@ const columns: DataTableColumnDef<User>[] = [
 
 #### Props
 
-| Name                 | Type                                                              | Description                                              |
-| -------------------- | ----------------------------------------------------------------- | -------------------------------------------------------- |
-| `column`             | `Column<TData>`                                                   | The column instance from TanStack Table (required).      |
-| `title`              | `string`                                                          | Custom title (uses `column.meta.label` if not provided). |
-| `variant`            | `"text" \| "number" \| "date" \| "boolean"`                       | Sort icon variant based on data type.                    |
-| `className`          | `string`                                                          | Additional CSS classes.                                  |
-| `onSort`             | `(columnId: string, direction: "asc" \| "desc" \| false) => void` | Callback when sort changes.                              |
-| `onVisibilityChange` | `(columnId: string, isVisible: boolean) => void`                  | Callback when visibility changes.                        |
+| Name        | Type                                        | Description                                              |
+| ----------- | ------------------------------------------- | -------------------------------------------------------- |
+| `column`    | `Column<TData>`                             | The column instance from TanStack Table (required).      |
+| `title`     | `string`                                    | Custom title (uses `column.meta.label` if not provided). |
+| `variant`   | `"text" \| "number" \| "date" \| "boolean"` | Sort icon variant based on data type.                    |
+| `className` | `string`                                    | Additional CSS classes.                                  |
 
 #### Composition
 
@@ -702,7 +692,6 @@ import {
   DataTableAsideDescription,
   DataTableAsideClose,
 } from "@/components/niko-data-table"
-
 ;<DataTableAside side="right">
   <DataTableAsideTrigger>Open Filters</DataTableAsideTrigger>
   <DataTableAsideContent>
@@ -761,7 +750,6 @@ Shows bulk actions when rows are selected.
 
 ```tsx showLineNumbers
 import { DataTableSelectionBar } from "@/components/niko-data-table"
-
 ;<DataTableSelectionBar
   selectedCount={table.getSelectedRowModel().rows.length}
   onClear={() => table.resetRowSelection()}

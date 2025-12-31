@@ -9,7 +9,6 @@ import {
   MoreVertical,
   Pin,
   PinOff,
-  Settings2,
   X,
 } from "lucide-react"
 
@@ -366,12 +365,6 @@ export function TableColumnMenu<TData, TValue>({
             </DropdownMenuItem>
           </>
         )}
-
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onSelect={() => {}}>
-          <Settings2 className="mr-2 size-4 text-muted-foreground/70" />
-          Settings...
-        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   )

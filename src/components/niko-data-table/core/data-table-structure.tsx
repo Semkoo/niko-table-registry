@@ -19,10 +19,6 @@ import { getCommonPinningStyles } from "../lib/styles"
 // ScrollEvent Type
 // ============================================================================
 
-// ============================================================================
-// ScrollEvent Type
-// ============================================================================
-
 export interface ScrollEvent {
   scrollTop: number
   scrollHeight: number
