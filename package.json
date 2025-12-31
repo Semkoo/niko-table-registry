@@ -6,7 +6,7 @@
   "author": "Semir N. <https://github.com/Semkoo>",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Semkoo/shadcn-advance-react-table-registry"
+    "url": "https://github.com/Semkoo/niko-data-table-registry"
   },
   "scripts": {
     "dev": "astro dev",

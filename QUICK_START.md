@@ -6,7 +6,7 @@
 
 Go to: https://github.com/new
 
-- **Repository name**: `shadcn-advance-react-table-registry`
+- **Repository name**: `niko-data-table-registry`
 - **Visibility**: Public (recommended) or Private
 - **❌ Do NOT** check "Initialize this repository with a README"
 
