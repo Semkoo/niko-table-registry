@@ -1,19 +1,19 @@
-# Setup Summary - Shadcn Advanced React Table Registry
+# Setup Summary - Niko Data Table Registry
 
 ## What Was Done
 
-This repository has been successfully transformed from the original WDS Shadcn Registry into your own project: **Shadcn Advanced React Table Registry**.
+This repository has been successfully transformed from the original WDS Shadcn Registry into your own project: **Niko Data Table Registry**.
 
 ## Changes Made
 
 ### 1. Git Configuration
 
-- ✅ Updated git remote to point to `https://github.com/Semkoo/shadcn-advance-react-table-registry.git`
-- Current remote: `origin → https://github.com/Semkoo/shadcn-advance-react-table-registry.git`
+- ✅ Updated git remote to point to `https://github.com/Semkoo/niko-data-table-registry.git`
+- Current remote: `origin → https://github.com/Semkoo/niko-data-table-registry.git`
 
 ### 2. Package Configuration (`package.json`)
 
-- ✅ Updated package name to `shadcn-advance-react-table-registry`
+- ✅ Updated package name to `niko-data-table-registry`
 - ✅ Added description: "A collection of advanced React table components built for use with Shadcn"
 - ✅ Added author: "Semir N. <https://github.com/Semkoo>"
 - ✅ Added repository information
@@ -23,9 +23,9 @@ This repository has been successfully transformed from the original WDS Shadcn R
 
 - ✅ Created `.env.example` with template values
 - ✅ Updated `.env` with your repository URLs:
-  - `GITHUB_REPO_URL=https://github.com/Semkoo/shadcn-advance-react-table-registry`
+  - `GITHUB_REPO_URL=https://github.com/Semkoo/niko-data-table-registry`
   - `DEPLOY_PRIME_URL=http://localhost:4321`
-  - `URL=https://shadcn-advance-react-table-registry.netlify.app`
+  - `URL=https://niko-data-table-registry.netlify.app`
 
 ### 4. Documentation Updates
 
@@ -42,7 +42,7 @@ This repository has been successfully transformed from the original WDS Shadcn R
 
 ### 5. Branding Updates
 
-- ✅ Site title: "Shadcn Advanced React Table Registry"
+- ✅ Site title: "Niko Data Table Registry"
 - ✅ Description focuses on advanced React table components
 - ✅ Footer includes credit to original WDS Shadcn Registry
 - ✅ Social links updated (GitHub + LinkedIn)
@@ -54,7 +54,7 @@ This repository has been successfully transformed from the original WDS Shadcn R
 You mentioned you haven't created the GitHub repo yet. Here's what to do:
 
 1. Go to https://github.com/new
-2. Create a new repository named: `shadcn-advance-react-table-registry`
+2. Create a new repository named: `niko-data-table-registry`
 3. **Do NOT initialize with README, .gitignore, or license** (you already have these)
 4. Set it to Public or Private as you prefer
 
@@ -75,7 +75,7 @@ git push -u origin main
 
 ### 3. Update Deployment URL (Optional)
 
-If you deploy to a different URL than the placeholder `shadcn-advance-react-table-registry.netlify.app`:
+If you deploy to a different URL than the placeholder `niko-data-table-registry.netlify.app`:
 
 - Update the `URL` in your `.env` file
 - Update `.env.example` to reflect the actual deployment URL

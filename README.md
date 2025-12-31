@@ -22,8 +22,8 @@ Documentation site will be available soon.
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/Semkoo/shadcn-advance-react-table-registry.git
-cd shadcn-advance-react-table-registry
+git clone https://github.com/Semkoo/niko-data-table-registry.git
+cd niko-data-table-registry
 ```
 
 2. Install dependencies:
