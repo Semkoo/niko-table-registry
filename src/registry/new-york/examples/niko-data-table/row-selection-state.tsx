@@ -26,6 +26,7 @@ import {
   DataTableEmptyMessage,
 } from "@/components/niko-data-table"
 import {
+  TableColumnTitle,
   TableColumnHeader,
   DataTableSelectionBar,
 } from "@/components/niko-data-table/components"
@@ -254,7 +255,11 @@ export default function RowSelectionStateExample() {
       },
       {
         accessorKey: "name",
-        header: ({ column }) => <TableColumnHeader column={column} />,
+        header: () => (
+          <TableColumnHeader>
+            <TableColumnTitle />
+          </TableColumnHeader>
+        ),
         meta: {
           label: "Name",
         },
@@ -264,21 +269,33 @@ export default function RowSelectionStateExample() {
       },
       {
         accessorKey: "email",
-        header: ({ column }) => <TableColumnHeader column={column} />,
+        header: () => (
+          <TableColumnHeader>
+            <TableColumnTitle />
+          </TableColumnHeader>
+        ),
         meta: {
           label: "Email",
         },
       },
       {
         accessorKey: "company",
-        header: ({ column }) => <TableColumnHeader column={column} />,
+        header: () => (
+          <TableColumnHeader>
+            <TableColumnTitle />
+          </TableColumnHeader>
+        ),
         meta: {
           label: "Company",
         },
       },
       {
         accessorKey: "phone",
-        header: ({ column }) => <TableColumnHeader column={column} />,
+        header: () => (
+          <TableColumnHeader>
+            <TableColumnTitle />
+          </TableColumnHeader>
+        ),
         meta: {
           label: "Phone",
         },

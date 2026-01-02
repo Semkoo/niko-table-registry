@@ -142,6 +142,7 @@ import type {
   SortingState,
   ColumnFiltersState,
   VisibilityState,
+  ColumnPinningState,
   Updater,
 } from "@tanstack/react-table"
 import {
@@ -164,7 +165,10 @@ import {
   DataTableEmptyMessage,
   DataTableSkeleton,
 } from "@/components/niko-data-table"
-import { TableColumnHeader } from "@/components/niko-data-table/components"
+import {
+  TableColumnTitle,
+  TableColumnHeader,
+} from "@/components/niko-data-table/components"
 import {
   daysAgo,
   JOIN_OPERATORS,
@@ -639,7 +643,11 @@ const brandOptions = [
 const columns: DataTableColumnDef<Product>[] = [
   {
     accessorKey: "name",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <TableColumnHeader>
+        <TableColumnTitle />
+      </TableColumnHeader>
+    ),
     meta: {
       label: "Product Name",
       variant: "text",
@@ -648,7 +656,11 @@ const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "category",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <TableColumnHeader>
+        <TableColumnTitle />
+      </TableColumnHeader>
+    ),
     meta: {
       label: "Category",
       variant: "select",
@@ -663,7 +675,11 @@ const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "brand",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <TableColumnHeader>
+        <TableColumnTitle />
+      </TableColumnHeader>
+    ),
     meta: {
       label: "Brand",
       variant: "select",
@@ -673,7 +689,11 @@ const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "price",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <TableColumnHeader>
+        <TableColumnTitle />
+      </TableColumnHeader>
+    ),
     meta: {
       label: "Price",
       unit: "$",
@@ -687,7 +707,11 @@ const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "stock",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <TableColumnHeader>
+        <TableColumnTitle />
+      </TableColumnHeader>
+    ),
     meta: {
       label: "Stock",
       variant: "number",
@@ -704,7 +728,11 @@ const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "rating",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <TableColumnHeader>
+        <TableColumnTitle />
+      </TableColumnHeader>
+    ),
     meta: {
       label: "Rating",
       variant: "number",
@@ -722,7 +750,11 @@ const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "inStock",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <TableColumnHeader>
+        <TableColumnTitle />
+      </TableColumnHeader>
+    ),
     meta: {
       label: "In Stock",
       variant: "boolean",
@@ -739,7 +771,11 @@ const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "releaseDate",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <TableColumnHeader>
+        <TableColumnTitle />
+      </TableColumnHeader>
+    ),
     meta: {
       label: "Release Date",
       variant: "date",
@@ -934,6 +970,9 @@ const tableStateParsers = {
     value => value as ExtendedColumnFilter<Product>[],
   ).withDefault([]),
   filterMode: parseAsString.withDefault("standard"),
+  pin: parseAsJson<ColumnPinningState>(
+    value => value as ColumnPinningState,
+  ).withDefault({ left: [], right: [] }),
 }
 
 // Map internal state keys to URL query parameter names
@@ -945,8 +984,9 @@ const tableStateUrlKeys = {
   search: "search",
   globalFilter: "global",
   columnVisibility: "cols",
-  inlineFilters: "inline",
+
   filterMode: "mode",
+  pin: "pin",
 }
 
 function ServerSideStateTableContent() {
@@ -1029,6 +1069,11 @@ function ServerSideStateTableContent() {
       }),
     )
   }, [urlParams.inlineFilters, globalFilter, filterMode])
+
+  // Column pinning state from URL
+  const columnPinning: ColumnPinningState = useMemo(() => {
+    return urlParams.pin || { left: [], right: [] }
+  }, [urlParams.pin])
 
   // Get active column filters based on filter mode
   const columnFilters =
@@ -1388,6 +1433,16 @@ function ServerSideStateTableContent() {
     [sorting, setUrlParams],
   )
 
+  // Handlers for column pinning
+  const handleColumnPinningChange = useCallback(
+    (updater: Updater<ColumnPinningState>) => {
+      const newPinning =
+        typeof updater === "function" ? updater(columnPinning) : updater
+      void setUrlParams({ pin: newPinning })
+    },
+    [columnPinning, setUrlParams],
+  )
+
   // Handlers for filters (standard mode)
   const handleStandardColumnFiltersChange = useCallback(
     (updater: Updater<ColumnFiltersState>) => {
@@ -1472,7 +1527,7 @@ function ServerSideStateTableContent() {
         })
       }
     },
-    [setUrlParams, urlParams.globalFilter],
+    [setUrlParams],
   )
 
   // Handlers for column visibility
@@ -1773,6 +1828,7 @@ function ServerSideStateTableContent() {
                 sorting,
                 columnFilters: standardColumnFilters,
                 columnVisibility,
+                columnPinning,
                 pagination,
               }}
               onGlobalFilterChange={handleGlobalFilterChange}
@@ -1780,6 +1836,7 @@ function ServerSideStateTableContent() {
               onColumnFiltersChange={handleStandardColumnFiltersChange}
               onColumnVisibilityChange={handleColumnVisibilityChange}
               onPaginationChange={handlePaginationChange}
+              onColumnPinningChange={handleColumnPinningChange}
             >
               <StandardFilterToolbar
                 filters={normalizedStandardFilters}
@@ -1849,6 +1906,7 @@ function ServerSideStateTableContent() {
                 sorting,
                 columnFilters: inlineColumnFilters,
                 columnVisibility,
+                columnPinning,
                 pagination,
               }}
               onGlobalFilterChange={handleGlobalFilterChange}
@@ -1856,6 +1914,7 @@ function ServerSideStateTableContent() {
               onColumnFiltersChange={handleInlineColumnFiltersChange}
               onColumnVisibilityChange={handleColumnVisibilityChange}
               onPaginationChange={handlePaginationChange}
+              onColumnPinningChange={handleColumnPinningChange}
             >
               <InlineFilterToolbar
                 filters={normalizedInlineFilters}

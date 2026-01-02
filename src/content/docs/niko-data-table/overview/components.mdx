@@ -605,7 +605,7 @@ import { TableColumnHeader } from "@/components/niko-data-table/components"
 const columns: DataTableColumnDef<User>[] = [
   {
     accessorKey: "name",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: ({ column }) => <TableColumnHeader />,
     meta: { label: "Name" },
   },
 ]
@@ -613,12 +613,10 @@ const columns: DataTableColumnDef<User>[] = [
 
 #### Props
 
-| Name        | Type                                        | Description                                              |
-| ----------- | ------------------------------------------- | -------------------------------------------------------- |
-| `column`    | `Column<TData>`                             | The column instance from TanStack Table (required).      |
-| `title`     | `string`                                    | Custom title (uses `column.meta.label` if not provided). |
-| `variant`   | `"text" \| "number" \| "date" \| "boolean"` | Sort icon variant based on data type.                    |
-| `className` | `string`                                    | Additional CSS classes.                                  |
+| Name        | Type     | Description                                              |
+| ----------- | -------- | -------------------------------------------------------- |
+| `title`     | `string` | Custom title (uses `column.meta.label` if not provided). |
+| `className` | `string` | Additional CSS classes.                                  |
 
 #### Composition
 
@@ -639,7 +637,7 @@ const columns: DataTableColumnDef<User>[] = [
   {
     accessorKey: "status",
     header: ({ column }) => (
-      <TableColumnHeader column={column}>
+      <TableColumnHeader>
         <TableColumnTitle />
         <TableColumnActions>
           <TableColumnFilter>
@@ -657,6 +655,12 @@ const columns: DataTableColumnDef<User>[] = [
   },
 ]
 ```
+
+#### How Context Works
+
+When you use `flexRender(...)` in the core structure (like `DataTableHeader` or `DataTableVirtualizedHeader`), it renders the JSX returned by your `header` function. That JSX is automatically wrapped by the `<TableColumnHeaderRoot column={...}>` provider in the core components.
+
+This means any component inside your `header` function (like `TableColumnHeader`, `TableColumnTitle`, etc.) correctly receives the column context even if you are using manual composition in your `columns` definition.
 
 #### Sub-Components
 

@@ -20,6 +20,7 @@ import {
 } from "@/components/niko-data-table"
 import {
   TableColumnHeader,
+  TableColumnTitle,
   DataTableSelectionBar,
 } from "@/components/niko-data-table/components"
 import type { DataTableColumnDef } from "@/components/niko-data-table/types"
@@ -477,7 +478,7 @@ export default function TreeTable() {
       // Project Name Column with Tree Visualization, Checkbox, and Selection
       {
         accessorKey: "name",
-        header: ({ column }) => (
+        header: () => (
           <div className="flex items-center gap-2">
             <Checkbox
               checked={
@@ -499,7 +500,9 @@ export default function TreeTable() {
               }}
               aria-label="Select all"
             />
-            <TableColumnHeader column={column} title="Project Name" />
+            <TableColumnHeader>
+              <TableColumnTitle title="Project Name" />
+            </TableColumnHeader>
           </div>
         ),
         cell: ({ row }) => {
@@ -588,8 +591,10 @@ export default function TreeTable() {
       // Status Column
       {
         accessorKey: "status",
-        header: ({ column }) => (
-          <TableColumnHeader column={column} title="Status" />
+        header: () => (
+          <TableColumnHeader>
+            <TableColumnTitle title="Status" />
+          </TableColumnHeader>
         ),
         cell: ({ row }) => {
           const status = row.getValue("status") as string
@@ -613,8 +618,10 @@ export default function TreeTable() {
       // Budget Column
       {
         accessorKey: "budget",
-        header: ({ column }) => (
-          <TableColumnHeader column={column} title="Budget" />
+        header: () => (
+          <TableColumnHeader>
+            <TableColumnTitle title="Budget" />
+          </TableColumnHeader>
         ),
         cell: ({ row }) => {
           const budget = row.getValue("budget") as number

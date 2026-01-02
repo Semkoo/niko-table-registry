@@ -6,6 +6,7 @@ import type {
   SortingState,
   ColumnFiltersState,
   VisibilityState,
+  ColumnPinningState,
 } from "@tanstack/react-table"
 import {
   DataTableRoot,
@@ -25,12 +26,19 @@ import {
 } from "@/components/niko-data-table"
 import {
   TableColumnHeader,
+  TableColumnTitle,
+  TableColumnActions,
+  TableColumnMenu,
+  TableColumnSortMenu,
+  TableColumnFilter,
+  TableColumnFilterTrigger,
   DataTableAside,
   DataTableAsideTrigger,
   DataTableAsideContent,
   DataTableAsideHeader,
-  DataTableAsideTitle,
   DataTableAsideClose,
+  DataTableAsideTitle,
+  DataTableFacetedFilter,
 } from "@/components/niko-data-table/components"
 import type { DataTableColumnDef } from "@/components/niko-data-table/types"
 import { Button } from "@/components/ui/button"
@@ -55,25 +63,114 @@ type Customer = {
   status: "active" | "inactive" | "pending"
   orders: number
   revenue: number
+  category?: string
+  brand?: string
 }
+
+const categoryOptions = [
+  { value: "electronics", label: "Electronics" },
+  { value: "clothing", label: "Clothing" },
+  { value: "home_goods", label: "Home Goods" },
+  { value: "books", label: "Books" },
+]
+
+const brandOptions = [
+  { value: "brand_a", label: "Brand A" },
+  { value: "brand_b", label: "Brand B" },
+  { value: "brand_c", label: "Brand C" },
+  { value: "brand_d", label: "Brand D" },
+]
 
 const columns: DataTableColumnDef<Customer>[] = [
   {
     accessorKey: "name",
-    header: ({ column }) => (
-      <TableColumnHeader column={column} title="Customer" />
+    header: () => (
+      <TableColumnHeader className="justify-start">
+        <span className="mr-2 text-sm font-semibold">Product Name</span>
+        <TableColumnSortMenu />
+      </TableColumnHeader>
     ),
+    meta: {
+      label: "Product Name",
+    },
+    enableColumnFilter: true,
+  },
+  {
+    accessorKey: "category",
+    header: () => (
+      <TableColumnHeader>
+        <TableColumnTitle />
+        <TableColumnActions>
+          <TableColumnMenu>
+            <div className="border-b p-2">
+              <DataTableFacetedFilter
+                accessorKey="category"
+                options={categoryOptions}
+                trigger={
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-full justify-start font-normal"
+                  >
+                    <Filter className="mr-2 h-4 w-4" />
+                    Filter
+                  </Button>
+                }
+              />
+            </div>
+          </TableColumnMenu>
+        </TableColumnActions>
+      </TableColumnHeader>
+    ),
+    meta: {
+      label: "Category",
+      options: categoryOptions,
+    },
+    cell: ({ row }) => {
+      // Custom cell to match select options
+      const category = row.getValue("category") as string
+      const option = categoryOptions.find(opt => opt.value === category)
+      return <span>{option?.label || category}</span>
+    },
+    enableColumnFilter: true,
+  },
+  {
+    accessorKey: "brand",
+    header: () => (
+      <TableColumnHeader>
+        <TableColumnTitle />
+        <TableColumnActions>
+          <TableColumnFilter>
+            <DataTableFacetedFilter
+              accessorKey="brand"
+              options={brandOptions}
+              trigger={<TableColumnFilterTrigger />}
+            />
+          </TableColumnFilter>
+          <TableColumnMenu />
+        </TableColumnActions>
+      </TableColumnHeader>
+    ),
+    meta: {
+      label: "Brand",
+      options: brandOptions,
+    },
+    enableColumnFilter: true,
   },
   {
     accessorKey: "company",
-    header: ({ column }) => (
-      <TableColumnHeader column={column} title="Company" />
+    header: () => (
+      <TableColumnHeader>
+        <TableColumnTitle title="Company" />
+      </TableColumnHeader>
     ),
   },
   {
     accessorKey: "status",
-    header: ({ column }) => (
-      <TableColumnHeader column={column} title="Status" />
+    header: () => (
+      <TableColumnHeader>
+        <TableColumnTitle title="Status" />
+      </TableColumnHeader>
     ),
     cell: ({ row }) => {
       const status = row.getValue("status") as string
@@ -94,14 +191,18 @@ const columns: DataTableColumnDef<Customer>[] = [
   },
   {
     accessorKey: "orders",
-    header: ({ column }) => (
-      <TableColumnHeader column={column} title="Orders" />
+    header: () => (
+      <TableColumnHeader>
+        <TableColumnTitle title="Orders" />
+      </TableColumnHeader>
     ),
   },
   {
     accessorKey: "revenue",
-    header: ({ column }) => (
-      <TableColumnHeader column={column} title="Revenue" />
+    header: () => (
+      <TableColumnHeader>
+        <TableColumnTitle title="Revenue" />
+      </TableColumnHeader>
     ),
     cell: ({ row }) => {
       const revenue = parseFloat(row.getValue("revenue"))
@@ -213,6 +314,10 @@ export default function AsideTableStateExample() {
     pageIndex: 0,
     pageSize: 8,
   })
+  const [columnPinning, setColumnPinning] = useState<ColumnPinningState>({
+    left: [],
+    right: [],
+  })
 
   // Selected customer for aside panel
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>()
@@ -227,6 +332,7 @@ export default function AsideTableStateExample() {
     setSorting([])
     setColumnFilters([])
     setColumnVisibility({})
+    setColumnPinning({ left: [], right: [] })
     setPagination({ pageIndex: 0, pageSize: 8 })
     setSelectedCustomerId(null)
   }
@@ -280,12 +386,14 @@ export default function AsideTableStateExample() {
           sorting,
           columnFilters,
           columnVisibility,
+          columnPinning,
           pagination,
         }}
         onGlobalFilterChange={setGlobalFilter}
         onSortingChange={setSorting}
         onColumnFiltersChange={setColumnFilters}
         onColumnVisibilityChange={setColumnVisibility}
+        onColumnPinningChange={setColumnPinning}
         onPaginationChange={setPagination}
       >
         <DataTableToolbarSection className="justify-between">
