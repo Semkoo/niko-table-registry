@@ -45,17 +45,21 @@ const columns: DataTableColumnDef<Product>[] = [
     accessorKey: "name",
     header: () => (
       <TableColumnHeader>
-        <TableColumnTitle title="Product" />
+        <TableColumnTitle />
         <TableColumnSortMenu />
       </TableColumnHeader>
     ),
+    meta: {
+      label: "Product",
+      variant: "select",
+    },
   },
   {
     accessorKey: "category",
     header: () => (
       <TableColumnHeader>
-        <TableColumnTitle title="Category" />
-        <TableColumnSortMenu />
+        <TableColumnTitle />
+        <TableColumnSortMenu variant="text" />
       </TableColumnHeader>
     ),
   },
@@ -63,8 +67,8 @@ const columns: DataTableColumnDef<Product>[] = [
     accessorKey: "price",
     header: () => (
       <TableColumnHeader>
-        <TableColumnTitle title="Price" />
-        <TableColumnSortMenu />
+        <TableColumnTitle />
+        <TableColumnSortMenu variant="number" />
       </TableColumnHeader>
     ),
     cell: ({ row }) => {
@@ -76,8 +80,8 @@ const columns: DataTableColumnDef<Product>[] = [
     accessorKey: "stock",
     header: () => (
       <TableColumnHeader>
-        <TableColumnTitle title="Stock" />
-        <TableColumnSortMenu />
+        <TableColumnTitle />
+        <TableColumnSortMenu variant="number" />
       </TableColumnHeader>
     ),
   },
