@@ -6,6 +6,7 @@ import type {
   SortingState,
   ColumnFiltersState,
   VisibilityState,
+  ColumnPinningState,
 } from "@tanstack/react-table"
 import {
   DataTableRoot,
@@ -23,8 +24,17 @@ import {
   DataTableEmptyDescription,
   DataTableEmptyIcon,
   DataTableEmptyMessage,
+  DataTableFacetedFilter, // Ensure FacetedFilter is available if we use it in columns
 } from "@/components/niko-data-table"
-import { TableColumnHeader } from "@/components/niko-data-table/components"
+import {
+  TableColumnHeader,
+  TableColumnTitle,
+  TableColumnActions,
+  TableColumnFilter,
+  TableColumnFilterTrigger,
+  TableColumnMenu,
+  TableColumnSortMenu,
+} from "@/components/niko-data-table/components"
 import {
   daysAgo,
   JOIN_OPERATORS,
@@ -80,7 +90,12 @@ const brandOptions = [
 const columns: DataTableColumnDef<Product>[] = [
   {
     accessorKey: "name",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <TableColumnHeader className="justify-start">
+        <span className="mr-2 text-sm font-semibold">Product Name</span>
+        <TableColumnSortMenu />
+      </TableColumnHeader>
+    ),
     meta: {
       label: "Product Name",
       variant: "text",
@@ -89,7 +104,22 @@ const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "category",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <TableColumnHeader>
+        <TableColumnTitle />
+        <TableColumnActions>
+          <TableColumnFilter>
+            <DataTableFacetedFilter
+              accessorKey="category"
+              title="Category"
+              options={categoryOptions}
+              trigger={<TableColumnFilterTrigger />}
+            />
+          </TableColumnFilter>
+          <TableColumnMenu />
+        </TableColumnActions>
+      </TableColumnHeader>
+    ),
     meta: {
       label: "Category",
       variant: "select",
@@ -104,7 +134,21 @@ const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "brand",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <TableColumnHeader>
+        <span className="mr-2 text-sm font-semibold">Brand</span>
+        <TableColumnActions>
+          <TableColumnFilter>
+            <DataTableFacetedFilter
+              accessorKey="brand"
+              title="Brand"
+              options={brandOptions}
+              trigger={<TableColumnFilterTrigger />}
+            />
+          </TableColumnFilter>
+        </TableColumnActions>
+      </TableColumnHeader>
+    ),
     meta: {
       label: "Brand",
       variant: "select",
@@ -114,7 +158,11 @@ const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "price",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <TableColumnHeader>
+        <TableColumnTitle />
+      </TableColumnHeader>
+    ),
     meta: {
       label: "Price",
       unit: "$",
@@ -128,7 +176,11 @@ const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "stock",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <TableColumnHeader>
+        <TableColumnTitle />
+      </TableColumnHeader>
+    ),
     meta: {
       label: "Stock",
       variant: "number",
@@ -145,7 +197,11 @@ const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "rating",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <TableColumnHeader>
+        <TableColumnTitle />
+      </TableColumnHeader>
+    ),
     meta: {
       label: "Rating",
       variant: "number",
@@ -163,7 +219,11 @@ const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "inStock",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <TableColumnHeader>
+        <TableColumnTitle />
+      </TableColumnHeader>
+    ),
     meta: {
       label: "In Stock",
       variant: "boolean",
@@ -180,7 +240,11 @@ const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "releaseDate",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <TableColumnHeader>
+        <TableColumnTitle />
+      </TableColumnHeader>
+    ),
     meta: {
       label: "Release Date",
       variant: "date",
@@ -395,6 +459,10 @@ export default function AdvancedInlineStateTableExample() {
     pageIndex: 0,
     pageSize: 10,
   })
+  const [columnPinning, setColumnPinning] = useState<ColumnPinningState>({
+    left: [],
+    right: [],
+  })
 
   // Extract current filters from table state (like advanced-state.tsx)
   const currentFilters = useMemo(() => {
@@ -538,7 +606,9 @@ export default function AdvancedInlineStateTableExample() {
     setGlobalFilter("")
     setSorting([])
     setColumnFilters([])
+    setColumnFilters([])
     setColumnVisibility({})
+    setColumnPinning({ left: [], right: [] })
     setPagination({ pageIndex: 0, pageSize: 10 })
   }
 
@@ -553,6 +623,7 @@ export default function AdvancedInlineStateTableExample() {
           sorting,
           columnFilters,
           columnVisibility,
+          columnPinning,
           pagination,
         }}
         // Pass state updaters
@@ -563,6 +634,7 @@ export default function AdvancedInlineStateTableExample() {
         onSortingChange={setSorting}
         onColumnFiltersChange={setColumnFilters}
         onColumnVisibilityChange={setColumnVisibility}
+        onColumnPinningChange={setColumnPinning}
         onPaginationChange={setPagination}
       >
         <FilterToolbar
@@ -683,6 +755,14 @@ export default function AdvancedInlineStateTableExample() {
                 }
               </span>
             </div>
+
+            <div className="flex justify-between">
+              <span className="font-medium">Pinned Columns:</span>
+              <span className="text-foreground">
+                {columnPinning.left?.length || 0} Left,{" "}
+                {columnPinning.right?.length || 0} Right
+              </span>
+            </div>
           </div>
 
           {/* Detailed state (collapsible) */}
@@ -697,6 +777,12 @@ export default function AdvancedInlineStateTableExample() {
                   {displayFilters.length > 0
                     ? JSON.stringify(displayFilters, null, 2)
                     : "No enhanced filters"}
+                </pre>
+              </div>
+              <div>
+                <strong>Column Pinning:</strong>
+                <pre className="mt-1 overflow-auto rounded bg-muted p-2">
+                  {JSON.stringify(columnPinning, null, 2)}
                 </pre>
               </div>
               <div>

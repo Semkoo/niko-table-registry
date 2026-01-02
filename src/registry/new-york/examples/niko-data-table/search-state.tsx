@@ -24,7 +24,10 @@ import {
   DataTableEmptyTitle,
   DataTableEmptyDescription,
 } from "@/components/niko-data-table"
-import { TableColumnHeader } from "@/components/niko-data-table/components"
+import {
+  TableColumnTitle,
+  TableColumnHeader,
+} from "@/components/niko-data-table/components"
 import type { DataTableColumnDef } from "@/components/niko-data-table/types"
 import { Button } from "@/components/ui/button"
 import { UserSearch, SearchX } from "lucide-react"
@@ -48,28 +51,44 @@ type Customer = {
 const columns: DataTableColumnDef<Customer>[] = [
   {
     accessorKey: "name",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <TableColumnHeader>
+        <TableColumnTitle />
+      </TableColumnHeader>
+    ),
     meta: {
       label: "Name",
     },
   },
   {
     accessorKey: "email",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <TableColumnHeader>
+        <TableColumnTitle />
+      </TableColumnHeader>
+    ),
     meta: {
       label: "Email",
     },
   },
   {
     accessorKey: "company",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <TableColumnHeader>
+        <TableColumnTitle />
+      </TableColumnHeader>
+    ),
     meta: {
       label: "Company",
     },
   },
   {
     accessorKey: "phone",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <TableColumnHeader>
+        <TableColumnTitle />
+      </TableColumnHeader>
+    ),
     meta: {
       label: "Phone",
     },

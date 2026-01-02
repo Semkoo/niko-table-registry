@@ -17,7 +17,10 @@ import {
   DataTableEmptyIcon,
   DataTableEmptyMessage,
 } from "@/components/niko-data-table"
-import { TableColumnHeader } from "@/components/niko-data-table/components"
+import {
+  TableColumnTitle,
+  TableColumnHeader,
+} from "@/components/niko-data-table/components"
 import { daysAgo } from "@/components/niko-data-table/lib"
 import type { DataTableColumnDef } from "@/components/niko-data-table/types"
 import { Badge } from "@/components/ui/badge"
@@ -48,7 +51,11 @@ const categoryOptions = [
 const columns: DataTableColumnDef<Product>[] = [
   {
     accessorKey: "name",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <TableColumnHeader>
+        <TableColumnTitle />
+      </TableColumnHeader>
+    ),
     meta: {
       label: "Product Name",
       variant: "text",
@@ -57,7 +64,11 @@ const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "category",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <TableColumnHeader>
+        <TableColumnTitle />
+      </TableColumnHeader>
+    ),
     meta: {
       label: "Category",
       variant: "select",
@@ -75,7 +86,11 @@ const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "brand",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <TableColumnHeader>
+        <TableColumnTitle />
+      </TableColumnHeader>
+    ),
     meta: {
       label: "Brand",
       variant: "select",
@@ -87,7 +102,11 @@ const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "price",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <TableColumnHeader>
+        <TableColumnTitle />
+      </TableColumnHeader>
+    ),
     meta: {
       label: "Price",
       unit: "$",
@@ -101,7 +120,11 @@ const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "stock",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <TableColumnHeader>
+        <TableColumnTitle />
+      </TableColumnHeader>
+    ),
     meta: {
       label: "Stock",
       variant: "number",
@@ -118,7 +141,11 @@ const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "rating",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <TableColumnHeader>
+        <TableColumnTitle />
+      </TableColumnHeader>
+    ),
     meta: {
       label: "Rating",
       variant: "number",
@@ -136,7 +163,11 @@ const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "inStock",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <TableColumnHeader>
+        <TableColumnTitle />
+      </TableColumnHeader>
+    ),
     meta: {
       label: "In Stock",
       variant: "boolean",
@@ -153,7 +184,11 @@ const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "releaseDate",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <TableColumnHeader>
+        <TableColumnTitle />
+      </TableColumnHeader>
+    ),
     meta: {
       label: "Release Date",
       variant: "date",

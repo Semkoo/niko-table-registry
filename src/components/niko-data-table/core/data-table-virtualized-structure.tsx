@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/table"
 import { Skeleton } from "@/components/ui/skeleton"
 import { DataTableEmptyState } from "../components/data-table-empty-state"
+import { TableColumnHeaderRoot } from "../components/table-column-header"
 import { getCommonPinningStyles } from "../lib/styles"
 
 // ============================================================================
@@ -79,12 +80,14 @@ export const DataTableVirtualizedHeader = React.memo(
                   className={cn(size ? "" : "w-full", "flex items-center")}
                   style={headerStyle}
                 >
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(
+                  {header.isPlaceholder ? null : (
+                    <TableColumnHeaderRoot column={header.column}>
+                      {flexRender(
                         header.column.columnDef.header,
                         header.getContext(),
                       )}
+                    </TableColumnHeaderRoot>
+                  )}
                 </TableHead>
               )
             })}

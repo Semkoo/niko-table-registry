@@ -1,11 +1,17 @@
 // Reusable UI components
 export {
   TableColumnHeader,
+  TableColumnHeaderRoot,
   TableColumnTitle,
   TableColumnActions,
   TableColumnFilter,
   TableColumnFilterTrigger,
+  TableColumnSortMenu,
+  TableColumnHide,
+  TableColumnPin,
   TableColumnMenu,
+  TableColumnFacetedFilterMenu,
+  TableColumnSettingFilterMenu,
 } from "./table-column-header"
 export { DataTableToolbarSection } from "./data-table-toolbar-section"
 export type { DataTableToolbarSectionProps } from "./data-table-toolbar-section"

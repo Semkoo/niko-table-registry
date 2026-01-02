@@ -17,7 +17,10 @@ import {
   DataTableEmptyTitle,
   DataTableEmptyDescription,
 } from "@/components/niko-data-table"
-import { TableColumnHeader } from "@/components/niko-data-table/components"
+import {
+  TableColumnHeader,
+  TableColumnTitle,
+} from "@/components/niko-data-table/components"
 import type { DataTableColumnDef } from "@/components/niko-data-table/types"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -126,8 +129,10 @@ export default function VirtualizedTableExample() {
       },
       {
         accessorKey: "name",
-        header: ({ column }) => (
-          <TableColumnHeader column={column} title="Name" />
+        header: () => (
+          <TableColumnHeader>
+            <TableColumnTitle title="Name" />
+          </TableColumnHeader>
         ),
         cell: ({ row }) => (
           <div className="font-medium">{row.getValue("name")}</div>
@@ -135,8 +140,10 @@ export default function VirtualizedTableExample() {
       },
       {
         accessorKey: "category",
-        header: ({ column }) => (
-          <TableColumnHeader column={column} title="Category" />
+        header: () => (
+          <TableColumnHeader>
+            <TableColumnTitle title="Category" />
+          </TableColumnHeader>
         ),
         cell: ({ row }) => (
           <div className="capitalize">{row.getValue("category")}</div>
@@ -144,8 +151,10 @@ export default function VirtualizedTableExample() {
       },
       {
         accessorKey: "price",
-        header: ({ column }) => (
-          <TableColumnHeader column={column} title="Price" />
+        header: () => (
+          <TableColumnHeader>
+            <TableColumnTitle title="Price" />
+          </TableColumnHeader>
         ),
         cell: ({ row }) => {
           const price = row.getValue("price") as number
@@ -154,8 +163,10 @@ export default function VirtualizedTableExample() {
       },
       {
         accessorKey: "stock",
-        header: ({ column }) => (
-          <TableColumnHeader column={column} title="Stock" />
+        header: () => (
+          <TableColumnHeader>
+            <TableColumnTitle title="Stock" />
+          </TableColumnHeader>
         ),
         cell: ({ row }) => (
           <div className="text-right">{row.getValue("stock")}</div>
@@ -163,8 +174,10 @@ export default function VirtualizedTableExample() {
       },
       {
         accessorKey: "status",
-        header: ({ column }) => (
-          <TableColumnHeader column={column} title="Status" />
+        header: () => (
+          <TableColumnHeader>
+            <TableColumnTitle title="Status" />
+          </TableColumnHeader>
         ),
         cell: ({ row }) => {
           const status = row.getValue("status") as string

@@ -6,6 +6,7 @@ import type {
   SortingState,
   ColumnFiltersState,
   VisibilityState,
+  ColumnPinningState,
   Updater,
 } from "@tanstack/react-table"
 import {
@@ -20,13 +21,20 @@ import {
   DataTableSortMenu,
   DataTableFilterMenu,
   DataTableEmptyBody,
+  DataTableEmptyIcon,
+  DataTableEmptyMessage,
   DataTableEmptyFilteredMessage,
   DataTableEmptyTitle,
   DataTableEmptyDescription,
-  DataTableEmptyIcon,
-  DataTableEmptyMessage,
 } from "@/components/niko-data-table"
-import { TableColumnHeader } from "@/components/niko-data-table/components"
+import {
+  TableColumnHeader,
+  TableColumnTitle,
+  TableColumnActions,
+  TableColumnSortMenu,
+  TableColumnFacetedFilterMenu,
+  TableColumnSettingFilterMenu,
+} from "@/components/niko-data-table/components"
 import {
   daysAgo,
   JOIN_OPERATORS,
@@ -82,16 +90,34 @@ const brandOptions = [
 const columns: DataTableColumnDef<Product>[] = [
   {
     accessorKey: "name",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <TableColumnHeader className="justify-start">
+        <TableColumnTitle>Product Name</TableColumnTitle>
+        <TableColumnSortMenu />
+        <TableColumnSettingFilterMenu />
+      </TableColumnHeader>
+    ),
     meta: {
       label: "Product Name",
       variant: "text",
     },
     enableColumnFilter: true,
+    cell: ({ row }) => (
+      <div className="font-medium">{row.getValue("name")}</div>
+    ),
   },
   {
     accessorKey: "category",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <TableColumnHeader>
+        <TableColumnTitle>Category</TableColumnTitle>
+        <TableColumnActions>
+          <TableColumnFacetedFilterMenu options={categoryOptions} />
+          <TableColumnSortMenu />
+          <TableColumnSettingFilterMenu />
+        </TableColumnActions>
+      </TableColumnHeader>
+    ),
     meta: {
       label: "Category",
       variant: "select",
@@ -106,7 +132,15 @@ const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "brand",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <TableColumnHeader>
+        <TableColumnTitle>Brand</TableColumnTitle>
+        <TableColumnActions>
+          <TableColumnFacetedFilterMenu options={brandOptions} />
+          <TableColumnSettingFilterMenu />
+        </TableColumnActions>
+      </TableColumnHeader>
+    ),
     meta: {
       label: "Brand",
       variant: "select",
@@ -116,7 +150,11 @@ const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "price",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <TableColumnHeader>
+        <TableColumnTitle />
+      </TableColumnHeader>
+    ),
     meta: {
       label: "Price",
       unit: "$",
@@ -130,7 +168,11 @@ const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "stock",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <TableColumnHeader>
+        <TableColumnTitle />
+      </TableColumnHeader>
+    ),
     meta: {
       label: "Stock",
       variant: "number",
@@ -147,7 +189,11 @@ const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "rating",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <TableColumnHeader>
+        <TableColumnTitle />
+      </TableColumnHeader>
+    ),
     meta: {
       label: "Rating",
       variant: "number",
@@ -165,7 +211,11 @@ const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "inStock",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <TableColumnHeader>
+        <TableColumnTitle />
+      </TableColumnHeader>
+    ),
     meta: {
       label: "In Stock",
       variant: "boolean",
@@ -182,7 +232,11 @@ const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "releaseDate",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <TableColumnHeader>
+        <TableColumnTitle />
+      </TableColumnHeader>
+    ),
     meta: {
       label: "Release Date",
       variant: "date",
@@ -398,12 +452,18 @@ export default function AdvancedStateTableExample() {
     pageIndex: 0,
     pageSize: 10,
   })
+  const [columnPinning, setColumnPinning] = useState<ColumnPinningState>({
+    left: [],
+    right: [],
+  })
 
   const resetAllState = useCallback(() => {
     setGlobalFilter("")
     setSorting([])
     setColumnFilters([])
+    setColumnFilters([])
     setColumnVisibility({})
+    setColumnPinning({ left: [], right: [] })
     setPagination({ pageIndex: 0, pageSize: 10 })
   }, [])
 
@@ -635,6 +695,7 @@ export default function AdvancedStateTableExample() {
           sorting,
           columnFilters,
           columnVisibility,
+          columnPinning,
           pagination,
         }}
         // Pass state updaters (using useCallback for performance)
@@ -643,6 +704,7 @@ export default function AdvancedStateTableExample() {
         onColumnFiltersChange={handleColumnFiltersChange}
         onColumnVisibilityChange={handleColumnVisibilityChange}
         onPaginationChange={handlePaginationChange}
+        onColumnPinningChange={setColumnPinning}
       >
         <FilterToolbar
           filters={currentFilters}
@@ -757,6 +819,14 @@ export default function AdvancedStateTableExample() {
                 }
               </span>
             </div>
+
+            <div className="flex justify-between">
+              <span className="font-medium">Pinned Columns:</span>
+              <span className="text-foreground">
+                {columnPinning.left?.length || 0} Left,{" "}
+                {columnPinning.right?.length || 0} Right
+              </span>
+            </div>
           </div>
 
           {/* Detailed state (collapsible) */}
@@ -771,6 +841,12 @@ export default function AdvancedStateTableExample() {
                   {displayFilters.length > 0
                     ? JSON.stringify(displayFilters, null, 2)
                     : "No enhanced filters"}
+                </pre>
+              </div>
+              <div>
+                <strong>Column Pinning:</strong>
+                <pre className="mt-1 overflow-auto rounded bg-muted p-2">
+                  {JSON.stringify(columnPinning, null, 2)}
                 </pre>
               </div>
               <div>

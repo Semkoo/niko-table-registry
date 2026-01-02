@@ -18,7 +18,10 @@ import {
   DataTableEmptyTitle,
   DataTableEmptyDescription,
 } from "@/components/niko-data-table"
-import { TableColumnHeader } from "@/components/niko-data-table/components"
+import {
+  TableColumnTitle,
+  TableColumnHeader,
+} from "@/components/niko-data-table/components"
 import type { DataTableColumnDef } from "@/components/niko-data-table/types"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -36,21 +39,33 @@ type Order = {
 const columns: DataTableColumnDef<Order>[] = [
   {
     accessorKey: "orderNumber",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <TableColumnHeader>
+        <TableColumnTitle />
+      </TableColumnHeader>
+    ),
     meta: {
       label: "Order #",
     },
   },
   {
     accessorKey: "customer",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <TableColumnHeader>
+        <TableColumnTitle />
+      </TableColumnHeader>
+    ),
     meta: {
       label: "Customer",
     },
   },
   {
     accessorKey: "amount",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <TableColumnHeader>
+        <TableColumnTitle />
+      </TableColumnHeader>
+    ),
     meta: {
       label: "Amount",
     },
@@ -61,7 +76,11 @@ const columns: DataTableColumnDef<Order>[] = [
   },
   {
     accessorKey: "status",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <TableColumnHeader>
+        <TableColumnTitle />
+      </TableColumnHeader>
+    ),
     meta: {
       label: "Status",
     },
@@ -78,7 +97,11 @@ const columns: DataTableColumnDef<Order>[] = [
   },
   {
     accessorKey: "date",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <TableColumnHeader>
+        <TableColumnTitle />
+      </TableColumnHeader>
+    ),
     meta: {
       label: "Date",
     },

@@ -18,13 +18,16 @@ import {
   DataTableEmptyBody,
 } from "@/components/niko-data-table"
 import {
-  TableColumnHeader,
   DataTableAside,
   DataTableAsideTrigger,
   DataTableAsideContent,
   DataTableAsideHeader,
   DataTableAsideTitle,
   DataTableAsideClose,
+} from "@/components/niko-data-table/components"
+import {
+  TableColumnTitle,
+  TableColumnHeader,
 } from "@/components/niko-data-table/components"
 import { useDataTable } from "@/components/niko-data-table/core"
 import type { DataTableColumnDef } from "@/components/niko-data-table/types"
@@ -171,7 +174,11 @@ export default function AsideTableExample() {
     () => [
       {
         accessorKey: "name",
-        header: ({ column }) => <TableColumnHeader column={column} />,
+        header: () => (
+          <TableColumnHeader>
+            <TableColumnTitle />
+          </TableColumnHeader>
+        ),
         meta: {
           label: "Name",
         },
@@ -181,21 +188,33 @@ export default function AsideTableExample() {
       },
       {
         accessorKey: "email",
-        header: ({ column }) => <TableColumnHeader column={column} />,
+        header: () => (
+          <TableColumnHeader>
+            <TableColumnTitle />
+          </TableColumnHeader>
+        ),
         meta: {
           label: "Email",
         },
       },
       {
         accessorKey: "company",
-        header: ({ column }) => <TableColumnHeader column={column} />,
+        header: () => (
+          <TableColumnHeader>
+            <TableColumnTitle />
+          </TableColumnHeader>
+        ),
         meta: {
           label: "Company",
         },
       },
       {
         accessorKey: "phone",
-        header: ({ column }) => <TableColumnHeader column={column} />,
+        header: () => (
+          <TableColumnHeader>
+            <TableColumnTitle />
+          </TableColumnHeader>
+        ),
         meta: {
           label: "Phone",
         },

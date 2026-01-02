@@ -24,6 +24,7 @@ import type {
   VisibilityState,
   RowSelectionState,
   ExpandedState,
+  ColumnPinningState,
 } from "@tanstack/react-table"
 import {
   DataTableRoot,
@@ -50,9 +51,9 @@ import {
   TableColumnHeader,
   TableColumnTitle,
   TableColumnActions,
-  TableColumnFilter,
-  TableColumnFilterTrigger,
-  TableColumnMenu,
+  TableColumnSortMenu,
+  TableColumnFacetedFilterMenu,
+  TableColumnSettingFilterMenu,
   DataTableAside,
   DataTableAsideContent,
   DataTableAsideHeader,
@@ -532,6 +533,10 @@ export default function AllFeaturesTableExample() {
     pageIndex: 0,
     pageSize: 10,
   })
+  const [columnPinning, setColumnPinning] = useState<ColumnPinningState>({
+    left: [],
+    right: [],
+  })
 
   // Sidebar state
   const [selectedProductId, setSelectedProductId] = useState<string | null>(
@@ -549,6 +554,7 @@ export default function AllFeaturesTableExample() {
     setColumnVisibility({})
     setRowSelection({})
     setExpanded({})
+    setColumnPinning({ left: [], right: [] })
     setPagination({ pageIndex: 0, pageSize: 10 })
     setSelectedProductId(null)
   }, [])
@@ -662,7 +668,13 @@ export default function AllFeaturesTableExample() {
       },
       {
         accessorKey: "name",
-        header: ({ column }) => <TableColumnHeader column={column} />,
+        header: () => (
+          <TableColumnHeader className="justify-start">
+            <TableColumnTitle>Product Name</TableColumnTitle>
+            <TableColumnSortMenu />
+            <TableColumnSettingFilterMenu />
+          </TableColumnHeader>
+        ),
         meta: {
           label: "Product Name",
           variant: "text",
@@ -681,18 +693,12 @@ export default function AllFeaturesTableExample() {
       },
       {
         accessorKey: "category",
-        header: ({ column }) => (
-          <TableColumnHeader column={column}>
+        header: () => (
+          <TableColumnHeader>
             <TableColumnTitle />
             <TableColumnActions>
-              <TableColumnFilter>
-                <DataTableFacetedFilter
-                  accessorKey="category"
-                  options={categoryOptions}
-                  trigger={<TableColumnFilterTrigger />}
-                />
-              </TableColumnFilter>
-              <TableColumnMenu />
+              <TableColumnFacetedFilterMenu options={categoryOptions} />
+              <TableColumnSettingFilterMenu />
             </TableColumnActions>
           </TableColumnHeader>
         ),
@@ -710,18 +716,12 @@ export default function AllFeaturesTableExample() {
       },
       {
         accessorKey: "brand",
-        header: ({ column }) => (
-          <TableColumnHeader column={column}>
+        header: () => (
+          <TableColumnHeader>
             <TableColumnTitle />
             <TableColumnActions>
-              <TableColumnFilter>
-                <DataTableFacetedFilter
-                  accessorKey="brand"
-                  options={brandOptions}
-                  trigger={<TableColumnFilterTrigger />}
-                />
-              </TableColumnFilter>
-              <TableColumnMenu />
+              <TableColumnFacetedFilterMenu options={brandOptions} />
+              <TableColumnSettingFilterMenu />
             </TableColumnActions>
           </TableColumnHeader>
         ),
@@ -734,7 +734,11 @@ export default function AllFeaturesTableExample() {
       },
       {
         accessorKey: "price",
-        header: ({ column }) => <TableColumnHeader column={column} />,
+        header: () => (
+          <TableColumnHeader>
+            <TableColumnTitle />
+          </TableColumnHeader>
+        ),
         meta: {
           label: "Price",
           unit: "$",
@@ -748,7 +752,11 @@ export default function AllFeaturesTableExample() {
       },
       {
         accessorKey: "stock",
-        header: ({ column }) => <TableColumnHeader column={column} />,
+        header: () => (
+          <TableColumnHeader>
+            <TableColumnTitle />
+          </TableColumnHeader>
+        ),
         meta: {
           label: "Stock",
           variant: "number",
@@ -765,7 +773,11 @@ export default function AllFeaturesTableExample() {
       },
       {
         accessorKey: "rating",
-        header: ({ column }) => <TableColumnHeader column={column} />,
+        header: () => (
+          <TableColumnHeader>
+            <TableColumnTitle />
+          </TableColumnHeader>
+        ),
         meta: {
           label: "Rating",
           variant: "number",
@@ -783,7 +795,11 @@ export default function AllFeaturesTableExample() {
       },
       {
         accessorKey: "inStock",
-        header: ({ column }) => <TableColumnHeader column={column} />,
+        header: () => (
+          <TableColumnHeader>
+            <TableColumnTitle />
+          </TableColumnHeader>
+        ),
         meta: {
           label: "In Stock",
           variant: "boolean",
@@ -800,7 +816,11 @@ export default function AllFeaturesTableExample() {
       },
       {
         accessorKey: "releaseDate",
-        header: ({ column }) => <TableColumnHeader column={column} />,
+        header: () => (
+          <TableColumnHeader>
+            <TableColumnTitle />
+          </TableColumnHeader>
+        ),
         meta: {
           label: "Release Date",
           variant: "date",
@@ -877,6 +897,7 @@ export default function AllFeaturesTableExample() {
           columnVisibility,
           rowSelection,
           expanded,
+          columnPinning,
           pagination,
         }}
         onGlobalFilterChange={value => {
@@ -888,6 +909,7 @@ export default function AllFeaturesTableExample() {
         onColumnVisibilityChange={setColumnVisibility}
         onRowSelectionChange={setRowSelection}
         onExpandedChange={setExpanded}
+        onColumnPinningChange={setColumnPinning}
         onPaginationChange={setPagination}
       >
         <FilterToolbar
@@ -1017,6 +1039,13 @@ export default function AllFeaturesTableExample() {
               <span className="font-medium">Page:</span>
               <span className="text-foreground">
                 {pagination.pageIndex + 1} (Size: {pagination.pageSize})
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="font-medium">Pinned Columns:</span>
+              <span className="text-foreground">
+                {columnPinning.left?.length || 0} Left,{" "}
+                {columnPinning.right?.length || 0} Right
               </span>
             </div>
           </div>

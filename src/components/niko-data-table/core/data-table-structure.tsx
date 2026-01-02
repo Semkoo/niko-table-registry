@@ -13,6 +13,7 @@ import {
 import { flexRender } from "@tanstack/react-table"
 import { Skeleton } from "@/components/ui/skeleton"
 import { DataTableEmptyState } from "../components/data-table-empty-state"
+import { TableColumnHeaderRoot } from "../components/table-column-header"
 import { getCommonPinningStyles } from "../lib/styles"
 
 // ============================================================================
@@ -74,12 +75,14 @@ export const DataTableHeader = React.memo(function DataTableHeader({
 
             return (
               <TableHead key={header.id} style={headerStyle}>
-                {header.isPlaceholder
-                  ? null
-                  : flexRender(
+                {header.isPlaceholder ? null : (
+                  <TableColumnHeaderRoot column={header.column}>
+                    {flexRender(
                       header.column.columnDef.header,
                       header.getContext(),
                     )}
+                  </TableColumnHeaderRoot>
+                )}
               </TableHead>
             )
           })}
