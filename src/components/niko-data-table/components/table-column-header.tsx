@@ -34,6 +34,7 @@ import {
 import { SORT_ICONS, SORT_LABELS } from "../config/data-table"
 import type { SortIconVariant } from "../config/data-table"
 import { DataTableFacetedFilter } from "./data-table-faceted-filter"
+import { useDerivedColumnTitle } from "../hooks"
 
 // ============================================================================
 // CONTEXT
@@ -129,8 +130,7 @@ export function TableColumnTitle<TData, TValue>({
 }) {
   const { column } = useColumnHeaderContext<TData, TValue>()
 
-  const displayTitle =
-    children ?? title ?? column.columnDef.meta?.label ?? column.id
+  const derivedTitle = useDerivedColumnTitle(column, column.id, title)
 
   return (
     <div
@@ -139,7 +139,7 @@ export function TableColumnTitle<TData, TValue>({
         className,
       )}
     >
-      {displayTitle}
+      {children ?? derivedTitle}
     </div>
   )
 }
@@ -264,7 +264,9 @@ export function TableColumnSortMenu<TData, TValue>({
     | TableColumnHeaderContextValue<TData, TValue>
     | undefined
   const column = propColumn || context?.column
-  const variant = propVariant
+
+  // Track shift key state for multi-sort
+  const shiftKeyRef = React.useRef(false)
 
   if (!column) {
     console.warn(
@@ -275,9 +277,13 @@ export function TableColumnSortMenu<TData, TValue>({
 
   const canSort = column.getCanSort()
   const sortState = column.getIsSorted()
+  // Access table options via runtime property (TanStack Table exposes this at runtime)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const enableMultiSort = ((column as any)._table?.options?.enableMultiSort ??
+    true) as boolean
 
   const resolvedVariant: SortIconVariant =
-    variant ||
+    propVariant ||
     (column.columnDef.meta?.variant === "number"
       ? "number"
       : column.columnDef.meta?.variant === "date"
@@ -318,20 +324,24 @@ export function TableColumnSortMenu<TData, TValue>({
       <DropdownMenuContent align="end" className="w-48">
         <DropdownMenuLabel className="flex items-center justify-between text-xs font-normal text-muted-foreground">
           Sort Options
-          <Tooltip delayDuration={300}>
-            <TooltipTrigger asChild>
-              <HelpCircle className="size-3.5 cursor-help" />
-            </TooltipTrigger>
-            <TooltipContent side="right">
-              Hold Shift to multi-sort
-            </TooltipContent>
-          </Tooltip>
+          {enableMultiSort && (
+            <Tooltip delayDuration={300}>
+              <TooltipTrigger asChild>
+                <HelpCircle className="size-3.5 cursor-help" />
+              </TooltipTrigger>
+              <TooltipContent side="right">
+                Hold Shift to multi-sort
+              </TooltipContent>
+            </Tooltip>
+          )}
         </DropdownMenuLabel>
         <DropdownMenuItem
-          onSelect={e => {
-            const isMulti = (e as unknown as { originalEvent?: MouseEvent })
-              .originalEvent?.shiftKey
-            column.toggleSorting(false, isMulti)
+          onPointerDown={e => {
+            shiftKeyRef.current = e.shiftKey
+          }}
+          onSelect={() => {
+            column.toggleSorting(false, enableMultiSort && shiftKeyRef.current)
+            shiftKeyRef.current = false
           }}
           className={cn(sortState === "asc" && "bg-accent font-medium")}
         >
@@ -339,10 +349,12 @@ export function TableColumnSortMenu<TData, TValue>({
           {labels.asc}
         </DropdownMenuItem>
         <DropdownMenuItem
-          onSelect={e => {
-            const isMulti = (e as unknown as { originalEvent?: MouseEvent })
-              .originalEvent?.shiftKey
-            column.toggleSorting(true, isMulti)
+          onPointerDown={e => {
+            shiftKeyRef.current = e.shiftKey
+          }}
+          onSelect={() => {
+            column.toggleSorting(true, enableMultiSort && shiftKeyRef.current)
+            shiftKeyRef.current = false
           }}
           className={cn(sortState === "desc" && "bg-accent font-medium")}
         >
@@ -549,11 +561,18 @@ export function TableColumnMenu<TData, TValue>({
 }) {
   const { column } = useColumnHeaderContext<TData, TValue>()
 
+  // Track shift key state for multi-sort
+  const shiftKeyRef = React.useRef(false)
+
   const canSort = column.getCanSort()
   const canHide = column.getCanHide()
   const canPin = column.getCanPin()
 
   const sortState = column.getIsSorted()
+  // Access table options via runtime property (TanStack Table exposes this at runtime)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const enableMultiSort = ((column as any)._table?.options?.enableMultiSort ??
+    true) as boolean
 
   const resolvedVariant: SortIconVariant =
     (column.columnDef.meta?.variant === "number"
@@ -594,28 +613,46 @@ export function TableColumnMenu<TData, TValue>({
           <>
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              onSelect={e => {
-                const isMulti = (e as unknown as { originalEvent?: MouseEvent })
-                  .originalEvent?.shiftKey
-                column.toggleSorting(false, isMulti)
+              onPointerDown={e => {
+                shiftKeyRef.current = e.shiftKey
+              }}
+              onSelect={() => {
+                column.toggleSorting(
+                  false,
+                  enableMultiSort && shiftKeyRef.current,
+                )
+                shiftKeyRef.current = false
               }}
               className={cn(sortState === "asc" && "bg-accent font-medium")}
             >
               <icons.asc className="mr-2 size-4 text-muted-foreground/70" />
               {labels.asc}
-              <DropdownMenuShortcut className="text-xs">⇧</DropdownMenuShortcut>
+              {enableMultiSort && (
+                <DropdownMenuShortcut className="text-xs">
+                  ⇧
+                </DropdownMenuShortcut>
+              )}
             </DropdownMenuItem>
             <DropdownMenuItem
-              onSelect={e => {
-                const isMulti = (e as unknown as { originalEvent?: MouseEvent })
-                  .originalEvent?.shiftKey
-                column.toggleSorting(true, isMulti)
+              onPointerDown={e => {
+                shiftKeyRef.current = e.shiftKey
+              }}
+              onSelect={() => {
+                column.toggleSorting(
+                  true,
+                  enableMultiSort && shiftKeyRef.current,
+                )
+                shiftKeyRef.current = false
               }}
               className={cn(sortState === "desc" && "bg-accent font-medium")}
             >
               <icons.desc className="mr-2 size-4 text-muted-foreground/70" />
               {labels.desc}
-              <DropdownMenuShortcut className="text-xs">⇧</DropdownMenuShortcut>
+              {enableMultiSort && (
+                <DropdownMenuShortcut className="text-xs">
+                  ⇧
+                </DropdownMenuShortcut>
+              )}
             </DropdownMenuItem>
             {sortState && (
               <DropdownMenuItem onSelect={() => column.clearSorting()}>
