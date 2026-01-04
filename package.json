@@ -65,9 +65,9 @@
     "@radix-ui/react-toggle-group": "^1.1.11",
     "@radix-ui/react-tooltip": "^1.2.8",
     "@tailwindcss/vite": "^4.1.18",
-    "@tanstack/react-query": "^5.90.12",
+    "@tanstack/react-query": "^5.90.16",
     "@tanstack/react-table": "^8.21.3",
-    "@tanstack/react-virtual": "^3.13.13",
+    "@tanstack/react-virtual": "^3.13.16",
     "@zxcvbn-ts/core": "^3.0.4",
     "@zxcvbn-ts/language-common": "^3.0.4",
     "@zxcvbn-ts/language-en": "^3.0.2",
@@ -84,9 +84,9 @@
     "react": "^19.2.3",
     "react-day-picker": "^9.13.0",
     "react-dom": "^19.2.3",
-    "react-hook-form": "^7.69.0",
-    "react-resizable-panels": "^4.0.15",
-    "react-virtuoso": "^4.17.0",
+    "react-hook-form": "^7.70.0",
+    "react-resizable-panels": "^4.2.0",
+    "react-virtuoso": "^4.18.1",
     "satori": "^0.18.3",
     "sharp": "^0.34.5",
     "shiki": "^3.20.0",
@@ -95,7 +95,7 @@
     "tailwind-merge": "^3.4.0",
     "tailwindcss": "^4.1.18",
     "vaul": "^1.1.2",
-    "zod": "^4.2.1"
+    "zod": "^4.3.5"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.6",
