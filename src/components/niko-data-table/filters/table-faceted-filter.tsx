@@ -266,7 +266,7 @@ export function TableFacetedFilterContent({
 }) {
   return (
     <Command>
-      <CommandInput placeholder={title} />
+      <CommandInput placeholder={title} className="pl-2" />
       <CommandList className="max-h-full">
         <CommandEmpty>No results found.</CommandEmpty>
         <CommandGroup className="max-h-75 overflow-x-hidden overflow-y-auto">
