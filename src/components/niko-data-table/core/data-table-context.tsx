@@ -9,13 +9,13 @@ import React, {
 } from "react"
 import type { DataTable, DataTableColumnDef } from "../types"
 
-export type DataTableContextState<TData> = {
-  table: DataTable<TData>
-  columns: DataTableColumnDef<TData>[]
+export type DataTableContextState = {
   isLoading: boolean
 }
 
-type DataTableContextProps<TData> = DataTableContextState<TData> & {
+type DataTableContextProps<TData> = DataTableContextState & {
+  table: DataTable<TData>
+  columns: DataTableColumnDef<TData>[]
   setIsLoading: (isLoading: boolean) => void
 }
 
@@ -37,23 +37,16 @@ export enum DataTableActions {
   SET_IS_LOADING,
 }
 
-type DataTableAction<TData> =
-  | {
-      type: DataTableActions.SET
-      value: Partial<DataTableContextState<TData>>
-    }
-  | {
-      type: DataTableActions.SET_IS_LOADING
-      value: boolean
-    }
+type DataTableAction = {
+  type: DataTableActions.SET_IS_LOADING
+  value: boolean
+}
 
-function dataTableReducer<TData>(
-  state: DataTableContextState<TData>,
-  action: DataTableAction<TData>,
-): DataTableContextState<TData> {
+function dataTableReducer(
+  state: DataTableContextState,
+  action: DataTableAction,
+): DataTableContextState {
   switch (action.type) {
-    case DataTableActions.SET:
-      return { ...state, ...action.value }
     case DataTableActions.SET_IS_LOADING:
       return { ...state, isLoading: action.value }
     default:
@@ -61,14 +54,8 @@ function dataTableReducer<TData>(
   }
 }
 
-function deriveInitialState<TData>(
-  table: DataTable<TData>,
-  columns?: DataTableColumnDef<TData>[],
-  isLoading?: boolean,
-): DataTableContextState<TData> {
+function deriveInitialState(isLoading?: boolean): DataTableContextState {
   return {
-    table,
-    columns: columns || (table.options.columns as DataTableColumnDef<TData>[]),
     isLoading: isLoading ?? false,
   }
 }
@@ -86,9 +73,9 @@ export function DataTableProvider<TData>({
   columns,
   isLoading: externalIsLoading,
 }: DataTableProviderProps<TData>) {
-  const initialState = deriveInitialState(table, columns, externalIsLoading)
+  const initialState = deriveInitialState(externalIsLoading)
 
-  const [state, dispatch] = useReducer(dataTableReducer<TData>, initialState)
+  const [state, dispatch] = useReducer(dataTableReducer, initialState)
 
   const setIsLoading = useCallback((value: boolean) => {
     dispatch({
@@ -126,7 +113,7 @@ export function DataTableProvider<TData>({
    * IMPACT: Enables proper reactivity - without this, search/filter/sort don't work.
    * Also 70-90% faster than JSON.stringify for large state objects.
    */
-  const tableState = state.table.getState()
+  const tableState = table.getState()
 
   // Extract state values for dependency tracking (more efficient than JSON.stringify)
   const globalFilter = tableState.globalFilter
@@ -179,8 +166,8 @@ export function DataTableProvider<TData>({
 
     return {
       globalFilter: globalFilterHash,
-      sortingLength: sorting?.length ?? 0,
-      columnFiltersLength: columnFilters?.length ?? 0,
+      sortingHash: JSON.stringify(sorting),
+      columnFiltersHash: JSON.stringify(columnFilters),
       columnVisibilityHash: getObjectHash(
         columnVisibility as Record<string, unknown> | undefined,
       ),
@@ -221,13 +208,13 @@ export function DataTableProvider<TData>({
   const value = React.useMemo(
     () =>
       ({
-        table: state.table,
-        columns: state.columns,
+        table,
+        columns:
+          columns || (table.options.columns as DataTableColumnDef<TData>[]),
         isLoading: state.isLoading,
         setIsLoading,
       }) as DataTableContextProps<TData>,
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [state.table, state.columns, state.isLoading, setIsLoading, tableStateKey],
+    [table, columns, state.isLoading, setIsLoading, tableStateKey],
   )
 
   return (

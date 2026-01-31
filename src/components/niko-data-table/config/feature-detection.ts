@@ -94,6 +94,10 @@ const COMPONENT_FEATURES: Record<string, FeatureRequirements> = {
   // Sorting components (most components support sorting by default)
   DataTableColumnHeader: { enableSorting: true },
   TableColumnHeader: { enableSorting: true },
+  TableColumnSortMenu: { enableSorting: true, enableMultiSort: true },
+  DataTableColumnSortMenu: { enableSorting: true, enableMultiSort: true },
+  TableColumnSortOptions: { enableSorting: true, enableMultiSort: true },
+  DataTableColumnSortOptions: { enableSorting: true, enableMultiSort: true },
 }
 
 /**
@@ -182,7 +186,7 @@ export function detectFeaturesFromChildren(
     }
   }
 
-  // Check columns for header components (like TableColumnHeader)
+  // Check columns for header components (like TableColumnHeader, TableColumnSortMenu)
   if (columns && Array.isArray(columns)) {
     for (const column of columns) {
       // Check if column has enableColumnFilter set
@@ -206,16 +210,22 @@ export function detectFeaturesFromChildren(
               getCanHide: () => true,
               getIsVisible: () => true,
               toggleVisibility: () => {},
+              getCanPin: () => true,
+              getIsPinned: () => false,
+              pin: () => {},
+              columnDef: { meta: {} },
+              id: "mock",
             },
           })
 
-          // Check if the result is a valid React element
-          if (isValidElement(headerResult)) {
-            if (typeof headerResult.type === "function") {
-              const componentType =
-                headerResult.type as ComponentType<unknown> & {
-                  displayName?: string
-                }
+          // Recursively check the header result and all its children for feature components
+          const checkElementForFeatures = (element: ReactNode) => {
+            if (!isValidElement(element)) return
+
+            if (typeof element.type === "function") {
+              const componentType = element.type as ComponentType<unknown> & {
+                displayName?: string
+              }
               const displayName = componentType.displayName
               const componentFeatures = displayName
                 ? COMPONENT_FEATURES[displayName]
@@ -231,7 +241,18 @@ export function detectFeaturesFromChildren(
                 })
               }
             }
+
+            // Recursively check children
+            const propsWithChildren =
+              element.props as PropsWithChildren<unknown>
+            if (propsWithChildren?.children) {
+              Children.toArray(propsWithChildren.children).forEach(
+                checkElementForFeatures,
+              )
+            }
           }
+
+          checkElementForFeatures(headerResult)
         } catch {
           // Ignore errors from calling header function
         }

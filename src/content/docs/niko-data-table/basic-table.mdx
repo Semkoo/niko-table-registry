@@ -63,7 +63,7 @@ First, we'll define our columns with sortable headers.
 ```tsx showLineNumbers title="columns.tsx"
 "use client"
 
-import { TableColumnHeader } from "@/components/niko-data-table/components"
+import { DataTableColumnHeader } from "@/components/niko-data-table/components"
 import type { DataTableColumnDef } from "@/components/niko-data-table/types"
 
 export type Product = {
@@ -78,18 +78,20 @@ export const columns: DataTableColumnDef<Product>[] = [
   {
     accessorKey: "name",
     header: ({ column }) => (
-      <TableColumnHeader column={column} title="Product" />
+      <DataTableColumnHeader column={column} title="Product" />
     ),
   },
   {
     accessorKey: "category",
     header: ({ column }) => (
-      <TableColumnHeader column={column} title="Category" />
+      <DataTableColumnHeader column={column} title="Category" />
     ),
   },
   {
     accessorKey: "price",
-    header: ({ column }) => <TableColumnHeader column={column} title="Price" />,
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Price" />
+    ),
     cell: ({ row }) => {
       const price = parseFloat(row.getValue("price"))
       return <div className="font-medium">${price.toFixed(2)}</div>
@@ -97,7 +99,9 @@ export const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "stock",
-    header: ({ column }) => <TableColumnHeader column={column} title="Stock" />,
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Stock" />
+    ),
   },
 ]
 ```
@@ -118,7 +122,7 @@ import {
   DataTablePagination,
   DataTableViewMenu,
 } from "@/components/niko-data-table"
-import { TableColumnHeader } from "@/components/niko-data-table/components"
+import { DataTableColumnHeader } from "@/components/niko-data-table/components"
 import type { DataTableColumnDef } from "@/components/niko-data-table/types"
 
 type Product = {
@@ -133,18 +137,20 @@ const columns: DataTableColumnDef<Product>[] = [
   {
     accessorKey: "name",
     header: ({ column }) => (
-      <TableColumnHeader column={column} title="Product" />
+      <DataTableColumnHeader column={column} title="Product" />
     ),
   },
   {
     accessorKey: "category",
     header: ({ column }) => (
-      <TableColumnHeader column={column} title="Category" />
+      <DataTableColumnHeader column={column} title="Category" />
     ),
   },
   {
     accessorKey: "price",
-    header: ({ column }) => <TableColumnHeader column={column} title="Price" />,
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Price" />
+    ),
     cell: ({ row }) => {
       const price = parseFloat(row.getValue("price"))
       return <div className="font-medium">${price.toFixed(2)}</div>
@@ -152,7 +158,9 @@ const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "stock",
-    header: ({ column }) => <TableColumnHeader column={column} title="Stock" />,
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Stock" />
+    ),
   },
 ]
 
@@ -202,7 +210,7 @@ You can customize the available page sizes:
 
 ## Sorting
 
-Sorting is enabled by using `TableColumnHeader` in your column definitions. Click any column header to sort by that column.
+Sorting is enabled by using `DataTableColumnHeader` in your column definitions. Click any column header to sort by that column.
 
 ### Multi-Column Sorting
 

@@ -67,7 +67,7 @@ First, we'll define our columns with filter metadata.
 ```tsx showLineNumbers title="columns.tsx"
 "use client"
 
-import { TableColumnHeader } from "@/components/niko-data-table/components"
+import { DataTableColumnHeader } from "@/components/niko-data-table/components"
 import type { DataTableColumnDef } from "@/components/niko-data-table/types"
 
 export type Product = {
@@ -85,7 +85,7 @@ export type Product = {
 export const columns: DataTableColumnDef<Product>[] = [
   {
     accessorKey: "name",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: ({ column }) => <DataTableColumnHeader column={column} />,
     meta: {
       label: "Product Name",
       variant: "text",
@@ -94,7 +94,7 @@ export const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "category",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: ({ column }) => <DataTableColumnHeader column={column} />,
     meta: {
       label: "Category",
       variant: "select",
@@ -107,7 +107,7 @@ export const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "price",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: ({ column }) => <DataTableColumnHeader column={column} />,
     meta: {
       label: "Price",
       variant: "number",
@@ -137,7 +137,7 @@ import {
   DataTableInlineFilter,
   DataTableEmptyBody,
 } from "@/components/niko-data-table"
-import { TableColumnHeader } from "@/components/niko-data-table/components"
+import { DataTableColumnHeader } from "@/components/niko-data-table/components"
 import type { DataTableColumnDef } from "@/components/niko-data-table/types"
 
 type Product = {
@@ -150,7 +150,7 @@ type Product = {
 const columns: DataTableColumnDef<Product>[] = [
   {
     accessorKey: "name",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: ({ column }) => <DataTableColumnHeader column={column} />,
     meta: {
       label: "Product Name",
       variant: "text",
@@ -159,7 +159,7 @@ const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "category",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: ({ column }) => <DataTableColumnHeader column={column} />,
     meta: {
       label: "Category",
       variant: "select",
@@ -172,7 +172,7 @@ const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "price",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: ({ column }) => <DataTableColumnHeader column={column} />,
     meta: {
       label: "Price",
       variant: "number",

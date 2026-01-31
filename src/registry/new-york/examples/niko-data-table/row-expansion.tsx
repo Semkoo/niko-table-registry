@@ -18,8 +18,9 @@ import {
   DataTableEmptyMessage,
 } from "@/components/niko-data-table"
 import {
-  TableColumnHeader,
-  TableColumnTitle,
+  DataTableColumnHeader,
+  DataTableColumnTitle,
+  DataTableColumnSortMenu,
 } from "@/components/niko-data-table/components"
 import type { DataTableColumnDef } from "@/components/niko-data-table/types"
 import { Button } from "@/components/ui/button"
@@ -282,9 +283,10 @@ export default function RowExpansionSimpleExample() {
       {
         accessorKey: "orderNumber",
         header: () => (
-          <TableColumnHeader>
-            <TableColumnTitle title="Order #" />
-          </TableColumnHeader>
+          <DataTableColumnHeader>
+            <DataTableColumnTitle title="Order #" />
+            <DataTableColumnSortMenu />
+          </DataTableColumnHeader>
         ),
         cell: ({ row }) => (
           <div className="font-mono font-medium">
@@ -295,9 +297,10 @@ export default function RowExpansionSimpleExample() {
       {
         accessorKey: "customer",
         header: () => (
-          <TableColumnHeader>
-            <TableColumnTitle title="Customer" />
-          </TableColumnHeader>
+          <DataTableColumnHeader>
+            <DataTableColumnTitle title="Customer" />
+            <DataTableColumnSortMenu variant="text" />
+          </DataTableColumnHeader>
         ),
         cell: ({ row }) => {
           return (
@@ -313,9 +316,10 @@ export default function RowExpansionSimpleExample() {
       {
         accessorKey: "items",
         header: () => (
-          <TableColumnHeader>
-            <TableColumnTitle title="Items" />
-          </TableColumnHeader>
+          <DataTableColumnHeader>
+            <DataTableColumnTitle title="Items" />
+            <DataTableColumnSortMenu />
+          </DataTableColumnHeader>
         ),
         cell: ({ row }) => {
           const itemCount = row.original.items.length
@@ -329,9 +333,10 @@ export default function RowExpansionSimpleExample() {
       {
         accessorKey: "date",
         header: () => (
-          <TableColumnHeader>
-            <TableColumnTitle title="Date" />
-          </TableColumnHeader>
+          <DataTableColumnHeader>
+            <DataTableColumnTitle title="Date" />
+            <DataTableColumnSortMenu />
+          </DataTableColumnHeader>
         ),
         cell: ({ row }) => (
           <div className="text-sm">
@@ -342,9 +347,10 @@ export default function RowExpansionSimpleExample() {
       {
         accessorKey: "total",
         header: () => (
-          <TableColumnHeader>
-            <TableColumnTitle title="Total" />
-          </TableColumnHeader>
+          <DataTableColumnHeader>
+            <DataTableColumnTitle title="Total" />
+            <DataTableColumnSortMenu variant="number" />
+          </DataTableColumnHeader>
         ),
         cell: ({ row }) => {
           const total = row.getValue("total") as number
@@ -354,9 +360,10 @@ export default function RowExpansionSimpleExample() {
       {
         accessorKey: "status",
         header: () => (
-          <TableColumnHeader>
-            <TableColumnTitle title="Status" />
-          </TableColumnHeader>
+          <DataTableColumnHeader>
+            <DataTableColumnTitle title="Status" />
+            <DataTableColumnSortMenu variant="text" />
+          </DataTableColumnHeader>
         ),
         cell: ({ row }) => {
           const status = row.getValue("status") as string

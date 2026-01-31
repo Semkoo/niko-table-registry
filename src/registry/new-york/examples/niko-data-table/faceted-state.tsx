@@ -29,13 +29,13 @@ import {
   DataTableEmptyMessage,
 } from "@/components/niko-data-table"
 import {
-  TableColumnHeader,
-  TableColumnTitle,
-  TableColumnActions,
-  TableColumnMenu,
-  TableColumnSortMenu,
-  TableColumnFilter,
-  TableColumnFilterTrigger,
+  DataTableColumnHeader,
+  DataTableColumnTitle,
+  DataTableColumnActions,
+  DataTableColumnSortMenu,
+  DataTableColumnSortOptions,
+  DataTableColumnFilter,
+  DataTableColumnFilterTrigger,
 } from "@/components/niko-data-table/components"
 import { daysAgo } from "@/components/niko-data-table/lib"
 import type { DataTableColumnDef } from "@/components/niko-data-table/types"
@@ -75,10 +75,10 @@ const columns: DataTableColumnDef<Product>[] = [
   {
     accessorKey: "name",
     header: () => (
-      <TableColumnHeader className="justify-start">
+      <DataTableColumnHeader className="justify-start">
         <span className="mr-2 text-sm font-semibold">Product Name</span>
-        <TableColumnSortMenu />
-      </TableColumnHeader>
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
     ),
     meta: {
       label: "Product Name",
@@ -87,29 +87,28 @@ const columns: DataTableColumnDef<Product>[] = [
   {
     accessorKey: "category",
     header: () => (
-      <TableColumnHeader>
-        <TableColumnTitle />
-        <TableColumnActions>
-          <TableColumnMenu>
-            <div className="border-b p-2">
-              <DataTableFacetedFilter
-                accessorKey="category"
-                options={categoryOptions}
-                trigger={
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 w-full justify-start font-normal"
-                  >
-                    <Filter className="mr-2 h-4 w-4" />
-                    Filter
-                  </Button>
-                }
-              />
-            </div>
-          </TableColumnMenu>
-        </TableColumnActions>
-      </TableColumnHeader>
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnActions>
+          <div className="border-b p-2">
+            <DataTableFacetedFilter
+              accessorKey="category"
+              options={categoryOptions}
+              trigger={
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 w-full justify-start font-normal"
+                >
+                  <Filter className="mr-2 h-4 w-4" />
+                  Filter
+                </Button>
+              }
+            />
+          </div>
+          <DataTableColumnSortOptions variant="text" />
+        </DataTableColumnActions>
+      </DataTableColumnHeader>
     ),
     meta: {
       label: "Category",
@@ -128,18 +127,18 @@ const columns: DataTableColumnDef<Product>[] = [
   {
     accessorKey: "brand",
     header: () => (
-      <TableColumnHeader>
-        <TableColumnTitle />
-        <TableColumnActions>
-          <TableColumnFilter>
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnActions>
+          <DataTableColumnFilter>
             <DataTableFacetedFilter
               accessorKey="brand"
-              trigger={<TableColumnFilterTrigger />}
+              trigger={<DataTableColumnFilterTrigger />}
             />
-          </TableColumnFilter>
-          <TableColumnMenu />
-        </TableColumnActions>
-      </TableColumnHeader>
+          </DataTableColumnFilter>
+          <DataTableColumnSortOptions variant="text" />
+        </DataTableColumnActions>
+      </DataTableColumnHeader>
     ),
     meta: {
       label: "Brand",
@@ -152,9 +151,10 @@ const columns: DataTableColumnDef<Product>[] = [
   {
     accessorKey: "price",
     header: () => (
-      <TableColumnHeader>
-        <TableColumnTitle />
-      </TableColumnHeader>
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu variant="number" />
+      </DataTableColumnHeader>
     ),
     meta: {
       label: "Price",
@@ -174,9 +174,10 @@ const columns: DataTableColumnDef<Product>[] = [
   {
     accessorKey: "stock",
     header: () => (
-      <TableColumnHeader>
-        <TableColumnTitle />
-      </TableColumnHeader>
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu variant="number" />
+      </DataTableColumnHeader>
     ),
     meta: {
       label: "Stock",
@@ -193,9 +194,10 @@ const columns: DataTableColumnDef<Product>[] = [
   {
     accessorKey: "rating",
     header: () => (
-      <TableColumnHeader>
-        <TableColumnTitle />
-      </TableColumnHeader>
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu variant="number" />
+      </DataTableColumnHeader>
     ),
     meta: {
       label: "Rating",
@@ -216,9 +218,10 @@ const columns: DataTableColumnDef<Product>[] = [
   {
     accessorKey: "inStock",
     header: () => (
-      <TableColumnHeader>
-        <TableColumnTitle />
-      </TableColumnHeader>
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
     ),
     meta: {
       label: "In Stock",
@@ -241,9 +244,10 @@ const columns: DataTableColumnDef<Product>[] = [
   {
     accessorKey: "releaseDate",
     header: () => (
-      <TableColumnHeader>
-        <TableColumnTitle />
-      </TableColumnHeader>
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
     ),
     meta: {
       label: "Release Date",

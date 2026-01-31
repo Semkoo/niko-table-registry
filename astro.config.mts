@@ -172,6 +172,10 @@ export default defineConfig({
               slug: "niko-data-table/row-expansion-table",
             },
             {
+              label: "Column Pinning Table",
+              slug: "niko-data-table/column-pinning-table",
+            },
+            {
               label: "Tree Table",
               slug: "niko-data-table/tree-table",
             },

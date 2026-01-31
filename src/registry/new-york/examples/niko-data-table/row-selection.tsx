@@ -18,8 +18,9 @@ import {
   DataTableEmptyDescription,
 } from "@/components/niko-data-table"
 import {
-  TableColumnTitle,
-  TableColumnHeader,
+  DataTableColumnTitle,
+  DataTableColumnHeader,
+  DataTableColumnSortMenu,
   DataTableSelectionBar,
 } from "@/components/niko-data-table/components"
 import { useDataTable } from "@/components/niko-data-table/core"
@@ -193,9 +194,10 @@ export default function RowSelectionExample() {
       {
         accessorKey: "name",
         header: () => (
-          <TableColumnHeader>
-            <TableColumnTitle />
-          </TableColumnHeader>
+          <DataTableColumnHeader>
+            <DataTableColumnTitle />
+            <DataTableColumnSortMenu />
+          </DataTableColumnHeader>
         ),
         meta: {
           label: "Name",
@@ -207,9 +209,10 @@ export default function RowSelectionExample() {
       {
         accessorKey: "email",
         header: () => (
-          <TableColumnHeader>
-            <TableColumnTitle />
-          </TableColumnHeader>
+          <DataTableColumnHeader>
+            <DataTableColumnTitle />
+            <DataTableColumnSortMenu variant="text" />
+          </DataTableColumnHeader>
         ),
         meta: {
           label: "Email",
@@ -218,9 +221,10 @@ export default function RowSelectionExample() {
       {
         accessorKey: "company",
         header: () => (
-          <TableColumnHeader>
-            <TableColumnTitle />
-          </TableColumnHeader>
+          <DataTableColumnHeader>
+            <DataTableColumnTitle />
+            <DataTableColumnSortMenu variant="text" />
+          </DataTableColumnHeader>
         ),
         meta: {
           label: "Company",
@@ -229,9 +233,10 @@ export default function RowSelectionExample() {
       {
         accessorKey: "phone",
         header: () => (
-          <TableColumnHeader>
-            <TableColumnTitle />
-          </TableColumnHeader>
+          <DataTableColumnHeader>
+            <DataTableColumnTitle />
+            <DataTableColumnSortMenu variant="text" />
+          </DataTableColumnHeader>
         ),
         meta: {
           label: "Phone",

@@ -25,13 +25,13 @@ import {
   DataTableEmptyMessage,
 } from "@/components/niko-data-table"
 import {
-  TableColumnHeader,
-  TableColumnTitle,
-  TableColumnActions,
-  TableColumnMenu,
-  TableColumnSortMenu,
-  TableColumnFilter,
-  TableColumnFilterTrigger,
+  DataTableColumnHeader,
+  DataTableColumnTitle,
+  DataTableColumnActions,
+  DataTableColumnSortMenu,
+  DataTableColumnSortOptions,
+  DataTableColumnFilter,
+  DataTableColumnFilterTrigger,
   DataTableAside,
   DataTableAsideTrigger,
   DataTableAsideContent,
@@ -85,10 +85,10 @@ const columns: DataTableColumnDef<Customer>[] = [
   {
     accessorKey: "name",
     header: () => (
-      <TableColumnHeader className="justify-start">
+      <DataTableColumnHeader className="justify-start">
         <span className="mr-2 text-sm font-semibold">Product Name</span>
-        <TableColumnSortMenu />
-      </TableColumnHeader>
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
     ),
     meta: {
       label: "Product Name",
@@ -98,29 +98,28 @@ const columns: DataTableColumnDef<Customer>[] = [
   {
     accessorKey: "category",
     header: () => (
-      <TableColumnHeader>
-        <TableColumnTitle />
-        <TableColumnActions>
-          <TableColumnMenu>
-            <div className="border-b p-2">
-              <DataTableFacetedFilter
-                accessorKey="category"
-                options={categoryOptions}
-                trigger={
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 w-full justify-start font-normal"
-                  >
-                    <Filter className="mr-2 h-4 w-4" />
-                    Filter
-                  </Button>
-                }
-              />
-            </div>
-          </TableColumnMenu>
-        </TableColumnActions>
-      </TableColumnHeader>
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnActions>
+          <div className="border-b p-2">
+            <DataTableFacetedFilter
+              accessorKey="category"
+              options={categoryOptions}
+              trigger={
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 w-full justify-start font-normal"
+                >
+                  <Filter className="mr-2 h-4 w-4" />
+                  Filter
+                </Button>
+              }
+            />
+          </div>
+          <DataTableColumnSortOptions variant="text" />
+        </DataTableColumnActions>
+      </DataTableColumnHeader>
     ),
     meta: {
       label: "Category",
@@ -137,19 +136,19 @@ const columns: DataTableColumnDef<Customer>[] = [
   {
     accessorKey: "brand",
     header: () => (
-      <TableColumnHeader>
-        <TableColumnTitle />
-        <TableColumnActions>
-          <TableColumnFilter>
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnActions>
+          <DataTableColumnFilter>
             <DataTableFacetedFilter
               accessorKey="brand"
               options={brandOptions}
-              trigger={<TableColumnFilterTrigger />}
+              trigger={<DataTableColumnFilterTrigger />}
             />
-          </TableColumnFilter>
-          <TableColumnMenu />
-        </TableColumnActions>
-      </TableColumnHeader>
+          </DataTableColumnFilter>
+          <DataTableColumnSortOptions variant="text" />
+        </DataTableColumnActions>
+      </DataTableColumnHeader>
     ),
     meta: {
       label: "Brand",
@@ -160,17 +159,19 @@ const columns: DataTableColumnDef<Customer>[] = [
   {
     accessorKey: "company",
     header: () => (
-      <TableColumnHeader>
-        <TableColumnTitle title="Company" />
-      </TableColumnHeader>
+      <DataTableColumnHeader>
+        <DataTableColumnTitle title="Company" />
+        <DataTableColumnSortMenu variant="text" />
+      </DataTableColumnHeader>
     ),
   },
   {
     accessorKey: "status",
     header: () => (
-      <TableColumnHeader>
-        <TableColumnTitle title="Status" />
-      </TableColumnHeader>
+      <DataTableColumnHeader>
+        <DataTableColumnTitle title="Status" />
+        <DataTableColumnSortMenu variant="text" />
+      </DataTableColumnHeader>
     ),
     cell: ({ row }) => {
       const status = row.getValue("status") as string
@@ -192,17 +193,19 @@ const columns: DataTableColumnDef<Customer>[] = [
   {
     accessorKey: "orders",
     header: () => (
-      <TableColumnHeader>
-        <TableColumnTitle title="Orders" />
-      </TableColumnHeader>
+      <DataTableColumnHeader>
+        <DataTableColumnTitle title="Orders" />
+        <DataTableColumnSortMenu variant="number" />
+      </DataTableColumnHeader>
     ),
   },
   {
     accessorKey: "revenue",
     header: () => (
-      <TableColumnHeader>
-        <TableColumnTitle title="Revenue" />
-      </TableColumnHeader>
+      <DataTableColumnHeader>
+        <DataTableColumnTitle title="Revenue" />
+        <DataTableColumnSortMenu variant="number" />
+      </DataTableColumnHeader>
     ),
     cell: ({ row }) => {
       const revenue = parseFloat(row.getValue("revenue"))

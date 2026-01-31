@@ -26,8 +26,9 @@ import {
   DataTableAsideClose,
 } from "@/components/niko-data-table/components"
 import {
-  TableColumnTitle,
-  TableColumnHeader,
+  DataTableColumnTitle,
+  DataTableColumnHeader,
+  DataTableColumnSortMenu,
 } from "@/components/niko-data-table/components"
 import { useDataTable } from "@/components/niko-data-table/core"
 import type { DataTableColumnDef } from "@/components/niko-data-table/types"
@@ -175,9 +176,10 @@ export default function AsideTableExample() {
       {
         accessorKey: "name",
         header: () => (
-          <TableColumnHeader>
-            <TableColumnTitle />
-          </TableColumnHeader>
+          <DataTableColumnHeader>
+            <DataTableColumnTitle />
+            <DataTableColumnSortMenu />
+          </DataTableColumnHeader>
         ),
         meta: {
           label: "Name",
@@ -189,9 +191,10 @@ export default function AsideTableExample() {
       {
         accessorKey: "email",
         header: () => (
-          <TableColumnHeader>
-            <TableColumnTitle />
-          </TableColumnHeader>
+          <DataTableColumnHeader>
+            <DataTableColumnTitle />
+            <DataTableColumnSortMenu variant="text" />
+          </DataTableColumnHeader>
         ),
         meta: {
           label: "Email",
@@ -200,9 +203,10 @@ export default function AsideTableExample() {
       {
         accessorKey: "company",
         header: () => (
-          <TableColumnHeader>
-            <TableColumnTitle />
-          </TableColumnHeader>
+          <DataTableColumnHeader>
+            <DataTableColumnTitle />
+            <DataTableColumnSortMenu variant="text" />
+          </DataTableColumnHeader>
         ),
         meta: {
           label: "Company",
@@ -211,9 +215,10 @@ export default function AsideTableExample() {
       {
         accessorKey: "phone",
         header: () => (
-          <TableColumnHeader>
-            <TableColumnTitle />
-          </TableColumnHeader>
+          <DataTableColumnHeader>
+            <DataTableColumnTitle />
+            <DataTableColumnSortMenu variant="text" />
+          </DataTableColumnHeader>
         ),
         meta: {
           label: "Phone",

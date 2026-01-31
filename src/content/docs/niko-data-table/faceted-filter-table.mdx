@@ -67,7 +67,7 @@ First, we'll define our columns with filter functions.
 ```tsx showLineNumbers title="columns.tsx"
 "use client"
 
-import { TableColumnHeader } from "@/components/niko-data-table/components"
+import { DataTableColumnHeader } from "@/components/niko-data-table/components"
 import type { DataTableColumnDef } from "@/components/niko-data-table/types"
 
 export type Product = {
@@ -85,12 +85,12 @@ export type Product = {
 export const columns: DataTableColumnDef<Product>[] = [
   {
     accessorKey: "name",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: ({ column }) => <DataTableColumnHeader column={column} />,
     meta: { label: "Product Name" },
   },
   {
     accessorKey: "category",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: ({ column }) => <DataTableColumnHeader column={column} />,
     meta: {
       label: "Category",
       options: categoryOptions,
@@ -107,7 +107,7 @@ export const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "brand",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: ({ column }) => <DataTableColumnHeader column={column} />,
     meta: {
       label: "Brand",
       autoOptions: true,
@@ -123,7 +123,7 @@ export const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "price",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: ({ column }) => <DataTableColumnHeader column={column} />,
     meta: { label: "Price", unit: "$" },
     enableColumnFilter: true,
     filterFn: (row, id, filterValue: [number, number]) => {
@@ -155,7 +155,7 @@ import {
   DataTableClearFilter,
   DataTableEmptyBody,
 } from "@/components/niko-data-table"
-import { TableColumnHeader } from "@/components/niko-data-table/components"
+import { DataTableColumnHeader } from "@/components/niko-data-table/components"
 import type { DataTableColumnDef } from "@/components/niko-data-table/types"
 
 type Product = {
@@ -185,12 +185,12 @@ const brandOptions = [
 const columns: DataTableColumnDef<Product>[] = [
   {
     accessorKey: "name",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: ({ column }) => <DataTableColumnHeader column={column} />,
     meta: { label: "Product Name" },
   },
   {
     accessorKey: "category",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: ({ column }) => <DataTableColumnHeader column={column} />,
     meta: { label: "Category" },
     enableColumnFilter: true,
     filterFn: (row, id, filterValue: string[]) => {
@@ -200,7 +200,7 @@ const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "brand",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: ({ column }) => <DataTableColumnHeader column={column} />,
     meta: { label: "Brand" },
     enableColumnFilter: true,
     filterFn: (row, id, filterValue: string[]) => {
@@ -210,7 +210,7 @@ const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "price",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: ({ column }) => <DataTableColumnHeader column={column} />,
     meta: { label: "Price", unit: "$" },
   },
 ]

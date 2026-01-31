@@ -236,7 +236,7 @@ function DataTableRootInternal<TData, TValue>({
   const detectFeatures = React.useMemo(() => {
     const detectedFeatures = detectedFeaturesRef.current ?? {}
 
-    return {
+    const features = {
       // Use config first, then explicit props, then detected features, then defaults
       enablePagination:
         finalConfig.enablePagination ??
@@ -270,6 +270,8 @@ function DataTableRootInternal<TData, TValue>({
         false,
       pageCount: finalConfig.pageCount ?? detectedFeatures.pageCount,
     }
+
+    return features
   }, [finalConfig])
 
   // State management

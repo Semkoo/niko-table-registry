@@ -38,6 +38,7 @@ import {
   DataTableSortMenu,
   DataTableFilterMenu,
   DataTableFacetedFilter,
+  DataTableSliderFilter,
   DataTableClearFilter,
   DataTableEmptyBody,
   DataTableEmptyIcon,
@@ -48,12 +49,13 @@ import {
   DataTableEmptyActions,
 } from "@/components/niko-data-table"
 import {
-  TableColumnHeader,
-  TableColumnTitle,
-  TableColumnActions,
-  TableColumnSortMenu,
-  TableColumnFacetedFilterMenu,
-  TableColumnSettingFilterMenu,
+  DataTableColumnHeader,
+  DataTableColumnTitle,
+  DataTableColumnActions,
+  DataTableColumnSortOptions,
+  DataTableColumnFacetedFilterOptions,
+  DataTableColumnPinOptions,
+  DataTableColumnHideOptions,
   DataTableAside,
   DataTableAsideContent,
   DataTableAsideHeader,
@@ -509,6 +511,7 @@ function FilterToolbar({
           limitToFilteredRows
           multiple
         />
+        <DataTableSliderFilter accessorKey="price" />
         <DataTableSortMenu />
         <DataTableFilterMenu
           filters={filters}
@@ -669,11 +672,14 @@ export default function AllFeaturesTableExample() {
       {
         accessorKey: "name",
         header: () => (
-          <TableColumnHeader className="justify-start">
-            <TableColumnTitle>Product Name</TableColumnTitle>
-            <TableColumnSortMenu />
-            <TableColumnSettingFilterMenu />
-          </TableColumnHeader>
+          <DataTableColumnHeader className="justify-start">
+            <DataTableColumnTitle>Product Name</DataTableColumnTitle>
+            <DataTableColumnActions>
+              <DataTableColumnSortOptions withSeparator={false} />
+              <DataTableColumnPinOptions />
+              <DataTableColumnHideOptions />
+            </DataTableColumnActions>
+          </DataTableColumnHeader>
         ),
         meta: {
           label: "Product Name",
@@ -694,13 +700,22 @@ export default function AllFeaturesTableExample() {
       {
         accessorKey: "category",
         header: () => (
-          <TableColumnHeader>
-            <TableColumnTitle />
-            <TableColumnActions>
-              <TableColumnFacetedFilterMenu options={categoryOptions} />
-              <TableColumnSettingFilterMenu />
-            </TableColumnActions>
-          </TableColumnHeader>
+          <DataTableColumnHeader>
+            <DataTableColumnTitle />
+            {/* Composable Actions: Multi-select filter example */}
+            <DataTableColumnActions label="Category Options">
+              <DataTableColumnSortOptions
+                variant="text"
+                withSeparator={false}
+              />
+              <DataTableColumnFacetedFilterOptions
+                options={categoryOptions}
+                multiple
+              />
+              <DataTableColumnPinOptions />
+              <DataTableColumnHideOptions />
+            </DataTableColumnActions>
+          </DataTableColumnHeader>
         ),
         meta: {
           label: "Category",
@@ -717,13 +732,22 @@ export default function AllFeaturesTableExample() {
       {
         accessorKey: "brand",
         header: () => (
-          <TableColumnHeader>
-            <TableColumnTitle />
-            <TableColumnActions>
-              <TableColumnFacetedFilterMenu options={brandOptions} />
-              <TableColumnSettingFilterMenu />
-            </TableColumnActions>
-          </TableColumnHeader>
+          <DataTableColumnHeader>
+            <DataTableColumnTitle />
+            {/* Composable Actions: Single-select filter example */}
+            <DataTableColumnActions label="Brand Options">
+              <DataTableColumnSortOptions
+                variant="text"
+                withSeparator={false}
+              />
+              <DataTableColumnFacetedFilterOptions
+                options={brandOptions}
+                multiple={false}
+              />
+              <DataTableColumnPinOptions />
+              <DataTableColumnHideOptions />
+            </DataTableColumnActions>
+          </DataTableColumnHeader>
         ),
         meta: {
           label: "Brand",
@@ -735,14 +759,22 @@ export default function AllFeaturesTableExample() {
       {
         accessorKey: "price",
         header: () => (
-          <TableColumnHeader>
-            <TableColumnTitle />
-          </TableColumnHeader>
+          <DataTableColumnHeader>
+            <DataTableColumnTitle />
+            <DataTableColumnActions>
+              <DataTableColumnSortOptions
+                variant="number"
+                withSeparator={false}
+              />
+              <DataTableColumnPinOptions />
+              <DataTableColumnHideOptions />
+            </DataTableColumnActions>
+          </DataTableColumnHeader>
         ),
         meta: {
           label: "Price",
           unit: "$",
-          variant: "number",
+          variant: "range",
         },
         cell: ({ row }) => {
           const price = parseFloat(row.getValue("price"))
@@ -753,9 +785,18 @@ export default function AllFeaturesTableExample() {
       {
         accessorKey: "stock",
         header: () => (
-          <TableColumnHeader>
-            <TableColumnTitle />
-          </TableColumnHeader>
+          <DataTableColumnHeader>
+            <DataTableColumnTitle />
+            {/* All actions composed in single dropdown */}
+            <DataTableColumnActions>
+              <DataTableColumnSortOptions
+                variant="number"
+                withSeparator={false}
+              />
+              <DataTableColumnPinOptions />
+              <DataTableColumnHideOptions />
+            </DataTableColumnActions>
+          </DataTableColumnHeader>
         ),
         meta: {
           label: "Stock",
@@ -774,9 +815,17 @@ export default function AllFeaturesTableExample() {
       {
         accessorKey: "rating",
         header: () => (
-          <TableColumnHeader>
-            <TableColumnTitle />
-          </TableColumnHeader>
+          <DataTableColumnHeader>
+            <DataTableColumnTitle />
+            <DataTableColumnActions>
+              <DataTableColumnSortOptions
+                variant="number"
+                withSeparator={false}
+              />
+              <DataTableColumnPinOptions />
+              <DataTableColumnHideOptions />
+            </DataTableColumnActions>
+          </DataTableColumnHeader>
         ),
         meta: {
           label: "Rating",
@@ -796,9 +845,14 @@ export default function AllFeaturesTableExample() {
       {
         accessorKey: "inStock",
         header: () => (
-          <TableColumnHeader>
-            <TableColumnTitle />
-          </TableColumnHeader>
+          <DataTableColumnHeader>
+            <DataTableColumnTitle />
+            <DataTableColumnActions>
+              <DataTableColumnSortOptions withSeparator={false} />
+              <DataTableColumnPinOptions />
+              <DataTableColumnHideOptions />
+            </DataTableColumnActions>
+          </DataTableColumnHeader>
         ),
         meta: {
           label: "In Stock",
@@ -817,9 +871,14 @@ export default function AllFeaturesTableExample() {
       {
         accessorKey: "releaseDate",
         header: () => (
-          <TableColumnHeader>
-            <TableColumnTitle />
-          </TableColumnHeader>
+          <DataTableColumnHeader>
+            <DataTableColumnTitle />
+            <DataTableColumnActions>
+              <DataTableColumnSortOptions withSeparator={false} />
+              <DataTableColumnPinOptions />
+              <DataTableColumnHideOptions />
+            </DataTableColumnActions>
+          </DataTableColumnHeader>
         ),
         meta: {
           label: "Release Date",

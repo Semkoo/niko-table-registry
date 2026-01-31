@@ -583,7 +583,7 @@ import { DataTableExportButton } from "@/components/niko-data-table"
 | `showIcon`       | `boolean`         | `true`         | Show download icon.             |
 | `className`      | `string`          | -              | Additional CSS classes.         |
 
-### TableColumnHeader
+### DataTableColumnHeader
 
 Sortable column header component with dropdown menu for sorting and visibility controls.
 
@@ -600,12 +600,12 @@ Sortable column header component with dropdown menu for sorting and visibility c
 </div>
 
 ```tsx showLineNumbers
-import { TableColumnHeader } from "@/components/niko-data-table/components"
+import { DataTableColumnHeader } from "@/components/niko-data-table/components"
 
 const columns: DataTableColumnDef<User>[] = [
   {
     accessorKey: "name",
-    header: ({ column }) => <TableColumnHeader />,
+    header: ({ column }) => <DataTableColumnHeader />,
     meta: { label: "Name" },
   },
 ]
@@ -620,16 +620,16 @@ const columns: DataTableColumnDef<User>[] = [
 
 #### Composition
 
-The `TableColumnHeader` is composable. You can break it down into parts to customize the layout or add custom filters.
+The `DataTableColumnHeader` is composable. You can break it down into parts to customize the layout or add custom filters.
 
 ```tsx showLineNumbers
 import {
-  TableColumnHeader,
-  TableColumnTitle,
-  TableColumnActions,
-  TableColumnFilter,
-  TableColumnFilterTrigger,
-  TableColumnMenu,
+  DataTableColumnHeader,
+  DataTableColumnTitle,
+  DataTableColumnActions,
+  DataTableColumnFilter,
+  DataDataTableColumnFilterTrigger,
+  DataTableColumnSortOptions,
   DataTableFacetedFilter,
 } from "@/components/niko-data-table"
 
@@ -637,19 +637,19 @@ const columns: DataTableColumnDef<User>[] = [
   {
     accessorKey: "status",
     header: ({ column }) => (
-      <TableColumnHeader>
-        <TableColumnTitle />
-        <TableColumnActions>
-          <TableColumnFilter>
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnActions>
+          <DataTableColumnFilter>
             <DataTableFacetedFilter
               accessorKey="status"
               options={statusOptions}
-              trigger={<TableColumnFilterTrigger />}
+              trigger={<DataDataTableColumnFilterTrigger />}
             />
-          </TableColumnFilter>
-          <TableColumnMenu />
-        </TableColumnActions>
-      </TableColumnHeader>
+          </DataTableColumnFilter>
+          <DataTableColumnSortOptions />
+        </DataTableColumnActions>
+      </DataTableColumnHeader>
     ),
     meta: { label: "Status" },
   },
@@ -658,17 +658,19 @@ const columns: DataTableColumnDef<User>[] = [
 
 #### How Context Works
 
-When you use `flexRender(...)` in the core structure (like `DataTableHeader` or `DataTableVirtualizedHeader`), it renders the JSX returned by your `header` function. That JSX is automatically wrapped by the `<TableColumnHeaderRoot column={...}>` provider in the core components.
+When you use `flexRender(...)` in the core structure (like `DataTableHeader` or `DataTableVirtualizedHeader`), it renders the JSX returned by your `header` function. That JSX is automatically wrapped by the `<DataTableColumnHeaderRoot column={...}>` provider in the core components.
 
-This means any component inside your `header` function (like `TableColumnHeader`, `TableColumnTitle`, etc.) correctly receives the column context even if you are using manual composition in your `columns` definition.
+This means any component inside your `header` function (like `DataTableColumnHeader`, `DataTableColumnTitle`, etc.) correctly receives the column context even if you are using manual composition in your `columns` definition.
 
 #### Sub-Components
 
-- **`TableColumnTitle`**: Renders the column title (clickable to toggle sort).
-- **`TableColumnActions`**: Container for action icons (Filter, Menu) to ensure proper alignment.
-- **`TableColumnFilter`**: Wrapper for filter components.
-- **`TableColumnFilterTrigger`**: Dedicated filter icon button.
-- **`TableColumnMenu`**: Dropdown menu for Sorting, Pinning, and Visibility.
+- **`DataTableColumnTitle`**: Renders the column title (clickable to toggle sort).
+- **`DataTableColumnActions`**: Container for action icons and dropdown menu for column options.
+- **`DataTableColumnFilter`**: Wrapper for filter components.
+- **`DataDataTableColumnFilterTrigger`**: Dedicated filter icon button.
+- **`DataTableColumnSortOptions`**: Sorting options to compose inside DataTableColumnActions.
+- **`DataTableColumnPinOptions`**: Pinning options to compose inside DataTableColumnActions.
+- **`DataTableColumnHideOptions`**: Hide column option to compose inside DataTableColumnActions.
 
 ### DataTableAside
 

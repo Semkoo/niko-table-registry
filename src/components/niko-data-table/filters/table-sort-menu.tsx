@@ -43,7 +43,8 @@ import { cn } from "@/lib/utils"
 import { ChevronsUpDown, Grip } from "lucide-react"
 
 // Import sort labels from TableColumnHeader for consistency
-import { SORT_LABELS, type SortIconVariant } from "../config/data-table"
+import { SORT_LABELS } from "../config/data-table"
+import { FILTER_VARIANTS } from "../lib/constants"
 
 interface TableSortItemProps {
   sort: ColumnSort
@@ -94,20 +95,18 @@ function TableSortItem({
 
   // Try to get the column's variant for sort label
   // This assumes the table instance is available in closure (from parent TableSortMenu)
-  let variant: SortIconVariant = "text"
+  let variant = FILTER_VARIANTS.TEXT
   try {
     // @ts-expect-error: Accessing global window property for table instance variant detection
     const col = (window.__tableSortMenuTable || null)
       ?.getAllColumns?.()
       .find?.((c: { id: string }) => c.id === sort.id)
-    if (col?.columnDef?.meta?.variant === "number") variant = "number"
-    else if (col?.columnDef?.meta?.variant === "date") variant = "date"
-    else if (col?.columnDef?.meta?.variant === "boolean") variant = "boolean"
+    variant = col?.columnDef?.meta?.variant || FILTER_VARIANTS.TEXT
   } catch {
     // ignore
   }
 
-  const labels = SORT_LABELS[variant]
+  const labels = SORT_LABELS[variant] || SORT_LABELS[FILTER_VARIANTS.TEXT]
 
   return (
     <SortableItem value={sort.id} asChild>
