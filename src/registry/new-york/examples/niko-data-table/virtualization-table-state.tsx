@@ -27,11 +27,11 @@ import {
   DataTableEmptyDescription,
 } from "@/components/niko-data-table"
 import {
-  TableColumnHeader,
-  TableColumnTitle,
-  TableColumnActions,
-  TableColumnMenu,
-  TableColumnSortMenu,
+  DataTableColumnHeader,
+  DataTableColumnTitle,
+  DataTableColumnActions,
+  DataTableColumnSortMenu,
+  DataTableColumnSortOptions,
 } from "@/components/niko-data-table/components"
 import type { DataTableColumnDef } from "@/components/niko-data-table/types"
 import { Badge } from "@/components/ui/badge"
@@ -166,10 +166,10 @@ export default function VirtualizedTableStateExample() {
       {
         accessorKey: "name",
         header: () => (
-          <TableColumnHeader className="justify-start">
+          <DataTableColumnHeader className="justify-start">
             <span className="mr-2 text-sm font-semibold">Name</span>
-            <TableColumnSortMenu />
-          </TableColumnHeader>
+            <DataTableColumnSortMenu />
+          </DataTableColumnHeader>
         ),
         cell: ({ row }) => (
           <div className="font-medium">{row.getValue("name")}</div>
@@ -178,12 +178,13 @@ export default function VirtualizedTableStateExample() {
       {
         accessorKey: "category",
         header: () => (
-          <TableColumnHeader>
-            <TableColumnTitle />
-            <TableColumnActions>
-              <TableColumnMenu />
-            </TableColumnActions>
-          </TableColumnHeader>
+          <DataTableColumnHeader>
+            <DataTableColumnTitle />
+            <DataTableColumnSortMenu variant="text" />
+            <DataTableColumnActions>
+              <DataTableColumnSortOptions variant="text" />
+            </DataTableColumnActions>
+          </DataTableColumnHeader>
         ),
         cell: ({ row }) => (
           <div className="capitalize">{row.getValue("category")}</div>
@@ -192,9 +193,10 @@ export default function VirtualizedTableStateExample() {
       {
         accessorKey: "price",
         header: () => (
-          <TableColumnHeader>
-            <TableColumnTitle title="Price" />
-          </TableColumnHeader>
+          <DataTableColumnHeader>
+            <DataTableColumnTitle title="Price" />
+            <DataTableColumnSortMenu variant="number" />
+          </DataTableColumnHeader>
         ),
         cell: ({ row }) => {
           const price = row.getValue("price") as number
@@ -204,9 +206,10 @@ export default function VirtualizedTableStateExample() {
       {
         accessorKey: "stock",
         header: () => (
-          <TableColumnHeader>
-            <TableColumnTitle title="Stock" />
-          </TableColumnHeader>
+          <DataTableColumnHeader>
+            <DataTableColumnTitle title="Stock" />
+            <DataTableColumnSortMenu variant="number" />
+          </DataTableColumnHeader>
         ),
         cell: ({ row }) => (
           <div className="text-right">{row.getValue("stock")}</div>
@@ -215,9 +218,10 @@ export default function VirtualizedTableStateExample() {
       {
         accessorKey: "status",
         header: () => (
-          <TableColumnHeader>
-            <TableColumnTitle title="Status" />
-          </TableColumnHeader>
+          <DataTableColumnHeader>
+            <DataTableColumnTitle title="Status" />
+            <DataTableColumnSortMenu variant="text" />
+          </DataTableColumnHeader>
         ),
         cell: ({ row }) => {
           const status = row.getValue("status") as string

@@ -19,8 +19,9 @@ import {
   DataTableEmptyDescription,
 } from "@/components/niko-data-table"
 import {
-  TableColumnTitle,
-  TableColumnHeader,
+  DataTableColumnTitle,
+  DataTableColumnHeader,
+  DataTableColumnSortMenu,
 } from "@/components/niko-data-table/components"
 import type { DataTableColumnDef } from "@/components/niko-data-table/types"
 import { Button } from "@/components/ui/button"
@@ -40,9 +41,10 @@ const columns: DataTableColumnDef<Order>[] = [
   {
     accessorKey: "orderNumber",
     header: () => (
-      <TableColumnHeader>
-        <TableColumnTitle />
-      </TableColumnHeader>
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
     ),
     meta: {
       label: "Order #",
@@ -51,9 +53,10 @@ const columns: DataTableColumnDef<Order>[] = [
   {
     accessorKey: "customer",
     header: () => (
-      <TableColumnHeader>
-        <TableColumnTitle />
-      </TableColumnHeader>
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu variant="text" />
+      </DataTableColumnHeader>
     ),
     meta: {
       label: "Customer",
@@ -62,9 +65,10 @@ const columns: DataTableColumnDef<Order>[] = [
   {
     accessorKey: "amount",
     header: () => (
-      <TableColumnHeader>
-        <TableColumnTitle />
-      </TableColumnHeader>
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu variant="number" />
+      </DataTableColumnHeader>
     ),
     meta: {
       label: "Amount",
@@ -77,9 +81,10 @@ const columns: DataTableColumnDef<Order>[] = [
   {
     accessorKey: "status",
     header: () => (
-      <TableColumnHeader>
-        <TableColumnTitle />
-      </TableColumnHeader>
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu variant="text" />
+      </DataTableColumnHeader>
     ),
     meta: {
       label: "Status",
@@ -98,9 +103,10 @@ const columns: DataTableColumnDef<Order>[] = [
   {
     accessorKey: "date",
     header: () => (
-      <TableColumnHeader>
-        <TableColumnTitle />
-      </TableColumnHeader>
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
     ),
     meta: {
       label: "Date",

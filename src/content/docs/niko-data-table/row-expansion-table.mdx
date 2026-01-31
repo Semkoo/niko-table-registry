@@ -68,7 +68,7 @@ First, we'll define our columns with an expand column.
 ```tsx showLineNumbers title="columns.tsx"
 "use client"
 
-import { TableColumnHeader } from "@/components/niko-data-table/components"
+import { DataTableColumnHeader } from "@/components/niko-data-table/components"
 import type { DataTableColumnDef } from "@/components/niko-data-table/types"
 import { Button } from "@/components/ui/button"
 import { ChevronRight, ChevronDown } from "lucide-react"
@@ -132,18 +132,20 @@ export const columns: DataTableColumnDef<Order>[] = [
   {
     accessorKey: "orderNumber",
     header: ({ column }) => (
-      <TableColumnHeader column={column} title="Order #" />
+      <DataTableColumnHeader column={column} title="Order #" />
     ),
   },
   {
     accessorKey: "customer",
     header: ({ column }) => (
-      <TableColumnHeader column={column} title="Customer" />
+      <DataTableColumnHeader column={column} title="Customer" />
     ),
   },
   {
     accessorKey: "total",
-    header: ({ column }) => <TableColumnHeader column={column} title="Total" />,
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Total" />
+    ),
     cell: ({ row }) => {
       const total = row.getValue("total") as number
       return <div className="font-mono">${total.toFixed(2)}</div>
@@ -152,7 +154,7 @@ export const columns: DataTableColumnDef<Order>[] = [
   {
     accessorKey: "status",
     header: ({ column }) => (
-      <TableColumnHeader column={column} title="Status" />
+      <DataTableColumnHeader column={column} title="Status" />
     ),
   },
 ]
@@ -176,7 +178,7 @@ import {
   DataTableViewMenu,
   DataTableEmptyBody,
 } from "@/components/niko-data-table"
-import { TableColumnHeader } from "@/components/niko-data-table/components"
+import { DataTableColumnHeader } from "@/components/niko-data-table/components"
 import type { DataTableColumnDef } from "@/components/niko-data-table/types"
 import { Button } from "@/components/ui/button"
 import { ChevronRight, ChevronDown } from "lucide-react"
@@ -240,18 +242,20 @@ const columns: DataTableColumnDef<Order>[] = [
   {
     accessorKey: "orderNumber",
     header: ({ column }) => (
-      <TableColumnHeader column={column} title="Order #" />
+      <DataTableColumnHeader column={column} title="Order #" />
     ),
   },
   {
     accessorKey: "customer",
     header: ({ column }) => (
-      <TableColumnHeader column={column} title="Customer" />
+      <DataTableColumnHeader column={column} title="Customer" />
     ),
   },
   {
     accessorKey: "total",
-    header: ({ column }) => <TableColumnHeader column={column} title="Total" />,
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Total" />
+    ),
     cell: ({ row }) => {
       const total = row.getValue("total") as number
       return <div className="font-mono">${total.toFixed(2)}</div>
@@ -260,7 +264,7 @@ const columns: DataTableColumnDef<Order>[] = [
   {
     accessorKey: "status",
     header: ({ column }) => (
-      <TableColumnHeader column={column} title="Status" />
+      <DataTableColumnHeader column={column} title="Status" />
     ),
   },
 ]

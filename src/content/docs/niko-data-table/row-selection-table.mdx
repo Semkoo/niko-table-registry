@@ -68,7 +68,7 @@ First, we'll add a select column to our definitions.
 ```tsx showLineNumbers title="columns.tsx"
 "use client"
 
-import { TableColumnHeader } from "@/components/niko-data-table/components"
+import { DataTableColumnHeader } from "@/components/niko-data-table/components"
 import type { DataTableColumnDef } from "@/components/niko-data-table/types"
 import { Checkbox } from "@/components/ui/checkbox"
 
@@ -105,22 +105,22 @@ export const columns: DataTableColumnDef<Customer>[] = [
   },
   {
     accessorKey: "name",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: ({ column }) => <DataTableColumnHeader column={column} />,
     meta: { label: "Name" },
   },
   {
     accessorKey: "email",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: ({ column }) => <DataTableColumnHeader column={column} />,
     meta: { label: "Email" },
   },
   {
     accessorKey: "company",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: ({ column }) => <DataTableColumnHeader column={column} />,
     meta: { label: "Company" },
   },
   {
     accessorKey: "phone",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: ({ column }) => <DataTableColumnHeader column={column} />,
     meta: { label: "Phone" },
   },
 ]
@@ -145,7 +145,7 @@ import {
   DataTableViewMenu,
   DataTableEmptyBody,
 } from "@/components/niko-data-table"
-import { TableColumnHeader } from "@/components/niko-data-table/components"
+import { DataTableColumnHeader } from "@/components/niko-data-table/components"
 import type { DataTableColumnDef } from "@/components/niko-data-table/types"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Button } from "@/components/ui/button"
@@ -191,22 +191,22 @@ const columns: DataTableColumnDef<Customer>[] = [
   },
   {
     accessorKey: "name",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: ({ column }) => <DataTableColumnHeader column={column} />,
     meta: { label: "Name" },
   },
   {
     accessorKey: "email",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: ({ column }) => <DataTableColumnHeader column={column} />,
     meta: { label: "Email" },
   },
   {
     accessorKey: "company",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: ({ column }) => <DataTableColumnHeader column={column} />,
     meta: { label: "Company" },
   },
   {
     accessorKey: "phone",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: ({ column }) => <DataTableColumnHeader column={column} />,
     meta: { label: "Phone" },
   },
 ]
@@ -348,7 +348,7 @@ Use `DataTableSelectionBar` to show a persistent selection bar:
 
 ```tsx showLineNumbers
 import { DataTableSelectionBar } from "@/components/niko-data-table/components"
-<DataTableSelectionBar
+;<DataTableSelectionBar
   selectedCount={selectedRows.length}
   onClear={clearSelection}
 >

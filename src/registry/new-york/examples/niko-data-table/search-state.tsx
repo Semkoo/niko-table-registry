@@ -25,8 +25,9 @@ import {
   DataTableEmptyDescription,
 } from "@/components/niko-data-table"
 import {
-  TableColumnTitle,
-  TableColumnHeader,
+  DataTableColumnTitle,
+  DataTableColumnHeader,
+  DataTableColumnSortMenu,
 } from "@/components/niko-data-table/components"
 import type { DataTableColumnDef } from "@/components/niko-data-table/types"
 import { Button } from "@/components/ui/button"
@@ -52,9 +53,10 @@ const columns: DataTableColumnDef<Customer>[] = [
   {
     accessorKey: "name",
     header: () => (
-      <TableColumnHeader>
-        <TableColumnTitle />
-      </TableColumnHeader>
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
     ),
     meta: {
       label: "Name",
@@ -63,9 +65,10 @@ const columns: DataTableColumnDef<Customer>[] = [
   {
     accessorKey: "email",
     header: () => (
-      <TableColumnHeader>
-        <TableColumnTitle />
-      </TableColumnHeader>
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
     ),
     meta: {
       label: "Email",
@@ -74,9 +77,10 @@ const columns: DataTableColumnDef<Customer>[] = [
   {
     accessorKey: "company",
     header: () => (
-      <TableColumnHeader>
-        <TableColumnTitle />
-      </TableColumnHeader>
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
     ),
     meta: {
       label: "Company",
@@ -85,9 +89,10 @@ const columns: DataTableColumnDef<Customer>[] = [
   {
     accessorKey: "phone",
     header: () => (
-      <TableColumnHeader>
-        <TableColumnTitle />
-      </TableColumnHeader>
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
     ),
     meta: {
       label: "Phone",

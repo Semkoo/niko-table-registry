@@ -50,16 +50,15 @@ export interface TableFacetedFilterProps<TData, TValue> {
   trigger?: React.ReactNode
 }
 
-export function TableFacetedFilter<TData, TValue>({
+export function useTableFacetedFilter<TData>({
   column,
-  title,
-  options = [],
-  multiple,
   onValueChange,
-  trigger,
-}: TableFacetedFilterProps<TData, TValue>) {
-  const [open, setOpen] = React.useState(false)
-
+  multiple,
+}: {
+  column?: Column<TData, unknown>
+  onValueChange?: (value: string[] | undefined) => void
+  multiple?: boolean
+}) {
   const columnFilterValue = column?.getFilterValue()
 
   // Handle both ExtendedColumnFilter format (new) and legacy array format
@@ -130,10 +129,9 @@ export function TableFacetedFilter<TData, TValue>({
           column.setFilterValue(extendedFilter)
           onValueChange?.([option.value])
         }
-        setOpen(false)
       }
     },
-    [column, multiple, selectedValues, onValueChange, setOpen],
+    [column, multiple, selectedValues, onValueChange],
   )
 
   const onReset = React.useCallback(
@@ -143,6 +141,40 @@ export function TableFacetedFilter<TData, TValue>({
       onValueChange?.(undefined)
     },
     [column, onValueChange],
+  )
+
+  return {
+    selectedValues,
+    onItemSelect,
+    onReset,
+  }
+}
+
+export function TableFacetedFilter<TData, TValue>({
+  column,
+  title,
+  options = [],
+  multiple,
+  onValueChange,
+  trigger,
+}: TableFacetedFilterProps<TData, TValue>) {
+  const [open, setOpen] = React.useState(false)
+
+  const { selectedValues, onItemSelect, onReset } = useTableFacetedFilter({
+    column,
+    onValueChange,
+    multiple,
+  })
+
+  // Wrap onItemSelect to close multiple=false popover
+  const handleItemSelect = React.useCallback(
+    (option: Option, isSelected: boolean) => {
+      onItemSelect(option, isSelected)
+      if (!multiple) {
+        setOpen(false)
+      }
+    },
+    [onItemSelect, multiple, setOpen],
   )
 
   return (
@@ -207,57 +239,81 @@ export function TableFacetedFilter<TData, TValue>({
         )}
       </PopoverTrigger>
       <PopoverContent className="w-50 p-0" align="start">
-        <Command>
-          <CommandInput placeholder={title} />
-          <CommandList className="max-h-full">
-            <CommandEmpty>No results found.</CommandEmpty>
-            <CommandGroup className="max-h-75 overflow-x-hidden overflow-y-auto">
-              {options.map(option => {
-                const isSelected = selectedValues.has(option.value)
-
-                return (
-                  <CommandItem
-                    key={option.value}
-                    onSelect={() => onItemSelect(option, isSelected)}
-                  >
-                    <div
-                      className={cn(
-                        "flex size-4 items-center justify-center rounded-sm border border-primary",
-                        isSelected
-                          ? "bg-primary text-primary-foreground"
-                          : "opacity-50 [&_svg]:invisible",
-                      )}
-                    >
-                      <Check className="size-4" />
-                    </div>
-                    {option.icon && <option.icon className="size-4" />}
-                    <span className="truncate">{option.label}</span>
-                    {option.count !== undefined && (
-                      <span className="ml-auto font-mono text-xs">
-                        {option.count}
-                      </span>
-                    )}
-                  </CommandItem>
-                )
-              })}
-            </CommandGroup>
-            {selectedValues.size > 0 && (
-              <>
-                <CommandSeparator />
-                <CommandGroup>
-                  <CommandItem
-                    onSelect={() => onReset()}
-                    className="justify-center text-center"
-                  >
-                    Clear filters
-                  </CommandItem>
-                </CommandGroup>
-              </>
-            )}
-          </CommandList>
-        </Command>
+        <TableFacetedFilterContent
+          title={title}
+          options={options}
+          selectedValues={selectedValues}
+          onItemSelect={handleItemSelect}
+          onReset={onReset}
+        />
       </PopoverContent>
     </Popover>
+  )
+}
+
+export function TableFacetedFilterContent({
+  title,
+  options,
+  selectedValues,
+  onItemSelect,
+  onReset,
+}: {
+  title?: string
+  options: Option[]
+  selectedValues: Set<string>
+  onItemSelect: (option: Option, isSelected: boolean) => void
+  onReset: (event?: React.MouseEvent) => void
+}) {
+  return (
+    <Command>
+      <CommandInput placeholder={title} />
+      <CommandList className="max-h-full">
+        <CommandEmpty>No results found.</CommandEmpty>
+        <CommandGroup className="max-h-75 overflow-x-hidden overflow-y-auto">
+          {options.map(option => {
+            const isSelected = selectedValues.has(option.value)
+
+            return (
+              <CommandItem
+                key={option.value}
+                onSelect={() => onItemSelect(option, isSelected)}
+              >
+                <div
+                  className={cn(
+                    "mr-2 flex size-4 items-center justify-center rounded-sm border border-primary",
+                    isSelected
+                      ? "bg-primary text-primary-foreground"
+                      : "opacity-50 [&_svg]:invisible",
+                  )}
+                >
+                  <Check className="size-4" />
+                </div>
+                {option.icon && <option.icon className="mr-2 size-4" />}
+                <span className="truncate">{option.label}</span>
+                {option.count !== undefined && (
+                  <span className="ml-auto font-mono text-xs">
+                    {option.count}
+                  </span>
+                )}
+              </CommandItem>
+            )
+          })}
+        </CommandGroup>
+        {selectedValues.size > 0 && (
+          <>
+            <CommandSeparator />
+            <CommandGroup>
+              <CommandItem
+                onSelect={() => onReset()}
+                className="justify-center text-center"
+              >
+                Clear filters
+              </CommandItem>
+            </CommandGroup>
+          </>
+        )}
+      </CommandList>
+    </Command>
   )
 }
 

@@ -168,7 +168,7 @@ export function useGeneratedOptions<TData>(
 
     for (const column of columns) {
       const meta = column.columnDef.meta ?? {}
-      const variant = meta.variant ?? "text"
+      const variant = meta.variant ?? FILTER_VARIANTS.TEXT
 
       // Only generate for select-like variants
       if (

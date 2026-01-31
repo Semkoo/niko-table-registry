@@ -10,9 +10,9 @@ import {
   DataTableBody,
 } from "@/components/niko-data-table"
 import {
-  TableColumnHeader,
-  TableColumnTitle,
-  TableColumnSortMenu,
+  DataTableColumnHeader,
+  DataTableColumnTitle,
+  DataTableColumnSortMenu,
 } from "@/components/niko-data-table/components"
 import type { DataTableColumnDef } from "@/components/niko-data-table/types"
 
@@ -28,10 +28,10 @@ const columns: DataTableColumnDef<Product>[] = [
   {
     accessorKey: "name",
     header: () => (
-      <TableColumnHeader>
-        <TableColumnTitle />
-        <TableColumnSortMenu />
-      </TableColumnHeader>
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
     ),
     meta: {
       label: "Product",
@@ -41,19 +41,19 @@ const columns: DataTableColumnDef<Product>[] = [
   {
     accessorKey: "category",
     header: () => (
-      <TableColumnHeader>
-        <TableColumnTitle />
-        <TableColumnSortMenu variant="text" />
-      </TableColumnHeader>
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu variant="text" />
+      </DataTableColumnHeader>
     ),
   },
   {
     accessorKey: "price",
     header: () => (
-      <TableColumnHeader>
-        <TableColumnTitle />
-        <TableColumnSortMenu variant="number" />
-      </TableColumnHeader>
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu variant="number" />
+      </DataTableColumnHeader>
     ),
     cell: ({ row }) => {
       const price = parseFloat(row.getValue("price"))
@@ -63,10 +63,10 @@ const columns: DataTableColumnDef<Product>[] = [
   {
     accessorKey: "stock",
     header: () => (
-      <TableColumnHeader>
-        <TableColumnTitle />
-        <TableColumnSortMenu variant="number" />
-      </TableColumnHeader>
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu variant="number" />
+      </DataTableColumnHeader>
     ),
   },
 ]

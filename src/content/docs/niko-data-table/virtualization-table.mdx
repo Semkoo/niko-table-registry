@@ -68,7 +68,7 @@ First, we'll define our columns.
 ```tsx showLineNumbers title="columns.tsx"
 "use client"
 
-import { TableColumnHeader } from "@/components/niko-data-table/components"
+import { DataTableColumnHeader } from "@/components/niko-data-table/components"
 import type { DataTableColumnDef } from "@/components/niko-data-table/types"
 
 export type Product = {
@@ -83,7 +83,9 @@ export type Product = {
 export const columns: DataTableColumnDef<Product>[] = [
   {
     accessorKey: "name",
-    header: ({ column }) => <TableColumnHeader column={column} title="Name" />,
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Name" />
+    ),
     cell: ({ row }) => (
       <div className="font-medium">{row.getValue("name")}</div>
     ),
@@ -91,12 +93,14 @@ export const columns: DataTableColumnDef<Product>[] = [
   {
     accessorKey: "category",
     header: ({ column }) => (
-      <TableColumnHeader column={column} title="Category" />
+      <DataTableColumnHeader column={column} title="Category" />
     ),
   },
   {
     accessorKey: "price",
-    header: ({ column }) => <TableColumnHeader column={column} title="Price" />,
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Price" />
+    ),
     cell: ({ row }) => {
       const price = row.getValue("price") as number
       return <div className="font-mono">${price.toFixed(2)}</div>
@@ -104,12 +108,14 @@ export const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "stock",
-    header: ({ column }) => <TableColumnHeader column={column} title="Stock" />,
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Stock" />
+    ),
   },
   {
     accessorKey: "status",
     header: ({ column }) => (
-      <TableColumnHeader column={column} title="Status" />
+      <DataTableColumnHeader column={column} title="Status" />
     ),
   },
 ]
@@ -134,7 +140,7 @@ import {
   DataTableVirtualizedEmptyBody,
   DataTableVirtualizedSkeleton,
 } from "@/components/niko-data-table"
-import { TableColumnHeader } from "@/components/niko-data-table/components"
+import { DataTableColumnHeader } from "@/components/niko-data-table/components"
 import type { DataTableColumnDef } from "@/components/niko-data-table/types"
 
 type Product = {
@@ -149,7 +155,9 @@ type Product = {
 const columns: DataTableColumnDef<Product>[] = [
   {
     accessorKey: "name",
-    header: ({ column }) => <TableColumnHeader column={column} title="Name" />,
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Name" />
+    ),
     cell: ({ row }) => (
       <div className="font-medium">{row.getValue("name")}</div>
     ),
@@ -157,12 +165,14 @@ const columns: DataTableColumnDef<Product>[] = [
   {
     accessorKey: "category",
     header: ({ column }) => (
-      <TableColumnHeader column={column} title="Category" />
+      <DataTableColumnHeader column={column} title="Category" />
     ),
   },
   {
     accessorKey: "price",
-    header: ({ column }) => <TableColumnHeader column={column} title="Price" />,
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Price" />
+    ),
     cell: ({ row }) => {
       const price = row.getValue("price") as number
       return <div className="font-mono">${price.toFixed(2)}</div>
@@ -170,12 +180,14 @@ const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "stock",
-    header: ({ column }) => <TableColumnHeader column={column} title="Stock" />,
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Stock" />
+    ),
   },
   {
     accessorKey: "status",
     header: ({ column }) => (
-      <TableColumnHeader column={column} title="Status" />
+      <DataTableColumnHeader column={column} title="Status" />
     ),
   },
 ]

@@ -19,8 +19,9 @@ import {
   DataTableEmptyMessage,
 } from "@/components/niko-data-table"
 import {
-  TableColumnHeader,
-  TableColumnTitle,
+  DataTableColumnHeader,
+  DataTableColumnTitle,
+  DataTableColumnSortMenu,
   DataTableSelectionBar,
 } from "@/components/niko-data-table/components"
 import type { DataTableColumnDef } from "@/components/niko-data-table/types"
@@ -500,9 +501,10 @@ export default function TreeTable() {
               }}
               aria-label="Select all"
             />
-            <TableColumnHeader>
-              <TableColumnTitle title="Project Name" />
-            </TableColumnHeader>
+            <DataTableColumnHeader>
+              <DataTableColumnTitle title="Project Name" />
+              <DataTableColumnSortMenu />
+            </DataTableColumnHeader>
           </div>
         ),
         cell: ({ row }) => {
@@ -592,9 +594,10 @@ export default function TreeTable() {
       {
         accessorKey: "status",
         header: () => (
-          <TableColumnHeader>
-            <TableColumnTitle title="Status" />
-          </TableColumnHeader>
+          <DataTableColumnHeader>
+            <DataTableColumnTitle title="Status" />
+            <DataTableColumnSortMenu variant="text" />
+          </DataTableColumnHeader>
         ),
         cell: ({ row }) => {
           const status = row.getValue("status") as string
@@ -619,9 +622,10 @@ export default function TreeTable() {
       {
         accessorKey: "budget",
         header: () => (
-          <TableColumnHeader>
-            <TableColumnTitle title="Budget" />
-          </TableColumnHeader>
+          <DataTableColumnHeader>
+            <DataTableColumnTitle title="Budget" />
+            <DataTableColumnSortMenu variant="number" />
+          </DataTableColumnHeader>
         ),
         cell: ({ row }) => {
           const budget = row.getValue("budget") as number
