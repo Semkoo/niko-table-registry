@@ -54,6 +54,8 @@ import {
   DataTableColumnActions,
   DataTableColumnSortOptions,
   DataTableColumnFacetedFilterOptions,
+  DataTableColumnSliderFilterOptions,
+  DataTableColumnDateFilterOptions,
   DataTableColumnPinOptions,
   DataTableColumnHideOptions,
   DataTableAside,
@@ -762,10 +764,8 @@ export default function AllFeaturesTableExample() {
           <DataTableColumnHeader>
             <DataTableColumnTitle />
             <DataTableColumnActions>
-              <DataTableColumnSortOptions
-                variant="number"
-                withSeparator={false}
-              />
+              <DataTableColumnSortOptions withSeparator={false} />
+              <DataTableColumnSliderFilterOptions />
               <DataTableColumnPinOptions />
               <DataTableColumnHideOptions />
             </DataTableColumnActions>
@@ -875,6 +875,7 @@ export default function AllFeaturesTableExample() {
             <DataTableColumnTitle />
             <DataTableColumnActions>
               <DataTableColumnSortOptions withSeparator={false} />
+              <DataTableColumnDateFilterOptions />
               <DataTableColumnPinOptions />
               <DataTableColumnHideOptions />
             </DataTableColumnActions>
@@ -978,7 +979,7 @@ export default function AllFeaturesTableExample() {
         <BulkActions />
 
         {/* Sidebar Layout */}
-        <div className="flex min-h-[600px] gap-4">
+        <div className="flex min-h-150 gap-4">
           {/* Main Table Area */}
           <DataTable className="flex-1" height="100%">
             <DataTableHeader />
