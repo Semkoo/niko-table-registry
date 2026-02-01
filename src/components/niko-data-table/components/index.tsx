@@ -16,6 +16,8 @@ export { DataTableColumnPinOptions } from "./data-table-column-pin-options"
 export { DataTableColumnPinMenu } from "./data-table-column-pin-menu"
 export { DataTableColumnFacetedFilterOptions } from "./data-table-column-faceted-filter-options"
 export { DataTableColumnFacetedFilterMenu } from "./data-table-column-faceted-filter-menu"
+export { DataTableColumnSliderFilterOptions } from "./data-table-column-slider-filter-options"
+export { DataTableColumnDateFilterOptions } from "./data-table-column-date-filter-options"
 export { DataTableToolbarSection } from "./data-table-toolbar-section"
 export type { DataTableToolbarSectionProps } from "./data-table-toolbar-section"
 export {
