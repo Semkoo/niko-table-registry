@@ -1,7 +1,7 @@
 "use client"
 
 import type { Column } from "@tanstack/react-table"
-import { CircleHelp, Pin, PinOff } from "lucide-react"
+import { Check, CircleHelp, Pin, PinOff } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -58,18 +58,35 @@ export function TableColumnPinOptions<TData, TValue>({
           </TooltipContent>
         </Tooltip>
       </DropdownMenuLabel>
-      <DropdownMenuItem onSelect={() => column.pin("left")}>
+      <DropdownMenuItem
+        onSelect={() => column.pin("left")}
+        className={cn(
+          "flex items-center",
+          isPinned === "left" && "bg-accent text-accent-foreground",
+        )}
+      >
         <Pin className="mr-2 size-4 -rotate-45" />
-        Pin to Left
+        <span className="flex-1">Pin to Left</span>
+        {isPinned === "left" && <Check className="ml-2 size-4" />}
       </DropdownMenuItem>
-      <DropdownMenuItem onSelect={() => column.pin("right")}>
+      <DropdownMenuItem
+        onSelect={() => column.pin("right")}
+        className={cn(
+          "flex items-center",
+          isPinned === "right" && "bg-accent text-accent-foreground",
+        )}
+      >
         <Pin className="mr-2 size-4 rotate-45" />
-        Pin to Right
+        <span className="flex-1">Pin to Right</span>
+        {isPinned === "right" && <Check className="ml-2 size-4" />}
       </DropdownMenuItem>
       {isPinned && (
-        <DropdownMenuItem onSelect={() => column.pin(false)}>
+        <DropdownMenuItem
+          onSelect={() => column.pin(false)}
+          className="flex items-center"
+        >
           <PinOff className="mr-2 size-4" />
-          Unpin
+          <span className="flex-1">Unpin</span>
         </DropdownMenuItem>
       )}
     </>
@@ -126,17 +143,34 @@ export function TableColumnPinMenu<TData, TValue>({
             </TooltipContent>
           </Tooltip>
         </DropdownMenuLabel>
-        <DropdownMenuItem onSelect={() => column.pin("left")}>
+        <DropdownMenuItem
+          onSelect={() => column.pin("left")}
+          className={cn(
+            "flex items-center",
+            isPinned === "left" && "bg-accent text-accent-foreground",
+          )}
+        >
           <Pin className="mr-2 size-4 -rotate-45" />
-          Pin to Left
+          <span className="flex-1">Pin to Left</span>
+          {isPinned === "left" && <Check className="ml-2 size-4" />}
         </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => column.pin("right")}>
+        <DropdownMenuItem
+          onSelect={() => column.pin("right")}
+          className={cn(
+            "flex items-center",
+            isPinned === "right" && "bg-accent text-accent-foreground",
+          )}
+        >
           <Pin className="mr-2 size-4 rotate-45" />
-          Pin to Right
+          <span className="flex-1">Pin to Right</span>
+          {isPinned === "right" && <Check className="ml-2 size-4" />}
         </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => column.pin(false)}>
+        <DropdownMenuItem
+          onSelect={() => column.pin(false)}
+          className="flex items-center"
+        >
           <PinOff className="mr-2 size-4" />
-          Unpin
+          <span className="flex-1">Unpin</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
