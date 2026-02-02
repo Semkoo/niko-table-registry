@@ -2,7 +2,10 @@
 
 import React from "react"
 
-import { TableColumnPinOptions } from "../filters/table-column-pin"
+import {
+  TableColumnPinOptions,
+  TableColumnPinMenu,
+} from "../filters/table-column-pin"
 import { useColumnHeaderContext } from "./data-table-column-header"
 
 /**
@@ -16,3 +19,15 @@ export function DataTableColumnPinOptions<TData, TValue>(
 }
 
 DataTableColumnPinOptions.displayName = "DataTableColumnPinOptions"
+
+/**
+ * Standalone pinning menu for column header using context.
+ */
+export function DataTableColumnPinMenu<TData, TValue>(
+  props: Omit<React.ComponentProps<typeof TableColumnPinMenu>, "column">,
+) {
+  const { column } = useColumnHeaderContext<TData, TValue>(true)
+  return <TableColumnPinMenu column={column} {...props} />
+}
+
+DataTableColumnPinMenu.displayName = "DataTableColumnPinMenu"

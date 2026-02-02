@@ -8,14 +8,22 @@ export { DataTableColumnTitle } from "./data-table-column-title"
 export { DataTableColumnActions } from "./data-table-column-actions"
 export { DataTableColumnFilter } from "./data-table-column-filter"
 export { DataTableColumnFilterTrigger } from "./data-table-column-filter-trigger"
-export { DataTableColumnSortMenu } from "./data-table-column-sort-menu"
-export { DataTableColumnSortOptions } from "./data-table-column-sort-options"
-export { DataTableColumnHideOptions } from "./data-table-column-hide-options"
-export { DataTableColumnHideMenu } from "./data-table-column-hide-menu"
-export { DataTableColumnPinOptions } from "./data-table-column-pin-options"
-export { DataTableColumnPinMenu } from "./data-table-column-pin-menu"
-export { DataTableColumnFacetedFilterOptions } from "./data-table-column-faceted-filter-options"
-export { DataTableColumnFacetedFilterMenu } from "./data-table-column-faceted-filter-menu"
+export {
+  DataTableColumnSortMenu,
+  DataTableColumnSortOptions,
+} from "./data-table-column-sort"
+export {
+  DataTableColumnHideOptions,
+  DataTableColumnHideMenu,
+} from "./data-table-column-hide"
+export {
+  DataTableColumnPinOptions,
+  DataTableColumnPinMenu,
+} from "./data-table-column-pin"
+export {
+  DataTableColumnFacetedFilterOptions,
+  DataTableColumnFacetedFilterMenu,
+} from "./data-table-column-faceted-filter"
 export { DataTableColumnSliderFilterOptions } from "./data-table-column-slider-filter-options"
 export { DataTableColumnDateFilterOptions } from "./data-table-column-date-filter-options"
 export { DataTableToolbarSection } from "./data-table-toolbar-section"
