@@ -1,5 +1,5 @@
 {
-  "name": "niko-data-table",
+  "name": "niko-data-table-registry",
   "type": "module",
   "version": "0.0.1",
   "description": "NikoDataTable - Nobody's table, everyone's solution. Advanced React table components built for use with Shadcn",

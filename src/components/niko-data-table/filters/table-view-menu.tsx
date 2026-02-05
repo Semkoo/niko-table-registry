@@ -5,7 +5,7 @@
  * Users can search for columns and toggle their visibility.
  */
 
-import type { Table } from "@tanstack/react-table"
+import type { Column, Table } from "@tanstack/react-table"
 import { Check, ChevronsUpDown, Settings2 } from "lucide-react"
 import * as React from "react"
 import { Button } from "@/components/ui/button"
@@ -23,6 +23,15 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
+import { formatLabel } from "../lib/format"
+
+/**
+ * Derives the display title for a column.
+ * Priority: column.meta.label > formatted column.id
+ */
+function getColumnTitle<TData>(column: Column<TData, unknown>): string {
+  return column.columnDef.meta?.label ?? formatLabel(column.id)
+}
 
 export interface TableViewMenuProps<TData> {
   table: Table<TData>
@@ -89,9 +98,7 @@ export function TableViewMenu<TData>({
                     onColumnVisibilityChange?.(column.id, newVisibility)
                   }}
                 >
-                  <span className="truncate">
-                    {column.columnDef.meta?.label ?? column.id}
-                  </span>
+                  <span className="truncate">{getColumnTitle(column)}</span>
                   <Check
                     className={cn(
                       "ml-auto size-4 shrink-0",

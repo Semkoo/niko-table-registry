@@ -18,7 +18,6 @@ import {
   DataTableEmptyBody,
 } from "@/components/niko-data-table"
 import {
-  TableColumnHeader,
   DataTableAside,
   DataTableAsideTrigger,
   DataTableAsideContent,
@@ -26,6 +25,12 @@ import {
   DataTableAsideTitle,
   DataTableAsideClose,
 } from "@/components/niko-data-table/components"
+import {
+  DataTableColumnTitle,
+  DataTableColumnHeader,
+  DataTableColumnSortMenu,
+} from "@/components/niko-data-table/components"
+import { FILTER_VARIANTS } from "@/components/niko-data-table/lib"
 import { useDataTable } from "@/components/niko-data-table/core"
 import type { DataTableColumnDef } from "@/components/niko-data-table/types"
 import { Button } from "@/components/ui/button"
@@ -171,7 +176,12 @@ export default function AsideTableExample() {
     () => [
       {
         accessorKey: "name",
-        header: ({ column }) => <TableColumnHeader column={column} />,
+        header: () => (
+          <DataTableColumnHeader>
+            <DataTableColumnTitle />
+            <DataTableColumnSortMenu />
+          </DataTableColumnHeader>
+        ),
         meta: {
           label: "Name",
         },
@@ -181,21 +191,36 @@ export default function AsideTableExample() {
       },
       {
         accessorKey: "email",
-        header: ({ column }) => <TableColumnHeader column={column} />,
+        header: () => (
+          <DataTableColumnHeader>
+            <DataTableColumnTitle />
+            <DataTableColumnSortMenu variant={FILTER_VARIANTS.TEXT} />
+          </DataTableColumnHeader>
+        ),
         meta: {
           label: "Email",
         },
       },
       {
         accessorKey: "company",
-        header: ({ column }) => <TableColumnHeader column={column} />,
+        header: () => (
+          <DataTableColumnHeader>
+            <DataTableColumnTitle />
+            <DataTableColumnSortMenu variant={FILTER_VARIANTS.TEXT} />
+          </DataTableColumnHeader>
+        ),
         meta: {
           label: "Company",
         },
       },
       {
         accessorKey: "phone",
-        header: ({ column }) => <TableColumnHeader column={column} />,
+        header: () => (
+          <DataTableColumnHeader>
+            <DataTableColumnTitle />
+            <DataTableColumnSortMenu variant={FILTER_VARIANTS.TEXT} />
+          </DataTableColumnHeader>
+        ),
         meta: {
           label: "Phone",
         },

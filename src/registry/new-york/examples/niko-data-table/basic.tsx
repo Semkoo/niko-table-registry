@@ -9,7 +9,12 @@ import {
   DataTableHeader,
   DataTableBody,
 } from "@/components/niko-data-table"
-import { TableColumnHeader } from "@/components/niko-data-table/components"
+import {
+  DataTableColumnHeader,
+  DataTableColumnTitle,
+  DataTableColumnSortMenu,
+} from "@/components/niko-data-table/components"
+import { FILTER_VARIANTS } from "@/components/niko-data-table/lib"
 import type { DataTableColumnDef } from "@/components/niko-data-table/types"
 
 type Product = {
@@ -23,19 +28,34 @@ type Product = {
 const columns: DataTableColumnDef<Product>[] = [
   {
     accessorKey: "name",
-    header: ({ column }) => (
-      <TableColumnHeader column={column} title="Product" />
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
     ),
+    meta: {
+      label: "Product",
+      variant: FILTER_VARIANTS.SELECT,
+    },
   },
   {
     accessorKey: "category",
-    header: ({ column }) => (
-      <TableColumnHeader column={column} title="Category" />
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu variant={FILTER_VARIANTS.TEXT} />
+      </DataTableColumnHeader>
     ),
   },
   {
     accessorKey: "price",
-    header: ({ column }) => <TableColumnHeader column={column} title="Price" />,
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu variant={FILTER_VARIANTS.NUMBER} />
+      </DataTableColumnHeader>
+    ),
     cell: ({ row }) => {
       const price = parseFloat(row.getValue("price"))
       return <div className="font-medium">${price.toFixed(2)}</div>
@@ -43,7 +63,12 @@ const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "stock",
-    header: ({ column }) => <TableColumnHeader column={column} title="Stock" />,
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu variant={FILTER_VARIANTS.NUMBER} />
+      </DataTableColumnHeader>
+    ),
   },
 ]
 

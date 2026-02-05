@@ -24,9 +24,13 @@ import {
   DataTableEmptyDescription,
   DataTableEmptyIcon,
   DataTableEmptyMessage,
+  SYSTEM_COLUMN_IDS,
+  FILTER_VARIANTS,
 } from "@/components/niko-data-table"
 import {
-  TableColumnHeader,
+  DataTableColumnTitle,
+  DataTableColumnHeader,
+  DataTableColumnSortMenu,
   DataTableSelectionBar,
 } from "@/components/niko-data-table/components"
 import { useDataTable } from "@/components/niko-data-table/core"
@@ -140,7 +144,9 @@ function SelectionBar({
   const handleExport = React.useCallback(() => {
     exportTableToCSV(table, {
       filename: "selected-customers",
-      excludeColumns: ["select"] as unknown as (keyof Customer)[],
+      excludeColumns: [
+        SYSTEM_COLUMN_IDS.SELECT,
+      ] as unknown as (keyof Customer)[],
       onlySelected: true,
     })
   }, [table])
@@ -231,7 +237,8 @@ export default function RowSelectionStateExample() {
   const columns: DataTableColumnDef<Customer>[] = React.useMemo(
     () => [
       {
-        id: "select", // 'id: "select"' triggers auto-detection for row selection
+        id: SYSTEM_COLUMN_IDS.SELECT, // 'id: "select"' triggers auto-detection for row selection
+        size: 40, // Compact width for checkbox column
         header: ({ table }) => (
           <Checkbox
             checked={
@@ -254,7 +261,12 @@ export default function RowSelectionStateExample() {
       },
       {
         accessorKey: "name",
-        header: ({ column }) => <TableColumnHeader column={column} />,
+        header: () => (
+          <DataTableColumnHeader>
+            <DataTableColumnTitle />
+            <DataTableColumnSortMenu />
+          </DataTableColumnHeader>
+        ),
         meta: {
           label: "Name",
         },
@@ -264,21 +276,36 @@ export default function RowSelectionStateExample() {
       },
       {
         accessorKey: "email",
-        header: ({ column }) => <TableColumnHeader column={column} />,
+        header: () => (
+          <DataTableColumnHeader>
+            <DataTableColumnTitle />
+            <DataTableColumnSortMenu variant={FILTER_VARIANTS.TEXT} />
+          </DataTableColumnHeader>
+        ),
         meta: {
           label: "Email",
         },
       },
       {
         accessorKey: "company",
-        header: ({ column }) => <TableColumnHeader column={column} />,
+        header: () => (
+          <DataTableColumnHeader>
+            <DataTableColumnTitle />
+            <DataTableColumnSortMenu variant={FILTER_VARIANTS.TEXT} />
+          </DataTableColumnHeader>
+        ),
         meta: {
           label: "Company",
         },
       },
       {
         accessorKey: "phone",
-        header: ({ column }) => <TableColumnHeader column={column} />,
+        header: () => (
+          <DataTableColumnHeader>
+            <DataTableColumnTitle />
+            <DataTableColumnSortMenu variant={FILTER_VARIANTS.TEXT} />
+          </DataTableColumnHeader>
+        ),
         meta: {
           label: "Phone",
         },

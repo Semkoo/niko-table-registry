@@ -8,6 +8,7 @@ import type {
   ColumnFiltersState,
   VisibilityState,
   ExpandedState,
+  ColumnPinningState,
 } from "@tanstack/react-table"
 import {
   DataTableRoot,
@@ -25,7 +26,17 @@ import {
   DataTableEmptyTitle,
   DataTableEmptyDescription,
 } from "@/components/niko-data-table"
-import { TableColumnHeader } from "@/components/niko-data-table/components"
+import {
+  DataTableColumnHeader,
+  DataTableColumnTitle,
+  DataTableColumnActions,
+  DataTableColumnSortMenu,
+  DataTableColumnSortOptions,
+} from "@/components/niko-data-table/components"
+import {
+  FILTER_VARIANTS,
+  SYSTEM_COLUMN_IDS,
+} from "@/components/niko-data-table/lib"
 import type { DataTableColumnDef } from "@/components/niko-data-table/types"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -120,11 +131,15 @@ export default function VirtualizedTableStateExample() {
     pageSize: 100, // Larger page size for virtualization
   })
   const [expanded, setExpanded] = useState<ExpandedState>({})
+  const [columnPinning, setColumnPinning] = useState<ColumnPinningState>({
+    left: [],
+    right: [],
+  })
 
   const columns: DataTableColumnDef<Product>[] = React.useMemo(
     () => [
       {
-        id: "expand",
+        id: SYSTEM_COLUMN_IDS.EXPAND,
         header: () => null,
         cell: ({ row }) => {
           if (!row.getCanExpand()) return null
@@ -154,8 +169,11 @@ export default function VirtualizedTableStateExample() {
       },
       {
         accessorKey: "name",
-        header: ({ column }) => (
-          <TableColumnHeader column={column} title="Name" />
+        header: () => (
+          <DataTableColumnHeader className="justify-start">
+            <span className="mr-2 text-sm font-semibold">Name</span>
+            <DataTableColumnSortMenu />
+          </DataTableColumnHeader>
         ),
         cell: ({ row }) => (
           <div className="font-medium">{row.getValue("name")}</div>
@@ -163,8 +181,14 @@ export default function VirtualizedTableStateExample() {
       },
       {
         accessorKey: "category",
-        header: ({ column }) => (
-          <TableColumnHeader column={column} title="Category" />
+        header: () => (
+          <DataTableColumnHeader>
+            <DataTableColumnTitle />
+            <DataTableColumnSortMenu variant={FILTER_VARIANTS.TEXT} />
+            <DataTableColumnActions>
+              <DataTableColumnSortOptions variant={FILTER_VARIANTS.TEXT} />
+            </DataTableColumnActions>
+          </DataTableColumnHeader>
         ),
         cell: ({ row }) => (
           <div className="capitalize">{row.getValue("category")}</div>
@@ -172,8 +196,11 @@ export default function VirtualizedTableStateExample() {
       },
       {
         accessorKey: "price",
-        header: ({ column }) => (
-          <TableColumnHeader column={column} title="Price" />
+        header: () => (
+          <DataTableColumnHeader>
+            <DataTableColumnTitle title="Price" />
+            <DataTableColumnSortMenu variant={FILTER_VARIANTS.NUMBER} />
+          </DataTableColumnHeader>
         ),
         cell: ({ row }) => {
           const price = row.getValue("price") as number
@@ -182,8 +209,11 @@ export default function VirtualizedTableStateExample() {
       },
       {
         accessorKey: "stock",
-        header: ({ column }) => (
-          <TableColumnHeader column={column} title="Stock" />
+        header: () => (
+          <DataTableColumnHeader>
+            <DataTableColumnTitle title="Stock" />
+            <DataTableColumnSortMenu variant={FILTER_VARIANTS.NUMBER} />
+          </DataTableColumnHeader>
         ),
         cell: ({ row }) => (
           <div className="text-right">{row.getValue("stock")}</div>
@@ -191,8 +221,11 @@ export default function VirtualizedTableStateExample() {
       },
       {
         accessorKey: "status",
-        header: ({ column }) => (
-          <TableColumnHeader column={column} title="Status" />
+        header: () => (
+          <DataTableColumnHeader>
+            <DataTableColumnTitle title="Status" />
+            <DataTableColumnSortMenu variant={FILTER_VARIANTS.TEXT} />
+          </DataTableColumnHeader>
         ),
         cell: ({ row }) => {
           const status = row.getValue("status") as string
@@ -225,6 +258,7 @@ export default function VirtualizedTableStateExample() {
     setColumnVisibility({})
     setPagination({ pageIndex: 0, pageSize: 100 })
     setExpanded({})
+    setColumnPinning({ left: [], right: [] })
   }
 
   // Calculate filtered data for display metrics
@@ -260,6 +294,7 @@ export default function VirtualizedTableStateExample() {
           columnVisibility,
           pagination,
           expanded,
+          columnPinning,
         }}
         // State updaters
         onGlobalFilterChange={value => {
@@ -274,6 +309,7 @@ export default function VirtualizedTableStateExample() {
         onColumnVisibilityChange={setColumnVisibility}
         onPaginationChange={setPagination}
         onExpandedChange={setExpanded}
+        onColumnPinningChange={setColumnPinning}
       >
         <DataTableToolbarSection>
           <DataTableSearchFilter placeholder="Search products..." />
@@ -386,6 +422,14 @@ export default function VirtualizedTableStateExample() {
                 }
               </span>
             </div>
+
+            <div className="flex justify-between">
+              <span className="font-medium">Pinned Columns:</span>
+              <span className="text-foreground">
+                {columnPinning.left?.length || 0} Left,{" "}
+                {columnPinning.right?.length || 0} Right
+              </span>
+            </div>
           </div>
 
           {/* Detailed state (collapsible) */}
@@ -416,6 +460,12 @@ export default function VirtualizedTableStateExample() {
                 <strong>Column Visibility:</strong>
                 <pre className="mt-1 overflow-auto rounded bg-muted p-2">
                   {JSON.stringify(columnVisibility, null, 2)}
+                </pre>
+              </div>
+              <div>
+                <strong>Column Pinning:</strong>
+                <pre className="mt-1 overflow-auto rounded bg-muted p-2">
+                  {JSON.stringify(columnPinning, null, 2)}
                 </pre>
               </div>
             </div>

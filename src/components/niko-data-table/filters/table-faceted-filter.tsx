@@ -44,17 +44,21 @@ export interface TableFacetedFilterProps<TData, TValue> {
    * Useful for server-side filtering or external state management
    */
   onValueChange?: (value: string[] | undefined) => void
+  /**
+   * Optional custom trigger element
+   */
+  trigger?: React.ReactNode
 }
 
-export function TableFacetedFilter<TData, TValue>({
+export function useTableFacetedFilter<TData>({
   column,
-  title,
-  options = [],
-  multiple,
   onValueChange,
-}: TableFacetedFilterProps<TData, TValue>) {
-  const [open, setOpen] = React.useState(false)
-
+  multiple,
+}: {
+  column?: Column<TData, unknown>
+  onValueChange?: (value: string[] | undefined) => void
+  multiple?: boolean
+}) {
   const columnFilterValue = column?.getFilterValue()
 
   // Handle both ExtendedColumnFilter format (new) and legacy array format
@@ -125,10 +129,9 @@ export function TableFacetedFilter<TData, TValue>({
           column.setFilterValue(extendedFilter)
           onValueChange?.([option.value])
         }
-        setOpen(false)
       }
     },
-    [column, multiple, selectedValues, onValueChange, setOpen],
+    [column, multiple, selectedValues, onValueChange],
   )
 
   const onReset = React.useCallback(
@@ -140,120 +143,177 @@ export function TableFacetedFilter<TData, TValue>({
     [column, onValueChange],
   )
 
+  return {
+    selectedValues,
+    onItemSelect,
+    onReset,
+  }
+}
+
+export function TableFacetedFilter<TData, TValue>({
+  column,
+  title,
+  options = [],
+  multiple,
+  onValueChange,
+  trigger,
+}: TableFacetedFilterProps<TData, TValue>) {
+  const [open, setOpen] = React.useState(false)
+
+  const { selectedValues, onItemSelect, onReset } = useTableFacetedFilter({
+    column,
+    onValueChange,
+    multiple,
+  })
+
+  // Wrap onItemSelect to close multiple=false popover
+  const handleItemSelect = React.useCallback(
+    (option: Option, isSelected: boolean) => {
+      onItemSelect(option, isSelected)
+      if (!multiple) {
+        setOpen(false)
+      }
+    },
+    [onItemSelect, multiple, setOpen],
+  )
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="outline" size="sm" className="border-dashed">
-          {selectedValues?.size > 0 ? (
-            <div
-              role="button"
-              aria-label={`Clear ${title} filter`}
-              tabIndex={0}
-              onClick={onReset}
-              onKeyDown={e => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault()
-                  onReset(e as unknown as React.MouseEvent)
-                }
-              }}
-              className="rounded-sm opacity-70 transition-opacity hover:opacity-100 focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
-            >
-              <XCircle />
-            </div>
-          ) : (
-            <PlusCircle />
-          )}
-          {title}
-          {selectedValues?.size > 0 && (
-            <>
-              <Separator
-                orientation="vertical"
-                className="mx-0.5 data-[orientation=vertical]:h-4"
-              />
-              <Badge
-                variant="secondary"
-                className="rounded-sm px-1 font-normal lg:hidden"
+        {trigger || (
+          <Button variant="outline" size="sm" className="h-8 border-dashed">
+            {selectedValues?.size > 0 ? (
+              <div
+                role="button"
+                aria-label={`Clear ${title} filter`}
+                tabIndex={0}
+                onClick={onReset}
+                onKeyDown={e => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault()
+                    onReset(e as unknown as React.MouseEvent)
+                  }
+                }}
+                className="rounded-sm opacity-70 transition-opacity hover:opacity-100 focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
               >
-                {selectedValues.size}
-              </Badge>
-              <div className="hidden items-center gap-1 lg:flex">
-                {selectedValues.size > 2 ? (
-                  <Badge
-                    variant="secondary"
-                    className="rounded-sm px-1 font-normal"
-                  >
-                    {selectedValues.size} selected
-                  </Badge>
-                ) : (
-                  options
-                    .filter(option => selectedValues.has(option.value))
-                    .map(option => (
-                      <Badge
-                        variant="secondary"
-                        key={option.value}
-                        className="rounded-sm px-1 font-normal"
-                      >
-                        {option.label}
-                      </Badge>
-                    ))
-                )}
+                <XCircle className="size-4" />
               </div>
-            </>
-          )}
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-50 p-0" align="start">
-        <Command>
-          <CommandInput placeholder={title} />
-          <CommandList className="max-h-full">
-            <CommandEmpty>No results found.</CommandEmpty>
-            <CommandGroup className="max-h-75 overflow-x-hidden overflow-y-auto">
-              {options.map(option => {
-                const isSelected = selectedValues.has(option.value)
-
-                return (
-                  <CommandItem
-                    key={option.value}
-                    onSelect={() => onItemSelect(option, isSelected)}
-                  >
-                    <div
-                      className={cn(
-                        "flex size-4 items-center justify-center rounded-sm border border-primary",
-                        isSelected
-                          ? "bg-primary text-primary-foreground"
-                          : "opacity-50 [&_svg]:invisible",
-                      )}
-                    >
-                      <Check className="size-4" />
-                    </div>
-                    {option.icon && <option.icon className="size-4" />}
-                    <span className="truncate">{option.label}</span>
-                    {option.count !== undefined && (
-                      <span className="ml-auto font-mono text-xs">
-                        {option.count}
-                      </span>
-                    )}
-                  </CommandItem>
-                )
-              })}
-            </CommandGroup>
-            {selectedValues.size > 0 && (
+            ) : (
+              <PlusCircle className="size-4" />
+            )}
+            {title}
+            {selectedValues?.size > 0 && (
               <>
-                <CommandSeparator />
-                <CommandGroup>
-                  <CommandItem
-                    onSelect={() => onReset()}
-                    className="justify-center text-center"
-                  >
-                    Clear filters
-                  </CommandItem>
-                </CommandGroup>
+                <Separator orientation="vertical" className="mx-2 h-4" />
+                <Badge
+                  variant="secondary"
+                  className="rounded-sm px-1 font-normal lg:hidden"
+                >
+                  {selectedValues.size}
+                </Badge>
+                <div className="hidden items-center gap-1 lg:flex">
+                  {selectedValues.size > 2 ? (
+                    <Badge
+                      variant="secondary"
+                      className="rounded-sm px-1 font-normal"
+                    >
+                      {selectedValues.size} selected
+                    </Badge>
+                  ) : (
+                    options
+                      .filter(option => selectedValues.has(option.value))
+                      .map(option => (
+                        <Badge
+                          variant="secondary"
+                          key={option.value}
+                          className="rounded-sm px-1 font-normal"
+                        >
+                          {option.label}
+                        </Badge>
+                      ))
+                  )}
+                </div>
               </>
             )}
-          </CommandList>
-        </Command>
+          </Button>
+        )}
+      </PopoverTrigger>
+      <PopoverContent className="w-50 p-0" align="start">
+        <TableFacetedFilterContent
+          title={title}
+          options={options}
+          selectedValues={selectedValues}
+          onItemSelect={handleItemSelect}
+          onReset={onReset}
+        />
       </PopoverContent>
     </Popover>
+  )
+}
+
+export function TableFacetedFilterContent({
+  title,
+  options,
+  selectedValues,
+  onItemSelect,
+  onReset,
+}: {
+  title?: string
+  options: Option[]
+  selectedValues: Set<string>
+  onItemSelect: (option: Option, isSelected: boolean) => void
+  onReset: (event?: React.MouseEvent) => void
+}) {
+  return (
+    <Command>
+      <CommandInput placeholder={title} className="pl-2" />
+      <CommandList className="max-h-full">
+        <CommandEmpty>No results found.</CommandEmpty>
+        <CommandGroup className="max-h-75 overflow-x-hidden overflow-y-auto">
+          {options.map(option => {
+            const isSelected = selectedValues.has(option.value)
+
+            return (
+              <CommandItem
+                key={option.value}
+                onSelect={() => onItemSelect(option, isSelected)}
+              >
+                <div
+                  className={cn(
+                    "mr-2 flex size-4 items-center justify-center rounded-sm border border-primary",
+                    isSelected
+                      ? "bg-primary text-primary-foreground"
+                      : "opacity-50 [&_svg]:invisible",
+                  )}
+                >
+                  <Check className="size-4" />
+                </div>
+                {option.icon && <option.icon className="mr-2 size-4" />}
+                <span className="truncate">{option.label}</span>
+                {option.count !== undefined && (
+                  <span className="ml-auto font-mono text-xs">
+                    {option.count}
+                  </span>
+                )}
+              </CommandItem>
+            )
+          })}
+        </CommandGroup>
+        {selectedValues.size > 0 && (
+          <>
+            <CommandSeparator />
+            <CommandGroup>
+              <CommandItem
+                onSelect={() => onReset()}
+                className="justify-center text-center"
+              >
+                Clear filters
+              </CommandItem>
+            </CommandGroup>
+          </>
+        )}
+      </CommandList>
+    </Command>
   )
 }
 

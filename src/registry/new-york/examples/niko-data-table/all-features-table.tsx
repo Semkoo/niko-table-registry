@@ -24,6 +24,7 @@ import type {
   VisibilityState,
   RowSelectionState,
   ExpandedState,
+  ColumnPinningState,
 } from "@tanstack/react-table"
 import {
   DataTableRoot,
@@ -37,6 +38,7 @@ import {
   DataTableSortMenu,
   DataTableFilterMenu,
   DataTableFacetedFilter,
+  DataTableSliderFilter,
   DataTableClearFilter,
   DataTableEmptyBody,
   DataTableEmptyIcon,
@@ -45,9 +47,19 @@ import {
   DataTableEmptyTitle,
   DataTableEmptyDescription,
   DataTableEmptyActions,
+  SYSTEM_COLUMN_IDS,
+  FILTER_VARIANTS,
 } from "@/components/niko-data-table"
 import {
-  TableColumnHeader,
+  DataTableColumnHeader,
+  DataTableColumnTitle,
+  DataTableColumnActions,
+  DataTableColumnSortOptions,
+  DataTableColumnFacetedFilterOptions,
+  DataTableColumnSliderFilterOptions,
+  DataTableColumnDateFilterOptions,
+  DataTableColumnPinOptions,
+  DataTableColumnHideOptions,
   DataTableAside,
   DataTableAsideContent,
   DataTableAsideHeader,
@@ -503,6 +515,7 @@ function FilterToolbar({
           limitToFilteredRows
           multiple
         />
+        <DataTableSliderFilter accessorKey="price" />
         <DataTableSortMenu />
         <DataTableFilterMenu
           filters={filters}
@@ -527,6 +540,10 @@ export default function AllFeaturesTableExample() {
     pageIndex: 0,
     pageSize: 10,
   })
+  const [columnPinning, setColumnPinning] = useState<ColumnPinningState>({
+    left: [],
+    right: [],
+  })
 
   // Sidebar state
   const [selectedProductId, setSelectedProductId] = useState<string | null>(
@@ -544,6 +561,7 @@ export default function AllFeaturesTableExample() {
     setColumnVisibility({})
     setRowSelection({})
     setExpanded({})
+    setColumnPinning({ left: [], right: [] })
     setPagination({ pageIndex: 0, pageSize: 10 })
     setSelectedProductId(null)
   }, [])
@@ -605,7 +623,8 @@ export default function AllFeaturesTableExample() {
   const columns: DataTableColumnDef<Product>[] = useMemo(
     () => [
       {
-        id: "select",
+        id: SYSTEM_COLUMN_IDS.SELECT,
+        size: 40, // Compact width for checkbox column
         header: ({ table }) => (
           <Checkbox
             checked={
@@ -627,7 +646,7 @@ export default function AllFeaturesTableExample() {
         enableHiding: false,
       },
       {
-        id: "expand",
+        id: SYSTEM_COLUMN_IDS.EXPAND,
         header: () => null,
         cell: ({ row }) => {
           if (!row.getCanExpand()) return null
@@ -657,10 +676,19 @@ export default function AllFeaturesTableExample() {
       },
       {
         accessorKey: "name",
-        header: ({ column }) => <TableColumnHeader column={column} />,
+        header: () => (
+          <DataTableColumnHeader className="justify-start">
+            <DataTableColumnTitle>Product Name</DataTableColumnTitle>
+            <DataTableColumnActions>
+              <DataTableColumnSortOptions withSeparator={false} />
+              <DataTableColumnPinOptions />
+              <DataTableColumnHideOptions />
+            </DataTableColumnActions>
+          </DataTableColumnHeader>
+        ),
         meta: {
           label: "Product Name",
-          variant: "text",
+          variant: FILTER_VARIANTS.TEXT,
         },
         enableColumnFilter: true,
         cell: ({ row }) => (
@@ -676,10 +704,27 @@ export default function AllFeaturesTableExample() {
       },
       {
         accessorKey: "category",
-        header: ({ column }) => <TableColumnHeader column={column} />,
+        header: () => (
+          <DataTableColumnHeader>
+            <DataTableColumnTitle />
+            {/* Composable Actions: Multi-select filter example */}
+            <DataTableColumnActions label="Category Options">
+              <DataTableColumnSortOptions
+                variant={FILTER_VARIANTS.TEXT}
+                withSeparator={false}
+              />
+              <DataTableColumnFacetedFilterOptions
+                options={categoryOptions}
+                multiple
+              />
+              <DataTableColumnPinOptions />
+              <DataTableColumnHideOptions />
+            </DataTableColumnActions>
+          </DataTableColumnHeader>
+        ),
         meta: {
           label: "Category",
-          variant: "select",
+          variant: FILTER_VARIANTS.SELECT,
           options: categoryOptions,
         },
         cell: ({ row }) => {
@@ -691,21 +736,48 @@ export default function AllFeaturesTableExample() {
       },
       {
         accessorKey: "brand",
-        header: ({ column }) => <TableColumnHeader column={column} />,
+        header: () => (
+          <DataTableColumnHeader>
+            <DataTableColumnTitle />
+            {/* Composable Actions: Single-select filter example */}
+            <DataTableColumnActions label="Brand Options">
+              <DataTableColumnSortOptions
+                variant={FILTER_VARIANTS.TEXT}
+                withSeparator={false}
+              />
+              <DataTableColumnFacetedFilterOptions
+                options={brandOptions}
+                multiple={false}
+              />
+              <DataTableColumnPinOptions />
+              <DataTableColumnHideOptions />
+            </DataTableColumnActions>
+          </DataTableColumnHeader>
+        ),
         meta: {
           label: "Brand",
-          variant: "select",
+          variant: FILTER_VARIANTS.SELECT,
           options: brandOptions,
         },
         enableColumnFilter: true,
       },
       {
         accessorKey: "price",
-        header: ({ column }) => <TableColumnHeader column={column} />,
+        header: () => (
+          <DataTableColumnHeader>
+            <DataTableColumnTitle />
+            <DataTableColumnActions>
+              <DataTableColumnSortOptions withSeparator={false} />
+              <DataTableColumnSliderFilterOptions />
+              <DataTableColumnPinOptions />
+              <DataTableColumnHideOptions />
+            </DataTableColumnActions>
+          </DataTableColumnHeader>
+        ),
         meta: {
           label: "Price",
           unit: "$",
-          variant: "number",
+          variant: FILTER_VARIANTS.RANGE,
         },
         cell: ({ row }) => {
           const price = parseFloat(row.getValue("price"))
@@ -715,10 +787,23 @@ export default function AllFeaturesTableExample() {
       },
       {
         accessorKey: "stock",
-        header: ({ column }) => <TableColumnHeader column={column} />,
+        header: () => (
+          <DataTableColumnHeader>
+            <DataTableColumnTitle />
+            {/* All actions composed in single dropdown */}
+            <DataTableColumnActions>
+              <DataTableColumnSortOptions
+                variant={FILTER_VARIANTS.NUMBER}
+                withSeparator={false}
+              />
+              <DataTableColumnPinOptions />
+              <DataTableColumnHideOptions />
+            </DataTableColumnActions>
+          </DataTableColumnHeader>
+        ),
         meta: {
           label: "Stock",
-          variant: "number",
+          variant: FILTER_VARIANTS.NUMBER,
         },
         cell: ({ row }) => {
           const stock = Number(row.getValue("stock"))
@@ -732,10 +817,22 @@ export default function AllFeaturesTableExample() {
       },
       {
         accessorKey: "rating",
-        header: ({ column }) => <TableColumnHeader column={column} />,
+        header: () => (
+          <DataTableColumnHeader>
+            <DataTableColumnTitle />
+            <DataTableColumnActions>
+              <DataTableColumnSortOptions
+                variant={FILTER_VARIANTS.NUMBER}
+                withSeparator={false}
+              />
+              <DataTableColumnPinOptions />
+              <DataTableColumnHideOptions />
+            </DataTableColumnActions>
+          </DataTableColumnHeader>
+        ),
         meta: {
           label: "Rating",
-          variant: "number",
+          variant: FILTER_VARIANTS.NUMBER,
         },
         cell: ({ row }) => {
           const rating = Number(row.getValue("rating"))
@@ -750,10 +847,19 @@ export default function AllFeaturesTableExample() {
       },
       {
         accessorKey: "inStock",
-        header: ({ column }) => <TableColumnHeader column={column} />,
+        header: () => (
+          <DataTableColumnHeader>
+            <DataTableColumnTitle />
+            <DataTableColumnActions>
+              <DataTableColumnSortOptions withSeparator={false} />
+              <DataTableColumnPinOptions />
+              <DataTableColumnHideOptions />
+            </DataTableColumnActions>
+          </DataTableColumnHeader>
+        ),
         meta: {
           label: "In Stock",
-          variant: "boolean",
+          variant: FILTER_VARIANTS.BOOLEAN,
         },
         cell: ({ row }) => {
           const inStock = Boolean(row.getValue("inStock"))
@@ -767,10 +873,20 @@ export default function AllFeaturesTableExample() {
       },
       {
         accessorKey: "releaseDate",
-        header: ({ column }) => <TableColumnHeader column={column} />,
+        header: () => (
+          <DataTableColumnHeader>
+            <DataTableColumnTitle />
+            <DataTableColumnActions>
+              <DataTableColumnSortOptions withSeparator={false} />
+              <DataTableColumnDateFilterOptions />
+              <DataTableColumnPinOptions />
+              <DataTableColumnHideOptions />
+            </DataTableColumnActions>
+          </DataTableColumnHeader>
+        ),
         meta: {
           label: "Release Date",
-          variant: "date",
+          variant: FILTER_VARIANTS.DATE,
         },
         cell: ({ row }) => {
           const date = row.getValue("releaseDate") as Date
@@ -844,6 +960,7 @@ export default function AllFeaturesTableExample() {
           columnVisibility,
           rowSelection,
           expanded,
+          columnPinning,
           pagination,
         }}
         onGlobalFilterChange={value => {
@@ -855,6 +972,7 @@ export default function AllFeaturesTableExample() {
         onColumnVisibilityChange={setColumnVisibility}
         onRowSelectionChange={setRowSelection}
         onExpandedChange={setExpanded}
+        onColumnPinningChange={setColumnPinning}
         onPaginationChange={setPagination}
       >
         <FilterToolbar
@@ -864,7 +982,7 @@ export default function AllFeaturesTableExample() {
         <BulkActions />
 
         {/* Sidebar Layout */}
-        <div className="flex min-h-[600px] gap-4">
+        <div className="flex min-h-150 gap-4">
           {/* Main Table Area */}
           <DataTable className="flex-1" height="100%">
             <DataTableHeader />
@@ -984,6 +1102,13 @@ export default function AllFeaturesTableExample() {
               <span className="font-medium">Page:</span>
               <span className="text-foreground">
                 {pagination.pageIndex + 1} (Size: {pagination.pageSize})
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="font-medium">Pinned Columns:</span>
+              <span className="text-foreground">
+                {columnPinning.left?.length || 0} Left,{" "}
+                {columnPinning.right?.length || 0} Right
               </span>
             </div>
           </div>

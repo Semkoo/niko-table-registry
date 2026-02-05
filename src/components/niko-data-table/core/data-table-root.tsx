@@ -33,7 +33,17 @@ import {
   numberRangeFilter,
   dateRangeFilter,
 } from "../lib/filter-functions"
-import { FILTER_VARIANTS } from "../lib/constants"
+import {
+  FILTER_VARIANTS,
+  SYSTEM_COLUMN_IDS,
+  SYSTEM_COLUMN_ID_LIST,
+} from "../lib/constants"
+
+/** Default column pinning state - module-level constant for stable reference */
+const DEFAULT_COLUMN_PINNING: { left: string[]; right: string[] } = {
+  left: [],
+  right: [],
+}
 
 export interface DataTableConfig {
   // Feature toggles
@@ -123,7 +133,7 @@ function DataTableRootInternal<TData, TValue>({
    * WHAT: Only recalculates when `columns` array reference changes.
    */
   const hasSelectColumn = React.useMemo(
-    () => columns?.some(col => col.id === "select") ?? false,
+    () => columns?.some(col => col.id === SYSTEM_COLUMN_IDS.SELECT) ?? false,
     [columns],
   )
 
@@ -139,7 +149,7 @@ function DataTableRootInternal<TData, TValue>({
     () =>
       columns?.some(
         col =>
-          col.id === "expand" ||
+          col.id === SYSTEM_COLUMN_IDS.EXPAND ||
           (col.meta &&
             "expandedContent" in col.meta &&
             col.meta.expandedContent),
@@ -236,7 +246,7 @@ function DataTableRootInternal<TData, TValue>({
   const detectFeatures = React.useMemo(() => {
     const detectedFeatures = detectedFeaturesRef.current ?? {}
 
-    return {
+    const features = {
       // Use config first, then explicit props, then detected features, then defaults
       enablePagination:
         finalConfig.enablePagination ??
@@ -270,6 +280,8 @@ function DataTableRootInternal<TData, TValue>({
         false,
       pageCount: finalConfig.pageCount ?? detectedFeatures.pageCount,
     }
+
+    return features
   }, [finalConfig])
 
   // State management
@@ -462,8 +474,88 @@ function DataTableRootInternal<TData, TValue>({
     rest.state?.globalFilter !== undefined
       ? rest.state.globalFilter
       : globalFilter
+  const controlledColumnPinning =
+    rest.state?.columnPinning ?? DEFAULT_COLUMN_PINNING
   const controlledExpanded = rest.state?.expanded ?? expanded
   const controlledPagination = rest.state?.pagination ?? pagination
+
+  /**
+   * SMART PINNING LOGIC:
+   * System columns (select, expand) should "follow" the first data column.
+   * - If first data column is pinned LEFT -> System cols go LEFT.
+   * - If first data column is pinned RIGHT -> System cols go RIGHT.
+   * - If first data column is UNPINNED -> System cols stay UNPINNED (default).
+   * This maintains the "Row Header" visual relationship.
+   */
+  const finalColumnPinning = React.useMemo(() => {
+    // Use centralized system column IDs from constants
+
+    // Helper to safely extract column ID (handles both id and accessorKey)
+    const getColumnId = (
+      col: DataTableColumnDef<TData, TValue>,
+    ): string | undefined => {
+      if (col.id) return col.id
+      // Type-safe check for accessorKey property
+      if ("accessorKey" in col && typeof col.accessorKey === "string") {
+        return col.accessorKey
+      }
+      return undefined
+    }
+
+    // 1. Identify the "First Data Column" (first non-system column)
+    const firstDataCol = columns.find(col => {
+      const id = getColumnId(col)
+      return id && !SYSTEM_COLUMN_ID_LIST.includes(id)
+    })
+
+    if (!firstDataCol) return controlledColumnPinning
+
+    const firstDataColId = getColumnId(firstDataCol)
+    if (!firstDataColId) return controlledColumnPinning
+
+    // 2. Check pinning state of the first data column
+    const isPinnedLeft = controlledColumnPinning.left?.includes(firstDataColId)
+    const isPinnedRight =
+      controlledColumnPinning.right?.includes(firstDataColId)
+
+    // If not fixed to either side, return default (system cols float naturally)
+    if (!isPinnedLeft && !isPinnedRight) {
+      return controlledColumnPinning
+    }
+
+    const left = [...(controlledColumnPinning.left ?? [])]
+    const right = [...(controlledColumnPinning.right ?? [])]
+
+    // 3. Prepare system columns list
+    const systemColsPresent: string[] = []
+    if (hasSelectColumn) systemColsPresent.push(SYSTEM_COLUMN_IDS.SELECT)
+    if (hasExpandColumn) systemColsPresent.push(SYSTEM_COLUMN_IDS.EXPAND)
+
+    // 4. Clean existing lists (remove system cols to avoid duplication)
+    const cleanLeft = left.filter(id => !SYSTEM_COLUMN_ID_LIST.includes(id))
+    const cleanRight = right.filter(id => !SYSTEM_COLUMN_ID_LIST.includes(id))
+
+    // 5. Construct new pinning state
+    if (isPinnedLeft) {
+      // Pin Left: [System, ...Others]
+      return {
+        left: [...systemColsPresent, ...cleanLeft],
+        right: cleanRight,
+      }
+    }
+
+    if (isPinnedRight) {
+      // Pin Right: [System, ...Others]
+      // We place system cols *before* others in the Right group so they appear
+      // to the immediate left of the right-pinned data columns.
+      return {
+        left: cleanLeft,
+        right: [...systemColsPresent, ...cleanRight],
+      }
+    }
+
+    return controlledColumnPinning
+  }, [controlledColumnPinning, columns, hasSelectColumn, hasExpandColumn])
 
   /**
    * PERFORMANCE: Memoize table options - critical for TanStack Table reactivity
@@ -501,6 +593,7 @@ function DataTableRootInternal<TData, TValue>({
         // External state (rest.state) takes precedence only if explicitly provided
         sorting: controlledSorting,
         columnVisibility: controlledColumnVisibility,
+        columnPinning: finalColumnPinning,
         rowSelection: controlledRowSelection,
         columnFilters: controlledColumnFilters,
         globalFilter: controlledGlobalFilter,
@@ -618,6 +711,8 @@ function DataTableRootInternal<TData, TValue>({
       controlledGlobalFilter,
       controlledExpanded,
       controlledPagination,
+      // Add column pinning state to dependencies so the table updates when it changes
+      finalColumnPinning,
     ],
   )
 

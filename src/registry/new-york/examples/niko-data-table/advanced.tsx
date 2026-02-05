@@ -18,8 +18,12 @@ import {
   DataTableEmptyTitle,
   DataTableEmptyDescription,
 } from "@/components/niko-data-table"
-import { TableColumnHeader } from "@/components/niko-data-table/components"
-import { daysAgo } from "@/components/niko-data-table/lib"
+import {
+  DataTableColumnTitle,
+  DataTableColumnHeader,
+  DataTableColumnSortMenu,
+} from "@/components/niko-data-table/components"
+import { daysAgo, FILTER_VARIANTS } from "@/components/niko-data-table/lib"
 import type { DataTableColumnDef } from "@/components/niko-data-table/types"
 import { Badge } from "@/components/ui/badge"
 import { UserSearch, SearchX } from "lucide-react"
@@ -49,19 +53,29 @@ const categoryOptions = [
 const columns: DataTableColumnDef<Product>[] = [
   {
     accessorKey: "name",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
+    ),
     meta: {
       label: "Product Name",
-      variant: "text",
+      variant: FILTER_VARIANTS.TEXT,
     },
     enableColumnFilter: true,
   },
   {
     accessorKey: "category",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu variant={FILTER_VARIANTS.TEXT} />
+      </DataTableColumnHeader>
+    ),
     meta: {
       label: "Category",
-      variant: "select",
+      variant: FILTER_VARIANTS.SELECT,
       // Keep static options but augment with dynamic counts from data
       options: categoryOptions,
       mergeStrategy: "augment",
@@ -77,10 +91,15 @@ const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "brand",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu variant={FILTER_VARIANTS.TEXT} />
+      </DataTableColumnHeader>
+    ),
     meta: {
       label: "Brand",
-      variant: "select",
+      variant: FILTER_VARIANTS.SELECT,
       // Demonstrate auto-generation (no static options provided)
       autoOptions: true,
       dynamicCounts: true,
@@ -90,11 +109,16 @@ const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "price",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu variant={FILTER_VARIANTS.NUMBER} />
+      </DataTableColumnHeader>
+    ),
     meta: {
       label: "Price",
       unit: "$",
-      variant: "number",
+      variant: FILTER_VARIANTS.NUMBER,
     },
     cell: ({ row }) => {
       const price = parseFloat(row.getValue("price"))
@@ -104,10 +128,15 @@ const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "stock",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu variant={FILTER_VARIANTS.NUMBER} />
+      </DataTableColumnHeader>
+    ),
     meta: {
       label: "Stock",
-      variant: "number",
+      variant: FILTER_VARIANTS.NUMBER,
     },
     cell: ({ row }) => {
       const stock = Number(row.getValue("stock"))
@@ -121,10 +150,15 @@ const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "rating",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu variant={FILTER_VARIANTS.NUMBER} />
+      </DataTableColumnHeader>
+    ),
     meta: {
       label: "Rating",
-      variant: "number",
+      variant: FILTER_VARIANTS.NUMBER,
     },
     cell: ({ row }) => {
       const rating = Number(row.getValue("rating"))
@@ -139,10 +173,15 @@ const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "inStock",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
+    ),
     meta: {
       label: "In Stock",
-      variant: "boolean",
+      variant: FILTER_VARIANTS.BOOLEAN,
     },
     cell: ({ row }) => {
       const inStock = Boolean(row.getValue("inStock"))
@@ -156,10 +195,15 @@ const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "releaseDate",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
+    ),
     meta: {
       label: "Release Date",
-      variant: "date",
+      variant: FILTER_VARIANTS.DATE,
     },
     cell: ({ row }) => {
       const date = row.getValue("releaseDate") as Date

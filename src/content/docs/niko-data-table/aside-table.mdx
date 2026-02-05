@@ -68,7 +68,7 @@ First, we'll define our columns.
 ```tsx showLineNumbers title="columns.tsx"
 "use client"
 
-import { TableColumnHeader } from "@/components/niko-data-table/components"
+import { DataTableColumnHeader } from "@/components/niko-data-table/components"
 import type { DataTableColumnDef } from "@/components/niko-data-table/types"
 
 export type Customer = {
@@ -82,22 +82,22 @@ export type Customer = {
 export const columns: DataTableColumnDef<Customer>[] = [
   {
     accessorKey: "name",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: ({ column }) => <DataTableColumnHeader column={column} />,
     meta: { label: "Name" },
   },
   {
     accessorKey: "email",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: ({ column }) => <DataTableColumnHeader column={column} />,
     meta: { label: "Email" },
   },
   {
     accessorKey: "company",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: ({ column }) => <DataTableColumnHeader column={column} />,
     meta: { label: "Company" },
   },
   {
     accessorKey: "phone",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: ({ column }) => <DataTableColumnHeader column={column} />,
     meta: { label: "Phone" },
   },
 ]
@@ -123,7 +123,7 @@ import {
   DataTableEmptyBody,
 } from "@/components/niko-data-table"
 import {
-  TableColumnHeader,
+  DataTableColumnHeader,
   DataTableAside,
   DataTableAsideTrigger,
   DataTableAsideContent,
@@ -148,22 +148,22 @@ type Customer = {
 const columns: DataTableColumnDef<Customer>[] = [
   {
     accessorKey: "name",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: ({ column }) => <DataTableColumnHeader column={column} />,
     meta: { label: "Name" },
   },
   {
     accessorKey: "email",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: ({ column }) => <DataTableColumnHeader column={column} />,
     meta: { label: "Email" },
   },
   {
     accessorKey: "company",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: ({ column }) => <DataTableColumnHeader column={column} />,
     meta: { label: "Company" },
   },
   {
     accessorKey: "phone",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: ({ column }) => <DataTableColumnHeader column={column} />,
     meta: { label: "Phone" },
   },
   {

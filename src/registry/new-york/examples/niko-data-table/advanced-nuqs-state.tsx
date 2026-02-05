@@ -97,6 +97,7 @@ import type {
   SortingState,
   ColumnFiltersState,
   VisibilityState,
+  ColumnPinningState,
   Updater,
 } from "@tanstack/react-table"
 import {
@@ -118,11 +119,16 @@ import {
   DataTableEmptyIcon,
   DataTableEmptyMessage,
 } from "@/components/niko-data-table"
-import { TableColumnHeader } from "@/components/niko-data-table/components"
+import {
+  DataTableColumnTitle,
+  DataTableColumnHeader,
+  DataTableColumnSortMenu,
+} from "@/components/niko-data-table/components"
 import {
   daysAgo,
   JOIN_OPERATORS,
   processFiltersForLogic,
+  FILTER_VARIANTS,
 } from "@/components/niko-data-table/lib"
 import { serializeFiltersForUrl } from "@/components/niko-data-table/filters/table-filter-menu"
 import { formatQueryString } from "@/components/niko-data-table/lib/format"
@@ -178,19 +184,29 @@ const brandOptions = [
 const columns: DataTableColumnDef<Product>[] = [
   {
     accessorKey: "name",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
+    ),
     meta: {
       label: "Product Name",
-      variant: "text",
+      variant: FILTER_VARIANTS.TEXT,
     },
     enableColumnFilter: true,
   },
   {
     accessorKey: "category",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu variant={FILTER_VARIANTS.TEXT} />
+      </DataTableColumnHeader>
+    ),
     meta: {
       label: "Category",
-      variant: "select",
+      variant: FILTER_VARIANTS.SELECT,
       options: categoryOptions,
     },
     cell: ({ row }) => {
@@ -202,21 +218,31 @@ const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "brand",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu variant={FILTER_VARIANTS.TEXT} />
+      </DataTableColumnHeader>
+    ),
     meta: {
       label: "Brand",
-      variant: "select",
+      variant: FILTER_VARIANTS.SELECT,
       options: brandOptions,
     },
     enableColumnFilter: true,
   },
   {
     accessorKey: "price",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu variant={FILTER_VARIANTS.NUMBER} />
+      </DataTableColumnHeader>
+    ),
     meta: {
       label: "Price",
       unit: "$",
-      variant: "number",
+      variant: FILTER_VARIANTS.NUMBER,
     },
     cell: ({ row }) => {
       const price = parseFloat(row.getValue("price"))
@@ -226,10 +252,15 @@ const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "stock",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu variant={FILTER_VARIANTS.NUMBER} />
+      </DataTableColumnHeader>
+    ),
     meta: {
       label: "Stock",
-      variant: "number",
+      variant: FILTER_VARIANTS.NUMBER,
     },
     cell: ({ row }) => {
       const stock = Number(row.getValue("stock"))
@@ -243,10 +274,15 @@ const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "rating",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu variant={FILTER_VARIANTS.NUMBER} />
+      </DataTableColumnHeader>
+    ),
     meta: {
       label: "Rating",
-      variant: "number",
+      variant: FILTER_VARIANTS.NUMBER,
     },
     cell: ({ row }) => {
       const rating = Number(row.getValue("rating"))
@@ -261,10 +297,15 @@ const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "inStock",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
+    ),
     meta: {
       label: "In Stock",
-      variant: "boolean",
+      variant: FILTER_VARIANTS.BOOLEAN,
     },
     cell: ({ row }) => {
       const inStock = Boolean(row.getValue("inStock"))
@@ -278,10 +319,15 @@ const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "releaseDate",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
+    ),
     meta: {
       label: "Release Date",
-      variant: "date",
+      variant: FILTER_VARIANTS.DATE,
     },
     cell: ({ row }) => {
       const date = row.getValue("releaseDate") as Date
@@ -558,7 +604,11 @@ const tableStateParsers = {
   inlineFilters: parseAsJson<ExtendedColumnFilter<Product>[]>(
     value => value as ExtendedColumnFilter<Product>[],
   ).withDefault([]),
+
   filterMode: parseAsString.withDefault("standard"),
+  pin: parseAsJson<ColumnPinningState>(
+    value => value as ColumnPinningState,
+  ).withDefault({ left: [], right: [] }),
 }
 
 // Map internal state keys to URL query parameter names
@@ -571,7 +621,9 @@ const tableStateUrlKeys = {
   globalFilter: "global",
   columnVisibility: "cols",
   inlineFilters: "inline",
+
   filterMode: "mode",
+  pin: "pin",
 }
 
 /**
@@ -759,6 +811,11 @@ function AdvancedNuqsTableContent() {
     )
   }, [urlParams.inlineFilters, globalFilter, filterMode])
 
+  // Column pinning state from URL
+  const columnPinning: ColumnPinningState = useMemo(() => {
+    return urlParams.pin || { left: [], right: [] }
+  }, [urlParams.pin])
+
   // Handlers for pagination
   const handlePaginationChange = useCallback(
     (updater: Updater<PaginationState>) => {
@@ -781,6 +838,16 @@ function AdvancedNuqsTableContent() {
       void setUrlParams({ sort: newSorting.length > 0 ? newSorting : null })
     },
     [sorting, setUrlParams],
+  )
+
+  // Handlers for column pinning
+  const handleColumnPinningChange = useCallback(
+    (updater: Updater<ColumnPinningState>) => {
+      const newPinning =
+        typeof updater === "function" ? updater(columnPinning) : updater
+      void setUrlParams({ pin: newPinning })
+    },
+    [columnPinning, setUrlParams],
   )
 
   // Handlers for filters (standard mode)
@@ -1323,12 +1390,14 @@ function AdvancedNuqsTableContent() {
                 sorting,
                 columnFilters: standardColumnFilters,
                 columnVisibility: urlParams.columnVisibility,
+                columnPinning,
                 pagination,
               }}
               onGlobalFilterChange={handleGlobalFilterChange}
               onSortingChange={handleSortingChange}
               onColumnFiltersChange={handleStandardColumnFiltersChange}
               onColumnVisibilityChange={handleColumnVisibilityChange}
+              onColumnPinningChange={handleColumnPinningChange}
               onPaginationChange={handlePaginationChange}
             >
               <StandardFilterToolbar

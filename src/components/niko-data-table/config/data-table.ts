@@ -16,14 +16,16 @@ import {
   Check,
   X as XIcon,
 } from "lucide-react"
-import type { FilterOperator, FilterVariant, JoinOperator } from "../types"
 import {
   JOIN_OPERATORS,
   FILTER_OPERATORS,
   FILTER_VARIANTS,
+  type JoinOperator,
+  type FilterOperator,
+  type FilterVariant,
 } from "../lib/constants"
 
-export type SortIconVariant = "text" | "number" | "date" | "boolean"
+export type SortIconVariant = FilterVariant
 
 interface SortIcons {
   asc: LucideIcon
@@ -37,44 +39,80 @@ interface SortLabels {
 }
 
 export const SORT_ICONS: Record<SortIconVariant, SortIcons> = {
-  text: {
+  [FILTER_VARIANTS.TEXT]: {
     asc: ArrowDownAZ,
     desc: ArrowDownZA,
     unsorted: ArrowUpDown,
   },
-  number: {
+  [FILTER_VARIANTS.NUMBER]: {
     asc: ArrowDown01,
     desc: ArrowDown10,
     unsorted: ArrowUpDown,
   },
-  date: {
+  [FILTER_VARIANTS.RANGE]: {
+    asc: ArrowDown01,
+    desc: ArrowDown10,
+    unsorted: ArrowUpDown,
+  },
+  [FILTER_VARIANTS.DATE]: {
     asc: ArrowUpDown,
     desc: ArrowUpDown,
     unsorted: Calendar,
   },
-  boolean: {
+  [FILTER_VARIANTS.DATE_RANGE]: {
+    asc: ArrowUpDown,
+    desc: ArrowUpDown,
+    unsorted: Calendar,
+  },
+  [FILTER_VARIANTS.BOOLEAN]: {
     asc: XIcon, // False First
     desc: Check, // True First
+    unsorted: ArrowUpDown,
+  },
+  [FILTER_VARIANTS.SELECT]: {
+    asc: ArrowDownAZ,
+    desc: ArrowDownZA,
+    unsorted: ArrowUpDown,
+  },
+  [FILTER_VARIANTS.MULTI_SELECT]: {
+    asc: ArrowDownAZ,
+    desc: ArrowDownZA,
     unsorted: ArrowUpDown,
   },
 }
 
 export const SORT_LABELS: Record<SortIconVariant, SortLabels> = {
-  text: {
+  [FILTER_VARIANTS.TEXT]: {
     asc: "Asc",
     desc: "Desc",
   },
-  number: {
+  [FILTER_VARIANTS.NUMBER]: {
     asc: "Low to High",
     desc: "High to Low",
   },
-  date: {
+  [FILTER_VARIANTS.RANGE]: {
+    asc: "Low to High",
+    desc: "High to Low",
+  },
+  [FILTER_VARIANTS.DATE]: {
     asc: "Oldest First",
     desc: "Newest First",
   },
-  boolean: {
+  [FILTER_VARIANTS.DATE_RANGE]: {
+    asc: "Oldest First",
+    desc: "Newest First",
+  },
+  [FILTER_VARIANTS.BOOLEAN]: {
     asc: "False First",
     desc: "True First",
+  },
+  [FILTER_VARIANTS.SELECT]: {
+    asc: "Asc",
+    desc: "Desc",
+  },
+  [FILTER_VARIANTS.MULTI_SELECT]: {
+    asc: "Asc",
+    desc: "Desc",
   },
 }
 

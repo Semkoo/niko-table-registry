@@ -4,6 +4,8 @@ import * as React from "react"
 import type { Table, Row } from "@tanstack/react-table"
 import {
   TableFacetedFilter,
+  TableFacetedFilterContent,
+  useTableFacetedFilter,
   type TableFacetedFilterProps,
 } from "../filters/table-faceted-filter"
 import { useDataTable } from "../core"
@@ -145,28 +147,35 @@ type DataTableFacetedFilterProps<TData, TValue> = Omit<
  *   showCounts={false}
  * />
  */
-export function DataTableFacetedFilter<TData, TValue = unknown>({
+
+/**
+ * Hook to generate options for faceted filter.
+ * Refactored from DataTableFacetedFilter to be reusable.
+ */
+function useFacetedOptions<TData>({
+  table,
   accessorKey,
   options,
   showCounts = true,
   dynamicCounts = true,
   limitToFilteredRows = true,
-  title,
-  multiple,
-  ...props
-}: DataTableFacetedFilterProps<TData, TValue>) {
-  const { table } = useDataTable<TData>()
-  const column = table.getColumn(accessorKey as string)
-
-  const derivedTitle = useDerivedColumnTitle(column, String(accessorKey), title)
+}: {
+  table: Table<TData>
+  accessorKey: string
+  options?: Option[]
+  showCounts?: boolean
+  dynamicCounts?: boolean
+  limitToFilteredRows?: boolean
+}) {
+  const column = table.getColumn(accessorKey)
 
   // Prefer shared generator that respects column meta (autoOptions, mergeStrategy, dynamicCounts, showCounts)
   // limitToFilteredRows controls whether to generate options from filtered rows (true) or all rows (false)
-  const generatedFromMeta = useGeneratedOptionsForColumn(
-    table,
-    accessorKey as string,
-    { showCounts, dynamicCounts, limitToFilteredRows },
-  )
+  const generatedFromMeta = useGeneratedOptionsForColumn(table, accessorKey, {
+    showCounts,
+    dynamicCounts,
+    limitToFilteredRows,
+  })
 
   // Get current filter state for reactivity
   const state = table.getState()
@@ -179,7 +188,8 @@ export function DataTableFacetedFilter<TData, TValue = unknown>({
     if (!column) return []
 
     const meta = column.columnDef.meta
-    const autoOptionsFormat = meta?.autoOptionsFormat ?? true
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const autoOptionsFormat = (meta as any)?.autoOptionsFormat ?? true
 
     // limitToFilteredRows controls whether to generate options from filtered rows (true) or all rows (false)
     // When generating options, we exclude the current column's filter so we see all options
@@ -187,7 +197,7 @@ export function DataTableFacetedFilter<TData, TValue = unknown>({
     const rows = limitToFilteredRows
       ? getFilteredRowsExcludingColumn(
           table,
-          accessorKey as string,
+          accessorKey,
           columnFilters,
           globalFilter,
         )
@@ -196,7 +206,7 @@ export function DataTableFacetedFilter<TData, TValue = unknown>({
     const valueCounts = new Map<string, number>()
 
     rows.forEach(row => {
-      const raw = row.getValue(accessorKey as string) as unknown
+      const raw = row.getValue(accessorKey) as unknown
       const values: unknown[] = Array.isArray(raw) ? raw : [raw]
       values.forEach(v => {
         if (v == null) return
@@ -232,13 +242,13 @@ export function DataTableFacetedFilter<TData, TValue = unknown>({
         // We reuse fallbackGenerated's logic of getting occurrenceMap from rows
         const rows = getFilteredRowsExcludingColumn(
           table,
-          accessorKey as string,
+          accessorKey,
           columnFilters,
           globalFilter,
         )
         const occurrenceMap = new Map<string, boolean>()
         rows.forEach(row => {
-          const raw = row.getValue(accessorKey as string) as unknown
+          const raw = row.getValue(accessorKey) as unknown
           const values: unknown[] = Array.isArray(raw) ? raw : [raw]
           values.forEach(v => {
             if (v != null) occurrenceMap.set(String(v), true)
@@ -262,6 +272,34 @@ export function DataTableFacetedFilter<TData, TValue = unknown>({
     globalFilter,
   ])
 
+  return dynamicOptions
+}
+
+export function DataTableFacetedFilter<TData, TValue = unknown>({
+  accessorKey,
+  options,
+  showCounts = true,
+  dynamicCounts = true,
+  limitToFilteredRows = true,
+  title,
+  multiple,
+  trigger,
+  ...props
+}: DataTableFacetedFilterProps<TData, TValue>) {
+  const { table } = useDataTable<TData>()
+  const column = table.getColumn(accessorKey as string)
+
+  const derivedTitle = useDerivedColumnTitle(column, String(accessorKey), title)
+
+  const dynamicOptions = useFacetedOptions({
+    table,
+    accessorKey: accessorKey as string,
+    options,
+    showCounts,
+    dynamicCounts,
+    limitToFilteredRows,
+  })
+
   // Early return if column not found
   if (!column) {
     console.warn(
@@ -276,6 +314,7 @@ export function DataTableFacetedFilter<TData, TValue = unknown>({
       options={dynamicOptions}
       title={derivedTitle}
       multiple={multiple}
+      trigger={trigger}
       {...props}
     />
   )
@@ -287,3 +326,48 @@ export function DataTableFacetedFilter<TData, TValue = unknown>({
  */
 
 DataTableFacetedFilter.displayName = "DataTableFacetedFilter"
+
+export function DataTableFacetedFilterContent<TData, TValue = unknown>({
+  accessorKey,
+  options,
+  showCounts = true,
+  dynamicCounts = true,
+  limitToFilteredRows = true,
+  title,
+  multiple,
+  onValueChange,
+}: DataTableFacetedFilterProps<TData, TValue>) {
+  const { table } = useDataTable<TData>()
+  const column = table.getColumn(accessorKey as string)
+  const derivedTitle = useDerivedColumnTitle(column, String(accessorKey), title)
+
+  const dynamicOptions = useFacetedOptions({
+    table,
+    accessorKey,
+    options,
+    showCounts,
+    dynamicCounts,
+    limitToFilteredRows,
+  })
+
+  // Use the shared hook for filter logic
+  const { selectedValues, onItemSelect, onReset } = useTableFacetedFilter({
+    column,
+    onValueChange,
+    multiple,
+  })
+
+  if (!column) return null
+
+  return (
+    <TableFacetedFilterContent
+      title={derivedTitle}
+      options={dynamicOptions}
+      selectedValues={selectedValues}
+      onItemSelect={onItemSelect}
+      onReset={onReset}
+    />
+  )
+}
+
+DataTableFacetedFilterContent.displayName = "DataTableFacetedFilterContent"

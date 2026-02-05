@@ -14,6 +14,8 @@ import {
 } from "@/components/ui/table"
 import { Skeleton } from "@/components/ui/skeleton"
 import { DataTableEmptyState } from "../components/data-table-empty-state"
+import { DataTableColumnHeaderRoot } from "../components/data-table-column-header"
+import { getCommonPinningStyles } from "../lib/styles"
 
 // ============================================================================
 // ScrollEvent Type
@@ -67,20 +69,29 @@ export const DataTableVirtualizedHeader = React.memo(
           <TableRow key={headerGroup.id} className="flex w-full border-b">
             {headerGroup.headers.map(header => {
               const size = header.column.columnDef.size
-              const headerStyle = size ? { width: `${size}px` } : undefined
+              const headerStyle = {
+                width: size ? `${size}px` : undefined,
+                ...getCommonPinningStyles(header.column, true),
+              }
 
               return (
                 <TableHead
                   key={header.id}
-                  className={cn(size ? "" : "w-full", "flex items-center")}
+                  className={cn(
+                    size ? "" : "w-full",
+                    "flex items-center",
+                    header.column.getIsPinned() && "bg-background",
+                  )}
                   style={headerStyle}
                 >
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(
+                  {header.isPlaceholder ? null : (
+                    <DataTableColumnHeaderRoot column={header.column}>
+                      {flexRender(
                         header.column.columnDef.header,
                         header.getContext(),
                       )}
+                    </DataTableColumnHeaderRoot>
+                  )}
                 </TableHead>
               )
             })}
@@ -300,18 +311,28 @@ export function DataTableVirtualizedBody<TData>({
                   }
                 }
               }}
-              className={cn("flex w-full", isClickable && "cursor-pointer")}
+              className={cn(
+                "group flex w-full",
+                isClickable && "cursor-pointer",
+              )}
             >
               {row.getVisibleCells().map(cell => {
                 const size = cell.column.columnDef.size
-                const cellStyle = size
-                  ? { width: `${size}px`, minHeight: `${estimateSize}px` }
-                  : { minHeight: `${estimateSize}px` }
+                const cellStyle = {
+                  width: size ? `${size}px` : undefined,
+                  minHeight: `${estimateSize}px`,
+                  ...getCommonPinningStyles(cell.column, false),
+                }
 
                 return (
                   <TableCell
                     key={cell.id}
-                    className={cn(size ? "" : "w-full", "flex items-center")}
+                    className={cn(
+                      size ? "" : "w-full",
+                      "flex items-center",
+                      cell.column.getIsPinned() &&
+                        "bg-background group-hover:bg-muted/50 group-data-[state=selected]:bg-muted",
+                    )}
                     style={cellStyle}
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}

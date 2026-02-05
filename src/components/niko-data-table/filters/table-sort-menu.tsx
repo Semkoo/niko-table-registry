@@ -6,7 +6,7 @@
  */
 
 import type { ColumnSort, SortDirection, Table } from "@tanstack/react-table"
-import { ArrowDownUp, Trash2 } from "lucide-react"
+import { ArrowDownUp, Trash2, CircleHelp } from "lucide-react"
 import * as React from "react"
 
 import { Badge } from "@/components/ui/badge"
@@ -24,6 +24,11 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import {
   Select,
   SelectContent,
@@ -43,7 +48,8 @@ import { cn } from "@/lib/utils"
 import { ChevronsUpDown, Grip } from "lucide-react"
 
 // Import sort labels from TableColumnHeader for consistency
-import { SORT_LABELS, type SortIconVariant } from "../config/data-table"
+import { SORT_LABELS } from "../config/data-table"
+import { FILTER_VARIANTS } from "../lib/constants"
 
 interface TableSortItemProps {
   sort: ColumnSort
@@ -94,20 +100,18 @@ function TableSortItem({
 
   // Try to get the column's variant for sort label
   // This assumes the table instance is available in closure (from parent TableSortMenu)
-  let variant: SortIconVariant = "text"
+  let variant = FILTER_VARIANTS.TEXT
   try {
     // @ts-expect-error: Accessing global window property for table instance variant detection
     const col = (window.__tableSortMenuTable || null)
       ?.getAllColumns?.()
       .find?.((c: { id: string }) => c.id === sort.id)
-    if (col?.columnDef?.meta?.variant === "number") variant = "number"
-    else if (col?.columnDef?.meta?.variant === "date") variant = "date"
-    else if (col?.columnDef?.meta?.variant === "boolean") variant = "boolean"
+    variant = col?.columnDef?.meta?.variant || FILTER_VARIANTS.TEXT
   } catch {
     // ignore
   }
 
-  const labels = SORT_LABELS[variant]
+  const labels = SORT_LABELS[variant] || SORT_LABELS[FILTER_VARIANTS.TEXT]
 
   return (
     <SortableItem value={sort.id} asChild>
@@ -380,9 +384,21 @@ export function TableSortMenu<TData>({
           {...props}
         >
           <div className="flex flex-col gap-1">
-            <h4 id={labelId} className="leading-none font-medium">
-              {sorting.length > 0 ? "Sort by" : "No sorting applied"}
-            </h4>
+            <div className="flex items-center gap-2">
+              <h4 id={labelId} className="leading-none font-medium">
+                {sorting.length > 0 ? "Sort by" : "No sorting applied"}
+              </h4>
+              {sorting.length > 1 && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <CircleHelp className="size-3.5 cursor-help text-muted-foreground" />
+                  </TooltipTrigger>
+                  <TooltipContent side="right">
+                    The order of fields determines sort priority
+                  </TooltipContent>
+                </Tooltip>
+              )}
+            </div>
             <p
               id={descriptionId}
               className={cn(

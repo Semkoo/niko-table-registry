@@ -13,6 +13,8 @@ import {
 import { flexRender } from "@tanstack/react-table"
 import { Skeleton } from "@/components/ui/skeleton"
 import { DataTableEmptyState } from "../components/data-table-empty-state"
+import { DataTableColumnHeaderRoot } from "../components/data-table-column-header"
+import { getCommonPinningStyles } from "../lib/styles"
 
 // ============================================================================
 // ScrollEvent Type
@@ -66,16 +68,25 @@ export const DataTableHeader = React.memo(function DataTableHeader({
         <TableRow key={headerGroup.id}>
           {headerGroup.headers.map(header => {
             const size = header.column.columnDef.size
-            const headerStyle = size ? { width: `${size}px` } : undefined
+            const headerStyle = {
+              width: size ? `${size}px` : undefined,
+              ...getCommonPinningStyles(header.column, true),
+            }
 
             return (
-              <TableHead key={header.id} style={headerStyle}>
-                {header.isPlaceholder
-                  ? null
-                  : flexRender(
+              <TableHead
+                key={header.id}
+                style={headerStyle}
+                className={cn(header.column.getIsPinned() && "bg-background")}
+              >
+                {header.isPlaceholder ? null : (
+                  <DataTableColumnHeaderRoot column={header.column}>
+                    {flexRender(
                       header.column.columnDef.header,
                       header.getContext(),
                     )}
+                  </DataTableColumnHeaderRoot>
+                )}
               </TableHead>
             )
           })}
@@ -224,14 +235,24 @@ export function DataTableBody<TData>({
                       onRowClick?.(row.original)
                     }
                   }}
-                  className={cn(isClickable && "cursor-pointer")}
+                  className={cn(isClickable && "cursor-pointer", "group")}
                 >
                   {row.getVisibleCells().map(cell => {
                     const size = cell.column.columnDef.size
-                    const cellStyle = size ? { width: `${size}px` } : undefined
+                    const cellStyle = {
+                      width: size ? `${size}px` : undefined,
+                      ...getCommonPinningStyles(cell.column, false),
+                    }
 
                     return (
-                      <TableCell key={cell.id} style={cellStyle}>
+                      <TableCell
+                        key={cell.id}
+                        style={cellStyle}
+                        className={cn(
+                          cell.column.getIsPinned() &&
+                            "bg-background group-hover:bg-muted/50 group-data-[state=selected]:bg-muted",
+                        )}
+                      >
                         {flexRender(
                           cell.column.columnDef.cell,
                           cell.getContext(),

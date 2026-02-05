@@ -17,9 +17,12 @@ import {
   DataTableEmptyDescription,
   DataTableEmptyIcon,
   DataTableEmptyMessage,
+  FILTER_VARIANTS,
 } from "@/components/niko-data-table"
 import {
-  TableColumnHeader,
+  DataTableColumnHeader,
+  DataTableColumnTitle,
+  DataTableColumnSortMenu,
   DataTableSelectionBar,
 } from "@/components/niko-data-table/components"
 import type { DataTableColumnDef } from "@/components/niko-data-table/types"
@@ -477,7 +480,7 @@ export default function TreeTable() {
       // Project Name Column with Tree Visualization, Checkbox, and Selection
       {
         accessorKey: "name",
-        header: ({ column }) => (
+        header: () => (
           <div className="flex items-center gap-2">
             <Checkbox
               checked={
@@ -499,7 +502,10 @@ export default function TreeTable() {
               }}
               aria-label="Select all"
             />
-            <TableColumnHeader column={column} title="Project Name" />
+            <DataTableColumnHeader>
+              <DataTableColumnTitle title="Project Name" />
+              <DataTableColumnSortMenu />
+            </DataTableColumnHeader>
           </div>
         ),
         cell: ({ row }) => {
@@ -588,8 +594,11 @@ export default function TreeTable() {
       // Status Column
       {
         accessorKey: "status",
-        header: ({ column }) => (
-          <TableColumnHeader column={column} title="Status" />
+        header: () => (
+          <DataTableColumnHeader>
+            <DataTableColumnTitle title="Status" />
+            <DataTableColumnSortMenu variant={FILTER_VARIANTS.TEXT} />
+          </DataTableColumnHeader>
         ),
         cell: ({ row }) => {
           const status = row.getValue("status") as string
@@ -613,8 +622,11 @@ export default function TreeTable() {
       // Budget Column
       {
         accessorKey: "budget",
-        header: ({ column }) => (
-          <TableColumnHeader column={column} title="Budget" />
+        header: () => (
+          <DataTableColumnHeader>
+            <DataTableColumnTitle title="Budget" />
+            <DataTableColumnSortMenu variant={FILTER_VARIANTS.NUMBER} />
+          </DataTableColumnHeader>
         ),
         cell: ({ row }) => {
           const budget = row.getValue("budget") as number

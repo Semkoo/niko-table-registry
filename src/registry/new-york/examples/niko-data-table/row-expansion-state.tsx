@@ -24,8 +24,14 @@ import {
   DataTableEmptyDescription,
   DataTableEmptyIcon,
   DataTableEmptyMessage,
+  SYSTEM_COLUMN_IDS,
+  FILTER_VARIANTS,
 } from "@/components/niko-data-table"
-import { TableColumnHeader } from "@/components/niko-data-table/components"
+import {
+  DataTableColumnHeader,
+  DataTableColumnTitle,
+  DataTableColumnSortMenu,
+} from "@/components/niko-data-table/components"
 import type { DataTableColumnDef } from "@/components/niko-data-table/types"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -274,7 +280,7 @@ export default function RowExpansionStateExample() {
     () => [
       {
         // Auto-detected: column with id="expand" or meta.expandedContent enables row expansion
-        id: "expand",
+        id: SYSTEM_COLUMN_IDS.EXPAND,
         header: () => null,
         cell: ({ row }) => {
           if (!row.getCanExpand()) return null
@@ -304,8 +310,11 @@ export default function RowExpansionStateExample() {
       },
       {
         accessorKey: "orderNumber",
-        header: ({ column }) => (
-          <TableColumnHeader column={column} title="Order #" />
+        header: () => (
+          <DataTableColumnHeader>
+            <DataTableColumnTitle title="Order #" />
+            <DataTableColumnSortMenu />
+          </DataTableColumnHeader>
         ),
         cell: ({ row }) => (
           <div className="font-mono font-medium">
@@ -315,8 +324,11 @@ export default function RowExpansionStateExample() {
       },
       {
         accessorKey: "customer",
-        header: ({ column }) => (
-          <TableColumnHeader column={column} title="Customer" />
+        header: () => (
+          <DataTableColumnHeader>
+            <DataTableColumnTitle title="Customer" />
+            <DataTableColumnSortMenu variant={FILTER_VARIANTS.TEXT} />
+          </DataTableColumnHeader>
         ),
         cell: ({ row }) => {
           return (
@@ -331,8 +343,11 @@ export default function RowExpansionStateExample() {
       },
       {
         accessorKey: "items",
-        header: ({ column }) => (
-          <TableColumnHeader column={column} title="Items" />
+        header: () => (
+          <DataTableColumnHeader>
+            <DataTableColumnTitle title="Items" />
+            <DataTableColumnSortMenu />
+          </DataTableColumnHeader>
         ),
         cell: ({ row }) => {
           const itemCount = row.original.items.length
@@ -345,8 +360,11 @@ export default function RowExpansionStateExample() {
       },
       {
         accessorKey: "date",
-        header: ({ column }) => (
-          <TableColumnHeader column={column} title="Date" />
+        header: () => (
+          <DataTableColumnHeader>
+            <DataTableColumnTitle title="Date" />
+            <DataTableColumnSortMenu />
+          </DataTableColumnHeader>
         ),
         cell: ({ row }) => (
           <div className="text-sm">
@@ -356,8 +374,11 @@ export default function RowExpansionStateExample() {
       },
       {
         accessorKey: "total",
-        header: ({ column }) => (
-          <TableColumnHeader column={column} title="Total" />
+        header: () => (
+          <DataTableColumnHeader>
+            <DataTableColumnTitle title="Total" />
+            <DataTableColumnSortMenu variant={FILTER_VARIANTS.NUMBER} />
+          </DataTableColumnHeader>
         ),
         cell: ({ row }) => {
           const total = row.getValue("total") as number
@@ -366,8 +387,11 @@ export default function RowExpansionStateExample() {
       },
       {
         accessorKey: "status",
-        header: ({ column }) => (
-          <TableColumnHeader column={column} title="Status" />
+        header: () => (
+          <DataTableColumnHeader>
+            <DataTableColumnTitle title="Status" />
+            <DataTableColumnSortMenu variant={FILTER_VARIANTS.TEXT} />
+          </DataTableColumnHeader>
         ),
         cell: ({ row }) => {
           const status = row.getValue("status") as string
