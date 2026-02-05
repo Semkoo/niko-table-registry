@@ -6,6 +6,7 @@ import type {
   SortingState,
   ColumnFiltersState,
   VisibilityState,
+  ColumnPinningState,
   Updater,
 } from "@tanstack/react-table"
 import {
@@ -20,17 +21,24 @@ import {
   DataTableSortMenu,
   DataTableFilterMenu,
   DataTableEmptyBody,
+  DataTableEmptyIcon,
+  DataTableEmptyMessage,
   DataTableEmptyFilteredMessage,
   DataTableEmptyTitle,
   DataTableEmptyDescription,
-  DataTableEmptyIcon,
-  DataTableEmptyMessage,
 } from "@/components/niko-data-table"
-import { TableColumnHeader } from "@/components/niko-data-table/components"
+import {
+  DataTableColumnHeader,
+  DataTableColumnTitle,
+  DataTableColumnActions,
+  DataTableColumnSortMenu,
+  DataTableColumnFacetedFilterMenu,
+} from "@/components/niko-data-table/components"
 import {
   daysAgo,
   JOIN_OPERATORS,
   processFiltersForLogic,
+  FILTER_VARIANTS,
 } from "@/components/niko-data-table/lib"
 import type {
   DataTableColumnDef,
@@ -82,19 +90,35 @@ const brandOptions = [
 const columns: DataTableColumnDef<Product>[] = [
   {
     accessorKey: "name",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <DataTableColumnHeader className="justify-start">
+        <DataTableColumnTitle>Product Name</DataTableColumnTitle>
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
+    ),
     meta: {
       label: "Product Name",
-      variant: "text",
+      variant: FILTER_VARIANTS.TEXT,
     },
     enableColumnFilter: true,
+    cell: ({ row }) => (
+      <div className="font-medium">{row.getValue("name")}</div>
+    ),
   },
   {
     accessorKey: "category",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle>Category</DataTableColumnTitle>
+        <DataTableColumnActions>
+          <DataTableColumnFacetedFilterMenu options={categoryOptions} />
+          <DataTableColumnSortMenu />
+        </DataTableColumnActions>
+      </DataTableColumnHeader>
+    ),
     meta: {
       label: "Category",
-      variant: "select",
+      variant: FILTER_VARIANTS.SELECT,
       options: categoryOptions,
     },
     cell: ({ row }) => {
@@ -106,21 +130,34 @@ const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "brand",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle>Brand</DataTableColumnTitle>
+        <DataTableColumnActions>
+          <DataTableColumnFacetedFilterMenu options={brandOptions} />
+          <DataTableColumnSortMenu variant={FILTER_VARIANTS.TEXT} />
+        </DataTableColumnActions>
+      </DataTableColumnHeader>
+    ),
     meta: {
       label: "Brand",
-      variant: "select",
+      variant: FILTER_VARIANTS.SELECT,
       options: brandOptions,
     },
     enableColumnFilter: true,
   },
   {
     accessorKey: "price",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu variant={FILTER_VARIANTS.NUMBER} />
+      </DataTableColumnHeader>
+    ),
     meta: {
       label: "Price",
       unit: "$",
-      variant: "number",
+      variant: FILTER_VARIANTS.NUMBER,
     },
     cell: ({ row }) => {
       const price = parseFloat(row.getValue("price"))
@@ -130,10 +167,15 @@ const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "stock",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu variant={FILTER_VARIANTS.NUMBER} />
+      </DataTableColumnHeader>
+    ),
     meta: {
       label: "Stock",
-      variant: "number",
+      variant: FILTER_VARIANTS.NUMBER,
     },
     cell: ({ row }) => {
       const stock = Number(row.getValue("stock"))
@@ -147,10 +189,15 @@ const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "rating",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu variant={FILTER_VARIANTS.NUMBER} />
+      </DataTableColumnHeader>
+    ),
     meta: {
       label: "Rating",
-      variant: "number",
+      variant: FILTER_VARIANTS.NUMBER,
     },
     cell: ({ row }) => {
       const rating = Number(row.getValue("rating"))
@@ -165,10 +212,15 @@ const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "inStock",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
+    ),
     meta: {
       label: "In Stock",
-      variant: "boolean",
+      variant: FILTER_VARIANTS.BOOLEAN,
     },
     cell: ({ row }) => {
       const inStock = Boolean(row.getValue("inStock"))
@@ -182,10 +234,15 @@ const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "releaseDate",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
+    ),
     meta: {
       label: "Release Date",
-      variant: "date",
+      variant: FILTER_VARIANTS.DATE,
     },
     cell: ({ row }) => {
       const date = row.getValue("releaseDate") as Date
@@ -398,12 +455,18 @@ export default function AdvancedStateTableExample() {
     pageIndex: 0,
     pageSize: 10,
   })
+  const [columnPinning, setColumnPinning] = useState<ColumnPinningState>({
+    left: [],
+    right: [],
+  })
 
   const resetAllState = useCallback(() => {
     setGlobalFilter("")
     setSorting([])
     setColumnFilters([])
+    setColumnFilters([])
     setColumnVisibility({})
+    setColumnPinning({ left: [], right: [] })
     setPagination({ pageIndex: 0, pageSize: 10 })
   }, [])
 
@@ -635,6 +698,7 @@ export default function AdvancedStateTableExample() {
           sorting,
           columnFilters,
           columnVisibility,
+          columnPinning,
           pagination,
         }}
         // Pass state updaters (using useCallback for performance)
@@ -643,6 +707,7 @@ export default function AdvancedStateTableExample() {
         onColumnFiltersChange={handleColumnFiltersChange}
         onColumnVisibilityChange={handleColumnVisibilityChange}
         onPaginationChange={handlePaginationChange}
+        onColumnPinningChange={setColumnPinning}
       >
         <FilterToolbar
           filters={currentFilters}
@@ -757,6 +822,14 @@ export default function AdvancedStateTableExample() {
                 }
               </span>
             </div>
+
+            <div className="flex justify-between">
+              <span className="font-medium">Pinned Columns:</span>
+              <span className="text-foreground">
+                {columnPinning.left?.length || 0} Left,{" "}
+                {columnPinning.right?.length || 0} Right
+              </span>
+            </div>
           </div>
 
           {/* Detailed state (collapsible) */}
@@ -771,6 +844,12 @@ export default function AdvancedStateTableExample() {
                   {displayFilters.length > 0
                     ? JSON.stringify(displayFilters, null, 2)
                     : "No enhanced filters"}
+                </pre>
+              </div>
+              <div>
+                <strong>Column Pinning:</strong>
+                <pre className="mt-1 overflow-auto rounded bg-muted p-2">
+                  {JSON.stringify(columnPinning, null, 2)}
                 </pre>
               </div>
               <div>

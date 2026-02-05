@@ -1,5 +1,31 @@
-// Reusable UI components
-export { TableColumnHeader } from "./table-column-header"
+// Column Header components (context-aware wrappers)
+export {
+  DataTableColumnHeader,
+  DataTableColumnHeaderRoot,
+  useColumnHeaderContext,
+} from "./data-table-column-header"
+export { DataTableColumnTitle } from "./data-table-column-title"
+export { DataTableColumnActions } from "./data-table-column-actions"
+export { DataTableColumnFilter } from "./data-table-column-filter"
+export { DataTableColumnFilterTrigger } from "./data-table-column-filter-trigger"
+export {
+  DataTableColumnSortMenu,
+  DataTableColumnSortOptions,
+} from "./data-table-column-sort"
+export {
+  DataTableColumnHideOptions,
+  DataTableColumnHideMenu,
+} from "./data-table-column-hide"
+export {
+  DataTableColumnPinOptions,
+  DataTableColumnPinMenu,
+} from "./data-table-column-pin"
+export {
+  DataTableColumnFacetedFilterOptions,
+  DataTableColumnFacetedFilterMenu,
+} from "./data-table-column-faceted-filter"
+export { DataTableColumnSliderFilterOptions } from "./data-table-column-slider-filter-options"
+export { DataTableColumnDateFilterOptions } from "./data-table-column-date-filter-options"
 export { DataTableToolbarSection } from "./data-table-toolbar-section"
 export type { DataTableToolbarSectionProps } from "./data-table-toolbar-section"
 export {

@@ -1,0 +1,181 @@
+---
+title: Column Pinning Table
+description: Pin columns to the left or right edge for easy reference while scrolling.
+---
+
+import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
+import CollapsiblePreview from "@/components/markdown/collapsible-preview.astro"
+
+<CodePreview demo="niko-data-table/column-pinning" />
+
+<CollapsiblePreview>
+  <CodePreview demo="niko-data-table/column-pinning-state" />
+</CollapsiblePreview>
+
+## Introduction
+
+Column pinning keeps important columns visible while users scroll horizontally. Pin identifier columns (like Order ID) to the left and action columns to the right.
+
+## Installation
+
+1. Add the required components:
+
+```bash
+npx shadcn@latest add table input button dropdown-menu badge
+```
+
+2. Add `tanstack/react-table` dependency:
+
+```bash
+npm install @tanstack/react-table
+```
+
+3. Copy the DataTable components into your project. See the [Installation Guide](/getting-started/installation) for detailed instructions.
+
+## Prerequisites
+
+We'll build a table showing orders. Here's our data:
+
+```tsx showLineNumbers
+type Order = {
+  id: string
+  customer: string
+  product: string
+  amount: number
+  status: "pending" | "shipped" | "delivered" | "cancelled"
+  date: string
+  region: string
+}
+
+const data: Order[] = [
+  {
+    id: "ORD-001",
+    customer: "John Doe",
+    product: "Premium Widget",
+    amount: 299.99,
+    status: "delivered",
+    date: "2024-01-15",
+    region: "North America",
+  },
+  // ...
+]
+```
+
+## Basic Column Pinning
+
+Set `initialState.columnPinning` to pin columns on mount:
+
+```tsx showLineNumbers title="column-pinning.tsx"
+<DataTableRoot
+  data={data}
+  columns={columns}
+  initialState={{
+    columnPinning: {
+      left: ["id"], // Pin Order ID to left
+      right: ["actions"], // Pin actions to right
+    },
+  }}
+>
+  <DataTable>
+    <DataTableHeader />
+    <DataTableBody />
+  </DataTable>
+</DataTableRoot>
+```
+
+## Column Definitions
+
+Set explicit `size` for each column to enable horizontal scrolling:
+
+```tsx showLineNumbers title="columns.tsx"
+const columns: DataTableColumnDef<Order>[] = [
+  {
+    accessorKey: "id",
+    size: 110,
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle title="Order ID" />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
+    ),
+    meta: { label: "Order ID" },
+  },
+  {
+    accessorKey: "customer",
+    size: 160,
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle title="Customer" />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
+    ),
+    meta: { label: "Customer" },
+  },
+  // ... more columns
+]
+```
+
+## Interactive Pinning
+
+Add pinning options to column actions for user-controlled pinning:
+
+```tsx showLineNumbers
+{
+  accessorKey: "customer",
+  size: 160,
+  header: () => (
+    <DataTableColumnHeader>
+      <DataTableColumnTitle title="Customer" />
+      <DataTableColumnActions>
+        <DataTableColumnSortOptions />
+        <DataTableColumnPinOptions />
+      </DataTableColumnActions>
+    </DataTableColumnHeader>
+  ),
+}
+```
+
+## Controlled State
+
+Manage pinning state externally:
+
+```tsx showLineNumbers title="column-pinning-state.tsx"
+import { useState } from "react"
+import { type ColumnPinningState } from "@tanstack/react-table"
+
+export function ControlledPinningTable({ data }: { data: Order[] }) {
+  const [columnPinning, setColumnPinning] = useState<ColumnPinningState>({
+    left: ["id"],
+    right: ["actions"],
+  })
+
+  return (
+    <DataTableRoot
+      data={data}
+      columns={columns}
+      state={{ columnPinning }}
+      onColumnPinningChange={setColumnPinning}
+    >
+      {/* ... */}
+    </DataTableRoot>
+  )
+}
+```
+
+## When to Use
+
+**✅ Use Column Pinning when:**
+
+- Tables have many columns requiring horizontal scroll
+- Key identifiers (ID, Name) must stay visible
+- Actions column should be always accessible
+
+**❌ Consider other options when:**
+
+- All columns fit on screen (no scrolling needed)
+- Mobile-first design (pinning adds complexity)
+
+## Next Steps
+
+- [Virtualization Table](/niko-data-table/virtualization-table) - Combine pinning with virtual scrolling
+- [Advanced Table](/niko-data-table/advanced-table) - Persistent pinning state

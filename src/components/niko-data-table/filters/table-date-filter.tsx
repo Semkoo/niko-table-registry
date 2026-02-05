@@ -59,12 +59,14 @@ export interface TableDateFilterProps<TData> {
   column: Column<TData, unknown>
   title?: string
   multiple?: boolean
+  trigger?: React.ReactNode
 }
 
 export function TableDateFilter<TData>({
   column,
   title,
   multiple,
+  trigger,
 }: TableDateFilterProps<TData>) {
   const columnFilterValue = column.getFilterValue()
 
@@ -180,22 +182,24 @@ export function TableDateFilter<TData>({
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="outline" size="sm" className="border-dashed">
-          {hasValue ? (
-            <div
-              role="button"
-              aria-label={`Clear ${title} filter`}
-              tabIndex={0}
-              onClick={onReset}
-              className="rounded-sm opacity-70 transition-opacity hover:opacity-100 focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
-            >
-              <XCircle />
-            </div>
-          ) : (
-            <CalendarIcon />
-          )}
-          {label}
-        </Button>
+        {trigger || (
+          <Button variant="outline" size="sm" className="h-8 border-dashed">
+            {hasValue ? (
+              <div
+                role="button"
+                aria-label={`Clear ${title} filter`}
+                tabIndex={0}
+                onClick={onReset}
+                className="rounded-sm opacity-70 transition-opacity hover:opacity-100 focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
+              >
+                <XCircle className="size-4" />
+              </div>
+            ) : (
+              <CalendarIcon className="size-4" />
+            )}
+            {label}
+          </Button>
+        )}
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">
         {multiple ? (

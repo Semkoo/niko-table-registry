@@ -81,7 +81,7 @@ First, we'll define our columns with tree visualization.
 ```tsx showLineNumbers title="columns.tsx"
 "use client"
 
-import { TableColumnHeader } from "@/components/niko-data-table/components"
+import { DataTableColumnHeader } from "@/components/niko-data-table/components"
 import type { DataTableColumnDef } from "@/components/niko-data-table/types"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -99,7 +99,7 @@ export const columns: DataTableColumnDef<Project>[] = [
   {
     accessorKey: "name",
     header: ({ column }) => (
-      <TableColumnHeader column={column} title="Project Name" />
+      <DataTableColumnHeader column={column} title="Project Name" />
     ),
     cell: ({ row }) => {
       const { depth, original: project } = row
@@ -138,13 +138,13 @@ export const columns: DataTableColumnDef<Project>[] = [
   {
     accessorKey: "status",
     header: ({ column }) => (
-      <TableColumnHeader column={column} title="Status" />
+      <DataTableColumnHeader column={column} title="Status" />
     ),
   },
   {
     accessorKey: "budget",
     header: ({ column }) => (
-      <TableColumnHeader column={column} title="Budget" />
+      <DataTableColumnHeader column={column} title="Budget" />
     ),
     cell: ({ row }) => {
       const budget = row.getValue("budget") as number
@@ -173,7 +173,7 @@ import {
   DataTableViewMenu,
   DataTableEmptyBody,
 } from "@/components/niko-data-table"
-import { TableColumnHeader } from "@/components/niko-data-table/components"
+import { DataTableColumnHeader } from "@/components/niko-data-table/components"
 import type { DataTableColumnDef } from "@/components/niko-data-table/types"
 import { Button } from "@/components/ui/button"
 import {
@@ -195,7 +195,7 @@ const columns: DataTableColumnDef<Project>[] = [
   {
     accessorKey: "name",
     header: ({ column }) => (
-      <TableColumnHeader column={column} title="Project Name" />
+      <DataTableColumnHeader column={column} title="Project Name" />
     ),
     cell: ({ row }) => {
       const canExpand = row.getCanExpand()
@@ -225,13 +225,13 @@ const columns: DataTableColumnDef<Project>[] = [
   {
     accessorKey: "status",
     header: ({ column }) => (
-      <TableColumnHeader column={column} title="Status" />
+      <DataTableColumnHeader column={column} title="Status" />
     ),
   },
   {
     accessorKey: "budget",
     header: ({ column }) => (
-      <TableColumnHeader column={column} title="Budget" />
+      <DataTableColumnHeader column={column} title="Budget" />
     ),
     cell: ({ row }) => {
       const budget = row.getValue("budget") as number

@@ -17,7 +17,15 @@ import {
   DataTableEmptyTitle,
   DataTableEmptyDescription,
 } from "@/components/niko-data-table"
-import { TableColumnHeader } from "@/components/niko-data-table/components"
+import {
+  DataTableColumnHeader,
+  DataTableColumnTitle,
+  DataTableColumnSortMenu,
+} from "@/components/niko-data-table/components"
+import {
+  FILTER_VARIANTS,
+  SYSTEM_COLUMN_IDS,
+} from "@/components/niko-data-table/lib"
 import type { DataTableColumnDef } from "@/components/niko-data-table/types"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -96,7 +104,7 @@ export default function VirtualizedTableExample() {
   const columns: DataTableColumnDef<Product>[] = React.useMemo(
     () => [
       {
-        id: "expand",
+        id: SYSTEM_COLUMN_IDS.EXPAND,
         header: () => null,
         cell: ({ row }) => {
           if (!row.getCanExpand()) return null
@@ -126,8 +134,11 @@ export default function VirtualizedTableExample() {
       },
       {
         accessorKey: "name",
-        header: ({ column }) => (
-          <TableColumnHeader column={column} title="Name" />
+        header: () => (
+          <DataTableColumnHeader>
+            <DataTableColumnTitle title="Name" />
+            <DataTableColumnSortMenu />
+          </DataTableColumnHeader>
         ),
         cell: ({ row }) => (
           <div className="font-medium">{row.getValue("name")}</div>
@@ -135,8 +146,11 @@ export default function VirtualizedTableExample() {
       },
       {
         accessorKey: "category",
-        header: ({ column }) => (
-          <TableColumnHeader column={column} title="Category" />
+        header: () => (
+          <DataTableColumnHeader>
+            <DataTableColumnTitle title="Category" />
+            <DataTableColumnSortMenu variant={FILTER_VARIANTS.TEXT} />
+          </DataTableColumnHeader>
         ),
         cell: ({ row }) => (
           <div className="capitalize">{row.getValue("category")}</div>
@@ -144,8 +158,11 @@ export default function VirtualizedTableExample() {
       },
       {
         accessorKey: "price",
-        header: ({ column }) => (
-          <TableColumnHeader column={column} title="Price" />
+        header: () => (
+          <DataTableColumnHeader>
+            <DataTableColumnTitle title="Price" />
+            <DataTableColumnSortMenu variant={FILTER_VARIANTS.NUMBER} />
+          </DataTableColumnHeader>
         ),
         cell: ({ row }) => {
           const price = row.getValue("price") as number
@@ -154,8 +171,11 @@ export default function VirtualizedTableExample() {
       },
       {
         accessorKey: "stock",
-        header: ({ column }) => (
-          <TableColumnHeader column={column} title="Stock" />
+        header: () => (
+          <DataTableColumnHeader>
+            <DataTableColumnTitle title="Stock" />
+            <DataTableColumnSortMenu variant={FILTER_VARIANTS.NUMBER} />
+          </DataTableColumnHeader>
         ),
         cell: ({ row }) => (
           <div className="text-right">{row.getValue("stock")}</div>
@@ -163,8 +183,11 @@ export default function VirtualizedTableExample() {
       },
       {
         accessorKey: "status",
-        header: ({ column }) => (
-          <TableColumnHeader column={column} title="Status" />
+        header: () => (
+          <DataTableColumnHeader>
+            <DataTableColumnTitle title="Status" />
+            <DataTableColumnSortMenu variant={FILTER_VARIANTS.TEXT} />
+          </DataTableColumnHeader>
         ),
         cell: ({ row }) => {
           const status = row.getValue("status") as string

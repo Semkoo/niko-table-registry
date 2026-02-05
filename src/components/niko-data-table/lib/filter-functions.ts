@@ -1,6 +1,6 @@
 import type { FilterFn, RowData } from "@tanstack/react-table"
 import type { ExtendedColumnFilter, FilterOperator } from "../types"
-import { JOIN_OPERATORS, FILTER_OPERATORS } from "./constants"
+import { JOIN_OPERATORS, FILTER_OPERATORS, FILTER_VARIANTS } from "./constants"
 
 // ============================================================================
 // Regex Cache for Performance
@@ -673,7 +673,7 @@ export const createFilterValue = <TData extends RowData = RowData>(
     filterId: "", // Will be set by the filter system
     operator,
     value: value as string | string[],
-    variant: "text", // Default variant
+    variant: FILTER_VARIANTS.TEXT, // Default variant
     joinOperator: JOIN_OPERATORS.AND, // Default join operator
   }
 }

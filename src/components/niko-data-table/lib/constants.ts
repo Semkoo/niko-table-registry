@@ -98,6 +98,20 @@ export const DEFAULT_VALUES = {
   PAGE_INDEX: 0,
 } as const
 
+/** System column IDs - used for smart pinning and feature detection */
+export const SYSTEM_COLUMN_IDS = {
+  /** Row selection checkbox column */
+  SELECT: "select",
+  /** Row expand/collapse column */
+  EXPAND: "expand",
+} as const
+
+/** Array of all system column IDs for filtering */
+export const SYSTEM_COLUMN_ID_LIST: string[] = [
+  SYSTEM_COLUMN_IDS.SELECT,
+  SYSTEM_COLUMN_IDS.EXPAND,
+]
+
 /** UI-related constraints and settings */
 export const UI_CONSTANTS = {
   /** Max characters allowed for a filter ID */

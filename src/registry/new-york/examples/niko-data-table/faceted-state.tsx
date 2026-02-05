@@ -6,6 +6,7 @@ import type {
   SortingState,
   ColumnFiltersState,
   VisibilityState,
+  ColumnPinningState,
 } from "@tanstack/react-table"
 import {
   DataTableRoot,
@@ -27,11 +28,19 @@ import {
   DataTableEmptyIcon,
   DataTableEmptyMessage,
 } from "@/components/niko-data-table"
-import { TableColumnHeader } from "@/components/niko-data-table/components"
-import { daysAgo } from "@/components/niko-data-table/lib"
+import {
+  DataTableColumnHeader,
+  DataTableColumnTitle,
+  DataTableColumnActions,
+  DataTableColumnSortMenu,
+  DataTableColumnSortOptions,
+  DataTableColumnFilter,
+  DataTableColumnFilterTrigger,
+} from "@/components/niko-data-table/components"
+import { daysAgo, FILTER_VARIANTS } from "@/components/niko-data-table/lib"
 import type { DataTableColumnDef } from "@/components/niko-data-table/types"
 import { Badge } from "@/components/ui/badge"
-import { UserSearch, SearchX } from "lucide-react"
+import { UserSearch, SearchX, Filter } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -65,14 +74,42 @@ const categoryOptions = [
 const columns: DataTableColumnDef<Product>[] = [
   {
     accessorKey: "name",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <DataTableColumnHeader className="justify-start">
+        <span className="mr-2 text-sm font-semibold">Product Name</span>
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
+    ),
     meta: {
       label: "Product Name",
     },
   },
   {
     accessorKey: "category",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnActions>
+          <div className="border-b p-2">
+            <DataTableFacetedFilter
+              accessorKey="category"
+              options={categoryOptions}
+              trigger={
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 w-full justify-start font-normal"
+                >
+                  <Filter className="mr-2 h-4 w-4" />
+                  Filter
+                </Button>
+              }
+            />
+          </div>
+          <DataTableColumnSortOptions variant={FILTER_VARIANTS.TEXT} />
+        </DataTableColumnActions>
+      </DataTableColumnHeader>
+    ),
     meta: {
       label: "Category",
       options: categoryOptions,
@@ -89,7 +126,20 @@ const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "brand",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnActions>
+          <DataTableColumnFilter>
+            <DataTableFacetedFilter
+              accessorKey="brand"
+              trigger={<DataTableColumnFilterTrigger />}
+            />
+          </DataTableColumnFilter>
+          <DataTableColumnSortOptions variant={FILTER_VARIANTS.TEXT} />
+        </DataTableColumnActions>
+      </DataTableColumnHeader>
+    ),
     meta: {
       label: "Brand",
       autoOptions: true,
@@ -100,7 +150,12 @@ const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "price",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu variant={FILTER_VARIANTS.NUMBER} />
+      </DataTableColumnHeader>
+    ),
     meta: {
       label: "Price",
       unit: "$",
@@ -118,7 +173,12 @@ const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "stock",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu variant={FILTER_VARIANTS.NUMBER} />
+      </DataTableColumnHeader>
+    ),
     meta: {
       label: "Stock",
     },
@@ -133,7 +193,12 @@ const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "rating",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu variant={FILTER_VARIANTS.NUMBER} />
+      </DataTableColumnHeader>
+    ),
     meta: {
       label: "Rating",
       autoOptions: true,
@@ -152,7 +217,12 @@ const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "inStock",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
+    ),
     meta: {
       label: "In Stock",
       options: [
@@ -173,7 +243,12 @@ const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "releaseDate",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
+    ),
     meta: {
       label: "Release Date",
     },
@@ -408,12 +483,17 @@ export default function FacetedStateTableExample() {
     pageIndex: 0,
     pageSize: 10,
   })
+  const [columnPinning, setColumnPinning] = useState<ColumnPinningState>({
+    left: [],
+    right: [],
+  })
 
   const resetAllState = () => {
     setGlobalFilter("")
     setSorting([])
     setColumnFilters([])
     setColumnVisibility({})
+    setColumnPinning({ left: [], right: [] })
     setPagination({ pageIndex: 0, pageSize: 10 })
   }
 
@@ -428,6 +508,7 @@ export default function FacetedStateTableExample() {
           sorting,
           columnFilters,
           columnVisibility,
+          columnPinning,
           pagination,
         }}
         // Pass state updaters
@@ -441,6 +522,7 @@ export default function FacetedStateTableExample() {
           setPagination(prev => ({ ...prev, pageIndex: 0 }))
         }}
         onColumnVisibilityChange={setColumnVisibility}
+        onColumnPinningChange={setColumnPinning}
         onPaginationChange={setPagination}
       >
         <FilterToolbar />
@@ -534,6 +616,14 @@ export default function FacetedStateTableExample() {
                 }
               </span>
             </div>
+
+            <div className="flex justify-between">
+              <span className="font-medium">Pinned Columns:</span>
+              <span className="text-foreground">
+                {columnPinning.left?.length || 0} Left,{" "}
+                {columnPinning.right?.length || 0} Right
+              </span>
+            </div>
           </div>
 
           {/* Detailed state (collapsible) */}
@@ -558,6 +648,12 @@ export default function FacetedStateTableExample() {
                 <strong>Column Visibility:</strong>
                 <pre className="mt-1 overflow-auto rounded bg-muted p-2">
                   {JSON.stringify(columnVisibility, null, 2)}
+                </pre>
+              </div>
+              <div>
+                <strong>Column Pinning:</strong>
+                <pre className="mt-1 overflow-auto rounded bg-muted p-2">
+                  {JSON.stringify(columnPinning, null, 2)}
                 </pre>
               </div>
             </div>
