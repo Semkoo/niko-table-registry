@@ -128,6 +128,7 @@ import {
   daysAgo,
   JOIN_OPERATORS,
   processFiltersForLogic,
+  FILTER_VARIANTS,
 } from "@/components/niko-data-table/lib"
 import { serializeFiltersForUrl } from "@/components/niko-data-table/filters/table-filter-menu"
 import { formatQueryString } from "@/components/niko-data-table/lib/format"
@@ -191,7 +192,7 @@ const columns: DataTableColumnDef<Product>[] = [
     ),
     meta: {
       label: "Product Name",
-      variant: "text",
+      variant: FILTER_VARIANTS.TEXT,
     },
     enableColumnFilter: true,
   },
@@ -200,12 +201,12 @@ const columns: DataTableColumnDef<Product>[] = [
     header: () => (
       <DataTableColumnHeader>
         <DataTableColumnTitle />
-        <DataTableColumnSortMenu variant="text" />
+        <DataTableColumnSortMenu variant={FILTER_VARIANTS.TEXT} />
       </DataTableColumnHeader>
     ),
     meta: {
       label: "Category",
-      variant: "select",
+      variant: FILTER_VARIANTS.SELECT,
       options: categoryOptions,
     },
     cell: ({ row }) => {
@@ -220,12 +221,12 @@ const columns: DataTableColumnDef<Product>[] = [
     header: () => (
       <DataTableColumnHeader>
         <DataTableColumnTitle />
-        <DataTableColumnSortMenu variant="text" />
+        <DataTableColumnSortMenu variant={FILTER_VARIANTS.TEXT} />
       </DataTableColumnHeader>
     ),
     meta: {
       label: "Brand",
-      variant: "select",
+      variant: FILTER_VARIANTS.SELECT,
       options: brandOptions,
     },
     enableColumnFilter: true,
@@ -235,13 +236,13 @@ const columns: DataTableColumnDef<Product>[] = [
     header: () => (
       <DataTableColumnHeader>
         <DataTableColumnTitle />
-        <DataTableColumnSortMenu variant="number" />
+        <DataTableColumnSortMenu variant={FILTER_VARIANTS.NUMBER} />
       </DataTableColumnHeader>
     ),
     meta: {
       label: "Price",
       unit: "$",
-      variant: "number",
+      variant: FILTER_VARIANTS.NUMBER,
     },
     cell: ({ row }) => {
       const price = parseFloat(row.getValue("price"))
@@ -254,12 +255,12 @@ const columns: DataTableColumnDef<Product>[] = [
     header: () => (
       <DataTableColumnHeader>
         <DataTableColumnTitle />
-        <DataTableColumnSortMenu variant="number" />
+        <DataTableColumnSortMenu variant={FILTER_VARIANTS.NUMBER} />
       </DataTableColumnHeader>
     ),
     meta: {
       label: "Stock",
-      variant: "number",
+      variant: FILTER_VARIANTS.NUMBER,
     },
     cell: ({ row }) => {
       const stock = Number(row.getValue("stock"))
@@ -276,12 +277,12 @@ const columns: DataTableColumnDef<Product>[] = [
     header: () => (
       <DataTableColumnHeader>
         <DataTableColumnTitle />
-        <DataTableColumnSortMenu variant="number" />
+        <DataTableColumnSortMenu variant={FILTER_VARIANTS.NUMBER} />
       </DataTableColumnHeader>
     ),
     meta: {
       label: "Rating",
-      variant: "number",
+      variant: FILTER_VARIANTS.NUMBER,
     },
     cell: ({ row }) => {
       const rating = Number(row.getValue("rating"))
@@ -304,7 +305,7 @@ const columns: DataTableColumnDef<Product>[] = [
     ),
     meta: {
       label: "In Stock",
-      variant: "boolean",
+      variant: FILTER_VARIANTS.BOOLEAN,
     },
     cell: ({ row }) => {
       const inStock = Boolean(row.getValue("inStock"))
@@ -326,7 +327,7 @@ const columns: DataTableColumnDef<Product>[] = [
     ),
     meta: {
       label: "Release Date",
-      variant: "date",
+      variant: FILTER_VARIANTS.DATE,
     },
     cell: ({ row }) => {
       const date = row.getValue("releaseDate") as Date

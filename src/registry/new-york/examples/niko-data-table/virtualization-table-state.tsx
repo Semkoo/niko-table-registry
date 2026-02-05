@@ -33,6 +33,10 @@ import {
   DataTableColumnSortMenu,
   DataTableColumnSortOptions,
 } from "@/components/niko-data-table/components"
+import {
+  FILTER_VARIANTS,
+  SYSTEM_COLUMN_IDS,
+} from "@/components/niko-data-table/lib"
 import type { DataTableColumnDef } from "@/components/niko-data-table/types"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -135,7 +139,7 @@ export default function VirtualizedTableStateExample() {
   const columns: DataTableColumnDef<Product>[] = React.useMemo(
     () => [
       {
-        id: "expand",
+        id: SYSTEM_COLUMN_IDS.EXPAND,
         header: () => null,
         cell: ({ row }) => {
           if (!row.getCanExpand()) return null
@@ -180,9 +184,9 @@ export default function VirtualizedTableStateExample() {
         header: () => (
           <DataTableColumnHeader>
             <DataTableColumnTitle />
-            <DataTableColumnSortMenu variant="text" />
+            <DataTableColumnSortMenu variant={FILTER_VARIANTS.TEXT} />
             <DataTableColumnActions>
-              <DataTableColumnSortOptions variant="text" />
+              <DataTableColumnSortOptions variant={FILTER_VARIANTS.TEXT} />
             </DataTableColumnActions>
           </DataTableColumnHeader>
         ),
@@ -195,7 +199,7 @@ export default function VirtualizedTableStateExample() {
         header: () => (
           <DataTableColumnHeader>
             <DataTableColumnTitle title="Price" />
-            <DataTableColumnSortMenu variant="number" />
+            <DataTableColumnSortMenu variant={FILTER_VARIANTS.NUMBER} />
           </DataTableColumnHeader>
         ),
         cell: ({ row }) => {
@@ -208,7 +212,7 @@ export default function VirtualizedTableStateExample() {
         header: () => (
           <DataTableColumnHeader>
             <DataTableColumnTitle title="Stock" />
-            <DataTableColumnSortMenu variant="number" />
+            <DataTableColumnSortMenu variant={FILTER_VARIANTS.NUMBER} />
           </DataTableColumnHeader>
         ),
         cell: ({ row }) => (
@@ -220,7 +224,7 @@ export default function VirtualizedTableStateExample() {
         header: () => (
           <DataTableColumnHeader>
             <DataTableColumnTitle title="Status" />
-            <DataTableColumnSortMenu variant="text" />
+            <DataTableColumnSortMenu variant={FILTER_VARIANTS.TEXT} />
           </DataTableColumnHeader>
         ),
         cell: ({ row }) => {

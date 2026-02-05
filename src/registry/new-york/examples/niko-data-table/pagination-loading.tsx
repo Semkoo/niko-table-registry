@@ -17,6 +17,7 @@ import {
   DataTableEmptyFilteredMessage,
   DataTableEmptyTitle,
   DataTableEmptyDescription,
+  FILTER_VARIANTS,
 } from "@/components/niko-data-table"
 import {
   DataTableColumnTitle,
@@ -55,7 +56,7 @@ const columns: DataTableColumnDef<Order>[] = [
     header: () => (
       <DataTableColumnHeader>
         <DataTableColumnTitle />
-        <DataTableColumnSortMenu variant="text" />
+        <DataTableColumnSortMenu variant={FILTER_VARIANTS.TEXT} />
       </DataTableColumnHeader>
     ),
     meta: {
@@ -67,7 +68,7 @@ const columns: DataTableColumnDef<Order>[] = [
     header: () => (
       <DataTableColumnHeader>
         <DataTableColumnTitle />
-        <DataTableColumnSortMenu variant="number" />
+        <DataTableColumnSortMenu variant={FILTER_VARIANTS.NUMBER} />
       </DataTableColumnHeader>
     ),
     meta: {
@@ -83,7 +84,7 @@ const columns: DataTableColumnDef<Order>[] = [
     header: () => (
       <DataTableColumnHeader>
         <DataTableColumnTitle />
-        <DataTableColumnSortMenu variant="text" />
+        <DataTableColumnSortMenu variant={FILTER_VARIANTS.TEXT} />
       </DataTableColumnHeader>
     ),
     meta: {

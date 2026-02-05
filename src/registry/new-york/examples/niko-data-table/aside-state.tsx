@@ -40,6 +40,7 @@ import {
   DataTableAsideTitle,
   DataTableFacetedFilter,
 } from "@/components/niko-data-table/components"
+import { FILTER_VARIANTS } from "@/components/niko-data-table/lib"
 import type { DataTableColumnDef } from "@/components/niko-data-table/types"
 import { Button } from "@/components/ui/button"
 import {
@@ -117,7 +118,7 @@ const columns: DataTableColumnDef<Customer>[] = [
               }
             />
           </div>
-          <DataTableColumnSortOptions variant="text" />
+          <DataTableColumnSortOptions variant={FILTER_VARIANTS.TEXT} />
         </DataTableColumnActions>
       </DataTableColumnHeader>
     ),
@@ -146,7 +147,7 @@ const columns: DataTableColumnDef<Customer>[] = [
               trigger={<DataTableColumnFilterTrigger />}
             />
           </DataTableColumnFilter>
-          <DataTableColumnSortOptions variant="text" />
+          <DataTableColumnSortOptions variant={FILTER_VARIANTS.TEXT} />
         </DataTableColumnActions>
       </DataTableColumnHeader>
     ),
@@ -161,7 +162,7 @@ const columns: DataTableColumnDef<Customer>[] = [
     header: () => (
       <DataTableColumnHeader>
         <DataTableColumnTitle title="Company" />
-        <DataTableColumnSortMenu variant="text" />
+        <DataTableColumnSortMenu variant={FILTER_VARIANTS.TEXT} />
       </DataTableColumnHeader>
     ),
   },
@@ -170,7 +171,7 @@ const columns: DataTableColumnDef<Customer>[] = [
     header: () => (
       <DataTableColumnHeader>
         <DataTableColumnTitle title="Status" />
-        <DataTableColumnSortMenu variant="text" />
+        <DataTableColumnSortMenu variant={FILTER_VARIANTS.TEXT} />
       </DataTableColumnHeader>
     ),
     cell: ({ row }) => {
@@ -195,7 +196,7 @@ const columns: DataTableColumnDef<Customer>[] = [
     header: () => (
       <DataTableColumnHeader>
         <DataTableColumnTitle title="Orders" />
-        <DataTableColumnSortMenu variant="number" />
+        <DataTableColumnSortMenu variant={FILTER_VARIANTS.NUMBER} />
       </DataTableColumnHeader>
     ),
   },
@@ -204,7 +205,7 @@ const columns: DataTableColumnDef<Customer>[] = [
     header: () => (
       <DataTableColumnHeader>
         <DataTableColumnTitle title="Revenue" />
-        <DataTableColumnSortMenu variant="number" />
+        <DataTableColumnSortMenu variant={FILTER_VARIANTS.NUMBER} />
       </DataTableColumnHeader>
     ),
     cell: ({ row }) => {

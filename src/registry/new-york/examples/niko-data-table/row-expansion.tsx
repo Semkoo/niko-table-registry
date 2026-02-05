@@ -16,6 +16,8 @@ import {
   DataTableEmptyDescription,
   DataTableEmptyIcon,
   DataTableEmptyMessage,
+  SYSTEM_COLUMN_IDS,
+  FILTER_VARIANTS,
 } from "@/components/niko-data-table"
 import {
   DataTableColumnHeader,
@@ -252,7 +254,7 @@ export default function RowExpansionSimpleExample() {
     () => [
       {
         // Auto-detected: column with id="expand" or meta.expandedContent enables row expansion
-        id: "expand",
+        id: SYSTEM_COLUMN_IDS.EXPAND,
         header: () => null,
         cell: ({ row }) => {
           if (!row.getCanExpand()) return null
@@ -299,7 +301,7 @@ export default function RowExpansionSimpleExample() {
         header: () => (
           <DataTableColumnHeader>
             <DataTableColumnTitle title="Customer" />
-            <DataTableColumnSortMenu variant="text" />
+            <DataTableColumnSortMenu variant={FILTER_VARIANTS.TEXT} />
           </DataTableColumnHeader>
         ),
         cell: ({ row }) => {
@@ -349,7 +351,7 @@ export default function RowExpansionSimpleExample() {
         header: () => (
           <DataTableColumnHeader>
             <DataTableColumnTitle title="Total" />
-            <DataTableColumnSortMenu variant="number" />
+            <DataTableColumnSortMenu variant={FILTER_VARIANTS.NUMBER} />
           </DataTableColumnHeader>
         ),
         cell: ({ row }) => {
@@ -362,7 +364,7 @@ export default function RowExpansionSimpleExample() {
         header: () => (
           <DataTableColumnHeader>
             <DataTableColumnTitle title="Status" />
-            <DataTableColumnSortMenu variant="text" />
+            <DataTableColumnSortMenu variant={FILTER_VARIANTS.TEXT} />
           </DataTableColumnHeader>
         ),
         cell: ({ row }) => {

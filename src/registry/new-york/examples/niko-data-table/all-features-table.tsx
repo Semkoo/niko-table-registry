@@ -47,6 +47,8 @@ import {
   DataTableEmptyTitle,
   DataTableEmptyDescription,
   DataTableEmptyActions,
+  SYSTEM_COLUMN_IDS,
+  FILTER_VARIANTS,
 } from "@/components/niko-data-table"
 import {
   DataTableColumnHeader,
@@ -621,7 +623,8 @@ export default function AllFeaturesTableExample() {
   const columns: DataTableColumnDef<Product>[] = useMemo(
     () => [
       {
-        id: "select",
+        id: SYSTEM_COLUMN_IDS.SELECT,
+        size: 40, // Compact width for checkbox column
         header: ({ table }) => (
           <Checkbox
             checked={
@@ -643,7 +646,7 @@ export default function AllFeaturesTableExample() {
         enableHiding: false,
       },
       {
-        id: "expand",
+        id: SYSTEM_COLUMN_IDS.EXPAND,
         header: () => null,
         cell: ({ row }) => {
           if (!row.getCanExpand()) return null
@@ -685,7 +688,7 @@ export default function AllFeaturesTableExample() {
         ),
         meta: {
           label: "Product Name",
-          variant: "text",
+          variant: FILTER_VARIANTS.TEXT,
         },
         enableColumnFilter: true,
         cell: ({ row }) => (
@@ -707,7 +710,7 @@ export default function AllFeaturesTableExample() {
             {/* Composable Actions: Multi-select filter example */}
             <DataTableColumnActions label="Category Options">
               <DataTableColumnSortOptions
-                variant="text"
+                variant={FILTER_VARIANTS.TEXT}
                 withSeparator={false}
               />
               <DataTableColumnFacetedFilterOptions
@@ -721,7 +724,7 @@ export default function AllFeaturesTableExample() {
         ),
         meta: {
           label: "Category",
-          variant: "select",
+          variant: FILTER_VARIANTS.SELECT,
           options: categoryOptions,
         },
         cell: ({ row }) => {
@@ -739,7 +742,7 @@ export default function AllFeaturesTableExample() {
             {/* Composable Actions: Single-select filter example */}
             <DataTableColumnActions label="Brand Options">
               <DataTableColumnSortOptions
-                variant="text"
+                variant={FILTER_VARIANTS.TEXT}
                 withSeparator={false}
               />
               <DataTableColumnFacetedFilterOptions
@@ -753,7 +756,7 @@ export default function AllFeaturesTableExample() {
         ),
         meta: {
           label: "Brand",
-          variant: "select",
+          variant: FILTER_VARIANTS.SELECT,
           options: brandOptions,
         },
         enableColumnFilter: true,
@@ -774,7 +777,7 @@ export default function AllFeaturesTableExample() {
         meta: {
           label: "Price",
           unit: "$",
-          variant: "range",
+          variant: FILTER_VARIANTS.RANGE,
         },
         cell: ({ row }) => {
           const price = parseFloat(row.getValue("price"))
@@ -790,7 +793,7 @@ export default function AllFeaturesTableExample() {
             {/* All actions composed in single dropdown */}
             <DataTableColumnActions>
               <DataTableColumnSortOptions
-                variant="number"
+                variant={FILTER_VARIANTS.NUMBER}
                 withSeparator={false}
               />
               <DataTableColumnPinOptions />
@@ -800,7 +803,7 @@ export default function AllFeaturesTableExample() {
         ),
         meta: {
           label: "Stock",
-          variant: "number",
+          variant: FILTER_VARIANTS.NUMBER,
         },
         cell: ({ row }) => {
           const stock = Number(row.getValue("stock"))
@@ -819,7 +822,7 @@ export default function AllFeaturesTableExample() {
             <DataTableColumnTitle />
             <DataTableColumnActions>
               <DataTableColumnSortOptions
-                variant="number"
+                variant={FILTER_VARIANTS.NUMBER}
                 withSeparator={false}
               />
               <DataTableColumnPinOptions />
@@ -829,7 +832,7 @@ export default function AllFeaturesTableExample() {
         ),
         meta: {
           label: "Rating",
-          variant: "number",
+          variant: FILTER_VARIANTS.NUMBER,
         },
         cell: ({ row }) => {
           const rating = Number(row.getValue("rating"))
@@ -856,7 +859,7 @@ export default function AllFeaturesTableExample() {
         ),
         meta: {
           label: "In Stock",
-          variant: "boolean",
+          variant: FILTER_VARIANTS.BOOLEAN,
         },
         cell: ({ row }) => {
           const inStock = Boolean(row.getValue("inStock"))
@@ -883,7 +886,7 @@ export default function AllFeaturesTableExample() {
         ),
         meta: {
           label: "Release Date",
-          variant: "date",
+          variant: FILTER_VARIANTS.DATE,
         },
         cell: ({ row }) => {
           const date = row.getValue("releaseDate") as Date

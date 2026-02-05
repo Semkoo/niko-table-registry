@@ -24,6 +24,8 @@ import {
   DataTableEmptyDescription,
   DataTableEmptyIcon,
   DataTableEmptyMessage,
+  SYSTEM_COLUMN_IDS,
+  FILTER_VARIANTS,
 } from "@/components/niko-data-table"
 import {
   DataTableColumnTitle,
@@ -142,7 +144,9 @@ function SelectionBar({
   const handleExport = React.useCallback(() => {
     exportTableToCSV(table, {
       filename: "selected-customers",
-      excludeColumns: ["select"] as unknown as (keyof Customer)[],
+      excludeColumns: [
+        SYSTEM_COLUMN_IDS.SELECT,
+      ] as unknown as (keyof Customer)[],
       onlySelected: true,
     })
   }, [table])
@@ -233,7 +237,8 @@ export default function RowSelectionStateExample() {
   const columns: DataTableColumnDef<Customer>[] = React.useMemo(
     () => [
       {
-        id: "select", // 'id: "select"' triggers auto-detection for row selection
+        id: SYSTEM_COLUMN_IDS.SELECT, // 'id: "select"' triggers auto-detection for row selection
+        size: 40, // Compact width for checkbox column
         header: ({ table }) => (
           <Checkbox
             checked={
@@ -274,7 +279,7 @@ export default function RowSelectionStateExample() {
         header: () => (
           <DataTableColumnHeader>
             <DataTableColumnTitle />
-            <DataTableColumnSortMenu variant="text" />
+            <DataTableColumnSortMenu variant={FILTER_VARIANTS.TEXT} />
           </DataTableColumnHeader>
         ),
         meta: {
@@ -286,7 +291,7 @@ export default function RowSelectionStateExample() {
         header: () => (
           <DataTableColumnHeader>
             <DataTableColumnTitle />
-            <DataTableColumnSortMenu variant="text" />
+            <DataTableColumnSortMenu variant={FILTER_VARIANTS.TEXT} />
           </DataTableColumnHeader>
         ),
         meta: {
@@ -298,7 +303,7 @@ export default function RowSelectionStateExample() {
         header: () => (
           <DataTableColumnHeader>
             <DataTableColumnTitle />
-            <DataTableColumnSortMenu variant="text" />
+            <DataTableColumnSortMenu variant={FILTER_VARIANTS.TEXT} />
           </DataTableColumnHeader>
         ),
         meta: {
