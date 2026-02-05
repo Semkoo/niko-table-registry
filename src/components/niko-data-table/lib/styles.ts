@@ -9,13 +9,17 @@ export const getCommonPinningStyles = <TData>(
   if (!isPinned) return {}
 
   const isLeft = isPinned === "left"
+  const columnSize = column.getSize()
 
   return {
     position: "sticky",
     left: isLeft ? `${column.getStart("left")}px` : undefined,
     right: !isLeft ? `${column.getAfter("right")}px` : undefined,
     opacity: 1,
-    width: column.getSize(),
+    width: columnSize,
+    minWidth: columnSize, // Prevent column from shrinking
+    maxWidth: columnSize, // Prevent column from growing
+    flexShrink: 0, // Prevent flex shrinking
     // Headers: z-20 to stay above other headers and body.
     // Body: z-10 to stay above other body cells.
     zIndex: isHeader ? 20 : 10,

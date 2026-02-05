@@ -26,6 +26,7 @@ import {
   DataTableEmptyDescription,
   DataTableEmptyIcon,
   DataTableEmptyMessage,
+  FILTER_VARIANTS,
 } from "@/components/niko-data-table"
 import {
   DataTableColumnHeader,
@@ -615,7 +616,7 @@ export default function TreeTableStateExample() {
         header: () => (
           <DataTableColumnHeader>
             <DataTableColumnTitle title="Status" />
-            <DataTableColumnSortMenu variant="text" />
+            <DataTableColumnSortMenu variant={FILTER_VARIANTS.TEXT} />
           </DataTableColumnHeader>
         ),
         cell: ({ row }) => {
@@ -643,7 +644,7 @@ export default function TreeTableStateExample() {
         header: () => (
           <DataTableColumnHeader>
             <DataTableColumnTitle title="Budget" />
-            <DataTableColumnSortMenu variant="number" />
+            <DataTableColumnSortMenu variant={FILTER_VARIANTS.NUMBER} />
           </DataTableColumnHeader>
         ),
         cell: ({ row }) => {

@@ -77,7 +77,11 @@ export const DataTableVirtualizedHeader = React.memo(
               return (
                 <TableHead
                   key={header.id}
-                  className={cn(size ? "" : "w-full", "flex items-center")}
+                  className={cn(
+                    size ? "" : "w-full",
+                    "flex items-center",
+                    header.column.getIsPinned() && "bg-background",
+                  )}
                   style={headerStyle}
                 >
                   {header.isPlaceholder ? null : (
@@ -307,7 +311,10 @@ export function DataTableVirtualizedBody<TData>({
                   }
                 }
               }}
-              className={cn("flex w-full", isClickable && "cursor-pointer")}
+              className={cn(
+                "group flex w-full",
+                isClickable && "cursor-pointer",
+              )}
             >
               {row.getVisibleCells().map(cell => {
                 const size = cell.column.columnDef.size
@@ -320,7 +327,12 @@ export function DataTableVirtualizedBody<TData>({
                 return (
                   <TableCell
                     key={cell.id}
-                    className={cn(size ? "" : "w-full", "flex items-center")}
+                    className={cn(
+                      size ? "" : "w-full",
+                      "flex items-center",
+                      cell.column.getIsPinned() &&
+                        "bg-background group-hover:bg-muted/50 group-data-[state=selected]:bg-muted",
+                    )}
                     style={cellStyle}
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}

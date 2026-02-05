@@ -37,7 +37,7 @@ import {
   DataTableColumnFilter,
   DataTableColumnFilterTrigger,
 } from "@/components/niko-data-table/components"
-import { daysAgo } from "@/components/niko-data-table/lib"
+import { daysAgo, FILTER_VARIANTS } from "@/components/niko-data-table/lib"
 import type { DataTableColumnDef } from "@/components/niko-data-table/types"
 import { Badge } from "@/components/ui/badge"
 import { UserSearch, SearchX, Filter } from "lucide-react"
@@ -106,7 +106,7 @@ const columns: DataTableColumnDef<Product>[] = [
               }
             />
           </div>
-          <DataTableColumnSortOptions variant="text" />
+          <DataTableColumnSortOptions variant={FILTER_VARIANTS.TEXT} />
         </DataTableColumnActions>
       </DataTableColumnHeader>
     ),
@@ -136,7 +136,7 @@ const columns: DataTableColumnDef<Product>[] = [
               trigger={<DataTableColumnFilterTrigger />}
             />
           </DataTableColumnFilter>
-          <DataTableColumnSortOptions variant="text" />
+          <DataTableColumnSortOptions variant={FILTER_VARIANTS.TEXT} />
         </DataTableColumnActions>
       </DataTableColumnHeader>
     ),
@@ -153,7 +153,7 @@ const columns: DataTableColumnDef<Product>[] = [
     header: () => (
       <DataTableColumnHeader>
         <DataTableColumnTitle />
-        <DataTableColumnSortMenu variant="number" />
+        <DataTableColumnSortMenu variant={FILTER_VARIANTS.NUMBER} />
       </DataTableColumnHeader>
     ),
     meta: {
@@ -176,7 +176,7 @@ const columns: DataTableColumnDef<Product>[] = [
     header: () => (
       <DataTableColumnHeader>
         <DataTableColumnTitle />
-        <DataTableColumnSortMenu variant="number" />
+        <DataTableColumnSortMenu variant={FILTER_VARIANTS.NUMBER} />
       </DataTableColumnHeader>
     ),
     meta: {
@@ -196,7 +196,7 @@ const columns: DataTableColumnDef<Product>[] = [
     header: () => (
       <DataTableColumnHeader>
         <DataTableColumnTitle />
-        <DataTableColumnSortMenu variant="number" />
+        <DataTableColumnSortMenu variant={FILTER_VARIANTS.NUMBER} />
       </DataTableColumnHeader>
     ),
     meta: {

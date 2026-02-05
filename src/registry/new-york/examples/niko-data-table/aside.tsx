@@ -30,6 +30,7 @@ import {
   DataTableColumnHeader,
   DataTableColumnSortMenu,
 } from "@/components/niko-data-table/components"
+import { FILTER_VARIANTS } from "@/components/niko-data-table/lib"
 import { useDataTable } from "@/components/niko-data-table/core"
 import type { DataTableColumnDef } from "@/components/niko-data-table/types"
 import { Button } from "@/components/ui/button"
@@ -193,7 +194,7 @@ export default function AsideTableExample() {
         header: () => (
           <DataTableColumnHeader>
             <DataTableColumnTitle />
-            <DataTableColumnSortMenu variant="text" />
+            <DataTableColumnSortMenu variant={FILTER_VARIANTS.TEXT} />
           </DataTableColumnHeader>
         ),
         meta: {
@@ -205,7 +206,7 @@ export default function AsideTableExample() {
         header: () => (
           <DataTableColumnHeader>
             <DataTableColumnTitle />
-            <DataTableColumnSortMenu variant="text" />
+            <DataTableColumnSortMenu variant={FILTER_VARIANTS.TEXT} />
           </DataTableColumnHeader>
         ),
         meta: {
@@ -217,7 +218,7 @@ export default function AsideTableExample() {
         header: () => (
           <DataTableColumnHeader>
             <DataTableColumnTitle />
-            <DataTableColumnSortMenu variant="text" />
+            <DataTableColumnSortMenu variant={FILTER_VARIANTS.TEXT} />
           </DataTableColumnHeader>
         ),
         meta: {

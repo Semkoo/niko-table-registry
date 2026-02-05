@@ -14,6 +14,7 @@ import {
   DataTableColumnTitle,
   DataTableColumnSortMenu,
 } from "@/components/niko-data-table/components"
+import { FILTER_VARIANTS } from "@/components/niko-data-table/lib"
 import type { DataTableColumnDef } from "@/components/niko-data-table/types"
 
 type Product = {
@@ -35,7 +36,7 @@ const columns: DataTableColumnDef<Product>[] = [
     ),
     meta: {
       label: "Product",
-      variant: "select",
+      variant: FILTER_VARIANTS.SELECT,
     },
   },
   {
@@ -43,7 +44,7 @@ const columns: DataTableColumnDef<Product>[] = [
     header: () => (
       <DataTableColumnHeader>
         <DataTableColumnTitle />
-        <DataTableColumnSortMenu variant="text" />
+        <DataTableColumnSortMenu variant={FILTER_VARIANTS.TEXT} />
       </DataTableColumnHeader>
     ),
   },
@@ -52,7 +53,7 @@ const columns: DataTableColumnDef<Product>[] = [
     header: () => (
       <DataTableColumnHeader>
         <DataTableColumnTitle />
-        <DataTableColumnSortMenu variant="number" />
+        <DataTableColumnSortMenu variant={FILTER_VARIANTS.NUMBER} />
       </DataTableColumnHeader>
     ),
     cell: ({ row }) => {
@@ -65,7 +66,7 @@ const columns: DataTableColumnDef<Product>[] = [
     header: () => (
       <DataTableColumnHeader>
         <DataTableColumnTitle />
-        <DataTableColumnSortMenu variant="number" />
+        <DataTableColumnSortMenu variant={FILTER_VARIANTS.NUMBER} />
       </DataTableColumnHeader>
     ),
   },

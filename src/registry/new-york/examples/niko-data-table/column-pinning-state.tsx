@@ -21,6 +21,7 @@ import {
   DataTableEmptyMessage,
   DataTableEmptyTitle,
   DataTableEmptyDescription,
+  FILTER_VARIANTS,
 } from "@/components/niko-data-table"
 import {
   DataTableColumnHeader,
@@ -218,12 +219,12 @@ const columns: DataTableColumnDef<Order>[] = [
   {
     accessorKey: "amount",
     size: 120,
-    meta: { label: "Amount", variant: "number" },
+    meta: { label: "Amount", variant: FILTER_VARIANTS.NUMBER },
     header: () => (
       <DataTableColumnHeader>
         <DataTableColumnTitle title="Amount" />
         <DataTableColumnActions>
-          <DataTableColumnSortOptions variant="number" />
+          <DataTableColumnSortOptions variant={FILTER_VARIANTS.NUMBER} />
           <DataTableColumnPinOptions />
         </DataTableColumnActions>
       </DataTableColumnHeader>
@@ -256,12 +257,12 @@ const columns: DataTableColumnDef<Order>[] = [
   {
     accessorKey: "date",
     size: 130,
-    meta: { label: "Date", variant: "date" },
+    meta: { label: "Date", variant: FILTER_VARIANTS.DATE },
     header: () => (
       <DataTableColumnHeader>
         <DataTableColumnTitle title="Date" />
         <DataTableColumnActions>
-          <DataTableColumnSortOptions variant="date" />
+          <DataTableColumnSortOptions variant={FILTER_VARIANTS.DATE} />
           <DataTableColumnPinOptions />
         </DataTableColumnActions>
       </DataTableColumnHeader>

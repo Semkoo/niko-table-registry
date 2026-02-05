@@ -74,7 +74,11 @@ export const DataTableHeader = React.memo(function DataTableHeader({
             }
 
             return (
-              <TableHead key={header.id} style={headerStyle}>
+              <TableHead
+                key={header.id}
+                style={headerStyle}
+                className={cn(header.column.getIsPinned() && "bg-background")}
+              >
                 {header.isPlaceholder ? null : (
                   <DataTableColumnHeaderRoot column={header.column}>
                     {flexRender(
@@ -231,7 +235,7 @@ export function DataTableBody<TData>({
                       onRowClick?.(row.original)
                     }
                   }}
-                  className={cn(isClickable && "cursor-pointer")}
+                  className={cn(isClickable && "cursor-pointer", "group")}
                 >
                   {row.getVisibleCells().map(cell => {
                     const size = cell.column.columnDef.size
@@ -241,7 +245,14 @@ export function DataTableBody<TData>({
                     }
 
                     return (
-                      <TableCell key={cell.id} style={cellStyle}>
+                      <TableCell
+                        key={cell.id}
+                        style={cellStyle}
+                        className={cn(
+                          cell.column.getIsPinned() &&
+                            "bg-background group-hover:bg-muted/50 group-data-[state=selected]:bg-muted",
+                        )}
+                      >
                         {flexRender(
                           cell.column.columnDef.cell,
                           cell.getContext(),

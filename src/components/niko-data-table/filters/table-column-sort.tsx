@@ -19,6 +19,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
+import { useDataTable } from "../core/data-table-context"
 
 import { SORT_ICONS, SORT_LABELS } from "../config/data-table"
 import type { SortIconVariant } from "../config/data-table"
@@ -36,6 +37,7 @@ import { FILTER_VARIANTS } from "../lib/constants"
  */
 export function TableColumnSortOptions<TData, TValue>({
   column,
+  table: propTable,
   variant: propVariant,
   withSeparator = true,
 }: {
@@ -45,6 +47,8 @@ export function TableColumnSortOptions<TData, TValue>({
   /** Whether to render a separator before the options. @default true */
   withSeparator?: boolean
 }) {
+  const context = useDataTable<TData>()
+  const table = propTable || context.table
   const sortState = column.getIsSorted()
 
   const variant =
@@ -52,6 +56,10 @@ export function TableColumnSortOptions<TData, TValue>({
 
   const icons = SORT_ICONS[variant] || SORT_ICONS[FILTER_VARIANTS.TEXT]
   const labels = SORT_LABELS[variant] || SORT_LABELS[FILTER_VARIANTS.TEXT]
+
+  const sortIndex = column.getSortIndex()
+  const isMultiSort = table && table.getState().sorting.length > 1
+  const showSortBadge = isMultiSort && sortIndex !== -1
 
   /**
    * Use a ref for immediate synchronous access to shift key state.
@@ -70,11 +78,11 @@ export function TableColumnSortOptions<TData, TValue>({
         setIsShiftPressed(isDown)
       }
     }
-    window.addEventListener("keydown", handleKey)
-    window.addEventListener("keyup", handleKey)
+    window.addEventListener("keydown", handleKey, { capture: true })
+    window.addEventListener("keyup", handleKey, { capture: true })
     return () => {
-      window.removeEventListener("keydown", handleKey)
-      window.removeEventListener("keyup", handleKey)
+      window.removeEventListener("keydown", handleKey, { capture: true })
+      window.removeEventListener("keyup", handleKey, { capture: true })
     }
   }, [])
 
@@ -122,7 +130,21 @@ export function TableColumnSortOptions<TData, TValue>({
     <>
       {withSeparator && <DropdownMenuSeparator />}
       <DropdownMenuLabel className="flex items-center justify-between text-xs font-normal text-muted-foreground">
-        <span>Column Sort</span>
+        <div className="flex items-center gap-2">
+          <span>Column Sort</span>
+          {showSortBadge && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="flex size-4 cursor-help items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground">
+                  {sortIndex + 1}
+                </span>
+              </TooltipTrigger>
+              <TooltipContent side="right">
+                Sort priority (order in which columns are sorted)
+              </TooltipContent>
+            </Tooltip>
+          )}
+        </div>
         <Tooltip>
           <TooltipTrigger asChild>
             <CircleHelp className="size-3.5 cursor-help" />
@@ -182,7 +204,7 @@ export function TableColumnSortOptions<TData, TValue>({
  */
 export function TableColumnSortMenu<TData, TValue>({
   column,
-  table,
+  table: propTable,
   variant: propVariant,
   className,
 }: {
@@ -191,6 +213,8 @@ export function TableColumnSortMenu<TData, TValue>({
   variant?: SortIconVariant
   className?: string
 }) {
+  const context = useDataTable<TData>()
+  const table = propTable || context.table
   const canSort = column.getCanSort()
   const sortState = column.getIsSorted()
 
@@ -208,6 +232,10 @@ export function TableColumnSortMenu<TData, TValue>({
         ? icons.desc
         : icons.unsorted
 
+  const sortIndex = column.getSortIndex()
+  const isMultiSort = table && table.getState().sorting.length > 1
+  const showSortBadge = isMultiSort && sortIndex !== -1
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -220,7 +248,14 @@ export function TableColumnSortMenu<TData, TValue>({
             className,
           )}
         >
-          <SortIcon className="size-4" />
+          <div className="relative flex items-center justify-center">
+            <SortIcon className="size-4" />
+            {showSortBadge && (
+              <span className="absolute -top-1 -right-2 flex size-3 items-center justify-center rounded-full bg-primary text-[9px] text-primary-foreground">
+                {sortIndex + 1}
+              </span>
+            )}
+          </div>
           <span className="sr-only">Sort column</span>
         </Button>
       </DropdownMenuTrigger>

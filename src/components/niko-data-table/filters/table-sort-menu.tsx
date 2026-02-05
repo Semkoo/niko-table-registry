@@ -6,7 +6,7 @@
  */
 
 import type { ColumnSort, SortDirection, Table } from "@tanstack/react-table"
-import { ArrowDownUp, Trash2 } from "lucide-react"
+import { ArrowDownUp, Trash2, CircleHelp } from "lucide-react"
 import * as React from "react"
 
 import { Badge } from "@/components/ui/badge"
@@ -24,6 +24,11 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import {
   Select,
   SelectContent,
@@ -379,9 +384,21 @@ export function TableSortMenu<TData>({
           {...props}
         >
           <div className="flex flex-col gap-1">
-            <h4 id={labelId} className="leading-none font-medium">
-              {sorting.length > 0 ? "Sort by" : "No sorting applied"}
-            </h4>
+            <div className="flex items-center gap-2">
+              <h4 id={labelId} className="leading-none font-medium">
+                {sorting.length > 0 ? "Sort by" : "No sorting applied"}
+              </h4>
+              {sorting.length > 1 && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <CircleHelp className="size-3.5 cursor-help text-muted-foreground" />
+                  </TooltipTrigger>
+                  <TooltipContent side="right">
+                    The order of fields determines sort priority
+                  </TooltipContent>
+                </Tooltip>
+              )}
+            </div>
             <p
               id={descriptionId}
               className={cn(
