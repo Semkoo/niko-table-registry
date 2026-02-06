@@ -7,11 +7,11 @@ import { loadEnv } from "vite"
 
 if (process.env.NODE_ENV == null) throw new Error("NODE_ENV is not set.")
 
-const { GITHUB_REPO_URL, DEPLOY_PRIME_URL, URL } = loadEnv(
-  process.env.NODE_ENV,
-  process.cwd(),
-  "",
-)
+const {
+  GITHUB_REPO_URL = "https://github.com/Semkoo/niko-table-registry",
+  DEPLOY_PRIME_URL = "localhost:4321",
+  URL = "http://niko-table.com",
+} = loadEnv(process.env.NODE_ENV, process.cwd(), "")
 
 const SERVER_URL =
   process.env.NODE_ENV === "production" ? URL : DEPLOY_PRIME_URL
