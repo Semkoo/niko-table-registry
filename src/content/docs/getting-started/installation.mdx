@@ -20,7 +20,7 @@ Before installing the DataTable component, make sure you have:
 
 The DataTable components use a two-layer architecture for maximum flexibility:
 
-- **Actions** (`data-table-*.tsx` in `/actions` folder) - Context-aware wrapper components that use `useDataTable()` hook to automatically get the table from `DataTableRoot` context. These eliminate prop drilling and are the recommended way to use components:
+- **Components** (`data-table-*.tsx` in `/components` folder) - Context-aware wrapper components that use `useDataTable()` hook to automatically get the table from `DataTableRoot` context. These eliminate prop drilling and are the recommended way to use components:
   - `DataTableSearchFilter`, `DataTableFilterMenu`, `DataTableSortMenu`, `DataTablePagination`, etc.
 - **Filters** (`table-*.tsx` in `/filters` folder) - Core implementation components that accept a `table` prop directly and use TanStack Table hooks (like `table.getState()`, `table.setGlobalFilter()`, etc.). These can be used standalone:
   - `TableSearchFilter`, `TableFilterMenu`, `TableSortMenu`, etc.
@@ -539,7 +539,6 @@ src/
 │       ├── hooks/
 │       ├── components/
 │       ├── filters/
-│       ├── actions/
 │       ├── config/
 │       ├── lib/
 │       └── index.tsx

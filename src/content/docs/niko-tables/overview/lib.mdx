@@ -405,6 +405,55 @@ import { processFiltersForLogic } from "@/components/niko-table"
 const { processedFilters, joinOperators } = processFiltersForLogic(filters)
 ```
 
+## Style Utilities
+
+Helper functions for styling table components, particularly for column pinning.
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/lib/styles.ts`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+</div>
+
+### getCommonPinningStyles
+
+Returns CSS styles for pinned columns (sticky positioning, z-index, shadows). Used internally by DataTable components, but available for custom implementations.
+
+```tsx showLineNumbers
+import { getCommonPinningStyles } from "@/components/niko-table"
+
+// In a custom header cell
+const pinningStyles = getCommonPinningStyles(column, true)
+
+// In a custom body cell
+const pinningStyles = getCommonPinningStyles(column, false)
+```
+
+#### Parameters
+
+| Name       | Type            | Default | Description                                           |
+| ---------- | --------------- | ------- | ----------------------------------------------------- |
+| `column`   | `Column<TData>` | -       | TanStack Table column instance                        |
+| `isHeader` | `boolean`       | `false` | Whether this is a header cell (affects z-index layer) |
+
+#### Returns
+
+`React.CSSProperties` - CSS styles object with sticky positioning, z-index, background, and shadow.
+
+**Style Properties Applied:**
+
+- `position: sticky` - Keeps column fixed during horizontal scroll
+- `left` or `right` - Calculated position based on pinning side
+- `zIndex` - 20 for headers, 10 for body cells
+- `backgroundColor` - Uses `--background` CSS variable for opacity
+- `boxShadow` - Visual separator using `--border` CSS variable
+
 ## Additional Constants
 
 ### SYSTEM_COLUMN_IDS
