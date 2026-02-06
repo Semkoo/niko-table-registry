@@ -23,3 +23,23 @@ export type { TablePaginationProps } from "./table-pagination"
 // Export components
 export { TableExportButton, exportTableToCSV } from "./table-export-button"
 export type { TableExportButtonProps } from "./table-export-button"
+
+// Column-level filter components
+export { TableColumnTitle } from "./table-column-title"
+export { TableColumnActions } from "./table-column-actions"
+export {
+  TableColumnSortOptions,
+  TableColumnSortMenu,
+} from "./table-column-sort"
+export {
+  TableColumnHideOptions,
+  TableColumnHideMenu,
+} from "./table-column-hide"
+export { TableColumnPinOptions, TableColumnPinMenu } from "./table-column-pin"
+export {
+  TableColumnFacetedFilterOptions,
+  TableColumnFacetedFilterMenu,
+  TableColumnFilterTrigger,
+} from "./table-column-faceted-filter"
+export { TableColumnSliderFilterOptions } from "./table-column-slider-filter"
+export { TableColumnDateFilterOptions } from "./table-column-date-filter"

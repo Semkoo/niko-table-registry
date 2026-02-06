@@ -108,7 +108,7 @@ export default defineConfig({
           },
         },
       ],
-      title: "Niko Table - Nobody's table, everyone's solution",
+      title: "Niko Tables - Nobody's table, everyone's solution",
       editLink: {
         baseUrl: `${GITHUB_REPO_URL}/tree/main`,
       },
@@ -138,74 +138,74 @@ export default defineConfig({
           ],
         },
         {
-          label: "Niko DataTable",
+          label: "Niko Tables",
           items: [
-            { label: "Introduction", slug: "niko-data-table/introduction" },
+            { label: "Introduction", slug: "niko-tables/introduction" },
             {
               label: "Components",
-              slug: "niko-data-table/overview/components",
+              slug: "niko-tables/overview/components",
             },
-            { label: "Core", slug: "niko-data-table/overview/core" },
+            { label: "Core", slug: "niko-tables/overview/core" },
             {
               label: "Filters",
-              slug: "niko-data-table/overview/filters",
+              slug: "niko-tables/overview/filters",
             },
-            { label: "Hooks", slug: "niko-data-table/overview/hooks" },
-            { label: "Library", slug: "niko-data-table/overview/lib" },
-            { label: "Types", slug: "niko-data-table/overview/types" },
-            { label: "Config", slug: "niko-data-table/overview/config" },
+            { label: "Hooks", slug: "niko-tables/overview/hooks" },
+            { label: "Library", slug: "niko-tables/overview/lib" },
+            { label: "Types", slug: "niko-tables/overview/types" },
+            { label: "Config", slug: "niko-tables/overview/config" },
           ],
         },
         {
           label: "Examples",
           items: [
-            { label: "Simple Table", slug: "niko-data-table/simple-table" },
-            { label: "Basic Table", slug: "niko-data-table/basic-table" },
-            { label: "Search Table", slug: "niko-data-table/search-table" },
-            { label: "Aside Table", slug: "niko-data-table/aside-table" },
+            { label: "Simple Table", slug: "niko-tables/simple-table" },
+            { label: "Basic Table", slug: "niko-tables/basic-table" },
+            { label: "Search Table", slug: "niko-tables/search-table" },
+            { label: "Aside Table", slug: "niko-tables/aside-table" },
             {
               label: "Row Selection Table",
-              slug: "niko-data-table/row-selection-table",
+              slug: "niko-tables/row-selection-table",
             },
             {
               label: "Row Expansion Table",
-              slug: "niko-data-table/row-expansion-table",
+              slug: "niko-tables/row-expansion-table",
             },
             {
               label: "Column Pinning Table",
-              slug: "niko-data-table/column-pinning-table",
+              slug: "niko-tables/column-pinning-table",
             },
             {
               label: "Tree Table",
-              slug: "niko-data-table/tree-table",
+              slug: "niko-tables/tree-table",
             },
             {
               label: "Virtualization Table",
-              slug: "niko-data-table/virtualization-table",
+              slug: "niko-tables/virtualization-table",
             },
             {
               label: "Faceted Filter Table",
-              slug: "niko-data-table/faceted-filter-table",
+              slug: "niko-tables/faceted-filter-table",
             },
             {
               label: "Advanced Filter Table",
-              slug: "niko-data-table/advanced-table",
+              slug: "niko-tables/advanced-table",
             },
             {
               label: "Advanced Inline Filter Table",
-              slug: "niko-data-table/advanced-inline-table",
+              slug: "niko-tables/advanced-inline-table",
             },
             {
               label: "Advanced Nuqs Table",
-              slug: "niko-data-table/advanced-nuqs-table",
+              slug: "niko-tables/advanced-nuqs-table",
             },
             {
               label: "Server-Side Table",
-              slug: "niko-data-table/server-side-table",
+              slug: "niko-tables/server-side-table",
             },
             {
               label: "Server-Side Nuqs Table",
-              slug: "niko-data-table/server-side-nuqs-table",
+              slug: "niko-tables/server-side-nuqs-table",
             },
           ],
         },
@@ -236,8 +236,8 @@ export default defineConfig({
               link: "/getting-started/installation",
             },
             {
-              label: "DataTable Examples",
-              link: "/niko-data-table/simple-table",
+              label: "Table Examples",
+              link: "/niko-tables/simple-table",
             },
             {
               label: "Contributing",

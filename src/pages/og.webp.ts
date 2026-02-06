@@ -7,7 +7,7 @@ const components = (await getCollection("docs")).filter(entry =>
 
 export function GET() {
   return generateOpenGraphImage({
-    title: "Niko Table - Nobody's table, everyone's solution",
+    title: "Niko Tables - Nobody's table, everyone's solution",
     tags: ["Accessible", "Shadcn Native Feel", "Type Safe"],
     secondaryText: `${components.length} Components`,
   })

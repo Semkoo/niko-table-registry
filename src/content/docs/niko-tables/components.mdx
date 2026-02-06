@@ -33,7 +33,7 @@ The components in `data-table` are built to be composable. You build your table 
 
 ## Directory Structure
 
-The Niko Table components are organized into logical directories following the file structure in `src/components/niko-data-table`:
+The Niko Tables components are organized into logical directories following the file structure in `src/components/niko-table`:
 
 - **`core/`** - Essential table components (DataTableRoot, DataTable, context, structure components)
 - **`components/`** - User-facing context-aware components (automatically connect to table context via `useDataTable` hook)
@@ -47,7 +47,7 @@ This documentation follows this structure for easy navigation. Each component se
 
 ## Documentation Sections
 
-### [Core Components](/niko-data-table/components/core/)
+### [Core Components](/niko-tables/overview/core)
 
 Essential building blocks of the data table. They handle table initialization, context management, and basic structure.
 
@@ -63,7 +63,7 @@ Essential building blocks of the data table. They handle table initialization, c
 - `DataTableErrorBoundary` - Error boundary for table
 - Virtualized components for large datasets
 
-### [User-Facing Components](/niko-data-table/components/components/)
+### [User-Facing Components](/niko-tables/overview/components)
 
 Context-aware components that automatically connect to the table via the `useDataTable` hook. These are the recommended components for most use cases.
 
@@ -86,7 +86,7 @@ Context-aware components that automatically connect to the table via the `useDat
 - `DataTableSelectionBar` - Bulk actions bar
 - `DataTableEmptyState` - Empty state composition components
 
-### [Filter Components](/niko-data-table/components/filters/)
+### [Filter Components](/niko-tables/overview/filters)
 
 Core filter implementation components that accept a `table` prop directly. They are used internally by the context-aware components but can also be used standalone when building custom components.
 
@@ -105,7 +105,7 @@ Core filter implementation components that accept a `table` prop directly. They 
 - `TableExportButton` - Core export button
 - `TableRangeFilter` - Core range filter
 
-### [Hooks](/niko-data-table/components/hooks/)
+### [Hooks](/niko-tables/overview/hooks)
 
 Custom React hooks for table functionality.
 
@@ -119,13 +119,13 @@ Custom React hooks for table functionality.
 
 ## Credits and Inspirations
 
-Niko Table is built on top of excellent open-source projects and inspired by the work of talented developers in the community.
+Niko Tables is built on top of excellent open-source projects and inspired by the work of talented developers in the community.
 
 ### Core Dependencies
 
 - **[TanStack Table](https://tanstack.com/table)** by Tanner Linsley - The headless table library that powers everything. Provides the foundation for all table functionality including sorting, filtering, pagination, and more.
 
-- **[Shadcn UI](https://ui.shadcn.com)** by Shadcn - Beautiful, accessible component primitives built on Radix UI. All UI components in Niko Table are built using Shadcn UI components.
+- **[Shadcn UI](https://ui.shadcn.com)** by Shadcn - Beautiful, accessible component primitives built on Radix UI. All UI components in Niko Tables are built using Shadcn UI components.
 
 ### Major Inspirations
 

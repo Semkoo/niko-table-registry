@@ -113,6 +113,6 @@ export function TableSearchFilter<TData>({
 
 /**
  * @required displayName is required for auto feature detection
- * @see src/components/niko-data-table/config/feature-detection.ts
+ * @see src/components/niko-table/config/feature-detection.ts
  */
 TableSearchFilter.displayName = "TableSearchFilter"

@@ -274,9 +274,9 @@ export { useDebounce } from "./hooks"
 ### Reusable UI Components
 
 - `TableColumnHeader` - `components/table-column-header.tsx`
-- `DataTableToolbarSection` - `components/niko-data-table-toolbar-section.tsx` ⭐ **MOVED**
-- `DataTableAside` - `components/niko-data-table-aside.tsx`
-- `DataTableSelectionBar` - `components/niko-data-table-selection-bar.tsx`
+- `DataTableToolbarSection` - `components/niko-table-toolbar-section.tsx` ⭐ **MOVED**
+- `DataTableAside` - `components/niko-table-aside.tsx`
+- `DataTableSelectionBar` - `components/niko-table-selection-bar.tsx`
 - `DataTableEmpty*` - `components/data-table-empty-state.tsx` ⭐ **NEW**
 
 ---
@@ -356,10 +356,10 @@ See `ANALYSIS_REPORT.md` for detailed roadmap including:
 
 ## Resources
 
-- **Main README**: `/src/components/niko-data-table/README.md`
-- **Analysis Report**: `/src/components/niko-data-table/ANALYSIS_REPORT.md`
-- **Updates Guide**: `/src/components/niko-data-table/UPDATES.md`
-- **Empty State Guide**: `/src/components/niko-data-table/EMPTY_STATE_COMPOSITION.md`
+- **Main README**: `/src/components/niko-table/README.md`
+- **Analysis Report**: `/src/components/niko-table/ANALYSIS_REPORT.md`
+- **Updates Guide**: `/src/components/niko-table/UPDATES.md`
+- **Empty State Guide**: `/src/components/niko-table/EMPTY_STATE_COMPOSITION.md`
 - **Examples**: `/src/registry/new-york/examples/`
 
 ---

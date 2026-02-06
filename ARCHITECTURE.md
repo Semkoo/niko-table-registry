@@ -34,8 +34,8 @@ import {
 
 **Purpose**: Foundation - generic, reusable code used across the entire project
 
-- ✅ **Can be imported by**: Niko Table layer, Documentation layer, Registry layer
-- ❌ **Cannot import from**: Documentation, Registry, or Niko Table layers
+- ✅ **Can be imported by**: Niko Tables layer, Documentation layer, Registry layer
+- ❌ **Cannot import from**: Documentation, Registry, or Niko Tables layers
 
 **Key directories**:
 
@@ -44,7 +44,7 @@ import {
 - `/hooks` - Shared React hooks (`use-mobile.ts`, `useLocalStorage.ts`)
 - `/types` - Shared TypeScript types
 
-### 2️⃣ Niko Table Layer (`/components/niko-data-table`)
+### 2️⃣ Niko Tables Layer (`/components/niko-table`)
 
 **Purpose**: Core table component library - the main product being documented
 
@@ -53,10 +53,10 @@ import {
 - ❌ **Cannot import from**: Documentation or Registry layers
 - ❌ **Cannot import from**: Other feature components
 
-**Structure within Niko Table**:
+**Structure within Niko Tables**:
 
 ```
-/components/niko-data-table/
+/components/niko-table/
   /core/          # Core table components (DataTableRoot, DataTable, context)
   /components/    # All user-facing components:
                   #   - Context-aware components (DataTableSearchFilter, DataTablePagination, etc.)
@@ -87,12 +87,12 @@ import {
 
 ### 3️⃣ Documentation Layer (`/content/docs`, `/components/markdown`)
 
-**Purpose**: Astro Starlight documentation site - pages and components that showcase Niko Table
+**Purpose**: Astro Starlight documentation site - pages and components that showcase Niko Tables
 
-- ✅ **Can import from**: Shared layer, Niko Table layer
+- ✅ **Can import from**: Shared layer, Niko Tables layer
 - ✅ **Can import from**: Registry examples
 - ❌ **Cannot import from**: Other Documentation routes
-- ❌ **Should NOT contain**: Business logic (delegate to Niko Table)
+- ❌ **Should NOT contain**: Business logic (delegate to Niko Tables)
 
 **Structure**:
 
@@ -103,15 +103,15 @@ import {
 
 **Purpose**: Example implementations and demos shown in documentation
 
-- ✅ **Can import from**: Shared layer, Niko Table layer
+- ✅ **Can import from**: Shared layer, Niko Tables layer
 - ✅ **Can be imported by**: Documentation layer
 - ❌ **Cannot import from**: Documentation layer
-- ❌ **Should NOT contain**: Business logic (use Niko Table components)
+- ❌ **Should NOT contain**: Business logic (use Niko Tables components)
 
 **Structure**:
 
 - `/registry/new-york/examples/data-table/` - Example table implementations
-- Each example demonstrates specific Niko Table features
+- Each example demonstrates specific Niko Tables features
 
 ## 🔄 Data Flow Rules
 
@@ -121,20 +121,20 @@ import {
      Shared Layer (@/components/ui, @/lib, @/hooks)
               ↓       ↓       ↓
               ↓       ↓       ↓
-         Niko Table → Registry → Documentation
+         Niko Tables → Registry → Documentation
 ```
 
 1. ✅ **Shared → All Layers**: All layers can import from Shared
-2. ✅ **Niko Table → Registry**: Examples can use Niko Table components
-3. ✅ **Niko Table → Documentation**: Docs can showcase Niko Table
+2. ✅ **Niko Tables → Registry**: Examples can use Niko Tables components
+3. ✅ **Niko Tables → Documentation**: Docs can showcase Niko Tables
 4. ✅ **Registry → Documentation**: Docs can render registry examples
-5. ❌ **Registry → Niko Table**: Examples cannot modify core library
-6. ❌ **Documentation → Niko Table**: Docs cannot modify core library
+5. ❌ **Registry → Niko Tables**: Examples cannot modify core library
+6. ❌ **Documentation → Niko Tables**: Docs cannot modify core library
 7. ❌ **Documentation → Registry**: Docs cannot modify examples (read-only rendering)
 
 ## 📝 Component Patterns
 
-### Niko Table Components vs Filters
+### Niko Tables Components vs Filters
 
 **Components** (`/components/`) - Context-aware, recommended:
 
@@ -218,11 +218,11 @@ export function BasicTable() {
 ### Import Rules
 
 - [ ] Base UI components are imported from `@/components/ui`
-- [ ] Niko Table components are imported from `@/components/niko-table`
+- [ ] Niko Tables components are imported from `@/components/niko-table`
 - [ ] Shared utilities are imported from `@/lib` or `@/hooks`
 - [ ] Documentation doesn't import from Registry (read-only rendering)
 - [ ] Registry examples don't import from Documentation
-- [ ] Niko Table doesn't import from Documentation or Registry
+- [ ] Niko Tables doesn't import from Documentation or Registry
 
 ### Component Patterns
 
@@ -235,9 +235,9 @@ export function BasicTable() {
 ### Architecture
 
 - [ ] Shared layer doesn't import from other layers
-- [ ] Niko Table only imports from Shared layer
-- [ ] Documentation imports from Niko Table and Registry
-- [ ] Registry examples import from Niko Table and Shared
+- [ ] Niko Tables only imports from Shared layer
+- [ ] Documentation imports from Niko Tables and Registry
+- [ ] Registry examples import from Niko Tables and Shared
 - [ ] One-way data flow is maintained
 
 ### Styling
@@ -248,7 +248,7 @@ export function BasicTable() {
 
 ## 📚 Additional Resources
 
-- [Niko Table Documentation](/getting-started/introduction)
+- [Niko Tables Documentation](/getting-started/introduction)
 - [Component Architecture](/data-table/components)
 - [Installation Guide](/getting-started/installation)
 - [Contributing Guide](/contributing)
