@@ -34,7 +34,7 @@ The `DataTableRoot` component provides the table context to all child components
 </div>
 
 ```tsx showLineNumbers
-import { DataTableRoot } from "@/components/niko-data-table"
+import { DataTableRoot } from "@/components/niko-table"
 
 export function MyTable({ data }: { data: User[] }) {
   return (
@@ -109,8 +109,7 @@ The main table container component that wraps the table structure and provides s
 </div>
 
 ```tsx showLineNumbers
-import { DataTable } from "@/components/niko-data-table"
-
+import { DataTable } from "@/components/niko-table"
 ;<DataTable className="rounded-md border" height={600}>
   <DataTableHeader />
   <DataTableBody />
@@ -143,8 +142,7 @@ Renders the table header with sortable columns.
 </div>
 
 ```tsx showLineNumbers
-import { DataTableHeader } from "@/components/niko-data-table"
-
+import { DataTableHeader } from "@/components/niko-table"
 ;<DataTableHeader sticky={true} />
 ```
 
@@ -176,8 +174,7 @@ import {
   DataTableBody,
   DataTableSkeleton,
   DataTableEmptyBody,
-} from "@/components/niko-data-table"
-
+} from "@/components/niko-table"
 ;<DataTableBody
   onScroll={e => console.log(`Scrolled ${e.percentage}%`)}
   onScrolledBottom={() => loadMore()}
@@ -340,8 +337,7 @@ Error boundary component that catches errors in the data table component tree an
 </div>
 
 ```tsx showLineNumbers
-import { DataTableErrorBoundary } from "@/components/niko-data-table"
-
+import { DataTableErrorBoundary } from "@/components/niko-table"
 ;<DataTableErrorBoundary
   onError={(error, errorInfo) => {
     console.error("Table error:", error)
@@ -388,8 +384,7 @@ Virtualized table header component.
 import {
   DataTableVirtualizedHeader,
   DataTableVirtualizedBody,
-} from "@/components/niko-data-table"
-
+} from "@/components/niko-table"
 ;<DataTable>
   <DataTableVirtualizedHeader />
   <DataTableVirtualizedBody estimateSize={34} overscan={20}>
@@ -435,9 +430,8 @@ import {
   DataTableEmptyMessage,
   DataTableEmptyTitle,
   DataTableEmptyDescription,
-} from "@/components/niko-data-table"
+} from "@/components/niko-table"
 import { PackageOpen } from "lucide-react"
-
 ;<DataTableVirtualizedBody estimateSize={34}>
   <DataTableVirtualizedEmptyBody>
     <DataTableEmptyIcon>
@@ -469,8 +463,7 @@ Loading skeleton for virtualized tables.
 import {
   DataTableVirtualizedBody,
   DataTableVirtualizedSkeleton,
-} from "@/components/niko-data-table"
-
+} from "@/components/niko-table"
 ;<DataTableVirtualizedBody estimateSize={34}>
   <DataTableVirtualizedSkeleton rows={10} estimateSize={34} />
 </DataTableVirtualizedBody>
@@ -495,9 +488,8 @@ Loading indicator for virtualized tables.
 import {
   DataTableVirtualizedBody,
   DataTableVirtualizedLoading,
-} from "@/components/niko-data-table"
+} from "@/components/niko-table"
 import { Loader2 } from "lucide-react"
-
 ;<DataTableVirtualizedBody estimateSize={34}>
   <DataTableVirtualizedLoading>
     <div className="flex items-center justify-center p-8">

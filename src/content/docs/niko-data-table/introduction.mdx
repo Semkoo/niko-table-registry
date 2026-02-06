@@ -133,8 +133,8 @@ import {
   DataTableToolbarSection,
   DataTableSearchFilter,
   DataTablePagination,
-} from "@/components/niko-data-table"
-import type { DataTableColumnDef } from "@/components/niko-data-table/types"
+} from "@/components/niko-table"
+import type { DataTableColumnDef } from "@/components/niko-table/types"
 
 type User = {
   id: string
@@ -175,7 +175,7 @@ Let's start with the most basic table. A simple table with data.
 1. **Create your column definitions**
 
    ```tsx showLineNumbers title="columns.tsx"
-   import type { DataTableColumnDef } from "@/components/niko-data-table/types"
+   import type { DataTableColumnDef } from "@/components/niko-table/types"
 
    type User = {
      id: string
@@ -203,7 +203,7 @@ Let's start with the most basic table. A simple table with data.
      DataTable,
      DataTableHeader,
      DataTableBody,
-   } from "@/components/niko-data-table"
+   } from "@/components/niko-table"
    import { columns } from "./columns"
 
    export function UsersTable({ data }: { data: User[] }) {
@@ -228,7 +228,7 @@ Let's start with the most basic table. A simple table with data.
      DataTableBody,
      DataTableSkeleton,
      DataTableEmptyBody,
-   } from "@/components/niko-data-table"
+   } from "@/components/niko-table"
 
    export function UsersTable({
      data,
@@ -264,7 +264,7 @@ Let's start with the most basic table. A simple table with data.
      DataTableToolbarSection,
      DataTableSearchFilter,
      DataTablePagination,
-   } from "@/components/niko-data-table"
+   } from "@/components/niko-table"
 
    export function UsersTable({
      data,
@@ -353,7 +353,7 @@ The `config` prop accepts a `DataTableConfig` object:
 The `useDataTable` hook is used to access the table instance from any child component.
 
 ```tsx showLineNumbers
-import { useDataTable } from "@/components/niko-data-table"
+import { useDataTable } from "@/components/niko-table"
 
 export function CustomComponent() {
   const { table, isLoading } = useDataTable()
@@ -559,7 +559,7 @@ The components in `data-table` are built to be composable. You build your table 
 
 ## Directory Structure
 
-The NikoDataTable components are organized into logical directories following the file structure in `src/components/niko-data-table`:
+The Niko Table components are organized into logical directories following the file structure in `src/components/niko-data-table`:
 
 - **`core/`** - Essential table components (DataTableRoot, DataTable, context, structure components)
 - **`components/`** - User-facing context-aware components (automatically connect to table context via `useDataTable` hook)
@@ -645,13 +645,13 @@ Custom React hooks for table functionality.
 
 ## Credits and Inspirations
 
-NikoDataTable is built on top of excellent open-source projects and inspired by the work of talented developers in the community.
+Niko Table is built on top of excellent open-source projects and inspired by the work of talented developers in the community.
 
 ### Core Dependencies
 
 - **[TanStack Table](https://tanstack.com/table)** by Tanner Linsley - The headless table library that powers everything. Provides the foundation for all table functionality including sorting, filtering, pagination, and more.
 
-- **[Shadcn UI](https://ui.shadcn.com)** by Shadcn - Beautiful, accessible component primitives built on Radix UI. All UI components in NikoDataTable are built using Shadcn UI components.
+- **[Shadcn UI](https://ui.shadcn.com)** by Shadcn - Beautiful, accessible component primitives built on Radix UI. All UI components in Niko Table are built using Shadcn UI components.
 
 ### Major Inspirations
 

@@ -49,7 +49,7 @@ import {
   DataTableEmptyActions,
   SYSTEM_COLUMN_IDS,
   FILTER_VARIANTS,
-} from "@/components/niko-data-table"
+} from "@/components/niko-table"
 import {
   DataTableColumnHeader,
   DataTableColumnTitle,
@@ -67,14 +67,14 @@ import {
   DataTableAsideDescription,
   DataTableAsideClose,
   DataTableSelectionBar,
-} from "@/components/niko-data-table/components"
-import { useDataTable } from "@/components/niko-data-table/core"
-import { daysAgo } from "@/components/niko-data-table/lib"
-import { exportTableToCSV } from "@/components/niko-data-table/filters"
+} from "@/components/niko-table/components"
+import { useDataTable } from "@/components/niko-table/core"
+import { daysAgo } from "@/components/niko-table/lib"
+import { exportTableToCSV } from "@/components/niko-table/filters"
 import type {
   DataTableColumnDef,
   ExtendedColumnFilter,
-} from "@/components/niko-data-table/types"
+} from "@/components/niko-table/types"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"

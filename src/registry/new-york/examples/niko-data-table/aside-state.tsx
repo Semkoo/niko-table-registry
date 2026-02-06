@@ -23,7 +23,7 @@ import {
   DataTableEmptyDescription,
   DataTableEmptyIcon,
   DataTableEmptyMessage,
-} from "@/components/niko-data-table"
+} from "@/components/niko-table"
 import {
   DataTableColumnHeader,
   DataTableColumnTitle,
@@ -39,9 +39,9 @@ import {
   DataTableAsideClose,
   DataTableAsideTitle,
   DataTableFacetedFilter,
-} from "@/components/niko-data-table/components"
-import { FILTER_VARIANTS } from "@/components/niko-data-table/lib"
-import type { DataTableColumnDef } from "@/components/niko-data-table/types"
+} from "@/components/niko-table/components"
+import { FILTER_VARIANTS } from "@/components/niko-table/lib"
+import type { DataTableColumnDef } from "@/components/niko-table/types"
 import { Button } from "@/components/ui/button"
 import {
   Card,

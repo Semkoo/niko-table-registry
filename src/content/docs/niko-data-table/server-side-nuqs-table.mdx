@@ -484,7 +484,7 @@ Define parsers for each state variable:
 ```tsx showLineNumbers
 import { parseAsInteger, parseAsJson, parseAsString } from "nuqs"
 import type { SortingState } from "@tanstack/react-table"
-import type { ExtendedColumnFilter } from "@/components/niko-data-table/types"
+import type { ExtendedColumnFilter } from "@/components/niko-table/types"
 
 const tableStateParsers = {
   pageIndex: parseAsInteger.withDefault(0),

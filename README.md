@@ -1,10 +1,10 @@
-# NikoDataTable
+# Niko Table
 
 **Nobody's table, everyone's solution.**
 
 A collection of advanced React table components built for use with Shadcn.
 
-This project is based on [NikoDataTable](https://github.com/Semkoo/niko-table), customized for advanced React table components.
+This project is based on [Niko Table](https://github.com/Semkoo/niko-table), customized for advanced React table components.
 
 ## Documentation
 

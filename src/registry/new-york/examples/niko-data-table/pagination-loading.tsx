@@ -18,13 +18,13 @@ import {
   DataTableEmptyTitle,
   DataTableEmptyDescription,
   FILTER_VARIANTS,
-} from "@/components/niko-data-table"
+} from "@/components/niko-table"
 import {
   DataTableColumnTitle,
   DataTableColumnHeader,
   DataTableColumnSortMenu,
-} from "@/components/niko-data-table/components"
-import type { DataTableColumnDef } from "@/components/niko-data-table/types"
+} from "@/components/niko-table/components"
+import type { DataTableColumnDef } from "@/components/niko-table/types"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Loader2, ShoppingCart, SearchX } from "lucide-react"

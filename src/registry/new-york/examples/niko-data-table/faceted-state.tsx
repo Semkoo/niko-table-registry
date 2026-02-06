@@ -27,7 +27,7 @@ import {
   DataTableEmptyDescription,
   DataTableEmptyIcon,
   DataTableEmptyMessage,
-} from "@/components/niko-data-table"
+} from "@/components/niko-table"
 import {
   DataTableColumnHeader,
   DataTableColumnTitle,
@@ -36,9 +36,9 @@ import {
   DataTableColumnSortOptions,
   DataTableColumnFilter,
   DataTableColumnFilterTrigger,
-} from "@/components/niko-data-table/components"
-import { daysAgo, FILTER_VARIANTS } from "@/components/niko-data-table/lib"
-import type { DataTableColumnDef } from "@/components/niko-data-table/types"
+} from "@/components/niko-table/components"
+import { daysAgo, FILTER_VARIANTS } from "@/components/niko-table/lib"
+import type { DataTableColumnDef } from "@/components/niko-table/types"
 import { Badge } from "@/components/ui/badge"
 import { UserSearch, SearchX, Filter } from "lucide-react"
 import { Button } from "@/components/ui/button"

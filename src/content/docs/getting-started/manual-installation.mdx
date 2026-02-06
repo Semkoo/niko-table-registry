@@ -27,7 +27,7 @@ The DataTable components use a two-layer architecture for maximum flexibility:
 
 **Why this architecture?**
 
-- Use `DataTable*` components from "@/components/niko-data-table/components" when you want context-based, zero-config usage
+- Use `DataTable*` components from "@/components/niko-table/components" when you want context-based, zero-config usage
 - Use `Table*` components from filters when you want to build custom components or manage the table instance yourself
 - All filter components use TanStack Table hooks directly, giving you full control
 
@@ -199,7 +199,7 @@ The DataTable components use a two-layer architecture for maximum flexibility:
 
    Update the import paths in the copied files to match your project structure. The components use:
    - `@/components/ui/` for Shadcn UI components
-   - `@/components/niko-data-table/` for DataTable components
+   - `@/components/niko-table/` for DataTable components
    - `@/lib/` for utility functions
 
 6. **Verify installation**
@@ -212,7 +212,7 @@ The DataTable components use a two-layer architecture for maximum flexibility:
      DataTable,
      DataTableHeader,
      DataTableBody,
-   } from "@/components/niko-data-table"
+   } from "@/components/niko-table"
 
    const columns = [
      { accessorKey: "name", header: "Name" },

@@ -25,7 +25,7 @@ Container for organizing filters and actions in the toolbar.
 </div>
 
 ```tsx showLineNumbers
-import { DataTableToolbarSection } from "@/components/niko-data-table"
+import { DataTableToolbarSection } from "@/components/niko-table"
 ;<DataTableToolbarSection className="flex justify-between">
   <DataTableSearchFilter />
   <DataTableViewMenu />
@@ -65,7 +65,7 @@ Full-featured pagination controls with page size selection and navigation.
 </div>
 
 ```tsx showLineNumbers
-import { DataTablePagination } from "@/components/niko-data-table"
+import { DataTablePagination } from "@/components/niko-table"
 ;<DataTablePagination
   pageSizeOptions={[10, 25, 50, 100]}
   totalCount={500}
@@ -123,7 +123,7 @@ Global search input with debouncing. Supports both controlled and uncontrolled m
 </div>
 
 ```tsx showLineNumbers
-import { DataTableSearchFilter } from "@/components/niko-data-table"
+import { DataTableSearchFilter } from "@/components/niko-table"
 
 // Uncontrolled (manages its own state)
 <DataTableSearchFilter placeholder="Search products..." />
@@ -180,7 +180,7 @@ Command palette-style interface for adding filters with advanced operators and A
 </div>
 
 ```tsx showLineNumbers
-import { DataTableFilterMenu } from "@/components/niko-data-table"
+import { DataTableFilterMenu } from "@/components/niko-table"
 ;<DataTableFilterMenu
   autoOptions
   dynamicCounts
@@ -237,7 +237,7 @@ Faceted filter component for single or multiple selection with dynamic option ge
 </div>
 
 ```tsx showLineNumbers
-import { DataTableFacetedFilter } from "@/components/niko-data-table"
+import { DataTableFacetedFilter } from "@/components/niko-table"
 
 // With static options
 <DataTableFacetedFilter
@@ -302,7 +302,7 @@ Menu for managing column sorting with drag-and-drop reordering.
 </div>
 
 ```tsx showLineNumbers
-import { DataTableSortMenu } from "@/components/niko-data-table"
+import { DataTableSortMenu } from "@/components/niko-table"
 ;<DataTableSortMenu className="ml-auto" />
 ```
 
@@ -342,7 +342,7 @@ Column visibility toggle menu with search functionality.
 </div>
 
 ```tsx showLineNumbers
-import { DataTableViewMenu } from "@/components/niko-data-table"
+import { DataTableViewMenu } from "@/components/niko-table"
 ;<DataTableViewMenu />
 ```
 
@@ -379,7 +379,7 @@ Inline filter toolbar for managing filters with advanced operators and AND/OR lo
 </div>
 
 ```tsx showLineNumbers
-import { DataTableInlineFilter } from "@/components/niko-data-table"
+import { DataTableInlineFilter } from "@/components/niko-table"
 ;<DataTableInlineFilter
   autoOptions
   dynamicCounts
@@ -418,7 +418,7 @@ Slider filter for numeric ranges with min/max inputs.
 </div>
 
 ```tsx showLineNumbers
-import { DataTableSliderFilter } from "@/components/niko-data-table"
+import { DataTableSliderFilter } from "@/components/niko-table"
 
 // Auto-detect from column metadata
 <DataTableSliderFilter accessorKey="price" />
@@ -477,7 +477,7 @@ Date filter component for single dates or date ranges.
 </div>
 
 ```tsx showLineNumbers
-import { DataTableDateFilter } from "@/components/niko-data-table"
+import { DataTableDateFilter } from "@/components/niko-table"
 
 // Single date
 <DataTableDateFilter accessorKey="releaseDate" />
@@ -523,7 +523,7 @@ Button to clear all active filters, sorting, and search.
 </div>
 
 ```tsx showLineNumbers
-import { DataTableClearFilter } from "@/components/niko-data-table"
+import { DataTableClearFilter } from "@/components/niko-table"
 ;<DataTableClearFilter />
 ```
 
@@ -566,7 +566,7 @@ Button to export table data to CSV.
 </div>
 
 ```tsx showLineNumbers
-import { DataTableExportButton } from "@/components/niko-data-table"
+import { DataTableExportButton } from "@/components/niko-table"
 ;<DataTableExportButton filename="products" onlySelected={false} />
 ```
 
@@ -600,7 +600,7 @@ Sortable column header component with dropdown menu for sorting and visibility c
 </div>
 
 ```tsx showLineNumbers
-import { DataTableColumnHeader } from "@/components/niko-data-table/components"
+import { DataTableColumnHeader } from "@/components/niko-table/components"
 
 const columns: DataTableColumnDef<User>[] = [
   {
@@ -631,7 +631,7 @@ import {
   DataDataTableColumnFilterTrigger,
   DataTableColumnSortOptions,
   DataTableFacetedFilter,
-} from "@/components/niko-data-table"
+} from "@/components/niko-table"
 
 const columns: DataTableColumnDef<User>[] = [
   {
@@ -697,7 +697,7 @@ import {
   DataTableAsideTitle,
   DataTableAsideDescription,
   DataTableAsideClose,
-} from "@/components/niko-data-table"
+} from "@/components/niko-table"
 ;<DataTableAside side="right">
   <DataTableAsideTrigger>Open Filters</DataTableAsideTrigger>
   <DataTableAsideContent>
@@ -755,7 +755,7 @@ Shows bulk actions when rows are selected.
 </div>
 
 ```tsx showLineNumbers
-import { DataTableSelectionBar } from "@/components/niko-data-table"
+import { DataTableSelectionBar } from "@/components/niko-table"
 ;<DataTableSelectionBar
   selectedCount={table.getSelectedRowModel().rows.length}
   onClear={() => table.resetRowSelection()}
@@ -798,7 +798,7 @@ import {
   DataTableEmptyDescription,
   DataTableEmptyFilteredMessage,
   DataTableEmptyActions,
-} from "@/components/niko-data-table"
+} from "@/components/niko-table"
 import { PackageOpen } from "lucide-react"
 import { Button } from "@/components/ui/button"
 

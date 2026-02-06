@@ -15,15 +15,15 @@ import {
   DataTableEmptyTitle,
   DataTableEmptyDescription,
   FILTER_VARIANTS,
-} from "@/components/niko-data-table"
+} from "@/components/niko-table"
 import {
   DataTableColumnHeader,
   DataTableColumnTitle,
   DataTableColumnActions,
   DataTableColumnSortOptions,
   DataTableColumnPinOptions,
-} from "@/components/niko-data-table/components"
-import type { DataTableColumnDef } from "@/components/niko-data-table/types"
+} from "@/components/niko-table/components"
+import type { DataTableColumnDef } from "@/components/niko-table/types"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {

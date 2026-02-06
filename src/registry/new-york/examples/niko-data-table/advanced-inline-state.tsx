@@ -25,7 +25,7 @@ import {
   DataTableEmptyIcon,
   DataTableEmptyMessage,
   DataTableFacetedFilter, // Ensure FacetedFilter is available if we use it in columns
-} from "@/components/niko-data-table"
+} from "@/components/niko-table"
 import {
   DataTableColumnHeader,
   DataTableColumnTitle,
@@ -34,17 +34,17 @@ import {
   DataTableColumnFilterTrigger,
   DataTableColumnSortMenu,
   DataTableColumnSortOptions,
-} from "@/components/niko-data-table/components"
+} from "@/components/niko-table/components"
 import {
   daysAgo,
   JOIN_OPERATORS,
   processFiltersForLogic,
   FILTER_VARIANTS,
-} from "@/components/niko-data-table/lib"
+} from "@/components/niko-table/lib"
 import type {
   DataTableColumnDef,
   ExtendedColumnFilter,
-} from "@/components/niko-data-table/types"
+} from "@/components/niko-table/types"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { UserSearch, SearchX } from "lucide-react"

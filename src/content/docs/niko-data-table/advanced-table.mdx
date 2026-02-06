@@ -73,8 +73,8 @@ First, we'll define our columns with filter metadata.
 ```tsx showLineNumbers title="columns.tsx"
 "use client"
 
-import { DataTableColumnHeader } from "@/components/niko-data-table/components"
-import type { DataTableColumnDef } from "@/components/niko-data-table/types"
+import { DataTableColumnHeader } from "@/components/niko-table/components"
+import type { DataTableColumnDef } from "@/components/niko-table/types"
 
 export type Product = {
   id: string
@@ -167,9 +167,9 @@ import {
   DataTableSortMenu,
   DataTableFilterMenu,
   DataTableEmptyBody,
-} from "@/components/niko-data-table"
-import { DataTableColumnHeader } from "@/components/niko-data-table/components"
-import type { DataTableColumnDef } from "@/components/niko-data-table/types"
+} from "@/components/niko-table"
+import { DataTableColumnHeader } from "@/components/niko-table/components"
+import type { DataTableColumnDef } from "@/components/niko-table/types"
 
 type Product = {
   id: string
@@ -361,7 +361,7 @@ import type {
   SortingState,
   ColumnFiltersState,
 } from "@tanstack/react-table"
-import type { ExtendedColumnFilter } from "@/components/niko-data-table/types"
+import type { ExtendedColumnFilter } from "@/components/niko-table/types"
 
 export function ControlledAdvancedTable({ data }: { data: Product[] }) {
   const [globalFilter, setGlobalFilter] = useState<string | object>("")

@@ -121,9 +121,8 @@ import {
   DataTableEmptyMessage,
   DataTableEmptyTitle,
   DataTableEmptyDescription,
-} from "@/components/niko-data-table"
+} from "@/components/niko-table"
 import { PackageOpen } from "lucide-react"
-
 ;<DataTableBody>
   <DataTableEmptyBody>
     <DataTableEmptyIcon>
@@ -171,7 +170,6 @@ import { PackageOpen } from "lucide-react"
 
 ```tsx
 import { Button } from "@/components/ui/button"
-
 ;<DataTableBody>
   <DataTableEmptyBody>
     <DataTableEmptyIcon>
@@ -202,7 +200,7 @@ import {
   DataTableEmptyActions,
   DataTableEmptyTitle,
   DataTableEmptyDescription,
-} from "@/components/niko-data-table"
+} from "@/components/niko-table"
 import { PackageOpen, SearchX } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
@@ -265,9 +263,8 @@ import {
   DataTableEmptyMessage,
   DataTableEmptyTitle,
   DataTableEmptyDescription,
-} from "@/components/niko-data-table"
+} from "@/components/niko-table"
 import { Database } from "lucide-react"
-
 ;<DataTableVirtualizedBody height={600}>
   <DataTableVirtualizedEmptyBody>
     <DataTableEmptyIcon>
@@ -310,7 +307,6 @@ All components accept `className` for custom styling:
 
 ```tsx
 import { PackageOpen, SearchX } from "lucide-react"
-
 ;<DataTableBody>
   <DataTableEmptyBody>
     {/* You can conditionally render different icons */}
@@ -333,7 +329,7 @@ import { PackageOpen, SearchX } from "lucide-react"
 </DataTableBody>
 
 // Or use the context to determine state:
-import { useDataTable } from "@/components/niko-data-table"
+import { useDataTable } from "@/components/niko-table"
 
 function CustomEmptyState() {
   const { table } = useDataTable()
@@ -443,7 +439,7 @@ import type {
   DataTableEmptyActionsProps,
   DataTableEmptyTitleProps,
   DataTableEmptyDescriptionProps,
-} from "@/components/niko-data-table"
+} from "@/components/niko-table"
 
 // All accept children and className
 interface DataTableEmptyIconProps {
@@ -528,7 +524,7 @@ import {
   DataTableEmptyActions,
   DataTableEmptyTitle,
   DataTableEmptyDescription,
-} from "@/components/niko-data-table"
+} from "@/components/niko-table"
 ```
 
 ### Step 2: Build Your Empty State
