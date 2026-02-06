@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for your interest in contributing to Niko Data Table Registry. We're happy to have you here.
+Thanks for your interest in contributing to Niko Tables. We're happy to have you here.
 
 Please take a moment to review this document before submitting your first pull request. We also strongly recommend that you check for open issues and pull requests to see if someone else is working on something similar.
 
@@ -47,13 +47,13 @@ You can fork this repo by clicking the fork button in the top right corner of th
 ### Clone on your local machine
 
 ```bash
-git clone git@github.com:Semkoo/niko-data-table-registry.git
+git clone git@github.com:Semkoo/niko-table-registry.git
 ```
 
 ### Navigate to project directory
 
 ```bash
-cd niko-data-table-registry
+cd niko-table-registry
 ```
 
 ### Create a new Branch

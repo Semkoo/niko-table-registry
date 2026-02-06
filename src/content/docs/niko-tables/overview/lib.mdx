@@ -15,7 +15,7 @@ Centralized constants for join operators, filter operators, filter variants, and
 <div className="mb-4 flex gap-2">
   <Button variant="outline" size="sm" asChild>
     <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/lib/constants.ts`}
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/lib/constants.ts`}
       target="_blank"
       rel="noopener noreferrer"
     >
@@ -110,7 +110,7 @@ Helper functions for filter operations and validation.
 <div className="mb-4 flex gap-2">
   <Button variant="outline" size="sm" asChild>
     <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/lib/data-table.ts`}
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/lib/data-table.ts`}
       target="_blank"
       rel="noopener noreferrer"
     >
@@ -193,7 +193,7 @@ Formatting functions for dates, labels, and query strings.
 <div className="mb-4 flex gap-2">
   <Button variant="outline" size="sm" asChild>
     <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/lib/format.ts`}
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/lib/format.ts`}
       target="_blank"
       rel="noopener noreferrer"
     >
@@ -304,7 +304,7 @@ Custom filter functions for TanStack Table with performance optimizations.
 <div className="mb-4 flex gap-2">
   <Button variant="outline" size="sm" asChild>
     <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/lib/filter-functions.ts`}
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/lib/filter-functions.ts`}
       target="_blank"
       rel="noopener noreferrer"
     >
@@ -327,3 +327,105 @@ The filter functions use regex caching to improve performance:
 - **With caching**: First search creates regex once, subsequent searches reuse cached regex (~5-20ms)
 
 The cache has a maximum size of 100 entries and uses LRU-like eviction to prevent memory leaks.
+
+### extendedFilter
+
+Custom filter function for TanStack Table that supports all filter operators (ilike, eq, neq, in, not_in, between, lt, gt, lte, gte, empty, not_empty). Used as the default `filterFn` for columns with advanced filtering.
+
+```tsx showLineNumbers
+import { extendedFilter } from "@/components/niko-table"
+
+const columns = [
+  {
+    accessorKey: "name",
+    filterFn: extendedFilter,
+  },
+]
+```
+
+### globalFilter
+
+Custom global filter function that searches across all visible columns. Supports debounced search input.
+
+```tsx showLineNumbers
+import { globalFilter } from "@/components/niko-table"
+
+const table = useReactTable({
+  globalFilterFn: globalFilter,
+})
+```
+
+### numberRangeFilter
+
+Filter function for numeric range columns. Filters rows where the value is between a `[min, max]` range.
+
+```tsx showLineNumbers
+import { numberRangeFilter } from "@/components/niko-table"
+
+const columns = [
+  {
+    accessorKey: "price",
+    filterFn: numberRangeFilter,
+  },
+]
+```
+
+### dateRangeFilter
+
+Filter function for date range columns. Filters rows where the date falls between a start and end date.
+
+```tsx showLineNumbers
+import { dateRangeFilter } from "@/components/niko-table"
+
+const columns = [
+  {
+    accessorKey: "createdAt",
+    filterFn: dateRangeFilter,
+  },
+]
+```
+
+### createFilterValue
+
+Utility to create a properly typed filter value object from an `ExtendedColumnFilter`. Used internally by the filter menu and inline filter components.
+
+```tsx showLineNumbers
+import { createFilterValue } from "@/components/niko-table"
+
+const filterValue = createFilterValue(filter)
+```
+
+### processFiltersForLogic
+
+Processes an array of `ExtendedColumnFilter` objects and groups them by join operator (AND/OR) for TanStack Table's column filter state. Returns processed filters and the join operator map.
+
+```tsx showLineNumbers
+import { processFiltersForLogic } from "@/components/niko-table"
+
+const { processedFilters, joinOperators } = processFiltersForLogic(filters)
+```
+
+## Additional Constants
+
+### SYSTEM_COLUMN_IDS
+
+System column IDs used for smart pinning and feature detection. These are the IDs for special columns like row selection and row expansion.
+
+```tsx showLineNumbers
+import { SYSTEM_COLUMN_IDS } from "@/components/niko-table"
+
+// Available IDs:
+SYSTEM_COLUMN_IDS.SELECT // "select" - Row selection checkbox column
+SYSTEM_COLUMN_IDS.EXPAND // "expand" - Row expansion toggle column
+```
+
+### ERROR_MESSAGES
+
+Standard error messages used throughout the library for consistent error reporting.
+
+```tsx showLineNumbers
+import { ERROR_MESSAGES } from "@/components/niko-table"
+
+// Available messages:
+ERROR_MESSAGES.DEPRECATED_GLOBAL_JOIN_OPERATOR
+```

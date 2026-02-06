@@ -15,7 +15,7 @@ Core search filter implementation.
 <div className="mb-4 flex gap-2">
   <Button variant="outline" size="sm" asChild>
     <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/filters/table-search-filter.tsx`}
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-search-filter.tsx`}
       target="_blank"
       rel="noopener noreferrer"
     >
@@ -47,7 +47,7 @@ Core pagination implementation.
 <div className="mb-4 flex gap-2">
   <Button variant="outline" size="sm" asChild>
     <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/filters/table-pagination.tsx`}
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-pagination.tsx`}
       target="_blank"
       rel="noopener noreferrer"
     >
@@ -87,7 +87,7 @@ Core filter menu implementation with command palette interface.
 <div className="mb-4 flex gap-2">
   <Button variant="outline" size="sm" asChild>
     <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/filters/table-filter-menu.tsx`}
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-filter-menu.tsx`}
       target="_blank"
       rel="noopener noreferrer"
     >
@@ -127,7 +127,7 @@ Core faceted filter implementation.
 <div className="mb-4 flex gap-2">
   <Button variant="outline" size="sm" asChild>
     <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/filters/table-faceted-filter.tsx`}
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-faceted-filter.tsx`}
       target="_blank"
       rel="noopener noreferrer"
     >
@@ -176,7 +176,7 @@ Core slider filter implementation for numeric ranges.
 <div className="mb-4 flex gap-2">
   <Button variant="outline" size="sm" asChild>
     <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/filters/table-slider-filter.tsx`}
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-slider-filter.tsx`}
       target="_blank"
       rel="noopener noreferrer"
     >
@@ -233,7 +233,7 @@ Core date filter implementation.
 <div className="mb-4 flex gap-2">
   <Button variant="outline" size="sm" asChild>
     <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/filters/table-date-filter.tsx`}
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-date-filter.tsx`}
       target="_blank"
       rel="noopener noreferrer"
     >
@@ -274,7 +274,7 @@ Core sort menu implementation.
 <div className="mb-4 flex gap-2">
   <Button variant="outline" size="sm" asChild>
     <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/filters/table-sort-menu.tsx`}
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-sort-menu.tsx`}
       target="_blank"
       rel="noopener noreferrer"
     >
@@ -322,7 +322,7 @@ Core view menu implementation for column visibility.
 <div className="mb-4 flex gap-2">
   <Button variant="outline" size="sm" asChild>
     <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/filters/table-view-menu.tsx`}
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-view-menu.tsx`}
       target="_blank"
       rel="noopener noreferrer"
     >
@@ -361,7 +361,7 @@ Core inline filter implementation with advanced operators.
 <div className="mb-4 flex gap-2">
   <Button variant="outline" size="sm" asChild>
     <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/filters/table-inline-filter.tsx`}
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-inline-filter.tsx`}
       target="_blank"
       rel="noopener noreferrer"
     >
@@ -401,7 +401,7 @@ Core clear filter button implementation.
 <div className="mb-4 flex gap-2">
   <Button variant="outline" size="sm" asChild>
     <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/filters/table-clear-filter.tsx`}
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-clear-filter.tsx`}
       target="_blank"
       rel="noopener noreferrer"
     >
@@ -456,7 +456,7 @@ Core export button implementation.
 <div className="mb-4 flex gap-2">
   <Button variant="outline" size="sm" asChild>
     <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/filters/table-export-button.tsx`}
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-export-button.tsx`}
       target="_blank"
       rel="noopener noreferrer"
     >
@@ -513,7 +513,7 @@ Core range filter implementation for numeric inputs.
 <div className="mb-4 flex gap-2">
   <Button variant="outline" size="sm" asChild>
     <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-data-table/filters/table-range-filter.tsx`}
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-range-filter.tsx`}
       target="_blank"
       rel="noopener noreferrer"
     >
@@ -553,3 +553,277 @@ const filter: ExtendedColumnFilter<Product> = {
 | `inputId`        | `string`                                                                                      | Unique input ID (required).       |
 | `onFilterUpdate` | `(filterId: string, updates: Partial<Omit<ExtendedColumnFilter<TData>, "filterId">>) => void` | Callback when filter updates.     |
 | `className`      | `string`                                                                                      | Additional CSS classes.           |
+
+---
+
+## Column-Level Filter Components
+
+These components are the core implementations used by the composable `DataTableColumnHeader` sub-components. They accept `column` and/or `table` props directly and can be used standalone when building custom column headers.
+
+### TableColumnTitle
+
+Core column title implementation. Renders a clickable title that toggles sorting.
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-column-title.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+</div>
+
+```tsx showLineNumbers
+import { TableColumnTitle } from "@/components/niko-table/filters"
+;<TableColumnTitle column={column} title="Custom Title" />
+```
+
+#### Props
+
+| Name        | Type                    | Description                                              |
+| ----------- | ----------------------- | -------------------------------------------------------- |
+| `column`    | `Column<TData, TValue>` | Table column instance (required).                        |
+| `title`     | `string`                | Custom title (uses `column.meta.label` if not provided). |
+| `className` | `string`                | Additional CSS classes.                                  |
+
+### TableColumnActions
+
+Core column actions container. Renders a dropdown menu trigger with active state indicator.
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-column-actions.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+</div>
+
+```tsx showLineNumbers
+import { TableColumnActions } from "@/components/niko-table/filters"
+;<TableColumnActions isActive={column.getIsSorted() !== false}>
+  {/* Sort, pin, hide options */}
+</TableColumnActions>
+```
+
+#### Props
+
+| Name        | Type              | Default | Description                                        |
+| ----------- | ----------------- | ------- | -------------------------------------------------- |
+| `children`  | `React.ReactNode` | -       | Action option components.                          |
+| `isActive`  | `boolean`         | `false` | Whether to show active indicator (dot on trigger). |
+| `className` | `string`          | -       | Additional CSS classes.                            |
+
+### TableColumnSortOptions / TableColumnSortMenu
+
+Core sorting implementations. `TableColumnSortOptions` renders sort items inside a dropdown menu. `TableColumnSortMenu` renders a standalone sort button.
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-column-sort.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+</div>
+
+```tsx showLineNumbers
+import {
+  TableColumnSortOptions,
+  TableColumnSortMenu,
+} from "@/components/niko-table/filters"
+
+// Inside a dropdown menu
+<TableColumnSortOptions column={column} table={table} />
+
+// Standalone button
+<TableColumnSortMenu column={column} table={table} />
+```
+
+#### Props
+
+| Name        | Type            | Description                         |
+| ----------- | --------------- | ----------------------------------- |
+| `column`    | `Column<TData>` | Table column instance (required).   |
+| `table`     | `Table<TData>`  | TanStack Table instance (required). |
+| `className` | `string`        | Additional CSS classes.             |
+
+### TableColumnHideOptions / TableColumnHideMenu
+
+Core hide column implementations. `TableColumnHideOptions` renders a hide item inside a dropdown menu. `TableColumnHideMenu` renders a standalone button.
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-column-hide.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+</div>
+
+```tsx showLineNumbers
+import {
+  TableColumnHideOptions,
+  TableColumnHideMenu,
+} from "@/components/niko-table/filters"
+
+// Inside a dropdown menu
+<TableColumnHideOptions column={column} />
+
+// Standalone button
+<TableColumnHideMenu column={column} />
+```
+
+#### Props
+
+| Name        | Type                    | Description                       |
+| ----------- | ----------------------- | --------------------------------- |
+| `column`    | `Column<TData, TValue>` | Table column instance (required). |
+| `className` | `string`                | Additional CSS classes.           |
+
+### TableColumnPinOptions / TableColumnPinMenu
+
+Core column pinning implementations. `TableColumnPinOptions` renders pin left/right/unpin items inside a dropdown menu. `TableColumnPinMenu` renders a standalone button.
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-column-pin.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+</div>
+
+```tsx showLineNumbers
+import {
+  TableColumnPinOptions,
+  TableColumnPinMenu,
+} from "@/components/niko-table/filters"
+
+// Inside a dropdown menu
+<TableColumnPinOptions column={column} />
+
+// Standalone button
+<TableColumnPinMenu column={column} />
+```
+
+#### Props
+
+| Name        | Type                    | Description                       |
+| ----------- | ----------------------- | --------------------------------- |
+| `column`    | `Column<TData, TValue>` | Table column instance (required). |
+| `className` | `string`                | Additional CSS classes.           |
+
+### TableColumnFacetedFilterOptions / TableColumnFacetedFilterMenu
+
+Core faceted filter implementations for column headers. `TableColumnFacetedFilterOptions` renders inside a dropdown. `TableColumnFacetedFilterMenu` renders a standalone popover.
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-column-faceted-filter.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+</div>
+
+```tsx showLineNumbers
+import {
+  TableColumnFacetedFilterOptions,
+  TableColumnFacetedFilterMenu,
+} from "@/components/niko-table/filters"
+
+// Inside a dropdown menu
+<TableColumnFacetedFilterOptions column={column} options={options} />
+
+// Standalone popover
+<TableColumnFacetedFilterMenu column={column} table={table} options={options} />
+```
+
+#### Props
+
+| Name        | Type            | Description                          |
+| ----------- | --------------- | ------------------------------------ |
+| `column`    | `Column<TData>` | Table column instance (required).    |
+| `table`     | `Table<TData>`  | TanStack Table instance (Menu only). |
+| `options`   | `Option[]`      | Static options array.                |
+| `multiple`  | `boolean`       | Allow multiple selection.            |
+| `className` | `string`        | Additional CSS classes.              |
+
+### TableColumnSliderFilterOptions
+
+Core slider filter implementation for column headers. Renders a range slider inside a dropdown menu.
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-column-slider-filter.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+</div>
+
+```tsx showLineNumbers
+import { TableColumnSliderFilterOptions } from "@/components/niko-table/filters"
+;<TableColumnSliderFilterOptions column={column} min={0} max={1000} step={10} />
+```
+
+#### Props
+
+| Name        | Type            | Description                       |
+| ----------- | --------------- | --------------------------------- |
+| `column`    | `Column<TData>` | Table column instance (required). |
+| `min`       | `number`        | Minimum value.                    |
+| `max`       | `number`        | Maximum value.                    |
+| `step`      | `number`        | Step increment.                   |
+| `className` | `string`        | Additional CSS classes.           |
+
+### TableColumnDateFilterOptions
+
+Core date filter implementation for column headers. Renders a date picker inside a dropdown menu.
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-column-date-filter.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+</div>
+
+```tsx showLineNumbers
+import { TableColumnDateFilterOptions } from "@/components/niko-table/filters"
+;<TableColumnDateFilterOptions column={column} multiple />
+```
+
+#### Props
+
+| Name        | Type            | Description                       |
+| ----------- | --------------- | --------------------------------- |
+| `column`    | `Column<TData>` | Table column instance (required). |
+| `multiple`  | `boolean`       | Enable date range selection.      |
+| `className` | `string`        | Additional CSS classes.           |
