@@ -111,7 +111,7 @@ The main table container component that wraps the table structure and provides s
 ```tsx showLineNumbers
 import { DataTable } from "@/components/niko-data-table"
 
-<DataTable className="rounded-md border" height={600}>
+;<DataTable className="rounded-md border" height={600}>
   <DataTableHeader />
   <DataTableBody />
 </DataTable>
@@ -145,7 +145,7 @@ Renders the table header with sortable columns.
 ```tsx showLineNumbers
 import { DataTableHeader } from "@/components/niko-data-table"
 
-<DataTableHeader sticky={true} />
+;<DataTableHeader sticky={true} />
 ```
 
 #### Props
@@ -178,7 +178,7 @@ import {
   DataTableEmptyBody,
 } from "@/components/niko-data-table"
 
-<DataTableBody
+;<DataTableBody
   onScroll={e => console.log(`Scrolled ${e.percentage}%`)}
   onScrolledBottom={() => loadMore()}
 >
@@ -342,7 +342,7 @@ Error boundary component that catches errors in the data table component tree an
 ```tsx showLineNumbers
 import { DataTableErrorBoundary } from "@/components/niko-data-table"
 
-<DataTableErrorBoundary
+;<DataTableErrorBoundary
   onError={(error, errorInfo) => {
     console.error("Table error:", error)
     trackError(error)
@@ -390,7 +390,7 @@ import {
   DataTableVirtualizedBody,
 } from "@/components/niko-data-table"
 
-<DataTable>
+;<DataTable>
   <DataTableVirtualizedHeader />
   <DataTableVirtualizedBody estimateSize={34} overscan={20}>
     {/* rows */}
@@ -438,7 +438,7 @@ import {
 } from "@/components/niko-data-table"
 import { PackageOpen } from "lucide-react"
 
-<DataTableVirtualizedBody estimateSize={34}>
+;<DataTableVirtualizedBody estimateSize={34}>
   <DataTableVirtualizedEmptyBody>
     <DataTableEmptyIcon>
       <PackageOpen className="size-12" />
@@ -471,7 +471,7 @@ import {
   DataTableVirtualizedSkeleton,
 } from "@/components/niko-data-table"
 
-<DataTableVirtualizedBody estimateSize={34}>
+;<DataTableVirtualizedBody estimateSize={34}>
   <DataTableVirtualizedSkeleton rows={10} estimateSize={34} />
 </DataTableVirtualizedBody>
 ```
@@ -498,7 +498,7 @@ import {
 } from "@/components/niko-data-table"
 import { Loader2 } from "lucide-react"
 
-<DataTableVirtualizedBody estimateSize={34}>
+;<DataTableVirtualizedBody estimateSize={34}>
   <DataTableVirtualizedLoading>
     <div className="flex items-center justify-center p-8">
       <Loader2 className="size-6 animate-spin" />

@@ -123,7 +123,8 @@ import {
   DataTableEmptyDescription,
 } from "@/components/niko-data-table"
 import { PackageOpen } from "lucide-react"
-<DataTableBody>
+
+;<DataTableBody>
   <DataTableEmptyBody>
     <DataTableEmptyIcon>
       <PackageOpen className="size-12" />
@@ -170,7 +171,8 @@ import { PackageOpen } from "lucide-react"
 
 ```tsx
 import { Button } from "@/components/ui/button"
-<DataTableBody>
+
+;<DataTableBody>
   <DataTableEmptyBody>
     <DataTableEmptyIcon>
       <PackageOpen className="size-12" />
@@ -265,7 +267,8 @@ import {
   DataTableEmptyDescription,
 } from "@/components/niko-data-table"
 import { Database } from "lucide-react"
-<DataTableVirtualizedBody height={600}>
+
+;<DataTableVirtualizedBody height={600}>
   <DataTableVirtualizedEmptyBody>
     <DataTableEmptyIcon>
       <Database className="size-12" />
@@ -307,7 +310,8 @@ All components accept `className` for custom styling:
 
 ```tsx
 import { PackageOpen, SearchX } from "lucide-react"
-<DataTableBody>
+
+;<DataTableBody>
   <DataTableEmptyBody>
     {/* You can conditionally render different icons */}
     <DataTableEmptyIcon>

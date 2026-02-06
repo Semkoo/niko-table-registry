@@ -27,6 +27,7 @@ export default defineConfig([
   },
   {
     files: ["**/*.json"],
+    // @ts-expect-error -- @eslint/json plugin types are incompatible with defineConfig's Plugin type
     plugins: { json },
     language: "json/json",
     extends: [json.configs.recommended],
