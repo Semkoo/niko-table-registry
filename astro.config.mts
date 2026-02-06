@@ -259,4 +259,5 @@ export default defineConfig({
       noExternal: ["zod"],
     },
   },
+  output: "static",
 })
