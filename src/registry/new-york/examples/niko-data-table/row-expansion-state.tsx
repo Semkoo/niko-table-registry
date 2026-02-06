@@ -26,13 +26,13 @@ import {
   DataTableEmptyMessage,
   SYSTEM_COLUMN_IDS,
   FILTER_VARIANTS,
-} from "@/components/niko-data-table"
+} from "@/components/niko-table"
 import {
   DataTableColumnHeader,
   DataTableColumnTitle,
   DataTableColumnSortMenu,
-} from "@/components/niko-data-table/components"
-import type { DataTableColumnDef } from "@/components/niko-data-table/types"
+} from "@/components/niko-table/components"
+import type { DataTableColumnDef } from "@/components/niko-table/types"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {

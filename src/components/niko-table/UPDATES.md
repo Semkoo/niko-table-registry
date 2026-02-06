@@ -79,7 +79,7 @@ A reusable debounce hook for delaying rapid value changes. Perfect for search in
 **Usage**:
 
 ```tsx
-import { useDebounce } from "@/components/niko-data-table"
+import { useDebounce } from "@/components/niko-table"
 
 // Basic usage with search
 function SearchFilter() {
@@ -369,7 +369,7 @@ import {
   DataTablePagination,
   DataTableErrorBoundary,
   useDebounce,
-} from "@/components/niko-data-table"
+} from "@/components/niko-table"
 import { PackageOpen, AlertCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 

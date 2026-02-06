@@ -121,7 +121,7 @@ This makes the API cleaner and follows the composition pattern consistently acro
 1. **DataTableToolbarSection Moved**
    - **Breaking Change**: Moved from `core/` to `components/`
    - **Reason**: It's a reusable UI component, not a core table function
-   - **Migration**: Import from `@/components/niko-data-table` (re-exported automatically)
+   - **Migration**: Import from `@/components/niko-table` (re-exported automatically)
 
 2. **Enhanced Empty State Support**
    - Both `DataTableEmptyBody` and `DataTableVirtualizedEmptyBody` updated
@@ -154,18 +154,18 @@ This makes the API cleaner and follows the composition pattern consistently acro
 **Before:**
 
 ```tsx
-import { DataTableToolbarSection } from "@/components/niko-data-table/core"
+import { DataTableToolbarSection } from "@/components/niko-table/core"
 ```
 
 **After:**
 
 ```tsx
-import { DataTableToolbarSection } from "@/components/niko-data-table"
+import { DataTableToolbarSection } from "@/components/niko-table"
 // OR
-import { DataTableToolbarSection } from "@/components/niko-data-table/components"
+import { DataTableToolbarSection } from "@/components/niko-table/components"
 ```
 
-**Note**: If you're importing from the main index (`@/components/niko-data-table`), no changes needed as it's automatically re-exported.
+**Note**: If you're importing from the main index (`@/components/niko-table`), no changes needed as it's automatically re-exported.
 
 ### Non-Breaking Changes
 
@@ -314,10 +314,10 @@ export { useDebounce } from "./hooks"
 
    ```tsx
    // Change this:
-   import { DataTableToolbarSection } from "@/components/niko-data-table/core"
+   import { DataTableToolbarSection } from "@/components/niko-table/core"
 
    // To this:
-   import { DataTableToolbarSection } from "@/components/niko-data-table"
+   import { DataTableToolbarSection } from "@/components/niko-table"
    ```
 
 2. **Review empty states** (optional - old API still works):

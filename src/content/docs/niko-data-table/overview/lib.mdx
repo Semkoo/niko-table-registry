@@ -124,8 +124,8 @@ Helper functions for filter operations and validation.
 Get available filter operators for a given filter variant.
 
 ```tsx showLineNumbers
-import { getFilterOperators } from "@/components/niko-data-table/lib"
-import { FILTER_VARIANTS } from "@/components/niko-data-table/lib/constants"
+import { getFilterOperators } from "@/components/niko-table/lib"
+import { FILTER_VARIANTS } from "@/components/niko-table/lib/constants"
 
 const textOperators = getFilterOperators(FILTER_VARIANTS.TEXT)
 // Returns: [{ label: "Contains", value: "ilike" }, ...]
@@ -148,8 +148,8 @@ Array of operator objects with `label` and `value` properties.
 Get the default filter operator for a given filter variant.
 
 ```tsx showLineNumbers
-import { getDefaultFilterOperator } from "@/components/niko-data-table/lib"
-import { FILTER_VARIANTS } from "@/components/niko-data-table/lib/constants"
+import { getDefaultFilterOperator } from "@/components/niko-table/lib"
+import { FILTER_VARIANTS } from "@/components/niko-table/lib/constants"
 
 const defaultOp = getDefaultFilterOperator(FILTER_VARIANTS.TEXT)
 // Returns: "ilike"
@@ -170,7 +170,7 @@ const defaultOp = getDefaultFilterOperator(FILTER_VARIANTS.TEXT)
 Filter out invalid filters from an array.
 
 ```tsx showLineNumbers
-import { getValidFilters } from "@/components/niko-data-table/lib"
+import { getValidFilters } from "@/components/niko-table/lib"
 
 const validFilters = getValidFilters(filters)
 // Returns: ExtendedColumnFilter<TData>[] with only valid filters
@@ -207,7 +207,7 @@ Formatting functions for dates, labels, and query strings.
 Format a date value into a human-readable string.
 
 ```tsx showLineNumbers
-import { formatDate } from "@/components/niko-data-table/lib"
+import { formatDate } from "@/components/niko-table/lib"
 
 formatDate(new Date())
 // Returns: "January 1, 2024"
@@ -232,7 +232,7 @@ formatDate(new Date(), { month: "short", day: "numeric" })
 Format a value into a human-readable label. Capitalizes first letter of each word and replaces hyphens/underscores with spaces.
 
 ```tsx showLineNumbers
-import { formatLabel } from "@/components/niko-data-table/lib"
+import { formatLabel } from "@/components/niko-table/lib"
 
 formatLabel("firstName") // "FirstName"
 formatLabel("first-name") // "First Name"
@@ -256,7 +256,7 @@ formatLabel("false") // "No"
 Create a date relative to the current date by subtracting days.
 
 ```tsx showLineNumbers
-import { daysAgo } from "@/components/niko-data-table/lib"
+import { daysAgo } from "@/components/niko-table/lib"
 
 daysAgo(7) // 7 days ago
 daysAgo(30) // 30 days ago (1 month)
@@ -278,7 +278,7 @@ daysAgo(365) // 365 days ago (1 year)
 Format URL query parameters into a human-readable query string for display.
 
 ```tsx showLineNumbers
-import { formatQueryString } from "@/components/niko-data-table/lib"
+import { formatQueryString } from "@/components/niko-table/lib"
 
 const urlParams = { search: "i", globalFilter: { filters: [...], joinOperator: "mixed" } }
 const urlKeys = { search: "search", globalFilter: "global" }

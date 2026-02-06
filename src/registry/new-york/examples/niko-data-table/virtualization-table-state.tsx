@@ -25,19 +25,16 @@ import {
   DataTableEmptyFilteredMessage,
   DataTableEmptyTitle,
   DataTableEmptyDescription,
-} from "@/components/niko-data-table"
+} from "@/components/niko-table"
 import {
   DataTableColumnHeader,
   DataTableColumnTitle,
   DataTableColumnActions,
   DataTableColumnSortMenu,
   DataTableColumnSortOptions,
-} from "@/components/niko-data-table/components"
-import {
-  FILTER_VARIANTS,
-  SYSTEM_COLUMN_IDS,
-} from "@/components/niko-data-table/lib"
-import type { DataTableColumnDef } from "@/components/niko-data-table/types"
+} from "@/components/niko-table/components"
+import { FILTER_VARIANTS, SYSTEM_COLUMN_IDS } from "@/components/niko-table/lib"
+import type { DataTableColumnDef } from "@/components/niko-table/types"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ChevronRight, ChevronDown, UserSearch, SearchX } from "lucide-react"

@@ -63,8 +63,8 @@ First, we'll define our columns with sortable headers.
 ```tsx showLineNumbers title="columns.tsx"
 "use client"
 
-import { DataTableColumnHeader } from "@/components/niko-data-table/components"
-import type { DataTableColumnDef } from "@/components/niko-data-table/types"
+import { DataTableColumnHeader } from "@/components/niko-table/components"
+import type { DataTableColumnDef } from "@/components/niko-table/types"
 
 export type Product = {
   id: string
@@ -121,9 +121,9 @@ import {
   DataTableBody,
   DataTablePagination,
   DataTableViewMenu,
-} from "@/components/niko-data-table"
-import { DataTableColumnHeader } from "@/components/niko-data-table/components"
-import type { DataTableColumnDef } from "@/components/niko-data-table/types"
+} from "@/components/niko-table"
+import { DataTableColumnHeader } from "@/components/niko-table/components"
+import type { DataTableColumnDef } from "@/components/niko-table/types"
 
 type Product = {
   id: string

@@ -25,8 +25,7 @@ Core search filter implementation.
 </div>
 
 ```tsx showLineNumbers
-import { TableSearchFilter } from "@/components/niko-data-table/filters"
-
+import { TableSearchFilter } from "@/components/niko-table/filters"
 ;<TableSearchFilter table={table} placeholder="Search..." />
 ```
 
@@ -58,7 +57,7 @@ Core pagination implementation.
 </div>
 
 ```tsx showLineNumbers
-import { TablePagination } from "@/components/niko-data-table/filters"
+import { TablePagination } from "@/components/niko-table/filters"
 
 // Basic usage
 <TablePagination table={table} />
@@ -98,9 +97,9 @@ Core filter menu implementation with command palette interface.
 </div>
 
 ```tsx showLineNumbers
-import { TableFilterMenu } from "@/components/niko-data-table/filters"
+import { TableFilterMenu } from "@/components/niko-table/filters"
 import { useState } from "react"
-import type { ExtendedColumnFilter } from "@/components/niko-data-table"
+import type { ExtendedColumnFilter } from "@/components/niko-table"
 
 // Controlled mode
 const [filters, setFilters] = useState<ExtendedColumnFilter<Product>[]>([])
@@ -138,7 +137,7 @@ Core faceted filter implementation.
 </div>
 
 ```tsx showLineNumbers
-import { TableFacetedFilter } from "@/components/niko-data-table/filters"
+import { TableFacetedFilter } from "@/components/niko-table/filters"
 
 // Basic usage with static options
 <TableFacetedFilter
@@ -187,7 +186,7 @@ Core slider filter implementation for numeric ranges.
 </div>
 
 ```tsx showLineNumbers
-import { TableSliderFilter } from "@/components/niko-data-table/filters"
+import { TableSliderFilter } from "@/components/niko-table/filters"
 
 // Basic usage (auto-detects range from data)
 <TableSliderFilter
@@ -244,7 +243,7 @@ Core date filter implementation.
 </div>
 
 ```tsx showLineNumbers
-import { TableDateFilter } from "@/components/niko-data-table/filters"
+import { TableDateFilter } from "@/components/niko-table/filters"
 
 // Single date selection
 <TableDateFilter
@@ -285,7 +284,7 @@ Core sort menu implementation.
 </div>
 
 ```tsx showLineNumbers
-import { TableSortMenu } from "@/components/niko-data-table/filters"
+import { TableSortMenu } from "@/components/niko-table/filters"
 
 // Basic usage
 <TableSortMenu table={table} />
@@ -333,7 +332,7 @@ Core view menu implementation for column visibility.
 </div>
 
 ```tsx showLineNumbers
-import { TableViewMenu } from "@/components/niko-data-table/filters"
+import { TableViewMenu } from "@/components/niko-table/filters"
 
 // Basic usage
 <TableViewMenu table={table} />
@@ -372,9 +371,9 @@ Core inline filter implementation with advanced operators.
 </div>
 
 ```tsx showLineNumbers
-import { TableInlineFilter } from "@/components/niko-data-table/filters"
+import { TableInlineFilter } from "@/components/niko-table/filters"
 import { useState } from "react"
-import type { ExtendedColumnFilter } from "@/components/niko-data-table"
+import type { ExtendedColumnFilter } from "@/components/niko-table"
 
 // Controlled mode with filters
 const [filters, setFilters] = useState<ExtendedColumnFilter<Product>[]>([])
@@ -412,7 +411,7 @@ Core clear filter button implementation.
 </div>
 
 ```tsx showLineNumbers
-import { TableClearFilter } from "@/components/niko-data-table/filters"
+import { TableClearFilter } from "@/components/niko-table/filters"
 
 // Basic usage
 <TableClearFilter table={table} />
@@ -467,7 +466,7 @@ Core export button implementation.
 </div>
 
 ```tsx showLineNumbers
-import { TableExportButton } from "@/components/niko-data-table/filters"
+import { TableExportButton } from "@/components/niko-table/filters"
 
 // Basic usage
 <TableExportButton table={table} />
@@ -524,8 +523,8 @@ Core range filter implementation for numeric inputs.
 </div>
 
 ```tsx showLineNumbers
-import { TableRangeFilter } from "@/components/niko-data-table/filters"
-import type { ExtendedColumnFilter } from "@/components/niko-data-table"
+import { TableRangeFilter } from "@/components/niko-table/filters"
+import type { ExtendedColumnFilter } from "@/components/niko-table"
 
 // Basic usage with filter configuration
 const filter: ExtendedColumnFilter<Product> = {

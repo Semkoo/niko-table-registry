@@ -67,8 +67,8 @@ First, we'll define our columns with filter metadata.
 ```tsx showLineNumbers title="columns.tsx"
 "use client"
 
-import { DataTableColumnHeader } from "@/components/niko-data-table/components"
-import type { DataTableColumnDef } from "@/components/niko-data-table/types"
+import { DataTableColumnHeader } from "@/components/niko-table/components"
+import type { DataTableColumnDef } from "@/components/niko-table/types"
 
 export type Product = {
   id: string
@@ -136,9 +136,9 @@ import {
   DataTableViewMenu,
   DataTableInlineFilter,
   DataTableEmptyBody,
-} from "@/components/niko-data-table"
-import { DataTableColumnHeader } from "@/components/niko-data-table/components"
-import type { DataTableColumnDef } from "@/components/niko-data-table/types"
+} from "@/components/niko-table"
+import { DataTableColumnHeader } from "@/components/niko-table/components"
+import type { DataTableColumnDef } from "@/components/niko-table/types"
 
 type Product = {
   id: string

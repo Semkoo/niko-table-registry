@@ -72,7 +72,7 @@ Automatic feature detection from component tree to enable/disable table features
 Recursively searches for components and aggregates feature requirements. Automatically detects which features should be enabled based on the components used in the table.
 
 ```tsx showLineNumbers
-import { detectFeaturesFromChildren } from "@/components/niko-data-table/config"
+import { detectFeaturesFromChildren } from "@/components/niko-table/config"
 
 const requirements = detectFeaturesFromChildren(children, columns)
 // Returns: { enableFilters: true, enablePagination: true, ... }
@@ -120,7 +120,7 @@ Caching is only enabled on the client-side to prevent SSR/CSR hydration mismatch
 Register a component's feature requirements. Allows third-party components to declare their needs.
 
 ```tsx showLineNumbers
-import { registerComponentFeatures } from "@/components/niko-data-table/config"
+import { registerComponentFeatures } from "@/components/niko-table/config"
 
 registerComponentFeatures("MyCustomFilter", {
   enableFilters: true,
@@ -139,7 +139,7 @@ registerComponentFeatures("MyCustomFilter", {
 Get all registered components and their features (for debugging).
 
 ```tsx showLineNumbers
-import { getRegisteredComponents } from "@/components/niko-data-table/config"
+import { getRegisteredComponents } from "@/components/niko-table/config"
 
 const registered = getRegisteredComponents()
 // Returns: { DataTablePagination: { enablePagination: true }, ... }

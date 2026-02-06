@@ -16,7 +16,7 @@ import {
   DataTableEmptyIcon,
   DataTableEmptyMessage,
   DataTableEmptyBody,
-} from "@/components/niko-data-table"
+} from "@/components/niko-table"
 import {
   DataTableAside,
   DataTableAsideTrigger,
@@ -24,15 +24,15 @@ import {
   DataTableAsideHeader,
   DataTableAsideTitle,
   DataTableAsideClose,
-} from "@/components/niko-data-table/components"
+} from "@/components/niko-table/components"
 import {
   DataTableColumnTitle,
   DataTableColumnHeader,
   DataTableColumnSortMenu,
-} from "@/components/niko-data-table/components"
-import { FILTER_VARIANTS } from "@/components/niko-data-table/lib"
-import { useDataTable } from "@/components/niko-data-table/core"
-import type { DataTableColumnDef } from "@/components/niko-data-table/types"
+} from "@/components/niko-table/components"
+import { FILTER_VARIANTS } from "@/components/niko-table/lib"
+import { useDataTable } from "@/components/niko-table/core"
+import type { DataTableColumnDef } from "@/components/niko-table/types"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"

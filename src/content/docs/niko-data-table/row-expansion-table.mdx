@@ -68,8 +68,8 @@ First, we'll define our columns with an expand column.
 ```tsx showLineNumbers title="columns.tsx"
 "use client"
 
-import { DataTableColumnHeader } from "@/components/niko-data-table/components"
-import type { DataTableColumnDef } from "@/components/niko-data-table/types"
+import { DataTableColumnHeader } from "@/components/niko-table/components"
+import type { DataTableColumnDef } from "@/components/niko-table/types"
 import { Button } from "@/components/ui/button"
 import { ChevronRight, ChevronDown } from "lucide-react"
 
@@ -177,9 +177,9 @@ import {
   DataTableSearchFilter,
   DataTableViewMenu,
   DataTableEmptyBody,
-} from "@/components/niko-data-table"
-import { DataTableColumnHeader } from "@/components/niko-data-table/components"
-import type { DataTableColumnDef } from "@/components/niko-data-table/types"
+} from "@/components/niko-table"
+import { DataTableColumnHeader } from "@/components/niko-table/components"
+import type { DataTableColumnDef } from "@/components/niko-table/types"
 import { Button } from "@/components/ui/button"
 import { ChevronRight, ChevronDown } from "lucide-react"
 
@@ -382,7 +382,7 @@ You can export table data to CSV format. When exporting row expansion tables, ke
 The simplest way to add export functionality:
 
 ```tsx showLineNumbers
-import { DataTableExportButton } from "@/components/niko-data-table"
+import { DataTableExportButton } from "@/components/niko-table"
 
 export function RowExpansionTableWithExport({ data }: { data: Order[] }) {
   return (
@@ -420,8 +420,8 @@ export function RowExpansionTableWithExport({ data }: { data: Order[] }) {
 For more control, use the `exportTableToCSV` function directly:
 
 ```tsx showLineNumbers
-import { useDataTable } from "@/components/niko-data-table/core"
-import { exportTableToCSV } from "@/components/niko-data-table/filters"
+import { useDataTable } from "@/components/niko-table/core"
+import { exportTableToCSV } from "@/components/niko-table/filters"
 import { Button } from "@/components/ui/button"
 import { Download } from "lucide-react"
 

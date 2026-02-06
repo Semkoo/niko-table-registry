@@ -25,7 +25,7 @@ Hook to access the table instance and context from any child component.
 </div>
 
 ```tsx showLineNumbers
-import { useDataTable } from "@/components/niko-data-table"
+import { useDataTable } from "@/components/niko-table"
 
 export function CustomComponent() {
   const { table, isLoading, columns } = useDataTable()
@@ -70,7 +70,7 @@ Hook to debounce a value, useful for search inputs and filters.
 </div>
 
 ```tsx showLineNumbers
-import { useDebounce } from "@/components/niko-data-table/hooks"
+import { useDebounce } from "@/components/niko-table/hooks"
 
 function SearchFilter() {
   const [search, setSearch] = useState("")
@@ -180,7 +180,7 @@ Hook for managing keyboard shortcuts with fine-grained control.
 </div>
 
 ```tsx showLineNumbers
-import { useKeyboardShortcut } from "@/components/niko-data-table/hooks"
+import { useKeyboardShortcut } from "@/components/niko-table/hooks"
 
 useKeyboardShortcut({
   key: "f",
