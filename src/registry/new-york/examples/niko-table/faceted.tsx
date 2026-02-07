@@ -24,6 +24,9 @@ import {
   DataTableColumnTitle,
   DataTableColumnHeader,
   DataTableColumnSortMenu,
+  DataTableColumnFacetedFilterMenu,
+  DataTableColumnSliderFilterMenu,
+  DataTableColumnDateFilterMenu,
 } from "@/components/niko-table/components"
 import { daysAgo, FILTER_VARIANTS } from "@/components/niko-table/lib"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
@@ -69,11 +72,14 @@ const columns: DataTableColumnDef<Product>[] = [
       <DataTableColumnHeader>
         <DataTableColumnTitle />
         <DataTableColumnSortMenu variant={FILTER_VARIANTS.TEXT} />
+        <DataTableColumnFacetedFilterMenu
+          multiple
+          limitToFilteredRows={false}
+        />
       </DataTableColumnHeader>
     ),
     meta: {
       label: "Category",
-      // Provide static options and augment with dynamic counts
       options: categoryOptions,
       mergeStrategy: "augment",
       dynamicCounts: true,
@@ -85,18 +91,6 @@ const columns: DataTableColumnDef<Product>[] = [
       return <span>{option?.label || category}</span>
     },
     enableColumnFilter: true,
-    // filterFn removed - uses default extendedFilter which handles ExtendedColumnFilter format
-    //
-    // If you need a custom filterFn, it will receive the ExtendedColumnFilter format:
-    // filterFn: (row, id, filterValue) => {
-    //   if (!filterValue) return true
-    //   // Extract value from ExtendedColumnFilter format
-    //   const values = typeof filterValue === "object" && "value" in filterValue
-    //     ? (Array.isArray(filterValue.value) ? filterValue.value : [filterValue.value])
-    //     : Array.isArray(filterValue) ? filterValue : [filterValue]
-    //   const rowValue = String(row.getValue(id))
-    //   return values.includes(rowValue)
-    // },
   },
   {
     accessorKey: "brand",
@@ -104,28 +98,16 @@ const columns: DataTableColumnDef<Product>[] = [
       <DataTableColumnHeader>
         <DataTableColumnTitle />
         <DataTableColumnSortMenu variant={FILTER_VARIANTS.TEXT} />
+        <DataTableColumnFacetedFilterMenu limitToFilteredRows />
       </DataTableColumnHeader>
     ),
     meta: {
       label: "Brand",
-      // Auto-generate options (no static list) with counts
       autoOptions: true,
       dynamicCounts: true,
       showCounts: true,
     },
     enableColumnFilter: true,
-    // filterFn removed - uses default extendedFilter which handles ExtendedColumnFilter format
-    //
-    // If you need a custom filterFn, it will receive the ExtendedColumnFilter format:
-    // filterFn: (row, id, filterValue) => {
-    //   if (!filterValue) return true
-    //   // Extract value from ExtendedColumnFilter format
-    //   const values = typeof filterValue === "object" && "value" in filterValue
-    //     ? (Array.isArray(filterValue.value) ? filterValue.value : [filterValue.value])
-    //     : Array.isArray(filterValue) ? filterValue : [filterValue]
-    //   const rowValue = String(row.getValue(id))
-    //   return values.includes(rowValue)
-    // },
   },
   {
     accessorKey: "price",
@@ -133,6 +115,7 @@ const columns: DataTableColumnDef<Product>[] = [
       <DataTableColumnHeader>
         <DataTableColumnTitle />
         <DataTableColumnSortMenu variant={FILTER_VARIANTS.NUMBER} />
+        <DataTableColumnSliderFilterMenu />
       </DataTableColumnHeader>
     ),
     meta: {
@@ -197,6 +180,7 @@ const columns: DataTableColumnDef<Product>[] = [
       <DataTableColumnHeader>
         <DataTableColumnTitle />
         <DataTableColumnSortMenu />
+        <DataTableColumnFacetedFilterMenu />
       </DataTableColumnHeader>
     ),
     meta: {
@@ -223,6 +207,7 @@ const columns: DataTableColumnDef<Product>[] = [
       <DataTableColumnHeader>
         <DataTableColumnTitle />
         <DataTableColumnSortMenu />
+        <DataTableColumnDateFilterMenu />
       </DataTableColumnHeader>
     ),
     meta: {

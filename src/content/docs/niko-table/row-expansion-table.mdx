@@ -68,7 +68,11 @@ First, we'll define our columns with an expand column.
 ```tsx showLineNumbers title="columns.tsx"
 "use client"
 
-import { DataTableColumnHeader } from "@/components/niko-table/components"
+import {
+  DataTableColumnHeader,
+  DataTableColumnTitle,
+  DataTableColumnSortMenu,
+} from "@/components/niko-table/components"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 import { Button } from "@/components/ui/button"
 import { ChevronRight, ChevronDown } from "lucide-react"
@@ -131,20 +135,29 @@ export const columns: DataTableColumnDef<Order>[] = [
   },
   {
     accessorKey: "orderNumber",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Order #" />
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle title="Order #" />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
     ),
   },
   {
     accessorKey: "customer",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Customer" />
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle title="Customer" />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
     ),
   },
   {
     accessorKey: "total",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Total" />
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle title="Total" />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
     ),
     cell: ({ row }) => {
       const total = row.getValue("total") as number
@@ -153,8 +166,11 @@ export const columns: DataTableColumnDef<Order>[] = [
   },
   {
     accessorKey: "status",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Status" />
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle title="Status" />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
     ),
   },
 ]
@@ -180,6 +196,8 @@ import {
   DataTableSearchFilter,
   DataTableViewMenu,
   DataTableColumnHeader,
+  DataTableColumnTitle,
+  DataTableColumnSortMenu,
 } from "@/components/niko-table/components"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 import { Button } from "@/components/ui/button"
@@ -243,20 +261,29 @@ const columns: DataTableColumnDef<Order>[] = [
   },
   {
     accessorKey: "orderNumber",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Order #" />
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle title="Order #" />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
     ),
   },
   {
     accessorKey: "customer",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Customer" />
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle title="Customer" />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
     ),
   },
   {
     accessorKey: "total",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Total" />
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle title="Total" />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
     ),
     cell: ({ row }) => {
       const total = row.getValue("total") as number
@@ -265,8 +292,11 @@ const columns: DataTableColumnDef<Order>[] = [
   },
   {
     accessorKey: "status",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Status" />
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle title="Status" />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
     ),
   },
 ]

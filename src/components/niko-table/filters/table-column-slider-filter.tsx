@@ -2,12 +2,17 @@
 
 import React from "react"
 import type { Column } from "@tanstack/react-table"
-import { CircleHelp } from "lucide-react"
+import { CircleHelp, SlidersHorizontal } from "lucide-react"
 
 import {
   DropdownMenuSeparator,
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 import {
   Tooltip,
   TooltipContent,
@@ -310,3 +315,59 @@ export function TableColumnSliderFilterOptions<TData, TValue>({
 }
 
 TableColumnSliderFilterOptions.displayName = "TableColumnSliderFilterOptions"
+
+/**
+ * Standalone slider filter menu for column headers.
+ * Shows a filter button that opens a popover with a range slider.
+ *
+ * @example
+ * ```tsx
+ * // Standalone usage
+ * <TableColumnSliderFilterMenu
+ *   column={column}
+ *   min={0}
+ *   max={1000}
+ * />
+ * ```
+ */
+export function TableColumnSliderFilterMenu<TData, TValue>({
+  column,
+  title,
+  className,
+  ...props
+}: Omit<
+  React.ComponentProps<typeof TableColumnSliderFilterOptions>,
+  "withSeparator" | "column"
+> & {
+  column: Column<TData, TValue>
+  className?: string
+}) {
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className={cn(
+            "size-7 transition-opacity dark:text-muted-foreground",
+            column.getIsFiltered() && "text-primary",
+            className,
+          )}
+        >
+          <SlidersHorizontal className="size-3.5" />
+          <span className="sr-only">Filter by range</span>
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent align="end" className="w-52 p-0">
+        <TableColumnSliderFilterOptions
+          column={column}
+          title={title}
+          withSeparator={false}
+          {...props}
+        />
+      </PopoverContent>
+    </Popover>
+  )
+}
+
+TableColumnSliderFilterMenu.displayName = "TableColumnSliderFilterMenu"

@@ -24,8 +24,14 @@ export {
   DataTableColumnFacetedFilterOptions,
   DataTableColumnFacetedFilterMenu,
 } from "./data-table-column-faceted-filter"
-export { DataTableColumnSliderFilterOptions } from "./data-table-column-slider-filter-options"
-export { DataTableColumnDateFilterOptions } from "./data-table-column-date-filter-options"
+export {
+  DataTableColumnSliderFilterOptions,
+  DataTableColumnSliderFilterMenu,
+} from "./data-table-column-slider-filter-options"
+export {
+  DataTableColumnDateFilterOptions,
+  DataTableColumnDateFilterMenu,
+} from "./data-table-column-date-filter-options"
 export { DataTableToolbarSection } from "./data-table-toolbar-section"
 export type { DataTableToolbarSectionProps } from "./data-table-toolbar-section"
 export {

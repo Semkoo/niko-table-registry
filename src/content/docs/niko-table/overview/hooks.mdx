@@ -208,3 +208,48 @@ useKeyboardShortcut({
 | `preventDefault`  | `boolean`       | `true`  | Whether to prevent default browser behavior.                |
 | `stopPropagation` | `boolean`       | `false` | Whether to stop event propagation.                          |
 | `condition`       | `() => boolean` | -       | Condition function to determine if shortcut should trigger. |
+
+### useKeyboardShortcuts
+
+Batch version of `useKeyboardShortcut` for managing multiple keyboard shortcuts at once with a single event listener.
+
+```tsx showLineNumbers
+import { useKeyboardShortcuts } from "@/components/niko-table/hooks"
+
+useKeyboardShortcuts([
+  { key: "f", onTrigger: () => setFilterOpen(true) },
+  { key: "s", onTrigger: () => setSortOpen((prev) => !prev) },
+  { key: "f", requireShift: true, onTrigger: () => clearFilters() },
+])
+```
+
+#### Parameters
+
+| Name        | Type                           | Description                                              |
+| ----------- | ------------------------------ | -------------------------------------------------------- |
+| `shortcuts` | `UseKeyboardShortcutOptions[]` | Array of shortcut configs (same as useKeyboardShortcut). |
+
+### useGeneratedOptionsForColumn
+
+Convenience wrapper around `useGeneratedOptions` that generates options for a single column.
+
+```tsx showLineNumbers
+import { useGeneratedOptionsForColumn } from "@/components/niko-table/hooks"
+
+const categoryOptions = useGeneratedOptionsForColumn(table, "category", {
+  showCounts: true,
+  dynamicCounts: true,
+})
+```
+
+#### Parameters
+
+| Name       | Type                    | Description                            |
+| ---------- | ----------------------- | -------------------------------------- |
+| `table`    | `Table<TData>`          | TanStack Table instance (required).    |
+| `columnId` | `string`                | The column ID to generate options for. |
+| `config`   | `GenerateOptionsConfig` | Optional configuration object.         |
+
+#### Returns
+
+An array of `Option` objects for the specified column.

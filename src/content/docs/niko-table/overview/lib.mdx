@@ -468,6 +468,17 @@ SYSTEM_COLUMN_IDS.SELECT // "select" - Row selection checkbox column
 SYSTEM_COLUMN_IDS.EXPAND // "expand" - Row expansion toggle column
 ```
 
+### SYSTEM_COLUMN_ID_LIST
+
+Array version of `SYSTEM_COLUMN_IDS` values. Useful for filtering or checking if a column ID is a system column.
+
+```tsx showLineNumbers
+import { SYSTEM_COLUMN_ID_LIST } from "@/components/niko-table/lib"
+
+// ["select", "expand"]
+const isSystemColumn = SYSTEM_COLUMN_ID_LIST.includes(columnId)
+```
+
 ### ERROR_MESSAGES
 
 Standard error messages used throughout the library for consistent error reporting.

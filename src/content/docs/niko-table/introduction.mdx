@@ -307,7 +307,7 @@ The components in `data-table` are built to be composable i.e you build your tab
 
 **If you need to change the code in `data-table`, you are encouraged to do so. The code is yours. Use `data-table` as a starting point and build your own.**
 
-See the [Components](/niko-table/components) page for detailed documentation on each component.
+See the [Components](/niko-table/overview/components) page for detailed documentation on each component.
 
 ## DataTableRoot
 
@@ -321,6 +321,7 @@ The `DataTableRoot` component is used to provide the table context to all child 
 | `columns`                  | `DataTableColumnDef<TData>[]`                    | Column definitions array.                          |
 | `table`                    | `Table<TData>`                                   | Pre-configured TanStack Table instance (optional). |
 | `config`                   | `DataTableConfig`                                | Configuration object for feature toggles.          |
+| `state`                    | `Partial<TableState>`                            | Controlled table state (pagination, sorting, etc). |
 | `isLoading`                | `boolean`                                        | Loading state for the table.                       |
 | `getRowId`                 | `(row: TData, index: number) => string`          | Custom function to get row IDs.                    |
 | `onGlobalFilterChange`     | `(value: GlobalFilter) => void`                  | Callback when global filter changes.               |
@@ -330,6 +331,7 @@ The `DataTableRoot` component is used to provide the table context to all child 
 | `onColumnVisibilityChange` | `(updater: Updater<VisibilityState>) => void`    | Callback when column visibility changes.           |
 | `onRowSelectionChange`     | `(updater: Updater<RowSelectionState>) => void`  | Callback when row selection changes.               |
 | `onExpandedChange`         | `(updater: Updater<ExpandedState>) => void`      | Callback when expanded state changes.              |
+| `onRowSelection`           | `(selectedRows: TData[]) => void`                | Callback with selected row data.                   |
 
 ### Config
 
@@ -351,6 +353,7 @@ The `config` prop accepts a `DataTableConfig` object:
 | `initialPageSize`    | `number`  | `10`    | Initial page size.                                                                 |
 | `initialPageIndex`   | `number`  | `0`     | Initial page index.                                                                |
 | `autoResetPageIndex` | `boolean` | -       | Auto-reset page on filter/sort. Defaults to `false` when `manualPagination: true`. |
+| `autoResetExpanded`  | `boolean` | `true`  | Auto-reset expanded rows on filter/sort change.                                    |
 
 ## useDataTable
 
@@ -373,10 +376,12 @@ export function CustomComponent() {
 
 ### Return Values
 
-| Property    | Type           | Description                              |
-| ----------- | -------------- | ---------------------------------------- |
-| `table`     | `Table<TData>` | The TanStack Table instance.             |
-| `isLoading` | `boolean`      | Whether the table is in a loading state. |
+| Property       | Type                           | Description                              |
+| -------------- | ------------------------------ | ---------------------------------------- |
+| `table`        | `DataTableInstance<TData>`     | The TanStack Table instance.             |
+| `columns`      | `DataTableColumnDef<TData>[]`  | The column definitions.                  |
+| `isLoading`    | `boolean`                      | Whether the table is in a loading state. |
+| `setIsLoading` | `(isLoading: boolean) => void` | Programmatically set the loading state.  |
 
 ## Controlled State
 
@@ -499,7 +504,12 @@ Columns support metadata for advanced filtering, sorting, and display:
 const columns: DataTableColumnDef<Product>[] = [
   {
     accessorKey: "name",
-    header: ({ column }) => <DataTableColumnHeader column={column} />,
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
+    ),
     meta: {
       label: "Product Name",
       placeholder: "Search products...",
@@ -510,7 +520,12 @@ const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "category",
-    header: ({ column }) => <DataTableColumnHeader column={column} />,
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
+    ),
     meta: {
       label: "Category",
       variant: "select",
@@ -523,7 +538,12 @@ const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "price",
-    header: ({ column }) => <DataTableColumnHeader column={column} />,
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
+    ),
     meta: {
       label: "Price",
       variant: "range",
@@ -549,7 +569,7 @@ const columns: DataTableColumnDef<Product>[] = [
 
 ## Next Steps
 
-- [Components](/niko-table/components) - Detailed component documentation
+- [Components](/niko-table/overview/components) - Detailed component documentation
 - [Simple Table](/niko-table/simple-table) - Basic table example
 - [Basic Table](/niko-table/basic-table) - Table with pagination and sorting
 - [Advanced Table](/niko-table/advanced-table) - Complex filtering and sorting
@@ -612,6 +632,9 @@ Context-aware components that automatically connect to the table via the `useDat
 - `DataTableClearFilter` - Clear all filters button
 - `DataTableExportButton` - Export to CSV button
 - `DataTableColumnHeader` - Sortable column header
+- `DataTableColumnFacetedFilterMenu` - Column-level faceted filter popover
+- `DataTableColumnSliderFilterMenu` - Column-level slider filter popover
+- `DataTableColumnDateFilterMenu` - Column-level date filter popover
 - `DataTableAside` - Sidebar component
 - `DataTableSelectionBar` - Bulk actions bar
 - `DataTableEmptyState` - Empty state composition components

@@ -81,15 +81,28 @@ const COMPONENT_FEATURES: Record<string, FeatureRequirements> = {
   DataTableFilterMenu: { enableFilters: true },
   TableFilterMenu: { enableFilters: true },
 
-  DataTableFilterList: { enableFilters: true },
-  DataTableFilterListWithState: { enableFilters: true },
-  DataTableFilterMenuWithState: { enableFilters: true },
-  TableFilterList: { enableFilters: true },
   DataTableDateFilter: { enableFilters: true },
-  DataTableRangeFilter: { enableFilters: true },
+  DataTableInlineFilter: { enableFilters: true },
+  TableInlineFilter: { enableFilters: true },
+  DataTableClearFilter: { enableFilters: true },
+  TableClearFilter: { enableFilters: true },
+
+  // Column-level filter menu components
+  DataTableColumnFacetedFilterMenu: { enableFilters: true },
+  TableColumnFacetedFilterMenu: { enableFilters: true },
+  DataTableColumnFacetedFilterOptions: { enableFilters: true },
+  TableColumnFacetedFilterOptions: { enableFilters: true },
+  DataTableColumnSliderFilterMenu: { enableFilters: true },
+  TableColumnSliderFilterMenu: { enableFilters: true },
+  DataTableColumnSliderFilterOptions: { enableFilters: true },
+  TableColumnSliderFilterOptions: { enableFilters: true },
+  DataTableColumnDateFilterMenu: { enableFilters: true },
+  TableColumnDateFilterMenu: { enableFilters: true },
+  DataTableColumnDateFilterOptions: { enableFilters: true },
+  TableColumnDateFilterOptions: { enableFilters: true },
 
   // Selection components
-  DataTableActionBar: { enableRowSelection: true },
+  DataTableSelectionBar: { enableRowSelection: true },
 
   // Sorting components (most components support sorting by default)
   DataTableColumnHeader: { enableSorting: true },

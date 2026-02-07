@@ -67,7 +67,15 @@ First, we'll define our columns with filter functions.
 ```tsx showLineNumbers title="columns.tsx"
 "use client"
 
-import { DataTableColumnHeader } from "@/components/niko-table/components"
+import {
+  DataTableColumnHeader,
+  DataTableColumnTitle,
+  DataTableColumnSortMenu,
+  DataTableColumnFacetedFilterMenu,
+  DataTableColumnSliderFilterMenu,
+  DataTableColumnDateFilterMenu,
+} from "@/components/niko-table/components"
+import { FILTER_VARIANTS } from "@/components/niko-table/lib"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 
 export type Product = {
@@ -85,12 +93,26 @@ export type Product = {
 export const columns: DataTableColumnDef<Product>[] = [
   {
     accessorKey: "name",
-    header: ({ column }) => <DataTableColumnHeader column={column} />,
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
+    ),
     meta: { label: "Product Name" },
   },
   {
     accessorKey: "category",
-    header: ({ column }) => <DataTableColumnHeader column={column} />,
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu variant={FILTER_VARIANTS.TEXT} />
+        <DataTableColumnFacetedFilterMenu
+          multiple
+          limitToFilteredRows={false}
+        />
+      </DataTableColumnHeader>
+    ),
     meta: {
       label: "Category",
       options: categoryOptions,
@@ -99,15 +121,16 @@ export const columns: DataTableColumnDef<Product>[] = [
       showCounts: true,
     },
     enableColumnFilter: true,
-    filterFn: (row, id, filterValue: string[]) => {
-      if (!filterValue?.length) return true
-      const rowValue = String(row.getValue(id))
-      return filterValue.includes(rowValue)
-    },
   },
   {
     accessorKey: "brand",
-    header: ({ column }) => <DataTableColumnHeader column={column} />,
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu variant={FILTER_VARIANTS.TEXT} />
+        <DataTableColumnFacetedFilterMenu limitToFilteredRows />
+      </DataTableColumnHeader>
+    ),
     meta: {
       label: "Brand",
       autoOptions: true,
@@ -115,22 +138,37 @@ export const columns: DataTableColumnDef<Product>[] = [
       showCounts: true,
     },
     enableColumnFilter: true,
-    filterFn: (row, id, filterValue: string[]) => {
-      if (!filterValue?.length) return true
-      const rowValue = String(row.getValue(id))
-      return filterValue.includes(rowValue)
-    },
   },
   {
     accessorKey: "price",
-    header: ({ column }) => <DataTableColumnHeader column={column} />,
-    meta: { label: "Price", unit: "$" },
-    enableColumnFilter: true,
-    filterFn: (row, id, filterValue: [number, number]) => {
-      if (!filterValue) return true
-      const value = row.getValue(id) as number
-      return value >= filterValue[0] && value <= filterValue[1]
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu variant={FILTER_VARIANTS.NUMBER} />
+        <DataTableColumnSliderFilterMenu />
+      </DataTableColumnHeader>
+    ),
+    meta: {
+      label: "Price",
+      unit: "$",
+      variant: "range", // Auto-applies numberRangeFilter
     },
+    enableColumnFilter: true,
+  },
+  {
+    accessorKey: "releaseDate",
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu />
+        <DataTableColumnDateFilterMenu />
+      </DataTableColumnHeader>
+    ),
+    meta: {
+      label: "Release Date",
+      variant: "date_range", // Auto-applies dateRangeFilter
+    },
+    enableColumnFilter: true,
   },
 ]
 ```
@@ -155,9 +193,17 @@ import {
   DataTableSearchFilter,
   DataTableViewMenu,
   DataTableFacetedFilter,
+  DataTableSliderFilter,
+  DataTableDateFilter,
   DataTableClearFilter,
   DataTableColumnHeader,
+  DataTableColumnTitle,
+  DataTableColumnSortMenu,
+  DataTableColumnFacetedFilterMenu,
+  DataTableColumnSliderFilterMenu,
+  DataTableColumnDateFilterMenu,
 } from "@/components/niko-table/components"
+import { FILTER_VARIANTS } from "@/components/niko-table/lib"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 
 type Product = {
@@ -178,56 +224,91 @@ const categoryOptions = [
   { label: "Sports", value: "sports" },
 ]
 
-const brandOptions = [
-  { label: "Apple", value: "apple" },
-  { label: "Samsung", value: "samsung" },
-  { label: "Nike", value: "nike" },
-]
-
 const columns: DataTableColumnDef<Product>[] = [
   {
     accessorKey: "name",
-    header: ({ column }) => <DataTableColumnHeader column={column} />,
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
+    ),
     meta: { label: "Product Name" },
   },
   {
     accessorKey: "category",
-    header: ({ column }) => <DataTableColumnHeader column={column} />,
-    meta: { label: "Category" },
-    enableColumnFilter: true,
-    filterFn: (row, id, filterValue: string[]) => {
-      if (!filterValue?.length) return true
-      return filterValue.includes(String(row.getValue(id)))
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu variant={FILTER_VARIANTS.TEXT} />
+        <DataTableColumnFacetedFilterMenu
+          multiple
+          limitToFilteredRows={false}
+        />
+      </DataTableColumnHeader>
+    ),
+    meta: {
+      label: "Category",
+      options: categoryOptions,
+      mergeStrategy: "augment",
+      dynamicCounts: true,
+      showCounts: true,
     },
+    enableColumnFilter: true,
   },
   {
     accessorKey: "brand",
-    header: ({ column }) => <DataTableColumnHeader column={column} />,
-    meta: { label: "Brand" },
-    enableColumnFilter: true,
-    filterFn: (row, id, filterValue: string[]) => {
-      if (!filterValue?.length) return true
-      return filterValue.includes(String(row.getValue(id)))
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu variant={FILTER_VARIANTS.TEXT} />
+        <DataTableColumnFacetedFilterMenu limitToFilteredRows />
+      </DataTableColumnHeader>
+    ),
+    meta: {
+      label: "Brand",
+      autoOptions: true,
+      dynamicCounts: true,
+      showCounts: true,
     },
+    enableColumnFilter: true,
   },
   {
     accessorKey: "price",
-    header: ({ column }) => <DataTableColumnHeader column={column} />,
-    meta: { label: "Price", unit: "$" },
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu variant={FILTER_VARIANTS.NUMBER} />
+        <DataTableColumnSliderFilterMenu />
+      </DataTableColumnHeader>
+    ),
+    meta: {
+      label: "Price",
+      unit: "$",
+      variant: "range",
+    },
+    enableColumnFilter: true,
+  },
+  {
+    accessorKey: "releaseDate",
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu />
+        <DataTableColumnDateFilterMenu />
+      </DataTableColumnHeader>
+    ),
+    meta: {
+      label: "Release Date",
+      variant: "date_range",
+    },
+    enableColumnFilter: true,
   },
 ]
 
 export function FacetedFilterTable({ data }: { data: Product[] }) {
   return (
-    <DataTableRoot
-      data={data}
-      columns={columns}
-      config={{
-        enablePagination: true,
-        enableSorting: true,
-        enableFilters: true,
-      }}
-    >
+    <DataTableRoot data={data} columns={columns}>
       <DataTableToolbarSection className="w-full flex-col justify-between gap-2">
         <DataTableToolbarSection className="px-0">
           <DataTableSearchFilter placeholder="Search products..." />
@@ -241,11 +322,9 @@ export function FacetedFilterTable({ data }: { data: Product[] }) {
             limitToFilteredRows={false}
           />
           {/* Brand: show only brands from filtered rows */}
-          <DataTableFacetedFilter
-            accessorKey="brand"
-            multiple
-            limitToFilteredRows={true}
-          />
+          <DataTableFacetedFilter accessorKey="brand" limitToFilteredRows />
+          <DataTableSliderFilter accessorKey="price" />
+          <DataTableDateFilter accessorKey="releaseDate" multiple />
           <DataTableClearFilter />
         </DataTableToolbarSection>
       </DataTableToolbarSection>
@@ -386,30 +465,45 @@ Manage filter state externally for full control:
 
 ```tsx showLineNumbers
 import { useState } from "react"
-import type { SortingState, ColumnFiltersState } from "@tanstack/react-table"
+import type {
+  PaginationState,
+  SortingState,
+  ColumnFiltersState,
+  VisibilityState,
+} from "@tanstack/react-table"
 
 export function ControlledFacetedFilterTable({ data }: { data: Product[] }) {
+  const [globalFilter, setGlobalFilter] = useState<string | object>("")
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-  const [globalFilter, setGlobalFilter] = useState("")
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 10,
+  })
 
   return (
     <DataTableRoot
       data={data}
       columns={columns}
-      config={{
-        enablePagination: true,
-        enableSorting: true,
-        enableFilters: true,
-      }}
       state={{
+        globalFilter,
         sorting,
         columnFilters,
-        globalFilter,
+        columnVisibility,
+        pagination,
+      }}
+      onGlobalFilterChange={value => {
+        setGlobalFilter(value)
+        setPagination(prev => ({ ...prev, pageIndex: 0 }))
       }}
       onSortingChange={setSorting}
-      onColumnFiltersChange={setColumnFilters}
-      onGlobalFilterChange={setGlobalFilter}
+      onColumnFiltersChange={filters => {
+        setColumnFilters(filters)
+        setPagination(prev => ({ ...prev, pageIndex: 0 }))
+      }}
+      onColumnVisibilityChange={setColumnVisibility}
+      onPaginationChange={setPagination}
     >
       <DataTableToolbarSection className="w-full flex-col justify-between gap-2">
         <DataTableToolbarSection className="px-0">
@@ -419,16 +513,12 @@ export function ControlledFacetedFilterTable({ data }: { data: Product[] }) {
         <DataTableToolbarSection className="flex-wrap px-0">
           <DataTableFacetedFilter
             accessorKey="category"
-            title="Category"
-            options={categoryOptions}
             multiple
+            limitToFilteredRows={false}
           />
-          <DataTableFacetedFilter
-            accessorKey="brand"
-            title="Brand"
-            options={brandOptions}
-            multiple
-          />
+          <DataTableFacetedFilter accessorKey="brand" limitToFilteredRows />
+          <DataTableSliderFilter accessorKey="price" />
+          <DataTableDateFilter accessorKey="releaseDate" multiple />
           <DataTableClearFilter />
         </DataTableToolbarSection>
       </DataTableToolbarSection>
