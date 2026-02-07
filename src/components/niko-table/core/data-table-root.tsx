@@ -39,12 +39,6 @@ import {
   SYSTEM_COLUMN_ID_LIST,
 } from "../lib/constants"
 
-/** Default column pinning state - module-level constant for stable reference */
-const DEFAULT_COLUMN_PINNING: { left: string[]; right: string[] } = {
-  left: [],
-  right: [],
-}
-
 export interface DataTableConfig {
   // Feature toggles
   enablePagination?: boolean
@@ -302,6 +296,13 @@ function DataTableRootInternal<TData, TValue>({
   const [expanded, setExpanded] = React.useState<ExpandedState>(
     rest.initialState?.expanded ?? {},
   )
+  const [columnPinning, setColumnPinning] = React.useState<{
+    left: string[]
+    right: string[]
+  }>({
+    left: rest.initialState?.columnPinning?.left ?? [],
+    right: rest.initialState?.columnPinning?.right ?? [],
+  })
   const [pagination, setPagination] = React.useState<PaginationState>({
     pageIndex:
       finalConfig.initialPageIndex ??
@@ -474,8 +475,7 @@ function DataTableRootInternal<TData, TValue>({
     rest.state?.globalFilter !== undefined
       ? rest.state.globalFilter
       : globalFilter
-  const controlledColumnPinning =
-    rest.state?.columnPinning ?? DEFAULT_COLUMN_PINNING
+  const controlledColumnPinning = rest.state?.columnPinning ?? columnPinning
   const controlledExpanded = rest.state?.expanded ?? expanded
   const controlledPagination = rest.state?.pagination ?? pagination
 
@@ -620,6 +620,15 @@ function DataTableRootInternal<TData, TValue>({
       onSortingChange: onSortingChange ?? setSorting,
       onColumnFiltersChange: onColumnFiltersChange ?? setColumnFilters,
       onColumnVisibilityChange: onColumnVisibilityChange ?? setColumnVisibility,
+      onColumnPinningChange: updater => {
+        setColumnPinning(prev => {
+          const next = typeof updater === "function" ? updater(prev) : updater
+          return {
+            left: next.left ?? [],
+            right: next.right ?? [],
+          }
+        })
+      },
       onExpandedChange: onExpandedChange ?? setExpanded,
       onPaginationChange: onPaginationChange ?? setPagination,
       getCoreRowModel: getCoreRowModel(),
