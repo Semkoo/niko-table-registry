@@ -1,14 +1,12 @@
 import { generateOpenGraphImage } from "@/lib/generateOpenGraphImage"
-import { getCollection } from "astro:content"
+import registry from "../../registry.json"
 
-const components = (await getCollection("docs")).filter(entry =>
-  entry.id.startsWith("components/"),
-)
+const componentCount = registry.items.length
 
 export function GET() {
   return generateOpenGraphImage({
     title: "Niko Table - Nobody's table, everyone's solution",
     tags: ["Accessible", "Shadcn Native Feel", "Type Safe"],
-    secondaryText: `${components.length} Components`,
+    secondaryText: `${componentCount} Components`,
   })
 }
