@@ -18,8 +18,8 @@
     "prepare": "husky",
     "lint": "eslint --fix .",
     "format": "prettier --write .",
-    "deploy": "pnpm build && wrangler pages deploy",
-    "deploy:preview": "pnpm build && wrangler pages deploy --branch preview"
+    "pages:deploy": "pnpm build && wrangler pages deploy",
+    "pages:preview": "pnpm build && wrangler pages deploy --branch preview"
   },
   "lint-staged": {
     "**/*": [
