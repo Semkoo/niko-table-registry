@@ -1,0 +1,30 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "data-table-column-hide",
+  "title": "DataTable Column Hide",
+  "description": "Column header option to hide/show individual columns.",
+  "dependencies": [
+    "lucide-react"
+  ],
+  "registryDependencies": [
+    "https://niko-table.com/r/data-table.json",
+    "button",
+    "dropdown-menu",
+    "tooltip"
+  ],
+  "files": [
+    {
+      "path": "src/components/niko-table/components/data-table-column-hide.tsx",
+      "content": "\"use client\"\n\nimport React from \"react\"\n\nimport {\n  TableColumnHideOptions,\n  TableColumnHideMenu,\n} from \"../filters/table-column-hide\"\nimport { useColumnHeaderContext } from \"./data-table-column-header\"\n\n/**\n * Hide options for column header menu using context.\n */\nexport function DataTableColumnHideOptions<TData, TValue>(\n  props: Omit<React.ComponentProps<typeof TableColumnHideOptions>, \"column\">,\n) {\n  const { column } = useColumnHeaderContext<TData, TValue>(true)\n  return <TableColumnHideOptions column={column} {...props} />\n}\n\nDataTableColumnHideOptions.displayName = \"DataTableColumnHideOptions\"\n\n/**\n * Standalone hide menu for column header using context.\n */\nexport function DataTableColumnHideMenu<TData, TValue>(\n  props: Omit<React.ComponentProps<typeof TableColumnHideMenu>, \"column\">,\n) {\n  const { column } = useColumnHeaderContext<TData, TValue>(true)\n  return <TableColumnHideMenu column={column} {...props} />\n}\n\nDataTableColumnHideMenu.displayName = \"DataTableColumnHideMenu\"\n",
+      "type": "registry:component",
+      "target": "components/niko-table/components/data-table-column-hide.tsx"
+    },
+    {
+      "path": "src/components/niko-table/filters/table-column-hide.tsx",
+      "content": "\"use client\"\n\nimport type { Column } from \"@tanstack/react-table\"\nimport { CircleHelp, EyeOff } from \"lucide-react\"\n\nimport { Button } from \"@/components/ui/button\"\nimport {\n  DropdownMenu,\n  DropdownMenuContent,\n  DropdownMenuItem,\n  DropdownMenuLabel,\n  DropdownMenuSeparator,\n  DropdownMenuTrigger,\n} from \"@/components/ui/dropdown-menu\"\nimport {\n  Tooltip,\n  TooltipContent,\n  TooltipTrigger,\n} from \"@/components/ui/tooltip\"\nimport { cn } from \"@/lib/utils\"\n\n/**\n * Dropdown menu item for hiding a column.\n * Use inside a DropdownMenuContent or as a child of TableColumnActions.\n *\n * @example\n * ```tsx\n * // Inside TableColumnActions\n * <TableColumnActions column={column}>\n *   <TableColumnHideOptions column={column} />\n * </TableColumnActions>\n * ```\n */\nexport function TableColumnHideOptions<TData, TValue>({\n  column,\n  withSeparator = true,\n}: {\n  column: Column<TData, TValue>\n  /** Whether to render a separator before the option. Defaults to true. */\n  withSeparator?: boolean\n}) {\n  const canHide = column.getCanHide()\n\n  if (!canHide) return null\n\n  return (\n    <>\n      {withSeparator && <DropdownMenuSeparator />}\n      <DropdownMenuLabel className=\"flex items-center justify-between text-xs font-normal text-muted-foreground\">\n        <span>Column Hide</span>\n        <Tooltip>\n          <TooltipTrigger asChild>\n            <CircleHelp className=\"size-3.5 cursor-help\" />\n          </TooltipTrigger>\n          <TooltipContent side=\"right\">\n            Hide this column from view\n          </TooltipContent>\n        </Tooltip>\n      </DropdownMenuLabel>\n      <DropdownMenuItem onSelect={() => column.toggleVisibility(false)}>\n        <EyeOff className=\"mr-2 size-4 text-muted-foreground/70\" />\n        Hide Column\n      </DropdownMenuItem>\n    </>\n  )\n}\n\n/**\n * Standalone dropdown menu for hiding a column.\n * Shows a hide button that opens a dropdown.\n *\n * @example\n * ```tsx\n * // Standalone usage\n * <TableColumnHideMenu column={column} />\n * ```\n */\nexport function TableColumnHideMenu<TData, TValue>({\n  column,\n  className,\n}: {\n  column: Column<TData, TValue>\n  className?: string\n}) {\n  const canHide = column.getCanHide()\n\n  if (!canHide) return null\n\n  return (\n    <DropdownMenu>\n      <DropdownMenuTrigger asChild>\n        <Button\n          variant=\"ghost\"\n          size=\"icon\"\n          className={cn(\n            \"size-7 transition-opacity group-hover:opacity-100 dark:text-muted-foreground\",\n            !column.getIsVisible() ? \"text-primary opacity-100\" : \"opacity-0\",\n            className,\n          )}\n        >\n          <EyeOff className=\"size-4\" />\n          <span className=\"sr-only\">Hide column</span>\n        </Button>\n      </DropdownMenuTrigger>\n      <DropdownMenuContent align=\"end\" className=\"w-48\">\n        <DropdownMenuLabel className=\"flex items-center justify-between text-xs font-normal text-muted-foreground\">\n          <span>Column Hide</span>\n          <Tooltip>\n            <TooltipTrigger asChild>\n              <CircleHelp className=\"size-3.5 cursor-help\" />\n            </TooltipTrigger>\n            <TooltipContent side=\"right\">\n              Hide this column from view\n            </TooltipContent>\n          </Tooltip>\n        </DropdownMenuLabel>\n        <DropdownMenuItem onSelect={() => column.toggleVisibility(false)}>\n          <EyeOff className=\"mr-2 size-4 text-muted-foreground/70\" />\n          Hide Column\n        </DropdownMenuItem>\n      </DropdownMenuContent>\n    </DropdownMenu>\n  )\n}\n\n/** @deprecated Use `TableColumnHideMenu` instead */\nexport const TableColumnHide = TableColumnHideMenu\n\nTableColumnHideOptions.displayName = \"TableColumnHideOptions\"\nTableColumnHideMenu.displayName = \"TableColumnHideMenu\"\n",
+      "type": "registry:component",
+      "target": "components/niko-table/filters/table-column-hide.tsx"
+    }
+  ],
+  "type": "registry:component"
+}

@@ -1,40 +1,20 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry.json",
-  "name": "niko-tables",
+  "name": "niko-table",
   "homepage": "https://niko-table.com",
   "items": [
     {
       "name": "data-table",
       "type": "registry:block",
       "title": "Data Table",
-      "description": "Advanced React DataTable component built with TanStack Table and Shadcn UI. Features sorting, filtering, pagination, column pinning, row selection, row expansion, virtualization, faceted filters, inline filters, and more.",
-      "dependencies": [
-        "@tanstack/react-table",
-        "@tanstack/react-virtual",
-        "lucide-react",
-        "react-day-picker",
-        "@dnd-kit/core",
-        "@dnd-kit/modifiers",
-        "@dnd-kit/sortable",
-        "@dnd-kit/utilities"
-      ],
+      "description": "Core DataTable component built with TanStack Table and Shadcn UI. Includes table structure, context, types, hooks, utilities, and base components (column header, toolbar section, empty state).",
+      "dependencies": ["@tanstack/react-table", "lucide-react"],
       "registryDependencies": [
         "table",
         "skeleton",
         "alert",
         "button",
-        "badge",
-        "input",
-        "label",
-        "popover",
-        "separator",
-        "slider",
-        "dropdown-menu",
-        "tooltip",
-        "command",
-        "calendar",
-        "select",
-        "sortable"
+        "dropdown-menu"
       ],
       "files": [
         {
@@ -58,11 +38,6 @@
           "target": "components/niko-table/core/data-table-structure.tsx"
         },
         {
-          "path": "src/components/niko-table/core/data-table-virtualized-structure.tsx",
-          "type": "registry:component",
-          "target": "components/niko-table/core/data-table-virtualized-structure.tsx"
-        },
-        {
           "path": "src/components/niko-table/core/data-table-error-boundary.tsx",
           "type": "registry:component",
           "target": "components/niko-table/core/data-table-error-boundary.tsx"
@@ -73,64 +48,9 @@
           "target": "components/niko-table/core/index.tsx"
         },
         {
-          "path": "src/components/niko-table/components/data-table-aside.tsx",
-          "type": "registry:component",
-          "target": "components/niko-table/components/data-table-aside.tsx"
-        },
-        {
-          "path": "src/components/niko-table/components/data-table-clear-filter.tsx",
-          "type": "registry:component",
-          "target": "components/niko-table/components/data-table-clear-filter.tsx"
-        },
-        {
-          "path": "src/components/niko-table/components/data-table-column-actions.tsx",
-          "type": "registry:component",
-          "target": "components/niko-table/components/data-table-column-actions.tsx"
-        },
-        {
-          "path": "src/components/niko-table/components/data-table-column-date-filter-options.tsx",
-          "type": "registry:component",
-          "target": "components/niko-table/components/data-table-column-date-filter-options.tsx"
-        },
-        {
-          "path": "src/components/niko-table/components/data-table-column-faceted-filter.tsx",
-          "type": "registry:component",
-          "target": "components/niko-table/components/data-table-column-faceted-filter.tsx"
-        },
-        {
-          "path": "src/components/niko-table/components/data-table-column-filter-trigger.tsx",
-          "type": "registry:component",
-          "target": "components/niko-table/components/data-table-column-filter-trigger.tsx"
-        },
-        {
-          "path": "src/components/niko-table/components/data-table-column-filter.tsx",
-          "type": "registry:component",
-          "target": "components/niko-table/components/data-table-column-filter.tsx"
-        },
-        {
           "path": "src/components/niko-table/components/data-table-column-header.tsx",
           "type": "registry:component",
           "target": "components/niko-table/components/data-table-column-header.tsx"
-        },
-        {
-          "path": "src/components/niko-table/components/data-table-column-hide.tsx",
-          "type": "registry:component",
-          "target": "components/niko-table/components/data-table-column-hide.tsx"
-        },
-        {
-          "path": "src/components/niko-table/components/data-table-column-pin.tsx",
-          "type": "registry:component",
-          "target": "components/niko-table/components/data-table-column-pin.tsx"
-        },
-        {
-          "path": "src/components/niko-table/components/data-table-column-slider-filter-options.tsx",
-          "type": "registry:component",
-          "target": "components/niko-table/components/data-table-column-slider-filter-options.tsx"
-        },
-        {
-          "path": "src/components/niko-table/components/data-table-column-sort.tsx",
-          "type": "registry:component",
-          "target": "components/niko-table/components/data-table-column-sort.tsx"
         },
         {
           "path": "src/components/niko-table/components/data-table-column-title.tsx",
@@ -138,59 +58,19 @@
           "target": "components/niko-table/components/data-table-column-title.tsx"
         },
         {
-          "path": "src/components/niko-table/components/data-table-date-filter.tsx",
+          "path": "src/components/niko-table/components/data-table-column-actions.tsx",
           "type": "registry:component",
-          "target": "components/niko-table/components/data-table-date-filter.tsx"
+          "target": "components/niko-table/components/data-table-column-actions.tsx"
         },
         {
-          "path": "src/components/niko-table/components/data-table-empty-state.tsx",
+          "path": "src/components/niko-table/components/data-table-column-filter.tsx",
           "type": "registry:component",
-          "target": "components/niko-table/components/data-table-empty-state.tsx"
+          "target": "components/niko-table/components/data-table-column-filter.tsx"
         },
         {
-          "path": "src/components/niko-table/components/data-table-export-button.tsx",
+          "path": "src/components/niko-table/components/data-table-column-filter-trigger.tsx",
           "type": "registry:component",
-          "target": "components/niko-table/components/data-table-export-button.tsx"
-        },
-        {
-          "path": "src/components/niko-table/components/data-table-faceted-filter.tsx",
-          "type": "registry:component",
-          "target": "components/niko-table/components/data-table-faceted-filter.tsx"
-        },
-        {
-          "path": "src/components/niko-table/components/data-table-filter-menu.tsx",
-          "type": "registry:component",
-          "target": "components/niko-table/components/data-table-filter-menu.tsx"
-        },
-        {
-          "path": "src/components/niko-table/components/data-table-inline-filter.tsx",
-          "type": "registry:component",
-          "target": "components/niko-table/components/data-table-inline-filter.tsx"
-        },
-        {
-          "path": "src/components/niko-table/components/data-table-pagination.tsx",
-          "type": "registry:component",
-          "target": "components/niko-table/components/data-table-pagination.tsx"
-        },
-        {
-          "path": "src/components/niko-table/components/data-table-search-filter.tsx",
-          "type": "registry:component",
-          "target": "components/niko-table/components/data-table-search-filter.tsx"
-        },
-        {
-          "path": "src/components/niko-table/components/data-table-selection-bar.tsx",
-          "type": "registry:component",
-          "target": "components/niko-table/components/data-table-selection-bar.tsx"
-        },
-        {
-          "path": "src/components/niko-table/components/data-table-slider-filter.tsx",
-          "type": "registry:component",
-          "target": "components/niko-table/components/data-table-slider-filter.tsx"
-        },
-        {
-          "path": "src/components/niko-table/components/data-table-sort-menu.tsx",
-          "type": "registry:component",
-          "target": "components/niko-table/components/data-table-sort-menu.tsx"
+          "target": "components/niko-table/components/data-table-column-filter-trigger.tsx"
         },
         {
           "path": "src/components/niko-table/components/data-table-toolbar-section.tsx",
@@ -198,9 +78,9 @@
           "target": "components/niko-table/components/data-table-toolbar-section.tsx"
         },
         {
-          "path": "src/components/niko-table/components/data-table-view-menu.tsx",
+          "path": "src/components/niko-table/components/data-table-empty-state.tsx",
           "type": "registry:component",
-          "target": "components/niko-table/components/data-table-view-menu.tsx"
+          "target": "components/niko-table/components/data-table-empty-state.tsx"
         },
         {
           "path": "src/components/niko-table/components/index.tsx",
@@ -208,104 +88,14 @@
           "target": "components/niko-table/components/index.tsx"
         },
         {
-          "path": "src/components/niko-table/filters/table-clear-filter.tsx",
-          "type": "registry:component",
-          "target": "components/niko-table/filters/table-clear-filter.tsx"
-        },
-        {
           "path": "src/components/niko-table/filters/table-column-actions.tsx",
           "type": "registry:component",
           "target": "components/niko-table/filters/table-column-actions.tsx"
         },
         {
-          "path": "src/components/niko-table/filters/table-column-date-filter.tsx",
-          "type": "registry:component",
-          "target": "components/niko-table/filters/table-column-date-filter.tsx"
-        },
-        {
-          "path": "src/components/niko-table/filters/table-column-faceted-filter.tsx",
-          "type": "registry:component",
-          "target": "components/niko-table/filters/table-column-faceted-filter.tsx"
-        },
-        {
-          "path": "src/components/niko-table/filters/table-column-hide.tsx",
-          "type": "registry:component",
-          "target": "components/niko-table/filters/table-column-hide.tsx"
-        },
-        {
-          "path": "src/components/niko-table/filters/table-column-pin.tsx",
-          "type": "registry:component",
-          "target": "components/niko-table/filters/table-column-pin.tsx"
-        },
-        {
-          "path": "src/components/niko-table/filters/table-column-slider-filter.tsx",
-          "type": "registry:component",
-          "target": "components/niko-table/filters/table-column-slider-filter.tsx"
-        },
-        {
-          "path": "src/components/niko-table/filters/table-column-sort.tsx",
-          "type": "registry:component",
-          "target": "components/niko-table/filters/table-column-sort.tsx"
-        },
-        {
           "path": "src/components/niko-table/filters/table-column-title.tsx",
           "type": "registry:component",
           "target": "components/niko-table/filters/table-column-title.tsx"
-        },
-        {
-          "path": "src/components/niko-table/filters/table-date-filter.tsx",
-          "type": "registry:component",
-          "target": "components/niko-table/filters/table-date-filter.tsx"
-        },
-        {
-          "path": "src/components/niko-table/filters/table-export-button.tsx",
-          "type": "registry:component",
-          "target": "components/niko-table/filters/table-export-button.tsx"
-        },
-        {
-          "path": "src/components/niko-table/filters/table-faceted-filter.tsx",
-          "type": "registry:component",
-          "target": "components/niko-table/filters/table-faceted-filter.tsx"
-        },
-        {
-          "path": "src/components/niko-table/filters/table-filter-menu.tsx",
-          "type": "registry:component",
-          "target": "components/niko-table/filters/table-filter-menu.tsx"
-        },
-        {
-          "path": "src/components/niko-table/filters/table-inline-filter.tsx",
-          "type": "registry:component",
-          "target": "components/niko-table/filters/table-inline-filter.tsx"
-        },
-        {
-          "path": "src/components/niko-table/filters/table-pagination.tsx",
-          "type": "registry:component",
-          "target": "components/niko-table/filters/table-pagination.tsx"
-        },
-        {
-          "path": "src/components/niko-table/filters/table-range-filter.tsx",
-          "type": "registry:component",
-          "target": "components/niko-table/filters/table-range-filter.tsx"
-        },
-        {
-          "path": "src/components/niko-table/filters/table-search-filter.tsx",
-          "type": "registry:component",
-          "target": "components/niko-table/filters/table-search-filter.tsx"
-        },
-        {
-          "path": "src/components/niko-table/filters/table-slider-filter.tsx",
-          "type": "registry:component",
-          "target": "components/niko-table/filters/table-slider-filter.tsx"
-        },
-        {
-          "path": "src/components/niko-table/filters/table-sort-menu.tsx",
-          "type": "registry:component",
-          "target": "components/niko-table/filters/table-sort-menu.tsx"
-        },
-        {
-          "path": "src/components/niko-table/filters/table-view-menu.tsx",
-          "type": "registry:component",
-          "target": "components/niko-table/filters/table-view-menu.tsx"
         },
         {
           "path": "src/components/niko-table/filters/index.tsx",
@@ -386,6 +176,511 @@
           "path": "src/components/niko-table/types/index.ts",
           "type": "registry:lib",
           "target": "components/niko-table/types/index.ts"
+        }
+      ]
+    },
+    {
+      "name": "data-table-virtualized",
+      "type": "registry:component",
+      "title": "DataTable Virtualized Structure",
+      "description": "Virtualized table structure for rendering large datasets efficiently using TanStack Virtual.",
+      "dependencies": ["@tanstack/react-virtual"],
+      "registryDependencies": ["https://niko-table.com/r/data-table.json"],
+      "files": [
+        {
+          "path": "src/components/niko-table/core/data-table-virtualized-structure.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/core/data-table-virtualized-structure.tsx"
+        }
+      ]
+    },
+    {
+      "name": "data-table-pagination",
+      "type": "registry:component",
+      "title": "DataTable Pagination",
+      "description": "Full-featured pagination controls with page size selector, page navigation, and row count display.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": [
+        "https://niko-table.com/r/data-table.json",
+        "button",
+        "select",
+        "input",
+        "skeleton"
+      ],
+      "files": [
+        {
+          "path": "src/components/niko-table/components/data-table-pagination.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-pagination.tsx"
+        },
+        {
+          "path": "src/components/niko-table/filters/table-pagination.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/table-pagination.tsx"
+        }
+      ]
+    },
+    {
+      "name": "data-table-search-filter",
+      "type": "registry:component",
+      "title": "DataTable Search Filter",
+      "description": "Global search input with debouncing for filtering table data.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": [
+        "https://niko-table.com/r/data-table.json",
+        "input"
+      ],
+      "files": [
+        {
+          "path": "src/components/niko-table/components/data-table-search-filter.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-search-filter.tsx"
+        },
+        {
+          "path": "src/components/niko-table/filters/table-search-filter.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/table-search-filter.tsx"
+        }
+      ]
+    },
+    {
+      "name": "data-table-sort-menu",
+      "type": "registry:component",
+      "title": "DataTable Sort Menu",
+      "description": "Sort management menu with multi-column sorting and drag-and-drop reordering.",
+      "dependencies": [
+        "lucide-react",
+        "@dnd-kit/core",
+        "@dnd-kit/modifiers",
+        "@dnd-kit/sortable",
+        "@dnd-kit/utilities"
+      ],
+      "registryDependencies": [
+        "https://niko-table.com/r/data-table.json",
+        "button",
+        "badge",
+        "command",
+        "popover",
+        "tooltip",
+        "select",
+        "sortable"
+      ],
+      "files": [
+        {
+          "path": "src/components/niko-table/components/data-table-sort-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-sort-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/filters/table-sort-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/table-sort-menu.tsx"
+        }
+      ]
+    },
+    {
+      "name": "data-table-view-menu",
+      "type": "registry:component",
+      "title": "DataTable View Menu",
+      "description": "Column visibility toggle menu for showing/hiding table columns.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": [
+        "https://niko-table.com/r/data-table.json",
+        "button",
+        "command",
+        "popover"
+      ],
+      "files": [
+        {
+          "path": "src/components/niko-table/components/data-table-view-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-view-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/filters/table-view-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/table-view-menu.tsx"
+        }
+      ]
+    },
+    {
+      "name": "data-table-clear-filter",
+      "type": "registry:component",
+      "title": "DataTable Clear Filter",
+      "description": "Button to clear all active table filters at once.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": [
+        "https://niko-table.com/r/data-table.json",
+        "button"
+      ],
+      "files": [
+        {
+          "path": "src/components/niko-table/components/data-table-clear-filter.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-clear-filter.tsx"
+        },
+        {
+          "path": "src/components/niko-table/filters/table-clear-filter.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/table-clear-filter.tsx"
+        }
+      ]
+    },
+    {
+      "name": "data-table-filter-menu",
+      "type": "registry:component",
+      "title": "DataTable Filter Menu",
+      "description": "Command palette-style filter interface for adding and managing column filters.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": [
+        "https://niko-table.com/r/data-table.json",
+        "button",
+        "badge",
+        "input",
+        "popover",
+        "command",
+        "select",
+        "calendar",
+        "separator"
+      ],
+      "files": [
+        {
+          "path": "src/components/niko-table/components/data-table-filter-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-filter-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/filters/table-filter-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/table-filter-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/filters/table-range-filter.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/table-range-filter.tsx"
+        }
+      ]
+    },
+    {
+      "name": "data-table-faceted-filter",
+      "type": "registry:component",
+      "title": "DataTable Faceted Filter",
+      "description": "Faceted filter for single/multiple selection with option counts and search.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": [
+        "https://niko-table.com/r/data-table.json",
+        "button",
+        "badge",
+        "command",
+        "popover",
+        "separator"
+      ],
+      "files": [
+        {
+          "path": "src/components/niko-table/components/data-table-faceted-filter.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-faceted-filter.tsx"
+        },
+        {
+          "path": "src/components/niko-table/filters/table-faceted-filter.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/table-faceted-filter.tsx"
+        }
+      ]
+    },
+    {
+      "name": "data-table-inline-filter",
+      "type": "registry:component",
+      "title": "DataTable Inline Filter",
+      "description": "Inline filter toolbar that displays active filters as editable chips.",
+      "dependencies": ["lucide-react", "react-day-picker"],
+      "registryDependencies": [
+        "https://niko-table.com/r/data-table.json",
+        "button",
+        "input",
+        "popover",
+        "command",
+        "select",
+        "calendar"
+      ],
+      "files": [
+        {
+          "path": "src/components/niko-table/components/data-table-inline-filter.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-inline-filter.tsx"
+        },
+        {
+          "path": "src/components/niko-table/filters/table-inline-filter.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/table-inline-filter.tsx"
+        }
+      ]
+    },
+    {
+      "name": "data-table-slider-filter",
+      "type": "registry:component",
+      "title": "DataTable Slider Filter",
+      "description": "Slider-based filter for numeric range filtering.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": [
+        "https://niko-table.com/r/data-table.json",
+        "button",
+        "input",
+        "label",
+        "popover",
+        "separator",
+        "slider"
+      ],
+      "files": [
+        {
+          "path": "src/components/niko-table/components/data-table-slider-filter.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-slider-filter.tsx"
+        },
+        {
+          "path": "src/components/niko-table/filters/table-slider-filter.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/table-slider-filter.tsx"
+        }
+      ]
+    },
+    {
+      "name": "data-table-date-filter",
+      "type": "registry:component",
+      "title": "DataTable Date Filter",
+      "description": "Date picker filter supporting single date and date range selection.",
+      "dependencies": ["lucide-react", "react-day-picker"],
+      "registryDependencies": [
+        "https://niko-table.com/r/data-table.json",
+        "button",
+        "calendar",
+        "popover",
+        "separator"
+      ],
+      "files": [
+        {
+          "path": "src/components/niko-table/components/data-table-date-filter.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-date-filter.tsx"
+        },
+        {
+          "path": "src/components/niko-table/filters/table-date-filter.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/table-date-filter.tsx"
+        }
+      ]
+    },
+    {
+      "name": "data-table-export-button",
+      "type": "registry:component",
+      "title": "DataTable Export Button",
+      "description": "Export table data to CSV with configurable options.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": [
+        "https://niko-table.com/r/data-table.json",
+        "button"
+      ],
+      "files": [
+        {
+          "path": "src/components/niko-table/components/data-table-export-button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-export-button.tsx"
+        },
+        {
+          "path": "src/components/niko-table/filters/table-export-button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/table-export-button.tsx"
+        }
+      ]
+    },
+    {
+      "name": "data-table-aside",
+      "type": "registry:component",
+      "title": "DataTable Aside",
+      "description": "Sidebar panel component for displaying row details or additional content alongside the table.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": ["https://niko-table.com/r/data-table.json"],
+      "files": [
+        {
+          "path": "src/components/niko-table/components/data-table-aside.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-aside.tsx"
+        }
+      ]
+    },
+    {
+      "name": "data-table-selection-bar",
+      "type": "registry:component",
+      "title": "DataTable Selection Bar",
+      "description": "Bulk actions bar that appears when rows are selected.",
+      "dependencies": [],
+      "registryDependencies": [
+        "https://niko-table.com/r/data-table.json",
+        "button",
+        "badge"
+      ],
+      "files": [
+        {
+          "path": "src/components/niko-table/components/data-table-selection-bar.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-selection-bar.tsx"
+        }
+      ]
+    },
+    {
+      "name": "data-table-column-sort",
+      "type": "registry:component",
+      "title": "DataTable Column Sort",
+      "description": "Column header sort options with ascending/descending/clear controls.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": [
+        "https://niko-table.com/r/data-table.json",
+        "button",
+        "dropdown-menu",
+        "tooltip"
+      ],
+      "files": [
+        {
+          "path": "src/components/niko-table/components/data-table-column-sort.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-column-sort.tsx"
+        },
+        {
+          "path": "src/components/niko-table/filters/table-column-sort.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/table-column-sort.tsx"
+        }
+      ]
+    },
+    {
+      "name": "data-table-column-hide",
+      "type": "registry:component",
+      "title": "DataTable Column Hide",
+      "description": "Column header option to hide/show individual columns.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": [
+        "https://niko-table.com/r/data-table.json",
+        "button",
+        "dropdown-menu",
+        "tooltip"
+      ],
+      "files": [
+        {
+          "path": "src/components/niko-table/components/data-table-column-hide.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-column-hide.tsx"
+        },
+        {
+          "path": "src/components/niko-table/filters/table-column-hide.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/table-column-hide.tsx"
+        }
+      ]
+    },
+    {
+      "name": "data-table-column-pin",
+      "type": "registry:component",
+      "title": "DataTable Column Pin",
+      "description": "Column header option to pin columns to left or right.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": [
+        "https://niko-table.com/r/data-table.json",
+        "button",
+        "dropdown-menu",
+        "tooltip"
+      ],
+      "files": [
+        {
+          "path": "src/components/niko-table/components/data-table-column-pin.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-column-pin.tsx"
+        },
+        {
+          "path": "src/components/niko-table/filters/table-column-pin.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/table-column-pin.tsx"
+        }
+      ]
+    },
+    {
+      "name": "data-table-column-faceted-filter",
+      "type": "registry:component",
+      "title": "DataTable Column Faceted Filter",
+      "description": "Column header faceted filter with multi-select options in a dropdown.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": [
+        "https://niko-table.com/r/data-table.json",
+        "button",
+        "dropdown-menu",
+        "tooltip",
+        "popover",
+        "command"
+      ],
+      "files": [
+        {
+          "path": "src/components/niko-table/components/data-table-column-faceted-filter.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-column-faceted-filter.tsx"
+        },
+        {
+          "path": "src/components/niko-table/filters/table-column-faceted-filter.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/table-column-faceted-filter.tsx"
+        }
+      ]
+    },
+    {
+      "name": "data-table-column-slider-filter",
+      "type": "registry:component",
+      "title": "DataTable Column Slider Filter",
+      "description": "Column header slider filter for numeric range filtering in a dropdown.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": [
+        "https://niko-table.com/r/data-table.json",
+        "button",
+        "dropdown-menu",
+        "tooltip",
+        "input",
+        "label",
+        "slider"
+      ],
+      "files": [
+        {
+          "path": "src/components/niko-table/components/data-table-column-slider-filter-options.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-column-slider-filter-options.tsx"
+        },
+        {
+          "path": "src/components/niko-table/filters/table-column-slider-filter.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/table-column-slider-filter.tsx"
+        }
+      ]
+    },
+    {
+      "name": "data-table-column-date-filter",
+      "type": "registry:component",
+      "title": "DataTable Column Date Filter",
+      "description": "Column header date filter with calendar picker in a dropdown.",
+      "dependencies": ["lucide-react", "react-day-picker"],
+      "registryDependencies": [
+        "https://niko-table.com/r/data-table.json",
+        "button",
+        "dropdown-menu",
+        "tooltip",
+        "popover",
+        "calendar"
+      ],
+      "files": [
+        {
+          "path": "src/components/niko-table/components/data-table-column-date-filter-options.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-column-date-filter-options.tsx"
+        },
+        {
+          "path": "src/components/niko-table/filters/table-column-date-filter.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/table-column-date-filter.tsx"
         }
       ]
     }

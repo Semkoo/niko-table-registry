@@ -1,8 +1,8 @@
-# Niko Tables - React Data Table Composition System
+# Niko Table - React Data Table Composition System
 
 **Nobody's table, everyone's solution.**
 
-Niko Tables provides a modern, flexible composition-based approach to building advanced data tables with hybrid state management. All components are self-contained and designed for maximum flexibility and reusability.
+Niko Table provides a modern, flexible composition-based approach to building advanced data tables with hybrid state management. All components are self-contained and designed for maximum flexibility and reusability.
 
 ## Key Benefits
 
@@ -1074,4 +1074,4 @@ When contributing new components or features:
 
 ## License
 
-This component is part of the Niko Tables project.
+This component is part of the Niko Table project.

@@ -1,4 +1,4 @@
-# Niko Tables
+# Niko Table
 
 **Nobody's table, everyone's solution.**
 
@@ -8,7 +8,7 @@ A comprehensive, production-ready DataTable component built with [TanStack Table
 
 ## Principles
 
-Niko Tables is built around the following principles:
+Niko Table is built around the following principles:
 
 **Open Code:** The top layer of your component code is open for modification. You get the full source code — not a black box. Modify any component, change any behavior, style anything your way.
 
@@ -155,7 +155,7 @@ export function AdvancedTable({ data, columns }) {
 
 ## Architecture
 
-Niko Tables uses a **two-layer architecture** for maximum flexibility:
+Niko Table uses a **two-layer architecture** for maximum flexibility:
 
 **Components** (`/components/`) — Context-aware wrappers that use `useDataTable()` to automatically get the table instance from `DataTableRoot`. Zero prop drilling, recommended for most use cases.
 
@@ -186,10 +186,10 @@ Full documentation with interactive examples is available at **[niko-table.com](
 
 - [Introduction](https://niko-table.com/getting-started/introduction) — Philosophy and architecture
 - [Installation](https://niko-table.com/getting-started/installation) — Setup your project
-- [Simple Table](https://niko-table.com/niko-tables/simple-table) — Your first table
-- [Basic Table](https://niko-table.com/niko-tables/basic-table) — Pagination and sorting
-- [Advanced Table](https://niko-table.com/niko-tables/advanced-table) — Full filtering
-- [Server-Side Table](https://niko-table.com/niko-tables/server-side-table) — Server-side data
+- [Simple Table](https://niko-table.com/niko-table/simple-table) — Your first table
+- [Basic Table](https://niko-table.com/niko-table/basic-table) — Pagination and sorting
+- [Advanced Table](https://niko-table.com/niko-table/advanced-table) — Full filtering
+- [Server-Side Table](https://niko-table.com/niko-table/server-side-table) — Server-side data
 
 ## Development
 

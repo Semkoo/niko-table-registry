@@ -1,0 +1,30 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "data-table-view-menu",
+  "title": "DataTable View Menu",
+  "description": "Column visibility toggle menu for showing/hiding table columns.",
+  "dependencies": [
+    "lucide-react"
+  ],
+  "registryDependencies": [
+    "https://niko-table.com/r/data-table.json",
+    "button",
+    "command",
+    "popover"
+  ],
+  "files": [
+    {
+      "path": "src/components/niko-table/components/data-table-view-menu.tsx",
+      "content": "\"use client\"\n\nimport { useDataTable } from \"../core\"\nimport {\n  TableViewMenu,\n  type TableViewMenuProps,\n} from \"../filters/table-view-menu\"\n\ntype DataTableViewMenuProps<TData> = Omit<TableViewMenuProps<TData>, \"table\">\n\nexport function DataTableViewMenu<TData>(props: DataTableViewMenuProps<TData>) {\n  const { table } = useDataTable<TData>()\n  return <TableViewMenu table={table} {...props} />\n}\n\n/**\n * @required displayName is required for auto feature detection\n * @see \"feature-detection.ts\"\n */\n\nDataTableViewMenu.displayName = \"DataTableViewMenu\"\n",
+      "type": "registry:component",
+      "target": "components/niko-table/components/data-table-view-menu.tsx"
+    },
+    {
+      "path": "src/components/niko-table/filters/table-view-menu.tsx",
+      "content": "\"use client\"\n/**\n * A dropdown menu component that allows users to toggle the visibility of table columns.\n * It uses a popover to display a list of columns with checkboxes.\n * Users can search for columns and toggle their visibility.\n */\n\nimport type { Column, Table } from \"@tanstack/react-table\"\nimport { Check, ChevronsUpDown, Settings2 } from \"lucide-react\"\nimport * as React from \"react\"\nimport { Button } from \"@/components/ui/button\"\nimport {\n  Command,\n  CommandEmpty,\n  CommandGroup,\n  CommandInput,\n  CommandItem,\n  CommandList,\n} from \"@/components/ui/command\"\nimport {\n  Popover,\n  PopoverContent,\n  PopoverTrigger,\n} from \"@/components/ui/popover\"\nimport { cn } from \"@/lib/utils\"\nimport { formatLabel } from \"../lib/format\"\n\n/**\n * Derives the display title for a column.\n * Priority: column.meta.label > formatted column.id\n */\nfunction getColumnTitle<TData>(column: Column<TData, unknown>): string {\n  return column.columnDef.meta?.label ?? formatLabel(column.id)\n}\n\nexport interface TableViewMenuProps<TData> {\n  table: Table<TData>\n  className?: string\n  onColumnVisibilityChange?: (columnId: string, isVisible: boolean) => void\n}\n\nexport function TableViewMenu<TData>({\n  table,\n  onColumnVisibilityChange,\n}: TableViewMenuProps<TData>) {\n  /**\n   * PERFORMANCE: Memoize filtered columns to avoid recalculating on every render\n   *\n   * WHY: `getAllColumns().filter()` iterates through all columns and checks properties.\n   * Without memoization, this runs on every render, even when columns haven't changed.\n   *\n   * IMPACT: Prevents unnecessary column filtering operations.\n   * With 20 columns: saves ~0.2-0.5ms per render.\n   *\n   * NOTE: Column visibility changes are tracked via table state in context,\n   * so this memoization correctly updates when visibility changes.\n   *\n   * WHAT: Only recalculates when table instance changes (rare).\n   */\n  const columns = React.useMemo(\n    () =>\n      table\n        .getAllColumns()\n        .filter(\n          column =>\n            typeof column.accessorFn !== \"undefined\" && column.getCanHide(),\n        ),\n    [table],\n  )\n\n  return (\n    <Popover>\n      <PopoverTrigger asChild>\n        <Button\n          aria-label=\"Toggle columns\"\n          role=\"combobox\"\n          variant=\"outline\"\n          size=\"sm\"\n          className=\"ml-auto hidden h-8 lg:flex\"\n        >\n          <Settings2 />\n          View\n          <ChevronsUpDown className=\"ml-auto opacity-50\" />\n        </Button>\n      </PopoverTrigger>\n      <PopoverContent align=\"end\" className=\"w-fit p-0\">\n        <Command>\n          <CommandInput placeholder=\"Search columns...\" />\n          <CommandList>\n            <CommandEmpty>No columns found.</CommandEmpty>\n            <CommandGroup>\n              {columns.map(column => (\n                <CommandItem\n                  key={column.id}\n                  onSelect={() => {\n                    const newVisibility = !column.getIsVisible()\n                    column.toggleVisibility(newVisibility)\n                    onColumnVisibilityChange?.(column.id, newVisibility)\n                  }}\n                >\n                  <span className=\"truncate\">{getColumnTitle(column)}</span>\n                  <Check\n                    className={cn(\n                      \"ml-auto size-4 shrink-0\",\n                      column.getIsVisible() ? \"opacity-100\" : \"opacity-0\",\n                    )}\n                  />\n                </CommandItem>\n              ))}\n            </CommandGroup>\n          </CommandList>\n        </Command>\n      </PopoverContent>\n    </Popover>\n  )\n}\n\n/**\n * @required displayName is required for auto feature detection\n * @see \"feature-detection.ts\"\n */\n\nTableViewMenu.displayName = \"TableViewMenu\"\n",
+      "type": "registry:component",
+      "target": "components/niko-table/filters/table-view-menu.tsx"
+    }
+  ],
+  "type": "registry:component"
+}
