@@ -1,6 +1,393 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry.json",
-  "name": "Niko Tables",
+  "name": "niko-tables",
   "homepage": "https://niko-table.com",
-  "items": []
+  "items": [
+    {
+      "name": "data-table",
+      "type": "registry:block",
+      "title": "Data Table",
+      "description": "Advanced React DataTable component built with TanStack Table and Shadcn UI. Features sorting, filtering, pagination, column pinning, row selection, row expansion, virtualization, faceted filters, inline filters, and more.",
+      "dependencies": [
+        "@tanstack/react-table",
+        "@tanstack/react-virtual",
+        "lucide-react",
+        "react-day-picker",
+        "@dnd-kit/core",
+        "@dnd-kit/modifiers",
+        "@dnd-kit/sortable",
+        "@dnd-kit/utilities"
+      ],
+      "registryDependencies": [
+        "table",
+        "skeleton",
+        "alert",
+        "button",
+        "badge",
+        "input",
+        "label",
+        "popover",
+        "separator",
+        "slider",
+        "dropdown-menu",
+        "tooltip",
+        "command",
+        "calendar",
+        "select",
+        "sortable"
+      ],
+      "files": [
+        {
+          "path": "src/components/niko-table/core/data-table.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/core/data-table.tsx"
+        },
+        {
+          "path": "src/components/niko-table/core/data-table-root.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/core/data-table-root.tsx"
+        },
+        {
+          "path": "src/components/niko-table/core/data-table-context.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/core/data-table-context.tsx"
+        },
+        {
+          "path": "src/components/niko-table/core/data-table-structure.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/core/data-table-structure.tsx"
+        },
+        {
+          "path": "src/components/niko-table/core/data-table-virtualized-structure.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/core/data-table-virtualized-structure.tsx"
+        },
+        {
+          "path": "src/components/niko-table/core/data-table-error-boundary.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/core/data-table-error-boundary.tsx"
+        },
+        {
+          "path": "src/components/niko-table/core/index.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/core/index.tsx"
+        },
+        {
+          "path": "src/components/niko-table/components/data-table-aside.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-aside.tsx"
+        },
+        {
+          "path": "src/components/niko-table/components/data-table-clear-filter.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-clear-filter.tsx"
+        },
+        {
+          "path": "src/components/niko-table/components/data-table-column-actions.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-column-actions.tsx"
+        },
+        {
+          "path": "src/components/niko-table/components/data-table-column-date-filter-options.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-column-date-filter-options.tsx"
+        },
+        {
+          "path": "src/components/niko-table/components/data-table-column-faceted-filter.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-column-faceted-filter.tsx"
+        },
+        {
+          "path": "src/components/niko-table/components/data-table-column-filter-trigger.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-column-filter-trigger.tsx"
+        },
+        {
+          "path": "src/components/niko-table/components/data-table-column-filter.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-column-filter.tsx"
+        },
+        {
+          "path": "src/components/niko-table/components/data-table-column-header.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-column-header.tsx"
+        },
+        {
+          "path": "src/components/niko-table/components/data-table-column-hide.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-column-hide.tsx"
+        },
+        {
+          "path": "src/components/niko-table/components/data-table-column-pin.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-column-pin.tsx"
+        },
+        {
+          "path": "src/components/niko-table/components/data-table-column-slider-filter-options.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-column-slider-filter-options.tsx"
+        },
+        {
+          "path": "src/components/niko-table/components/data-table-column-sort.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-column-sort.tsx"
+        },
+        {
+          "path": "src/components/niko-table/components/data-table-column-title.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-column-title.tsx"
+        },
+        {
+          "path": "src/components/niko-table/components/data-table-date-filter.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-date-filter.tsx"
+        },
+        {
+          "path": "src/components/niko-table/components/data-table-empty-state.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-empty-state.tsx"
+        },
+        {
+          "path": "src/components/niko-table/components/data-table-export-button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-export-button.tsx"
+        },
+        {
+          "path": "src/components/niko-table/components/data-table-faceted-filter.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-faceted-filter.tsx"
+        },
+        {
+          "path": "src/components/niko-table/components/data-table-filter-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-filter-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/components/data-table-inline-filter.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-inline-filter.tsx"
+        },
+        {
+          "path": "src/components/niko-table/components/data-table-pagination.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-pagination.tsx"
+        },
+        {
+          "path": "src/components/niko-table/components/data-table-search-filter.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-search-filter.tsx"
+        },
+        {
+          "path": "src/components/niko-table/components/data-table-selection-bar.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-selection-bar.tsx"
+        },
+        {
+          "path": "src/components/niko-table/components/data-table-slider-filter.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-slider-filter.tsx"
+        },
+        {
+          "path": "src/components/niko-table/components/data-table-sort-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-sort-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/components/data-table-toolbar-section.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-toolbar-section.tsx"
+        },
+        {
+          "path": "src/components/niko-table/components/data-table-view-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-view-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/components/index.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/index.tsx"
+        },
+        {
+          "path": "src/components/niko-table/filters/table-clear-filter.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/table-clear-filter.tsx"
+        },
+        {
+          "path": "src/components/niko-table/filters/table-column-actions.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/table-column-actions.tsx"
+        },
+        {
+          "path": "src/components/niko-table/filters/table-column-date-filter.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/table-column-date-filter.tsx"
+        },
+        {
+          "path": "src/components/niko-table/filters/table-column-faceted-filter.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/table-column-faceted-filter.tsx"
+        },
+        {
+          "path": "src/components/niko-table/filters/table-column-hide.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/table-column-hide.tsx"
+        },
+        {
+          "path": "src/components/niko-table/filters/table-column-pin.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/table-column-pin.tsx"
+        },
+        {
+          "path": "src/components/niko-table/filters/table-column-slider-filter.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/table-column-slider-filter.tsx"
+        },
+        {
+          "path": "src/components/niko-table/filters/table-column-sort.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/table-column-sort.tsx"
+        },
+        {
+          "path": "src/components/niko-table/filters/table-column-title.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/table-column-title.tsx"
+        },
+        {
+          "path": "src/components/niko-table/filters/table-date-filter.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/table-date-filter.tsx"
+        },
+        {
+          "path": "src/components/niko-table/filters/table-export-button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/table-export-button.tsx"
+        },
+        {
+          "path": "src/components/niko-table/filters/table-faceted-filter.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/table-faceted-filter.tsx"
+        },
+        {
+          "path": "src/components/niko-table/filters/table-filter-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/table-filter-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/filters/table-inline-filter.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/table-inline-filter.tsx"
+        },
+        {
+          "path": "src/components/niko-table/filters/table-pagination.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/table-pagination.tsx"
+        },
+        {
+          "path": "src/components/niko-table/filters/table-range-filter.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/table-range-filter.tsx"
+        },
+        {
+          "path": "src/components/niko-table/filters/table-search-filter.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/table-search-filter.tsx"
+        },
+        {
+          "path": "src/components/niko-table/filters/table-slider-filter.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/table-slider-filter.tsx"
+        },
+        {
+          "path": "src/components/niko-table/filters/table-sort-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/table-sort-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/filters/table-view-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/table-view-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/filters/index.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/index.tsx"
+        },
+        {
+          "path": "src/components/niko-table/hooks/use-debounce.ts",
+          "type": "registry:hook",
+          "target": "components/niko-table/hooks/use-debounce.ts"
+        },
+        {
+          "path": "src/components/niko-table/hooks/use-derived-column-title.ts",
+          "type": "registry:hook",
+          "target": "components/niko-table/hooks/use-derived-column-title.ts"
+        },
+        {
+          "path": "src/components/niko-table/hooks/use-generated-options.ts",
+          "type": "registry:hook",
+          "target": "components/niko-table/hooks/use-generated-options.ts"
+        },
+        {
+          "path": "src/components/niko-table/hooks/use-keyboard-shortcut.ts",
+          "type": "registry:hook",
+          "target": "components/niko-table/hooks/use-keyboard-shortcut.ts"
+        },
+        {
+          "path": "src/components/niko-table/hooks/index.ts",
+          "type": "registry:hook",
+          "target": "components/niko-table/hooks/index.ts"
+        },
+        {
+          "path": "src/components/niko-table/lib/constants.ts",
+          "type": "registry:lib",
+          "target": "components/niko-table/lib/constants.ts"
+        },
+        {
+          "path": "src/components/niko-table/lib/data-table.ts",
+          "type": "registry:lib",
+          "target": "components/niko-table/lib/data-table.ts"
+        },
+        {
+          "path": "src/components/niko-table/lib/filter-functions.ts",
+          "type": "registry:lib",
+          "target": "components/niko-table/lib/filter-functions.ts"
+        },
+        {
+          "path": "src/components/niko-table/lib/format.ts",
+          "type": "registry:lib",
+          "target": "components/niko-table/lib/format.ts"
+        },
+        {
+          "path": "src/components/niko-table/lib/styles.ts",
+          "type": "registry:lib",
+          "target": "components/niko-table/lib/styles.ts"
+        },
+        {
+          "path": "src/components/niko-table/lib/index.ts",
+          "type": "registry:lib",
+          "target": "components/niko-table/lib/index.ts"
+        },
+        {
+          "path": "src/components/niko-table/config/data-table.ts",
+          "type": "registry:lib",
+          "target": "components/niko-table/config/data-table.ts"
+        },
+        {
+          "path": "src/components/niko-table/config/feature-detection.ts",
+          "type": "registry:lib",
+          "target": "components/niko-table/config/feature-detection.ts"
+        },
+        {
+          "path": "src/components/niko-table/config/index.tsx",
+          "type": "registry:lib",
+          "target": "components/niko-table/config/index.tsx"
+        },
+        {
+          "path": "src/components/niko-table/types/index.ts",
+          "type": "registry:lib",
+          "target": "components/niko-table/types/index.ts"
+        }
+      ]
+    }
+  ]
 }
