@@ -17,9 +17,7 @@
     "registry:build": "shadcn build",
     "prepare": "husky",
     "lint": "eslint --fix .",
-    "format": "prettier --write .",
-    "pages:deploy": "pnpm build && wrangler pages deploy",
-    "pages:preview": "pnpm build && wrangler pages deploy --branch preview"
+    "format": "prettier --write ."
   },
   "lint-staged": {
     "**/*": [
