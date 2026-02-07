@@ -9,7 +9,28 @@ import type {
 import { SERVER_URL } from "@/data/env"
 import { ManualInstallCodeCard } from "@/components/manual-install-code-card"
 
-type RegistryItem = "data-table" | never
+type RegistryItem =
+  | "data-table"
+  | "data-table-virtualized"
+  | "data-table-pagination"
+  | "data-table-search-filter"
+  | "data-table-sort-menu"
+  | "data-table-view-menu"
+  | "data-table-clear-filter"
+  | "data-table-filter-menu"
+  | "data-table-faceted-filter"
+  | "data-table-inline-filter"
+  | "data-table-slider-filter"
+  | "data-table-date-filter"
+  | "data-table-export-button"
+  | "data-table-aside"
+  | "data-table-selection-bar"
+  | "data-table-column-sort"
+  | "data-table-column-hide"
+  | "data-table-column-pin"
+  | "data-table-column-faceted-filter"
+  | "data-table-column-slider-filter"
+  | "data-table-column-date-filter"
 
 type Props = { registryItem: RegistryItem }
 
@@ -80,7 +101,7 @@ function getFileLocationFromType(type: RegistryFileType) {
     <CliCommandCode
       slot="cliSteps"
       action="run"
-      command={`shadcn@latest add @niko-tables/${registryItem}`}
+      command={`shadcn@latest add @niko-table/${registryItem}`}
     />
     <div class="flex flex-col gap-8">
       {

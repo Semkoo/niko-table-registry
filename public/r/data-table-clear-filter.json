@@ -1,0 +1,28 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "data-table-clear-filter",
+  "title": "DataTable Clear Filter",
+  "description": "Button to clear all active table filters at once.",
+  "dependencies": [
+    "lucide-react"
+  ],
+  "registryDependencies": [
+    "https://niko-table.com/r/data-table.json",
+    "button"
+  ],
+  "files": [
+    {
+      "path": "src/components/niko-table/components/data-table-clear-filter.tsx",
+      "content": "\"use client\"\n\nimport { useDataTable } from \"../core\"\nimport {\n  TableClearFilter,\n  type TableClearFilterProps,\n} from \"../filters/table-clear-filter\"\n\ntype DataTableClearFilterProps<TData> = Omit<\n  TableClearFilterProps<TData>,\n  \"table\"\n>\n\n/**\n * Context-aware clear filter button component that automatically gets the table from DataTableRoot context.\n * Automatically hides when there are no active filters to clear.\n *\n * @example - Clear all filters (default)\n * <DataTableClearFilter />\n *\n * @example - Only reset column filters, keep search\n * <DataTableClearFilter enableResetGlobalFilter={false} />\n *\n * @example - Only reset search, keep column filters\n * <DataTableClearFilter enableResetColumnFilters={false} />\n *\n * @example - Only reset sorting\n * <DataTableClearFilter enableResetColumnFilters={false} enableResetGlobalFilter={false} />\n *\n * @example - Custom styling and text\n * <DataTableClearFilter\n *   variant=\"ghost\"\n *   size=\"sm\"\n *   className=\"text-red-500\"\n * >\n *   Clear All\n * </DataTableClearFilter>\n *\n * @example - Without icon\n * <DataTableClearFilter showIcon={false}>\n *   Reset Filters\n * </DataTableClearFilter>\n */\nexport function DataTableClearFilter<TData>(\n  props: DataTableClearFilterProps<TData>,\n) {\n  const { table } = useDataTable<TData>()\n  return <TableClearFilter table={table} {...props} />\n}\n\nDataTableClearFilter.displayName = \"DataTableClearFilter\"\n",
+      "type": "registry:component",
+      "target": "components/niko-table/components/data-table-clear-filter.tsx"
+    },
+    {
+      "path": "src/components/niko-table/filters/table-clear-filter.tsx",
+      "content": "\"use client\"\n\nimport * as React from \"react\"\nimport type { Table } from \"@tanstack/react-table\"\nimport { Button } from \"@/components/ui/button\"\nimport { cn } from \"@/lib/utils\"\nimport { X } from \"lucide-react\"\n\nexport interface TableClearFilterProps<TData> {\n  table: Table<TData>\n  className?: string\n  variant?: \"default\" | \"outline\" | \"ghost\"\n  size?: \"default\" | \"sm\" | \"lg\"\n  showIcon?: boolean\n  children?: React.ReactNode\n  /**\n   * Enable resetting column filters\n   * @default true\n   */\n  enableResetColumnFilters?: boolean\n  /**\n   * Enable resetting global filter (search)\n   * @default true\n   */\n  enableResetGlobalFilter?: boolean\n  /**\n   * Enable resetting sorting\n   * @default true\n   */\n  enableResetSorting?: boolean\n}\n\n/**\n * Core clear filter button component that accepts a table prop directly.\n * Use this when you want to manage the table instance yourself.\n *\n * Automatically hides when there are no active filters to clear.\n *\n * @example\n * ```tsx\n * const table = useReactTable({ ... })\n * <TableClearFilter table={table} />\n * ```\n */\nexport function TableClearFilter<TData>({\n  table,\n  className,\n  variant = \"outline\",\n  size = \"sm\",\n  showIcon = true,\n  children,\n  enableResetColumnFilters = true,\n  enableResetGlobalFilter = true,\n  enableResetSorting = true,\n}: TableClearFilterProps<TData>) {\n  // Read state directly - should be reactive via table re-renders\n  const state = table.getState()\n  const hasActiveFilters = state.columnFilters.length > 0\n  const hasGlobalFilter = Boolean(state.globalFilter)\n  const hasSorting = state.sorting.length > 0\n\n  // Only check for states that are meant to be reset\n  const hasAnythingToReset =\n    (enableResetColumnFilters && hasActiveFilters) ||\n    (enableResetGlobalFilter && hasGlobalFilter) ||\n    (enableResetSorting && hasSorting)\n\n  const handleClearAll = React.useCallback(() => {\n    if (enableResetColumnFilters) {\n      table.resetColumnFilters()\n    }\n    if (enableResetGlobalFilter) {\n      table.setGlobalFilter(\"\")\n    }\n    if (enableResetSorting) {\n      table.resetSorting()\n    }\n  }, [\n    table,\n    enableResetColumnFilters,\n    enableResetGlobalFilter,\n    enableResetSorting,\n  ])\n\n  if (!hasAnythingToReset) {\n    return null\n  }\n\n  return (\n    <Button\n      variant={variant}\n      size={size}\n      onClick={handleClearAll}\n      className={cn(\"h-8\", className)}\n    >\n      {showIcon && <X className=\"mr-2 h-4 w-4\" />}\n      {children || \"Reset\"}\n    </Button>\n  )\n}\n\nTableClearFilter.displayName = \"TableClearFilter\"\n",
+      "type": "registry:component",
+      "target": "components/niko-table/filters/table-clear-filter.tsx"
+    }
+  ],
+  "type": "registry:component"
+}
