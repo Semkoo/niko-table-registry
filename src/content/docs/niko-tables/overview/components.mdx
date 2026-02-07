@@ -25,7 +25,7 @@ Container for organizing filters and actions in the toolbar.
 </div>
 
 ```tsx showLineNumbers
-import { DataTableToolbarSection } from "@/components/niko-table"
+import { DataTableToolbarSection } from "@/components/niko-table/components"
 ;<DataTableToolbarSection className="flex justify-between">
   <DataTableSearchFilter />
   <DataTableViewMenu />
@@ -65,7 +65,7 @@ Full-featured pagination controls with page size selection and navigation.
 </div>
 
 ```tsx showLineNumbers
-import { DataTablePagination } from "@/components/niko-table"
+import { DataTablePagination } from "@/components/niko-table/components"
 ;<DataTablePagination
   pageSizeOptions={[10, 25, 50, 100]}
   totalCount={500}
@@ -123,7 +123,7 @@ Global search input with debouncing. Supports both controlled and uncontrolled m
 </div>
 
 ```tsx showLineNumbers
-import { DataTableSearchFilter } from "@/components/niko-table"
+import { DataTableSearchFilter } from "@/components/niko-table/components"
 
 // Uncontrolled (manages its own state)
 <DataTableSearchFilter placeholder="Search products..." />
@@ -180,7 +180,7 @@ Command palette-style interface for adding filters with advanced operators and A
 </div>
 
 ```tsx showLineNumbers
-import { DataTableFilterMenu } from "@/components/niko-table"
+import { DataTableFilterMenu } from "@/components/niko-table/components"
 ;<DataTableFilterMenu
   autoOptions
   dynamicCounts
@@ -237,7 +237,7 @@ Faceted filter component for single or multiple selection with dynamic option ge
 </div>
 
 ```tsx showLineNumbers
-import { DataTableFacetedFilter } from "@/components/niko-table"
+import { DataTableFacetedFilter } from "@/components/niko-table/components"
 
 // With static options
 <DataTableFacetedFilter
@@ -302,7 +302,7 @@ Menu for managing column sorting with drag-and-drop reordering.
 </div>
 
 ```tsx showLineNumbers
-import { DataTableSortMenu } from "@/components/niko-table"
+import { DataTableSortMenu } from "@/components/niko-table/components"
 ;<DataTableSortMenu className="ml-auto" />
 ```
 
@@ -342,7 +342,7 @@ Column visibility toggle menu with search functionality.
 </div>
 
 ```tsx showLineNumbers
-import { DataTableViewMenu } from "@/components/niko-table"
+import { DataTableViewMenu } from "@/components/niko-table/components"
 ;<DataTableViewMenu />
 ```
 
@@ -379,7 +379,7 @@ Inline filter toolbar for managing filters with advanced operators and AND/OR lo
 </div>
 
 ```tsx showLineNumbers
-import { DataTableInlineFilter } from "@/components/niko-table"
+import { DataTableInlineFilter } from "@/components/niko-table/components"
 ;<DataTableInlineFilter
   autoOptions
   dynamicCounts
@@ -418,7 +418,7 @@ Slider filter for numeric ranges with min/max inputs.
 </div>
 
 ```tsx showLineNumbers
-import { DataTableSliderFilter } from "@/components/niko-table"
+import { DataTableSliderFilter } from "@/components/niko-table/components"
 
 // Auto-detect from column metadata
 <DataTableSliderFilter accessorKey="price" />
@@ -477,7 +477,7 @@ Date filter component for single dates or date ranges.
 </div>
 
 ```tsx showLineNumbers
-import { DataTableDateFilter } from "@/components/niko-table"
+import { DataTableDateFilter } from "@/components/niko-table/components"
 
 // Single date
 <DataTableDateFilter accessorKey="releaseDate" />
@@ -523,7 +523,7 @@ Button to clear all active filters, sorting, and search.
 </div>
 
 ```tsx showLineNumbers
-import { DataTableClearFilter } from "@/components/niko-table"
+import { DataTableClearFilter } from "@/components/niko-table/components"
 ;<DataTableClearFilter />
 ```
 
@@ -566,22 +566,31 @@ Button to export table data to CSV.
 </div>
 
 ```tsx showLineNumbers
-import { DataTableExportButton } from "@/components/niko-table"
-;<DataTableExportButton filename="products" onlySelected={false} />
+import { DataTableExportButton } from "@/components/niko-table/components"
+
+// Basic usage
+;<DataTableExportButton filename="products" />
+
+// With human-readable headers from column.meta.label
+;<DataTableExportButton filename="products" useHeaderLabels />
+
+// Export only selected rows
+;<DataTableExportButton filename="selected" onlySelected />
 ```
 
 #### Props
 
-| Name             | Type              | Default        | Description                     |
-| ---------------- | ----------------- | -------------- | ------------------------------- |
-| `filename`       | `string`          | `"table"`      | Filename for exported CSV.      |
-| `excludeColumns` | `(keyof TData)[]` | -              | Columns to exclude from export. |
-| `onlySelected`   | `boolean`         | `false`        | Export only selected rows.      |
-| `variant`        | `ButtonVariant`   | `"outline"`    | Button variant.                 |
-| `size`           | `ButtonSize`      | `"sm"`         | Button size.                    |
-| `label`          | `string`          | `"Export CSV"` | Button label.                   |
-| `showIcon`       | `boolean`         | `true`         | Show download icon.             |
-| `className`      | `string`          | -              | Additional CSS classes.         |
+| Name              | Type              | Default        | Description                                                             |
+| ----------------- | ----------------- | -------------- | ----------------------------------------------------------------------- |
+| `filename`        | `string`          | `"table"`      | Filename for exported CSV (without extension).                          |
+| `excludeColumns`  | `(keyof TData)[]` | -              | Columns to exclude from export.                                         |
+| `onlySelected`    | `boolean`         | `false`        | Export only selected rows.                                              |
+| `useHeaderLabels` | `boolean`         | `false`        | Use `column.columnDef.meta.label` as CSV headers instead of column IDs. |
+| `variant`         | `ButtonVariant`   | `"outline"`    | Button variant.                                                         |
+| `size`            | `ButtonSize`      | `"sm"`         | Button size.                                                            |
+| `label`           | `string`          | `"Export CSV"` | Button label.                                                           |
+| `showIcon`        | `boolean`         | `true`         | Show download icon.                                                     |
+| `className`       | `string`          | -              | Additional CSS classes.                                                 |
 
 ### DataTableColumnHeader
 
@@ -600,7 +609,7 @@ Composable column header container. Provides layout for title, actions, and filt
 </div>
 
 ```tsx showLineNumbers
-import { DataTableColumnHeader } from "@/components/niko-table"
+import { DataTableColumnHeader } from "@/components/niko-table/components"
 
 const columns: DataTableColumnDef<User>[] = [
   {
@@ -635,7 +644,7 @@ import {
   DataTableColumnFacetedFilterOptions,
   DataTableColumnSliderFilterOptions,
   DataTableColumnDateFilterOptions,
-} from "@/components/niko-table"
+} from "@/components/niko-table/components"
 
 const columns: DataTableColumnDef<User>[] = [
   {
@@ -674,8 +683,7 @@ For custom integrations, the column header context is available directly:
 Provider component that supplies column context to all child header components. This is used internally by `DataTableHeader` and `DataTableVirtualizedHeader` -- you typically don't need this unless building a completely custom header renderer.
 
 ```tsx showLineNumbers
-import { DataTableColumnHeaderRoot } from "@/components/niko-table"
-
+import { DataTableColumnHeaderRoot } from "@/components/niko-table/components"
 ;<DataTableColumnHeaderRoot column={column}>
   {/* All child components receive column context */}
   <DataTableColumnHeader>
@@ -694,7 +702,7 @@ import { DataTableColumnHeaderRoot } from "@/components/niko-table"
 Hook to access the column header context. Returns the current `column` instance. Use this when building custom sub-components that need access to the column.
 
 ```tsx showLineNumbers
-import { useColumnHeaderContext } from "@/components/niko-table"
+import { useColumnHeaderContext } from "@/components/niko-table/components"
 
 function CustomHeaderButton() {
   const { column } = useColumnHeaderContext(true)
@@ -861,7 +869,7 @@ import {
   DataTableAsideTitle,
   DataTableAsideDescription,
   DataTableAsideClose,
-} from "@/components/niko-table"
+} from "@/components/niko-table/components"
 ;<DataTableAside side="right">
   <DataTableAsideTrigger>Open Filters</DataTableAsideTrigger>
   <DataTableAsideContent>
@@ -919,7 +927,7 @@ Shows bulk actions when rows are selected.
 </div>
 
 ```tsx showLineNumbers
-import { DataTableSelectionBar } from "@/components/niko-table"
+import { DataTableSelectionBar } from "@/components/niko-table/components"
 ;<DataTableSelectionBar
   selectedCount={table.getSelectedRowModel().rows.length}
   onClear={() => table.resetRowSelection()}
@@ -962,7 +970,7 @@ import {
   DataTableEmptyDescription,
   DataTableEmptyFilteredMessage,
   DataTableEmptyActions,
-} from "@/components/niko-table"
+} from "@/components/niko-table/components"
 import { PackageOpen } from "lucide-react"
 import { Button } from "@/components/ui/button"
 

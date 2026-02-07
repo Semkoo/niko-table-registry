@@ -130,17 +130,19 @@ Next, we'll create a virtualized table.
 
 import {
   DataTableRoot,
-  DataTableToolbarSection,
   DataTable,
   DataTableVirtualizedHeader,
   DataTableVirtualizedBody,
+  DataTableVirtualizedEmptyBody,
+  DataTableVirtualizedSkeleton,
+} from "@/components/niko-table/core"
+import {
+  DataTableToolbarSection,
   DataTablePagination,
   DataTableSearchFilter,
   DataTableViewMenu,
-  DataTableVirtualizedEmptyBody,
-  DataTableVirtualizedSkeleton,
-} from "@/components/niko-table"
-import { DataTableColumnHeader } from "@/components/niko-table/components"
+  DataTableColumnHeader,
+} from "@/components/niko-table/components"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 
 type Product = {

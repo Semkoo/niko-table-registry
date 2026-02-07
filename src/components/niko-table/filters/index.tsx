@@ -22,7 +22,10 @@ export type { TablePaginationProps } from "./table-pagination"
 
 // Export components
 export { TableExportButton, exportTableToCSV } from "./table-export-button"
-export type { TableExportButtonProps } from "./table-export-button"
+export type {
+  TableExportButtonProps,
+  ExportTableToCSVOptions,
+} from "./table-export-button"
 
 // Column-level filter components
 export { TableColumnTitle } from "./table-column-title"

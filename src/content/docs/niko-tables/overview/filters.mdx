@@ -99,7 +99,7 @@ Core filter menu implementation with command palette interface.
 ```tsx showLineNumbers
 import { TableFilterMenu } from "@/components/niko-table/filters"
 import { useState } from "react"
-import type { ExtendedColumnFilter } from "@/components/niko-table"
+import type { ExtendedColumnFilter } from "@/components/niko-table/types"
 
 // Controlled mode
 const [filters, setFilters] = useState<ExtendedColumnFilter<Product>[]>([])
@@ -373,7 +373,7 @@ Core inline filter implementation with advanced operators.
 ```tsx showLineNumbers
 import { TableInlineFilter } from "@/components/niko-table/filters"
 import { useState } from "react"
-import type { ExtendedColumnFilter } from "@/components/niko-table"
+import type { ExtendedColumnFilter } from "@/components/niko-table/types"
 
 // Controlled mode with filters
 const [filters, setFilters] = useState<ExtendedColumnFilter<Product>[]>([])
@@ -466,7 +466,7 @@ Core export button implementation.
 </div>
 
 ```tsx showLineNumbers
-import { TableExportButton } from "@/components/niko-table/filters"
+import { TableExportButton, exportTableToCSV } from "@/components/niko-table/filters"
 
 // Basic usage
 <TableExportButton table={table} />
@@ -490,21 +490,59 @@ import { TableExportButton } from "@/components/niko-table/filters"
   onlySelected
   label="Export Selected"
 />
+
+// With human-readable headers from column.meta.label
+<TableExportButton
+  table={table}
+  filename="products"
+  useHeaderLabels
+/>
 ```
 
 #### Props
 
-| Name             | Type              | Default        | Description                         |
-| ---------------- | ----------------- | -------------- | ----------------------------------- |
-| `table`          | `Table<TData>`    | -              | TanStack Table instance (required). |
-| `filename`       | `string`          | `"table"`      | Filename for exported CSV.          |
-| `excludeColumns` | `(keyof TData)[]` | -              | Columns to exclude from export.     |
-| `onlySelected`   | `boolean`         | `false`        | Export only selected rows.          |
-| `variant`        | `ButtonVariant`   | `"outline"`    | Button variant.                     |
-| `size`           | `ButtonSize`      | `"sm"`         | Button size.                        |
-| `label`          | `string`          | `"Export CSV"` | Button label.                       |
-| `showIcon`       | `boolean`         | `true`         | Show download icon.                 |
-| `className`      | `string`          | -              | Additional CSS classes.             |
+| Name              | Type              | Default        | Description                                                             |
+| ----------------- | ----------------- | -------------- | ----------------------------------------------------------------------- |
+| `table`           | `Table<TData>`    | -              | TanStack Table instance (required).                                     |
+| `filename`        | `string`          | `"table"`      | Filename for exported CSV (without extension).                          |
+| `excludeColumns`  | `(keyof TData)[]` | -              | Columns to exclude from export.                                         |
+| `onlySelected`    | `boolean`         | `false`        | Export only selected rows.                                              |
+| `useHeaderLabels` | `boolean`         | `false`        | Use `column.columnDef.meta.label` as CSV headers instead of column IDs. |
+| `variant`         | `ButtonVariant`   | `"outline"`    | Button variant.                                                         |
+| `size`            | `ButtonSize`      | `"sm"`         | Button size.                                                            |
+| `label`           | `string`          | `"Export CSV"` | Button label.                                                           |
+| `showIcon`        | `boolean`         | `true`         | Show download icon.                                                     |
+| `className`       | `string`          | -              | Additional CSS classes.                                                 |
+
+### exportTableToCSV
+
+Standalone utility function to export a TanStack Table to CSV. Use this when you want full control over when and how the export happens.
+
+```tsx showLineNumbers
+import { exportTableToCSV } from "@/components/niko-table/filters"
+
+// Basic export
+exportTableToCSV(table, { filename: "users" })
+
+// Export with human-readable headers from column.meta.label
+exportTableToCSV(table, { filename: "users", useHeaderLabels: true })
+
+// Export only selected rows, excluding certain columns
+exportTableToCSV(table, {
+  filename: "selected-users",
+  onlySelected: true,
+  excludeColumns: ["id", "internalNotes"],
+})
+```
+
+#### Options (`ExportTableToCSVOptions<TData>`)
+
+| Name              | Type              | Default   | Description                                                             |
+| ----------------- | ----------------- | --------- | ----------------------------------------------------------------------- |
+| `filename`        | `string`          | `"table"` | Filename for exported CSV (without extension).                          |
+| `excludeColumns`  | `(keyof TData)[]` | `[]`      | Columns to exclude from export.                                         |
+| `onlySelected`    | `boolean`         | `false`   | Export only selected rows.                                              |
+| `useHeaderLabels` | `boolean`         | `false`   | Use `column.columnDef.meta.label` as CSV headers instead of column IDs. |
 
 ### TableRangeFilter
 
@@ -524,7 +562,7 @@ Core range filter implementation for numeric inputs.
 
 ```tsx showLineNumbers
 import { TableRangeFilter } from "@/components/niko-table/filters"
-import type { ExtendedColumnFilter } from "@/components/niko-table"
+import type { ExtendedColumnFilter } from "@/components/niko-table/types"
 
 // Basic usage with filter configuration
 const filter: ExtendedColumnFilter<Product> = {

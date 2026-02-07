@@ -2,14 +2,14 @@
 
 import {
   DataTableRoot,
-  DataTableViewMenu,
-  DataTablePagination,
-  DataTableToolbarSection,
   DataTable,
   DataTableHeader,
   DataTableBody,
-} from "@/components/niko-table"
+} from "@/components/niko-table/core"
 import {
+  DataTableViewMenu,
+  DataTablePagination,
+  DataTableToolbarSection,
   DataTableColumnHeader,
   DataTableColumnTitle,
   DataTableColumnSortMenu,

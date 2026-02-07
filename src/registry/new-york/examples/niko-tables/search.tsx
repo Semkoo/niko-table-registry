@@ -3,22 +3,22 @@
 import React from "react"
 import {
   DataTableRoot,
-  DataTableToolbarSection,
   DataTable,
   DataTableHeader,
   DataTableBody,
+  DataTableEmptyBody,
+  DataTableSkeleton,
+} from "@/components/niko-table/core"
+import {
+  DataTableToolbarSection,
   DataTablePagination,
   DataTableSearchFilter,
   DataTableViewMenu,
-  DataTableEmptyBody,
-  DataTableSkeleton,
   DataTableEmptyIcon,
   DataTableEmptyMessage,
   DataTableEmptyFilteredMessage,
   DataTableEmptyTitle,
   DataTableEmptyDescription,
-} from "@/components/niko-table"
-import {
   DataTableColumnTitle,
   DataTableColumnHeader,
   DataTableColumnSortMenu,

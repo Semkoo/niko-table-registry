@@ -3,27 +3,26 @@
 import * as React from "react"
 import {
   DataTableRoot,
-  DataTableToolbarSection,
   DataTable,
   DataTableHeader,
   DataTableBody,
+  DataTableEmptyBody,
+} from "@/components/niko-table/core"
+import {
+  DataTableToolbarSection,
   DataTablePagination,
   DataTableSearchFilter,
   DataTableViewMenu,
-  DataTableEmptyBody,
   DataTableEmptyFilteredMessage,
   DataTableEmptyTitle,
   DataTableEmptyDescription,
   DataTableEmptyIcon,
   DataTableEmptyMessage,
-  SYSTEM_COLUMN_IDS,
-  FILTER_VARIANTS,
-} from "@/components/niko-table"
-import {
   DataTableColumnHeader,
   DataTableColumnTitle,
   DataTableColumnSortMenu,
 } from "@/components/niko-table/components"
+import { SYSTEM_COLUMN_IDS, FILTER_VARIANTS } from "@/components/niko-table/lib"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"

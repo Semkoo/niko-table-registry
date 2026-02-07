@@ -120,14 +120,16 @@ Next, we'll add the search filter component.
 
 import {
   DataTableRoot,
-  DataTableToolbarSection,
   DataTable,
   DataTableHeader,
   DataTableBody,
+} from "@/components/niko-table/core"
+import {
+  DataTableToolbarSection,
   DataTablePagination,
   DataTableSearchFilter,
-} from "@/components/niko-table"
-import { DataTableColumnHeader } from "@/components/niko-table/components"
+  DataTableColumnHeader,
+} from "@/components/niko-table/components"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 
 type Customer = {

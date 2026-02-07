@@ -2,27 +2,27 @@
 
 import {
   DataTableRoot,
-  DataTableToolbarSection,
   DataTable,
   DataTableHeader,
   DataTableBody,
+  DataTableEmptyBody,
+} from "@/components/niko-table/core"
+import {
+  DataTableToolbarSection,
   DataTablePagination,
   DataTableSearchFilter,
   DataTableViewMenu,
-  DataTableEmptyBody,
   DataTableEmptyIcon,
   DataTableEmptyMessage,
   DataTableEmptyTitle,
   DataTableEmptyDescription,
-  FILTER_VARIANTS,
-} from "@/components/niko-table"
-import {
   DataTableColumnHeader,
   DataTableColumnTitle,
   DataTableColumnActions,
   DataTableColumnSortOptions,
   DataTableColumnPinOptions,
 } from "@/components/niko-table/components"
+import { FILTER_VARIANTS } from "@/components/niko-table/lib"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"

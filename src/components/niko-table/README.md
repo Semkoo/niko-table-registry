@@ -218,7 +218,7 @@ import {
   DataTableBody,
   DataTableSkeleton,
   DataTableEmptyBody,
-} from "@/components/niko-table"
+} from "@/components/niko-table/core"
 ;<DataTableRoot data={data} columns={columns}>
   <DataTable>
     <DataTableHeader />
@@ -235,13 +235,15 @@ import {
 ```tsx
 import {
   DataTableRoot,
-  DataTableToolbarSection,
   DataTable,
   DataTableHeader,
   DataTableBody,
+} from "@/components/niko-table/core"
+import {
+  DataTableToolbarSection,
   DataTablePagination,
   DataTableViewMenu,
-} from "@/components/niko-table"
+} from "@/components/niko-table/components"
 ;<DataTableRoot data={data} columns={columns}>
   <DataTableToolbarSection className="justify-between">
     <h2 className="text-lg font-semibold">Products</h2>
@@ -260,18 +262,20 @@ import {
 ```tsx
 import {
   DataTableRoot,
-  DataTableToolbarSection,
   DataTable,
   DataTableHeader,
   DataTableBody,
+  DataTableEmptyBody,
+} from "@/components/niko-table/core"
+import {
+  DataTableToolbarSection,
   DataTablePagination,
   DataTableSearchFilter,
   DataTableViewMenu,
   DataTableClearFilter,
   DataTableSortMenu,
   DataTableFilterMenu,
-  DataTableEmptyBody,
-} from "@/components/niko-table"
+} from "@/components/niko-table/components"
 ;<DataTableRoot data={data} columns={columns}>
   <DataTableToolbarSection>
     <DataTableToolbarSection className="px-0">
@@ -299,14 +303,16 @@ import {
 ```tsx
 import {
   DataTableRoot,
-  DataTableToolbarSection,
-  DataTableSearchFilter,
   DataTable,
   DataTableVirtualizedHeader,
   DataTableVirtualizedBody,
   DataTableVirtualizedEmptyBody,
+} from "@/components/niko-table/core"
+import {
+  DataTableToolbarSection,
+  DataTableSearchFilter,
   DataTablePagination,
-} from "@/components/niko-table"
+} from "@/components/niko-table/components"
 ;<DataTableRoot data={largeData} columns={columns}>
   <DataTableToolbarSection>
     <DataTableSearchFilter placeholder="Search logs..." />
@@ -526,7 +532,7 @@ import {
   DataTableVirtualizedHeader,
   DataTableVirtualizedBody,
   DataTableVirtualizedEmptyBody,
-} from "@/components/niko-table"
+} from "@/components/niko-table/core"
 ;<DataTableRoot data={largeData} columns={columns}>
   <DataTable>
     <DataTableVirtualizedHeader />
@@ -564,7 +570,7 @@ const columns: DataTableColumnDef<Product>[] = [
 Show skeleton loading state during data fetching:
 
 ```tsx
-import { DataTableSkeleton } from "@/components/niko-table"
+import { DataTableSkeleton } from "@/components/niko-table/core"
 
 const [isLoading, setIsLoading] = React.useState(false)
 
@@ -582,7 +588,7 @@ const [isLoading, setIsLoading] = React.useState(false)
 ### Custom Toolbar Actions
 
 ```tsx
-import { useDataTable } from "@/components/niko-table"
+import { useDataTable } from "@/components/niko-table/core"
 
 function CustomToolbar() {
   const { table } = useDataTable()
@@ -616,7 +622,7 @@ function CustomToolbar() {
 ### Accessing Table Instance
 
 ```tsx
-import { useDataTable } from "@/components/niko-table"
+import { useDataTable } from "@/components/niko-table/core"
 
 function CustomComponent() {
   const { table, isLoading } = useDataTable()
@@ -661,8 +667,8 @@ import {
   DataTableHeader,
   DataTableVirtualizedBody,
   DataTableVirtualizedEmptyBody,
-  DataTablePagination,
-} from "@/components/niko-table"
+} from "@/components/niko-table/core"
+import { DataTablePagination } from "@/components/niko-table/components"
 ;<DataTableRoot columns={columns} data={data}>
   <CustomToolbar />
   <DataTable>
@@ -851,12 +857,14 @@ import {
   DataTable,
   DataTableHeader,
   DataTableBody,
+} from "@/components/niko-table/core"
+import {
   DataTableToolbarSection,
   DataTableSearchFilter,
   DataTableViewMenu,
   DataTablePagination,
-} from "@/components/niko-table"
-import { TableColumnHeader } from "@/components/niko-table/components"
+} from "@/components/niko-table/components"
+import { TableColumnHeader } from "@/components/niko-table/filters"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 
 // Define your columns with proper typing
@@ -927,7 +935,7 @@ import {
   DataTableBody,
   DataTableSkeleton,
   DataTableEmptyBody,
-} from "@/components/niko-table"
+} from "@/components/niko-table/core"
 
 export function MyTable() {
   const [data, setData] = React.useState([])
@@ -964,7 +972,7 @@ export function MyTable() {
 ### Accessing Loading State in Custom Components
 
 ```tsx
-import { useDataTable } from "@/components/niko-table"
+import { useDataTable } from "@/components/niko-table/core"
 
 function CustomComponent() {
   const { isLoading, setIsLoading } = useDataTable()

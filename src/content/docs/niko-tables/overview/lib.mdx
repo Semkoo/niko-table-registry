@@ -125,7 +125,7 @@ Get available filter operators for a given filter variant.
 
 ```tsx showLineNumbers
 import { getFilterOperators } from "@/components/niko-table/lib"
-import { FILTER_VARIANTS } from "@/components/niko-table/lib/constants"
+import { FILTER_VARIANTS } from "@/components/niko-table/lib"
 
 const textOperators = getFilterOperators(FILTER_VARIANTS.TEXT)
 // Returns: [{ label: "Contains", value: "ilike" }, ...]
@@ -149,7 +149,7 @@ Get the default filter operator for a given filter variant.
 
 ```tsx showLineNumbers
 import { getDefaultFilterOperator } from "@/components/niko-table/lib"
-import { FILTER_VARIANTS } from "@/components/niko-table/lib/constants"
+import { FILTER_VARIANTS } from "@/components/niko-table/lib"
 
 const defaultOp = getDefaultFilterOperator(FILTER_VARIANTS.TEXT)
 // Returns: "ilike"
@@ -333,7 +333,7 @@ The cache has a maximum size of 100 entries and uses LRU-like eviction to preven
 Custom filter function for TanStack Table that supports all filter operators (ilike, eq, neq, in, not_in, between, lt, gt, lte, gte, empty, not_empty). Used as the default `filterFn` for columns with advanced filtering.
 
 ```tsx showLineNumbers
-import { extendedFilter } from "@/components/niko-table"
+import { extendedFilter } from "@/components/niko-table/lib"
 
 const columns = [
   {
@@ -348,7 +348,7 @@ const columns = [
 Custom global filter function that searches across all visible columns. Supports debounced search input.
 
 ```tsx showLineNumbers
-import { globalFilter } from "@/components/niko-table"
+import { globalFilter } from "@/components/niko-table/lib"
 
 const table = useReactTable({
   globalFilterFn: globalFilter,
@@ -360,7 +360,7 @@ const table = useReactTable({
 Filter function for numeric range columns. Filters rows where the value is between a `[min, max]` range.
 
 ```tsx showLineNumbers
-import { numberRangeFilter } from "@/components/niko-table"
+import { numberRangeFilter } from "@/components/niko-table/lib"
 
 const columns = [
   {
@@ -375,7 +375,7 @@ const columns = [
 Filter function for date range columns. Filters rows where the date falls between a start and end date.
 
 ```tsx showLineNumbers
-import { dateRangeFilter } from "@/components/niko-table"
+import { dateRangeFilter } from "@/components/niko-table/lib"
 
 const columns = [
   {
@@ -390,7 +390,7 @@ const columns = [
 Utility to create a properly typed filter value object from an `ExtendedColumnFilter`. Used internally by the filter menu and inline filter components.
 
 ```tsx showLineNumbers
-import { createFilterValue } from "@/components/niko-table"
+import { createFilterValue } from "@/components/niko-table/lib"
 
 const filterValue = createFilterValue(filter)
 ```
@@ -400,7 +400,7 @@ const filterValue = createFilterValue(filter)
 Processes an array of `ExtendedColumnFilter` objects and groups them by join operator (AND/OR) for TanStack Table's column filter state. Returns processed filters and the join operator map.
 
 ```tsx showLineNumbers
-import { processFiltersForLogic } from "@/components/niko-table"
+import { processFiltersForLogic } from "@/components/niko-table/lib"
 
 const { processedFilters, joinOperators } = processFiltersForLogic(filters)
 ```
@@ -426,7 +426,7 @@ Helper functions for styling table components, particularly for column pinning.
 Returns CSS styles for pinned columns (sticky positioning, z-index, shadows). Used internally by DataTable components, but available for custom implementations.
 
 ```tsx showLineNumbers
-import { getCommonPinningStyles } from "@/components/niko-table"
+import { getCommonPinningStyles } from "@/components/niko-table/lib"
 
 // In a custom header cell
 const pinningStyles = getCommonPinningStyles(column, true)
@@ -461,7 +461,7 @@ const pinningStyles = getCommonPinningStyles(column, false)
 System column IDs used for smart pinning and feature detection. These are the IDs for special columns like row selection and row expansion.
 
 ```tsx showLineNumbers
-import { SYSTEM_COLUMN_IDS } from "@/components/niko-table"
+import { SYSTEM_COLUMN_IDS } from "@/components/niko-table/lib"
 
 // Available IDs:
 SYSTEM_COLUMN_IDS.SELECT // "select" - Row selection checkbox column
@@ -473,7 +473,7 @@ SYSTEM_COLUMN_IDS.EXPAND // "expand" - Row expansion toggle column
 Standard error messages used throughout the library for consistent error reporting.
 
 ```tsx showLineNumbers
-import { ERROR_MESSAGES } from "@/components/niko-table"
+import { ERROR_MESSAGES } from "@/components/niko-table/lib"
 
 // Available messages:
 ERROR_MESSAGES.DEPRECATED_GLOBAL_JOIN_OPERATOR

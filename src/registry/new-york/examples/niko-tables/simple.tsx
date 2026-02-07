@@ -1,17 +1,19 @@
 "use client"
 
 import {
-  DataTableBody,
+  DataTableRoot,
   DataTable,
   DataTableHeader,
-  DataTableRoot,
+  DataTableBody,
   DataTableSkeleton,
   DataTableEmptyBody,
+} from "@/components/niko-table/core"
+import {
   DataTableEmptyIcon,
   DataTableEmptyMessage,
   DataTableEmptyTitle,
   DataTableEmptyDescription,
-} from "@/components/niko-table"
+} from "@/components/niko-table/components"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 import { Inbox } from "lucide-react"
 
