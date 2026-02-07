@@ -63,7 +63,11 @@ First, we'll define our columns with sortable headers.
 ```tsx showLineNumbers title="columns.tsx"
 "use client"
 
-import { DataTableColumnHeader } from "@/components/niko-table/components"
+import {
+  DataTableColumnHeader,
+  DataTableColumnTitle,
+  DataTableColumnSortMenu,
+} from "@/components/niko-table/components"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 
 export type Product = {
@@ -77,21 +81,33 @@ export type Product = {
 export const columns: DataTableColumnDef<Product>[] = [
   {
     accessorKey: "name",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Product" />
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
     ),
+    meta: { label: "Product" },
   },
   {
     accessorKey: "category",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Category" />
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
     ),
+    meta: { label: "Category" },
   },
   {
     accessorKey: "price",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Price" />
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
     ),
+    meta: { label: "Price" },
     cell: ({ row }) => {
       const price = parseFloat(row.getValue("price"))
       return <div className="font-medium">${price.toFixed(2)}</div>
@@ -99,9 +115,13 @@ export const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "stock",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Stock" />
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
     ),
+    meta: { label: "Stock" },
   },
 ]
 ```
@@ -124,6 +144,8 @@ import {
   DataTablePagination,
   DataTableViewMenu,
   DataTableColumnHeader,
+  DataTableColumnTitle,
+  DataTableColumnSortMenu,
 } from "@/components/niko-table/components"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 
@@ -138,21 +160,33 @@ type Product = {
 const columns: DataTableColumnDef<Product>[] = [
   {
     accessorKey: "name",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Product" />
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
     ),
+    meta: { label: "Product" },
   },
   {
     accessorKey: "category",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Category" />
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
     ),
+    meta: { label: "Category" },
   },
   {
     accessorKey: "price",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Price" />
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
     ),
+    meta: { label: "Price" },
     cell: ({ row }) => {
       const price = parseFloat(row.getValue("price"))
       return <div className="font-medium">${price.toFixed(2)}</div>
@@ -160,9 +194,13 @@ const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "stock",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Stock" />
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
     ),
+    meta: { label: "Stock" },
   },
 ]
 

@@ -68,7 +68,11 @@ First, we'll define our columns.
 ```tsx showLineNumbers title="columns.tsx"
 "use client"
 
-import { DataTableColumnHeader } from "@/components/niko-table/components"
+import {
+  DataTableColumnHeader,
+  DataTableColumnTitle,
+  DataTableColumnSortMenu,
+} from "@/components/niko-table/components"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 
 export type Customer = {
@@ -82,22 +86,42 @@ export type Customer = {
 export const columns: DataTableColumnDef<Customer>[] = [
   {
     accessorKey: "name",
-    header: ({ column }) => <DataTableColumnHeader column={column} />,
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
+    ),
     meta: { label: "Name" },
   },
   {
     accessorKey: "email",
-    header: ({ column }) => <DataTableColumnHeader column={column} />,
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
+    ),
     meta: { label: "Email" },
   },
   {
     accessorKey: "company",
-    header: ({ column }) => <DataTableColumnHeader column={column} />,
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
+    ),
     meta: { label: "Company" },
   },
   {
     accessorKey: "phone",
-    header: ({ column }) => <DataTableColumnHeader column={column} />,
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
+    ),
     meta: { label: "Phone" },
   },
 ]
@@ -124,6 +148,8 @@ import {
   DataTableSearchFilter,
   DataTableViewMenu,
   DataTableColumnHeader,
+  DataTableColumnTitle,
+  DataTableColumnSortMenu,
   DataTableAside,
   DataTableAsideTrigger,
   DataTableAsideContent,
@@ -148,22 +174,42 @@ type Customer = {
 const columns: DataTableColumnDef<Customer>[] = [
   {
     accessorKey: "name",
-    header: ({ column }) => <DataTableColumnHeader column={column} />,
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
+    ),
     meta: { label: "Name" },
   },
   {
     accessorKey: "email",
-    header: ({ column }) => <DataTableColumnHeader column={column} />,
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
+    ),
     meta: { label: "Email" },
   },
   {
     accessorKey: "company",
-    header: ({ column }) => <DataTableColumnHeader column={column} />,
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
+    ),
     meta: { label: "Company" },
   },
   {
     accessorKey: "phone",
-    header: ({ column }) => <DataTableColumnHeader column={column} />,
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
+    ),
     meta: { label: "Phone" },
   },
   {

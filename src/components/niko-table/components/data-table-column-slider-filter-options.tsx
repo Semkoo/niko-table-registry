@@ -3,7 +3,10 @@
 import React from "react"
 import type { Column } from "@tanstack/react-table"
 
-import { TableColumnSliderFilterOptions } from "../filters/table-column-slider-filter"
+import {
+  TableColumnSliderFilterOptions,
+  TableColumnSliderFilterMenu,
+} from "../filters/table-column-slider-filter"
 import { useColumnHeaderContext } from "./data-table-column-header"
 
 /**
@@ -32,3 +35,29 @@ export function DataTableColumnSliderFilterOptions<TData, TValue>(
 
 DataTableColumnSliderFilterOptions.displayName =
   "DataTableColumnSliderFilterOptions"
+
+/**
+ * Standalone slider filter menu for column header using context.
+ */
+export function DataTableColumnSliderFilterMenu<TData, TValue>(
+  props: Omit<
+    React.ComponentProps<typeof TableColumnSliderFilterMenu>,
+    "column"
+  > & {
+    column?: Column<TData, TValue>
+  },
+) {
+  const context = useColumnHeaderContext<TData, TValue>(false)
+  const column = props.column || context?.column
+
+  if (!column) {
+    console.warn(
+      "DataTableColumnSliderFilterMenu must be used within DataTableColumnHeaderRoot or provided with a column prop",
+    )
+    return null
+  }
+
+  return <TableColumnSliderFilterMenu column={column} {...props} />
+}
+
+DataTableColumnSliderFilterMenu.displayName = "DataTableColumnSliderFilterMenu"
