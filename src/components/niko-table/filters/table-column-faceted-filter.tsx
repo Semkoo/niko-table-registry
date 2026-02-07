@@ -2,8 +2,9 @@
 
 import React from "react"
 import type { Column, Table } from "@tanstack/react-table"
-import { CircleHelp, Filter } from "lucide-react"
+import { CircleHelp, Filter, FilterX } from "lucide-react"
 
+import { Button } from "@/components/ui/button"
 import {
   DropdownMenuSeparator,
   DropdownMenuLabel,
@@ -13,12 +14,15 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { cn } from "@/lib/utils"
 import {
   TableFacetedFilter,
   TableFacetedFilterContent,
   useTableFacetedFilter,
 } from "./table-faceted-filter"
 import { useDerivedColumnTitle } from "../hooks"
+import { useGeneratedOptionsForColumn } from "../hooks/use-generated-options"
+import { formatLabel } from "../lib/format"
 import type { Option } from "../types"
 
 /**
@@ -26,22 +30,29 @@ import type { Option } from "../types"
  */
 export function TableColumnFilterTrigger<TData, TValue>({
   column,
+  className,
   ...props
 }: {
   column: Column<TData, TValue>
-} & React.ComponentProps<"button">) {
+} & React.ComponentProps<typeof Button>) {
   const isFiltered = column.getIsFiltered()
 
+  const Icon = isFiltered ? FilterX : Filter
+
   return (
-    <button
-      className={`size-7 transition-opacity ${
-        isFiltered ? "text-primary" : ""
-      }`}
+    <Button
+      variant="ghost"
+      size="icon"
+      className={cn(
+        "size-7 transition-opacity dark:text-muted-foreground",
+        isFiltered && "text-primary",
+        className,
+      )}
       {...props}
     >
-      <Filter className="size-3.5" />
+      <Icon className="size-3.5" />
       <span className="sr-only">Filter column</span>
-    </button>
+    </Button>
   )
 }
 
@@ -131,27 +142,99 @@ export function TableColumnFacetedFilterOptions<TData, TValue>({
  */
 export function TableColumnFacetedFilterMenu<TData, TValue>({
   column,
+  table,
   title,
   options,
   onValueChange,
   multiple,
+  limitToFilteredRows = true,
   ...props
 }: Omit<
   React.ComponentProps<typeof TableFacetedFilter>,
-  "column" | "trigger"
+  "column" | "trigger" | "options"
 > & {
   column: Column<TData, TValue>
   table?: Table<TData>
   title?: string
   options?: React.ComponentProps<typeof TableFacetedFilter>["options"]
+  /**
+   * If true, only show options that exist in the currently filtered rows.
+   * If false, show all options from the entire dataset.
+   * @default true
+   */
+  limitToFilteredRows?: boolean
 }) {
   const derivedTitle = useDerivedColumnTitle(column, column.id, title)
+
+  // Auto-generate options from column meta (works for select/multi_select variants)
+  const generatedOptions = useGeneratedOptionsForColumn(
+    table as Table<TData>,
+    column.id,
+    { limitToFilteredRows },
+  )
+
+  // Fallback: generate options from row data for any variant (text, boolean, etc.)
+  const fallbackOptions = React.useMemo((): Option[] => {
+    if (!table || !column) return []
+
+    const meta = column.columnDef.meta
+    const autoOptionsFormat =
+      (meta as Record<string, unknown>)?.autoOptionsFormat ?? true
+    const showCounts = (meta as Record<string, unknown>)?.showCounts ?? true
+
+    const rows = limitToFilteredRows
+      ? table.getFilteredRowModel().rows
+      : table.getCoreRowModel().rows
+    const valueCounts = new Map<string, number>()
+
+    rows.forEach(row => {
+      const raw = row.getValue(column.id) as unknown
+      const values: unknown[] = Array.isArray(raw) ? raw : [raw]
+      values.forEach(v => {
+        if (v == null) return
+        const s = String(v)
+        if (!s) return
+        valueCounts.set(s, (valueCounts.get(s) || 0) + 1)
+      })
+    })
+
+    // If static options exist in meta with augment strategy, use them with counts
+    const metaOptions = (meta as Record<string, unknown>)?.options as
+      | Option[]
+      | undefined
+    const mergeStrategy = (meta as Record<string, unknown>)?.mergeStrategy as
+      | string
+      | undefined
+
+    if (metaOptions && metaOptions.length > 0 && mergeStrategy === "augment") {
+      return metaOptions.map(opt => ({
+        ...opt,
+        count: showCounts ? (valueCounts.get(opt.value) ?? 0) : undefined,
+      }))
+    }
+
+    if (metaOptions && metaOptions.length > 0) {
+      return metaOptions
+    }
+
+    return Array.from(valueCounts.entries())
+      .map(([value, count]) => ({
+        label: autoOptionsFormat ? formatLabel(value) : value,
+        value,
+        count: showCounts ? count : undefined,
+      }))
+      .sort((a, b) => a.label.localeCompare(b.label))
+  }, [table, column, limitToFilteredRows])
+
+  const resolvedOptions =
+    options ??
+    (generatedOptions.length > 0 ? generatedOptions : fallbackOptions)
 
   return (
     <TableFacetedFilter
       column={column}
       title={derivedTitle}
-      options={options || []}
+      options={resolvedOptions}
       multiple={multiple}
       onValueChange={onValueChange}
       trigger={<TableColumnFilterTrigger column={column} />}

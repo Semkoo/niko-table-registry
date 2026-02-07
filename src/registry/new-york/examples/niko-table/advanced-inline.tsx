@@ -21,6 +21,9 @@ import {
   DataTableColumnTitle,
   DataTableColumnHeader,
   DataTableColumnSortMenu,
+  DataTableColumnFacetedFilterMenu,
+  DataTableColumnSliderFilterMenu,
+  DataTableColumnDateFilterMenu,
 } from "@/components/niko-table/components"
 import { daysAgo, FILTER_VARIANTS } from "@/components/niko-table/lib"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
@@ -70,6 +73,7 @@ const columns: DataTableColumnDef<Product>[] = [
       <DataTableColumnHeader>
         <DataTableColumnTitle />
         <DataTableColumnSortMenu variant={FILTER_VARIANTS.TEXT} />
+        <DataTableColumnFacetedFilterMenu />
       </DataTableColumnHeader>
     ),
     meta: {
@@ -93,6 +97,7 @@ const columns: DataTableColumnDef<Product>[] = [
       <DataTableColumnHeader>
         <DataTableColumnTitle />
         <DataTableColumnSortMenu variant={FILTER_VARIANTS.TEXT} />
+        <DataTableColumnFacetedFilterMenu />
       </DataTableColumnHeader>
     ),
     meta: {
@@ -110,6 +115,7 @@ const columns: DataTableColumnDef<Product>[] = [
       <DataTableColumnHeader>
         <DataTableColumnTitle />
         <DataTableColumnSortMenu variant={FILTER_VARIANTS.NUMBER} />
+        <DataTableColumnSliderFilterMenu />
       </DataTableColumnHeader>
     ),
     meta: {
@@ -174,6 +180,7 @@ const columns: DataTableColumnDef<Product>[] = [
       <DataTableColumnHeader>
         <DataTableColumnTitle />
         <DataTableColumnSortMenu />
+        <DataTableColumnFacetedFilterMenu />
       </DataTableColumnHeader>
     ),
     meta: {
@@ -196,6 +203,7 @@ const columns: DataTableColumnDef<Product>[] = [
       <DataTableColumnHeader>
         <DataTableColumnTitle />
         <DataTableColumnSortMenu />
+        <DataTableColumnDateFilterMenu />
       </DataTableColumnHeader>
     ),
     meta: {
