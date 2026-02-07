@@ -26,14 +26,17 @@ export default defineConfig({
       GITHUB_REPO_URL: envField.string({
         context: "client",
         access: "public",
+        default: "https://github.com/Semkoo/niko-table-registry",
       }),
       DEPLOY_PRIME_URL: envField.string({
         context: "client",
         access: "public",
+        default: "http://localhost:4321",
       }),
       URL: envField.string({
         context: "client",
         access: "public",
+        default: "https://niko-table.com",
       }),
     },
   },
