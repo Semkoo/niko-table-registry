@@ -92,6 +92,41 @@ The `config` prop accepts a `DataTableConfig` object with the following properti
 | `autoResetPageIndex` | `boolean` | -       | Auto-reset page on filter/sort change. Defaults to `false` when `manualPagination: true`, otherwise `true`. |
 | `autoResetExpanded`  | `boolean` | `true`  | Auto-reset expanded rows on filter/sort change.                                                             |
 
+### DataTableProvider
+
+Low-level context provider used internally by `DataTableRoot`. Use this directly when you need to provide a pre-configured TanStack Table instance to the context (e.g., when using `useReactTable` yourself).
+
+```tsx showLineNumbers
+import { DataTableProvider } from "@/components/niko-table/core"
+import { useReactTable, getCoreRowModel } from "@tanstack/react-table"
+
+const table = useReactTable({ data, columns, getCoreRowModel: getCoreRowModel() })
+
+<DataTableProvider table={table} columns={columns} isLoading={false}>
+  {/* child components can use useDataTable() */}
+</DataTableProvider>
+```
+
+#### Props
+
+| Name        | Type                          | Description                         |
+| ----------- | ----------------------------- | ----------------------------------- |
+| `table`     | `DataTableInstance<TData>`    | TanStack Table instance (required). |
+| `columns`   | `DataTableColumnDef<TData>[]` | Column definitions (optional).      |
+| `isLoading` | `boolean`                     | Loading state (optional).           |
+| `children`  | `React.ReactNode`             | Child components.                   |
+
+### DataTableContext
+
+The raw React context object. Useful for advanced scenarios where you need direct access to the context (e.g., conditional rendering based on context availability).
+
+```tsx showLineNumbers
+import { DataTableContext } from "@/components/niko-table/core"
+import { useContext } from "react"
+
+const context = useContext(DataTableContext)
+```
+
 ### DataTable
 
 The main table container component that wraps the table structure and provides scrolling behavior.

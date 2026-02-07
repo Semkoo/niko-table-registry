@@ -73,7 +73,11 @@ First, we'll define our columns with filter metadata.
 ```tsx showLineNumbers title="columns.tsx"
 "use client"
 
-import { DataTableColumnHeader } from "@/components/niko-table/components"
+import {
+  DataTableColumnHeader,
+  DataTableColumnTitle,
+  DataTableColumnSortMenu,
+} from "@/components/niko-table/components"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 
 export type Product = {
@@ -103,7 +107,12 @@ const brandOptions = [
 export const columns: DataTableColumnDef<Product>[] = [
   {
     accessorKey: "name",
-    header: ({ column }) => <DataTableColumnHeader column={column} />,
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
+    ),
     meta: {
       label: "Product Name",
       variant: "text",
@@ -112,7 +121,12 @@ export const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "category",
-    header: ({ column }) => <DataTableColumnHeader column={column} />,
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
+    ),
     meta: {
       label: "Category",
       variant: "select",
@@ -125,7 +139,12 @@ export const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "brand",
-    header: ({ column }) => <DataTableColumnHeader column={column} />,
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
+    ),
     meta: {
       label: "Brand",
       variant: "select",
@@ -137,7 +156,12 @@ export const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "price",
-    header: ({ column }) => <DataTableColumnHeader column={column} />,
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
+    ),
     meta: {
       label: "Price",
       variant: "number",
@@ -170,6 +194,8 @@ import {
   DataTableSortMenu,
   DataTableFilterMenu,
   DataTableColumnHeader,
+  DataTableColumnTitle,
+  DataTableColumnSortMenu,
 } from "@/components/niko-table/components"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 
@@ -184,7 +210,12 @@ type Product = {
 const columns: DataTableColumnDef<Product>[] = [
   {
     accessorKey: "name",
-    header: ({ column }) => <DataTableColumnHeader column={column} />,
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
+    ),
     meta: {
       label: "Product Name",
       variant: "text",
@@ -193,7 +224,12 @@ const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "category",
-    header: ({ column }) => <DataTableColumnHeader column={column} />,
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
+    ),
     meta: {
       label: "Category",
       variant: "select",
@@ -206,7 +242,12 @@ const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "price",
-    header: ({ column }) => <DataTableColumnHeader column={column} />,
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
+    ),
     meta: {
       label: "Price",
       variant: "number",

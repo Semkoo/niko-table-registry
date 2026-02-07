@@ -619,12 +619,21 @@ Composable column header container. Provides layout for title, actions, and filt
 </div>
 
 ```tsx showLineNumbers
-import { DataTableColumnHeader } from "@/components/niko-table/components"
+import {
+  DataTableColumnHeader,
+  DataTableColumnTitle,
+  DataTableColumnSortMenu,
+} from "@/components/niko-table/components"
 
 const columns: DataTableColumnDef<User>[] = [
   {
     accessorKey: "name",
-    header: ({ column }) => <DataTableColumnHeader />,
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
+    ),
     meta: { label: "Name" },
   },
 ]
@@ -659,7 +668,7 @@ import {
 const columns: DataTableColumnDef<User>[] = [
   {
     accessorKey: "status",
-    header: ({ column }) => (
+    header: () => (
       <DataTableColumnHeader>
         <DataTableColumnTitle />
         <DataTableColumnActions>
@@ -674,6 +683,62 @@ const columns: DataTableColumnDef<User>[] = [
       </DataTableColumnHeader>
     ),
     meta: { label: "Status" },
+  },
+]
+```
+
+**Standalone filter menus** can also be placed directly inside `DataTableColumnHeader` without needing `DataTableColumnActions`:
+
+```tsx showLineNumbers
+import {
+  DataTableColumnHeader,
+  DataTableColumnTitle,
+  DataTableColumnSortMenu,
+  DataTableColumnFacetedFilterMenu,
+  DataTableColumnSliderFilterMenu,
+  DataTableColumnDateFilterMenu,
+} from "@/components/niko-table/components"
+import { FILTER_VARIANTS } from "@/components/niko-table/lib"
+
+const columns: DataTableColumnDef<Product>[] = [
+  {
+    accessorKey: "category",
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu variant={FILTER_VARIANTS.TEXT} />
+        <DataTableColumnFacetedFilterMenu
+          multiple
+          limitToFilteredRows={false}
+        />
+      </DataTableColumnHeader>
+    ),
+    meta: { label: "Category" },
+    enableColumnFilter: true,
+  },
+  {
+    accessorKey: "price",
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu variant={FILTER_VARIANTS.NUMBER} />
+        <DataTableColumnSliderFilterMenu />
+      </DataTableColumnHeader>
+    ),
+    meta: { label: "Price", variant: "range" },
+    enableColumnFilter: true,
+  },
+  {
+    accessorKey: "releaseDate",
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu />
+        <DataTableColumnDateFilterMenu />
+      </DataTableColumnHeader>
+    ),
+    meta: { label: "Release Date", variant: "date_range" },
+    enableColumnFilter: true,
   },
 ]
 ```
@@ -767,17 +832,20 @@ Dedicated filter icon button that uses column context. Shows a funnel icon to op
 
 Sorting options to compose inside `DataTableColumnActions`. Renders sort ascending/descending/clear options within a dropdown menu.
 
-| Name        | Type     | Description             |
-| ----------- | -------- | ----------------------- |
-| `className` | `string` | Additional CSS classes. |
+| Name            | Type              | Default  | Description                                                                                   |
+| --------------- | ----------------- | -------- | --------------------------------------------------------------------------------------------- |
+| `variant`       | `SortIconVariant` | `"text"` | Sort icon variant (`"text"`, `"number"`, `"date"`). Auto-detected from `column.meta.variant`. |
+| `withSeparator` | `boolean`         | `true`   | Whether to render a separator before the options.                                             |
+| `className`     | `string`          | -        | Additional CSS classes.                                                                       |
 
 ##### DataTableColumnSortMenu
 
-Standalone sort button for inline use outside dropdown menus. Renders as a clickable button.
+Standalone sort button for inline use outside dropdown menus. Renders as a clickable button with a dropdown for sort options.
 
-| Name        | Type     | Description             |
-| ----------- | -------- | ----------------------- |
-| `className` | `string` | Additional CSS classes. |
+| Name        | Type              | Default  | Description                                                                                   |
+| ----------- | ----------------- | -------- | --------------------------------------------------------------------------------------------- |
+| `variant`   | `SortIconVariant` | `"text"` | Sort icon variant (`"text"`, `"number"`, `"date"`). Auto-detected from `column.meta.variant`. |
+| `className` | `string`          | -        | Additional CSS classes.                                                                       |
 
 ##### DataTableColumnPinOptions
 
@@ -824,14 +892,15 @@ Faceted filter options to compose inside `DataTableColumnActions`. Shows a multi
 
 ##### DataTableColumnFacetedFilterMenu
 
-Standalone faceted filter popover for column header. Renders as a clickable button with filter icon.
+Standalone faceted filter popover for column header. Renders as a clickable button with filter icon. Auto-generates options from row data when no explicit options are provided.
 
-| Name        | Type            | Description                                     |
-| ----------- | --------------- | ----------------------------------------------- |
-| `column`    | `Column<TData>` | Optional override (auto-detected from context). |
-| `options`   | `Option[]`      | Static options array.                           |
-| `multiple`  | `boolean`       | Allow multiple selection.                       |
-| `className` | `string`        | Additional CSS classes.                         |
+| Name                  | Type            | Default | Description                                                |
+| --------------------- | --------------- | ------- | ---------------------------------------------------------- |
+| `column`              | `Column<TData>` | -       | Optional override (auto-detected from context).            |
+| `options`             | `Option[]`      | -       | Static options array (auto-generated if omitted).          |
+| `multiple`            | `boolean`       | -       | Allow multiple selection.                                  |
+| `limitToFilteredRows` | `boolean`       | `true`  | Show only options from filtered rows (`false` = all rows). |
+| `className`           | `string`        | -       | Additional CSS classes.                                    |
 
 ##### DataTableColumnSliderFilterOptions
 
@@ -845,9 +914,31 @@ Slider filter options to compose inside `DataTableColumnActions`. Shows a range 
 | `step`      | `number`        | Step increment.                                 |
 | `className` | `string`        | Additional CSS classes.                         |
 
+##### DataTableColumnSliderFilterMenu
+
+Standalone slider filter popover for column header. Renders as a clickable button with slider icon.
+
+| Name        | Type            | Description                                     |
+| ----------- | --------------- | ----------------------------------------------- |
+| `column`    | `Column<TData>` | Optional override (auto-detected from context). |
+| `min`       | `number`        | Minimum value.                                  |
+| `max`       | `number`        | Maximum value.                                  |
+| `step`      | `number`        | Step increment.                                 |
+| `className` | `string`        | Additional CSS classes.                         |
+
 ##### DataTableColumnDateFilterOptions
 
 Date filter options to compose inside `DataTableColumnActions`. Shows a date picker for date columns.
+
+| Name        | Type            | Description                                     |
+| ----------- | --------------- | ----------------------------------------------- |
+| `column`    | `Column<TData>` | Optional override (auto-detected from context). |
+| `multiple`  | `boolean`       | Enable date range selection.                    |
+| `className` | `string`        | Additional CSS classes.                         |
+
+##### DataTableColumnDateFilterMenu
+
+Standalone date filter popover for column header. Renders as a clickable button with calendar icon.
 
 | Name        | Type            | Description                                     |
 | ----------- | --------------- | ----------------------------------------------- |

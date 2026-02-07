@@ -68,7 +68,11 @@ First, we'll define our columns.
 ```tsx showLineNumbers title="columns.tsx"
 "use client"
 
-import { DataTableColumnHeader } from "@/components/niko-table/components"
+import {
+  DataTableColumnHeader,
+  DataTableColumnTitle,
+  DataTableColumnSortMenu,
+} from "@/components/niko-table/components"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 
 export type Product = {
@@ -83,24 +87,36 @@ export type Product = {
 export const columns: DataTableColumnDef<Product>[] = [
   {
     accessorKey: "name",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Name" />
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
     ),
+    meta: { label: "Name" },
     cell: ({ row }) => (
       <div className="font-medium">{row.getValue("name")}</div>
     ),
   },
   {
     accessorKey: "category",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Category" />
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
     ),
+    meta: { label: "Category" },
   },
   {
     accessorKey: "price",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Price" />
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
     ),
+    meta: { label: "Price" },
     cell: ({ row }) => {
       const price = row.getValue("price") as number
       return <div className="font-mono">${price.toFixed(2)}</div>
@@ -108,15 +124,23 @@ export const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "stock",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Stock" />
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
     ),
+    meta: { label: "Stock" },
   },
   {
     accessorKey: "status",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Status" />
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
     ),
+    meta: { label: "Status" },
   },
 ]
 ```
@@ -142,6 +166,8 @@ import {
   DataTableSearchFilter,
   DataTableViewMenu,
   DataTableColumnHeader,
+  DataTableColumnTitle,
+  DataTableColumnSortMenu,
 } from "@/components/niko-table/components"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 
@@ -157,24 +183,36 @@ type Product = {
 const columns: DataTableColumnDef<Product>[] = [
   {
     accessorKey: "name",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Name" />
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
     ),
+    meta: { label: "Name" },
     cell: ({ row }) => (
       <div className="font-medium">{row.getValue("name")}</div>
     ),
   },
   {
     accessorKey: "category",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Category" />
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
     ),
+    meta: { label: "Category" },
   },
   {
     accessorKey: "price",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Price" />
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
     ),
+    meta: { label: "Price" },
     cell: ({ row }) => {
       const price = row.getValue("price") as number
       return <div className="font-mono">${price.toFixed(2)}</div>
@@ -182,15 +220,23 @@ const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "stock",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Stock" />
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
     ),
+    meta: { label: "Stock" },
   },
   {
     accessorKey: "status",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Status" />
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
     ),
+    meta: { label: "Status" },
   },
 ]
 

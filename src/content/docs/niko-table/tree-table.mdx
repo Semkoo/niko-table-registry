@@ -81,7 +81,11 @@ First, we'll define our columns with tree visualization.
 ```tsx showLineNumbers title="columns.tsx"
 "use client"
 
-import { DataTableColumnHeader } from "@/components/niko-table/components"
+import {
+  DataTableColumnHeader,
+  DataTableColumnTitle,
+  DataTableColumnSortMenu,
+} from "@/components/niko-table/components"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -98,9 +102,13 @@ export type Project = {
 export const columns: DataTableColumnDef<Project>[] = [
   {
     accessorKey: "name",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Project Name" />
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
     ),
+    meta: { label: "Project Name" },
     cell: ({ row }) => {
       const { depth, original: project } = row
       const canExpand = row.getCanExpand()
@@ -137,15 +145,23 @@ export const columns: DataTableColumnDef<Project>[] = [
   },
   {
     accessorKey: "status",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Status" />
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
     ),
+    meta: { label: "Status" },
   },
   {
     accessorKey: "budget",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Budget" />
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
     ),
+    meta: { label: "Budget" },
     cell: ({ row }) => {
       const budget = row.getValue("budget") as number
       return <div className="font-mono">${budget.toLocaleString()}</div>
@@ -175,6 +191,8 @@ import {
   DataTableSearchFilter,
   DataTableViewMenu,
   DataTableColumnHeader,
+  DataTableColumnTitle,
+  DataTableColumnSortMenu,
 } from "@/components/niko-table/components"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 import { Button } from "@/components/ui/button"
@@ -196,9 +214,13 @@ type Project = {
 const columns: DataTableColumnDef<Project>[] = [
   {
     accessorKey: "name",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Project Name" />
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
     ),
+    meta: { label: "Project Name" },
     cell: ({ row }) => {
       const canExpand = row.getCanExpand()
       const isExpanded = row.getIsExpanded()
@@ -226,15 +248,23 @@ const columns: DataTableColumnDef<Project>[] = [
   },
   {
     accessorKey: "status",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Status" />
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
     ),
+    meta: { label: "Status" },
   },
   {
     accessorKey: "budget",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Budget" />
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle />
+        <DataTableColumnSortMenu />
+      </DataTableColumnHeader>
     ),
+    meta: { label: "Budget" },
     cell: ({ row }) => {
       const budget = row.getValue("budget") as number
       return <div className="font-mono">${budget.toLocaleString()}</div>

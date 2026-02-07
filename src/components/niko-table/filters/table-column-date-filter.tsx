@@ -3,7 +3,7 @@
 import React from "react"
 import type { Column } from "@tanstack/react-table"
 import type { DateRange } from "react-day-picker"
-import { CircleHelp, CalendarIcon } from "lucide-react"
+import { CircleHelp, CalendarIcon, CalendarX2 } from "lucide-react"
 
 import {
   DropdownMenuSeparator,
@@ -213,3 +213,62 @@ export function TableColumnDateFilterOptions<TData, TValue>({
 }
 
 TableColumnDateFilterOptions.displayName = "TableColumnDateFilterOptions"
+
+/**
+ * Standalone date filter menu for column headers.
+ * Shows a filter button that opens a popover with a calendar picker.
+ *
+ * @example
+ * ```tsx
+ * // Standalone usage
+ * <TableColumnDateFilterMenu
+ *   column={column}
+ *   multiple
+ * />
+ * ```
+ */
+export function TableColumnDateFilterMenu<TData, TValue>({
+  column,
+  title,
+  className,
+  ...props
+}: Omit<
+  React.ComponentProps<typeof TableColumnDateFilterOptions>,
+  "withSeparator" | "column"
+> & {
+  column: Column<TData, TValue>
+  className?: string
+}) {
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className={cn(
+            "size-7 transition-opacity dark:text-muted-foreground",
+            column.getIsFiltered() && "text-primary",
+            className,
+          )}
+        >
+          {column.getIsFiltered() ? (
+            <CalendarX2 className="size-3.5" />
+          ) : (
+            <CalendarIcon className="size-3.5" />
+          )}
+          <span className="sr-only">Filter by date</span>
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent align="end" className="w-auto p-0">
+        <TableColumnDateFilterOptions
+          column={column}
+          title={title}
+          withSeparator={false}
+          {...props}
+        />
+      </PopoverContent>
+    </Popover>
+  )
+}
+
+TableColumnDateFilterMenu.displayName = "TableColumnDateFilterMenu"
