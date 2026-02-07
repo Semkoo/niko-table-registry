@@ -26,7 +26,8 @@ Core search filter implementation.
 
 ```tsx showLineNumbers
 import { TableSearchFilter } from "@/components/niko-table/filters"
-;<TableSearchFilter table={table} placeholder="Search..." />
+
+<TableSearchFilter table={table} placeholder="Search..." />
 ```
 
 #### Props
@@ -616,7 +617,8 @@ Core column title implementation. Renders a clickable title that toggles sorting
 
 ```tsx showLineNumbers
 import { TableColumnTitle } from "@/components/niko-table/filters"
-;<TableColumnTitle column={column} title="Custom Title" />
+
+<TableColumnTitle column={column} title="Custom Title" />
 ```
 
 #### Props
@@ -645,7 +647,8 @@ Core column actions container. Renders a dropdown menu trigger with active state
 
 ```tsx showLineNumbers
 import { TableColumnActions } from "@/components/niko-table/filters"
-;<TableColumnActions isActive={column.getIsSorted() !== false}>
+
+<TableColumnActions isActive={column.getIsSorted() !== false}>
   {/* Sort, pin, hide options */}
 </TableColumnActions>
 ```
@@ -824,7 +827,8 @@ Core slider filter implementation for column headers. Renders a range slider ins
 
 ```tsx showLineNumbers
 import { TableColumnSliderFilterOptions } from "@/components/niko-table/filters"
-;<TableColumnSliderFilterOptions column={column} min={0} max={1000} step={10} />
+
+<TableColumnSliderFilterOptions column={column} min={0} max={1000} step={10} />
 ```
 
 #### Props
@@ -855,7 +859,8 @@ Core date filter implementation for column headers. Renders a date picker inside
 
 ```tsx showLineNumbers
 import { TableColumnDateFilterOptions } from "@/components/niko-table/filters"
-;<TableColumnDateFilterOptions column={column} multiple />
+
+<TableColumnDateFilterOptions column={column} multiple />
 ```
 
 #### Props
