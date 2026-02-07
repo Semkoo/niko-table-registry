@@ -1,7 +1,5 @@
 {
   "name": "niko-table-registry",
   "compatibility_date": "2026-02-06",
-  "assets": {
-    "directory": "./dist",
-  },
+  "pages_build_output_dir": "./dist",
 }
