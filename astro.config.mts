@@ -9,8 +9,8 @@ if (process.env.NODE_ENV == null) throw new Error("NODE_ENV is not set.")
 
 const {
   GITHUB_REPO_URL = "https://github.com/Semkoo/niko-table-registry",
-  DEPLOY_PRIME_URL = "localhost:4321",
-  URL = "http://niko-table.com",
+  DEPLOY_PRIME_URL = "http://localhost:4321",
+  URL = "https://niko-table.com",
 } = loadEnv(process.env.NODE_ENV, process.cwd(), "")
 
 const SERVER_URL =
