@@ -169,16 +169,18 @@ Next, we'll create the table with row expansion enabled.
 
 import {
   DataTableRoot,
-  DataTableToolbarSection,
   DataTable,
   DataTableHeader,
   DataTableBody,
+  DataTableEmptyBody,
+} from "@/components/niko-table/core"
+import {
+  DataTableToolbarSection,
   DataTablePagination,
   DataTableSearchFilter,
   DataTableViewMenu,
-  DataTableEmptyBody,
-} from "@/components/niko-table"
-import { DataTableColumnHeader } from "@/components/niko-table/components"
+  DataTableColumnHeader,
+} from "@/components/niko-table/components"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 import { Button } from "@/components/ui/button"
 import { ChevronRight, ChevronDown } from "lucide-react"
@@ -382,7 +384,7 @@ You can export table data to CSV format. When exporting row expansion tables, ke
 The simplest way to add export functionality:
 
 ```tsx showLineNumbers
-import { DataTableExportButton } from "@/components/niko-table"
+import { DataTableExportButton } from "@/components/niko-table/components"
 
 export function RowExpansionTableWithExport({ data }: { data: Order[] }) {
   return (

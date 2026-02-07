@@ -102,24 +102,24 @@ import type {
 } from "@tanstack/react-table"
 import {
   DataTableRoot,
-  DataTableToolbarSection,
   DataTable,
   DataTableHeader,
   DataTableBody,
+  DataTableEmptyBody,
+} from "@/components/niko-table/core"
+import {
+  DataTableToolbarSection,
   DataTablePagination,
   DataTableSearchFilter,
   DataTableViewMenu,
   DataTableSortMenu,
   DataTableFilterMenu,
   DataTableInlineFilter,
-  DataTableEmptyBody,
   DataTableEmptyFilteredMessage,
   DataTableEmptyTitle,
   DataTableEmptyDescription,
   DataTableEmptyIcon,
   DataTableEmptyMessage,
-} from "@/components/niko-table"
-import {
   DataTableColumnTitle,
   DataTableColumnHeader,
   DataTableColumnSortMenu,

@@ -144,18 +144,20 @@ Next, we'll add faceted filter components.
 
 import {
   DataTableRoot,
-  DataTableToolbarSection,
   DataTable,
   DataTableHeader,
   DataTableBody,
+  DataTableEmptyBody,
+} from "@/components/niko-table/core"
+import {
+  DataTableToolbarSection,
   DataTablePagination,
   DataTableSearchFilter,
   DataTableViewMenu,
   DataTableFacetedFilter,
   DataTableClearFilter,
-  DataTableEmptyBody,
-} from "@/components/niko-table"
-import { DataTableColumnHeader } from "@/components/niko-table/components"
+  DataTableColumnHeader,
+} from "@/components/niko-table/components"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 
 type Product = {

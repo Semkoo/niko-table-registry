@@ -10,20 +10,22 @@ import type {
 } from "@tanstack/react-table"
 import {
   DataTableRoot,
-  DataTableViewMenu,
-  DataTablePagination,
-  DataTableToolbarSection,
   DataTable,
   DataTableHeader,
   DataTableBody,
-  DataTableSearchFilter,
   DataTableEmptyBody,
+} from "@/components/niko-table/core"
+import {
+  DataTableViewMenu,
+  DataTablePagination,
+  DataTableToolbarSection,
+  DataTableSearchFilter,
   DataTableEmptyFilteredMessage,
   DataTableEmptyTitle,
   DataTableEmptyDescription,
   DataTableEmptyIcon,
   DataTableEmptyMessage,
-} from "@/components/niko-table"
+} from "@/components/niko-table/components"
 import {
   DataTableColumnHeader,
   DataTableColumnTitle,

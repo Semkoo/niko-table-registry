@@ -3,10 +3,13 @@
 import * as React from "react"
 import {
   DataTableRoot,
-  DataTableToolbarSection,
   DataTable,
   DataTableHeader,
   DataTableBody,
+  DataTableEmptyBody,
+} from "@/components/niko-table/core"
+import {
+  DataTableToolbarSection,
   DataTablePagination,
   DataTableSearchFilter,
   DataTableViewMenu,
@@ -15,17 +18,12 @@ import {
   DataTableEmptyDescription,
   DataTableEmptyIcon,
   DataTableEmptyMessage,
-  DataTableEmptyBody,
-} from "@/components/niko-table"
-import {
   DataTableAside,
   DataTableAsideTrigger,
   DataTableAsideContent,
   DataTableAsideHeader,
   DataTableAsideTitle,
   DataTableAsideClose,
-} from "@/components/niko-table/components"
-import {
   DataTableColumnTitle,
   DataTableColumnHeader,
   DataTableColumnSortMenu,

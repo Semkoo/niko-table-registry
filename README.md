@@ -84,7 +84,7 @@ import {
   DataTable,
   DataTableHeader,
   DataTableBody,
-} from "@/components/niko-table"
+} from "@/components/niko-table/core"
 
 const columns = [
   { accessorKey: "name", header: "Name" },
@@ -111,13 +111,15 @@ import {
   DataTable,
   DataTableHeader,
   DataTableBody,
+} from "@/components/niko-table/core"
+import {
   DataTableToolbarSection,
   DataTableSearchFilter,
   DataTableFilterMenu,
   DataTableViewMenu,
   DataTableSortMenu,
   DataTablePagination,
-} from "@/components/niko-table"
+} from "@/components/niko-table/components"
 
 export function AdvancedTable({ data, columns }) {
   return (

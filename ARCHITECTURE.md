@@ -140,7 +140,7 @@ import {
 
 ```typescript
 // ✅ Use DataTable* components from "@/components/niko-table/components"
-import { DataTableSearchFilter } from "@/components/niko-table"
+import { DataTableSearchFilter } from "@/components/niko-table/components"
 
 // Automatically gets table from DataTableRoot context
 <DataTableSearchFilter placeholder="Search..." />
@@ -198,7 +198,7 @@ import {
   DataTable,
   DataTableHeader,
   DataTableBody,
-} from "@/components/niko-table"
+} from "@/components/niko-table/core"
 
 export function BasicTable() {
   // Example implementation

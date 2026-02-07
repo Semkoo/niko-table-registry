@@ -121,7 +121,7 @@ import {
   DataTableEmptyMessage,
   DataTableEmptyTitle,
   DataTableEmptyDescription,
-} from "@/components/niko-table"
+} from "@/components/niko-table/components"
 import { PackageOpen } from "lucide-react"
 ;<DataTableBody>
   <DataTableEmptyBody>
@@ -200,7 +200,7 @@ import {
   DataTableEmptyActions,
   DataTableEmptyTitle,
   DataTableEmptyDescription,
-} from "@/components/niko-table"
+} from "@/components/niko-table/components"
 import { PackageOpen, SearchX } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
@@ -263,7 +263,7 @@ import {
   DataTableEmptyMessage,
   DataTableEmptyTitle,
   DataTableEmptyDescription,
-} from "@/components/niko-table"
+} from "@/components/niko-table/components"
 import { Database } from "lucide-react"
 ;<DataTableVirtualizedBody height={600}>
   <DataTableVirtualizedEmptyBody>
@@ -329,7 +329,7 @@ import { PackageOpen, SearchX } from "lucide-react"
 </DataTableBody>
 
 // Or use the context to determine state:
-import { useDataTable } from "@/components/niko-table"
+import { useDataTable } from "@/components/niko-table/core"
 
 function CustomEmptyState() {
   const { table } = useDataTable()
@@ -439,7 +439,7 @@ import type {
   DataTableEmptyActionsProps,
   DataTableEmptyTitleProps,
   DataTableEmptyDescriptionProps,
-} from "@/components/niko-table"
+} from "@/components/niko-table/components"
 
 // All accept children and className
 interface DataTableEmptyIconProps {
@@ -524,7 +524,7 @@ import {
   DataTableEmptyActions,
   DataTableEmptyTitle,
   DataTableEmptyDescription,
-} from "@/components/niko-table"
+} from "@/components/niko-table/components"
 ```
 
 ### Step 2: Build Your Empty State

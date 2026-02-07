@@ -10,23 +10,23 @@ import type {
 } from "@tanstack/react-table"
 import {
   DataTableRoot,
-  DataTableToolbarSection,
   DataTable,
   DataTableHeader,
   DataTableBody,
+  DataTableEmptyBody,
+} from "@/components/niko-table/core"
+import {
+  DataTableToolbarSection,
   DataTablePagination,
   DataTableSearchFilter,
   DataTableViewMenu,
   DataTableInlineFilter,
-  DataTableEmptyBody,
   DataTableEmptyFilteredMessage,
   DataTableEmptyTitle,
   DataTableEmptyDescription,
   DataTableEmptyIcon,
   DataTableEmptyMessage,
-  DataTableFacetedFilter, // Ensure FacetedFilter is available if we use it in columns
-} from "@/components/niko-table"
-import {
+  DataTableFacetedFilter,
   DataTableColumnHeader,
   DataTableColumnTitle,
   DataTableColumnActions,

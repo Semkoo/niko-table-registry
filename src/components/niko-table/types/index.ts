@@ -143,7 +143,7 @@ export type DataTableRow<TData> = Row<TData> & {
   // You can extend with additional properties if needed
 }
 
-export type DataTable<TData> = Table<TData> & {
+export type DataTableInstance<TData> = Table<TData> & {
   // You can extend with additional properties if needed
 }
 

@@ -6,53 +6,114 @@ import { Button } from "@/components/ui/button"
 import { Download } from "lucide-react"
 
 /**
+ * Escape a cell value for CSV output.
+ * Handles strings, numbers, booleans, dates, arrays, null, and undefined.
+ */
+function escapeCsvValue(value: unknown): string {
+  if (value === null || value === undefined) return ""
+
+  if (value instanceof Date) {
+    return `"${value.toISOString()}"`
+  }
+
+  if (Array.isArray(value)) {
+    const joined = value.map(String).join(", ")
+    return `"${joined.replace(/"/g, '""')}"`
+  }
+
+  if (typeof value === "boolean") return value ? "true" : "false"
+  if (typeof value === "number") return String(value)
+
+  // Default: treat as string and escape quotes
+  const str = String(value)
+  // Wrap in quotes if the value contains commas, quotes, or newlines
+  if (str.includes(",") || str.includes('"') || str.includes("\n")) {
+    return `"${str.replace(/"/g, '""')}"`
+  }
+  return str
+}
+
+export interface ExportTableToCSVOptions<TData> {
+  /** Filename for the exported CSV (without extension). @default "table" */
+  filename?: string
+  /** Column IDs to exclude from export. */
+  excludeColumns?: (keyof TData)[]
+  /** Whether to export only selected rows. @default false */
+  onlySelected?: boolean
+  /**
+   * Use human-readable labels from `column.columnDef.meta.label` as CSV
+   * header names instead of raw column IDs.
+   * @default false
+   */
+  useHeaderLabels?: boolean
+}
+
+/**
  * Core utility function to export a TanStack Table to CSV.
  * This is the base implementation that can be used directly or wrapped in components.
  *
  * @param table - The TanStack Table instance
  * @param opts - Export options
- * @param opts.filename - Filename for the exported CSV (default: "table")
- * @param opts.excludeColumns - Column IDs to exclude from export
- * @param opts.onlySelected - Whether to export only selected rows (default: false)
+ *
+ * @example
+ * ```ts
+ * import { exportTableToCSV } from "@/components/niko-table/filters"
+ *
+ * // Basic export
+ * exportTableToCSV(table, { filename: "users" })
+ *
+ * // Export with human-readable headers
+ * exportTableToCSV(table, { filename: "users", useHeaderLabels: true })
+ *
+ * // Export only selected rows
+ * exportTableToCSV(table, { filename: "selected-users", onlySelected: true })
+ * ```
  */
 export function exportTableToCSV<TData>(
   table: Table<TData>,
-  opts: {
-    filename?: string
-    excludeColumns?: (keyof TData)[]
-    onlySelected?: boolean
-  } = {},
+  opts: ExportTableToCSVOptions<TData> = {},
 ): void {
-  const { filename = "table", excludeColumns = [], onlySelected = false } = opts
+  const {
+    filename = "table",
+    excludeColumns = [],
+    onlySelected = false,
+    useHeaderLabels = false,
+  } = opts
 
-  // Retrieve headers
-  const headers = table
+  // Retrieve columns, filtering out excluded ones
+  const columns = table
     .getAllLeafColumns()
-    .map(column => column.id)
-    .filter(id => !excludeColumns.includes(id as keyof TData))
+    .filter(column => !excludeColumns.includes(column.id as keyof TData))
 
-  // Build CSV content
-  const csvContent = [
-    headers.join(","),
-    ...(onlySelected
-      ? table.getFilteredSelectedRowModel().rows
-      : table.getRowModel().rows
-    ).map(row =>
-      headers
-        .map(header => {
-          const cellValue = row.getValue(header)
+  // Build header row — use meta.label when available and useHeaderLabels is true
+  const headerRow = columns
+    .map(column => {
+      if (useHeaderLabels) {
+        const label = (
+          column.columnDef.meta as Record<string, unknown> | undefined
+        )?.label as string | undefined
+        return escapeCsvValue(label ?? column.id)
+      }
+      return escapeCsvValue(column.id)
+    })
+    .join(",")
 
-          return typeof cellValue === "string"
-            ? `"${cellValue.replace(/"/g, '""')}"`
-            : cellValue
-        })
-        .join(","),
-    ),
-  ].join("\n")
+  // Column IDs for value lookup
+  const columnIds = columns.map(column => column.id)
 
-  // Create blob
+  // Build data rows
+  const rows = onlySelected
+    ? table.getFilteredSelectedRowModel().rows
+    : table.getRowModel().rows
+
+  const dataRows = rows.map(row =>
+    columnIds.map(id => escapeCsvValue(row.getValue(id))).join(","),
+  )
+
+  const csvContent = [headerRow, ...dataRows].join("\n")
+
+  // Create blob and trigger download
   const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
-
   const url = URL.createObjectURL(blob)
   const link = document.createElement("a")
   link.setAttribute("href", url)
@@ -61,6 +122,7 @@ export function exportTableToCSV<TData>(
   document.body.appendChild(link)
   link.click()
   document.body.removeChild(link)
+  URL.revokeObjectURL(url)
 }
 
 export interface TableExportButtonProps<TData> {
@@ -69,7 +131,7 @@ export interface TableExportButtonProps<TData> {
    */
   table: Table<TData>
   /**
-   * Optional filename for the exported CSV
+   * Optional filename for the exported CSV (without extension)
    * @default "table"
    */
   filename?: string
@@ -82,6 +144,12 @@ export interface TableExportButtonProps<TData> {
    * @default false
    */
   onlySelected?: boolean
+  /**
+   * Use human-readable labels from column.columnDef.meta.label as CSV
+   * header names instead of raw column IDs.
+   * @default false
+   */
+  useHeaderLabels?: boolean
   /**
    * Button variant
    * @default "outline"
@@ -129,6 +197,7 @@ export function TableExportButton<TData>({
   filename = "table",
   excludeColumns,
   onlySelected = false,
+  useHeaderLabels = false,
   variant = "outline",
   size = "sm",
   label = "Export CSV",
@@ -140,8 +209,9 @@ export function TableExportButton<TData>({
       filename,
       excludeColumns,
       onlySelected,
+      useHeaderLabels,
     })
-  }, [table, filename, excludeColumns, onlySelected])
+  }, [table, filename, excludeColumns, onlySelected, useHeaderLabels])
 
   return (
     <Button

@@ -12,21 +12,21 @@ import type {
 } from "@tanstack/react-table"
 import {
   DataTableRoot,
-  DataTableToolbarSection,
   DataTable,
   DataTableVirtualizedHeader,
   DataTableVirtualizedBody,
+  DataTableVirtualizedEmptyBody,
+} from "@/components/niko-table/core"
+import {
+  DataTableToolbarSection,
   DataTablePagination,
   DataTableSearchFilter,
   DataTableViewMenu,
-  DataTableVirtualizedEmptyBody,
   DataTableEmptyIcon,
   DataTableEmptyMessage,
   DataTableEmptyFilteredMessage,
   DataTableEmptyTitle,
   DataTableEmptyDescription,
-} from "@/components/niko-table"
-import {
   DataTableColumnHeader,
   DataTableColumnTitle,
   DataTableColumnActions,

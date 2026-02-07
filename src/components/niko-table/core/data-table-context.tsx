@@ -7,14 +7,14 @@ import React, {
   useEffect,
   useReducer,
 } from "react"
-import type { DataTable, DataTableColumnDef } from "../types"
+import type { DataTableInstance, DataTableColumnDef } from "../types"
 
 export type DataTableContextState = {
   isLoading: boolean
 }
 
 type DataTableContextProps<TData> = DataTableContextState & {
-  table: DataTable<TData>
+  table: DataTableInstance<TData>
   columns: DataTableColumnDef<TData>[]
   setIsLoading: (isLoading: boolean) => void
 }
@@ -62,7 +62,7 @@ function deriveInitialState(isLoading?: boolean): DataTableContextState {
 
 interface DataTableProviderProps<TData> {
   children: React.ReactNode
-  table: DataTable<TData>
+  table: DataTableInstance<TData>
   columns?: DataTableColumnDef<TData>[]
   isLoading?: boolean
 }
