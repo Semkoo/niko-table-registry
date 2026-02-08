@@ -235,7 +235,7 @@ export function DataTableVirtualizedDndBody<TData>({
                     <TableCell
                       key={cell.id}
                       className={cn(
-                        size ? "" : "w-full",
+                        size ? "shrink-0" : "min-w-0 flex-1",
                         "flex items-center",
                         isClickable && "cursor-pointer",
                         cell.column.getIsPinned() &&
@@ -366,23 +366,27 @@ export const DataTableVirtualizedDndHeader = React.memo(
               const size = header.column.columnDef.size
 
               return (
-                <TableDraggableHeader key={header.id} header={header}>
-                  <div
-                    className={cn(size ? "" : "w-full", "flex items-center")}
-                    style={{
-                      width: size ? `${size}px` : undefined,
-                      ...getCommonPinningStyles(header.column, true),
-                    }}
-                  >
-                    {header.isPlaceholder ? null : (
-                      <DataTableColumnHeaderRoot column={header.column}>
-                        {flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
-                      </DataTableColumnHeaderRoot>
-                    )}
-                  </div>
+                <TableDraggableHeader
+                  key={header.id}
+                  header={header}
+                  className={cn(
+                    size ? "shrink-0" : "min-w-0 flex-1",
+                    "flex items-center",
+                    header.column.getIsPinned() && "bg-background",
+                  )}
+                  style={{
+                    width: size ? `${size}px` : undefined,
+                    ...getCommonPinningStyles(header.column, true),
+                  }}
+                >
+                  {header.isPlaceholder ? null : (
+                    <DataTableColumnHeaderRoot column={header.column}>
+                      {flexRender(
+                        header.column.columnDef.header,
+                        header.getContext(),
+                      )}
+                    </DataTableColumnHeaderRoot>
+                  )}
                 </TableDraggableHeader>
               )
             })}
@@ -553,21 +557,27 @@ export function DataTableVirtualizedDndColumnBody<TData>({
             data-state={row.getIsSelected() && "selected"}
             className={cn("group flex w-full", isClickable && "cursor-pointer")}
           >
-            {row.getVisibleCells().map(cell => (
-              <TableDragAlongCell key={cell.id} cell={cell}>
-                <div
+            {row.getVisibleCells().map(cell => {
+              const size = cell.column.columnDef.size
+              return (
+                <TableDragAlongCell
+                  key={cell.id}
+                  cell={cell}
                   className={cn(
-                    cell.column.columnDef.size ? "" : "w-full",
+                    size ? "shrink-0" : "min-w-0 flex-1",
                     "flex items-center",
+                    cell.column.getIsPinned() &&
+                      "bg-background group-hover:bg-muted/50 group-data-[state=selected]:bg-muted",
                   )}
                   style={{
+                    width: size ? `${size}px` : undefined,
                     minHeight: `${estimateSize}px`,
                   }}
                 >
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </div>
-              </TableDragAlongCell>
-            ))}
+                </TableDragAlongCell>
+              )
+            })}
           </TableRow>
         )
       })}

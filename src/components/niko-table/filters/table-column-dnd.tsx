@@ -91,12 +91,15 @@ export interface TableDraggableHeaderProps<TData, TValue> {
   header: Header<TData, TValue>
   children: React.ReactNode
   className?: string
+  /** Additional styles merged with DnD transform styles */
+  style?: CSSProperties
 }
 
 export function TableDraggableHeader<TData, TValue>({
   header,
   children,
   className,
+  style: externalStyle,
 }: TableDraggableHeaderProps<TData, TValue>) {
   const { attributes, isDragging, listeners, setNodeRef, transform } =
     useSortable({
@@ -109,9 +112,9 @@ export function TableDraggableHeader<TData, TValue>({
     transform: CSS.Translate.toString(transform),
     transition: "width transform 0.2s ease-in-out",
     whiteSpace: "nowrap",
-    width: header.column.getSize(),
     zIndex: isDragging ? 1 : 0,
     cursor: "grab",
+    ...externalStyle,
   }
 
   return (
@@ -139,12 +142,15 @@ export interface TableDragAlongCellProps<TData, TValue> {
   cell: Cell<TData, TValue>
   children: React.ReactNode
   className?: string
+  /** Additional styles merged with DnD transform styles */
+  style?: CSSProperties
 }
 
 export function TableDragAlongCell<TData, TValue>({
   cell,
   children,
   className,
+  style: externalStyle,
 }: TableDragAlongCellProps<TData, TValue>) {
   const { isDragging, setNodeRef, transform } = useSortable({
     id: cell.column.id,
@@ -155,8 +161,8 @@ export function TableDragAlongCell<TData, TValue>({
     position: "relative",
     transform: CSS.Translate.toString(transform),
     transition: "width transform 0.2s ease-in-out",
-    width: cell.column.getSize(),
     zIndex: isDragging ? 1 : 0,
+    ...externalStyle,
   }
 
   return (

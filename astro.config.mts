@@ -162,10 +162,12 @@ export default defineConfig({
         {
           label: "Examples",
           items: [
+            // Getting Started
             { label: "Simple Table", slug: "niko-table/simple-table" },
             { label: "Basic Table", slug: "niko-table/basic-table" },
             { label: "Search Table", slug: "niko-table/search-table" },
-            { label: "Aside Table", slug: "niko-table/aside-table" },
+
+            // Row & Column Features
             {
               label: "Row Selection Table",
               slug: "niko-table/row-selection-table",
@@ -182,6 +184,8 @@ export default defineConfig({
               label: "Tree Table",
               slug: "niko-table/tree-table",
             },
+
+            // Drag & Drop
             {
               label: "Row DnD Table",
               slug: "niko-table/row-dnd-table",
@@ -190,10 +194,15 @@ export default defineConfig({
               label: "Column DnD Table",
               slug: "niko-table/column-dnd-table",
             },
+
+            // Layout & Presentation
+            { label: "Aside Table", slug: "niko-table/aside-table" },
             {
               label: "Virtualization Table",
               slug: "niko-table/virtualization-table",
             },
+
+            // Filtering
             {
               label: "Faceted Filter Table",
               slug: "niko-table/faceted-filter-table",
@@ -206,6 +215,8 @@ export default defineConfig({
               label: "Advanced Inline Filter Table",
               slug: "niko-table/advanced-inline-table",
             },
+
+            // Server-Side & URL State
             {
               label: "Advanced Nuqs Table",
               slug: "niko-table/advanced-nuqs-table",

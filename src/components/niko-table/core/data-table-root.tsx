@@ -459,6 +459,15 @@ function DataTableRootInternal<TData, TValue>({
       enableSorting: true,
       enableHiding: true,
       filterFn: "extended" as FilterFnOption<TData>,
+      /**
+       * Override TanStack Table's internal default (size: 150) so that
+       * columns without an explicit `size` have `columnDef.size === undefined`.
+       * This lets the virtualized flex-layout distinguish between fixed-width
+       * columns (`shrink-0`) and flexible columns (`flex-1 min-w-0`).
+       * `column.getSize()` still falls back to 150 internally, so all other
+       * sizing behaviour (resizing, pinning styles, etc.) is unaffected.
+       */
+      size: undefined,
     }),
     [],
   )
