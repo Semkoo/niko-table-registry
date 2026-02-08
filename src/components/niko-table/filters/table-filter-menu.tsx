@@ -1310,7 +1310,8 @@ function FilterBooleanSelect<TData>({
         id={inputId}
         aria-controls={inputListboxId}
         aria-label={`${columnMeta?.label} boolean filter`}
-        className="h-8 w-full rounded data-size:h-8"
+        size="sm"
+        className="w-full rounded"
       >
         <SelectValue placeholder={filter.value ? "True" : "False"} />
       </SelectTrigger>
@@ -1596,7 +1597,8 @@ function FilterJoinOperator<TData>({
         <SelectTrigger
           aria-label="Select join operator"
           aria-controls={joinOperatorListboxId}
-          className="h-8 rounded lowercase data-size:h-8"
+          size="sm"
+          className="rounded lowercase"
         >
           <SelectValue placeholder={filter.joinOperator || "and"} />
         </SelectTrigger>
@@ -1745,7 +1747,8 @@ function FilterOperatorSelector<TData>({
     >
       <SelectTrigger
         aria-controls={operatorListboxId}
-        className="h-8 w-32 rounded lowercase data-size:h-8"
+        size="sm"
+        className="w-32 rounded lowercase"
       >
         <div className="truncate">
           <SelectValue placeholder={filter.operator} />
