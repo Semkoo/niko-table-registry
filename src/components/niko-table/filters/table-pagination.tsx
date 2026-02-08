@@ -95,20 +95,17 @@ export function TablePagination<TData>({
   // Show loading skeleton while initializing
   if (isLoading) {
     return (
-      <div className="flex items-center justify-between px-4 py-2">
+      <div className="flex flex-wrap items-center justify-between gap-4 px-4 py-2">
         <div className="flex items-center space-x-2">
           <Skeleton className="h-8 w-24" />
           <Skeleton className="h-8 w-16" />
         </div>
-
         <Skeleton className="h-8 w-32" />
-
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-2">
             <Skeleton className="h-8 w-12" />
             <Skeleton className="h-8 w-20" />
           </div>
-
           <div className="flex items-center space-x-1">
             <Skeleton className="h-8 w-8" />
             <Skeleton className="h-8 w-8" />
@@ -120,12 +117,12 @@ export function TablePagination<TData>({
 
   return (
     <nav
-      className="flex items-center justify-between px-4 py-2"
+      className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 px-4 py-2"
       aria-label="Table pagination"
     >
       <div className="flex items-center space-x-2">
         <span
-          className="text-sm text-muted-foreground"
+          className="text-sm whitespace-nowrap text-muted-foreground"
           id="pagination-page-size-label"
         >
           Items per page
@@ -140,7 +137,8 @@ export function TablePagination<TData>({
           disabled={isLoading}
         >
           <SelectTrigger
-            className="h-8 w-16 focus:ring-0"
+            size="sm"
+            className="w-16 focus:ring-0"
             aria-label="Select page size"
             aria-labelledby="pagination-page-size-label"
           >
@@ -157,7 +155,7 @@ export function TablePagination<TData>({
       </div>
 
       <div
-        className="text-sm text-muted-foreground"
+        className="flex-1 text-right text-sm whitespace-nowrap text-muted-foreground md:text-center"
         role="status"
         aria-live="polite"
         aria-atomic="true"
@@ -167,7 +165,7 @@ export function TablePagination<TData>({
           : `${startItem}-${endItem} of ${totalRows} items`}
       </div>
 
-      <div className="flex items-center space-x-4">
+      <div className="ml-auto flex items-center space-x-4">
         <div className="flex items-center space-x-2 text-sm text-muted-foreground">
           <label htmlFor="page-number-input" className="sr-only">
             Page number
@@ -201,7 +199,9 @@ export function TablePagination<TData>({
             disabled={totalPages === 0 || isLoading || isFetching}
             aria-label={`Page ${currentPage} of ${totalPages}`}
           />
-          <span aria-hidden="true">of {Math.max(1, totalPages)} pages</span>
+          <span className="whitespace-nowrap" aria-hidden="true">
+            of {Math.max(1, totalPages)} pages
+          </span>
         </div>
 
         <div className="flex items-center space-x-1">
