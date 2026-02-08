@@ -78,7 +78,7 @@ export const DataTableVirtualizedHeader = React.memo(
                 <TableHead
                   key={header.id}
                   className={cn(
-                    size ? "" : "w-full",
+                    size ? "shrink-0" : "min-w-0 flex-1",
                     "flex items-center",
                     header.column.getIsPinned() && "bg-background",
                   )}
@@ -328,7 +328,7 @@ export function DataTableVirtualizedBody<TData>({
                   <TableCell
                     key={cell.id}
                     className={cn(
-                      size ? "" : "w-full",
+                      size ? "shrink-0" : "min-w-0 flex-1",
                       "flex items-center",
                       cell.column.getIsPinned() &&
                         "bg-background group-hover:bg-muted/50 group-data-[state=selected]:bg-muted",

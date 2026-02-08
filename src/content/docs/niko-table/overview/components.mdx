@@ -1155,3 +1155,104 @@ Actions component for empty state (buttons, links, etc.).
 | ----------- | ----------------- | ----------------------- |
 | `children`  | `React.ReactNode` | Action buttons/links.   |
 | `className` | `string`          | Additional CSS classes. |
+
+---
+
+### Drag-and-Drop Components
+
+Context-aware DnD wrappers that pair with the core `Table*DndProvider` components in `filters/`. Use these for the recommended composition pattern.
+
+#### DataTableRowDndProvider
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-row-dnd.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+</div>
+
+Wraps the table with row DnD context. Automatically connects to `DataTableRoot` via `useDataTable`.
+
+```tsx showLineNumbers
+import { DataTableRowDndProvider, DataTableRowDragHandle } from "@/components/niko-table/components"
+
+<DataTableRowDndProvider data={data} onReorder={setData}>
+  <DataTable>
+    <DataTableHeader />
+    <DataTableDndBody />
+  </DataTable>
+</DataTableRowDndProvider>
+```
+
+| Name        | Type                      | Default | Description                                        |
+| ----------- | ------------------------- | ------- | -------------------------------------------------- |
+| `data`      | `TData[]`                 | -       | The current data array (required).                 |
+| `onReorder` | `(data: TData[]) => void` | -       | Callback with the reordered data array (required). |
+| `children`  | `React.ReactNode`         | -       | Table components to wrap.                          |
+
+#### DataTableRowDragHandle
+
+Grip icon button for initiating row drags. Uses `useSortable` internally.
+
+| Name        | Type     | Default | Description                                    |
+| ----------- | -------- | ------- | ---------------------------------------------- |
+| `rowId`     | `string` | -       | Unique row identifier for sortable (required). |
+| `className` | `string` | -       | Additional CSS classes.                        |
+
+#### DataTableColumnDndProvider
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-column-dnd.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+</div>
+
+Wraps the table with column DnD context (horizontal axis).
+
+```tsx showLineNumbers
+import { DataTableColumnDndProvider } from "@/components/niko-table/components"
+
+<DataTableColumnDndProvider columnOrder={columnOrder} onColumnOrderChange={setColumnOrder}>
+  <DataTable>
+    <DataTableDndHeader />
+    <DataTableDndColumnBody />
+  </DataTable>
+</DataTableColumnDndProvider>
+```
+
+| Name                  | Type                              | Default | Description                                    |
+| --------------------- | --------------------------------- | ------- | ---------------------------------------------- |
+| `columnOrder`         | `string[]`                        | -       | Current column order array (required).         |
+| `onColumnOrderChange` | `(columnOrder: string[]) => void` | -       | Callback with the new column order (required). |
+| `children`            | `React.ReactNode`                 | -       | Table components to wrap.                      |
+
+#### DataTableDraggableHeader
+
+Context-aware wrapper for `TableDraggableHeader`. Makes header cells draggable.
+
+| Name        | Type                    | Default | Description                                |
+| ----------- | ----------------------- | ------- | ------------------------------------------ |
+| `header`    | `Header<TData, TValue>` | -       | TanStack Table header instance (required). |
+| `children`  | `React.ReactNode`       | -       | Header content.                            |
+| `className` | `string`                | -       | Additional CSS classes.                    |
+
+#### DataTableDragAlongCell
+
+Context-aware wrapper for `TableDragAlongCell`. Cell follows column drag position.
+
+| Name        | Type                  | Default | Description                              |
+| ----------- | --------------------- | ------- | ---------------------------------------- |
+| `cell`      | `Cell<TData, TValue>` | -       | TanStack Table cell instance (required). |
+| `children`  | `React.ReactNode`     | -       | Cell content.                            |
+| `className` | `string`              | -       | Additional CSS classes.                  |

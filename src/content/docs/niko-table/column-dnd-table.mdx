@@ -20,6 +20,60 @@ For large datasets, use `DataTableVirtualizedDndHeader` and `DataTableVirtualize
 
 <CodePreview demo="niko-table/virtualized-column-dnd" />
 
+### How It Works
+
+These components replace `DataTableVirtualizedHeader` and `DataTableVirtualizedBody` when you need column drag-and-drop in a virtualized table. Headers are draggable, and body cells follow the column drag position.
+
+```tsx showLineNumbers title="virtualized-column-dnd.tsx"
+const [columnOrder, setColumnOrder] = React.useState<string[]>(() =>
+  columns.map(c => c.id as string),
+)
+
+return (
+  <DataTableRoot
+    data={data}
+    columns={columns}
+    state={{ columnOrder }}
+    onColumnOrderChange={setColumnOrder}
+  >
+    <DataTableColumnDndProvider
+      columnOrder={columnOrder}
+      onColumnOrderChange={setColumnOrder}
+    >
+      <DataTable height={500}>
+        <DataTableVirtualizedDndHeader />
+        <DataTableVirtualizedDndColumnBody estimateSize={40} overscan={10}>
+          <DataTableVirtualizedEmptyBody>
+            {/* empty state */}
+          </DataTableVirtualizedEmptyBody>
+        </DataTableVirtualizedDndColumnBody>
+      </DataTable>
+    </DataTableColumnDndProvider>
+  </DataTableRoot>
+)
+```
+
+### DataTableVirtualizedDndHeader Props
+
+| Name        | Type      | Default | Description                                        |
+| ----------- | --------- | ------- | -------------------------------------------------- |
+| `className` | `string`  | -       | Additional CSS classes.                            |
+| `sticky`    | `boolean` | `true`  | Makes the header sticky at the top when scrolling. |
+
+### DataTableVirtualizedDndColumnBody Props
+
+| Name               | Type                                            | Default | Description                                              |
+| ------------------ | ----------------------------------------------- | ------- | -------------------------------------------------------- |
+| `children`         | `React.ReactNode`                               | -       | Child components (e.g. `DataTableVirtualizedEmptyBody`). |
+| `estimateSize`     | `number`                                        | `34`    | Estimated row height in pixels.                          |
+| `overscan`         | `number`                                        | `20`    | Number of items to render outside visible area.          |
+| `className`        | `string`                                        | -       | Additional CSS classes.                                  |
+| `onScroll`         | `(event: ScrollEvent) => void`                  | -       | Scroll event handler.                                    |
+| `onScrolledTop`    | `() => void`                                    | -       | Called when scrolled to top.                             |
+| `onScrolledBottom` | `() => void`                                    | -       | Called when scrolled to bottom.                          |
+| `scrollThreshold`  | `number`                                        | `50`    | Pixel threshold for top/bottom scroll events.            |
+| `onRowClick`       | `(row: TData, event: React.MouseEvent) => void` | -       | Called when a row is clicked.                            |
+
 ## Introduction
 
 Column DnD lets users reorder table columns by dragging headers. Built with `@dnd-kit` and composable primitives following the shadcn/ui open-code pattern.
@@ -96,4 +150,5 @@ return (
 ## Next Steps
 
 - [Row DnD Table](/niko-table/row-dnd-table) — Drag-and-drop row reordering
+- [Virtualization Table](/niko-table/virtualization-table) — Virtual scrolling for large datasets
 - [Column Pinning Table](/niko-table/column-pinning-table) — Pin columns to edges

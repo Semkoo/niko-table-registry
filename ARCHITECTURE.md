@@ -85,6 +85,24 @@ import {
    - ✅ Can be used standalone
    - Examples: `TableSearchFilter`, `TableFilterMenu`, `TableSortMenu`
 
+**Three-Layer DnD Architecture**:
+
+DnD components follow a three-layer pattern built on `@dnd-kit`:
+
+1. **Filters** (`/filters/`) - Low-level DnD primitives accepting direct props
+   - `TableRowDndProvider`, `TableDraggableRow`, `TableRowDragHandle`
+   - `TableColumnDndProvider`, `TableDraggableHeader`, `TableDragAlongCell`
+
+2. **Components** (`/components/`) - Context-aware DnD wrappers using `useDataTable()`
+   - `DataTableRowDndProvider`, `DataTableRowDragHandle`
+   - `DataTableColumnDndProvider`, `DataTableDraggableHeader`, `DataTableDragAlongCell`
+
+3. **Core** (`/core/`) - DnD-aware structure components (drop-in replacements)
+   - Standard: `DataTableDndBody`, `DataTableDndHeader`, `DataTableDndColumnBody`
+   - Virtualized: `DataTableVirtualizedDndBody`, `DataTableVirtualizedDndHeader`, `DataTableVirtualizedDndColumnBody`
+
+**DnD Constraint**: Row DnD should not be combined with sorting or filtering (reorder conflicts with sort order). Column DnD is safe to combine with any feature.
+
 ### 3️⃣ Documentation Layer (`/content/docs`, `/components/markdown`)
 
 **Purpose**: Astro Starlight documentation site - pages and components that showcase Niko Table
@@ -231,6 +249,8 @@ export function BasicTable() {
 - [ ] Documentation components use Astro `.astro` files
 - [ ] Interactive React components use `client:load` or `client:visible`
 - [ ] Registry examples are self-contained and runnable
+- [ ] DnD components follow three-layer architecture (filters → components → core structure)
+- [ ] Row DnD tables do not include sorting or filtering components
 
 ### Architecture
 
