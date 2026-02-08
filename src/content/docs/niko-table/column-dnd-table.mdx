@@ -1,0 +1,100 @@
+---
+title: Column DnD Table
+description: Drag-and-drop column reordering with composable primitives.
+---
+
+import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
+import CollapsiblePreview from "@/components/markdown/collapsible-preview.astro"
+
+## Overview
+
+<CodePreview demo="niko-table/column-dnd" />
+
+<CollapsiblePreview>
+  <CodePreview demo="niko-table/column-dnd-state" />
+</CollapsiblePreview>
+
+## Virtualized Column DnD
+
+For large datasets, use `DataTableVirtualizedDndHeader` and `DataTableVirtualizedDndColumnBody` which combine row virtualization with column drag-and-drop.
+
+<CodePreview demo="niko-table/virtualized-column-dnd" />
+
+## Introduction
+
+Column DnD lets users reorder table columns by dragging headers. Built with `@dnd-kit` and composable primitives following the shadcn/ui open-code pattern.
+
+## Installation
+
+1. Add the required shadcn/ui components:
+
+```bash
+npx shadcn@latest add table
+```
+
+2. Add dependencies:
+
+```bash
+npm install @tanstack/react-table @dnd-kit/core @dnd-kit/modifiers @dnd-kit/sortable @dnd-kit/utilities
+```
+
+3. Copy the DataTable components into your project. See the [Installation Guide](/getting-started/installation) for detailed instructions.
+
+## Basic Column DnD
+
+Three components work together:
+
+1. **`DataTableColumnDndProvider`** — Wraps the table with horizontal DnD context
+2. **`DataTableDndHeader`** — Renders headers as draggable items
+3. **`DataTableDndColumnBody`** — Cells follow column drag position
+
+```tsx showLineNumbers title="column-dnd.tsx"
+const [columnOrder, setColumnOrder] = React.useState<string[]>(() =>
+  columns.map(c => c.id as string),
+)
+
+return (
+  <DataTableRoot
+    data={data}
+    columns={columns}
+    state={{ columnOrder }}
+    onColumnOrderChange={setColumnOrder}
+  >
+    <DataTableColumnDndProvider
+      columnOrder={columnOrder}
+      onColumnOrderChange={setColumnOrder}
+    >
+      <DataTable>
+        <DataTableDndHeader />
+        <DataTableDndColumnBody />
+      </DataTable>
+    </DataTableColumnDndProvider>
+  </DataTableRoot>
+)
+```
+
+## Key Points
+
+- Every column needs an explicit **`id`** field for column order tracking
+- **`columnOrder`** state must be passed to both `DataTableRoot` and `DataTableColumnDndProvider`
+- Headers are draggable by default — grab any header to reorder
+- **Safe to combine with sorting and filtering** — column order is independent of data order, unlike [Row DnD](/niko-table/row-dnd-table)
+
+## When to Use
+
+**✅ Use Column DnD when:**
+
+- Users want to customize their table layout
+- Different users prefer different column arrangements
+- Building configurable dashboards
+
+**❌ Consider other options when:**
+
+- Column order is fixed by design
+- Tables have very few columns
+
+## Next Steps
+
+- [Row DnD Table](/niko-table/row-dnd-table) — Drag-and-drop row reordering
+- [Virtualization Table](/niko-table/virtualization-table) — Virtual scrolling for large datasets
+- [Column Pinning Table](/niko-table/column-pinning-table) — Pin columns to edges

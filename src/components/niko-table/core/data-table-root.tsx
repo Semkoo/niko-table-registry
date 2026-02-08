@@ -19,6 +19,7 @@ import {
   type RowSelectionState,
   type VisibilityState,
   type ExpandedState,
+  type ColumnOrderState,
   type Updater,
   type FilterFn,
   type FilterFnOption,
@@ -90,6 +91,7 @@ interface TableRootProps<TData, TValue> extends Partial<TableOptions<TData>> {
   onColumnFiltersChange?: (updater: Updater<ColumnFiltersState>) => void
   onRowSelectionChange?: (updater: Updater<RowSelectionState>) => void
   onExpandedChange?: (updater: Updater<ExpandedState>) => void
+  onColumnOrderChange?: (updater: Updater<ColumnOrderState>) => void
   onRowSelection?: (selectedRows: TData[]) => void
 }
 
@@ -109,6 +111,7 @@ function DataTableRootInternal<TData, TValue>({
   onColumnFiltersChange,
   onRowSelectionChange,
   onExpandedChange,
+  onColumnOrderChange,
   onColumnPinningChange,
   onRowSelection,
   ...rest
@@ -304,6 +307,9 @@ function DataTableRootInternal<TData, TValue>({
     left: rest.initialState?.columnPinning?.left ?? [],
     right: rest.initialState?.columnPinning?.right ?? [],
   })
+  const [columnOrder, setColumnOrder] = React.useState<ColumnOrderState>(
+    rest.initialState?.columnOrder ?? [],
+  )
   const [pagination, setPagination] = React.useState<PaginationState>({
     pageIndex:
       finalConfig.initialPageIndex ??
@@ -453,6 +459,15 @@ function DataTableRootInternal<TData, TValue>({
       enableSorting: true,
       enableHiding: true,
       filterFn: "extended" as FilterFnOption<TData>,
+      /**
+       * Override TanStack Table's internal default (size: 150) so that
+       * columns without an explicit `size` have `columnDef.size === undefined`.
+       * This lets the virtualized flex-layout distinguish between fixed-width
+       * columns (`shrink-0`) and flexible columns (`flex-1 min-w-0`).
+       * `column.getSize()` still falls back to 150 internally, so all other
+       * sizing behaviour (resizing, pinning styles, etc.) is unaffected.
+       */
+      size: undefined,
     }),
     [],
   )
@@ -477,6 +492,7 @@ function DataTableRootInternal<TData, TValue>({
       ? rest.state.globalFilter
       : globalFilter
   const controlledColumnPinning = rest.state?.columnPinning ?? columnPinning
+  const controlledColumnOrder = rest.state?.columnOrder ?? columnOrder
   const controlledExpanded = rest.state?.expanded ?? expanded
   const controlledPagination = rest.state?.pagination ?? pagination
 
@@ -595,6 +611,7 @@ function DataTableRootInternal<TData, TValue>({
         sorting: controlledSorting,
         columnVisibility: controlledColumnVisibility,
         columnPinning: finalColumnPinning,
+        columnOrder: controlledColumnOrder,
         rowSelection: controlledRowSelection,
         columnFilters: controlledColumnFilters,
         globalFilter: controlledGlobalFilter,
@@ -632,6 +649,7 @@ function DataTableRootInternal<TData, TValue>({
             }
           })
         }),
+      onColumnOrderChange: onColumnOrderChange ?? setColumnOrder,
       onExpandedChange: onExpandedChange ?? setExpanded,
       onPaginationChange: onPaginationChange ?? setPagination,
       getCoreRowModel: getCoreRowModel(),
@@ -711,6 +729,8 @@ function DataTableRootInternal<TData, TValue>({
       setColumnVisibility,
       onColumnVisibilityChange,
       onColumnPinningChange,
+      onColumnOrderChange,
+      setColumnOrder,
       setExpanded,
       onExpandedChange,
       setPagination,
@@ -722,6 +742,7 @@ function DataTableRootInternal<TData, TValue>({
       controlledRowSelection,
       controlledColumnFilters,
       controlledGlobalFilter,
+      controlledColumnOrder,
       controlledExpanded,
       controlledPagination,
       // Add column pinning state to dependencies so the table updates when it changes

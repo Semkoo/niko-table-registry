@@ -870,3 +870,122 @@ import { TableColumnDateFilterOptions } from "@/components/niko-table/filters"
 | `column`    | `Column<TData>` | Table column instance (required). |
 | `multiple`  | `boolean`       | Enable date range selection.      |
 | `className` | `string`        | Additional CSS classes.           |
+
+---
+
+## Drag-and-Drop Components
+
+### TableRowDndProvider
+
+Core row DnD provider that wraps the table with DnD context and sensors. Handles `arrayMove` internally and calls `onReorder` with the new data array.
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-row-dnd.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+</div>
+
+```tsx showLineNumbers
+import { TableRowDndProvider, TableDraggableRow, TableRowDragHandle } from "@/components/niko-table/filters"
+
+<TableRowDndProvider data={data} onReorder={setData}>
+  {/* table content */}
+</TableRowDndProvider>
+```
+
+#### Props
+
+| Name        | Type                      | Description                                        |
+| ----------- | ------------------------- | -------------------------------------------------- |
+| `data`      | `TData[]`                 | The current data array (required).                 |
+| `onReorder` | `(data: TData[]) => void` | Callback with the reordered data array (required). |
+| `children`  | `React.ReactNode`         | Table components to wrap.                          |
+| `modifiers` | `Modifier[]`              | DnD modifiers (defaults to vertical axis).         |
+
+### TableDraggableRow
+
+Makes a table row draggable via `@dnd-kit/sortable`.
+
+#### Props
+
+| Name        | Type              | Description                                    |
+| ----------- | ----------------- | ---------------------------------------------- |
+| `children`  | `React.ReactNode` | Row cell content.                              |
+| `rowId`     | `string`          | Unique row identifier for sortable (required). |
+| `className` | `string`          | Additional CSS classes.                        |
+
+### TableRowDragHandle
+
+A grip icon button cell for initiating row drags.
+
+#### Props
+
+| Name        | Type     | Description                                    |
+| ----------- | -------- | ---------------------------------------------- |
+| `rowId`     | `string` | Unique row identifier for sortable (required). |
+| `className` | `string` | Additional CSS classes.                        |
+
+### TableColumnDndProvider
+
+Core column DnD provider that wraps the table with horizontal DnD context. Handles `arrayMove` on column order.
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-column-dnd.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+</div>
+
+```tsx showLineNumbers
+import { TableColumnDndProvider, TableDraggableHeader, TableDragAlongCell } from "@/components/niko-table/filters"
+
+<TableColumnDndProvider columnOrder={columnOrder} onColumnOrderChange={setColumnOrder}>
+  {/* table content */}
+</TableColumnDndProvider>
+```
+
+#### Props
+
+| Name                  | Type                              | Description                                             |
+| --------------------- | --------------------------------- | ------------------------------------------------------- |
+| `columnOrder`         | `string[]`                        | Current column order array (required).                  |
+| `onColumnOrderChange` | `(columnOrder: string[]) => void` | Callback with the new column order (required).          |
+| `children`            | `React.ReactNode`                 | Table components to wrap.                               |
+| `modifiers`           | `Modifier[]`                      | DnD modifiers (defaults to `restrictToHorizontalAxis`). |
+
+### TableDraggableHeader
+
+Makes a table header cell draggable for column reordering.
+
+#### Props
+
+| Name        | Type                    | Description                                   |
+| ----------- | ----------------------- | --------------------------------------------- |
+| `header`    | `Header<TData, TValue>` | TanStack Table header instance (required).    |
+| `children`  | `React.ReactNode`       | Header content.                               |
+| `className` | `string`                | Additional CSS classes.                       |
+| `style`     | `CSSProperties`         | Additional styles merged with DnD transforms. |
+
+### TableDragAlongCell
+
+Table cell that follows its column's drag position.
+
+#### Props
+
+| Name        | Type                  | Description                                   |
+| ----------- | --------------------- | --------------------------------------------- |
+| `cell`      | `Cell<TData, TValue>` | TanStack Table cell instance (required).      |
+| `children`  | `React.ReactNode`     | Cell content.                                 |
+| `className` | `string`              | Additional CSS classes.                       |
+| `style`     | `CSSProperties`       | Additional styles merged with DnD transforms. |

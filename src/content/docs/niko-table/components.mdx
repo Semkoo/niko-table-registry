@@ -62,6 +62,8 @@ Essential building blocks of the data table. They handle table initialization, c
 - `DataTableLoading` - Loading indicator
 - `DataTableErrorBoundary` - Error boundary for table
 - Virtualized components for large datasets
+- DnD structure components for drag-and-drop (row and column)
+- Virtualized DnD components for drag-and-drop with virtualization
 
 ### [User-Facing Components](/niko-table/overview/components)
 
@@ -88,6 +90,11 @@ Context-aware components that automatically connect to the table via the `useDat
 - `DataTableAside` - Sidebar component
 - `DataTableSelectionBar` - Bulk actions bar
 - `DataTableEmptyState` - Empty state composition components
+- `DataTableRowDndProvider` - Row DnD context provider
+- `DataTableRowDragHandle` - Drag handle for row reordering
+- `DataTableColumnDndProvider` - Column DnD context provider
+- `DataTableDraggableHeader` - Draggable column header
+- `DataTableDragAlongCell` - Cell that follows column drag
 
 ### [Filter Components](/niko-table/overview/filters)
 
@@ -107,6 +114,12 @@ Core filter implementation components that accept a `table` prop directly. They 
 - `TableClearFilter` - Core clear filter
 - `TableExportButton` - Core export button
 - `TableRangeFilter` - Core range filter
+- `TableRowDndProvider` - Core row DnD provider
+- `TableDraggableRow` - Core draggable row
+- `TableRowDragHandle` - Core row drag handle
+- `TableColumnDndProvider` - Core column DnD provider
+- `TableDraggableHeader` - Core draggable header
+- `TableDragAlongCell` - Core drag-along cell
 
 ### [Hooks](/niko-table/overview/hooks)
 

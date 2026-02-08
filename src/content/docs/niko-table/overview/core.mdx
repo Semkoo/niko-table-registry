@@ -68,6 +68,8 @@ export function MyTable({ data }: { data: User[] }) {
 | `onColumnVisibilityChange` | `(updater: Updater<VisibilityState>) => void`    | Called when column visibility changes. |
 | `onRowSelectionChange`     | `(updater: Updater<RowSelectionState>) => void`  | Called when row selection changes.     |
 | `onExpandedChange`         | `(updater: Updater<ExpandedState>) => void`      | Called when expanded state changes.    |
+| `onColumnPinningChange`    | `(updater: Updater<ColumnPinningState>) => void` | Called when column pinning changes.    |
+| `onColumnOrderChange`      | `(updater: Updater<ColumnOrderState>) => void`   | Called when column order changes.      |
 | `onRowSelection`           | `(selectedRows: TData[]) => void`                | Called with selected row data.         |
 
 #### Config Object
@@ -550,3 +552,183 @@ import { Loader2 } from "lucide-react"
 | `children`  | `React.ReactNode` | -       | Custom loading content.                            |
 | `colSpan`   | `number`          | -       | Number of columns (auto-detected if not provided). |
 | `className` | `string`          | -       | Additional CSS classes.                            |
+
+### DnD Components
+
+Choose the right DnD components based on your use case:
+
+| Use Case                     | Components                                                            |
+| ---------------------------- | --------------------------------------------------------------------- |
+| Row reorder (standard)       | `DataTableDndBody`                                                    |
+| Column reorder (standard)    | `DataTableDndHeader` + `DataTableDndColumnBody`                       |
+| Row reorder (virtualized)    | `DataTableVirtualizedDndBody`                                         |
+| Column reorder (virtualized) | `DataTableVirtualizedDndHeader` + `DataTableVirtualizedDndColumnBody` |
+
+For standard (non-virtualized) tables with drag-and-drop, use these components from `data-table-dnd-structure.tsx`. They are drop-in replacements for `DataTableHeader` / `DataTableBody` when using row or column DnD.
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/core/data-table-dnd-structure.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+</div>
+
+#### DataTableDndBody
+
+DnD-aware table body that renders rows as draggable items. Drop-in replacement for `DataTableBody` when using row drag-and-drop. Must be wrapped in a `DataTableRowDndProvider`.
+
+```tsx showLineNumbers
+import { DataTableDndBody } from "@/components/niko-table/core"
+import { DataTableRowDndProvider } from "@/components/niko-table/components"
+
+<DataTableRowDndProvider data={data} onReorder={setData}>
+  <DataTable>
+    <DataTableHeader />
+    <DataTableDndBody />
+  </DataTable>
+</DataTableRowDndProvider>
+```
+
+#### Props
+
+| Name         | Type                   | Default | Description                   |
+| ------------ | ---------------------- | ------- | ----------------------------- |
+| `children`   | `React.ReactNode`      | -       | Child components.             |
+| `className`  | `string`               | -       | Additional CSS classes.       |
+| `onRowClick` | `(row: TData) => void` | -       | Called when a row is clicked. |
+
+#### DataTableDndHeader
+
+DnD-aware table header that renders column headers as draggable items. Drop-in replacement for `DataTableHeader` when using column drag-and-drop. Must be wrapped in a `DataTableColumnDndProvider`.
+
+```tsx showLineNumbers
+import { DataTableDndHeader, DataTableDndColumnBody } from "@/components/niko-table/core"
+import { DataTableColumnDndProvider } from "@/components/niko-table/components"
+
+<DataTableColumnDndProvider columnOrder={columnOrder} onColumnOrderChange={setColumnOrder}>
+  <DataTable>
+    <DataTableDndHeader />
+    <DataTableDndColumnBody />
+  </DataTable>
+</DataTableColumnDndProvider>
+```
+
+#### Props
+
+| Name        | Type      | Default | Description                                        |
+| ----------- | --------- | ------- | -------------------------------------------------- |
+| `className` | `string`  | -       | Additional CSS classes.                            |
+| `sticky`    | `boolean` | `true`  | Makes the header sticky at the top when scrolling. |
+
+#### DataTableDndColumnBody
+
+DnD-aware table body for column drag-and-drop. Each cell follows its column's drag position using `useSortable`. Must be wrapped in a `DataTableColumnDndProvider`.
+
+#### Props
+
+| Name         | Type                   | Default | Description                   |
+| ------------ | ---------------------- | ------- | ----------------------------- |
+| `children`   | `React.ReactNode`      | -       | Child components.             |
+| `className`  | `string`               | -       | Additional CSS classes.       |
+| `onRowClick` | `(row: TData) => void` | -       | Called when a row is clicked. |
+
+### Virtualized DnD Components
+
+For combining virtualization with drag-and-drop, use these specialized components from `data-table-virtualized-dnd-structure.tsx`.
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/core/data-table-virtualized-dnd-structure.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+</div>
+
+#### DataTableVirtualizedDndBody
+
+Virtualized DnD-aware table body for **row** drag-and-drop. Combines `@tanstack/react-virtual` for windowing with `@dnd-kit/sortable` for drag interactions. Must be wrapped in a `DataTableRowDndProvider`.
+
+```tsx showLineNumbers
+import {
+  DataTableVirtualizedHeader,
+  DataTableVirtualizedDndBody,
+  DataTableVirtualizedEmptyBody,
+} from "@/components/niko-table/core"
+import { DataTableRowDndProvider } from "@/components/niko-table/components"
+
+<DataTableRowDndProvider data={data} onReorder={setData}>
+  <DataTable height={500}>
+    <DataTableVirtualizedHeader />
+    <DataTableVirtualizedDndBody estimateSize={40} overscan={10}>
+      <DataTableVirtualizedEmptyBody />
+    </DataTableVirtualizedDndBody>
+  </DataTable>
+</DataTableRowDndProvider>
+```
+
+#### Props
+
+| Name               | Type                                            | Default | Description                                              |
+| ------------------ | ----------------------------------------------- | ------- | -------------------------------------------------------- |
+| `children`         | `React.ReactNode`                               | -       | Child components (e.g. `DataTableVirtualizedEmptyBody`). |
+| `estimateSize`     | `number`                                        | `34`    | Estimated row height in pixels.                          |
+| `overscan`         | `number`                                        | `20`    | Number of items to render outside visible area.          |
+| `className`        | `string`                                        | -       | Additional CSS classes.                                  |
+| `onScroll`         | `(event: ScrollEvent) => void`                  | -       | Scroll event handler.                                    |
+| `onScrolledTop`    | `() => void`                                    | -       | Called when scrolled to top.                             |
+| `onScrolledBottom` | `() => void`                                    | -       | Called when scrolled to bottom.                          |
+| `scrollThreshold`  | `number`                                        | `50`    | Pixel threshold for top/bottom scroll events.            |
+| `onRowClick`       | `(row: TData, event: React.MouseEvent) => void` | -       | Called when a row is clicked.                            |
+
+#### DataTableVirtualizedDndHeader
+
+Virtualized DnD-aware table header for **column** drag-and-drop. Must be wrapped in a `DataTableColumnDndProvider`.
+
+```tsx showLineNumbers
+import {
+  DataTableVirtualizedDndHeader,
+  DataTableVirtualizedDndColumnBody,
+} from "@/components/niko-table/core"
+import { DataTableColumnDndProvider } from "@/components/niko-table/components"
+
+<DataTableColumnDndProvider columnOrder={columnOrder} onColumnOrderChange={setColumnOrder}>
+  <DataTable height={500}>
+    <DataTableVirtualizedDndHeader />
+    <DataTableVirtualizedDndColumnBody estimateSize={40} />
+  </DataTable>
+</DataTableColumnDndProvider>
+```
+
+#### Props
+
+| Name        | Type      | Default | Description                                        |
+| ----------- | --------- | ------- | -------------------------------------------------- |
+| `className` | `string`  | -       | Additional CSS classes.                            |
+| `sticky`    | `boolean` | `true`  | Makes the header sticky at the top when scrolling. |
+
+#### DataTableVirtualizedDndColumnBody
+
+Virtualized DnD-aware table body for **column** drag-and-drop. Each cell follows column drag position using `useSortable`. Must be wrapped in a `DataTableColumnDndProvider`.
+
+#### Props
+
+| Name               | Type                                            | Default | Description                                              |
+| ------------------ | ----------------------------------------------- | ------- | -------------------------------------------------------- |
+| `children`         | `React.ReactNode`                               | -       | Child components (e.g. `DataTableVirtualizedEmptyBody`). |
+| `estimateSize`     | `number`                                        | `34`    | Estimated row height in pixels.                          |
+| `overscan`         | `number`                                        | `20`    | Number of items to render outside visible area.          |
+| `className`        | `string`                                        | -       | Additional CSS classes.                                  |
+| `onScroll`         | `(event: ScrollEvent) => void`                  | -       | Scroll event handler.                                    |
+| `onScrolledTop`    | `() => void`                                    | -       | Called when scrolled to top.                             |
+| `onScrolledBottom` | `() => void`                                    | -       | Called when scrolled to bottom.                          |
+| `scrollThreshold`  | `number`                                        | `50`    | Pixel threshold for top/bottom scroll events.            |
+| `onRowClick`       | `(row: TData, event: React.MouseEvent) => void` | -       | Called when a row is clicked.                            |

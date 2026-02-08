@@ -1,0 +1,68 @@
+# Niko Table
+
+> Niko Table is a composable, shadcn-compatible data table component registry built with TanStack Table, React, and Tailwind CSS. It follows an open-code philosophy — install components into your project and own the code. Features include sorting, filtering, pagination, row selection, row expansion, column pinning, drag-and-drop (row and column), virtualization, server-side data, and URL state management. AI-Ready by design.
+
+## Getting Started
+
+- [Introduction](https://niko-table.com/getting-started/introduction): Overview, quick start, and installation instructions.
+- [Installation](https://niko-table.com/getting-started/installation): CLI-based installation using the shadcn registry.
+- [Manual Installation](https://niko-table.com/getting-started/manual-installation): Step-by-step manual setup without the CLI.
+
+## API Reference
+
+- [Components](https://niko-table.com/niko-table/overview/components): Context-aware components that auto-connect via useDataTable hook (DataTableSearchFilter, DataTablePagination, DataTableFilterMenu, etc.).
+- [Core](https://niko-table.com/niko-table/overview/core): Core building blocks — DataTableRoot, DataTable, DataTableHeader, DataTableBody, virtualized variants, and DnD structure components.
+- [Filters](https://niko-table.com/niko-table/overview/filters): Low-level filter components accepting a table prop directly (TableSearchFilter, TableFilterMenu, TableSortMenu, etc.).
+- [Hooks](https://niko-table.com/niko-table/overview/hooks): Custom React hooks for table state and utilities.
+- [Library](https://niko-table.com/niko-table/overview/lib): Utility functions for formatting, filtering, sorting, and CSV export.
+- [Types](https://niko-table.com/niko-table/overview/types): TypeScript type definitions and interfaces.
+- [Config](https://niko-table.com/niko-table/overview/config): Configuration and feature detection utilities.
+
+## Examples
+
+### Getting Started
+
+- [Simple Table](https://niko-table.com/niko-table/simple-table): Minimal table with columns and data.
+- [Basic Table](https://niko-table.com/niko-table/basic-table): Table with pagination, sorting, and column visibility.
+- [Search Table](https://niko-table.com/niko-table/search-table): Table with global search filtering.
+
+### Row & Column Features
+
+- [Row Selection Table](https://niko-table.com/niko-table/row-selection-table): Checkbox-based row selection with bulk actions.
+- [Row Expansion Table](https://niko-table.com/niko-table/row-expansion-table): Expandable rows with custom content.
+- [Column Pinning Table](https://niko-table.com/niko-table/column-pinning-table): Pin columns to left or right edges.
+- [Tree Table](https://niko-table.com/niko-table/tree-table): Hierarchical tree data with expand/collapse.
+
+### Drag & Drop
+
+- [Row DnD Table](https://niko-table.com/niko-table/row-dnd-table): Drag-and-drop row reordering with @dnd-kit.
+- [Column DnD Table](https://niko-table.com/niko-table/column-dnd-table): Drag-and-drop column reordering with @dnd-kit.
+
+### Layout & Presentation
+
+- [Aside Table](https://niko-table.com/niko-table/aside-table): Table with a collapsible sidebar panel.
+- [Virtualization Table](https://niko-table.com/niko-table/virtualization-table): Virtual scrolling for large datasets using @tanstack/react-virtual.
+
+### Filtering
+
+- [Faceted Filter Table](https://niko-table.com/niko-table/faceted-filter-table): Multi-faceted filtering with filter menus.
+- [Advanced Filter Table](https://niko-table.com/niko-table/advanced-table): Full-featured table with toolbar filters.
+- [Advanced Inline Filter Table](https://niko-table.com/niko-table/advanced-inline-table): Inline column-level filters.
+
+### Server-Side & URL State
+
+- [Advanced Nuqs Table](https://niko-table.com/niko-table/advanced-nuqs-table): Client-side filtering with URL state via nuqs.
+- [Server-Side Table](https://niko-table.com/niko-table/server-side-table): Server-side pagination, sorting, and filtering.
+- [Server-Side Nuqs Table](https://niko-table.com/niko-table/server-side-nuqs-table): Server-side data with URL state management via nuqs.
+
+## Architecture
+
+- Two-layer component system: context-aware (`DataTable*` prefix, auto-connect via `useDataTable()`) and direct-prop (`Table*` prefix, accept `table` prop).
+- Three-layer DnD architecture: low-level primitives (filters/) → context-aware wrappers (components/) → structure components (core/).
+- Built on TanStack Table for state management, @dnd-kit for drag-and-drop, @tanstack/react-virtual for virtualization.
+- Components are distributed via the shadcn registry CLI: `npx shadcn@latest add https://niko-table.com/r/data-table.json`
+
+## Optional
+
+- [Component Overview](https://niko-table.com/niko-table/components): High-level directory of all components organized by category.
+- [DataTable Introduction](https://niko-table.com/niko-table/introduction): Deep dive into the DataTable component system and composition patterns.
