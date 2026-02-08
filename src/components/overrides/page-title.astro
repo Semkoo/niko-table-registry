@@ -1,0 +1,192 @@
+---
+import fs from "node:fs/promises"
+import { CopyPageButtonInternal } from "./_copy-page-button-internal"
+
+const PAGE_TITLE_ID = "_top"
+
+const { starlightRoute } = Astro.locals
+const { title, template, description } = starlightRoute.entry.data
+const filePath = starlightRoute.entry.filePath
+
+// Extended schema from starlight-theme-black
+const links = (starlightRoute.entry.data as Record<string, unknown>).links as
+  | { doc?: string; api?: string }
+  | undefined
+
+let rawMarkdown = ""
+try {
+  rawMarkdown = await fs.readFile(`./${filePath}`, "utf-8")
+} catch {
+  rawMarkdown = ""
+}
+
+const pageUrl = Astro.url.href
+---
+
+{
+  template === "doc" && (
+    <div class="breadcrumb">
+      <div class="truncate">Docs</div>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="m9 18 6-6-6-6" />
+      </svg>
+      <div class="text-foreground">{title}</div>
+    </div>
+  )
+}
+
+<div class="page-title-wrapper">
+  <h1 id={PAGE_TITLE_ID}>{title}</h1>
+  {
+    rawMarkdown && (
+      <CopyPageButtonInternal
+        client:load
+        rawMarkdown={rawMarkdown}
+        pageUrl={pageUrl}
+      />
+    )
+  }
+</div>
+
+{description && <p class="description">{description}</p>}
+
+{
+  links && (
+    <div class="links">
+      {links.doc && (
+        <a href={links.doc} target="_blank" rel="noreferrer">
+          Docs
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="0.75rem"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M15 3h6v6" />
+            <path d="M10 14 21 3" />
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+          </svg>
+        </a>
+      )}
+
+      {links.api && (
+        <a href={links.api} target="_blank" rel="noreferrer">
+          API
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="0.75rem"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M15 3h6v6" />
+            <path d="M10 14 21 3" />
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+          </svg>
+        </a>
+      )}
+    </div>
+  )
+}
+
+<style>
+  .breadcrumb {
+    color: var(--muted-foreground);
+    line-height: 1;
+    font-size: 0.875rem;
+    align-items: center;
+    display: flex;
+    margin-bottom: 1rem;
+  }
+
+  .truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .breadcrumb svg {
+    width: 0.875rem;
+    height: 0.875rem;
+    margin-left: 0.5rem;
+  }
+
+  .text-foreground {
+    color: var(--foreground);
+    margin-left: 0.5rem;
+  }
+
+  .page-title-wrapper {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  h1 {
+    letter-spacing: -0.025em;
+    font-weight: 700;
+    font-size: 1.875rem;
+    line-height: 2.25rem;
+    scroll-margin: 5rem;
+    margin: 0;
+  }
+
+  .description {
+    margin: 0;
+    margin-top: 0.5rem;
+    color: var(--muted-foreground);
+    font-size: 1rem;
+    line-height: 1.5rem;
+    text-wrap: balance;
+  }
+
+  .links {
+    padding-top: 1rem;
+    align-items: center;
+    display: flex;
+  }
+
+  .links > a {
+    transition-property:
+      color, background-color, border-color, text-decoration-color, fill, stroke;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 0.15s;
+    color: var(--secondary-foreground);
+    font-weight: 600;
+    font-size: 0.75rem;
+    line-height: 1rem;
+    padding-top: 0.125rem;
+    padding-bottom: 0.125rem;
+    padding-left: 0.625rem;
+    padding-right: 0.625rem;
+    background-color: var(--secondary);
+    border-radius: calc(var(--radius) - 2px);
+    gap: 0.25rem;
+    align-items: center;
+    display: inline-flex;
+    text-decoration: inherit;
+  }
+
+  .links > a:not(:first-child) {
+    margin-right: 0.5rem;
+    margin-left: 0.5rem;
+  }
+</style>
