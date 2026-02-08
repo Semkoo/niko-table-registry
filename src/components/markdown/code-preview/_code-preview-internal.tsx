@@ -33,6 +33,12 @@ export type Demo =
   | "niko-table/basic-state"
   | "niko-table/search-state"
   | "niko-table/pagination-loading"
+  | "niko-table/row-dnd"
+  | "niko-table/row-dnd-state"
+  | "niko-table/column-dnd"
+  | "niko-table/column-dnd-state"
+  | "niko-table/virtualized-row-dnd"
+  | "niko-table/virtualized-column-dnd"
 
 export function CodePreviewInternal({
   demo,

@@ -46,3 +46,27 @@ export {
 } from "./table-column-faceted-filter"
 export { TableColumnSliderFilterOptions } from "./table-column-slider-filter"
 export { TableColumnDateFilterOptions } from "./table-column-date-filter"
+
+// Row DnD components (standalone)
+export {
+  TableRowDndProvider,
+  TableDraggableRow,
+  TableRowDragHandle,
+} from "./table-row-dnd"
+export type {
+  TableRowDndProviderProps,
+  TableDraggableRowProps,
+  TableRowDragHandleProps,
+} from "./table-row-dnd"
+
+// Column DnD components (standalone)
+export {
+  TableColumnDndProvider,
+  TableDraggableHeader,
+  TableDragAlongCell,
+} from "./table-column-dnd"
+export type {
+  TableColumnDndProviderProps,
+  TableDraggableHeaderProps,
+  TableDragAlongCellProps,
+} from "./table-column-dnd"
