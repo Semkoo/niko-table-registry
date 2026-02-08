@@ -90,7 +90,7 @@ return (
 
 ## Key Points
 
-- **`getRowId`** is required — row indexes change during reorder, so a stable ID is needed
+- **`getRowId`** is required — use stable, unique IDs (e.g., database IDs), not array indexes. Array indexes break DnD after reordering because the index no longer matches the original item
 - **`DataTableRowDndProvider`** must wrap outside `<DataTable>` — DnD context creates `<div>` elements that can't be inside `<table>`
 - **`onReorder`** receives the new data array after `arrayMove` — just pass `setData`
 

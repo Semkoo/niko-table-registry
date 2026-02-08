@@ -44,6 +44,7 @@ export default defineConfig({
     starlight({
       components: {
         Head: "./src/components/overrides/head.astro",
+        PageTitle: "./src/components/overrides/page-title.astro",
       },
       head: [
         // Add ICO favicon fallback for Safari.

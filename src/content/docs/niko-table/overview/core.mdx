@@ -68,6 +68,8 @@ export function MyTable({ data }: { data: User[] }) {
 | `onColumnVisibilityChange` | `(updater: Updater<VisibilityState>) => void`    | Called when column visibility changes. |
 | `onRowSelectionChange`     | `(updater: Updater<RowSelectionState>) => void`  | Called when row selection changes.     |
 | `onExpandedChange`         | `(updater: Updater<ExpandedState>) => void`      | Called when expanded state changes.    |
+| `onColumnPinningChange`    | `(updater: Updater<ColumnPinningState>) => void` | Called when column pinning changes.    |
+| `onColumnOrderChange`      | `(updater: Updater<ColumnOrderState>) => void`   | Called when column order changes.      |
 | `onRowSelection`           | `(selectedRows: TData[]) => void`                | Called with selected row data.         |
 
 #### Config Object
@@ -552,6 +554,15 @@ import { Loader2 } from "lucide-react"
 | `className` | `string`          | -       | Additional CSS classes.                            |
 
 ### DnD Components
+
+Choose the right DnD components based on your use case:
+
+| Use Case                     | Components                                                            |
+| ---------------------------- | --------------------------------------------------------------------- |
+| Row reorder (standard)       | `DataTableDndBody`                                                    |
+| Column reorder (standard)    | `DataTableDndHeader` + `DataTableDndColumnBody`                       |
+| Row reorder (virtualized)    | `DataTableVirtualizedDndBody`                                         |
+| Column reorder (virtualized) | `DataTableVirtualizedDndHeader` + `DataTableVirtualizedDndColumnBody` |
 
 For standard (non-virtualized) tables with drag-and-drop, use these components from `data-table-dnd-structure.tsx`. They are drop-in replacements for `DataTableHeader` / `DataTableBody` when using row or column DnD.
 
