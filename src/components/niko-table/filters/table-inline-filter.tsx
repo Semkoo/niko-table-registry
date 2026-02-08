@@ -530,7 +530,10 @@ export function TableInline<TData>({
                   onFilterUpdate(filter.filterId, { joinOperator: value })
                 }
               >
-                <SelectTrigger className="h-8 w-20 text-xs font-medium uppercase">
+                <SelectTrigger
+                  size="sm"
+                  className="w-20 text-xs font-medium uppercase"
+                >
                   <SelectValue placeholder={filter.joinOperator || "and"} />
                 </SelectTrigger>
                 <SelectContent>
@@ -799,7 +802,8 @@ function TableInlineFilterItem<TData>({
         <SelectTrigger
           title="Change operator"
           aria-controls={operatorListboxId}
-          className="h-8 rounded-none border-r-0 px-2.5 lowercase data-size:h-8 [&_svg]:hidden"
+          size="sm"
+          className="rounded-none border-r-0 px-2.5 lowercase [&_svg]:hidden"
         >
           <SelectValue placeholder={filter.operator} />
         </SelectTrigger>
