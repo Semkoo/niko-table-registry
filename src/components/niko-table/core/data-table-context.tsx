@@ -124,6 +124,7 @@ export function DataTableProvider<TData>({
   const rowSelection = tableState.rowSelection
   const pagination = tableState.pagination
   const columnPinning = tableState.columnPinning
+  const columnOrder = tableState.columnOrder
 
   /**
    * PERFORMANCE: Create lightweight state hash instead of JSON.stringify
@@ -179,6 +180,7 @@ export function DataTableProvider<TData>({
       ),
       paginationKey,
       columnPinningHash: JSON.stringify(columnPinning),
+      columnOrderHash: JSON.stringify(columnOrder),
     }
   }, [
     globalFilter,
@@ -189,6 +191,7 @@ export function DataTableProvider<TData>({
     rowSelection,
     pagination,
     columnPinning,
+    columnOrder,
   ])
 
   /**

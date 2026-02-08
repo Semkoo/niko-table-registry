@@ -183,6 +183,14 @@ export default defineConfig({
               slug: "niko-table/tree-table",
             },
             {
+              label: "Row DnD Table",
+              slug: "niko-table/row-dnd-table",
+            },
+            {
+              label: "Column DnD Table",
+              slug: "niko-table/column-dnd-table",
+            },
+            {
               label: "Virtualization Table",
               slug: "niko-table/virtualization-table",
             },

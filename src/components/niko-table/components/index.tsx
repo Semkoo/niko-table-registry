@@ -68,3 +68,27 @@ export { DataTableInlineFilter } from "./data-table-inline-filter"
 export { DataTablePagination } from "./data-table-pagination"
 export { DataTableExportButton } from "./data-table-export-button"
 export type { DataTableExportButtonProps } from "./data-table-export-button"
+
+// Row DnD components (context-aware wrappers)
+export {
+  DataTableRowDndProvider,
+  DataTableDraggableRow,
+  DataTableRowDragHandle,
+} from "./data-table-row-dnd"
+export type {
+  DataTableRowDndProviderProps,
+  DataTableDraggableRowProps,
+  DataTableRowDragHandleProps,
+} from "./data-table-row-dnd"
+
+// Column DnD components (context-aware wrappers)
+export {
+  DataTableColumnDndProvider,
+  DataTableDraggableHeader,
+  DataTableDragAlongCell,
+} from "./data-table-column-dnd"
+export type {
+  DataTableColumnDndProviderProps,
+  DataTableDraggableHeaderProps,
+  DataTableDragAlongCellProps,
+} from "./data-table-column-dnd"
