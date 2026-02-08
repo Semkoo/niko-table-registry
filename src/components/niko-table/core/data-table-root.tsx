@@ -109,6 +109,7 @@ function DataTableRootInternal<TData, TValue>({
   onColumnFiltersChange,
   onRowSelectionChange,
   onExpandedChange,
+  onColumnPinningChange,
   onRowSelection,
   ...rest
 }: Omit<TableRootProps<TData, TValue>, "table"> & {
@@ -620,15 +621,17 @@ function DataTableRootInternal<TData, TValue>({
       onSortingChange: onSortingChange ?? setSorting,
       onColumnFiltersChange: onColumnFiltersChange ?? setColumnFilters,
       onColumnVisibilityChange: onColumnVisibilityChange ?? setColumnVisibility,
-      onColumnPinningChange: updater => {
-        setColumnPinning(prev => {
-          const next = typeof updater === "function" ? updater(prev) : updater
-          return {
-            left: next.left ?? [],
-            right: next.right ?? [],
-          }
-        })
-      },
+      onColumnPinningChange:
+        onColumnPinningChange ??
+        (updater => {
+          setColumnPinning(prev => {
+            const next = typeof updater === "function" ? updater(prev) : updater
+            return {
+              left: next.left ?? [],
+              right: next.right ?? [],
+            }
+          })
+        }),
       onExpandedChange: onExpandedChange ?? setExpanded,
       onPaginationChange: onPaginationChange ?? setPagination,
       getCoreRowModel: getCoreRowModel(),
@@ -707,6 +710,7 @@ function DataTableRootInternal<TData, TValue>({
       onColumnFiltersChange,
       setColumnVisibility,
       onColumnVisibilityChange,
+      onColumnPinningChange,
       setExpanded,
       onExpandedChange,
       setPagination,
