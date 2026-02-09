@@ -19,6 +19,7 @@ export default defineConfig([
     "dist/",
     "public/r/",
     "package-lock.json",
+    "scripts/fixtures/",
   ]),
   {
     files: ["**/*.{md}"], // ,mdx
@@ -40,6 +41,10 @@ export default defineConfig([
   {
     files: ["**/*.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"],
     languageOptions: { globals: { ...globals.browser } },
+  },
+  {
+    files: ["scripts/*.mjs"],
+    languageOptions: { globals: { ...globals.node } },
   },
   tseslint.configs.strict,
   {

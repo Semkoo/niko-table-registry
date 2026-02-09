@@ -17,7 +17,9 @@
     "registry:build": "shadcn build",
     "prepare": "husky",
     "lint": "eslint --fix .",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "test:registry": "node scripts/test-registry-urls.mjs",
+    "test:install": "node scripts/test-install-e2e.mjs"
   },
   "lint-staged": {
     "**/*": [
