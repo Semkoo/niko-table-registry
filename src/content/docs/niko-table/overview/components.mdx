@@ -1195,6 +1195,28 @@ import { DataTableRowDndProvider, DataTableRowDragHandle } from "@/components/ni
 | `onReorder` | `(data: TData[]) => void` | -       | Callback with the reordered data array (required). |
 | `children`  | `React.ReactNode`         | -       | Table components to wrap.                          |
 
+#### DataTableDraggableRow
+
+Context-aware wrapper that makes a single table row draggable. Used internally by `DataTableDndBody` to render each row; you can also use it when building custom row layouts. Wraps the core `TableDraggableRow` from `filters/`.
+
+```tsx showLineNumbers
+import { DataTableDraggableRow } from "@/components/niko-table/components"
+
+<DataTableDraggableRow row={row}>
+  {row.getVisibleCells().map(cell => (
+    <TableCell key={cell.id}>
+      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+    </TableCell>
+  ))}
+</DataTableDraggableRow>
+```
+
+| Name        | Type              | Default | Description                             |
+| ----------- | ----------------- | ------- | --------------------------------------- |
+| `row`       | `Row<TData>`      | -       | TanStack Table row instance (required). |
+| `children`  | `React.ReactNode` | -       | Row content (e.g. cells).               |
+| `className` | `string`          | -       | Additional CSS classes.                 |
+
 #### DataTableRowDragHandle
 
 Grip icon button for initiating row drags. Uses `useSortable` internally.

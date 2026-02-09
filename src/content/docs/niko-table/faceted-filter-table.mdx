@@ -5,6 +5,7 @@ description: Add inline faceted filters that show available options and counts.
 
 import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
 import CollapsiblePreview from "@/components/markdown/collapsible-preview.astro"
+import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
 
 <CodePreview demo="niko-table/faceted" />
 
@@ -20,17 +21,23 @@ The Faceted Filter Table adds inline filter components that show available optio
 
 1. Add the required components:
 
-```bash
-npx shadcn@latest add table input button dropdown-menu popover command badge scroll-area separator
-```
+<CliCommandCode action="run" command="shadcn@latest add table input button dropdown-menu popover command badge scroll-area separator" />
 
 2. Add `tanstack/react-table` dependency:
 
-```bash
-npm install @tanstack/react-table
-```
+<CliCommandCode action="install" command="@tanstack/react-table" />
 
-3. Copy the DataTable components into your project. See the [Installation Guide](/getting-started/installation) for detailed instructions.
+3. **Update the Shadcn table component** — Replace the contents of `components/ui/table.tsx` with the DataTable-compatible version (adds `TableComponent` export and `data-slot` attributes). See the [Installation Guide](/getting-started/installation#update-shadcn-table-component-first) for the full code.
+
+4. **Install the DataTable core** — From your project root, run:
+
+<CliCommandCode action="run" command={'shadcn@latest add "https://niko-table.com/r/data-table.json"'} />
+
+5. **Install add-ons for this example** — This example uses pagination, search, view menu, faceted filter, clear filter, slider filter, date filter, column sort, and column-level faceted/slider/date filters. Run:
+
+<CliCommandCode action="run" command={'shadcn@latest add "https://niko-table.com/r/data-table-pagination.json" "https://niko-table.com/r/data-table-search-filter.json" "https://niko-table.com/r/data-table-view-menu.json" "https://niko-table.com/r/data-table-faceted-filter.json" "https://niko-table.com/r/data-table-clear-filter.json" "https://niko-table.com/r/data-table-slider-filter.json" "https://niko-table.com/r/data-table-date-filter.json" "https://niko-table.com/r/data-table-column-sort.json" "https://niko-table.com/r/data-table-column-faceted-filter.json" "https://niko-table.com/r/data-table-column-slider-filter.json" "https://niko-table.com/r/data-table-column-date-filter.json"'} />
+
+For other add-ons or manual copy-paste, see the [Installation Guide](/getting-started/installation).
 
 ## Prerequisites
 

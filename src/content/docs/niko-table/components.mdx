@@ -91,6 +91,7 @@ Context-aware components that automatically connect to the table via the `useDat
 - `DataTableSelectionBar` - Bulk actions bar
 - `DataTableEmptyState` - Empty state composition components
 - `DataTableRowDndProvider` - Row DnD context provider
+- `DataTableDraggableRow` - Wrapper for a draggable row (used with DataTableDndBody)
 - `DataTableRowDragHandle` - Drag handle for row reordering
 - `DataTableColumnDndProvider` - Column DnD context provider
 - `DataTableDraggableHeader` - Draggable column header
@@ -105,6 +106,7 @@ Core filter implementation components that accept a `table` prop directly. They 
 - `TableSearchFilter` - Core search filter
 - `TablePagination` - Core pagination
 - `TableFilterMenu` - Core filter menu
+- `TableColumnFilterTrigger` - Core column filter trigger button
 - `TableFacetedFilter` - Core faceted filter
 - `TableSliderFilter` - Core slider filter
 - `TableDateFilter` - Core date filter
@@ -131,7 +133,9 @@ Custom React hooks for table functionality.
 - `useDebounce` - Debounce values for search/filters
 - `useDerivedColumnTitle` - Derive column titles
 - `useGeneratedOptions` - Generate filter options from data
+- `useGeneratedOptionsForColumn` - Generate options for a single column
 - `useKeyboardShortcut` - Manage keyboard shortcuts
+- `useKeyboardShortcuts` - Batch keyboard shortcuts
 
 ## Credits and Inspirations
 

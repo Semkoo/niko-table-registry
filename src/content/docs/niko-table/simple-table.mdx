@@ -4,6 +4,7 @@ description: A basic data table with no pagination - perfect for small datasets.
 ---
 
 import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
+import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
 
 <CodePreview demo="niko-table/simple" />
 
@@ -15,17 +16,19 @@ The Simple Table is the most basic implementation. It displays your data in a cl
 
 1. Add the `<Table />` component to your project:
 
-```bash
-npx shadcn@latest add table
-```
+<CliCommandCode action="run" command="shadcn@latest add table" />
 
 2. Add `tanstack/react-table` dependency:
 
-```bash
-npm install @tanstack/react-table
-```
+<CliCommandCode action="install" command="@tanstack/react-table" />
 
-3. Copy the DataTable components into your project. See the [Installation Guide](/getting-started/installation) for detailed instructions.
+3. **Update the Shadcn table component** — Replace the contents of `components/ui/table.tsx` with the DataTable-compatible version (adds `TableComponent` export and `data-slot` attributes). See the [Installation Guide](/getting-started/installation#update-shadcn-table-component-first) for the full code.
+
+4. **Install the DataTable core** — From your project root, run:
+
+<CliCommandCode action="run" command={'shadcn@latest add "https://niko-table.com/r/data-table.json"'} />
+
+For optional add-ons (pagination, filters, virtualization, etc.) and manual copy-paste, see the [Installation Guide](/getting-started/installation).
 
 ## Prerequisites
 
