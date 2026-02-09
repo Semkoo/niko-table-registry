@@ -4,6 +4,7 @@ description: Server-side pagination, sorting, and filtering with TanStack Query 
 ---
 
 import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
+import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
 
 <CodePreview demo="niko-table/server-side-state" />
 
@@ -15,15 +16,11 @@ The Server-Side Table demonstrates server-side pagination, sorting, and filterin
 
 1. Add the required components:
 
-```bash
-npx shadcn@latest add table input button dropdown-menu popover command checkbox select scroll-area separator skeleton tooltip
-```
+<CliCommandCode action="run" command="shadcn@latest add table input button dropdown-menu popover command checkbox select scroll-area separator skeleton tooltip" />
 
 2. Add dependencies:
 
-```bash
-npm install @tanstack/react-table @tanstack/react-query
-```
+<CliCommandCode action="install" command="@tanstack/react-table @tanstack/react-query" />
 
 **Note:** [TanStack Query](https://tanstack.com/query/latest) provides powerful asynchronous state management, server-state utilities, and data fetching capabilities. It handles caching, background updates, and stale data out of the box with zero-configuration.
 
@@ -31,7 +28,17 @@ npm install @tanstack/react-table @tanstack/react-query
 
 This example uses `DataTableSortMenu` and `DataTableFilterMenu` which require the Sortable component for drag-and-drop reordering. Follow the [DiceUI Sortable installation guide](https://www.diceui.com/docs/components/sortable).
 
-3. Copy the DataTable components into your project. See the [Installation Guide](/getting-started/installation) for detailed instructions.
+3. **Update the Shadcn table component** — Replace the contents of `components/ui/table.tsx` with the DataTable-compatible version (adds `TableComponent` export and `data-slot` attributes). See the [Installation Guide](/getting-started/installation#update-shadcn-table-component-first) for the full code.
+
+4. **Install the DataTable core** — From your project root, run:
+
+<CliCommandCode action="run" command={'shadcn@latest add "https://niko-table.com/r/data-table.json"'} />
+
+5. **Install add-ons for this example** — This example uses sort menu, filter menu, pagination, search, view menu, column sort, and column-level faceted/slider/date filters. Run:
+
+<CliCommandCode action="run" command={'shadcn@latest add "https://niko-table.com/r/data-table-pagination.json" "https://niko-table.com/r/data-table-search-filter.json" "https://niko-table.com/r/data-table-view-menu.json" "https://niko-table.com/r/data-table-sort-menu.json" "https://niko-table.com/r/data-table-filter-menu.json" "https://niko-table.com/r/data-table-column-sort.json" "https://niko-table.com/r/data-table-column-faceted-filter.json" "https://niko-table.com/r/data-table-column-slider-filter.json" "https://niko-table.com/r/data-table-column-date-filter.json"'} />
+
+For other add-ons or manual copy-paste, see the [Installation Guide](/getting-started/installation).
 
 ## Setup
 
