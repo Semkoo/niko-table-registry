@@ -809,6 +809,25 @@ import {
 | `multiple`  | `boolean`       | Allow multiple selection.            |
 | `className` | `string`        | Additional CSS classes.              |
 
+### TableColumnFilterTrigger
+
+Core trigger button for opening the column filter popover. Renders a filter icon (or filter-clear icon when the column is filtered). Often used with `TableColumnFacetedFilterOptions` or `TableColumnFacetedFilterMenu`; accepts standard Button props in addition to `column`.
+
+```tsx showLineNumbers
+import { TableColumnFilterTrigger } from "@/components/niko-table/filters"
+
+<TableColumnFilterTrigger column={column} />
+```
+
+#### Props
+
+| Name        | Type                    | Default | Description                                |
+| ----------- | ----------------------- | ------- | ------------------------------------------ |
+| `column`    | `Column<TData, TValue>` | -       | TanStack Table column instance (required). |
+| `className` | `string`                | -       | Additional CSS classes.                    |
+
+All other props are passed through to the underlying `Button` component.
+
 ### TableColumnSliderFilterOptions
 
 Core slider filter implementation for column headers. Renders a range slider inside a dropdown menu.
