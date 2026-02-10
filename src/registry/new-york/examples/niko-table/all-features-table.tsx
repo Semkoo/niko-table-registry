@@ -66,7 +66,11 @@ import {
   DataTableAsideClose,
   DataTableSelectionBar,
 } from "@/components/niko-table/components"
-import { SYSTEM_COLUMN_IDS, FILTER_VARIANTS } from "@/components/niko-table/lib"
+import {
+  SYSTEM_COLUMN_IDS,
+  FILTER_VARIANTS,
+  JOIN_OPERATORS,
+} from "@/components/niko-table/lib"
 import { useDataTable } from "@/components/niko-table/core"
 import { daysAgo } from "@/components/niko-table/lib"
 import { exportTableToCSV } from "@/components/niko-table/filters"
@@ -618,6 +622,126 @@ export default function AllFeaturesTableExample() {
     [],
   )
 
+  // Helper to display global filter state
+  const getGlobalFilterDisplay = () => {
+    if (typeof globalFilter === "string") {
+      return globalFilter || "None"
+    }
+    if (
+      typeof globalFilter === "object" &&
+      globalFilter &&
+      "filters" in globalFilter
+    ) {
+      const filterObj = globalFilter as {
+        filters: unknown[]
+        joinOperator: string
+      }
+      return `OR Filter (${filterObj.filters?.length || 0} conditions)`
+    }
+    return "None"
+  }
+
+  // Extract actual filter data for display
+  const displayFilters = useMemo(() => {
+    if (
+      typeof globalFilter === "object" &&
+      globalFilter &&
+      "filters" in globalFilter
+    ) {
+      const filterObj = globalFilter as {
+        filters: unknown[]
+        joinOperator: string
+      }
+      return filterObj.filters || []
+    }
+    return columnFilters
+  }, [columnFilters, globalFilter])
+
+  // Enhanced filter statistics
+  const filterStats = useMemo(() => {
+    if (
+      typeof globalFilter === "object" &&
+      globalFilter &&
+      "filters" in globalFilter
+    ) {
+      const filterObj = globalFilter as {
+        filters: Array<{
+          joinOperator?: string
+          value?: unknown
+        }>
+        joinOperator: string
+      }
+      const filters = filterObj.filters || []
+
+      const hasAndFilters = filters.some(
+        (filter, index) =>
+          index === 0 || filter.joinOperator === JOIN_OPERATORS.AND,
+      )
+      const hasOrFilters = filters.some(
+        (filter, index) =>
+          index > 0 && filter.joinOperator === JOIN_OPERATORS.OR,
+      )
+
+      return {
+        totalFilters: filters.length,
+        hasAndFilters,
+        hasOrFilters,
+        effectiveJoinOperator: hasOrFilters
+          ? JOIN_OPERATORS.MIXED
+          : JOIN_OPERATORS.AND,
+        activeFilters: filters.filter(f => f.value && f.value !== "").length,
+      }
+    }
+
+    const hasAndFilters = columnFilters.length > 0
+    const hasOrFilters = columnFilters.some(
+      filter =>
+        typeof filter.value === "object" &&
+        filter.value &&
+        "joinOperator" in filter.value &&
+        filter.value.joinOperator === "or",
+    )
+
+    return {
+      totalFilters: columnFilters.length,
+      hasAndFilters,
+      hasOrFilters,
+      effectiveJoinOperator: hasOrFilters
+        ? JOIN_OPERATORS.MIXED
+        : JOIN_OPERATORS.AND,
+      activeFilters: columnFilters.filter(f => f.value && f.value !== "")
+        .length,
+    }
+  }, [columnFilters, globalFilter])
+
+  // Get current filter mode
+  const getFilterMode = () => {
+    if (
+      typeof globalFilter === "object" &&
+      globalFilter &&
+      "filters" in globalFilter
+    ) {
+      const filterObj = globalFilter as {
+        filters: unknown[]
+        joinOperator: string
+      }
+      if (filterObj.joinOperator === "mixed") {
+        return "MIXED"
+      }
+      return filterObj.joinOperator.toUpperCase()
+    }
+
+    const hasOrOperators = columnFilters.some(
+      filter =>
+        typeof filter.value === "object" &&
+        filter.value &&
+        "joinOperator" in filter.value &&
+        filter.value.joinOperator === "or",
+    )
+
+    return hasOrOperators ? "MIXED" : "AND"
+  }
+
   // Define columns with all features
   const columns: DataTableColumnDef<Product>[] = useMemo(
     () => [
@@ -1061,9 +1185,17 @@ export default function AllFeaturesTableExample() {
         <CardContent className="space-y-4">
           <div className="grid gap-2 text-xs text-muted-foreground">
             <div className="flex justify-between">
+              <span className="font-medium">Search Query:</span>
+              <span className="text-foreground">
+                {getGlobalFilterDisplay()}
+              </span>
+            </div>
+
+            <div className="flex justify-between">
               <span className="font-medium">Total Items:</span>
               <span className="text-foreground">{data.length}</span>
             </div>
+
             <div className="flex justify-between">
               <span className="font-medium">Selected Rows:</span>
               <span className="text-foreground">
@@ -1073,6 +1205,7 @@ export default function AllFeaturesTableExample() {
                 }
               </span>
             </div>
+
             <div className="flex justify-between">
               <span className="font-medium">Expanded Rows:</span>
               <span className="text-foreground">
@@ -1083,10 +1216,33 @@ export default function AllFeaturesTableExample() {
                   : 0}
               </span>
             </div>
+
             <div className="flex justify-between">
               <span className="font-medium">Active Filters:</span>
-              <span className="text-foreground">{currentFilters.length}</span>
+              <span className="text-foreground">{columnFilters.length}</span>
             </div>
+
+            <div className="flex justify-between">
+              <span className="font-medium">Enhanced Filters:</span>
+              <span className="text-foreground">
+                {filterStats.totalFilters}
+              </span>
+            </div>
+
+            <div className="flex justify-between">
+              <span className="font-medium">Active Enhanced:</span>
+              <span className="text-foreground">
+                {filterStats.activeFilters}
+              </span>
+            </div>
+
+            <div className="flex justify-between">
+              <span className="font-medium">Join Logic:</span>
+              <span className="text-foreground">
+                {filterStats.effectiveJoinOperator}
+              </span>
+            </div>
+
             <div className="flex justify-between">
               <span className="font-medium">Sorting:</span>
               <span className="text-foreground">
@@ -1097,12 +1253,24 @@ export default function AllFeaturesTableExample() {
                   : "None"}
               </span>
             </div>
+
             <div className="flex justify-between">
               <span className="font-medium">Page:</span>
               <span className="text-foreground">
                 {pagination.pageIndex + 1} (Size: {pagination.pageSize})
               </span>
             </div>
+
+            <div className="flex justify-between">
+              <span className="font-medium">Hidden Columns:</span>
+              <span className="text-foreground">
+                {
+                  Object.values(columnVisibility).filter(v => v === false)
+                    .length
+                }
+              </span>
+            </div>
+
             <div className="flex justify-between">
               <span className="font-medium">Pinned Columns:</span>
               <span className="text-foreground">
@@ -1111,6 +1279,81 @@ export default function AllFeaturesTableExample() {
               </span>
             </div>
           </div>
+
+          {/* Detailed state (collapsible) */}
+          <details className="border-t pt-4">
+            <summary className="cursor-pointer text-xs font-medium hover:text-foreground">
+              View Full State Object
+            </summary>
+            <div className="mt-4 space-y-3 text-xs">
+              <div>
+                <strong>Enhanced Filters:</strong>
+                <pre className="mt-1 overflow-auto rounded bg-muted p-2">
+                  {displayFilters.length > 0
+                    ? JSON.stringify(displayFilters, null, 2)
+                    : "No enhanced filters"}
+                </pre>
+              </div>
+              <div>
+                <strong>Column Pinning:</strong>
+                <pre className="mt-1 overflow-auto rounded bg-muted p-2">
+                  {JSON.stringify(columnPinning, null, 2)}
+                </pre>
+              </div>
+              <div>
+                <strong>Filter Stats:</strong>
+                <pre className="mt-1 overflow-auto rounded bg-muted p-2">
+                  {JSON.stringify(filterStats, null, 2)}
+                </pre>
+              </div>
+              <div>
+                <strong>Filter Mode:</strong> {getFilterMode()}
+                <div className="mt-1 text-muted-foreground">
+                  {getFilterMode() === "AND"
+                    ? "All conditions must match (stored in columnFilters)"
+                    : getFilterMode() === "OR"
+                      ? "Any condition can match (stored in globalFilter)"
+                      : "Mixed logic - individual AND/OR operators per filter"}
+                </div>
+              </div>
+              <div>
+                <strong>Sorting:</strong>
+                <pre className="mt-1 overflow-auto rounded bg-muted p-2">
+                  {JSON.stringify(sorting, null, 2)}
+                </pre>
+              </div>
+              <div>
+                <strong>Column Filters State (AND logic):</strong>
+                <pre className="mt-1 overflow-auto rounded bg-muted p-2">
+                  {JSON.stringify(columnFilters, null, 2)}
+                </pre>
+              </div>
+              <div>
+                <strong>Global Filter State (OR logic):</strong>
+                <pre className="mt-1 overflow-auto rounded bg-muted p-2">
+                  {JSON.stringify(globalFilter, null, 2)}
+                </pre>
+              </div>
+              <div>
+                <strong>Column Visibility:</strong>
+                <pre className="mt-1 overflow-auto rounded bg-muted p-2">
+                  {JSON.stringify(columnVisibility, null, 2)}
+                </pre>
+              </div>
+              <div>
+                <strong>Row Selection:</strong>
+                <pre className="mt-1 overflow-auto rounded bg-muted p-2">
+                  {JSON.stringify(rowSelection, null, 2)}
+                </pre>
+              </div>
+              <div>
+                <strong>Expanded Rows:</strong>
+                <pre className="mt-1 overflow-auto rounded bg-muted p-2">
+                  {JSON.stringify(expanded, null, 2)}
+                </pre>
+              </div>
+            </div>
+          </details>
         </CardContent>
       </Card>
     </div>
