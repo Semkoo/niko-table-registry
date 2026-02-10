@@ -193,6 +193,22 @@ Learn more in the [Introduction](/getting-started/introduction#state-management-
 
 </Steps>
 
+## Configure the Niko Table Registry
+
+To use the `@niko-table/` namespace with the shadcn CLI, you must first register it in your project's `components.json`. Add the `registries` field:
+
+```json title="components.json"
+{
+  "$schema": "https://ui.shadcn.com/schema.json",
+  // ... your existing config (style, tailwind, aliases, etc.)
+  "registries": {
+    "@niko-table": "https://niko-table.com/r/{name}.json"
+  }
+}
+```
+
+> **Tip:** If you prefer not to modify `components.json`, you can install any component directly via URL instead – see the URL-based commands in each section below.
+
 ## Installation
 
 Now you can install the core DataTable components:
@@ -203,7 +219,7 @@ Now you can install the core DataTable components:
 
 ## Install Everything
 
-Want all components at once? The following command installs **core + all optional add-ons** in one go. It uses the `@niko-table/` namespace, so the niko-table registry must be configured in your `components.json`.
+Want all components at once? The following command installs **core + all optional add-ons** in one go:
 
 <CliCommandCode
   action="run"
