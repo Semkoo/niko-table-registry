@@ -98,11 +98,24 @@ function getFileLocationFromType(type: RegistryFileType) {
 <div>
   <!-- @ts-expect-error: This component takes a cliSteps prop but the only way to pass that in with Astro is with a slot -->
   <InstallationTabsInternal client:load>
-    <CliCommandCode
-      slot="cliSteps"
-      action="run"
-      command={`shadcn@latest add @niko-table/${registryItem}`}
-    />
+    <div slot="cliSteps" class="flex flex-col gap-4">
+      <CliCommandCode
+        action="run"
+        command={`shadcn@latest add @niko-table/${registryItem}`}
+      />
+      <p class="text-sm text-muted-foreground">
+        Requires the <code>@niko-table</code> registry in your <code
+          >components.json</code
+        >. See the <a
+          href="/getting-started/installation#configure-the-niko-table-registry"
+          class="underline underline-offset-3">Installation Guide</a
+        > for setup. Or install directly via URL:
+      </p>
+      <CliCommandCode
+        action="run"
+        command={`shadcn@latest add "https://niko-table.com/r/${registryItem}.json"`}
+      />
+    </div>
     <div class="flex flex-col gap-8">
       {
         registryDependencies != null && registryDependencies.length > 0 && (
