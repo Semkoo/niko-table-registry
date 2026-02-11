@@ -1,13 +1,12 @@
 "use client"
 
 import * as React from "react"
+import { DataTableRoot, DataTable } from "@/components/niko-table/core"
+import { DataTableVirtualizedEmptyBody } from "@/components/niko-table/core/data-table-virtualized-structure"
 import {
-  DataTableRoot,
-  DataTable,
   DataTableVirtualizedDndHeader,
   DataTableVirtualizedDndColumnBody,
-  DataTableVirtualizedEmptyBody,
-} from "@/components/niko-table/core"
+} from "@/components/niko-table/core/data-table-virtualized-dnd-structure"
 import {
   DataTableColumnDndProvider,
   DataTableEmptyIcon,
