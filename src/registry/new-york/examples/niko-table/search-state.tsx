@@ -17,9 +17,6 @@ import {
 } from "@/components/niko-table/core"
 import {
   DataTableToolbarSection,
-  DataTablePagination,
-  DataTableSearchFilter,
-  DataTableViewMenu,
   DataTableEmptyIcon,
   DataTableEmptyMessage,
   DataTableEmptyFilteredMessage,
@@ -27,8 +24,11 @@ import {
   DataTableEmptyDescription,
   DataTableColumnTitle,
   DataTableColumnHeader,
-  DataTableColumnSortMenu,
 } from "@/components/niko-table/components"
+import { DataTablePagination } from "@/components/niko-table/components/data-table-pagination"
+import { DataTableSearchFilter } from "@/components/niko-table/components/data-table-search-filter"
+import { DataTableViewMenu } from "@/components/niko-table/components/data-table-view-menu"
+import { DataTableColumnSortMenu } from "@/components/niko-table/components/data-table-column-sort"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 import { Button } from "@/components/ui/button"
 import { UserSearch, SearchX } from "lucide-react"
