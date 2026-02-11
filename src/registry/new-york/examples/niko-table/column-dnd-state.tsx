@@ -4,10 +4,12 @@ import * as React from "react"
 import {
   DataTableRoot,
   DataTable,
-  DataTableDndHeader,
-  DataTableDndColumnBody,
   DataTableEmptyBody,
 } from "@/components/niko-table/core"
+import {
+  DataTableDndHeader,
+  DataTableDndColumnBody,
+} from "@/components/niko-table/core/data-table-dnd-structure"
 import {
   DataTableColumnDndProvider,
   DataTableEmptyIcon,

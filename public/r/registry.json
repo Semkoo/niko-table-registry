@@ -42,11 +42,6 @@
           "target": "components/niko-table/core/data-table-error-boundary.tsx"
         },
         {
-          "path": "src/components/niko-table/core/index.tsx",
-          "type": "registry:component",
-          "target": "components/niko-table/core/index.tsx"
-        },
-        {
           "path": "src/components/niko-table/components/data-table-column-header.tsx",
           "type": "registry:component",
           "target": "components/niko-table/components/data-table-column-header.tsx"
@@ -67,11 +62,6 @@
           "target": "components/niko-table/components/data-table-column-filter.tsx"
         },
         {
-          "path": "src/components/niko-table/components/data-table-column-filter-trigger.tsx",
-          "type": "registry:component",
-          "target": "components/niko-table/components/data-table-column-filter-trigger.tsx"
-        },
-        {
           "path": "src/components/niko-table/components/data-table-toolbar-section.tsx",
           "type": "registry:component",
           "target": "components/niko-table/components/data-table-toolbar-section.tsx"
@@ -82,11 +72,6 @@
           "target": "components/niko-table/components/data-table-empty-state.tsx"
         },
         {
-          "path": "src/components/niko-table/components/index.tsx",
-          "type": "registry:component",
-          "target": "components/niko-table/components/index.tsx"
-        },
-        {
           "path": "src/components/niko-table/filters/table-column-actions.tsx",
           "type": "registry:component",
           "target": "components/niko-table/filters/table-column-actions.tsx"
@@ -95,11 +80,6 @@
           "path": "src/components/niko-table/filters/table-column-title.tsx",
           "type": "registry:component",
           "target": "components/niko-table/filters/table-column-title.tsx"
-        },
-        {
-          "path": "src/components/niko-table/filters/index.tsx",
-          "type": "registry:component",
-          "target": "components/niko-table/filters/index.tsx"
         },
         {
           "path": "src/components/niko-table/hooks/use-debounce.ts",
@@ -175,6 +155,11 @@
           "path": "src/components/niko-table/types/index.ts",
           "type": "registry:lib",
           "target": "components/niko-table/types/index.ts"
+        },
+        {
+          "path": "src/components/niko-table/core/index.tsx",
+          "type": "registry:lib",
+          "target": "components/niko-table/core/index.tsx"
         }
       ]
     },
@@ -412,6 +397,11 @@
           "path": "src/components/niko-table/filters/table-inline-filter.tsx",
           "type": "registry:component",
           "target": "components/niko-table/filters/table-inline-filter.tsx"
+        },
+        {
+          "path": "src/components/niko-table/filters/table-range-filter.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/table-range-filter.tsx"
         }
       ]
     },
@@ -609,6 +599,7 @@
       "dependencies": ["lucide-react"],
       "registryDependencies": [
         "https://niko-table.com/r/data-table.json",
+        "https://niko-table.com/r/data-table-faceted-filter.json",
         "button",
         "dropdown-menu",
         "tooltip",
@@ -625,6 +616,11 @@
           "path": "src/components/niko-table/filters/table-column-faceted-filter.tsx",
           "type": "registry:component",
           "target": "components/niko-table/filters/table-column-faceted-filter.tsx"
+        },
+        {
+          "path": "src/components/niko-table/components/data-table-column-filter-trigger.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-column-filter-trigger.tsx"
         }
       ]
     },
@@ -706,6 +702,11 @@
           "target": "components/niko-table/filters/table-row-dnd.tsx"
         },
         {
+          "path": "src/components/niko-table/filters/table-column-dnd.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/table-column-dnd.tsx"
+        },
+        {
           "path": "src/components/niko-table/components/data-table-row-dnd.tsx",
           "type": "registry:component",
           "target": "components/niko-table/components/data-table-row-dnd.tsx"
@@ -714,11 +715,6 @@
           "path": "src/components/niko-table/core/data-table-dnd-structure.tsx",
           "type": "registry:component",
           "target": "components/niko-table/core/data-table-dnd-structure.tsx"
-        },
-        {
-          "path": "src/components/niko-table/core/data-table-virtualized-dnd-structure.tsx",
-          "type": "registry:component",
-          "target": "components/niko-table/core/data-table-virtualized-dnd-structure.tsx"
         }
       ]
     },
@@ -741,6 +737,11 @@
           "target": "components/niko-table/filters/table-column-dnd.tsx"
         },
         {
+          "path": "src/components/niko-table/filters/table-row-dnd.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/table-row-dnd.tsx"
+        },
+        {
           "path": "src/components/niko-table/components/data-table-column-dnd.tsx",
           "type": "registry:component",
           "target": "components/niko-table/components/data-table-column-dnd.tsx"
@@ -749,11 +750,6 @@
           "path": "src/components/niko-table/core/data-table-dnd-structure.tsx",
           "type": "registry:component",
           "target": "components/niko-table/core/data-table-dnd-structure.tsx"
-        },
-        {
-          "path": "src/components/niko-table/core/data-table-virtualized-dnd-structure.tsx",
-          "type": "registry:component",
-          "target": "components/niko-table/core/data-table-virtualized-dnd-structure.tsx"
         }
       ]
     }
