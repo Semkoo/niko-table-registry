@@ -9,13 +9,6 @@ import {
 } from "@/components/niko-table/core"
 import {
   DataTableToolbarSection,
-  DataTablePagination,
-  DataTableSearchFilter,
-  DataTableViewMenu,
-  DataTableFacetedFilter,
-  DataTableClearFilter,
-  DataTableSliderFilter,
-  DataTableDateFilter,
   DataTableEmptyFilteredMessage,
   DataTableEmptyTitle,
   DataTableEmptyDescription,
@@ -23,11 +16,18 @@ import {
   DataTableEmptyMessage,
   DataTableColumnTitle,
   DataTableColumnHeader,
-  DataTableColumnSortMenu,
-  DataTableColumnFacetedFilterMenu,
-  DataTableColumnSliderFilterMenu,
-  DataTableColumnDateFilterMenu,
 } from "@/components/niko-table/components"
+import { DataTablePagination } from "@/components/niko-table/components/data-table-pagination"
+import { DataTableSearchFilter } from "@/components/niko-table/components/data-table-search-filter"
+import { DataTableViewMenu } from "@/components/niko-table/components/data-table-view-menu"
+import { DataTableFacetedFilter } from "@/components/niko-table/components/data-table-faceted-filter"
+import { DataTableClearFilter } from "@/components/niko-table/components/data-table-clear-filter"
+import { DataTableSliderFilter } from "@/components/niko-table/components/data-table-slider-filter"
+import { DataTableDateFilter } from "@/components/niko-table/components/data-table-date-filter"
+import { DataTableColumnSortMenu } from "@/components/niko-table/components/data-table-column-sort"
+import { DataTableColumnFacetedFilterMenu } from "@/components/niko-table/components/data-table-column-faceted-filter"
+import { DataTableColumnSliderFilterMenu } from "@/components/niko-table/components/data-table-column-slider-filter-options"
+import { DataTableColumnDateFilterMenu } from "@/components/niko-table/components/data-table-column-date-filter-options"
 import { daysAgo, FILTER_VARIANTS } from "@/components/niko-table/lib"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 import { Badge } from "@/components/ui/badge"
