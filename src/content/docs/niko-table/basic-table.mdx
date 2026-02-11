@@ -19,23 +19,11 @@ The Basic Table builds on the Simple Table by adding pagination, sorting, and co
 
 ## Installation
 
-1. Add the `<Table />` component to your project:
+Install the DataTable core and add-ons for this example:
 
-<CliCommandCode action="run" command="shadcn@latest add table button dropdown-menu" />
+<CliCommandCode action="run" command="shadcn@latest add @niko-table/data-table @niko-table/data-table-pagination @niko-table/data-table-view-menu @niko-table/data-table-column-sort" />
 
-2. Add `tanstack/react-table` dependency:
-
-<CliCommandCode action="install" command="@tanstack/react-table" />
-
-3. **Update the Shadcn table component** — Replace the contents of `components/ui/table.tsx` with the DataTable-compatible version (adds `TableComponent` export and `data-slot` attributes). See the [Installation Guide](/getting-started/installation#update-shadcn-table-component-first) for the full code.
-
-4. **Install the DataTable core** — From your project root, run:
-
-<CliCommandCode action="run" command={'shadcn@latest add "https://niko-table.com/r/data-table.json"'} />
-
-5. **Install add-ons for this example** — This example uses pagination, column sort, and view menu. Run:
-
-<CliCommandCode action="run" command={'shadcn@latest add "https://niko-table.com/r/data-table-pagination.json" "https://niko-table.com/r/data-table-view-menu.json" "https://niko-table.com/r/data-table-column-sort.json"'} />
+> First time using `@niko-table`? See the [Installation Guide](/getting-started/installation#configure-the-niko-table-registry) to set up the registry.
 
 For other add-ons or manual copy-paste, see the [Installation Guide](/getting-started/installation).
 
