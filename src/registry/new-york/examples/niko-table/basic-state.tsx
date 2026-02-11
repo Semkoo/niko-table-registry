@@ -14,13 +14,13 @@ import {
   DataTableBody,
 } from "@/components/niko-table/core"
 import {
+  DataTableViewMenu,
+  DataTablePagination,
   DataTableToolbarSection,
   DataTableColumnHeader,
   DataTableColumnTitle,
+  DataTableColumnSortMenu,
 } from "@/components/niko-table/components"
-import { DataTableViewMenu } from "@/components/niko-table/components/data-table-view-menu"
-import { DataTablePagination } from "@/components/niko-table/components/data-table-pagination"
-import { DataTableColumnSortMenu } from "@/components/niko-table/components/data-table-column-sort"
 import { FILTER_VARIANTS } from "@/components/niko-table/lib"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 import { Button } from "@/components/ui/button"

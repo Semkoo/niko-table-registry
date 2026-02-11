@@ -17,29 +17,27 @@ import {
 } from "@/components/niko-table/core"
 import {
   DataTableToolbarSection,
+  DataTablePagination,
+  DataTableSearchFilter,
+  DataTableViewMenu,
+  DataTableInlineFilter,
   DataTableEmptyFilteredMessage,
   DataTableEmptyTitle,
   DataTableEmptyDescription,
   DataTableEmptyIcon,
   DataTableEmptyMessage,
+  DataTableFacetedFilter,
   DataTableColumnHeader,
   DataTableColumnTitle,
   DataTableColumnActions,
   DataTableColumnFilter,
-} from "@/components/niko-table/components"
-import { DataTablePagination } from "@/components/niko-table/components/data-table-pagination"
-import { DataTableSearchFilter } from "@/components/niko-table/components/data-table-search-filter"
-import { DataTableViewMenu } from "@/components/niko-table/components/data-table-view-menu"
-import { DataTableInlineFilter } from "@/components/niko-table/components/data-table-inline-filter"
-import { DataTableFacetedFilter } from "@/components/niko-table/components/data-table-faceted-filter"
-import { DataTableColumnFilterTrigger } from "@/components/niko-table/components/data-table-column-filter-trigger"
-import {
+  DataTableColumnFilterTrigger,
   DataTableColumnSortMenu,
   DataTableColumnSortOptions,
-} from "@/components/niko-table/components/data-table-column-sort"
-import { DataTableColumnFacetedFilterMenu } from "@/components/niko-table/components/data-table-column-faceted-filter"
-import { DataTableColumnSliderFilterMenu } from "@/components/niko-table/components/data-table-column-slider-filter-options"
-import { DataTableColumnDateFilterMenu } from "@/components/niko-table/components/data-table-column-date-filter-options"
+  DataTableColumnFacetedFilterMenu,
+  DataTableColumnSliderFilterMenu,
+  DataTableColumnDateFilterMenu,
+} from "@/components/niko-table/components"
 import {
   daysAgo,
   JOIN_OPERATORS,
