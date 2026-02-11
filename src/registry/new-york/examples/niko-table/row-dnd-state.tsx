@@ -9,6 +9,8 @@ import {
 } from "@/components/niko-table/core"
 import { DataTableDndBody } from "@/components/niko-table/core/data-table-dnd-structure"
 import {
+  DataTableRowDndProvider,
+  DataTableRowDragHandle,
   DataTableEmptyIcon,
   DataTableEmptyMessage,
   DataTableEmptyTitle,
@@ -16,10 +18,6 @@ import {
   DataTableColumnHeader,
   DataTableColumnTitle,
 } from "@/components/niko-table/components"
-import {
-  DataTableRowDndProvider,
-  DataTableRowDragHandle,
-} from "@/components/niko-table/components/data-table-row-dnd"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"

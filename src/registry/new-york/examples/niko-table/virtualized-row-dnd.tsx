@@ -8,6 +8,8 @@ import {
 } from "@/components/niko-table/core/data-table-virtualized-structure"
 import { DataTableVirtualizedDndBody } from "@/components/niko-table/core/data-table-virtualized-dnd-structure"
 import {
+  DataTableRowDndProvider,
+  DataTableRowDragHandle,
   DataTableEmptyIcon,
   DataTableEmptyMessage,
   DataTableEmptyTitle,
@@ -15,10 +17,6 @@ import {
   DataTableColumnHeader,
   DataTableColumnTitle,
 } from "@/components/niko-table/components"
-import {
-  DataTableRowDndProvider,
-  DataTableRowDragHandle,
-} from "@/components/niko-table/components/data-table-row-dnd"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 import { Badge } from "@/components/ui/badge"
 import { Inbox } from "lucide-react"
