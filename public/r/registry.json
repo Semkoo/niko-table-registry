@@ -160,6 +160,16 @@
           "path": "src/components/niko-table/core/index.tsx",
           "type": "registry:lib",
           "target": "components/niko-table/core/index.tsx"
+        },
+        {
+          "path": "src/components/niko-table/components/index.tsx",
+          "type": "registry:lib",
+          "target": "components/niko-table/components/index.tsx"
+        },
+        {
+          "path": "src/components/niko-table/filters/index.tsx",
+          "type": "registry:lib",
+          "target": "components/niko-table/filters/index.tsx"
         }
       ]
     },
