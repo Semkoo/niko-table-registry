@@ -19,23 +19,15 @@ The Row Selection Table adds checkboxes to each row, allowing users to select in
 
 ## Installation
 
-1. Add the required components:
+Install the DataTable core and add-ons for this example:
 
-<CliCommandCode action="run" command="shadcn@latest add table input button dropdown-menu checkbox tooltip" />
+<CliCommandCode action="run" command="shadcn@latest add @niko-table/data-table @niko-table/data-table-selection-bar @niko-table/data-table-pagination @niko-table/data-table-search-filter @niko-table/data-table-view-menu @niko-table/data-table-column-sort" />
 
-2. Add `tanstack/react-table` dependency:
+This example also uses `checkbox` from Shadcn UI for row selection:
 
-<CliCommandCode action="install" command="@tanstack/react-table" />
+<CliCommandCode action="run" command="shadcn@latest add checkbox" />
 
-3. **Update the Shadcn table component** — Replace the contents of `components/ui/table.tsx` with the DataTable-compatible version (adds `TableComponent` export and `data-slot` attributes). See the [Installation Guide](/getting-started/installation#update-shadcn-table-component-first) for the full code.
-
-4. **Install the DataTable core** — From your project root, run:
-
-<CliCommandCode action="run" command={'shadcn@latest add "https://niko-table.com/r/data-table.json"'} />
-
-5. **Install add-ons for this example** — This example uses selection bar, pagination, search, view menu, and column sort. Run:
-
-<CliCommandCode action="run" command={'shadcn@latest add "https://niko-table.com/r/data-table-selection-bar.json" "https://niko-table.com/r/data-table-pagination.json" "https://niko-table.com/r/data-table-search-filter.json" "https://niko-table.com/r/data-table-view-menu.json" "https://niko-table.com/r/data-table-column-sort.json"'} />
+> First time using `@niko-table`? See the [Installation Guide](/getting-started/installation#configure-the-niko-table-registry) to set up the registry.
 
 For other add-ons or manual copy-paste, see the [Installation Guide](/getting-started/installation).
 

@@ -54,23 +54,21 @@ We now have a solid foundation to build on top of. Composable. Themeable. Custom
 
 <Steps>
 
-1. **Run the following command to install the required Shadcn components**
+1. **Configure the `@niko-table` registry**
 
-   <CliCommandCode action="run" command="shadcn@latest add table input button dropdown-menu popover command badge scroll-area separator checkbox select skeleton tooltip" />
+   Add the registry to your `components.json`:
 
-2. **Add the TanStack Table dependency**
+   ```json title="components.json"
+   {
+     "registries": {
+       "@niko-table": "https://niko-table.com/r/{name}.json"
+     }
+   }
+   ```
 
-   <CliCommandCode action="install" command="@tanstack/react-table" />
+2. **Install the DataTable core and all add-ons**
 
-3. **Update the Shadcn table component**
-
-   Replace the contents of `components/ui/table.tsx` with the DataTable-compatible version (adds `TableComponent` export and `data-slot` attributes). See the [Installation Guide](/getting-started/installation#update-shadcn-table-component-first) for the full code.
-
-4. **Install the DataTable core**
-
-   From your project root, run:
-
-   <CliCommandCode action="run" command={'shadcn@latest add "https://niko-table.com/r/data-table.json"'} />
+   <CliCommandCode action="run" command="shadcn@latest add @niko-table/data-table @niko-table/data-table-pagination @niko-table/data-table-search-filter @niko-table/data-table-view-menu @niko-table/data-table-sort-menu @niko-table/data-table-filter-menu @niko-table/data-table-column-sort @niko-table/data-table-column-faceted-filter @niko-table/data-table-column-slider-filter @niko-table/data-table-column-date-filter" />
 
    For optional add-ons (pagination, filters, virtualization, etc.) and manual copy-paste, see the [Installation Guide](/getting-started/installation).
 
