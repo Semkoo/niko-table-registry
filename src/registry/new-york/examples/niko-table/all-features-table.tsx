@@ -35,14 +35,6 @@ import {
 } from "@/components/niko-table/core"
 import {
   DataTableToolbarSection,
-  DataTablePagination,
-  DataTableSearchFilter,
-  DataTableViewMenu,
-  DataTableSortMenu,
-  DataTableFilterMenu,
-  DataTableFacetedFilter,
-  DataTableSliderFilter,
-  DataTableClearFilter,
   DataTableEmptyIcon,
   DataTableEmptyMessage,
   DataTableEmptyFilteredMessage,
@@ -52,20 +44,30 @@ import {
   DataTableColumnHeader,
   DataTableColumnTitle,
   DataTableColumnActions,
-  DataTableColumnSortOptions,
-  DataTableColumnFacetedFilterOptions,
-  DataTableColumnSliderFilterOptions,
-  DataTableColumnDateFilterOptions,
-  DataTableColumnPinOptions,
-  DataTableColumnHideOptions,
+} from "@/components/niko-table/components"
+import { DataTablePagination } from "@/components/niko-table/components/data-table-pagination"
+import { DataTableSearchFilter } from "@/components/niko-table/components/data-table-search-filter"
+import { DataTableViewMenu } from "@/components/niko-table/components/data-table-view-menu"
+import { DataTableSortMenu } from "@/components/niko-table/components/data-table-sort-menu"
+import { DataTableFilterMenu } from "@/components/niko-table/components/data-table-filter-menu"
+import { DataTableFacetedFilter } from "@/components/niko-table/components/data-table-faceted-filter"
+import { DataTableSliderFilter } from "@/components/niko-table/components/data-table-slider-filter"
+import { DataTableClearFilter } from "@/components/niko-table/components/data-table-clear-filter"
+import { DataTableColumnSortOptions } from "@/components/niko-table/components/data-table-column-sort"
+import { DataTableColumnFacetedFilterOptions } from "@/components/niko-table/components/data-table-column-faceted-filter"
+import { DataTableColumnSliderFilterOptions } from "@/components/niko-table/components/data-table-column-slider-filter-options"
+import { DataTableColumnDateFilterOptions } from "@/components/niko-table/components/data-table-column-date-filter-options"
+import { DataTableColumnPinOptions } from "@/components/niko-table/components/data-table-column-pin"
+import { DataTableColumnHideOptions } from "@/components/niko-table/components/data-table-column-hide"
+import {
   DataTableAside,
   DataTableAsideContent,
   DataTableAsideHeader,
   DataTableAsideTitle,
   DataTableAsideDescription,
   DataTableAsideClose,
-  DataTableSelectionBar,
-} from "@/components/niko-table/components"
+} from "@/components/niko-table/components/data-table-aside"
+import { DataTableSelectionBar } from "@/components/niko-table/components/data-table-selection-bar"
 import {
   SYSTEM_COLUMN_IDS,
   FILTER_VARIANTS,
@@ -73,7 +75,7 @@ import {
 } from "@/components/niko-table/lib"
 import { useDataTable } from "@/components/niko-table/core"
 import { daysAgo } from "@/components/niko-table/lib"
-import { exportTableToCSV } from "@/components/niko-table/filters"
+import { exportTableToCSV } from "@/components/niko-table/filters/table-export-button"
 import type {
   DataTableColumnDef,
   ExtendedColumnFilter,

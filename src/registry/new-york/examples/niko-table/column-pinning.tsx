@@ -9,9 +9,6 @@ import {
 } from "@/components/niko-table/core"
 import {
   DataTableToolbarSection,
-  DataTablePagination,
-  DataTableSearchFilter,
-  DataTableViewMenu,
   DataTableEmptyIcon,
   DataTableEmptyMessage,
   DataTableEmptyTitle,
@@ -19,9 +16,12 @@ import {
   DataTableColumnHeader,
   DataTableColumnTitle,
   DataTableColumnActions,
-  DataTableColumnSortOptions,
-  DataTableColumnPinOptions,
 } from "@/components/niko-table/components"
+import { DataTablePagination } from "@/components/niko-table/components/data-table-pagination"
+import { DataTableSearchFilter } from "@/components/niko-table/components/data-table-search-filter"
+import { DataTableViewMenu } from "@/components/niko-table/components/data-table-view-menu"
+import { DataTableColumnSortOptions } from "@/components/niko-table/components/data-table-column-sort"
+import { DataTableColumnPinOptions } from "@/components/niko-table/components/data-table-column-pin"
 import { FILTER_VARIANTS } from "@/components/niko-table/lib"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 import { Badge } from "@/components/ui/badge"

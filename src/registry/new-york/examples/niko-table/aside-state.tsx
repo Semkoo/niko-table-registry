@@ -16,32 +16,34 @@ import {
   DataTableEmptyBody,
 } from "@/components/niko-table/core"
 import {
-  DataTableViewMenu,
-  DataTablePagination,
   DataTableToolbarSection,
-  DataTableSearchFilter,
   DataTableEmptyFilteredMessage,
   DataTableEmptyTitle,
   DataTableEmptyDescription,
   DataTableEmptyIcon,
   DataTableEmptyMessage,
-} from "@/components/niko-table/components"
-import {
   DataTableColumnHeader,
   DataTableColumnTitle,
   DataTableColumnActions,
+  DataTableColumnFilter,
+} from "@/components/niko-table/components"
+import { DataTableViewMenu } from "@/components/niko-table/components/data-table-view-menu"
+import { DataTablePagination } from "@/components/niko-table/components/data-table-pagination"
+import { DataTableSearchFilter } from "@/components/niko-table/components/data-table-search-filter"
+import {
   DataTableColumnSortMenu,
   DataTableColumnSortOptions,
-  DataTableColumnFilter,
-  DataTableColumnFilterTrigger,
+} from "@/components/niko-table/components/data-table-column-sort"
+import { DataTableColumnFilterTrigger } from "@/components/niko-table/components/data-table-column-filter-trigger"
+import {
   DataTableAside,
   DataTableAsideTrigger,
   DataTableAsideContent,
   DataTableAsideHeader,
   DataTableAsideClose,
   DataTableAsideTitle,
-  DataTableFacetedFilter,
-} from "@/components/niko-table/components"
+} from "@/components/niko-table/components/data-table-aside"
+import { DataTableFacetedFilter } from "@/components/niko-table/components/data-table-faceted-filter"
 import { FILTER_VARIANTS } from "@/components/niko-table/lib"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 import { Button } from "@/components/ui/button"
