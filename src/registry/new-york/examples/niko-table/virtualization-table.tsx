@@ -1,13 +1,12 @@
 "use client"
 
 import * as React from "react"
+import { DataTableRoot, DataTable } from "@/components/niko-table/core"
 import {
-  DataTableRoot,
-  DataTable,
   DataTableVirtualizedHeader,
   DataTableVirtualizedBody,
   DataTableVirtualizedEmptyBody,
-} from "@/components/niko-table/core"
+} from "@/components/niko-table/core/data-table-virtualized-structure"
 import {
   DataTableToolbarSection,
   DataTablePagination,

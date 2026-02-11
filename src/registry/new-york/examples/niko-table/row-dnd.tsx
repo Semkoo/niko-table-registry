@@ -5,9 +5,9 @@ import {
   DataTableRoot,
   DataTable,
   DataTableHeader,
-  DataTableDndBody,
   DataTableEmptyBody,
 } from "@/components/niko-table/core"
+import { DataTableDndBody } from "@/components/niko-table/core/data-table-dnd-structure"
 import {
   DataTableRowDndProvider,
   DataTableRowDragHandle,

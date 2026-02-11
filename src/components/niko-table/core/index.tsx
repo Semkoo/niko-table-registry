@@ -27,47 +27,6 @@ export type {
   DataTableLoadingProps,
 } from "./data-table-structure"
 
-// Virtualized table structure (VirtualizedHeader, VirtualizedBody, VirtualizedEmptyBody, VirtualizedSkeleton, VirtualizedLoading) - consolidated for easy copy/paste
-export {
-  DataTableVirtualizedHeader,
-  DataTableVirtualizedBody,
-  DataTableVirtualizedEmptyBody,
-  DataTableVirtualizedSkeleton,
-  DataTableVirtualizedLoading,
-} from "./data-table-virtualized-structure"
-export type {
-  DataTableVirtualizedHeaderProps,
-  DataTableVirtualizedBodyProps,
-  DataTableVirtualizedEmptyBodyProps,
-  DataTableVirtualizedSkeletonProps,
-  DataTableVirtualizedLoadingProps,
-} from "./data-table-virtualized-structure"
-// Note: ScrollEvent is exported from data-table-structure above to avoid duplicate exports
-
-// DnD table structure (DndBody, DndHeader, DndColumnBody) - for drag-and-drop row/column reordering
-export {
-  DataTableDndBody,
-  DataTableDndHeader,
-  DataTableDndColumnBody,
-} from "./data-table-dnd-structure"
-export type {
-  DataTableDndBodyProps,
-  DataTableDndHeaderProps,
-  DataTableDndColumnBodyProps,
-} from "./data-table-dnd-structure"
-
-// Virtualized DnD table structure
-export {
-  DataTableVirtualizedDndBody,
-  DataTableVirtualizedDndHeader,
-  DataTableVirtualizedDndColumnBody,
-} from "./data-table-virtualized-dnd-structure"
-export type {
-  DataTableVirtualizedDndBodyProps,
-  DataTableVirtualizedDndHeaderProps,
-  DataTableVirtualizedDndColumnBodyProps,
-} from "./data-table-virtualized-dnd-structure"
-
 // Types
 export type { DataTableContextState } from "./data-table-context"
 export type { DataTableContainerProps } from "./data-table"
