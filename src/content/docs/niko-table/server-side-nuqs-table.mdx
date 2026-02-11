@@ -14,32 +14,24 @@ The Server-Side Nuqs Table demonstrates server-side pagination, sorting, and fil
 
 ## Installation
 
-1. Add the required components:
+Install the DataTable core and add-ons for this example:
 
-<CliCommandCode action="run" command="shadcn@latest add table input button dropdown-menu popover command checkbox select scroll-area separator skeleton tooltip" />
+<CliCommandCode action="run" command="shadcn@latest add @niko-table/data-table @niko-table/data-table-pagination @niko-table/data-table-search-filter @niko-table/data-table-view-menu @niko-table/data-table-sort-menu @niko-table/data-table-filter-menu @niko-table/data-table-column-sort @niko-table/data-table-column-faceted-filter @niko-table/data-table-column-slider-filter @niko-table/data-table-column-date-filter" />
 
-2. Add dependencies:
+Install additional dependencies:
 
-<CliCommandCode action="install" command="@tanstack/react-table @tanstack/react-query nuqs" />
+<CliCommandCode action="install" command="@tanstack/react-query nuqs" />
 
 **Note:**
 
 - [TanStack Query](https://tanstack.com/query/latest) provides powerful asynchronous state management, server-state utilities, and data fetching capabilities. It handles caching, background updates, and stale data out of the box with zero-configuration.
 - [nuqs](https://nuqs.dev/) enables URL state persistence, making table views bookmarkable and shareable.
 
-**Required: Sortable Component**
+This example also uses `checkbox` from Shadcn UI:
 
-This example uses `DataTableSortMenu` and `DataTableFilterMenu` which require the Sortable component for drag-and-drop reordering. Follow the [DiceUI Sortable installation guide](https://www.diceui.com/docs/components/sortable).
+<CliCommandCode action="run" command="shadcn@latest add checkbox" />
 
-3. **Update the Shadcn table component** — Replace the contents of `components/ui/table.tsx` with the DataTable-compatible version (adds `TableComponent` export and `data-slot` attributes). See the [Installation Guide](/getting-started/installation#update-shadcn-table-component-first) for the full code.
-
-4. **Install the DataTable core** — From your project root, run:
-
-<CliCommandCode action="run" command={'shadcn@latest add "https://niko-table.com/r/data-table.json"'} />
-
-5. **Install add-ons for this example** — This example uses the same add-ons as Server-Side Table (sort menu, filter menu, pagination, search, view menu, column sort, column faceted/slider/date filters). Run:
-
-<CliCommandCode action="run" command={'shadcn@latest add "https://niko-table.com/r/data-table-pagination.json" "https://niko-table.com/r/data-table-search-filter.json" "https://niko-table.com/r/data-table-view-menu.json" "https://niko-table.com/r/data-table-sort-menu.json" "https://niko-table.com/r/data-table-filter-menu.json" "https://niko-table.com/r/data-table-column-sort.json" "https://niko-table.com/r/data-table-column-faceted-filter.json" "https://niko-table.com/r/data-table-column-slider-filter.json" "https://niko-table.com/r/data-table-column-date-filter.json"'} />
+> First time using `@niko-table`? See the [Installation Guide](/getting-started/installation#configure-the-niko-table-registry) to set up the registry.
 
 For other add-ons or manual copy-paste, see the [Installation Guide](/getting-started/installation).
 

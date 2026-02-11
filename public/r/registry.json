@@ -9,14 +9,13 @@
       "title": "Data Table",
       "description": "Core DataTable component built with TanStack Table and Shadcn UI. Includes table structure, context, types, hooks, utilities, and base components (column header, toolbar section, empty state).",
       "dependencies": ["@tanstack/react-table", "lucide-react"],
-      "registryDependencies": [
-        "table",
-        "skeleton",
-        "alert",
-        "button",
-        "dropdown-menu"
-      ],
+      "registryDependencies": ["skeleton", "alert", "button", "dropdown-menu"],
       "files": [
+        {
+          "path": "src/components/ui/table.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/table.tsx"
+        },
         {
           "path": "src/components/niko-table/core/data-table.tsx",
           "type": "registry:component",
