@@ -10,26 +10,24 @@ import {
 } from "@/components/niko-table/core"
 import {
   DataTableToolbarSection,
+  DataTablePagination,
+  DataTableSearchFilter,
+  DataTableViewMenu,
   DataTableEmptyFilteredMessage,
   DataTableEmptyTitle,
   DataTableEmptyDescription,
   DataTableEmptyIcon,
   DataTableEmptyMessage,
-  DataTableColumnTitle,
-  DataTableColumnHeader,
-} from "@/components/niko-table/components"
-import { DataTablePagination } from "@/components/niko-table/components/data-table-pagination"
-import { DataTableSearchFilter } from "@/components/niko-table/components/data-table-search-filter"
-import { DataTableViewMenu } from "@/components/niko-table/components/data-table-view-menu"
-import {
   DataTableAside,
   DataTableAsideTrigger,
   DataTableAsideContent,
   DataTableAsideHeader,
   DataTableAsideTitle,
   DataTableAsideClose,
-} from "@/components/niko-table/components/data-table-aside"
-import { DataTableColumnSortMenu } from "@/components/niko-table/components/data-table-column-sort"
+  DataTableColumnTitle,
+  DataTableColumnHeader,
+  DataTableColumnSortMenu,
+} from "@/components/niko-table/components"
 import { FILTER_VARIANTS } from "@/components/niko-table/lib"
 import { useDataTable } from "@/components/niko-table/core"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
