@@ -34,3 +34,6 @@ export {
 
 // Style utilities
 export { getCommonPinningStyles } from "./styles"
+
+// Row filtering utilities
+export { getFilteredRowsExcludingColumn } from "./filter-rows"

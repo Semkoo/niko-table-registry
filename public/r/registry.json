@@ -122,6 +122,11 @@
           "target": "components/niko-table/lib/filter-functions.ts"
         },
         {
+          "path": "src/components/niko-table/lib/filter-rows.ts",
+          "type": "registry:lib",
+          "target": "components/niko-table/lib/filter-rows.ts"
+        },
+        {
           "path": "src/components/niko-table/lib/format.ts",
           "type": "registry:lib",
           "target": "components/niko-table/lib/format.ts"
