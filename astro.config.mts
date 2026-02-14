@@ -164,71 +164,71 @@ export default defineConfig({
           label: "Examples",
           items: [
             // Getting Started
-            { label: "Simple Table", slug: "niko-table/simple-table" },
-            { label: "Basic Table", slug: "niko-table/basic-table" },
-            { label: "Search Table", slug: "niko-table/search-table" },
+            { label: "Simple Table", slug: "examples/simple-table" },
+            { label: "Basic Table", slug: "examples/basic-table" },
+            { label: "Search Table", slug: "examples/search-table" },
 
             // Row & Column Features
             {
               label: "Row Selection Table",
-              slug: "niko-table/row-selection-table",
+              slug: "examples/row-selection-table",
             },
             {
               label: "Row Expansion Table",
-              slug: "niko-table/row-expansion-table",
+              slug: "examples/row-expansion-table",
             },
             {
               label: "Column Pinning Table",
-              slug: "niko-table/column-pinning-table",
+              slug: "examples/column-pinning-table",
             },
             {
               label: "Tree Table",
-              slug: "niko-table/tree-table",
+              slug: "examples/tree-table",
             },
 
             // Drag & Drop
             {
               label: "Row DnD Table",
-              slug: "niko-table/row-dnd-table",
+              slug: "examples/row-dnd-table",
             },
             {
               label: "Column DnD Table",
-              slug: "niko-table/column-dnd-table",
+              slug: "examples/column-dnd-table",
             },
 
             // Layout & Presentation
-            { label: "Aside Table", slug: "niko-table/aside-table" },
+            { label: "Aside Table", slug: "examples/aside-table" },
             {
               label: "Virtualization Table",
-              slug: "niko-table/virtualization-table",
+              slug: "examples/virtualization-table",
             },
 
             // Filtering
             {
               label: "Faceted Filter Table",
-              slug: "niko-table/faceted-filter-table",
+              slug: "examples/faceted-filter-table",
             },
             {
               label: "Advanced Filter Table",
-              slug: "niko-table/advanced-table",
+              slug: "examples/advanced-table",
             },
             {
               label: "Advanced Inline Filter Table",
-              slug: "niko-table/advanced-inline-table",
+              slug: "examples/advanced-inline-table",
             },
 
             // Server-Side & URL State
             {
               label: "Advanced Nuqs Table",
-              slug: "niko-table/advanced-nuqs-table",
+              slug: "examples/advanced-nuqs-table",
             },
             {
               label: "Server-Side Table",
-              slug: "niko-table/server-side-table",
+              slug: "examples/server-side-table",
             },
             {
               label: "Server-Side Nuqs Table",
-              slug: "niko-table/server-side-nuqs-table",
+              slug: "examples/server-side-nuqs-table",
             },
           ],
         },
@@ -260,7 +260,7 @@ export default defineConfig({
             },
             {
               label: "Table Examples",
-              link: "/niko-table/simple-table",
+              link: "/examples/simple-table",
             },
             {
               label: "Contributing",
