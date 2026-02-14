@@ -13,7 +13,7 @@ import {
   DataTableEmptyMessage,
   DataTableEmptyTitle,
   DataTableEmptyDescription,
-} from "@/components/niko-table/components"
+} from "@/components/niko-table/components/data-table-empty-state"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 import { Inbox } from "lucide-react"
 

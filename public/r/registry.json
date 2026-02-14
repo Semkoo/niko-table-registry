@@ -147,9 +147,9 @@
           "target": "components/niko-table/config/feature-detection.ts"
         },
         {
-          "path": "src/components/niko-table/config/index.tsx",
+          "path": "src/components/niko-table/config/index.ts",
           "type": "registry:lib",
-          "target": "components/niko-table/config/index.tsx"
+          "target": "components/niko-table/config/index.ts"
         },
         {
           "path": "src/components/niko-table/types/index.ts",
@@ -157,19 +157,9 @@
           "target": "components/niko-table/types/index.ts"
         },
         {
-          "path": "src/components/niko-table/core/index.tsx",
+          "path": "src/components/niko-table/core/index.ts",
           "type": "registry:lib",
-          "target": "components/niko-table/core/index.tsx"
-        },
-        {
-          "path": "src/components/niko-table/components/index.tsx",
-          "type": "registry:lib",
-          "target": "components/niko-table/components/index.tsx"
-        },
-        {
-          "path": "src/components/niko-table/filters/index.tsx",
-          "type": "registry:lib",
-          "target": "components/niko-table/filters/index.tsx"
+          "target": "components/niko-table/core/index.ts"
         }
       ]
     },

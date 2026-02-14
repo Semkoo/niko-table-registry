@@ -584,7 +584,7 @@ DnD-aware table body that renders rows as draggable items. Drop-in replacement f
 
 ```tsx showLineNumbers
 import { DataTableDndBody } from "@/components/niko-table/core"
-import { DataTableRowDndProvider } from "@/components/niko-table/components"
+import { DataTableRowDndProvider } from "@/components/niko-table/components/data-table-row-dnd"
 
 <DataTableRowDndProvider data={data} onReorder={setData}>
   <DataTable>
@@ -608,7 +608,7 @@ DnD-aware table header that renders column headers as draggable items. Drop-in r
 
 ```tsx showLineNumbers
 import { DataTableDndHeader, DataTableDndColumnBody } from "@/components/niko-table/core"
-import { DataTableColumnDndProvider } from "@/components/niko-table/components"
+import { DataTableColumnDndProvider } from "@/components/niko-table/components/data-table-column-dnd"
 
 <DataTableColumnDndProvider columnOrder={columnOrder} onColumnOrderChange={setColumnOrder}>
   <DataTable>
@@ -663,7 +663,7 @@ import {
   DataTableVirtualizedDndBody,
   DataTableVirtualizedEmptyBody,
 } from "@/components/niko-table/core"
-import { DataTableRowDndProvider } from "@/components/niko-table/components"
+import { DataTableRowDndProvider } from "@/components/niko-table/components/data-table-row-dnd"
 
 <DataTableRowDndProvider data={data} onReorder={setData}>
   <DataTable height={500}>
@@ -698,7 +698,7 @@ import {
   DataTableVirtualizedDndHeader,
   DataTableVirtualizedDndColumnBody,
 } from "@/components/niko-table/core"
-import { DataTableColumnDndProvider } from "@/components/niko-table/components"
+import { DataTableColumnDndProvider } from "@/components/niko-table/components/data-table-column-dnd"
 
 <DataTableColumnDndProvider columnOrder={columnOrder} onColumnOrderChange={setColumnOrder}>
   <DataTable height={500}>

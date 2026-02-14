@@ -15,29 +15,31 @@ import {
   DataTableBody,
   DataTableEmptyBody,
 } from "@/components/niko-table/core"
+import { DataTableColumnHeader } from "@/components/niko-table/components/data-table-column-header"
+import { DataTableColumnTitle } from "@/components/niko-table/components/data-table-column-title"
+import { DataTableColumnActions } from "@/components/niko-table/components/data-table-column-actions"
+import { DataTableColumnFilter } from "@/components/niko-table/components/data-table-column-filter"
+import { DataTableColumnFilterTrigger } from "@/components/niko-table/components/data-table-column-filter-trigger"
 import {
-  DataTableToolbarSection,
-  DataTablePagination,
-  DataTableSearchFilter,
-  DataTableViewMenu,
-  DataTableInlineFilter,
+  DataTableColumnSortMenu,
+  DataTableColumnSortOptions,
+} from "@/components/niko-table/components/data-table-column-sort"
+import { DataTableColumnFacetedFilterMenu } from "@/components/niko-table/components/data-table-column-faceted-filter"
+import { DataTableColumnSliderFilterMenu } from "@/components/niko-table/components/data-table-column-slider-filter-options"
+import { DataTableColumnDateFilterMenu } from "@/components/niko-table/components/data-table-column-date-filter-options"
+import { DataTableToolbarSection } from "@/components/niko-table/components/data-table-toolbar-section"
+import {
+  DataTableEmptyIcon,
+  DataTableEmptyMessage,
   DataTableEmptyFilteredMessage,
   DataTableEmptyTitle,
   DataTableEmptyDescription,
-  DataTableEmptyIcon,
-  DataTableEmptyMessage,
-  DataTableFacetedFilter,
-  DataTableColumnHeader,
-  DataTableColumnTitle,
-  DataTableColumnActions,
-  DataTableColumnFilter,
-  DataTableColumnFilterTrigger,
-  DataTableColumnSortMenu,
-  DataTableColumnSortOptions,
-  DataTableColumnFacetedFilterMenu,
-  DataTableColumnSliderFilterMenu,
-  DataTableColumnDateFilterMenu,
-} from "@/components/niko-table/components"
+} from "@/components/niko-table/components/data-table-empty-state"
+import { DataTableSearchFilter } from "@/components/niko-table/components/data-table-search-filter"
+import { DataTableViewMenu } from "@/components/niko-table/components/data-table-view-menu"
+import { DataTableFacetedFilter } from "@/components/niko-table/components/data-table-faceted-filter"
+import { DataTableInlineFilter } from "@/components/niko-table/components/data-table-inline-filter"
+import { DataTablePagination } from "@/components/niko-table/components/data-table-pagination"
 import {
   daysAgo,
   JOIN_OPERATORS,
