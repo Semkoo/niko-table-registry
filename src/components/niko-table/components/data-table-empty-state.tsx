@@ -18,7 +18,7 @@ function useDataTableEmptyState() {
   const context = React.useContext(DataTableEmptyStateContext)
   if (!context) {
     throw new Error(
-      "Empty state components must be used within DataTableEmptyBody",
+      "Empty state components must be used within DataTableEmptyState",
     )
   }
   return context
