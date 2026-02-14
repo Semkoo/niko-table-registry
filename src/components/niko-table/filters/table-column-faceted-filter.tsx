@@ -173,6 +173,15 @@ export function TableColumnFacetedFilterMenu<TData, TValue>({
     { limitToFilteredRows },
   )
 
+  /**
+   * REACTIVITY FIX: Extract row model references outside memos so that when
+   * async data arrives, the new rows array reference triggers memo recomputation.
+   * Without this, `table` reference is stable across data changes and memos
+   * would return stale (empty) results after initial render with no data.
+   */
+  const coreRows = table?.getCoreRowModel().rows
+  const filteredRows = table?.getFilteredRowModel().rows
+
   // Fallback: generate options from row data for any variant (text, boolean, etc.)
   const fallbackOptions = React.useMemo((): Option[] => {
     if (!table || !column) return []
@@ -182,9 +191,8 @@ export function TableColumnFacetedFilterMenu<TData, TValue>({
       (meta as Record<string, unknown>)?.autoOptionsFormat ?? true
     const showCounts = (meta as Record<string, unknown>)?.showCounts ?? true
 
-    const rows = limitToFilteredRows
-      ? table.getFilteredRowModel().rows
-      : table.getCoreRowModel().rows
+    const rows = limitToFilteredRows ? filteredRows : coreRows
+    if (!rows) return []
     const valueCounts = new Map<string, number>()
 
     rows.forEach(row => {
@@ -224,7 +232,7 @@ export function TableColumnFacetedFilterMenu<TData, TValue>({
         count: showCounts ? count : undefined,
       }))
       .sort((a, b) => a.label.localeCompare(b.label))
-  }, [table, column, limitToFilteredRows])
+  }, [table, column, limitToFilteredRows, coreRows, filteredRows])
 
   const resolvedOptions =
     options ??
