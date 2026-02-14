@@ -70,8 +70,8 @@ First, we'll define our columns.
 import {
   DataTableColumnHeader,
   DataTableColumnTitle,
-  DataTableColumnSortMenu,
-} from "@/components/niko-table/components"
+} from "@/components/niko-table/components/data-table-column-header"
+import { DataTableColumnSortMenu } from "@/components/niko-table/components/data-table-column-sort"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 
 export type Customer = {
@@ -141,21 +141,23 @@ import {
   DataTableBody,
   DataTableEmptyBody,
 } from "@/components/niko-table/core"
+import { DataTableToolbarSection } from "@/components/niko-table/components/data-table-toolbar-section"
+import { DataTablePagination } from "@/components/niko-table/components/data-table-pagination"
+import { DataTableSearchFilter } from "@/components/niko-table/components/data-table-search-filter"
+import { DataTableViewMenu } from "@/components/niko-table/components/data-table-view-menu"
 import {
-  DataTableToolbarSection,
-  DataTablePagination,
-  DataTableSearchFilter,
-  DataTableViewMenu,
   DataTableColumnHeader,
   DataTableColumnTitle,
-  DataTableColumnSortMenu,
+} from "@/components/niko-table/components/data-table-column-header"
+import { DataTableColumnSortMenu } from "@/components/niko-table/components/data-table-column-sort"
+import {
   DataTableAside,
   DataTableAsideTrigger,
   DataTableAsideContent,
   DataTableAsideHeader,
   DataTableAsideTitle,
   DataTableAsideClose,
-} from "@/components/niko-table/components"
+} from "@/components/niko-table/components/data-table-aside"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"

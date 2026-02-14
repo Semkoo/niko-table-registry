@@ -57,7 +57,7 @@ export interface ExportTableToCSVOptions<TData> {
  *
  * @example
  * ```ts
- * import { exportTableToCSV } from "@/components/niko-table/filters"
+ * import { exportTableToCSV } from "@/components/niko-table/filters/table-export-button"
  *
  * // Basic export
  * exportTableToCSV(table, { filename: "users" })

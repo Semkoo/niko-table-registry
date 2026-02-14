@@ -16,20 +16,20 @@ import {
   DataTableBody,
   DataTableEmptyBody,
 } from "@/components/niko-table/core"
+import { DataTableColumnHeader } from "@/components/niko-table/components/data-table-column-header"
+import { DataTableColumnTitle } from "@/components/niko-table/components/data-table-column-title"
+import { DataTableColumnSortMenu } from "@/components/niko-table/components/data-table-column-sort"
+import { DataTableToolbarSection } from "@/components/niko-table/components/data-table-toolbar-section"
 import {
-  DataTableToolbarSection,
-  DataTablePagination,
-  DataTableSearchFilter,
-  DataTableViewMenu,
+  DataTableEmptyIcon,
+  DataTableEmptyMessage,
   DataTableEmptyFilteredMessage,
   DataTableEmptyTitle,
   DataTableEmptyDescription,
-  DataTableEmptyIcon,
-  DataTableEmptyMessage,
-  DataTableColumnHeader,
-  DataTableColumnTitle,
-  DataTableColumnSortMenu,
-} from "@/components/niko-table/components"
+} from "@/components/niko-table/components/data-table-empty-state"
+import { DataTableViewMenu } from "@/components/niko-table/components/data-table-view-menu"
+import { DataTableSearchFilter } from "@/components/niko-table/components/data-table-search-filter"
+import { DataTablePagination } from "@/components/niko-table/components/data-table-pagination"
 import { SYSTEM_COLUMN_IDS, FILTER_VARIANTS } from "@/components/niko-table/lib"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 import { Button } from "@/components/ui/button"

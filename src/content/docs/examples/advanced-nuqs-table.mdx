@@ -78,8 +78,8 @@ First, we'll define our columns with filter metadata.
 import {
   DataTableColumnHeader,
   DataTableColumnTitle,
-  DataTableColumnSortMenu,
-} from "@/components/niko-table/components"
+} from "@/components/niko-table/components/data-table-column-header"
+import { DataTableColumnSortMenu } from "@/components/niko-table/components/data-table-column-sort"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 
 export type Product = {
@@ -192,17 +192,17 @@ import {
   DataTableBody,
   DataTableEmptyBody,
 } from "@/components/niko-table/core"
+import { DataTableToolbarSection } from "@/components/niko-table/components/data-table-toolbar-section"
+import { DataTablePagination } from "@/components/niko-table/components/data-table-pagination"
+import { DataTableSearchFilter } from "@/components/niko-table/components/data-table-search-filter"
+import { DataTableViewMenu } from "@/components/niko-table/components/data-table-view-menu"
+import { DataTableSortMenu } from "@/components/niko-table/components/data-table-sort-menu"
+import { DataTableFilterMenu } from "@/components/niko-table/components/data-table-filter-menu"
 import {
-  DataTableToolbarSection,
-  DataTablePagination,
-  DataTableSearchFilter,
-  DataTableViewMenu,
-  DataTableSortMenu,
-  DataTableFilterMenu,
   DataTableColumnHeader,
   DataTableColumnTitle,
-  DataTableColumnSortMenu,
-} from "@/components/niko-table/components"
+} from "@/components/niko-table/components/data-table-column-header"
+import { DataTableColumnSortMenu } from "@/components/niko-table/components/data-table-column-sort"
 import type {
   DataTableColumnDef,
   ExtendedColumnFilter,

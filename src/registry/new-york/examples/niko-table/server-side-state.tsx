@@ -131,26 +131,26 @@ import {
   DataTableEmptyBody,
   DataTableSkeleton,
 } from "@/components/niko-table/core"
+import { DataTableColumnHeader } from "@/components/niko-table/components/data-table-column-header"
+import { DataTableColumnTitle } from "@/components/niko-table/components/data-table-column-title"
+import { DataTableColumnSortMenu } from "@/components/niko-table/components/data-table-column-sort"
+import { DataTableColumnFacetedFilterMenu } from "@/components/niko-table/components/data-table-column-faceted-filter"
+import { DataTableColumnSliderFilterMenu } from "@/components/niko-table/components/data-table-column-slider-filter-options"
+import { DataTableColumnDateFilterMenu } from "@/components/niko-table/components/data-table-column-date-filter-options"
+import { DataTableToolbarSection } from "@/components/niko-table/components/data-table-toolbar-section"
 import {
-  DataTableToolbarSection,
-  DataTablePagination,
-  DataTableSearchFilter,
-  DataTableViewMenu,
-  DataTableSortMenu,
-  DataTableFilterMenu,
-  DataTableInlineFilter,
+  DataTableEmptyIcon,
+  DataTableEmptyMessage,
   DataTableEmptyFilteredMessage,
   DataTableEmptyTitle,
   DataTableEmptyDescription,
-  DataTableEmptyIcon,
-  DataTableEmptyMessage,
-  DataTableColumnTitle,
-  DataTableColumnHeader,
-  DataTableColumnSortMenu,
-  DataTableColumnFacetedFilterMenu,
-  DataTableColumnSliderFilterMenu,
-  DataTableColumnDateFilterMenu,
-} from "@/components/niko-table/components"
+} from "@/components/niko-table/components/data-table-empty-state"
+import { DataTableSearchFilter } from "@/components/niko-table/components/data-table-search-filter"
+import { DataTableViewMenu } from "@/components/niko-table/components/data-table-view-menu"
+import { DataTableSortMenu } from "@/components/niko-table/components/data-table-sort-menu"
+import { DataTableFilterMenu } from "@/components/niko-table/components/data-table-filter-menu"
+import { DataTableInlineFilter } from "@/components/niko-table/components/data-table-inline-filter"
+import { DataTablePagination } from "@/components/niko-table/components/data-table-pagination"
 import {
   daysAgo,
   JOIN_OPERATORS,

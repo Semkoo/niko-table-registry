@@ -7,27 +7,27 @@ import {
   DataTableBody,
   DataTableEmptyBody,
 } from "@/components/niko-table/core"
+import { DataTableColumnHeader } from "@/components/niko-table/components/data-table-column-header"
+import { DataTableColumnTitle } from "@/components/niko-table/components/data-table-column-title"
+import { DataTableColumnSortMenu } from "@/components/niko-table/components/data-table-column-sort"
+import { DataTableColumnFacetedFilterMenu } from "@/components/niko-table/components/data-table-column-faceted-filter"
+import { DataTableColumnSliderFilterMenu } from "@/components/niko-table/components/data-table-column-slider-filter-options"
+import { DataTableColumnDateFilterMenu } from "@/components/niko-table/components/data-table-column-date-filter-options"
+import { DataTableToolbarSection } from "@/components/niko-table/components/data-table-toolbar-section"
 import {
-  DataTableToolbarSection,
-  DataTablePagination,
-  DataTableSearchFilter,
-  DataTableViewMenu,
-  DataTableFacetedFilter,
-  DataTableClearFilter,
-  DataTableSliderFilter,
-  DataTableDateFilter,
+  DataTableEmptyIcon,
+  DataTableEmptyMessage,
   DataTableEmptyFilteredMessage,
   DataTableEmptyTitle,
   DataTableEmptyDescription,
-  DataTableEmptyIcon,
-  DataTableEmptyMessage,
-  DataTableColumnTitle,
-  DataTableColumnHeader,
-  DataTableColumnSortMenu,
-  DataTableColumnFacetedFilterMenu,
-  DataTableColumnSliderFilterMenu,
-  DataTableColumnDateFilterMenu,
-} from "@/components/niko-table/components"
+} from "@/components/niko-table/components/data-table-empty-state"
+import { DataTableSearchFilter } from "@/components/niko-table/components/data-table-search-filter"
+import { DataTableViewMenu } from "@/components/niko-table/components/data-table-view-menu"
+import { DataTableFacetedFilter } from "@/components/niko-table/components/data-table-faceted-filter"
+import { DataTableClearFilter } from "@/components/niko-table/components/data-table-clear-filter"
+import { DataTableSliderFilter } from "@/components/niko-table/components/data-table-slider-filter"
+import { DataTableDateFilter } from "@/components/niko-table/components/data-table-date-filter"
+import { DataTablePagination } from "@/components/niko-table/components/data-table-pagination"
 import { daysAgo, FILTER_VARIANTS } from "@/components/niko-table/lib"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 import { Badge } from "@/components/ui/badge"

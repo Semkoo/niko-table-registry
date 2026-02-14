@@ -10,13 +10,13 @@ import {
   DataTableDndHeader,
   DataTableDndColumnBody,
 } from "@/components/niko-table/core/data-table-dnd-structure"
+import { DataTableColumnDndProvider } from "@/components/niko-table/components/data-table-column-dnd"
 import {
-  DataTableColumnDndProvider,
   DataTableEmptyIcon,
   DataTableEmptyMessage,
   DataTableEmptyTitle,
   DataTableEmptyDescription,
-} from "@/components/niko-table/components"
+} from "@/components/niko-table/components/data-table-empty-state"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 import { Badge } from "@/components/ui/badge"
 import { Inbox } from "lucide-react"
