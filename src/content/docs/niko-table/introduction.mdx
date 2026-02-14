@@ -134,11 +134,9 @@ import {
   DataTableEmptyBody,
   DataTableSkeleton,
 } from "@/components/niko-table/core"
-import {
-  DataTableToolbarSection,
-  DataTableSearchFilter,
-  DataTablePagination,
-} from "@/components/niko-table/components"
+import { DataTableToolbarSection } from "@/components/niko-table/components/data-table-toolbar-section"
+import { DataTableSearchFilter } from "@/components/niko-table/components/data-table-search-filter"
+import { DataTablePagination } from "@/components/niko-table/components/data-table-pagination"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 
 type User = {
@@ -267,11 +265,9 @@ Let's start with the most basic table. A simple table with data.
      DataTableSkeleton,
      DataTableEmptyBody,
    } from "@/components/niko-table/core"
-   import {
-     DataTableToolbarSection,
-     DataTableSearchFilter,
-     DataTablePagination,
-   } from "@/components/niko-table/components"
+   import { DataTableToolbarSection } from "@/components/niko-table/components/data-table-toolbar-section"
+   import { DataTableSearchFilter } from "@/components/niko-table/components/data-table-search-filter"
+   import { DataTablePagination } from "@/components/niko-table/components/data-table-pagination"
 
    export function UsersTable({
      data,

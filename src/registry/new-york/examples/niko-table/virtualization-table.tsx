@@ -7,20 +7,20 @@ import {
   DataTableVirtualizedBody,
   DataTableVirtualizedEmptyBody,
 } from "@/components/niko-table/core/data-table-virtualized-structure"
+import { DataTableColumnHeader } from "@/components/niko-table/components/data-table-column-header"
+import { DataTableColumnTitle } from "@/components/niko-table/components/data-table-column-title"
+import { DataTableColumnSortMenu } from "@/components/niko-table/components/data-table-column-sort"
 import {
-  DataTableToolbarSection,
-  DataTablePagination,
-  DataTableSearchFilter,
-  DataTableViewMenu,
   DataTableEmptyIcon,
   DataTableEmptyMessage,
   DataTableEmptyFilteredMessage,
   DataTableEmptyTitle,
   DataTableEmptyDescription,
-  DataTableColumnHeader,
-  DataTableColumnTitle,
-  DataTableColumnSortMenu,
-} from "@/components/niko-table/components"
+} from "@/components/niko-table/components/data-table-empty-state"
+import { DataTablePagination } from "@/components/niko-table/components/data-table-pagination"
+import { DataTableSearchFilter } from "@/components/niko-table/components/data-table-search-filter"
+import { DataTableToolbarSection } from "@/components/niko-table/components/data-table-toolbar-section"
+import { DataTableViewMenu } from "@/components/niko-table/components/data-table-view-menu"
 import { FILTER_VARIANTS, SYSTEM_COLUMN_IDS } from "@/components/niko-table/lib"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 import { Badge } from "@/components/ui/badge"

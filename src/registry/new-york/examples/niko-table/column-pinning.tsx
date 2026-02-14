@@ -7,21 +7,21 @@ import {
   DataTableBody,
   DataTableEmptyBody,
 } from "@/components/niko-table/core"
+import { DataTableColumnHeader } from "@/components/niko-table/components/data-table-column-header"
+import { DataTableColumnTitle } from "@/components/niko-table/components/data-table-column-title"
+import { DataTableColumnActions } from "@/components/niko-table/components/data-table-column-actions"
+import { DataTableColumnSortOptions } from "@/components/niko-table/components/data-table-column-sort"
+import { DataTableColumnPinOptions } from "@/components/niko-table/components/data-table-column-pin"
+import { DataTableToolbarSection } from "@/components/niko-table/components/data-table-toolbar-section"
 import {
-  DataTableToolbarSection,
-  DataTablePagination,
-  DataTableSearchFilter,
-  DataTableViewMenu,
   DataTableEmptyIcon,
   DataTableEmptyMessage,
   DataTableEmptyTitle,
   DataTableEmptyDescription,
-  DataTableColumnHeader,
-  DataTableColumnTitle,
-  DataTableColumnActions,
-  DataTableColumnSortOptions,
-  DataTableColumnPinOptions,
-} from "@/components/niko-table/components"
+} from "@/components/niko-table/components/data-table-empty-state"
+import { DataTableSearchFilter } from "@/components/niko-table/components/data-table-search-filter"
+import { DataTableViewMenu } from "@/components/niko-table/components/data-table-view-menu"
+import { DataTablePagination } from "@/components/niko-table/components/data-table-pagination"
 import { FILTER_VARIANTS } from "@/components/niko-table/lib"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 import { Badge } from "@/components/ui/badge"
