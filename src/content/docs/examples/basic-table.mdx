@@ -61,8 +61,8 @@ First, we'll define our columns with sortable headers.
 import {
   DataTableColumnHeader,
   DataTableColumnTitle,
-  DataTableColumnSortMenu,
-} from "@/components/niko-table/components"
+} from "@/components/niko-table/components/data-table-column-header"
+import { DataTableColumnSortMenu } from "@/components/niko-table/components/data-table-column-sort"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 
 export type Product = {
@@ -134,14 +134,14 @@ import {
   DataTableHeader,
   DataTableBody,
 } from "@/components/niko-table/core"
+import { DataTableToolbarSection } from "@/components/niko-table/components/data-table-toolbar-section"
+import { DataTablePagination } from "@/components/niko-table/components/data-table-pagination"
+import { DataTableViewMenu } from "@/components/niko-table/components/data-table-view-menu"
 import {
-  DataTableToolbarSection,
-  DataTablePagination,
-  DataTableViewMenu,
   DataTableColumnHeader,
   DataTableColumnTitle,
-  DataTableColumnSortMenu,
-} from "@/components/niko-table/components"
+} from "@/components/niko-table/components/data-table-column-header"
+import { DataTableColumnSortMenu } from "@/components/niko-table/components/data-table-column-sort"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 
 type Product = {

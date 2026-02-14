@@ -8,16 +8,18 @@ import {
   DataTableEmptyBody,
 } from "@/components/niko-table/core"
 import { DataTableDndBody } from "@/components/niko-table/core/data-table-dnd-structure"
+import { DataTableColumnHeader } from "@/components/niko-table/components/data-table-column-header"
+import { DataTableColumnTitle } from "@/components/niko-table/components/data-table-column-title"
 import {
-  DataTableRowDndProvider,
-  DataTableRowDragHandle,
   DataTableEmptyIcon,
   DataTableEmptyMessage,
   DataTableEmptyTitle,
   DataTableEmptyDescription,
-  DataTableColumnHeader,
-  DataTableColumnTitle,
-} from "@/components/niko-table/components"
+} from "@/components/niko-table/components/data-table-empty-state"
+import {
+  DataTableRowDndProvider,
+  DataTableRowDragHandle,
+} from "@/components/niko-table/components/data-table-row-dnd"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
