@@ -114,27 +114,6 @@ export const extendedFilter: FilterFn<RowData> = (
       return value >= min && value <= max
     }
 
-    // Handle date range arrays [from, to] (timestamps)
-    // Check if both values are numbers and look like timestamps (large numbers)
-    if (
-      filterValue.length === 2 &&
-      typeof filterValue[0] === "number" &&
-      typeof filterValue[1] === "number" &&
-      filterValue[0] > 1000000000000 && // Timestamp in ms (year 2001+)
-      filterValue[1] > 1000000000000
-    ) {
-      const rowValue = cellValue
-      const rowTimestamp =
-        rowValue instanceof Date
-          ? rowValue.getTime()
-          : typeof rowValue === "number"
-            ? rowValue
-            : new Date(rowValue as string).getTime()
-      if (isNaN(rowTimestamp)) return false
-      const [from, to] = filterValue
-      return rowTimestamp >= from && rowTimestamp <= to
-    }
-
     // Handle string arrays (from TableFacetedFilter with multiple selection)
     // When filterValue is an array like ["electronics", "clothing"], check if cell value is in the array
 
@@ -528,7 +507,11 @@ function applyFilterOperator(
 
     // Date operators (basic implementation)
     case FILTER_OPERATORS.RELATIVE:
-      // This would need more complex implementation based on requirements
+      if (process.env.NODE_ENV !== "production") {
+        console.warn(
+          "FILTER_OPERATORS.RELATIVE is not yet implemented — all rows will pass this filter.",
+        )
+      }
       return true
 
     default:
