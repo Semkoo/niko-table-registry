@@ -22,38 +22,38 @@
 
 ### Getting Started
 
-- [Simple Table](https://niko-table.com/niko-table/simple-table): Minimal table with columns and data.
-- [Basic Table](https://niko-table.com/niko-table/basic-table): Table with pagination, sorting, and column visibility.
-- [Search Table](https://niko-table.com/niko-table/search-table): Table with global search filtering.
+- [Simple Table](https://niko-table.com/examples/simple-table): Minimal table with columns and data.
+- [Basic Table](https://niko-table.com/examples/basic-table): Table with pagination, sorting, and column visibility.
+- [Search Table](https://niko-table.com/examples/search-table): Table with global search filtering.
 
 ### Row & Column Features
 
-- [Row Selection Table](https://niko-table.com/niko-table/row-selection-table): Checkbox-based row selection with bulk actions.
-- [Row Expansion Table](https://niko-table.com/niko-table/row-expansion-table): Expandable rows with custom content.
-- [Column Pinning Table](https://niko-table.com/niko-table/column-pinning-table): Pin columns to left or right edges.
-- [Tree Table](https://niko-table.com/niko-table/tree-table): Hierarchical tree data with expand/collapse.
+- [Row Selection Table](https://niko-table.com/examples/row-selection-table): Checkbox-based row selection with bulk actions.
+- [Row Expansion Table](https://niko-table.com/examples/row-expansion-table): Expandable rows with custom content.
+- [Column Pinning Table](https://niko-table.com/examples/column-pinning-table): Pin columns to left or right edges.
+- [Tree Table](https://niko-table.com/examples/tree-table): Hierarchical tree data with expand/collapse.
 
 ### Drag & Drop
 
-- [Row DnD Table](https://niko-table.com/niko-table/row-dnd-table): Drag-and-drop row reordering with @dnd-kit.
-- [Column DnD Table](https://niko-table.com/niko-table/column-dnd-table): Drag-and-drop column reordering with @dnd-kit.
+- [Row DnD Table](https://niko-table.com/examples/row-dnd-table): Drag-and-drop row reordering with @dnd-kit.
+- [Column DnD Table](https://niko-table.com/examples/column-dnd-table): Drag-and-drop column reordering with @dnd-kit.
 
 ### Layout & Presentation
 
-- [Aside Table](https://niko-table.com/niko-table/aside-table): Table with a collapsible sidebar panel.
-- [Virtualization Table](https://niko-table.com/niko-table/virtualization-table): Virtual scrolling for large datasets using @tanstack/react-virtual.
+- [Aside Table](https://niko-table.com/examples/aside-table): Table with a collapsible sidebar panel.
+- [Virtualization Table](https://niko-table.com/examples/virtualization-table): Virtual scrolling for large datasets using @tanstack/react-virtual.
 
 ### Filtering
 
-- [Faceted Filter Table](https://niko-table.com/niko-table/faceted-filter-table): Multi-faceted filtering with filter menus.
-- [Advanced Filter Table](https://niko-table.com/niko-table/advanced-table): Full-featured table with toolbar filters.
-- [Advanced Inline Filter Table](https://niko-table.com/niko-table/advanced-inline-table): Inline column-level filters.
+- [Faceted Filter Table](https://niko-table.com/examples/faceted-filter-table): Multi-faceted filtering with filter menus.
+- [Advanced Filter Table](https://niko-table.com/examples/advanced-table): Full-featured table with toolbar filters.
+- [Advanced Inline Filter Table](https://niko-table.com/examples/advanced-inline-table): Inline column-level filters.
 
 ### Server-Side & URL State
 
-- [Advanced Nuqs Table](https://niko-table.com/niko-table/advanced-nuqs-table): Client-side filtering with URL state via nuqs.
-- [Server-Side Table](https://niko-table.com/niko-table/server-side-table): Server-side pagination, sorting, and filtering.
-- [Server-Side Nuqs Table](https://niko-table.com/niko-table/server-side-nuqs-table): Server-side data with URL state management via nuqs.
+- [Advanced Nuqs Table](https://niko-table.com/examples/advanced-nuqs-table): Client-side filtering with URL state via nuqs.
+- [Server-Side Table](https://niko-table.com/examples/server-side-table): Server-side pagination, sorting, and filtering.
+- [Server-Side Nuqs Table](https://niko-table.com/examples/server-side-nuqs-table): Server-side data with URL state management via nuqs.
 
 ## Architecture
 
