@@ -1,5 +1,7 @@
 ---
 const { head } = Astro.locals.starlightRoute
+const { title, description } = Astro.locals.starlightRoute.entry.data
+const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href
 
 // By default, Astro renders the default favicon before the media specific favicons which results in the media specific favicons not being used.
 // This code forces the default favicon to only be used when the user has no preference for light or dark mode instead of always being used.
@@ -19,6 +21,49 @@ const sortedHead = head.map(h => {
     attrs: { ...h.attrs, media: "(prefers-color-scheme: no-preference)" },
   }
 })
+
+const isHomePage = Astro.url.pathname === "/" || Astro.url.pathname === ""
+
+const websiteSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "Niko Table",
+  description:
+    "A composable, shadcn-compatible data table component registry built with TanStack Table and React.",
+  url: Astro.site?.href ?? "https://niko-table.com",
+}
+
+const softwareSchema = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareSourceCode",
+  name: title ?? "Niko Table",
+  description: description ?? "Data table component for React",
+  url: canonicalUrl,
+  codeRepository: "https://github.com/Semkoo/niko-table-registry",
+  programmingLanguage: ["TypeScript", "React"],
+  runtimePlatform: "Node.js",
+  license: "https://opensource.org/licenses/MIT",
+}
+
+const breadcrumbItems = Astro.url.pathname
+  .split("/")
+  .filter(Boolean)
+  .map((segment, index, arr) => ({
+    "@type": "ListItem" as const,
+    position: index + 1,
+    name: segment.replace(/-/g, " ").replace(/\b\w/g, c => c.toUpperCase()),
+    item: new URL(arr.slice(0, index + 1).join("/") + "/", Astro.site).href,
+  }))
+
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: breadcrumbItems,
+}
+
+const jsonLd = isHomePage
+  ? JSON.stringify(websiteSchema)
+  : JSON.stringify([softwareSchema, breadcrumbSchema])
 ---
 
 {
@@ -26,3 +71,6 @@ const sortedHead = head.map(h => {
     <Tag {...attrs} set:html={content} />
   ))
 }
+
+<link rel="canonical" href={canonicalUrl} />
+<script is:inline type="application/ld+json" set:html={jsonLd} />

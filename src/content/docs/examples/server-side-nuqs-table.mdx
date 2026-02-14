@@ -1,16 +1,16 @@
 ---
-title: Server-Side Table
-description: Server-side pagination, sorting, and filtering with TanStack Query for efficient data fetching and caching.
+title: Server-Side Nuqs Table
+description: Server-side pagination, sorting, and filtering with TanStack Query and URL state persistence using nuqs.
 ---
 
 import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
 import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
 
-<CodePreview demo="niko-table/server-side-state" />
+<CodePreview demo="niko-table/server-side-nuqs-state" />
 
 ## Introduction
 
-The Server-Side Table demonstrates server-side pagination, sorting, and filtering using [TanStack Query](https://tanstack.com/query/latest) for efficient data fetching, caching, and state management. This example shows how to handle large datasets by fetching data from a server with automatic caching, background updates, and request deduplication. State is managed with React `useState` and does NOT persist across page refreshes.
+The Server-Side Nuqs Table demonstrates server-side pagination, sorting, and filtering using [TanStack Query](https://tanstack.com/query/latest) for efficient data fetching, caching, and state management, combined with [nuqs](https://nuqs.dev/) for URL state persistence. This example shows how to handle large datasets by fetching data from a server with automatic caching, background updates, and request deduplication, while maintaining all table state in the URL for bookmarkable and shareable views.
 
 ## Installation
 
@@ -20,9 +20,12 @@ Install the DataTable core and add-ons for this example:
 
 Install additional dependencies:
 
-<CliCommandCode action="install" command="@tanstack/react-query" />
+<CliCommandCode action="install" command="@tanstack/react-query nuqs" />
 
-**Note:** [TanStack Query](https://tanstack.com/query/latest) provides powerful asynchronous state management, server-state utilities, and data fetching capabilities. It handles caching, background updates, and stale data out of the box with zero-configuration.
+**Note:**
+
+- [TanStack Query](https://tanstack.com/query/latest) provides powerful asynchronous state management, server-state utilities, and data fetching capabilities. It handles caching, background updates, and stale data out of the box with zero-configuration.
+- [nuqs](https://nuqs.dev/) enables URL state persistence, making table views bookmarkable and shareable.
 
 This example also uses `checkbox` from Shadcn UI:
 
@@ -34,7 +37,7 @@ For other add-ons or manual copy-paste, see the [Installation Guide](/getting-st
 
 ## Setup
 
-Before using the Server-Side Table, you need to wrap your app with `QueryClientProvider`. Follow the setup instructions based on your framework:
+Before using the Server-Side Table + Nuqs, you need to wrap your app with both `QueryClientProvider` and `NuqsAdapter`. Follow the setup instructions based on your framework:
 
 ### Next.js App Router
 
@@ -42,6 +45,7 @@ Wrap `{children}` in `app/layout.tsx`:
 
 ```tsx
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { NuqsAdapter } from "nuqs/adapters/next/app"
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -57,7 +61,7 @@ export default function RootLayout({ children }) {
     <html>
       <body>
         <QueryClientProvider client={queryClient}>
-          {children}
+          <NuqsAdapter>{children}</NuqsAdapter>
         </QueryClientProvider>
       </body>
     </html>
@@ -71,6 +75,7 @@ Wrap `<Component>` in `pages/_app.tsx`:
 
 ```tsx
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { NuqsAdapter } from "nuqs/adapters/next/pages"
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -84,7 +89,9 @@ const queryClient = new QueryClient({
 export default function App({ Component, pageProps }) {
   return (
     <QueryClientProvider client={queryClient}>
-      <Component {...pageProps} />
+      <NuqsAdapter>
+        <Component {...pageProps} />
+      </NuqsAdapter>
     </QueryClientProvider>
   )
 }
@@ -96,6 +103,7 @@ Wrap `<App />` in `src/main.tsx`:
 
 ```tsx
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { NuqsAdapter } from "nuqs/adapters/react"
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -108,7 +116,9 @@ const queryClient = new QueryClient({
 
 createRoot(document.getElementById("root")!).render(
   <QueryClientProvider client={queryClient}>
-    <App />
+    <NuqsAdapter>
+      <App />
+    </NuqsAdapter>
   </QueryClientProvider>,
 )
 ```
@@ -180,9 +190,8 @@ async function fetchProducts(
 
 Use `useQuery` to fetch data with automatic caching and refetching:
 
-```tsx showLineNumbers title="server-side-state.tsx"
-import { useState } from "react"
-import { useQuery, keepPreviousData } from "@tanstack/react-query"
+```tsx showLineNumbers title="server-side-nuqs-state.tsx"
+import { useQuery } from "@tanstack/react-query"
 import type { SortingState, ColumnFiltersState } from "@tanstack/react-table"
 
 function ServerSideTable() {
@@ -210,7 +219,6 @@ function ServerSideTable() {
       }),
     staleTime: 30000, // Consider data fresh for 30 seconds
     gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
-    placeholderData: keepPreviousData, // Keep previous data visible during pagination
   })
 
   const products = data?.data ?? []
@@ -284,9 +292,9 @@ import { useQueryClient } from "@tanstack/react-query"
 import { useEffect, useState, useRef } from "react"
 import { Loader2 } from "lucide-react"
 
-function ServerSideTable() {
+function ServerSideNuqsTable() {
   const queryClient = useQueryClient()
-  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 })
+  const [urlParams, setUrlParams] = useQueryStates(tableStateParsers)
   // ... other state
 
   // Track prefetching state for UI feedback
@@ -298,8 +306,8 @@ function ServerSideTable() {
 
   // Prefetch next and previous pages
   useEffect(() => {
-    const totalPages = Math.ceil(totalCount / pagination.pageSize)
-    const currentPage = pagination.pageIndex
+    const totalPages = Math.ceil(totalCount / urlParams.pageSize)
+    const currentPage = urlParams.pageIndex
     const currentRun = ++effectRunRef.current
 
     // Reset prefetching state at the start of each effect run
@@ -322,19 +330,19 @@ function ServerSideTable() {
           queryKey: [
             "products",
             currentPage + 1,
-            pagination.pageSize,
-            sorting,
-            globalFilter,
-            columnFilters,
-            filterMode, // Include filterMode if you have filter modes
+            urlParams.pageSize,
+            urlParams.sort,
+            urlParams.globalFilter,
+            urlParams.filters,
+            urlParams.filterMode,
           ],
           queryFn: () =>
             fetchProducts({
               page: currentPage + 1,
-              pageSize: pagination.pageSize,
-              sorting,
-              globalFilter,
-              columnFilters,
+              pageSize: urlParams.pageSize,
+              sorting: urlParams.sort,
+              globalFilter: urlParams.globalFilter,
+              columnFilters: urlParams.filters,
             }),
           staleTime: 30000,
         })
@@ -363,19 +371,19 @@ function ServerSideTable() {
           queryKey: [
             "products",
             currentPage - 1,
-            pagination.pageSize,
-            sorting,
-            globalFilter,
-            columnFilters,
-            filterMode, // Include filterMode if you have filter modes
+            urlParams.pageSize,
+            urlParams.sort,
+            urlParams.globalFilter,
+            urlParams.filters,
+            urlParams.filterMode,
           ],
           queryFn: () =>
             fetchProducts({
               page: currentPage - 1,
-              pageSize: pagination.pageSize,
-              sorting,
-              globalFilter,
-              columnFilters,
+              pageSize: urlParams.pageSize,
+              sorting: urlParams.sort,
+              globalFilter: urlParams.globalFilter,
+              columnFilters: urlParams.filters,
             }),
           staleTime: 30000,
         })
@@ -397,13 +405,13 @@ function ServerSideTable() {
     }
   }, [
     queryClient,
-    pagination.pageIndex,
-    pagination.pageSize,
+    urlParams.pageIndex,
+    urlParams.pageSize,
+    urlParams.sort,
+    urlParams.globalFilter,
+    urlParams.filters,
+    urlParams.filterMode,
     totalCount,
-    sorting,
-    globalFilter,
-    columnFilters,
-    filterMode, // Add filterMode to dependencies if you use it
   ])
 
   return (
@@ -457,23 +465,103 @@ if (isError) {
 }
 ```
 
-## State Management
+## URL State Management with nuqs
 
-This example uses React `useState` for state management. State does NOT persist across page refreshes. If you need URL state persistence, see the [Server-Side Nuqs Table](/niko-table/server-side-nuqs-table) example.
+This example uses [nuqs](https://nuqs.dev/) to persist all table state in the URL, making table views bookmarkable and shareable. The state includes:
+
+- Pagination (page index and page size)
+- Sorting configuration
+- Column filters (standard and inline modes)
+- Global search/filter
+- Column visibility
+- Filter mode (standard vs inline)
+
+### URL State Parsers
+
+Define parsers for each state variable:
 
 ```tsx showLineNumbers
-function ServerSideTable() {
-  // State management with useState
-  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 })
-  const [sorting, setSorting] = useState<SortingState>([])
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-  const [globalFilter, setGlobalFilter] = useState<string | object>('')
+import { parseAsInteger, parseAsJson, parseAsString } from "nuqs"
+import type { SortingState } from "@tanstack/react-table"
+import type { ExtendedColumnFilter } from "@/components/niko-table/types"
 
-  // Use TanStack Query for data fetching
-  const { data, isLoading } = useQuery({
-    queryKey: ['products', pagination, sorting, globalFilter, columnFilters],
-    queryFn: () => fetchProducts({ ... }),
+const tableStateParsers = {
+  pageIndex: parseAsInteger.withDefault(0),
+  pageSize: parseAsInteger.withDefault(10),
+  sort: parseAsJson<SortingState>(value => value as SortingState).withDefault(
+    [],
+  ),
+  filters: parseAsJson<ExtendedColumnFilter<Product>[]>(
+    value => value as ExtendedColumnFilter<Product>[],
+  ).withDefault([]),
+  search: parseAsString.withDefault(""),
+  globalFilter: parseAsJson<
+    string | { filters: unknown[]; joinOperator: string }
+  >(value => {
+    if (value && typeof value === "object" && "filters" in value) {
+      return value as { filters: unknown[]; joinOperator: string }
+    }
+    if (typeof value === "string") {
+      return value
+    }
+    return ""
+  }).withDefault(""),
+  columnVisibility: parseAsJson<VisibilityState>(
+    value => value as VisibilityState,
+  ).withDefault({}),
+  inlineFilters: parseAsJson<ExtendedColumnFilter<Product>[]>(
+    value => value as ExtendedColumnFilter<Product>[],
+  ).withDefault([]),
+  filterMode: parseAsString.withDefault("standard"),
+}
+```
+
+### Using useQueryStates
+
+The `useQueryStates` hook provides URL state management:
+
+```tsx showLineNumbers
+import { useQueryStates } from "nuqs"
+
+function ServerSideTable() {
+  const [urlParams, setUrlParams] = useQueryStates(tableStateParsers, {
+    urlKeys: {
+      pageIndex: "page",
+      pageSize: "perPage",
+      sort: "sort",
+      filters: "filters",
+      search: "search",
+      globalFilter: "global",
+      columnVisibility: "cols",
+      inlineFilters: "inline",
+      filterMode: "mode",
+    },
+    history: "replace",
+    scroll: false,
+    shallow: true,
   })
+
+  // Use urlParams for table state
+  const pagination = useMemo(
+    () => ({
+      pageIndex: urlParams.pageIndex,
+      pageSize: urlParams.pageSize,
+    }),
+    [urlParams.pageIndex, urlParams.pageSize],
+  )
+
+  // Update URL when state changes
+  const handlePaginationChange = useCallback(
+    (updater: Updater<PaginationState>) => {
+      const newPagination =
+        typeof updater === "function" ? updater(pagination) : updater
+      void setUrlParams({
+        pageIndex: newPagination.pageIndex,
+        pageSize: newPagination.pageSize,
+      })
+    },
+    [pagination, setUrlParams],
+  )
 
   // ... rest of component
 }
@@ -556,7 +644,7 @@ function useUpdateProduct() {
 
 ## When to Use
 
-**✅ Use Server-Side Table when:**
+**✅ Use Server-Side Table + Nuqs when:**
 
 - Working with large datasets (thousands+ rows)
 - Data needs to be fetched from an API
@@ -564,14 +652,14 @@ function useUpdateProduct() {
 - You need request deduplication
 - You want optimistic updates
 - You need error handling and retry logic
-- You don't need URL state persistence
+- You want URL state persistence for bookmarkable and shareable table views
+- You need table state to survive page refreshes
 
 **❌ Consider other options when:**
 
 - Working with small datasets (< 1000 rows) - use client-side filtering
 - Data is static or rarely changes - simple state management may suffice
-- You need URL state persistence - use [Server-Side Nuqs Table](/niko-table/server-side-nuqs-table)
-- You need bookmarkable/shareable table views - use [Server-Side Nuqs Table](/niko-table/server-side-nuqs-table)
+- You don't need URL state persistence - use a simpler server-side implementation without nuqs
 
 ## Best Practices
 
@@ -581,10 +669,9 @@ function useUpdateProduct() {
 4. **Optimize query keys**: Include all parameters that affect data
 5. **Use loading states**: Show skeletons during initial load
 6. **Handle pagination**: Reset to page 1 when filters change
-7. **Use `placeholderData: keepPreviousData`**: Prevents UI jumps during pagination
 
 ## Next Steps
 
-- [Advanced Table](/niko-table/advanced-table) - Learn about advanced filtering
-- [Server-Side Nuqs Table](/niko-table/server-side-nuqs-table) - Add URL state persistence
+- [Advanced Table](/examples/advanced-table) - Learn about advanced filtering
+- [Advanced Nuqs Table](/examples/advanced-nuqs-table) - Add URL state persistence
 - [TanStack Query Docs](https://tanstack.com/query/latest) - Learn more about TanStack Query
