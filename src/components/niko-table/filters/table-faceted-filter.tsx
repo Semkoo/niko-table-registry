@@ -238,7 +238,7 @@ export function TableFacetedFilter<TData, TValue>({
           </Button>
         )}
       </PopoverTrigger>
-      <PopoverContent className="w-50 p-0" align="start">
+      <PopoverContent className="w-52 p-0" align="start">
         <TableFacetedFilterContent
           title={title}
           options={options}
