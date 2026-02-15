@@ -21,6 +21,7 @@ if (SERVER_URL === undefined) throw new Error("SERVER_URL is not set.")
 // https://astro.build/config
 export default defineConfig({
   site: SERVER_URL,
+  trailingSlash: "always",
   env: {
     schema: {
       GITHUB_REPO_URL: envField.string({
