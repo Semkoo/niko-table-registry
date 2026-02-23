@@ -234,6 +234,10 @@ export default defineConfig({
           ],
         },
         {
+          label: "Changelog",
+          slug: "changelog",
+        },
+        {
           label: "Contributing",
           items: [
             { label: "Introduction", slug: "contributing" },
