@@ -76,8 +76,7 @@ export const extendedFilter: FilterFn<RowData> = (
   row,
   columnId,
   filterValue,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  addMeta,
+  _addMeta,
 ) => {
   // If no filter value, show all rows
   if (!filterValue) return true
@@ -178,8 +177,7 @@ export const globalFilter: FilterFn<RowData> = (
   row,
   _columnId,
   filterValue,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  addMeta,
+  _addMeta,
 ) => {
   // If no filter value, show all rows
   if (!filterValue) return true

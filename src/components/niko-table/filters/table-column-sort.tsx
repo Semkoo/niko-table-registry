@@ -24,6 +24,7 @@ import { useDataTable } from "../core/data-table-context"
 import { SORT_ICONS, SORT_LABELS } from "../config/data-table"
 import type { SortIconVariant } from "../config/data-table"
 import { FILTER_VARIANTS } from "../lib/constants"
+import type { FilterVariant } from "../lib/constants"
 
 /**
  * Sort options menu items for composition inside TableColumnActions.
@@ -51,7 +52,7 @@ export function TableColumnSortOptions<TData, TValue>({
   const table = propTable || context.table
   const sortState = column.getIsSorted()
 
-  const variant =
+  const variant: FilterVariant =
     propVariant || column.columnDef.meta?.variant || FILTER_VARIANTS.TEXT
 
   const icons = SORT_ICONS[variant] || SORT_ICONS[FILTER_VARIANTS.TEXT]
@@ -218,7 +219,7 @@ export function TableColumnSortMenu<TData, TValue>({
   const canSort = column.getCanSort()
   const sortState = column.getIsSorted()
 
-  const variant =
+  const variant: FilterVariant =
     propVariant || column.columnDef.meta?.variant || FILTER_VARIANTS.TEXT
 
   const icons = SORT_ICONS[variant] || SORT_ICONS[FILTER_VARIANTS.TEXT]
