@@ -48,6 +48,15 @@ export default defineConfig([
   },
   tseslint.configs.strict,
   {
+    files: ["**/*.{ts,mts,cts,tsx}"],
+    rules: {
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
+      ],
+    },
+  },
+  {
     settings: {
       react: {
         version: "detect",
