@@ -190,13 +190,13 @@ export function useGeneratedOptions<TData>(
               occurrenceMap.set(String(v), true)
             }
           }
-          filteredStaticOptions = meta.options.filter(opt =>
+          filteredStaticOptions = meta.options.filter((opt: Option) =>
             occurrenceMap.has(opt.value),
           )
         }
 
         // Return static options with augmented counts
-        result[colId] = filteredStaticOptions.map(opt => ({
+        result[colId] = filteredStaticOptions.map((opt: Option) => ({
           ...opt,
           count: colShowCounts
             ? (countMap.get(opt.value) ?? opt.count)
@@ -251,7 +251,7 @@ export function useGeneratedOptions<TData>(
           // counts map already has keys from optionSourceRows
           counts.forEach((_, key) => occurrenceMap.set(key, true))
 
-          result[colId] = meta.options.filter(opt =>
+          result[colId] = meta.options.filter((opt: Option) =>
             occurrenceMap.has(opt.value),
           )
         } else {

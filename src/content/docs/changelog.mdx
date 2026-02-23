@@ -1,0 +1,44 @@
+---
+title: Changelog
+description: Latest updates and release notes for Niko Table.
+---
+
+## February 2026 - Initial Release
+
+The first public release of Niko Table — a composable, shadcn-compatible data table component registry built with TanStack Table and React.
+
+### Components
+
+- **DataTable** - Core data table with sorting, filtering, and pagination
+- **DataTableVirtualized** - Virtualized rendering for large datasets
+- **DataTablePagination** - Flexible pagination controls
+- **DataTableSearchFilter** - Global search across all columns
+- **DataTableFacetedFilter** - Multi-select faceted filtering with counts
+- **DataTableFilterMenu** - Advanced filter menu with AND/OR logic
+- **DataTableInlineFilter** - Inline filter bar with mixed operator support
+- **DataTableSliderFilter** - Range slider filtering for numeric columns
+- **DataTableDateFilter** - Date and date range filtering
+- **DataTableExportButton** - CSV/JSON export
+- **DataTableAside** - Side panel for row details
+- **DataTableSelectionBar** - Bulk actions on selected rows
+- **DataTableColumnSort** - Sort menu and sort icon components
+- **DataTableColumnHide** - Column visibility toggle
+- **DataTableColumnPin** - Column pinning (left/right)
+
+### Features
+
+- **Row DnD** - Drag and drop row reordering via `@dnd-kit`
+- **Column DnD** - Drag and drop column reordering
+- **Row Selection** - Single and multi-row selection with bulk actions
+- **Row Expansion** - Expandable rows with custom content
+- **Tree Table** - Hierarchical data with expand/collapse
+- **Virtualization** - Smooth scrolling for 10k+ rows
+- **URL State** - Sync filters, sorting, and pagination to URL via `nuqs`
+- **Server-Side** - Server-side filtering, sorting, and pagination support
+
+### Filter System
+
+- 15+ filter operators (contains, equals, greater than, between, etc.)
+- Mixed AND/OR logic with mathematical precedence
+- Per-filter join operator control
+- Regex-cached filter execution for large datasets
