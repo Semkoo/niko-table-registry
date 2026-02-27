@@ -1,5 +1,5 @@
-# Domain redirect: www → non-www
-https://www.niko-table.com/* https://niko-table.com/:splat 301
+# NOTE: www → non-www and http → https redirects are handled by Cloudflare
+# Dashboard redirect rules (CF Pages _redirects does not support cross-host redirects)
 
 # Example page redirects (URL restructure: /niko-table/<example> → /examples/<example>)
 /niko-table/simple-table /examples/simple-table/ 301
