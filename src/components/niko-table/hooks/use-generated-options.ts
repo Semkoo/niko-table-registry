@@ -68,9 +68,16 @@ export function useGeneratedOptions<TData>(
    * WHY: `table.getAllColumns()` may return a new array reference on every call,
    * even when columns haven't changed. This causes downstream useMemo to recalculate.
    *
-   * IMPACT: Prevents unnecessary option regeneration when columns are stable.
+   * REACTIVITY: We include `table.options.columns` as a dependency so that when
+   * column definitions change (e.g., updated `meta.options` from server-side facets),
+   * this memo recomputes. The `table` reference alone is stable across renders
+   * and would cause stale column data.
    */
-  const columns = React.useMemo(() => table.getAllColumns(), [table])
+   
+  const columns = React.useMemo(
+    () => table.getAllColumns(),
+    [table, table.options.columns],
+  )
 
   /**
    * REACTIVITY FIX: Extract coreRows outside memos so that when async data
