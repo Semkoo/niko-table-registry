@@ -118,6 +118,24 @@ Hook that derives the title for a column filter component.
   </Button>
 </div>
 
+```tsx showLineNumbers
+import { useDerivedColumnTitle } from "@/components/niko-table/hooks"
+
+function ColumnHeader({ column }: { column: Column<Product> }) {
+  // Priority: title prop → column.meta.label → formatted accessorKey
+  const title = useDerivedColumnTitle(column, "first_name")
+  // Returns "First Name" (formatted from accessorKey)
+
+  const titleWithMeta = useDerivedColumnTitle(column, "firstName")
+  // Returns column.columnDef.meta.label if set, otherwise "First Name"
+
+  const titleWithOverride = useDerivedColumnTitle(column, "firstName", "Custom Title")
+  // Returns "Custom Title" (explicit title always wins)
+
+  return <span>{title}</span>
+}
+```
+
 #### Parameters
 
 | Name          | Type            | Description                     |
@@ -145,6 +163,30 @@ Hook to generate options for select/multi_select columns from table data.
     </a>
   </Button>
 </div>
+
+```tsx showLineNumbers
+import { useGeneratedOptions } from "@/components/niko-table/hooks"
+
+function FilterPanel({ table }: { table: Table<Product> }) {
+  const optionsByColumn = useGeneratedOptions(table, {
+    showCounts: true,
+    dynamicCounts: true,
+    limitToFilteredRows: true,
+    includeColumns: ["category", "brand"],
+  })
+
+  // optionsByColumn.category → [{ value: "electronics", label: "Electronics", count: 42 }, ...]
+  // optionsByColumn.brand → [{ value: "apple", label: "Apple", count: 18 }, ...]
+
+  return (
+    <div>
+      {Object.entries(optionsByColumn).map(([columnId, options]) => (
+        <FacetedFilter key={columnId} columnId={columnId} options={options} />
+      ))}
+    </div>
+  )
+}
+```
 
 #### Parameters
 
@@ -253,3 +295,11 @@ const categoryOptions = useGeneratedOptionsForColumn(table, "category", {
 #### Returns
 
 An array of `Option` objects for the specified column.
+
+---
+
+### Changelog
+
+#### useGeneratedOptions
+
+- **Fix: Column definitions reactivity** — The hook now properly tracks changes to column definitions passed to the table. Previously, the internal columns memo only depended on the `table` reference, which is stable across renders in TanStack Table. This caused the hook to return stale options when column definitions were dynamically updated (e.g., server-side facets updating `meta.options`). The fix adds `table.options.columns` as a memo dependency so the hook recomputes whenever column definitions change.
