@@ -198,6 +198,7 @@ import {
 } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Loader2, AlertCircle, UserSearch, SearchX } from "lucide-react"
+import { useDebounce } from "@/components/niko-table/hooks/use-debounce"
 
 type Product = {
   id: string
@@ -417,6 +418,7 @@ type ServerResponse<T> = {
   total: number
   page: number
   pageSize: number
+  facets: Record<string, string[]>
 }
 
 type FetchParams = {
@@ -427,10 +429,158 @@ type FetchParams = {
   columnFilters: ColumnFiltersState
 }
 
+// Helper function to check if a product matches a single filter
+function matchesFilter(
+  product: Product,
+  filter: ExtendedColumnFilter<Product>,
+): boolean {
+  const productValue = product[filter.id as keyof Product]
+  const filterValue = filter.value
+
+  if (
+    filter.operator === FILTER_OPERATORS.EMPTY ||
+    filter.operator === FILTER_OPERATORS.NOT_EMPTY
+  ) {
+    // These don't need a value
+  } else if (!filterValue || filterValue === "") {
+    return true
+  }
+
+  switch (filter.operator) {
+    case FILTER_OPERATORS.EQ:
+      return (
+        String(productValue).toLowerCase() === String(filterValue).toLowerCase()
+      )
+    case FILTER_OPERATORS.NEQ:
+      return (
+        String(productValue).toLowerCase() !== String(filterValue).toLowerCase()
+      )
+    case FILTER_OPERATORS.ILIKE:
+      return String(productValue)
+        .toLowerCase()
+        .includes(String(filterValue).toLowerCase())
+    case FILTER_OPERATORS.NOT_ILIKE:
+      return !String(productValue)
+        .toLowerCase()
+        .includes(String(filterValue).toLowerCase())
+    case FILTER_OPERATORS.GT:
+      return Number(productValue) > Number(filterValue)
+    case FILTER_OPERATORS.LT:
+      return Number(productValue) < Number(filterValue)
+    case FILTER_OPERATORS.GTE:
+      return Number(productValue) >= Number(filterValue)
+    case FILTER_OPERATORS.LTE:
+      return Number(productValue) <= Number(filterValue)
+    case FILTER_OPERATORS.EMPTY:
+      return (
+        productValue === null ||
+        productValue === undefined ||
+        String(productValue).trim() === ""
+      )
+    case FILTER_OPERATORS.NOT_EMPTY:
+      return (
+        productValue !== null &&
+        productValue !== undefined &&
+        String(productValue).trim() !== ""
+      )
+    case FILTER_OPERATORS.IN:
+      if (Array.isArray(filterValue)) {
+        return filterValue.some(
+          v => String(productValue).toLowerCase() === String(v).toLowerCase(),
+        )
+      }
+      return false
+    case FILTER_OPERATORS.NOT_IN:
+      if (Array.isArray(filterValue)) {
+        return !filterValue.some(
+          v => String(productValue).toLowerCase() === String(v).toLowerCase(),
+        )
+      }
+      return true
+    default:
+      return true
+  }
+}
+
+// Filter products using all filter params, optionally excluding one column's filter.
+// Used for both main data filtering and facet computation (where we exclude the
+// facet column's own filter so users can see all available values for that column).
+function filterProductsByParams(
+  products: Product[],
+  params: FetchParams,
+  excludeColumnId?: string,
+): Product[] {
+  let filtered = [...products]
+
+  // Apply global search filter (server-side) - string search
+  if (typeof params.globalFilter === "string" && params.globalFilter) {
+    const searchTerm = params.globalFilter.toLowerCase()
+    filtered = filtered.filter(product =>
+      Object.values(product).some(value =>
+        String(value).toLowerCase().includes(searchTerm),
+      ),
+    )
+  }
+
+  // Apply OR filters from globalFilter (when it's an object with filters)
+  if (
+    typeof params.globalFilter === "object" &&
+    params.globalFilter &&
+    "filters" in params.globalFilter
+  ) {
+    const filterObj = params.globalFilter as {
+      filters: ExtendedColumnFilter<Product>[]
+      joinOperator: string
+    }
+    const orFilters = (filterObj.filters || []).filter(
+      f =>
+        f.value &&
+        f.value !== "" &&
+        (!excludeColumnId || f.id !== excludeColumnId),
+    )
+
+    if (orFilters.length > 0) {
+      filtered = filtered.filter(product =>
+        orFilters.some(filter => matchesFilter(product, filter)),
+      )
+    }
+  }
+
+  // Apply AND filters from columnFilters (server-side)
+  if (params.columnFilters.length > 0) {
+    filtered = filtered.filter(product => {
+      return params.columnFilters.every(filter => {
+        // Skip excluded column
+        if (excludeColumnId && filter.id === excludeColumnId) return true
+
+        const value = filter.value
+
+        // Skip empty filters
+        if (
+          !value ||
+          (typeof value === "object" && "value" in value && !value.value)
+        ) {
+          return true
+        }
+
+        // Handle ExtendedColumnFilter format
+        if (typeof value === "object" && "id" in value) {
+          const extendedFilter = value as ExtendedColumnFilter<Product>
+          return matchesFilter(product, extendedFilter)
+        }
+
+        return true
+      })
+    })
+  }
+
+  return filtered
+}
+
 // Simulate server-side filtering, sorting, and pagination
 function fetchProducts(
   params: FetchParams,
-  delay = 800,
+  delay = 500,
 ): Promise<ServerResponse<Product>> {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
@@ -444,151 +594,21 @@ function fetchProducts(
         // Generate a large dataset
         const allProducts = generateMockProducts(500)
 
-        // Apply server-side filtering
-        let filtered = [...allProducts]
+        // Apply all filters
+        const filtered = filterProductsByParams(allProducts, params)
 
-        // Helper function to check if a product matches a single filter
-        const matchesFilter = (
-          product: Product,
-          filter: ExtendedColumnFilter<Product>,
-        ): boolean => {
-          const productValue = product[filter.id as keyof Product]
-          const filterValue = filter.value
-
-          // Handle empty value filters
-          if (
-            filter.operator === FILTER_OPERATORS.EMPTY ||
-            filter.operator === FILTER_OPERATORS.NOT_EMPTY
-          ) {
-            // These don't need a value
-          } else if (!filterValue || filterValue === "") {
-            return true // Empty filter value means no filter
-          }
-
-          switch (filter.operator) {
-            case FILTER_OPERATORS.EQ:
-              return (
-                String(productValue).toLowerCase() ===
-                String(filterValue).toLowerCase()
-              )
-            case FILTER_OPERATORS.NEQ:
-              return (
-                String(productValue).toLowerCase() !==
-                String(filterValue).toLowerCase()
-              )
-            case FILTER_OPERATORS.ILIKE:
-              return String(productValue)
-                .toLowerCase()
-                .includes(String(filterValue).toLowerCase())
-            case FILTER_OPERATORS.NOT_ILIKE:
-              return !String(productValue)
-                .toLowerCase()
-                .includes(String(filterValue).toLowerCase())
-            case FILTER_OPERATORS.GT:
-              return Number(productValue) > Number(filterValue)
-            case FILTER_OPERATORS.LT:
-              return Number(productValue) < Number(filterValue)
-            case FILTER_OPERATORS.GTE:
-              return Number(productValue) >= Number(filterValue)
-            case FILTER_OPERATORS.LTE:
-              return Number(productValue) <= Number(filterValue)
-            case FILTER_OPERATORS.EMPTY:
-              return (
-                productValue === null ||
-                productValue === undefined ||
-                String(productValue).trim() === ""
-              )
-            case FILTER_OPERATORS.NOT_EMPTY:
-              return (
-                productValue !== null &&
-                productValue !== undefined &&
-                String(productValue).trim() !== ""
-              )
-            case FILTER_OPERATORS.IN:
-              if (Array.isArray(filterValue)) {
-                return filterValue.some(
-                  v =>
-                    String(productValue).toLowerCase() ===
-                    String(v).toLowerCase(),
-                )
-              }
-              return false
-            case FILTER_OPERATORS.NOT_IN:
-              if (Array.isArray(filterValue)) {
-                return !filterValue.some(
-                  v =>
-                    String(productValue).toLowerCase() ===
-                    String(v).toLowerCase(),
-                )
-              }
-              return true
-            default:
-              return true
-          }
-        }
-
-        // Apply global search filter (server-side) - string search
-        if (typeof params.globalFilter === "string" && params.globalFilter) {
-          const searchTerm = params.globalFilter.toLowerCase()
-          filtered = filtered.filter(product =>
-            Object.values(product).some(value =>
-              String(value).toLowerCase().includes(searchTerm),
-            ),
-          )
-        }
-
-        // Apply OR filters from globalFilter (when it's an object with filters)
-        if (
-          typeof params.globalFilter === "object" &&
-          params.globalFilter &&
-          "filters" in params.globalFilter
-        ) {
-          const filterObj = params.globalFilter as {
-            filters: ExtendedColumnFilter<Product>[]
-            joinOperator: string
-          }
-          const orFilters = filterObj.filters || []
-
-          if (orFilters.length > 0) {
-            // Filter out empty filters
-            const validFilters = orFilters.filter(
-              f => f.value && f.value !== "",
-            )
-
-            if (validFilters.length > 0) {
-              // Apply OR logic: product matches if ANY filter matches
-              filtered = filtered.filter(product => {
-                return validFilters.some(filter =>
-                  matchesFilter(product, filter),
-                )
-              })
-            }
-          }
-        }
-
-        // Apply AND filters from columnFilters (server-side)
-        if (params.columnFilters.length > 0) {
-          filtered = filtered.filter(product => {
-            return params.columnFilters.every(filter => {
-              const value = filter.value
-
-              // Skip empty filters
-              if (
-                !value ||
-                (typeof value === "object" && "value" in value && !value.value)
-              ) {
-                return true
-              }
-
-              // Handle ExtendedColumnFilter format
-              if (typeof value === "object" && "id" in value) {
-                const extendedFilter = value as ExtendedColumnFilter<Product>
-                return matchesFilter(product, extendedFilter)
-              }
-
-              return true
-            })
-          })
+        // Compute facets: for each select column, get distinct values from
+        // data filtered by all OTHER column filters (excluding that column's own)
+        // This enables cross-filter behavior in the UI
+        const facetColumns = ["category", "brand"] as const
+        const facets: Record<string, string[]> = {}
+        for (const col of facetColumns) {
+          const facetFiltered = filterProductsByParams(allProducts, params, col)
+          facets[col] = [
+            ...new Set(facetFiltered.map(p => String(p[col as keyof Product]))),
+          ]
+            .filter(v => v.trim() !== "")
+            .sort()
         }
 
         // Apply server-side sorting
@@ -618,6 +638,7 @@ function fetchProducts(
           total,
           page: params.page,
           pageSize: params.pageSize,
+          facets,
         })
       } catch (error) {
         reject(error)
@@ -673,6 +694,9 @@ const columns: DataTableColumnDef<Product>[] = [
       label: "Category",
       variant: FILTER_VARIANTS.SELECT,
       options: categoryOptions,
+      // Disable auto-generation for server-side tables - use static options as-is
+      // since coreRows only contain server-filtered data, not the full dataset
+      autoOptions: false,
     },
     cell: ({ row }) => {
       const category = row.getValue("category") as string
@@ -694,6 +718,8 @@ const columns: DataTableColumnDef<Product>[] = [
       label: "Brand",
       variant: FILTER_VARIANTS.SELECT,
       options: brandOptions,
+      // Disable auto-generation for server-side tables - use static options as-is
+      autoOptions: false,
     },
     enableColumnFilter: true,
   },
@@ -1097,6 +1123,10 @@ function ServerSideStateTableContent() {
   const columnFilters =
     filterMode === "standard" ? standardColumnFilters : inlineColumnFilters
 
+  // PERFORMANCE: Debounce column filters to batch rapid filter changes (e.g. clicking
+  // multiple faceted filter options) into a single server request instead of one per click
+  const debouncedColumnFilters = useDebounce(columnFilters, 300)
+
   // Column visibility from URL
   const columnVisibility = urlParams.columnVisibility
 
@@ -1118,7 +1148,7 @@ function ServerSideStateTableContent() {
       pagination.pageSize,
       sorting,
       globalFilter,
-      columnFilters,
+      debouncedColumnFilters,
       filterMode,
     ],
     queryFn: () =>
@@ -1127,7 +1157,7 @@ function ServerSideStateTableContent() {
         pageSize: pagination.pageSize,
         sorting,
         globalFilter,
-        columnFilters,
+        columnFilters: debouncedColumnFilters,
       }),
     staleTime: 30000, // Consider data fresh for 30 seconds
     gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
@@ -1137,6 +1167,49 @@ function ServerSideStateTableContent() {
   // Extract data and total from query response
   const data = queryData?.data ?? []
   const totalCount = queryData?.total ?? 0
+  const facets = queryData?.facets
+
+  // Create dynamic columns with faceted options passed directly to filter menus.
+  // The `options` prop on DataTableColumnFacetedFilterMenu bypasses useGeneratedOptions
+  // entirely, avoiding stale memo issues with table.getAllColumns().
+  const dynamicColumns = useMemo(() => {
+    const categoryOpts = facets?.category
+      ? categoryOptions.filter(opt => facets.category.includes(opt.value))
+      : categoryOptions
+    const brandOpts = facets?.brand
+      ? brandOptions.filter(opt => facets.brand.includes(opt.value))
+      : brandOptions
+
+    return columns.map(col => {
+      const key = (col as { accessorKey?: string }).accessorKey
+      if (key === "category") {
+        return {
+          ...col,
+          header: () => (
+            <DataTableColumnHeader>
+              <DataTableColumnTitle />
+              <DataTableColumnSortMenu variant={FILTER_VARIANTS.TEXT} />
+              <DataTableColumnFacetedFilterMenu options={categoryOpts} />
+            </DataTableColumnHeader>
+          ),
+        } as DataTableColumnDef<Product>
+      }
+      if (key === "brand") {
+        return {
+          ...col,
+          header: () => (
+            <DataTableColumnHeader>
+              <DataTableColumnTitle />
+              <DataTableColumnSortMenu variant={FILTER_VARIANTS.TEXT} />
+              <DataTableColumnFacetedFilterMenu options={brandOpts} />
+            </DataTableColumnHeader>
+          ),
+        } as DataTableColumnDef<Product>
+      }
+      return col
+    })
+  }, [facets])
+
   const error = queryError
     ? queryError instanceof Error
       ? queryError.message
@@ -1833,7 +1906,7 @@ function ServerSideStateTableContent() {
           <TabsContent value="standard" className="space-y-4">
             <DataTableRoot
               data={data}
-              columns={columns}
+              columns={dynamicColumns}
               isLoading={isLoading}
               config={{
                 manualPagination: true,
@@ -1911,7 +1984,7 @@ function ServerSideStateTableContent() {
           <TabsContent value="inline" className="space-y-4">
             <DataTableRoot
               data={data}
-              columns={columns}
+              columns={dynamicColumns}
               isLoading={isLoading}
               config={{
                 manualPagination: true,
