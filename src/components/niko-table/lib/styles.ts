@@ -13,6 +13,7 @@ export const getCommonPinningStyles = <TData>(
 
   return {
     position: "sticky",
+    top: isHeader ? 0 : undefined,
     left: isLeft ? `${column.getStart("left")}px` : undefined,
     right: !isLeft ? `${column.getAfter("right")}px` : undefined,
     opacity: 1,
