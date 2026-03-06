@@ -194,7 +194,7 @@ export const DataTableDndHeader = React.memo(function DataTableDndHeader({
   return (
     <TableHeader
       className={cn(
-        sticky && "sticky top-0 z-10 bg-background",
+        sticky && "sticky top-0 z-30 bg-background",
         sticky &&
           "after:absolute after:right-0 after:bottom-0 after:left-0 after:h-px after:bg-border",
         className,

@@ -356,7 +356,7 @@ export const DataTableVirtualizedDndHeader = React.memo(
       <TableHeader
         className={cn(
           "block",
-          sticky && "sticky top-0 z-10 bg-background",
+          sticky && "sticky top-0 z-30 bg-background",
           className,
         )}
       >

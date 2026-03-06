@@ -3,6 +3,15 @@ title: Changelog
 description: Latest updates and release notes for Niko Table.
 ---
 
+## March 2026
+
+### Bug Fixes
+
+- **Sticky header z-index** — Fixed an issue where pinned body cells could overlap the sticky header during scroll. The sticky header container now uses `z-30`, above header pinned cells (`z-20`) and body pinned cells (`z-10`).
+- **Pinned header cell `top` style** — Added `top: 0` to pinned header cells in `getCommonPinningStyles` so they stick vertically when the header is sticky.
+
+---
+
 ## February 2026 - Initial Release
 
 The first public release of Niko Table — a composable, shadcn-compatible data table component registry built with TanStack Table and React.
