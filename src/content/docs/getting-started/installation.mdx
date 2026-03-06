@@ -43,6 +43,36 @@ The DataTable registry automatically installs a custom `components/ui/table.tsx`
 
 > **Note:** This is **100% backward compatible** — your existing Shadcn tables will continue to work exactly as before. If you already have a `table.tsx`, the CLI will prompt you before overwriting.
 
+### Monorepo / Non-Standard Layouts
+
+If your project uses a non-standard UI component path (e.g., `packages/ui/src/components/` instead of `src/components/ui/`), the shadcn CLI may place `table.tsx` in the wrong location. This is a [known upstream issue](https://github.com/shadcn-ui/ui/issues) with `registry:ui` path resolution.
+
+**Workaround:** After installing, check that `table.tsx` landed in the correct directory. If it was placed in a nested `ui/` folder, move it to your actual UI components path and ensure it exports `TableComponent`:
+
+```tsx
+// Your existing table.tsx — add this function and export
+function TableComponent({
+  className,
+  ...props
+}: React.ComponentProps<"table">) {
+  return (
+    <table
+      data-slot="table"
+      className={cn("w-full caption-bottom text-sm", className)}
+      {...props}
+    />
+  )
+}
+
+// Add TableComponent to your existing exports
+export {
+  TableComponent,
+  Table,
+  TableHeader,
+  // ... your other exports
+}
+```
+
 ## Configure the Niko Table Registry
 
 To use the `@niko-table/` namespace with the shadcn CLI, you must first register it in your project's `components.json`. Add the `registries` field:

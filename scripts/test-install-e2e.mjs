@@ -13,7 +13,6 @@ import {
   rmSync,
   readdirSync,
   cpSync,
-  writeFileSync,
   readFileSync,
   existsSync,
 } from "fs"
@@ -25,7 +24,6 @@ import os from "os"
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const fixtureDir = join(__dirname, "fixtures")
 const nextFixture = join(fixtureDir, "next-shadcn")
-const tableFixture = join(fixtureDir, "table.tsx")
 
 const baseUrl = (
   process.env.REGISTRY_BASE_URL || "https://niko-table.com"
@@ -44,6 +42,7 @@ function run(cmd, opts = {}) {
 
 // Key files that must exist after `shadcn add data-table.json`
 const REQUIRED_FILES = [
+  "src/components/ui/table.tsx",
   "src/components/niko-table/core/data-table.tsx",
   "src/components/niko-table/core/data-table-root.tsx",
   "src/components/niko-table/core/index.tsx",
@@ -64,36 +63,31 @@ async function main() {
     run("pnpm install")
 
     console.log(
-      "Adding shadcn base components (table, skeleton, alert, button, dropdown-menu)...",
+      "Adding shadcn base components (skeleton, alert, button, dropdown-menu)...",
     )
-    run(
-      "pnpm dlx shadcn@latest add table skeleton alert button dropdown-menu --yes",
-    )
-
-    console.log("Overwriting table.tsx with DataTable-compatible version...")
-    writeFileSync(
-      join(tempDir, "src", "components", "ui", "table.tsx"),
-      readFileSync(tableFixture, "utf8"),
-    )
+    run("pnpm dlx shadcn@latest add skeleton alert button dropdown-menu --yes")
 
     console.log(`Adding data-table from registry: ${dataTableUrl}`)
     run(`echo y | pnpm dlx shadcn@latest add "${dataTableUrl}" --yes`, {
       shell: true,
     })
 
-    console.log(
-      "Restoring DataTable-compatible table.tsx (add overwrites it)...",
-    )
-    writeFileSync(
-      join(tempDir, "src", "components", "ui", "table.tsx"),
-      readFileSync(tableFixture, "utf8"),
-    )
-
     console.log("Verifying expected files were created...")
     const missing = REQUIRED_FILES.filter(f => !existsSync(join(tempDir, f)))
     if (missing.length > 0) {
       throw new Error(
         `Missing expected files:\n${missing.map(f => `  - ${f}`).join("\n")}`,
+      )
+    }
+
+    console.log("Verifying table.tsx has TableComponent export...")
+    const tableContent = readFileSync(
+      join(tempDir, "src", "components", "ui", "table.tsx"),
+      "utf8",
+    )
+    if (!tableContent.includes("TableComponent")) {
+      throw new Error(
+        "table.tsx is missing the TableComponent export — the registry's modified version was not installed correctly.",
       )
     }
 
