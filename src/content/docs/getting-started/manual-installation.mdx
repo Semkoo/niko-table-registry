@@ -27,8 +27,8 @@ The DataTable components use a two-layer architecture for maximum flexibility:
 
 **Why this architecture?**
 
-- Use `DataTable*` components from "@/components/niko-table/components" when you want context-based, zero-config usage
-- Use `Table*` components from filters when you want to build custom components or manage the table instance yourself
+- Use `DataTable*` components from their direct paths (e.g. `@/components/niko-table/components/data-table-pagination`) when you want context-based, zero-config usage
+- Use `Table*` components from filters (e.g. `@/components/niko-table/filters/table-pagination`) when you want to build custom components or manage the table instance yourself
 - All filter components use TanStack Table hooks directly, giving you full control
 
 ## Installation Steps
@@ -46,7 +46,7 @@ The DataTable components use a two-layer architecture for maximum flexibility:
 
 3.  **Copy the custom table component**
 
-    The DataTable requires a custom `components/ui/table.tsx` with a `TableComponent` export. Copy it from the [manual installation files below](#all-components), or install it via the registry CLI (see the [Installation Guide](/getting-started/installation)).
+    The DataTable requires a custom `components/ui/table.tsx` with a `TableComponent` export. Copy it from the [manual installation files below](#all-components), or install it via the registry CLI (see the [Installation Guide](/getting-started/installation/)).
 
 4.  **Copy all DataTable components**
 
@@ -59,17 +59,19 @@ The DataTable components use a two-layer architecture for maximum flexibility:
     - `@/components/niko-table/` for DataTable components
     - `@/lib/` for utility functions
 
+    Ensure your project has the `@/` path alias pointing at your `src/` directory (or replace `@/` with your own alias in the copied code). **Use direct file imports only** (no barrel exports): import from the specific file (e.g. `@/components/niko-table/core/data-table-root`, `@/components/niko-table/lib/constants`) so bundlers can tree-shake. This matches the shadcn pattern of one entry point per component.
+
 6.  **Verify installation**
 
     Create a simple test to verify everything is working:
 
     ```tsx
+    import { DataTableRoot } from "@/components/niko-table/core/data-table-root"
+    import { DataTable } from "@/components/niko-table/core/data-table"
     import {
-      DataTableRoot,
-      DataTable,
       DataTableHeader,
       DataTableBody,
-    } from "@/components/niko-table/core"
+    } from "@/components/niko-table/core/data-table-structure"
 
     const columns = [
       { accessorKey: "name", header: "Name" },
@@ -210,8 +212,8 @@ For drag-and-drop row reordering, follow the [DiceUI Sortable installation guide
 
 Now that you have all the components installed, check out the examples:
 
-- [Simple Table](/examples/simple-table) - Basic table with no pagination
-- [Basic Table](/examples/basic-table) - Add pagination and sorting
-- [Search Table](/examples/search-table) - Add search functionality
-- [Faceted Filter Table](/examples/faceted-filter-table) - Add advanced filtering
-- [Advanced Table](/examples/advanced-table) - All features combined
+- [Simple Table](/examples/simple-table/) - Basic table with no pagination
+- [Basic Table](/examples/basic-table/) - Add pagination and sorting
+- [Search Table](/examples/search-table/) - Add search functionality
+- [Faceted Filter Table](/examples/faceted-filter-table/) - Add advanced filtering
+- [Advanced Table](/examples/advanced-table/) - All features combined

@@ -25,7 +25,7 @@ Hook to access the table instance and context from any child component.
 </div>
 
 ```tsx showLineNumbers
-import { useDataTable } from "@/components/niko-table/core"
+import { useDataTable } from "@/components/niko-table/core/data-table-context"
 
 export function CustomComponent() {
   const { table, isLoading, columns } = useDataTable()
@@ -70,7 +70,7 @@ Hook to debounce a value, useful for search inputs and filters.
 </div>
 
 ```tsx showLineNumbers
-import { useDebounce } from "@/components/niko-table/hooks"
+import { useDebounce } from "@/components/niko-table/hooks/use-debounce"
 
 function SearchFilter() {
   const [search, setSearch] = useState("")
@@ -119,7 +119,7 @@ Hook that derives the title for a column filter component.
 </div>
 
 ```tsx showLineNumbers
-import { useDerivedColumnTitle } from "@/components/niko-table/hooks"
+import { useDerivedColumnTitle } from "@/components/niko-table/hooks/use-derived-column-title"
 
 function ColumnHeader({ column }: { column: Column<Product> }) {
   // Priority: title prop → column.meta.label → formatted accessorKey
@@ -165,7 +165,7 @@ Hook to generate options for select/multi_select columns from table data.
 </div>
 
 ```tsx showLineNumbers
-import { useGeneratedOptions } from "@/components/niko-table/hooks"
+import { useGeneratedOptions } from "@/components/niko-table/hooks/use-generated-options"
 
 function FilterPanel({ table }: { table: Table<Product> }) {
   const optionsByColumn = useGeneratedOptions(table, {
@@ -222,7 +222,7 @@ Hook for managing keyboard shortcuts with fine-grained control.
 </div>
 
 ```tsx showLineNumbers
-import { useKeyboardShortcut } from "@/components/niko-table/hooks"
+import { useKeyboardShortcut } from "@/components/niko-table/hooks/use-keyboard-shortcut"
 
 useKeyboardShortcut({
   key: "f",
@@ -256,7 +256,7 @@ useKeyboardShortcut({
 Batch version of `useKeyboardShortcut` for managing multiple keyboard shortcuts at once with a single event listener.
 
 ```tsx showLineNumbers
-import { useKeyboardShortcuts } from "@/components/niko-table/hooks"
+import { useKeyboardShortcuts } from "@/components/niko-table/hooks/use-keyboard-shortcut"
 
 useKeyboardShortcuts([
   { key: "f", onTrigger: () => setFilterOpen(true) },
@@ -276,7 +276,7 @@ useKeyboardShortcuts([
 Convenience wrapper around `useGeneratedOptions` that generates options for a single column.
 
 ```tsx showLineNumbers
-import { useGeneratedOptionsForColumn } from "@/components/niko-table/hooks"
+import { useGeneratedOptionsForColumn } from "@/components/niko-table/hooks/use-generated-options"
 
 const categoryOptions = useGeneratedOptionsForColumn(table, "category", {
   showCounts: true,

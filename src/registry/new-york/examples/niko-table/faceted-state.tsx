@@ -8,13 +8,13 @@ import type {
   VisibilityState,
   ColumnPinningState,
 } from "@tanstack/react-table"
+import { DataTableRoot } from "@/components/niko-table/core/data-table-root"
+import { DataTable } from "@/components/niko-table/core/data-table"
 import {
-  DataTableRoot,
-  DataTable,
   DataTableHeader,
   DataTableBody,
   DataTableEmptyBody,
-} from "@/components/niko-table/core"
+} from "@/components/niko-table/core/data-table-structure"
 import { DataTableColumnHeader } from "@/components/niko-table/components/data-table-column-header"
 import { DataTableColumnTitle } from "@/components/niko-table/components/data-table-column-title"
 import { DataTableColumnActions } from "@/components/niko-table/components/data-table-column-actions"
@@ -42,7 +42,8 @@ import { DataTableClearFilter } from "@/components/niko-table/components/data-ta
 import { DataTableSliderFilter } from "@/components/niko-table/components/data-table-slider-filter"
 import { DataTableDateFilter } from "@/components/niko-table/components/data-table-date-filter"
 import { DataTablePagination } from "@/components/niko-table/components/data-table-pagination"
-import { daysAgo, FILTER_VARIANTS } from "@/components/niko-table/lib"
+import { daysAgo } from "@/components/niko-table/lib/format"
+import { FILTER_VARIANTS } from "@/components/niko-table/lib/constants"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 import { Badge } from "@/components/ui/badge"
 import { UserSearch, SearchX, Filter } from "lucide-react"

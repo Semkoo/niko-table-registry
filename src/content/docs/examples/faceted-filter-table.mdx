@@ -25,7 +25,7 @@ Install the DataTable core and add-ons for this example:
 
 > First time using `@niko-table`? See the [Installation Guide](/getting-started/installation#configure-the-niko-table-registry) to set up the registry.
 
-For other add-ons or manual copy-paste, see the [Installation Guide](/getting-started/installation).
+For other add-ons or manual copy-paste, see the [Installation Guide](/getting-started/installation/).
 
 ## Prerequisites
 
@@ -70,7 +70,7 @@ import { DataTableColumnSortMenu } from "@/components/niko-table/components/data
 import { DataTableColumnFacetedFilterMenu } from "@/components/niko-table/components/data-table-column-faceted-filter"
 import { DataTableColumnSliderFilterMenu } from "@/components/niko-table/components/data-table-column-slider-filter-options"
 import { DataTableColumnDateFilterMenu } from "@/components/niko-table/components/data-table-column-date-filter-options"
-import { FILTER_VARIANTS } from "@/components/niko-table/lib"
+import { FILTER_VARIANTS } from "@/components/niko-table/lib/constants"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 
 export type Product = {
@@ -175,13 +175,13 @@ Next, we'll add faceted filter components.
 ```tsx showLineNumbers title="faceted-filter-table.tsx"
 "use client"
 
+import { DataTableRoot } from "@/components/niko-table/core/data-table-root"
+import { DataTable } from "@/components/niko-table/core/data-table"
 import {
-  DataTableRoot,
-  DataTable,
   DataTableHeader,
   DataTableBody,
   DataTableEmptyBody,
-} from "@/components/niko-table/core"
+} from "@/components/niko-table/core/data-table-structure"
 import { DataTableToolbarSection } from "@/components/niko-table/components/data-table-toolbar-section"
 import { DataTablePagination } from "@/components/niko-table/components/data-table-pagination"
 import { DataTableSearchFilter } from "@/components/niko-table/components/data-table-search-filter"
@@ -198,7 +198,7 @@ import { DataTableColumnSortMenu } from "@/components/niko-table/components/data
 import { DataTableColumnFacetedFilterMenu } from "@/components/niko-table/components/data-table-column-faceted-filter"
 import { DataTableColumnSliderFilterMenu } from "@/components/niko-table/components/data-table-column-slider-filter-options"
 import { DataTableColumnDateFilterMenu } from "@/components/niko-table/components/data-table-column-date-filter-options"
-import { FILTER_VARIANTS } from "@/components/niko-table/lib"
+import { FILTER_VARIANTS } from "@/components/niko-table/lib/constants"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 
 type Product = {
@@ -542,11 +542,11 @@ export function ControlledFacetedFilterTable({ data }: { data: Product[] }) {
 
 **❌ Consider other options when:**
 
-- You need complex rule-based filtering (use [Advanced Table](/examples/advanced-table))
-- You prefer dropdown filters (use [Advanced Table](/examples/advanced-table))
-- You only need search (use [Search Table](/examples/search-table))
+- You need complex rule-based filtering (use [Advanced Table](/examples/advanced-table/))
+- You prefer dropdown filters (use [Advanced Table](/examples/advanced-table/))
+- You only need search (use [Search Table](/examples/search-table/))
 
 ## Next Steps
 
-- [Advanced Table](/examples/advanced-table) - Add advanced filtering menus
-- [Search Table](/examples/search-table) - Add global search
+- [Advanced Table](/examples/advanced-table/) - Add advanced filtering menus
+- [Search Table](/examples/search-table/) - Add global search

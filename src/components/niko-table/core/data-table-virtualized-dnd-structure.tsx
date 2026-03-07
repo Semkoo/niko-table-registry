@@ -33,12 +33,15 @@ import type { ScrollEvent } from "./data-table-virtualized-structure"
 interface VirtualizedDraggableRowProps {
   children: React.ReactNode
   rowId: string
+  /** Used for event delegation (row click); forwarded as data-row-index. */
+  rowIndex?: number
   className?: string
 }
 
 function VirtualizedDraggableRow({
   children,
   rowId,
+  rowIndex,
   className,
 }: VirtualizedDraggableRowProps) {
   const { transform, transition, setNodeRef, isDragging } = useSortable({
@@ -58,6 +61,7 @@ function VirtualizedDraggableRow({
       ref={setNodeRef}
       style={style}
       className={cn("flex w-full", isDragging && "bg-muted/50", className)}
+      data-row-index={rowIndex}
     >
       {children}
     </TableRow>
@@ -147,6 +151,40 @@ export function DataTableVirtualizedDndBody<TData>({
     onScrolledBottom?.()
   }, [onScrolledBottom])
 
+  /** Single row-click handler with event delegation (useCallback). */
+  const handleRowClick = React.useCallback(
+    (event: React.MouseEvent<HTMLTableSectionElement>) => {
+      if (!onRowClick) return
+      const target = event.target as HTMLElement
+      const rowElement = target.closest("tr[data-row-index]")
+      if (!rowElement) return
+
+      const isInteractiveElement =
+        target.closest("button") ||
+        target.closest("input") ||
+        target.closest("a") ||
+        target.closest('[role="button"]') ||
+        target.closest('[role="checkbox"]') ||
+        target.closest("[data-radix-collection-item]") ||
+        target.closest('[data-slot="checkbox"]') ||
+        target.tagName === "INPUT" ||
+        target.tagName === "BUTTON" ||
+        target.tagName === "A"
+      if (isInteractiveElement) return
+
+      const rowIndexAttr = rowElement.getAttribute("data-row-index")
+      if (rowIndexAttr === null) return
+      const index = parseInt(rowIndexAttr, 10)
+      if (Number.isNaN(index) || index < 0 || index >= rows.length) return
+      const row = rows[index]
+      onRowClick(
+        row.original as TData,
+        event as unknown as React.MouseEvent<HTMLTableRowElement>,
+      )
+    },
+    [onRowClick, rows],
+  )
+
   React.useEffect(() => {
     if (!scrollElement || !onScroll) return
 
@@ -201,7 +239,11 @@ export function DataTableVirtualizedDndBody<TData>({
     : 0
 
   return (
-    <TableBody ref={parentRef} className={cn("block", className)}>
+    <TableBody
+      ref={parentRef}
+      className={cn("block", className)}
+      onClick={onRowClick ? handleRowClick : undefined}
+    >
       <SortableContext items={dataIds} strategy={verticalListSortingStrategy}>
         {/* Top spacer for virtual scrolling offset */}
         {topSpacerHeight > 0 && (
@@ -222,7 +264,7 @@ export function DataTableVirtualizedDndBody<TData>({
 
           return (
             <React.Fragment key={`${row.id}-${isExpanded}`}>
-              <VirtualizedDraggableRow rowId={row.id}>
+              <VirtualizedDraggableRow rowId={row.id} rowIndex={row?.index}>
                 {row.getVisibleCells().map(cell => {
                   const size = cell.column.columnDef.size
                   const cellStyle = {
@@ -242,33 +284,6 @@ export function DataTableVirtualizedDndBody<TData>({
                           "bg-background group-hover:bg-muted/50 group-data-[state=selected]:bg-muted",
                       )}
                       style={cellStyle}
-                      onClick={
-                        isClickable
-                          ? event => {
-                              const target = event.target as HTMLElement
-                              const isInteractiveElement =
-                                target.closest("button") ||
-                                target.closest("input") ||
-                                target.closest("a") ||
-                                target.closest('[role="button"]') ||
-                                target.closest('[role="checkbox"]') ||
-                                target.closest(
-                                  "[data-radix-collection-item]",
-                                ) ||
-                                target.closest('[data-slot="checkbox"]') ||
-                                target.tagName === "INPUT" ||
-                                target.tagName === "BUTTON" ||
-                                target.tagName === "A"
-
-                              if (!isInteractiveElement) {
-                                onRowClick(
-                                  row.original as TData,
-                                  event as unknown as React.MouseEvent<HTMLTableRowElement>,
-                                )
-                              }
-                            }
-                          : undefined
-                      }
                     >
                       {flexRender(
                         cell.column.columnDef.cell,
@@ -518,6 +533,40 @@ export function DataTableVirtualizedDndColumnBody<TData>({
     scrollThreshold,
   ])
 
+  /** Single row-click handler with event delegation (useCallback). */
+  const handleRowClick = React.useCallback(
+    (event: React.MouseEvent<HTMLTableSectionElement>) => {
+      if (!onRowClick) return
+      const target = event.target as HTMLElement
+      const rowElement = target.closest("tr[data-row-index]")
+      if (!rowElement) return
+
+      const isInteractiveElement =
+        target.closest("button") ||
+        target.closest("input") ||
+        target.closest("a") ||
+        target.closest('[role="button"]') ||
+        target.closest('[role="checkbox"]') ||
+        target.closest("[data-radix-collection-item]") ||
+        target.closest('[data-slot="checkbox"]') ||
+        target.tagName === "INPUT" ||
+        target.tagName === "BUTTON" ||
+        target.tagName === "A"
+      if (isInteractiveElement) return
+
+      const rowIndexAttr = rowElement.getAttribute("data-row-index")
+      if (rowIndexAttr === null) return
+      const index = parseInt(rowIndexAttr, 10)
+      if (Number.isNaN(index) || index < 0 || index >= rows.length) return
+      const row = rows[index]
+      onRowClick(
+        row.original as TData,
+        event as unknown as React.MouseEvent<HTMLTableRowElement>,
+      )
+    },
+    [onRowClick, rows],
+  )
+
   const virtualItems = rowVirtualizer.getVirtualItems()
   const hasVirtualItems = virtualItems.length > 0
 
@@ -530,7 +579,11 @@ export function DataTableVirtualizedDndColumnBody<TData>({
     : 0
 
   return (
-    <TableBody ref={parentRef} className={cn("block", className)}>
+    <TableBody
+      ref={parentRef}
+      className={cn("block", className)}
+      onClick={onRowClick ? handleRowClick : undefined}
+    >
       {/* Top spacer for virtual scrolling offset */}
       {topSpacerHeight > 0 && (
         <TableRow

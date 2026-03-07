@@ -23,7 +23,7 @@ import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Slider } from "@/components/ui/slider"
 import { cn } from "@/lib/utils"
-import { useDerivedColumnTitle } from "../hooks"
+import { useDerivedColumnTitle } from "../hooks/use-derived-column-title"
 
 type RangeValue = [number, number]
 

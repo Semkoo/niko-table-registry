@@ -29,7 +29,7 @@ This example also uses `checkbox` from Shadcn UI:
 
 > First time using `@niko-table`? See the [Installation Guide](/getting-started/installation#configure-the-niko-table-registry) to set up the registry.
 
-For other add-ons or manual copy-paste, see the [Installation Guide](/getting-started/installation).
+For other add-ons or manual copy-paste, see the [Installation Guide](/getting-started/installation/).
 
 ## Prerequisites
 
@@ -175,13 +175,13 @@ Next, we'll create the tree table with `getSubRows`.
 "use client"
 
 import * as React from "react"
+import { DataTableRoot } from "@/components/niko-table/core/data-table-root"
+import { DataTable } from "@/components/niko-table/core/data-table"
 import {
-  DataTableRoot,
-  DataTable,
   DataTableHeader,
   DataTableBody,
   DataTableEmptyBody,
-} from "@/components/niko-table/core"
+} from "@/components/niko-table/core/data-table-structure"
 import { DataTableToolbarSection } from "@/components/niko-table/components/data-table-toolbar-section"
 import { DataTablePagination } from "@/components/niko-table/components/data-table-pagination"
 import { DataTableSearchFilter } from "@/components/niko-table/components/data-table-search-filter"
@@ -476,7 +476,7 @@ export function ControlledTreeTable({ data }: { data: Project[] }) {
 
 ## Tree Selection
 
-For hierarchical selection (selecting a parent selects all children), you'll need custom selection logic. See the [Tree Table example](/examples/tree-table) for a complete implementation.
+For hierarchical selection (selecting a parent selects all children), you'll need custom selection logic. See the [Tree Table example](/examples/tree-table/) for a complete implementation.
 
 ## When to Use
 
@@ -489,11 +489,11 @@ For hierarchical selection (selecting a parent selects all children), you'll nee
 
 **❌ Don't use Tree Table when:**
 
-- Data is flat (use [Basic Table](/examples/basic-table))
+- Data is flat (use [Basic Table](/examples/basic-table/))
 - You don't need hierarchical structure
-- You prefer sidebars for details (use [Aside Table](/examples/aside-table))
+- You prefer sidebars for details (use [Aside Table](/examples/aside-table/))
 
 ## Next Steps
 
-- [Row Expansion Table](/examples/row-expansion-table) - Simple row expansion
-- [Advanced Table](/examples/advanced-table) - Combine with other features
+- [Row Expansion Table](/examples/row-expansion-table/) - Simple row expansion
+- [Advanced Table](/examples/advanced-table/) - Combine with other features

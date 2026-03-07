@@ -20,7 +20,7 @@ import {
   TableFacetedFilterContent,
   useTableFacetedFilter,
 } from "./table-faceted-filter"
-import { useDerivedColumnTitle } from "../hooks"
+import { useDerivedColumnTitle } from "../hooks/use-derived-column-title"
 import { useGeneratedOptionsForColumn } from "../hooks/use-generated-options"
 import { formatLabel } from "../lib/format"
 import type { Option } from "../types"

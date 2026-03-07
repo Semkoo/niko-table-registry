@@ -6,7 +6,7 @@ import {
   TableColumnSortOptions,
   TableColumnSortMenu,
 } from "../filters/table-column-sort"
-import { useDataTable } from "../core"
+import { useDataTable } from "../core/data-table-context"
 import { useColumnHeaderContext } from "./data-table-column-header"
 
 /**

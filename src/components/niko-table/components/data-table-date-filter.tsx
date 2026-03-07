@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { useDataTable } from "../core"
+import { useDataTable } from "../core/data-table-context"
 import type { TableDateFilterProps } from "../filters/table-date-filter"
 import { TableDateFilter } from "../filters/table-date-filter"
 import { useDerivedColumnTitle } from "../hooks/use-derived-column-title"

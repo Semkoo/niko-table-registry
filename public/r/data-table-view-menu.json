@@ -15,7 +15,7 @@
   "files": [
     {
       "path": "src/components/niko-table/components/data-table-view-menu.tsx",
-      "content": "\"use client\"\n\nimport { useDataTable } from \"../core\"\nimport {\n  TableViewMenu,\n  type TableViewMenuProps,\n} from \"../filters/table-view-menu\"\n\ntype DataTableViewMenuProps<TData> = Omit<TableViewMenuProps<TData>, \"table\">\n\nexport function DataTableViewMenu<TData>(props: DataTableViewMenuProps<TData>) {\n  const { table } = useDataTable<TData>()\n  return <TableViewMenu table={table} {...props} />\n}\n\n/**\n * @required displayName is required for auto feature detection\n * @see \"feature-detection.ts\"\n */\n\nDataTableViewMenu.displayName = \"DataTableViewMenu\"\n",
+      "content": "\"use client\"\n\nimport { useDataTable } from \"../core/data-table-context\"\nimport {\n  TableViewMenu,\n  type TableViewMenuProps,\n} from \"../filters/table-view-menu\"\n\ntype DataTableViewMenuProps<TData> = Omit<TableViewMenuProps<TData>, \"table\">\n\nexport function DataTableViewMenu<TData>(props: DataTableViewMenuProps<TData>) {\n  const { table } = useDataTable<TData>()\n  return <TableViewMenu table={table} {...props} />\n}\n\n/**\n * @required displayName is required for auto feature detection\n * @see \"feature-detection.ts\"\n */\n\nDataTableViewMenu.displayName = \"DataTableViewMenu\"\n",
       "type": "registry:component",
       "target": "components/niko-table/components/data-table-view-menu.tsx"
     },

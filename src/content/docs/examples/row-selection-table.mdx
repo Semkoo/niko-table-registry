@@ -29,7 +29,7 @@ This example also uses `checkbox` from Shadcn UI for row selection:
 
 > First time using `@niko-table`? See the [Installation Guide](/getting-started/installation#configure-the-niko-table-registry) to set up the registry.
 
-For other add-ons or manual copy-paste, see the [Installation Guide](/getting-started/installation).
+For other add-ons or manual copy-paste, see the [Installation Guide](/getting-started/installation/).
 
 ## Prerequisites
 
@@ -155,13 +155,13 @@ Next, we'll create the table with row selection enabled.
 "use client"
 
 import { useState, useMemo } from "react"
+import { DataTableRoot } from "@/components/niko-table/core/data-table-root"
+import { DataTable } from "@/components/niko-table/core/data-table"
 import {
-  DataTableRoot,
-  DataTable,
   DataTableHeader,
   DataTableBody,
   DataTableEmptyBody,
-} from "@/components/niko-table/core"
+} from "@/components/niko-table/core/data-table-structure"
 import { DataTableToolbarSection } from "@/components/niko-table/components/data-table-toolbar-section"
 import { DataTablePagination } from "@/components/niko-table/components/data-table-pagination"
 import { DataTableSearchFilter } from "@/components/niko-table/components/data-table-search-filter"
@@ -366,7 +366,7 @@ The select column is automatically detected when you use `id: "select"`:
 Access selected rows using the table instance:
 
 ```tsx showLineNumbers
-import { useDataTable } from "@/components/niko-table/core"
+import { useDataTable } from "@/components/niko-table/core/data-table-context"
 
 function BulkActions() {
   const { table } = useDataTable<Customer>()
@@ -440,10 +440,10 @@ export function ControlledSelectionTable({ data }: { data: Customer[] }) {
 
 **❌ Consider other options when:**
 
-- You don't need bulk actions (use [Basic Table](/examples/basic-table))
+- You don't need bulk actions (use [Basic Table](/examples/basic-table/))
 - Only single selection is needed (use row click handlers)
 
 ## Next Steps
 
-- [Advanced Table](/examples/advanced-table) - Combine selection with filters
-- [Tree Table](/examples/tree-table) - Hierarchical selection
+- [Advanced Table](/examples/advanced-table/) - Combine selection with filters
+- [Tree Table](/examples/tree-table/) - Hierarchical selection

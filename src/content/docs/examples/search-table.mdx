@@ -25,7 +25,7 @@ Install the DataTable core and add-ons for this example:
 
 > First time using `@niko-table`? See the [Installation Guide](/getting-started/installation#configure-the-niko-table-registry) to set up the registry.
 
-For other add-ons or manual copy-paste, see the [Installation Guide](/getting-started/installation).
+For other add-ons or manual copy-paste, see the [Installation Guide](/getting-started/installation/).
 
 ## Prerequisites
 
@@ -127,12 +127,12 @@ Next, we'll add the search filter component.
 ```tsx showLineNumbers title="search-table.tsx"
 "use client"
 
+import { DataTableRoot } from "@/components/niko-table/core/data-table-root"
+import { DataTable } from "@/components/niko-table/core/data-table"
 import {
-  DataTableRoot,
-  DataTable,
   DataTableHeader,
   DataTableBody,
-} from "@/components/niko-table/core"
+} from "@/components/niko-table/core/data-table-structure"
 import { DataTableToolbarSection } from "@/components/niko-table/components/data-table-toolbar-section"
 import { DataTablePagination } from "@/components/niko-table/components/data-table-pagination"
 import { DataTableSearchFilter } from "@/components/niko-table/components/data-table-search-filter"
@@ -283,7 +283,7 @@ export function ControlledSearchTable({ data }: { data: Customer[] }) {
 Build your own search UI using the context:
 
 ```tsx showLineNumbers
-import { useDataTable } from "@/components/niko-table/core"
+import { useDataTable } from "@/components/niko-table/core/data-table-context"
 import { Input } from "@/components/ui/input"
 import { Search, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -327,10 +327,10 @@ function CustomSearchInput() {
 
 **❌ Consider other options when:**
 
-- You need column-specific filters (use [Advanced Table](/examples/advanced-table))
+- You need column-specific filters (use [Advanced Table](/examples/advanced-table/))
 - Dataset is > 1000 rows (implement server-side filtering)
-- Search is not the primary use case (use [Basic Table](/examples/basic-table))
+- Search is not the primary use case (use [Basic Table](/examples/basic-table/))
 
 ## Next Steps
 
-- [Advanced Table](/examples/advanced-table) - Add advanced filtering and sorting menus
+- [Advanced Table](/examples/advanced-table/) - Add advanced filtering and sorting menus
