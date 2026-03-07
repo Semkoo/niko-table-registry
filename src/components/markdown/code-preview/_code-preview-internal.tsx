@@ -9,7 +9,6 @@ export type Demo =
   | "niko-table/simple"
   | "niko-table/basic"
   | "niko-table/search"
-  | "niko-table/filter"
   | "niko-table/advanced"
   | "niko-table/all-features-table"
   | "niko-table/row-selection"
@@ -32,7 +31,6 @@ export type Demo =
   | "niko-table/server-side-nuqs-state"
   | "niko-table/basic-state"
   | "niko-table/search-state"
-  | "niko-table/pagination-loading"
   | "niko-table/row-dnd"
   | "niko-table/row-dnd-state"
   | "niko-table/column-dnd"
@@ -47,8 +45,11 @@ export function CodePreviewInternal({
   demo: Demo
   children: ReactNode
 }) {
-  const componentName = demo.split("/")[0]
-  const Component = getComponent(componentName, demo.split("/")[1])
+  const [componentName, demoName] = demo.split("/")
+  const Component = getComponent(componentName, demoName)
+  // Installable registry blocks are named data-table, data-table-pagination, etc.; no niko-table.json
+  const registryBlock =
+    componentName === "niko-table" ? "data-table" : componentName
 
   return (
     <Tabs defaultValue="preview" className="not-content">
@@ -60,7 +61,7 @@ export function CodePreviewInternal({
           Code
         </TabsTrigger>
         <OpenInV0Button
-          url={`${SERVER_URL}/r/${componentName}.json`}
+          url={`${SERVER_URL}/r/${registryBlock}.json`}
           className="ml-auto"
         />
       </TabsList>

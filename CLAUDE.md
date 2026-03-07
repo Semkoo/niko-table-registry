@@ -35,8 +35,8 @@ src/
 - **Two-layer component pattern**:
   - `components/` = context-aware (`DataTable*` prefix, use `useDataTable()` hook)
   - `filters/` = direct prop (`Table*` prefix, accept `table` prop)
-- Exports go through barrel `index.tsx` files in each directory
-- Registry examples must be self-contained (import only from `@/components/niko-table` and `@/components/ui`)
+- **No barrel exports**: Use direct file imports only (e.g. `@/components/niko-table/core/data-table-root`, `@/components/niko-table/lib/constants`) for tree-shaking and to follow the shadcn pattern. Do not add or use `index.ts` re-exports for core, components, filters, hooks, lib, or config. Types may use `types/index.ts` as the single types module.
+- Registry examples must be self-contained (import only from `@/components/niko-table/*` direct paths and `@/components/ui`)
 - Use semantic color tokens (`bg-success`, `text-destructive`) not hardcoded Tailwind colors
 
 ## DnD Architecture
@@ -55,7 +55,7 @@ Built on `@dnd-kit`. Three tiers of components:
 
 - MDX files in `src/content/docs/niko-table/`
 - Overview API docs in `overview/` subdirectory (`core.mdx`, `components.mdx`, `filters.mdx`)
-- Example pages at top level (`row-dnd-table.mdx`, `column-dnd-table.mdx`, etc.)
+- Example pages in `src/content/docs/examples/` (`row-dnd-table.mdx`, `column-dnd-table.mdx`, etc.)
 - Sidebar navigation defined in `astro.config.mts`
 - `CodePreview` component references registry examples by name: `<CodePreview demo="niko-table/example-name" />`
 - Source code buttons link to GitHub using `GITHUB_REPO_URL` env variable
@@ -64,9 +64,9 @@ Built on `@dnd-kit`. Three tiers of components:
 ## Adding New Components
 
 1. Create component in appropriate directory (`core/`, `components/`, or `filters/`)
-2. Export from directory's `index.tsx`
+2. Do not add barrel `index.ts`; consumers import from the component file directly
 3. Add registry entry in `registry.json` if installable
 4. Create example in `src/registry/new-york/examples/niko-table/`
 5. Document in corresponding `overview/` MDX file
-6. Create example page MDX in `src/content/docs/niko-table/`
+6. Create example page MDX in `src/content/docs/examples/`
 7. Add sidebar entry in `astro.config.mts`

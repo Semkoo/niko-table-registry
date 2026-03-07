@@ -3,7 +3,7 @@
 import React from "react"
 import type { Column } from "@tanstack/react-table"
 import { cn } from "@/lib/utils"
-import { useDerivedColumnTitle } from "../hooks"
+import { useDerivedColumnTitle } from "../hooks/use-derived-column-title"
 
 /**
  * Renders the column title.

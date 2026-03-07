@@ -186,10 +186,10 @@ Full documentation with interactive examples is available at **[niko-table.com](
 
 - [Introduction](https://niko-table.com/getting-started/introduction) — Philosophy and architecture
 - [Installation](https://niko-table.com/getting-started/installation) — Setup your project
-- [Simple Table](https://niko-table.com/niko-table/simple-table) — Your first table
-- [Basic Table](https://niko-table.com/niko-table/basic-table) — Pagination and sorting
-- [Advanced Table](https://niko-table.com/niko-table/advanced-table) — Full filtering
-- [Server-Side Table](https://niko-table.com/niko-table/server-side-table) — Server-side data
+- [Simple Table](https://niko-table.com/examples/simple-table/) — Your first table
+- [Basic Table](https://niko-table.com/examples/basic-table/) — Pagination and sorting
+- [Advanced Table](https://niko-table.com/examples/advanced-table/) — Full filtering
+- [Server-Side Table](https://niko-table.com/examples/server-side-table/) — Server-side data
 
 ## Development
 

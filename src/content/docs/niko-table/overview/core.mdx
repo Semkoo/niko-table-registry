@@ -34,7 +34,7 @@ The `DataTableRoot` component provides the table context to all child components
 </div>
 
 ```tsx showLineNumbers
-import { DataTableRoot } from "@/components/niko-table/core"
+import { DataTableRoot } from "@/components/niko-table/core/data-table-root"
 
 export function MyTable({ data }: { data: User[] }) {
   return (
@@ -49,6 +49,7 @@ export function MyTable({ data }: { data: User[] }) {
 
 | Name        | Type                                    | Description                                        |
 | ----------- | --------------------------------------- | -------------------------------------------------- |
+| `children`  | `React.ReactNode`                       | Child components (required).                       |
 | `data`      | `TData[]`                               | The data array to display in the table.            |
 | `columns`   | `DataTableColumnDef<TData>[]`           | Column definitions array.                          |
 | `table`     | `Table<TData>`                          | Pre-configured TanStack Table instance (optional). |
@@ -56,6 +57,7 @@ export function MyTable({ data }: { data: User[] }) {
 | `isLoading` | `boolean`                               | Loading state for the table.                       |
 | `getRowId`  | `(row: TData, index: number) => string` | Custom function to get row IDs.                    |
 | `className` | `string`                                | Additional CSS classes.                            |
+| `state`     | `Partial<TableState>`                   | Controlled table state (pagination, sorting, etc). |
 
 #### Event Handlers
 
@@ -99,7 +101,7 @@ The `config` prop accepts a `DataTableConfig` object with the following properti
 Low-level context provider used internally by `DataTableRoot`. Use this directly when you need to provide a pre-configured TanStack Table instance to the context (e.g., when using `useReactTable` yourself).
 
 ```tsx showLineNumbers
-import { DataTableProvider } from "@/components/niko-table/core"
+import { DataTableProvider } from "@/components/niko-table/core/data-table-context"
 import { useReactTable, getCoreRowModel } from "@tanstack/react-table"
 
 const table = useReactTable({ data, columns, getCoreRowModel: getCoreRowModel() })
@@ -123,7 +125,7 @@ const table = useReactTable({ data, columns, getCoreRowModel: getCoreRowModel() 
 The raw React context object. Useful for advanced scenarios where you need direct access to the context (e.g., conditional rendering based on context availability).
 
 ```tsx showLineNumbers
-import { DataTableContext } from "@/components/niko-table/core"
+import { DataTableContext } from "@/components/niko-table/core/data-table-context"
 import { useContext } from "react"
 
 const context = useContext(DataTableContext)
@@ -146,7 +148,7 @@ The main table container component that wraps the table structure and provides s
 </div>
 
 ```tsx showLineNumbers
-import { DataTable } from "@/components/niko-table/core"
+import { DataTable } from "@/components/niko-table/core/data-table"
 
 <DataTable className="rounded-md border" height={600}>
   <DataTableHeader />
@@ -180,7 +182,7 @@ Renders the table header with sortable columns.
 </div>
 
 ```tsx showLineNumbers
-import { DataTableHeader } from "@/components/niko-table/core"
+import { DataTableHeader } from "@/components/niko-table/core/data-table-structure"
 
 <DataTableHeader sticky={true} />
 ```
@@ -213,7 +215,7 @@ import {
   DataTableBody,
   DataTableSkeleton,
   DataTableEmptyBody,
-} from "@/components/niko-table/core"
+} from "@/components/niko-table/core/data-table-structure"
 
 <DataTableBody
   onScroll={e => console.log(`Scrolled ${e.percentage}%`)}
@@ -377,7 +379,7 @@ Error boundary component that catches errors in the data table component tree an
 </div>
 
 ```tsx showLineNumbers
-import { DataTableErrorBoundary } from "@/components/niko-table/core"
+import { DataTableErrorBoundary } from "@/components/niko-table/core/data-table-error-boundary"
 
 <DataTableErrorBoundary
   onError={(error, errorInfo) => {
@@ -425,7 +427,7 @@ Virtualized table header component.
 import {
   DataTableVirtualizedHeader,
   DataTableVirtualizedBody,
-} from "@/components/niko-table/core"
+} from "@/components/niko-table/core/data-table-virtualized-structure"
 
 <DataTable>
   <DataTableVirtualizedHeader />
@@ -468,11 +470,13 @@ Empty state component for virtualized tables.
 import {
   DataTableVirtualizedBody,
   DataTableVirtualizedEmptyBody,
+} from "@/components/niko-table/core/data-table-virtualized-structure"
+import {
   DataTableEmptyIcon,
   DataTableEmptyMessage,
   DataTableEmptyTitle,
   DataTableEmptyDescription,
-} from "@/components/niko-table/core"
+} from "@/components/niko-table/components/data-table-empty-state"
 import { PackageOpen } from "lucide-react"
 
 <DataTableVirtualizedBody estimateSize={34}>
@@ -506,7 +510,7 @@ Loading skeleton for virtualized tables.
 import {
   DataTableVirtualizedBody,
   DataTableVirtualizedSkeleton,
-} from "@/components/niko-table/core"
+} from "@/components/niko-table/core/data-table-virtualized-structure"
 
 <DataTableVirtualizedBody estimateSize={34}>
   <DataTableVirtualizedSkeleton rows={10} estimateSize={34} />
@@ -532,7 +536,7 @@ Loading indicator for virtualized tables.
 import {
   DataTableVirtualizedBody,
   DataTableVirtualizedLoading,
-} from "@/components/niko-table/core"
+} from "@/components/niko-table/core/data-table-virtualized-structure"
 import { Loader2 } from "lucide-react"
 
 <DataTableVirtualizedBody estimateSize={34}>
@@ -583,7 +587,7 @@ For standard (non-virtualized) tables with drag-and-drop, use these components f
 DnD-aware table body that renders rows as draggable items. Drop-in replacement for `DataTableBody` when using row drag-and-drop. Must be wrapped in a `DataTableRowDndProvider`.
 
 ```tsx showLineNumbers
-import { DataTableDndBody } from "@/components/niko-table/core"
+import { DataTableDndBody } from "@/components/niko-table/core/data-table-dnd-structure"
 import { DataTableRowDndProvider } from "@/components/niko-table/components/data-table-row-dnd"
 
 <DataTableRowDndProvider data={data} onReorder={setData}>
@@ -607,7 +611,7 @@ import { DataTableRowDndProvider } from "@/components/niko-table/components/data
 DnD-aware table header that renders column headers as draggable items. Drop-in replacement for `DataTableHeader` when using column drag-and-drop. Must be wrapped in a `DataTableColumnDndProvider`.
 
 ```tsx showLineNumbers
-import { DataTableDndHeader, DataTableDndColumnBody } from "@/components/niko-table/core"
+import { DataTableDndHeader, DataTableDndColumnBody } from "@/components/niko-table/core/data-table-dnd-structure"
 import { DataTableColumnDndProvider } from "@/components/niko-table/components/data-table-column-dnd"
 
 <DataTableColumnDndProvider columnOrder={columnOrder} onColumnOrderChange={setColumnOrder}>
@@ -662,7 +666,7 @@ import {
   DataTableVirtualizedHeader,
   DataTableVirtualizedDndBody,
   DataTableVirtualizedEmptyBody,
-} from "@/components/niko-table/core"
+} from "@/components/niko-table/core/data-table-virtualized-dnd-structure"
 import { DataTableRowDndProvider } from "@/components/niko-table/components/data-table-row-dnd"
 
 <DataTableRowDndProvider data={data} onReorder={setData}>
@@ -697,7 +701,7 @@ Virtualized DnD-aware table header for **column** drag-and-drop. Must be wrapped
 import {
   DataTableVirtualizedDndHeader,
   DataTableVirtualizedDndColumnBody,
-} from "@/components/niko-table/core"
+} from "@/components/niko-table/core/data-table-virtualized-dnd-structure"
 import { DataTableColumnDndProvider } from "@/components/niko-table/components/data-table-column-dnd"
 
 <DataTableColumnDndProvider columnOrder={columnOrder} onColumnOrderChange={setColumnOrder}>

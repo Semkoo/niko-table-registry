@@ -26,13 +26,13 @@ import type {
   ExpandedState,
   ColumnPinningState,
 } from "@tanstack/react-table"
+import { DataTableRoot } from "@/components/niko-table/core/data-table-root"
+import { DataTable } from "@/components/niko-table/core/data-table"
 import {
-  DataTableRoot,
-  DataTable,
   DataTableHeader,
   DataTableBody,
   DataTableEmptyBody,
-} from "@/components/niko-table/core"
+} from "@/components/niko-table/core/data-table-structure"
 import {
   DataTableAside,
   DataTableAsideContent,
@@ -72,9 +72,9 @@ import {
   SYSTEM_COLUMN_IDS,
   FILTER_VARIANTS,
   JOIN_OPERATORS,
-} from "@/components/niko-table/lib"
-import { useDataTable } from "@/components/niko-table/core"
-import { daysAgo } from "@/components/niko-table/lib"
+} from "@/components/niko-table/lib/constants"
+import { useDataTable } from "@/components/niko-table/core/data-table-context"
+import { daysAgo } from "@/components/niko-table/lib/format"
 import { exportTableToCSV } from "@/components/niko-table/filters/table-export-button"
 import type {
   DataTableColumnDef,

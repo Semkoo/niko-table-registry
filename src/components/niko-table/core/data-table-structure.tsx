@@ -146,6 +146,46 @@ export function DataTableBody<TData>({
   }, [onScrolledBottom])
 
   /**
+   * PERFORMANCE: Single row-click handler with event delegation (useCallback)
+   *
+   * WHY: Without this, we create one inline arrow function per row in the map,
+   * causing N new function references every render and preventing row memoization.
+   *
+   * IMPACT: One stable callback (when deps don't change) instead of N per render.
+   *
+   * WHAT: Delegates click on TableBody, reads data-row-index from the clicked row,
+   * skips if click target is interactive, then calls onRowClick with the row data.
+   */
+  const handleRowClick = React.useCallback(
+    (event: React.MouseEvent<HTMLTableSectionElement>) => {
+      if (!onRowClick) return
+      const target = event.target as HTMLElement
+      const rowElement = target.closest("tr[data-row-index]")
+      if (!rowElement) return
+
+      const isInteractiveElement =
+        target.closest("button") ||
+        target.closest("input") ||
+        target.closest("a") ||
+        target.closest('[role="button"]') ||
+        target.closest('[role="checkbox"]') ||
+        target.closest("[data-radix-collection-item]") ||
+        target.closest('[data-slot="checkbox"]') ||
+        target.tagName === "INPUT" ||
+        target.tagName === "BUTTON" ||
+        target.tagName === "A"
+      if (isInteractiveElement) return
+
+      const rowIndex = rowElement.getAttribute("data-row-index")
+      if (rowIndex === null) return
+      const index = parseInt(rowIndex, 10)
+      if (Number.isNaN(index) || index < 0 || index >= rows.length) return
+      onRowClick(rows[index].original)
+    },
+    [onRowClick, rows],
+  )
+
+  /**
    * PERFORMANCE: Use passive event listener for smoother scrolling
    *
    * WHY: Passive listeners tell the browser the handler won't call preventDefault().
@@ -192,7 +232,11 @@ export function DataTableBody<TData>({
   }, [onScroll, handleScrollTop, handleScrollBottom, scrollThreshold])
 
   return (
-    <TableBody ref={containerRef} className={className}>
+    <TableBody
+      ref={containerRef}
+      className={className}
+      onClick={onRowClick ? handleRowClick : undefined}
+    >
       {/* Only show rows when not loading */}
       {!isLoading && rows?.length
         ? rows.map(row => {
@@ -210,31 +254,6 @@ export function DataTableBody<TData>({
                   data-row-index={row?.index}
                   data-row-id={row?.id}
                   data-state={row.getIsSelected() && "selected"}
-                  onClick={event => {
-                    // Check if the click originated from an interactive element
-                    const target = event.target as HTMLElement
-                    const isInteractiveElement =
-                      // Check for buttons, inputs, links
-                      target.closest("button") ||
-                      target.closest("input") ||
-                      target.closest("a") ||
-                      // Check for elements with interactive roles
-                      target.closest('[role="button"]') ||
-                      target.closest('[role="checkbox"]') ||
-                      // Check for Radix UI components
-                      target.closest("[data-radix-collection-item]") ||
-                      // Check for checkbox (Radix checkbox uses button with data-slot="checkbox")
-                      target.closest('[data-slot="checkbox"]') ||
-                      // Direct tag checks
-                      target.tagName === "INPUT" ||
-                      target.tagName === "BUTTON" ||
-                      target.tagName === "A"
-
-                    // Only call onRowClick if not clicking on an interactive element
-                    if (!isInteractiveElement) {
-                      onRowClick?.(row.original)
-                    }
-                  }}
                   className={cn(isClickable && "cursor-pointer", "group")}
                 >
                   {row.getVisibleCells().map(cell => {

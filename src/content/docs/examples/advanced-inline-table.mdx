@@ -29,7 +29,7 @@ This example also uses `checkbox` from Shadcn UI:
 
 > First time using `@niko-table`? See the [Installation Guide](/getting-started/installation#configure-the-niko-table-registry) to set up the registry.
 
-For other add-ons or manual copy-paste, see the [Installation Guide](/getting-started/installation).
+For other add-ons or manual copy-paste, see the [Installation Guide](/getting-started/installation/).
 
 ## Prerequisites
 
@@ -143,13 +143,13 @@ Next, we'll add the inline filter component.
 ```tsx showLineNumbers title="advanced-inline-table.tsx"
 "use client"
 
+import { DataTableRoot } from "@/components/niko-table/core/data-table-root"
+import { DataTable } from "@/components/niko-table/core/data-table"
 import {
-  DataTableRoot,
-  DataTable,
   DataTableHeader,
   DataTableBody,
   DataTableEmptyBody,
-} from "@/components/niko-table/core"
+} from "@/components/niko-table/core/data-table-structure"
 import { DataTableToolbarSection } from "@/components/niko-table/components/data-table-toolbar-section"
 import { DataTablePagination } from "@/components/niko-table/components/data-table-pagination"
 import { DataTableSearchFilter } from "@/components/niko-table/components/data-table-search-filter"
@@ -370,11 +370,11 @@ export function ControlledInlineTable({ data }: { data: Product[] }) {
 
 **❌ Consider other options when:**
 
-- You need complex rule-based filtering (use [Advanced Filter Table](/examples/advanced-table))
-- You want filter menus (use [Advanced Filter Table](/examples/advanced-table))
-- You need URL state persistence (use [Advanced Nuqs Table](/examples/advanced-nuqs-table))
+- You need complex rule-based filtering (use [Advanced Filter Table](/examples/advanced-table/))
+- You want filter menus (use [Advanced Filter Table](/examples/advanced-table/))
+- You need URL state persistence (use [Advanced Nuqs Table](/examples/advanced-nuqs-table/))
 
 ## Next Steps
 
-- [Advanced Filter Table](/examples/advanced-table) - Add rule-based filter menus
-- [Advanced Nuqs Table](/examples/advanced-nuqs-table) - Add URL state persistence
+- [Advanced Filter Table](/examples/advanced-table/) - Add rule-based filter menus
+- [Advanced Nuqs Table](/examples/advanced-nuqs-table/) - Add URL state persistence

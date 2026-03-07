@@ -9,13 +9,13 @@ import type {
   VisibilityState,
   ExpandedState,
 } from "@tanstack/react-table"
+import { DataTableRoot } from "@/components/niko-table/core/data-table-root"
+import { DataTable } from "@/components/niko-table/core/data-table"
 import {
-  DataTableRoot,
-  DataTable,
   DataTableHeader,
   DataTableBody,
   DataTableEmptyBody,
-} from "@/components/niko-table/core"
+} from "@/components/niko-table/core/data-table-structure"
 import { DataTableColumnHeader } from "@/components/niko-table/components/data-table-column-header"
 import { DataTableColumnTitle } from "@/components/niko-table/components/data-table-column-title"
 import { DataTableColumnSortMenu } from "@/components/niko-table/components/data-table-column-sort"
@@ -30,7 +30,10 @@ import {
 import { DataTableViewMenu } from "@/components/niko-table/components/data-table-view-menu"
 import { DataTableSearchFilter } from "@/components/niko-table/components/data-table-search-filter"
 import { DataTablePagination } from "@/components/niko-table/components/data-table-pagination"
-import { SYSTEM_COLUMN_IDS, FILTER_VARIANTS } from "@/components/niko-table/lib"
+import {
+  SYSTEM_COLUMN_IDS,
+  FILTER_VARIANTS,
+} from "@/components/niko-table/lib/constants"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"

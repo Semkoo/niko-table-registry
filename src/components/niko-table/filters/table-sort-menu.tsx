@@ -43,7 +43,7 @@ import {
   SortableItemHandle,
   SortableOverlay,
 } from "@/components/ui/sortable"
-import { useKeyboardShortcut } from "../hooks"
+import { useKeyboardShortcut } from "../hooks/use-keyboard-shortcut"
 import { cn } from "@/lib/utils"
 import { ChevronsUpDown, Grip } from "lucide-react"
 

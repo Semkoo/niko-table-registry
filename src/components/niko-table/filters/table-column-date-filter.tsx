@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
 import { Button } from "@/components/ui/button"
-import { useDerivedColumnTitle } from "../hooks"
+import { useDerivedColumnTitle } from "../hooks/use-derived-column-title"
 import { formatDate } from "../lib/format"
 import { cn } from "@/lib/utils"
 

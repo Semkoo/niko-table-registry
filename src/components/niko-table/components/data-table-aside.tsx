@@ -86,13 +86,17 @@ function DataTableAsideTrigger({
 }: DataTableAsideTriggerProps) {
   const { open, onOpenChange } = useDataTableAside()
 
+  const handleToggle = React.useCallback(() => {
+    onOpenChange(!open)
+  }, [onOpenChange, open])
+
   if (asChild && React.isValidElement(children)) {
     const childProps = children.props as {
       onClick?: (e: React.MouseEvent) => void
     }
     return React.cloneElement(children, {
       onClick: (e: React.MouseEvent) => {
-        onOpenChange(!open)
+        handleToggle()
         childProps.onClick?.(e)
       },
     } as Partial<unknown> & React.Attributes)
@@ -103,7 +107,7 @@ function DataTableAsideTrigger({
       data-slot="aside-trigger"
       type="button"
       className={className}
-      onClick={() => onOpenChange(!open)}
+      onClick={handleToggle}
       {...props}
     >
       {children}
@@ -208,6 +212,10 @@ function DataTableAsideClose({
 }: DataTableAsideCloseProps) {
   const { onOpenChange } = useDataTableAside()
 
+  const handleClose = React.useCallback(() => {
+    onOpenChange(false)
+  }, [onOpenChange])
+
   return (
     <button
       data-slot="aside-close"
@@ -216,7 +224,7 @@ function DataTableAsideClose({
         "rounded-xs opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none",
         className,
       )}
-      onClick={() => onOpenChange(false)}
+      onClick={handleClose}
       {...props}
     >
       {showIcon && <XIcon className="size-4" />}

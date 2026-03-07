@@ -8,7 +8,7 @@ import {
   useTableFacetedFilter,
   type TableFacetedFilterProps,
 } from "../filters/table-faceted-filter"
-import { useDataTable } from "../core"
+import { useDataTable } from "../core/data-table-context"
 import type { Option } from "../types"
 import { useDerivedColumnTitle } from "../hooks/use-derived-column-title"
 import { useGeneratedOptionsForColumn } from "../hooks/use-generated-options"
