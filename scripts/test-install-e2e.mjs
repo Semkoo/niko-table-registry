@@ -41,11 +41,11 @@ function run(cmd, opts = {}) {
 }
 
 // Key files that must exist after `shadcn add data-table.json`
+// (No barrel exports: core, components, filters, hooks, lib, config use direct file imports.)
 const REQUIRED_FILES = [
   "src/components/ui/table.tsx",
   "src/components/niko-table/core/data-table.tsx",
   "src/components/niko-table/core/data-table-root.tsx",
-  "src/components/niko-table/core/index.tsx",
   "src/components/niko-table/types/index.ts",
 ]
 

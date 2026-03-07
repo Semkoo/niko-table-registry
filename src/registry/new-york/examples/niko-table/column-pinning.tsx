@@ -1,12 +1,12 @@
 "use client"
 
+import { DataTableRoot } from "@/components/niko-table/core/data-table-root"
+import { DataTable } from "@/components/niko-table/core/data-table"
 import {
-  DataTableRoot,
-  DataTable,
   DataTableHeader,
   DataTableBody,
   DataTableEmptyBody,
-} from "@/components/niko-table/core"
+} from "@/components/niko-table/core/data-table-structure"
 import { DataTableColumnHeader } from "@/components/niko-table/components/data-table-column-header"
 import { DataTableColumnTitle } from "@/components/niko-table/components/data-table-column-title"
 import { DataTableColumnActions } from "@/components/niko-table/components/data-table-column-actions"
@@ -22,7 +22,7 @@ import {
 import { DataTableSearchFilter } from "@/components/niko-table/components/data-table-search-filter"
 import { DataTableViewMenu } from "@/components/niko-table/components/data-table-view-menu"
 import { DataTablePagination } from "@/components/niko-table/components/data-table-pagination"
-import { FILTER_VARIANTS } from "@/components/niko-table/lib"
+import { FILTER_VARIANTS } from "@/components/niko-table/lib/constants"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"

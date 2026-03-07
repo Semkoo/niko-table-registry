@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { useDataTable } from "../core"
+import { useDataTable } from "../core/data-table-context"
 import {
   TableSliderFilter,
   type TableSliderFilterProps,

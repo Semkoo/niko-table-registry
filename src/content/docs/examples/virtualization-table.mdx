@@ -25,7 +25,7 @@ Install the DataTable core and add-ons for this example:
 
 > First time using `@niko-table`? See the [Installation Guide](/getting-started/installation#configure-the-niko-table-registry) to set up the registry.
 
-For other add-ons or manual copy-paste, see the [Installation Guide](/getting-started/installation).
+For other add-ons or manual copy-paste, see the [Installation Guide](/getting-started/installation/).
 
 ## Prerequisites
 
@@ -145,14 +145,14 @@ Next, we'll create a virtualized table.
 ```tsx showLineNumbers title="virtualization-table.tsx"
 "use client"
 
+import { DataTableRoot } from "@/components/niko-table/core/data-table-root"
+import { DataTable } from "@/components/niko-table/core/data-table"
 import {
-  DataTableRoot,
-  DataTable,
   DataTableVirtualizedHeader,
   DataTableVirtualizedBody,
   DataTableVirtualizedEmptyBody,
   DataTableVirtualizedSkeleton,
-} from "@/components/niko-table/core"
+} from "@/components/niko-table/core/data-table-virtualized-structure"
 import { DataTableToolbarSection } from "@/components/niko-table/components/data-table-toolbar-section"
 import { DataTablePagination } from "@/components/niko-table/components/data-table-pagination"
 import { DataTableSearchFilter } from "@/components/niko-table/components/data-table-search-filter"
@@ -398,7 +398,7 @@ export function ControlledVirtualizationTable({ data }: { data: Product[] }) {
 
 **❌ Don't use Virtualization Table when:**
 
-- You have < 1000 rows (use [Basic Table](/examples/basic-table))
+- You have < 1000 rows (use [Basic Table](/examples/basic-table/))
 - You need variable row heights (virtualization works best with fixed heights)
 - You need complex row interactions (virtualization has limitations)
 
@@ -411,5 +411,5 @@ export function ControlledVirtualizationTable({ data }: { data: Product[] }) {
 
 ## Next Steps
 
-- [Basic Table](/examples/basic-table) - For smaller datasets
-- [Advanced Table](/examples/advanced-table) - Combine with other features
+- [Basic Table](/examples/basic-table/) - For smaller datasets
+- [Advanced Table](/examples/advanced-table/) - Combine with other features

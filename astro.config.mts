@@ -261,15 +261,15 @@ export default defineConfig({
           navLinks: [
             {
               label: "Docs",
-              link: "/getting-started/installation",
+              link: "/getting-started/installation/",
             },
             {
               label: "Table Examples",
-              link: "/examples/simple-table",
+              link: "/examples/simple-table/",
             },
             {
               label: "Contributing",
-              link: "/contributing",
+              link: "/contributing/",
             },
           ],
           footerText: "",

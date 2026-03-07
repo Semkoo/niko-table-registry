@@ -60,8 +60,41 @@ export function DataTableDndBody<TData>({
     [rows],
   )
 
+  /** Single row-click handler with event delegation (useCallback). */
+  const handleRowClick = React.useCallback(
+    (event: React.MouseEvent<HTMLTableSectionElement>) => {
+      if (!onRowClick) return
+      const target = event.target as HTMLElement
+      const rowElement = target.closest("tr[data-row-index]")
+      if (!rowElement) return
+
+      const isInteractiveElement =
+        target.closest("button") ||
+        target.closest("input") ||
+        target.closest("a") ||
+        target.closest('[role="button"]') ||
+        target.closest('[role="checkbox"]') ||
+        target.closest("[data-radix-collection-item]") ||
+        target.closest('[data-slot="checkbox"]') ||
+        target.tagName === "INPUT" ||
+        target.tagName === "BUTTON" ||
+        target.tagName === "A"
+      if (isInteractiveElement) return
+
+      const rowIndexAttr = rowElement.getAttribute("data-row-index")
+      if (rowIndexAttr === null) return
+      const index = parseInt(rowIndexAttr, 10)
+      if (Number.isNaN(index) || index < 0 || index >= rows.length) return
+      onRowClick(rows[index].original)
+    },
+    [onRowClick, rows],
+  )
+
   return (
-    <TableBody className={className}>
+    <TableBody
+      className={className}
+      onClick={onRowClick ? handleRowClick : undefined}
+    >
       {!isLoading && rows?.length ? (
         <SortableContext items={dataIds} strategy={verticalListSortingStrategy}>
           {rows.map(row => {
@@ -87,30 +120,6 @@ export function DataTableDndBody<TData>({
                       <TableCell
                         key={cell.id}
                         style={cellStyle}
-                        onClick={
-                          isClickable
-                            ? event => {
-                                const target = event.target as HTMLElement
-                                const isInteractiveElement =
-                                  target.closest("button") ||
-                                  target.closest("input") ||
-                                  target.closest("a") ||
-                                  target.closest('[role="button"]') ||
-                                  target.closest('[role="checkbox"]') ||
-                                  target.closest(
-                                    "[data-radix-collection-item]",
-                                  ) ||
-                                  target.closest('[data-slot="checkbox"]') ||
-                                  target.tagName === "INPUT" ||
-                                  target.tagName === "BUTTON" ||
-                                  target.tagName === "A"
-
-                                if (!isInteractiveElement) {
-                                  onRowClick?.(row.original)
-                                }
-                              }
-                            : undefined
-                        }
                         className={cn(
                           isClickable && "cursor-pointer",
                           cell.column.getIsPinned() &&
@@ -254,8 +263,41 @@ export function DataTableDndColumnBody<TData>({
   const { table, isLoading } = useDataTable<TData>()
   const { rows } = table.getRowModel()
 
+  /** Single row-click handler with event delegation (useCallback). */
+  const handleRowClick = React.useCallback(
+    (event: React.MouseEvent<HTMLTableSectionElement>) => {
+      if (!onRowClick) return
+      const target = event.target as HTMLElement
+      const rowElement = target.closest("tr[data-row-index]")
+      if (!rowElement) return
+
+      const isInteractiveElement =
+        target.closest("button") ||
+        target.closest("input") ||
+        target.closest("a") ||
+        target.closest('[role="button"]') ||
+        target.closest('[role="checkbox"]') ||
+        target.closest("[data-radix-collection-item]") ||
+        target.closest('[data-slot="checkbox"]') ||
+        target.tagName === "INPUT" ||
+        target.tagName === "BUTTON" ||
+        target.tagName === "A"
+      if (isInteractiveElement) return
+
+      const rowIndexAttr = rowElement.getAttribute("data-row-index")
+      if (rowIndexAttr === null) return
+      const index = parseInt(rowIndexAttr, 10)
+      if (Number.isNaN(index) || index < 0 || index >= rows.length) return
+      onRowClick(rows[index].original)
+    },
+    [onRowClick, rows],
+  )
+
   return (
-    <TableBody className={className}>
+    <TableBody
+      className={className}
+      onClick={onRowClick ? handleRowClick : undefined}
+    >
       {!isLoading && rows?.length
         ? rows.map(row => {
             const isClickable = !!onRowClick

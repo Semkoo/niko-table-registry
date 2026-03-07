@@ -10,7 +10,8 @@ import type {
   ExpandedState,
   ColumnPinningState,
 } from "@tanstack/react-table"
-import { DataTableRoot, DataTable } from "@/components/niko-table/core"
+import { DataTableRoot } from "@/components/niko-table/core/data-table-root"
+import { DataTable } from "@/components/niko-table/core/data-table"
 import {
   DataTableVirtualizedHeader,
   DataTableVirtualizedBody,
@@ -34,7 +35,10 @@ import { DataTablePagination } from "@/components/niko-table/components/data-tab
 import { DataTableSearchFilter } from "@/components/niko-table/components/data-table-search-filter"
 import { DataTableToolbarSection } from "@/components/niko-table/components/data-table-toolbar-section"
 import { DataTableViewMenu } from "@/components/niko-table/components/data-table-view-menu"
-import { FILTER_VARIANTS, SYSTEM_COLUMN_IDS } from "@/components/niko-table/lib"
+import {
+  FILTER_VARIANTS,
+  SYSTEM_COLUMN_IDS,
+} from "@/components/niko-table/lib/constants"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"

@@ -1,7 +1,7 @@
 "use client"
 
 import React from "react"
-import { useDataTable } from "../core"
+import { useDataTable } from "../core/data-table-context"
 import {
   TableInline,
   type TableInlineProps,

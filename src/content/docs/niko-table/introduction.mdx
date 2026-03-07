@@ -48,7 +48,7 @@ I don't like building data tables. So I built 30+ of them. All kinds of configur
 
 We now have a solid foundation to build on top of. Composable. Themeable. Customizable.
 
-[Browse Examples](/examples/simple-table).
+[Browse Examples](/examples/simple-table/).
 
 ## Installation
 
@@ -70,7 +70,7 @@ We now have a solid foundation to build on top of. Composable. Themeable. Custom
 
    <CliCommandCode action="run" command="shadcn@latest add @niko-table/data-table @niko-table/data-table-pagination @niko-table/data-table-search-filter @niko-table/data-table-view-menu @niko-table/data-table-sort-menu @niko-table/data-table-filter-menu @niko-table/data-table-column-sort @niko-table/data-table-column-faceted-filter @niko-table/data-table-column-slider-filter @niko-table/data-table-column-date-filter" />
 
-   For optional add-ons (pagination, filters, virtualization, etc.) and manual copy-paste, see the [Installation Guide](/getting-started/installation).
+   For optional add-ons (pagination, filters, virtualization, etc.) and manual copy-paste, see the [Installation Guide](/getting-started/installation/).
 
 </Steps>
 
@@ -126,14 +126,14 @@ A `DataTable` component is composed of the following parts:
 ## Usage
 
 ```tsx showLineNumbers title="components/users-table.tsx"
+import { DataTableRoot } from "@/components/niko-table/core/data-table-root"
+import { DataTable } from "@/components/niko-table/core/data-table"
 import {
-  DataTableRoot,
-  DataTable,
   DataTableHeader,
   DataTableBody,
   DataTableEmptyBody,
   DataTableSkeleton,
-} from "@/components/niko-table/core"
+} from "@/components/niko-table/core/data-table-structure"
 import { DataTableToolbarSection } from "@/components/niko-table/components/data-table-toolbar-section"
 import { DataTableSearchFilter } from "@/components/niko-table/components/data-table-search-filter"
 import { DataTablePagination } from "@/components/niko-table/components/data-table-pagination"
@@ -201,12 +201,12 @@ Let's start with the most basic table. A simple table with data.
 2. **Create your table component**
 
    ```tsx showLineNumbers title="users-table.tsx"
+   import { DataTableRoot } from "@/components/niko-table/core/data-table-root"
+   import { DataTable } from "@/components/niko-table/core/data-table"
    import {
-     DataTableRoot,
-     DataTable,
      DataTableHeader,
      DataTableBody,
-   } from "@/components/niko-table/core"
+   } from "@/components/niko-table/core/data-table-structure"
    import { columns } from "./columns"
 
    export function UsersTable({ data }: { data: User[] }) {
@@ -224,14 +224,14 @@ Let's start with the most basic table. A simple table with data.
 3. **Add loading and empty states**
 
    ```tsx showLineNumbers title="users-table.tsx"
+   import { DataTableRoot } from "@/components/niko-table/core/data-table-root"
+   import { DataTable } from "@/components/niko-table/core/data-table"
    import {
-     DataTableRoot,
-     DataTable,
      DataTableHeader,
      DataTableBody,
      DataTableSkeleton,
      DataTableEmptyBody,
-   } from "@/components/niko-table/core"
+   } from "@/components/niko-table/core/data-table-structure"
 
    export function UsersTable({
      data,
@@ -257,14 +257,14 @@ Let's start with the most basic table. A simple table with data.
 4. **Add search and pagination**
 
    ```tsx showLineNumbers title="users-table.tsx"
+   import { DataTableRoot } from "@/components/niko-table/core/data-table-root"
+   import { DataTable } from "@/components/niko-table/core/data-table"
    import {
-     DataTableRoot,
-     DataTable,
      DataTableHeader,
      DataTableBody,
      DataTableSkeleton,
      DataTableEmptyBody,
-   } from "@/components/niko-table/core"
+   } from "@/components/niko-table/core/data-table-structure"
    import { DataTableToolbarSection } from "@/components/niko-table/components/data-table-toolbar-section"
    import { DataTableSearchFilter } from "@/components/niko-table/components/data-table-search-filter"
    import { DataTablePagination } from "@/components/niko-table/components/data-table-pagination"
@@ -296,7 +296,7 @@ Let's start with the most basic table. A simple table with data.
 
 5. **You've created your first table!**
 
-   Your table now has search functionality and pagination. See the [Examples](/examples/simple-table) for more advanced configurations.
+   Your table now has search functionality and pagination. See the [Examples](/examples/simple-table/) for more advanced configurations.
 
 </Steps>
 
@@ -306,7 +306,7 @@ The components in `data-table` are built to be composable i.e you build your tab
 
 **If you need to change the code in `data-table`, you are encouraged to do so. The code is yours. Use `data-table` as a starting point and build your own.**
 
-See the [Components](/niko-table/overview/components) page for detailed documentation on each component.
+See the [Components](/niko-table/overview/components/) page for detailed documentation on each component.
 
 ## DataTableRoot
 
@@ -316,6 +316,7 @@ The `DataTableRoot` component is used to provide the table context to all child 
 
 | Name                       | Type                                             | Description                                        |
 | -------------------------- | ------------------------------------------------ | -------------------------------------------------- |
+| `children`                 | `React.ReactNode`                                | Child components (required).                       |
 | `data`                     | `TData[]`                                        | The data array to display in the table.            |
 | `columns`                  | `DataTableColumnDef<TData>[]`                    | Column definitions array.                          |
 | `table`                    | `Table<TData>`                                   | Pre-configured TanStack Table instance (optional). |
@@ -323,6 +324,7 @@ The `DataTableRoot` component is used to provide the table context to all child 
 | `state`                    | `Partial<TableState>`                            | Controlled table state (pagination, sorting, etc). |
 | `isLoading`                | `boolean`                                        | Loading state for the table.                       |
 | `getRowId`                 | `(row: TData, index: number) => string`          | Custom function to get row IDs.                    |
+| `className`                | `string`                                         | Additional CSS classes.                            |
 | `onGlobalFilterChange`     | `(value: GlobalFilter) => void`                  | Callback when global filter changes.               |
 | `onPaginationChange`       | `(updater: Updater<PaginationState>) => void`    | Callback when pagination changes.                  |
 | `onSortingChange`          | `(updater: Updater<SortingState>) => void`       | Callback when sorting changes.                     |
@@ -359,7 +361,7 @@ The `config` prop accepts a `DataTableConfig` object:
 The `useDataTable` hook is used to access the table instance from any child component.
 
 ```tsx showLineNumbers
-import { useDataTable } from "@/components/niko-table/core"
+import { useDataTable } from "@/components/niko-table/core/data-table-context"
 
 export function CustomComponent() {
   const { table, isLoading } = useDataTable()
@@ -568,11 +570,11 @@ const columns: DataTableColumnDef<Product>[] = [
 
 ## Next Steps
 
-- [Components](/niko-table/overview/components) - Detailed component documentation
-- [Simple Table](/examples/simple-table) - Basic table example
-- [Basic Table](/examples/basic-table) - Table with pagination and sorting
-- [Advanced Table](/examples/advanced-table) - Complex filtering and sorting
-- [Server-Side Table](/examples/server-side-table) - Server-side data handling
+- [Components](/niko-table/overview/components/) - Detailed component documentation
+- [Simple Table](/examples/simple-table/) - Basic table example
+- [Basic Table](/examples/basic-table/) - Table with pagination and sorting
+- [Advanced Table](/examples/advanced-table/) - Complex filtering and sorting
+- [Server-Side Table](/examples/server-side-table/) - Server-side data handling
 
 ---
 
@@ -596,7 +598,7 @@ This documentation follows this structure for easy navigation. Each component se
 
 ## Documentation Sections
 
-### [Core Components](/niko-table/overview/core)
+### [Core Components](/niko-table/overview/core/)
 
 Essential building blocks of the data table. They handle table initialization, context management, and basic structure.
 
@@ -612,7 +614,7 @@ Essential building blocks of the data table. They handle table initialization, c
 - `DataTableErrorBoundary` - Error boundary for table
 - Virtualized components for large datasets
 
-### [User-Facing Components](/niko-table/overview/components)
+### [User-Facing Components](/niko-table/overview/components/)
 
 Context-aware components that automatically connect to the table via the `useDataTable` hook. These are the recommended components for most use cases.
 
@@ -638,7 +640,7 @@ Context-aware components that automatically connect to the table via the `useDat
 - `DataTableSelectionBar` - Bulk actions bar
 - `DataTableEmptyState` - Empty state composition components
 
-### [Filter Components](/niko-table/overview/filters)
+### [Filter Components](/niko-table/overview/filters/)
 
 Core filter implementation components that accept a `table` prop directly. They are used internally by the context-aware components but can also be used standalone when building custom components.
 
@@ -657,7 +659,7 @@ Core filter implementation components that accept a `table` prop directly. They 
 - `TableExportButton` - Core export button
 - `TableRangeFilter` - Core range filter
 
-### [Hooks](/niko-table/overview/hooks)
+### [Hooks](/niko-table/overview/hooks/)
 
 Custom React hooks for table functionality.
 

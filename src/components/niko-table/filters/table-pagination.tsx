@@ -92,6 +92,51 @@ export function TablePagination<TData>({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  const handlePageSizeChange = React.useCallback(
+    (value: string) => {
+      const newPageSize = Number(value)
+      table.setPageSize(newPageSize)
+      onPageSizeChange?.(newPageSize, pageIndex)
+    },
+    [table, pageIndex, onPageSizeChange],
+  )
+
+  const handlePageInputChange = React.useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const page = Number(e.target.value)
+      if (page >= 1 && page <= totalPages) {
+        const newPageIndex = page - 1
+        table.setPageIndex(newPageIndex)
+        onPageChange?.(newPageIndex)
+      }
+    },
+    [table, totalPages, onPageChange],
+  )
+
+  const handlePageInputBlur = React.useCallback(
+    (e: React.FocusEvent<HTMLInputElement>) => {
+      const page = Number(e.target.value)
+      if (Number.isNaN(page) || page < 1 || page > totalPages) {
+        if (e.currentTarget) {
+          e.currentTarget.value = currentPage.toString()
+        }
+      }
+    },
+    [totalPages, currentPage],
+  )
+
+  const handlePreviousPage = React.useCallback(() => {
+    const newPageIndex = pageIndex - 1
+    table.previousPage()
+    onPreviousPage?.(newPageIndex)
+  }, [table, pageIndex, onPreviousPage])
+
+  const handleNextPage = React.useCallback(() => {
+    const newPageIndex = pageIndex + 1
+    table.nextPage()
+    onNextPage?.(newPageIndex)
+  }, [table, pageIndex, onNextPage])
+
   // Show loading skeleton while initializing
   if (isLoading) {
     return (
@@ -129,11 +174,7 @@ export function TablePagination<TData>({
         </span>
         <Select
           value={`${Number(pageSize) === 0 ? defaultPageSize : Number(pageSize)}`}
-          onValueChange={value => {
-            const newPageSize = Number(value)
-            table.setPageSize(newPageSize)
-            onPageSizeChange?.(newPageSize, pageIndex)
-          }}
+          onValueChange={handlePageSizeChange}
           disabled={isLoading}
         >
           <SelectTrigger
@@ -176,22 +217,8 @@ export function TablePagination<TData>({
             min="1"
             max={totalPages}
             value={currentPage}
-            onChange={e => {
-              const page = Number(e.target.value)
-              if (page >= 1 && page <= totalPages) {
-                const newPageIndex = page - 1
-                table.setPageIndex(newPageIndex)
-                onPageChange?.(newPageIndex)
-              }
-            }}
-            onBlur={e => {
-              const page = Number(e.target.value)
-              if (isNaN(page) || page < 1 || page > totalPages) {
-                if (e.currentTarget) {
-                  e.currentTarget.value = currentPage.toString()
-                }
-              }
-            }}
+            onChange={handlePageInputChange}
+            onBlur={handlePageInputBlur}
             className="h-8 min-w-12 text-center"
             style={{
               width: `${Math.max(String(totalPages).length, 2) + 1}ch`,
@@ -209,11 +236,7 @@ export function TablePagination<TData>({
             variant="ghost"
             size="sm"
             className="h-8 w-8 p-0"
-            onClick={() => {
-              const newPageIndex = pageIndex - 1
-              table.previousPage()
-              onPreviousPage?.(newPageIndex)
-            }}
+            onClick={handlePreviousPage}
             disabled={!canGoPrevious}
             aria-label={`Go to previous page, page ${pageIndex}`}
             title="Go to previous page"
@@ -224,11 +247,7 @@ export function TablePagination<TData>({
             variant="ghost"
             size="sm"
             className="h-8 w-8 p-0"
-            onClick={() => {
-              const newPageIndex = pageIndex + 1
-              table.nextPage()
-              onNextPage?.(newPageIndex)
-            }}
+            onClick={handleNextPage}
             disabled={!canGoNext}
             aria-label={`Go to next page, page ${pageIndex + 2}`}
             title="Go to next page"

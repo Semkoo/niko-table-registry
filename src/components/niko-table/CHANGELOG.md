@@ -4,6 +4,42 @@ All notable changes to the data-table component.
 
 ---
 
+## Unreleased
+
+### ⚡ Performance & consistency
+
+#### Core
+
+- **DataTableRoot**
+  - `onGlobalFilterChange` now uses the memoized `handleGlobalFilterChange` directly instead of an inline wrapper.
+  - Default column pinning handler is memoized with `useCallback` (`handleColumnPinningChange`) to avoid recreating options on every render.
+- **Row click: event delegation**
+  - All table body components use a single row-click handler with event delegation instead of one inline handler per row/cell.
+  - One `useCallback` per body (e.g. `handleRowClick`) is attached to `TableBody`; the handler resolves the row via `data-row-index` and skips interactive elements (buttons, inputs, links, etc.).
+  - **Affected**: `DataTableBody`, `DataTableVirtualizedBody`, `DataTableVirtualizedDndBody`, `DataTableVirtualizedDndColumnBody`, `DataTableDndBody`, `DataTableDndColumnBody`.
+- **Filters**
+  - `TableDraggableRow` (filters) now sets `data-row-index` and `data-row-id` on the row element for delegation.
+  - `VirtualizedDraggableRow` (core) accepts optional `rowIndex` and forwards it as `data-row-index` for delegation.
+- **TablePagination** (filters)
+  - Page size, page input change/blur, and prev/next button handlers are memoized with `useCallback` (`handlePageSizeChange`, `handlePageInputChange`, `handlePageInputBlur`, `handlePreviousPage`, `handleNextPage`).
+- **DataTableAside** (components)
+  - Trigger toggle and close button handlers are memoized with `useCallback` (`handleToggle`, `handleClose`).
+
+#### Why
+
+- Fewer function allocations per render and stable callback references where they are in dependency arrays (e.g. table options, effects).
+- Consistent behavior and performance across standard, virtualized, and DnD body variants.
+
+### 📚 Documentation
+
+- **DataTableRoot**
+  - Documented required `children` and optional `state` (controlled mode) in overview and introduction.
+- **Introduction**
+  - Documented `className` for `DataTableRoot`.
+- Doc accuracy pass: props tables and examples aligned with current implementation.
+
+---
+
 ## v2.1.0 - November 10, 2025
 
 ### 🧹 Code Cleanup
