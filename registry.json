@@ -101,11 +101,6 @@
           "target": "components/niko-table/hooks/use-keyboard-shortcut.ts"
         },
         {
-          "path": "src/components/niko-table/hooks/index.ts",
-          "type": "registry:hook",
-          "target": "components/niko-table/hooks/index.ts"
-        },
-        {
           "path": "src/components/niko-table/lib/constants.ts",
           "type": "registry:lib",
           "target": "components/niko-table/lib/constants.ts"
@@ -136,11 +131,6 @@
           "target": "components/niko-table/lib/styles.ts"
         },
         {
-          "path": "src/components/niko-table/lib/index.ts",
-          "type": "registry:lib",
-          "target": "components/niko-table/lib/index.ts"
-        },
-        {
           "path": "src/components/niko-table/config/data-table.ts",
           "type": "registry:lib",
           "target": "components/niko-table/config/data-table.ts"
@@ -151,19 +141,9 @@
           "target": "components/niko-table/config/feature-detection.ts"
         },
         {
-          "path": "src/components/niko-table/config/index.ts",
-          "type": "registry:lib",
-          "target": "components/niko-table/config/index.ts"
-        },
-        {
           "path": "src/components/niko-table/types/index.ts",
           "type": "registry:lib",
           "target": "components/niko-table/types/index.ts"
-        },
-        {
-          "path": "src/components/niko-table/core/index.ts",
-          "type": "registry:lib",
-          "target": "components/niko-table/core/index.ts"
         }
       ]
     },

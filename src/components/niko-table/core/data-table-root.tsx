@@ -20,6 +20,7 @@ import {
   type VisibilityState,
   type ExpandedState,
   type ColumnOrderState,
+  type ColumnPinningState,
   type Updater,
   type FilterFn,
   type FilterFnOption,
@@ -408,6 +409,27 @@ function DataTableRootInternal<TData, TValue>({
   )
 
   /**
+   * PERFORMANCE: Memoize default column pinning handler with useCallback
+   *
+   * WHY: Used as fallback in tableOptions when onColumnPinningChange is not provided.
+   * Without useCallback, an inline would be created inside useMemo on every run.
+   *
+   * WHAT: Stable reference so tableOptions dependency array stays minimal.
+   */
+  const handleColumnPinningChange = React.useCallback(
+    (updater: Updater<ColumnPinningState>) => {
+      setColumnPinning(prev => {
+        const next = typeof updater === "function" ? updater(prev) : updater
+        return {
+          left: next.left ?? [],
+          right: next.right ?? [],
+        }
+      })
+    },
+    [],
+  )
+
+  /**
    * Auto-apply filterFn based on meta.variant if not explicitly provided
    * This allows developers to set variant in meta and get the right filterFn automatically
    */
@@ -631,24 +653,12 @@ function DataTableRootInternal<TData, TValue>({
       // Can be overridden via config
       autoResetPageIndex: finalConfig.autoResetPageIndex,
       autoResetExpanded: finalConfig.autoResetExpanded,
-      onGlobalFilterChange: value => {
-        handleGlobalFilterChange(value)
-      },
+      onGlobalFilterChange: handleGlobalFilterChange,
       onRowSelectionChange: onRowSelectionChange ?? handleRowSelectionChange,
       onSortingChange: onSortingChange ?? setSorting,
       onColumnFiltersChange: onColumnFiltersChange ?? setColumnFilters,
       onColumnVisibilityChange: onColumnVisibilityChange ?? setColumnVisibility,
-      onColumnPinningChange:
-        onColumnPinningChange ??
-        (updater => {
-          setColumnPinning(prev => {
-            const next = typeof updater === "function" ? updater(prev) : updater
-            return {
-              left: next.left ?? [],
-              right: next.right ?? [],
-            }
-          })
-        }),
+      onColumnPinningChange: onColumnPinningChange ?? handleColumnPinningChange,
       onColumnOrderChange: onColumnOrderChange ?? setColumnOrder,
       onExpandedChange: onExpandedChange ?? setExpanded,
       onPaginationChange: onPaginationChange ?? setPagination,
@@ -729,6 +739,7 @@ function DataTableRootInternal<TData, TValue>({
       setColumnVisibility,
       onColumnVisibilityChange,
       onColumnPinningChange,
+      handleColumnPinningChange,
       onColumnOrderChange,
       setColumnOrder,
       setExpanded,

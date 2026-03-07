@@ -7,7 +7,7 @@ import {
   TableColumnFacetedFilterOptions,
   TableColumnFacetedFilterMenu,
 } from "../filters/table-column-faceted-filter"
-import { useDataTable } from "../core"
+import { useDataTable } from "../core/data-table-context"
 import { useColumnHeaderContext } from "./data-table-column-header"
 
 /**

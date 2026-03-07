@@ -1,7 +1,7 @@
 "use client"
 
 import React from "react"
-import { useDataTable } from "../core"
+import { useDataTable } from "../core/data-table-context"
 import { TableFilterMenu } from "../filters/table-filter-menu"
 import { useGeneratedOptions } from "../hooks/use-generated-options"
 import { FILTER_VARIANTS } from "../lib/constants"

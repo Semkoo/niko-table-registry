@@ -1,12 +1,12 @@
 "use client"
 
+import { DataTableRoot } from "@/components/niko-table/core/data-table-root"
+import { DataTable } from "@/components/niko-table/core/data-table"
 import {
-  DataTableRoot,
-  DataTable,
   DataTableHeader,
   DataTableBody,
   DataTableEmptyBody,
-} from "@/components/niko-table/core"
+} from "@/components/niko-table/core/data-table-structure"
 import { DataTableColumnHeader } from "@/components/niko-table/components/data-table-column-header"
 import { DataTableColumnTitle } from "@/components/niko-table/components/data-table-column-title"
 import { DataTableColumnSortMenu } from "@/components/niko-table/components/data-table-column-sort"
@@ -26,7 +26,8 @@ import { DataTableViewMenu } from "@/components/niko-table/components/data-table
 import { DataTableSortMenu } from "@/components/niko-table/components/data-table-sort-menu"
 import { DataTableFilterMenu } from "@/components/niko-table/components/data-table-filter-menu"
 import { DataTablePagination } from "@/components/niko-table/components/data-table-pagination"
-import { daysAgo, FILTER_VARIANTS } from "@/components/niko-table/lib"
+import { daysAgo } from "@/components/niko-table/lib/format"
+import { FILTER_VARIANTS } from "@/components/niko-table/lib/constants"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 import { Badge } from "@/components/ui/badge"
 import { UserSearch, SearchX } from "lucide-react"

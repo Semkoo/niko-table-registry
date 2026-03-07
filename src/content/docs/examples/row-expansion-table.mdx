@@ -29,7 +29,7 @@ This example also uses `card` and `separator` from Shadcn UI:
 
 > First time using `@niko-table`? See the [Installation Guide](/getting-started/installation#configure-the-niko-table-registry) to set up the registry.
 
-For other add-ons or manual copy-paste, see the [Installation Guide](/getting-started/installation).
+For other add-ons or manual copy-paste, see the [Installation Guide](/getting-started/installation/).
 
 ## Prerequisites
 
@@ -180,13 +180,13 @@ Next, we'll create the table with row expansion enabled.
 ```tsx showLineNumbers title="row-expansion-table.tsx"
 "use client"
 
+import { DataTableRoot } from "@/components/niko-table/core/data-table-root"
+import { DataTable } from "@/components/niko-table/core/data-table"
 import {
-  DataTableRoot,
-  DataTable,
   DataTableHeader,
   DataTableBody,
   DataTableEmptyBody,
-} from "@/components/niko-table/core"
+} from "@/components/niko-table/core/data-table-structure"
 import { DataTableToolbarSection } from "@/components/niko-table/components/data-table-toolbar-section"
 import { DataTablePagination } from "@/components/niko-table/components/data-table-pagination"
 import { DataTableSearchFilter } from "@/components/niko-table/components/data-table-search-filter"
@@ -447,7 +447,7 @@ export function RowExpansionTableWithExport({ data }: { data: Order[] }) {
 For more control, use the `exportTableToCSV` function directly:
 
 ```tsx showLineNumbers
-import { useDataTable } from "@/components/niko-table/core"
+import { useDataTable } from "@/components/niko-table/core/data-table-context"
 import { exportTableToCSV } from "@/components/niko-table/filters/table-export-button"
 import { Button } from "@/components/ui/button"
 import { Download } from "lucide-react"
@@ -550,11 +550,11 @@ excludeColumns={["expand"] as unknown as (keyof Order)[]}
 
 **❌ Consider other options when:**
 
-- You need to show details for all rows (use [Aside Table](/examples/aside-table))
-- Expanded content is very large (use [Aside Table](/examples/aside-table))
-- You don't need additional details (use [Basic Table](/examples/basic-table))
+- You need to show details for all rows (use [Aside Table](/examples/aside-table/))
+- Expanded content is very large (use [Aside Table](/examples/aside-table/))
+- You don't need additional details (use [Basic Table](/examples/basic-table/))
 
 ## Next Steps
 
-- [Aside Table](/examples/aside-table) - Show details in sidebars
-- [Tree Table](/examples/tree-table) - Hierarchical data with expansion
+- [Aside Table](/examples/aside-table/) - Show details in sidebars
+- [Tree Table](/examples/tree-table/) - Hierarchical data with expansion

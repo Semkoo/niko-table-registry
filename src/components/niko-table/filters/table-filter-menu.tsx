@@ -88,7 +88,7 @@ import {
   processFiltersForLogic,
 } from "../lib/data-table"
 import { formatDate } from "../lib/format"
-import { useKeyboardShortcut } from "../hooks"
+import { useKeyboardShortcut } from "../hooks/use-keyboard-shortcut"
 import { cn } from "@/lib/utils"
 import {
   FILTER_OPERATORS,

@@ -27,11 +27,11 @@ The DataTable components use a two-layer architecture for maximum flexibility:
 
 **Why this architecture?**
 
-- Use `DataTable*` components from "@/components/niko-table/components" when you want context-based, zero-config usage
-- Use `Table*` components from filters when you want to build custom components or manage the table instance yourself
+- Use `DataTable*` components from their direct paths (e.g. `@/components/niko-table/components/data-table-pagination`) when you want context-based, zero-config usage
+- Use `Table*` components from filters (e.g. `@/components/niko-table/filters/table-pagination`) when you want to build custom components or manage the table instance yourself
 - All filter components use TanStack Table hooks directly, giving you full control
 
-Learn more in the [Introduction](/getting-started/introduction#state-management-with-react-context).
+Learn more in the [Introduction](/getting-started/introduction/#state-management-with-react-context).
 
 ## Custom Table Component
 
@@ -91,11 +91,16 @@ To use the `@niko-table/` namespace with the shadcn CLI, you must first register
 
 ## Installation
 
-Now you can install the core DataTable components:
+Install in two steps (or all at once):
+
+1. **Install the core once** — one command copies the base table (Root, DataTable, context, structure, column header, empty state, hooks, lib, types) into your project.
+2. **Add features one by one** — run the CLI for each feature you need (pagination, search filter, DnD, etc.). Each add-on depends on the core, so the CLI will install or reuse it.
+
+Now install the core:
 
 <Installation registryItem="data-table" />
 
-**This installs only the core** (Root, DataTable, context, structure, column header, empty state). For pagination, filters, DnD, virtualization, aside, and other features, add the optional blocks below or use **Install Everything**.
+**This installs only the core.** For pagination, filters, DnD, virtualization, aside, and other features, add the optional blocks below (one by one) or use **Install Everything**.
 
 ## Install Everything
 
@@ -209,7 +214,7 @@ Or install only the components you need. Each component can be added individuall
 
 ## Manual Installation
 
-Prefer to copy and paste all components manually? Check out our [Manual Installation Guide](/getting-started/manual-installation) page where you can copy all the component files at once.
+Prefer to copy and paste all components manually? Check out our [Manual Installation Guide](/getting-started/manual-installation/) page where you can copy all the component files at once.
 
 ## Your First Table
 
@@ -274,12 +279,12 @@ Let's build your first table. We'll start with a simple table and progressively 
    You can now build your table using DataTable components.
 
    ```tsx title="components/example-table.tsx"
+   import { DataTableRoot } from "@/components/niko-table/core/data-table-root"
+   import { DataTable } from "@/components/niko-table/core/data-table"
    import {
-     DataTableRoot,
-     DataTable,
      DataTableHeader,
      DataTableBody,
-   } from "@/components/niko-table/core"
+   } from "@/components/niko-table/core/data-table-structure"
 
    export function ExampleTable() {
      return (
@@ -409,8 +414,7 @@ src/
 │       ├── components/
 │       ├── filters/
 │       ├── config/
-│       ├── lib/
-│       └── index.tsx
+│       └── lib/
 └── lib/
     └── utils.ts
 ```
@@ -420,12 +424,12 @@ src/
 Create a simple test to verify everything is working:
 
 ```tsx
+import { DataTableRoot } from "@/components/niko-table/core/data-table-root"
+import { DataTable } from "@/components/niko-table/core/data-table"
 import {
-  DataTableRoot,
-  DataTable,
   DataTableHeader,
   DataTableBody,
-} from "@/components/niko-table/core"
+} from "@/components/niko-table/core/data-table-structure"
 
 const columns = [
   { accessorKey: "name", header: "Name" },
@@ -453,8 +457,8 @@ export function TestTable() {
 
 Now that you have the DataTable installed, check out the examples:
 
-- [Simple Table](/examples/simple-table) - Basic table with no pagination
-- [Basic Table](/examples/basic-table) - Add pagination and sorting
-- [Search Table](/examples/search-table) - Add search functionality
-- [Faceted Filter Table](/examples/faceted-filter-table) - Add advanced filtering
-- [Advanced Table](/examples/advanced-table) - All features combined
+- [Simple Table](/examples/simple-table/) - Basic table with no pagination
+- [Basic Table](/examples/basic-table/) - Add pagination and sorting
+- [Search Table](/examples/search-table/) - Add search functionality
+- [Faceted Filter Table](/examples/faceted-filter-table/) - Add advanced filtering
+- [Advanced Table](/examples/advanced-table/) - All features combined

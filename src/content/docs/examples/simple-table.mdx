@@ -20,7 +20,7 @@ Install the DataTable core:
 
 > First time using `@niko-table`? See the [Installation Guide](/getting-started/installation#configure-the-niko-table-registry) to set up the registry.
 
-For optional add-ons (pagination, filters, virtualization, etc.) and manual copy-paste, see the [Installation Guide](/getting-started/installation).
+For optional add-ons (pagination, filters, virtualization, etc.) and manual copy-paste, see the [Installation Guide](/getting-started/installation/).
 
 ## Prerequisites
 
@@ -89,14 +89,14 @@ Next, we'll create a `<DataTable />` component to render our table.
 ```tsx showLineNumbers title="simple-table.tsx"
 "use client"
 
+import { DataTableRoot } from "@/components/niko-table/core/data-table-root"
+import { DataTable } from "@/components/niko-table/core/data-table"
 import {
-  DataTableRoot,
-  DataTable,
   DataTableHeader,
   DataTableBody,
   DataTableSkeleton,
   DataTableEmptyBody,
-} from "@/components/niko-table/core"
+} from "@/components/niko-table/core/data-table-structure"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 
 type User = {
@@ -204,13 +204,13 @@ The `DataTableEmptyBody` component automatically shows when there's no data or w
 
 **❌ Don't use Simple Table when:**
 
-- You have more than 50 rows (use [Basic Table](/examples/basic-table) with pagination)
-- Users need to search or filter data (use [Search Table](/examples/search-table))
-- Users need to sort columns (use [Basic Table](/examples/basic-table))
+- You have more than 50 rows (use [Basic Table](/examples/basic-table/) with pagination)
+- Users need to search or filter data (use [Search Table](/examples/search-table/))
+- Users need to sort columns (use [Basic Table](/examples/basic-table/))
 
 ## Next Steps
 
 Once you're comfortable with the Simple Table, try adding more features:
 
-- [Basic Table](/examples/basic-table) - Add pagination and sorting
-- [Search Table](/examples/search-table) - Add search functionality
+- [Basic Table](/examples/basic-table/) - Add pagination and sorting
+- [Search Table](/examples/search-table/) - Add search functionality

@@ -100,13 +100,13 @@ import type {
   ColumnPinningState,
   Updater,
 } from "@tanstack/react-table"
+import { DataTableRoot } from "@/components/niko-table/core/data-table-root"
+import { DataTable } from "@/components/niko-table/core/data-table"
 import {
-  DataTableRoot,
-  DataTable,
   DataTableHeader,
   DataTableBody,
   DataTableEmptyBody,
-} from "@/components/niko-table/core"
+} from "@/components/niko-table/core/data-table-structure"
 import { DataTableColumnHeader } from "@/components/niko-table/components/data-table-column-header"
 import { DataTableColumnTitle } from "@/components/niko-table/components/data-table-column-title"
 import { DataTableColumnSortMenu } from "@/components/niko-table/components/data-table-column-sort"
@@ -127,14 +127,13 @@ import { DataTableSortMenu } from "@/components/niko-table/components/data-table
 import { DataTableFilterMenu } from "@/components/niko-table/components/data-table-filter-menu"
 import { DataTableInlineFilter } from "@/components/niko-table/components/data-table-inline-filter"
 import { DataTablePagination } from "@/components/niko-table/components/data-table-pagination"
+import { daysAgo, formatQueryString } from "@/components/niko-table/lib/format"
 import {
-  daysAgo,
   JOIN_OPERATORS,
-  processFiltersForLogic,
   FILTER_VARIANTS,
-} from "@/components/niko-table/lib"
+} from "@/components/niko-table/lib/constants"
+import { processFiltersForLogic } from "@/components/niko-table/lib/data-table"
 import { serializeFiltersForUrl } from "@/components/niko-table/filters/table-filter-menu"
-import { formatQueryString } from "@/components/niko-table/lib/format"
 import type {
   DataTableColumnDef,
   ExtendedColumnFilter,

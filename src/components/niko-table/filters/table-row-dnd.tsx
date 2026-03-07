@@ -121,6 +121,8 @@ export function TableDraggableRow<TData>({
     <TableRow
       ref={setNodeRef}
       style={style}
+      data-row-index={row.index}
+      data-row-id={row.id}
       data-state={row.getIsSelected() && "selected"}
       className={cn(isDragging && "bg-muted/50", className)}
     >

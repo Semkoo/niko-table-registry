@@ -1,6 +1,6 @@
 "use client"
 
-import { useDataTable } from "../core"
+import { useDataTable } from "../core/data-table-context"
 import {
   TableSearchFilter,
   type TableSearchFilterProps,

@@ -5,6 +5,18 @@ description: Latest updates and release notes for Niko Table.
 
 ## March 2026
 
+### Performance & consistency
+
+- **Row click: event delegation** — All table body components (standard, virtualized, and DnD variants) now use a single delegated row-click handler instead of one handler per row or per cell. This reduces allocations and keeps behavior consistent across `DataTableBody`, `DataTableVirtualizedBody`, `DataTableVirtualizedDndBody`, `DataTableVirtualizedDndColumnBody`, `DataTableDndBody`, and `DataTableDndColumnBody`.
+- **DataTableRoot** — Global filter and default column-pinning handlers are memoized with `useCallback` so table options stay stable and the table does not re-initialize unnecessarily.
+- **TablePagination** — Page size, page input, and prev/next button handlers are memoized with `useCallback` for stable references when pagination state changes.
+- **DataTableAside** — Trigger toggle and close button handlers are memoized with `useCallback`.
+
+### Documentation
+
+- **DataTableRoot** — Docs now list the required `children` prop and the optional `state` prop for controlled mode. The introduction page also documents `className`.
+- Props tables and examples were reviewed for accuracy against the current implementation.
+
 ### Bug Fixes
 
 - **Sticky header z-index** — Fixed an issue where pinned body cells could overlap the sticky header during scroll. The sticky header container now uses `z-30`, above header pinned cells (`z-20`) and body pinned cells (`z-10`).
