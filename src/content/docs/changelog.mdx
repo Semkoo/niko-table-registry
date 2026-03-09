@@ -19,6 +19,8 @@ description: Latest updates and release notes for Niko Table.
 
 ### Bug Fixes
 
+- **TablePagination — page input draft state** — The page number input now uses local draft state so users can type intermediate values (e.g. `"1"` before completing `"12"`) without the table jumping mid-edit. The page index is only committed on blur or Enter; invalid input resets to the current page.
+- **TablePagination — stale page index on page size change** — `onPageSizeChange` now receives the recalculated page index (`Math.floor((pageIndex * pageSize) / newPageSize)`) instead of the stale pre-change index.
 - **Sticky header z-index** — Fixed an issue where pinned body cells could overlap the sticky header during scroll. The sticky header container now uses `z-30`, above header pinned cells (`z-20`) and body pinned cells (`z-10`).
 - **Pinned header cell `top` style** — Added `top: 0` to pinned header cells in `getCommonPinningStyles` so they stick vertically when the header is sticky.
 
