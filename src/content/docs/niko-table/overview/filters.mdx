@@ -429,11 +429,11 @@ import { TableClearFilter } from "@/components/niko-table/filters/table-clear-fi
   Reset All
 </TableClearFilter>
 
-// Selective reset (only filters, not sorting)
-<TableClearFilter
-  table={table}
-  enableResetSorting={false}
-/>
+// Reset filters and search only (default; sorting is not reset)
+<TableClearFilter table={table} />
+
+// Also reset sorting when clearing
+<TableClearFilter table={table} enableResetSorting />
 ```
 
 #### Props
@@ -447,7 +447,7 @@ import { TableClearFilter } from "@/components/niko-table/filters/table-clear-fi
 | `children`                 | `React.ReactNode`                   | -           | Button content.                          |
 | `enableResetColumnFilters` | `boolean`                           | `true`      | Enable resetting column filters.         |
 | `enableResetGlobalFilter`  | `boolean`                           | `true`      | Enable resetting global filter (search). |
-| `enableResetSorting`       | `boolean`                           | `true`      | Enable resetting sorting.                |
+| `enableResetSorting`       | `boolean`                           | `false`     | Enable resetting sorting.                |
 | `className`                | `string`                            | -           | Additional CSS classes.                  |
 
 ### TableExportButton

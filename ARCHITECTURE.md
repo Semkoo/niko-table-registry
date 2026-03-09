@@ -157,8 +157,8 @@ DnD components follow a three-layer pattern built on `@dnd-kit`:
 **Components** (`/components/`) - Context-aware, recommended:
 
 ```typescript
-// ✅ Use DataTable* components from "@/components/niko-table/components"
-import { DataTableSearchFilter } from "@/components/niko-table/components"
+// ✅ Use DataTable* components from direct file paths (no barrel)
+import { DataTableSearchFilter } from "@/components/niko-table/components/data-table-search-filter"
 
 // Automatically gets table from DataTableRoot context
 <DataTableSearchFilter placeholder="Search..." />
@@ -168,8 +168,8 @@ import { DataTableSearchFilter } from "@/components/niko-table/components"
 
 ```typescript
 // ✅ Use Table* components from filters when building custom components
-import { TableSearchFilter } from "@/components/niko-table/filters"
-import { useDataTable } from "@/components/niko-table/core"
+import { TableSearchFilter } from "@/components/niko-table/filters/table-search-filter"
+import { useDataTable } from "@/components/niko-table/core/data-table-context"
 
 function CustomSearch() {
   const { table } = useDataTable()
@@ -200,10 +200,10 @@ import { InstallationTabsInternal } from "./_installation-tabs-internal"
 
 ### Registry Examples
 
-**Example Files** (`/registry/new-york/examples/data-table/`):
+**Example Files** (`/registry/new-york/examples/niko-table/`):
 
 - Self-contained example implementations
-- Import from `@/components/niko-table`
+- Use **direct file imports** from `@/components/niko-table/core/*`, `@/components/niko-table/components/*`, etc. (no barrel exports for tree-shaking)
 - Should be runnable standalone
 - Used for documentation rendering
 
@@ -211,12 +211,12 @@ import { InstallationTabsInternal } from "./_installation-tabs-internal"
 
 ```typescript
 // basic.tsx
+import { DataTableRoot } from "@/components/niko-table/core/data-table-root"
+import { DataTable } from "@/components/niko-table/core/data-table"
 import {
-  DataTableRoot,
-  DataTable,
   DataTableHeader,
   DataTableBody,
-} from "@/components/niko-table/core"
+} from "@/components/niko-table/core/data-table-structure"
 
 export function BasicTable() {
   // Example implementation
@@ -236,7 +236,7 @@ export function BasicTable() {
 ### Import Rules
 
 - [ ] Base UI components are imported from `@/components/ui`
-- [ ] Niko Table components are imported from `@/components/niko-table`
+- [ ] Niko Table components use direct file imports (e.g. `@/components/niko-table/core/data-table-root`), no barrel
 - [ ] Shared utilities are imported from `@/lib` or `@/hooks`
 - [ ] Documentation doesn't import from Registry (read-only rendering)
 - [ ] Registry examples don't import from Documentation

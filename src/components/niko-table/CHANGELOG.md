@@ -196,12 +196,10 @@ import { DataTableToolbarSection } from "@/components/niko-table/core"
 **After:**
 
 ```tsx
-import { DataTableToolbarSection } from "@/components/niko-table"
-// OR
-import { DataTableToolbarSection } from "@/components/niko-table/components"
+import { DataTableToolbarSection } from "@/components/niko-table/components/data-table-toolbar-section"
 ```
 
-**Note**: If you're importing from the main index (`@/components/niko-table`), no changes needed as it's automatically re-exported.
+**Note**: Use direct file imports (no barrel) for tree-shaking.
 
 ### Non-Breaking Changes
 
@@ -353,7 +351,7 @@ export { useDebounce } from "./hooks"
    import { DataTableToolbarSection } from "@/components/niko-table/core"
 
    // To this:
-   import { DataTableToolbarSection } from "@/components/niko-table"
+   import { DataTableToolbarSection } from "@/components/niko-table/components/data-table-toolbar-section"
    ```
 
 2. **Review empty states** (optional - old API still works):

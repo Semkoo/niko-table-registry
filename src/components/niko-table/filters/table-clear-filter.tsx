@@ -25,7 +25,7 @@ export interface TableClearFilterProps<TData> {
   enableResetGlobalFilter?: boolean
   /**
    * Enable resetting sorting
-   * @default true
+   * @default false
    */
   enableResetSorting?: boolean
 }
@@ -51,7 +51,7 @@ export function TableClearFilter<TData>({
   children,
   enableResetColumnFilters = true,
   enableResetGlobalFilter = true,
-  enableResetSorting = true,
+  enableResetSorting = false,
 }: TableClearFilterProps<TData>) {
   // Read state directly - should be reactive via table re-renders
   const state = table.getState()

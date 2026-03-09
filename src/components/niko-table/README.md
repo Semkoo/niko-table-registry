@@ -114,7 +114,7 @@ Context-aware wrapper components for advanced filtering:
 
 ### Reusable UI Components
 
-- **`TableColumnHeader`**: Sortable column header with proper styling
+- **`DataTableColumnHeaderRoot`** / **`DataTableColumnTitle`**: Sortable column header with proper styling (from `components/data-table-column-header`, `components/data-table-column-title`)
 - **`DataTableToolbarSection`**: Flexible toolbar container for filters, search, and actions
 - **`DataTableAside`**: Sidebar component for filters/actions
 - **`DataTableSelectionBar`**: Floating action bar for selected rows
@@ -131,13 +131,18 @@ The composition system supports comprehensive column configuration with meta pro
 ### Column Meta Properties
 
 ```tsx
-import { TableColumnHeader } from "@/components/niko-table/components"
+import { DataTableColumnHeaderRoot } from "@/components/niko-table/components/data-table-column-header"
+import { DataTableColumnTitle } from "@/components/niko-table/components/data-table-column-title"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 
 const columns: DataTableColumnDef<Product>[] = [
   {
     accessorKey: "name",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: ({ column }) => (
+      <DataTableColumnHeaderRoot column={column}>
+        <DataTableColumnTitle />
+      </DataTableColumnHeaderRoot>
+    ),
     meta: {
       label: "Product Name", // Display label for filters/sorting
       placeholder: "Search products...", // Placeholder text for search
@@ -178,16 +183,24 @@ const columns: DataTableColumnDef<Product>[] = [
 - **`enableSorting`**: Enable/disable sorting for the column (default: true)
 - **`enableHiding`**: Allow column to be hidden/shown in view options (default: true)
 
-### Important: Use TableColumnHeader
+### Important: Use DataTableColumnHeaderRoot and DataTableColumnTitle
 
-Always use `TableColumnHeader` for proper column sorting functionality:
+Always use `DataTableColumnHeaderRoot` with `DataTableColumnTitle` for proper column sorting functionality:
 
 ```tsx
 // ✅ Correct - enables sorting
-header: ({ column }) => <TableColumnHeader column={column} />,
+header: ({ column }) => (
+  <DataTableColumnHeaderRoot column={column}>
+    <DataTableColumnTitle />
+  </DataTableColumnHeaderRoot>
+),
 
 // ✅ Also correct - with custom title
-header: ({ column }) => <TableColumnHeader column={column} title="Product Name" />,
+header: ({ column }) => (
+  <DataTableColumnHeaderRoot column={column}>
+    <DataTableColumnTitle title="Product Name" />
+  </DataTableColumnHeaderRoot>
+),
 
 // ❌ Incorrect - no sorting functionality
 header: "Product Name",
@@ -211,14 +224,14 @@ The composition pattern includes intelligent auto-detection that automatically e
 ### Simple Table (Minimal)
 
 ```tsx
+import { DataTableRoot } from "@/components/niko-table/core/data-table-root"
+import { DataTable } from "@/components/niko-table/core/data-table"
 import {
-  DataTableRoot,
-  DataTable,
   DataTableHeader,
   DataTableBody,
   DataTableSkeleton,
   DataTableEmptyBody,
-} from "@/components/niko-table/core"
+} from "@/components/niko-table/core/data-table-structure"
 
 <DataTableRoot data={data} columns={columns}>
   <DataTable>
@@ -234,17 +247,15 @@ import {
 ### Basic Table with Pagination
 
 ```tsx
+import { DataTableRoot } from "@/components/niko-table/core/data-table-root"
+import { DataTable } from "@/components/niko-table/core/data-table"
 import {
-  DataTableRoot,
-  DataTable,
   DataTableHeader,
   DataTableBody,
-} from "@/components/niko-table/core"
-import {
-  DataTableToolbarSection,
-  DataTablePagination,
-  DataTableViewMenu,
-} from "@/components/niko-table/components"
+} from "@/components/niko-table/core/data-table-structure"
+import { DataTableToolbarSection } from "@/components/niko-table/components/data-table-toolbar-section"
+import { DataTablePagination } from "@/components/niko-table/components/data-table-pagination"
+import { DataTableViewMenu } from "@/components/niko-table/components/data-table-view-menu"
 
 <DataTableRoot data={data} columns={columns}>
   <DataTableToolbarSection className="justify-between">
@@ -262,22 +273,20 @@ import {
 ### Advanced Table with Filtering and Sorting
 
 ```tsx
+import { DataTableRoot } from "@/components/niko-table/core/data-table-root"
+import { DataTable } from "@/components/niko-table/core/data-table"
 import {
-  DataTableRoot,
-  DataTable,
   DataTableHeader,
   DataTableBody,
   DataTableEmptyBody,
-} from "@/components/niko-table/core"
-import {
-  DataTableToolbarSection,
-  DataTablePagination,
-  DataTableSearchFilter,
-  DataTableViewMenu,
-  DataTableClearFilter,
-  DataTableSortMenu,
-  DataTableFilterMenu,
-} from "@/components/niko-table/components"
+} from "@/components/niko-table/core/data-table-structure"
+import { DataTableToolbarSection } from "@/components/niko-table/components/data-table-toolbar-section"
+import { DataTablePagination } from "@/components/niko-table/components/data-table-pagination"
+import { DataTableSearchFilter } from "@/components/niko-table/components/data-table-search-filter"
+import { DataTableViewMenu } from "@/components/niko-table/components/data-table-view-menu"
+import { DataTableClearFilter } from "@/components/niko-table/components/data-table-clear-filter"
+import { DataTableSortMenu } from "@/components/niko-table/components/data-table-sort-menu"
+import { DataTableFilterMenu } from "@/components/niko-table/components/data-table-filter-menu"
 
 <DataTableRoot data={data} columns={columns}>
   <DataTableToolbarSection>
@@ -304,18 +313,16 @@ import {
 ### Virtualized Table for Large Datasets
 
 ```tsx
+import { DataTableRoot } from "@/components/niko-table/core/data-table-root"
+import { DataTable } from "@/components/niko-table/core/data-table"
 import {
-  DataTableRoot,
-  DataTable,
   DataTableVirtualizedHeader,
   DataTableVirtualizedBody,
   DataTableVirtualizedEmptyBody,
-} from "@/components/niko-table/core"
-import {
-  DataTableToolbarSection,
-  DataTableSearchFilter,
-  DataTablePagination,
-} from "@/components/niko-table/components"
+} from "@/components/niko-table/core/data-table-virtualized-structure"
+import { DataTableToolbarSection } from "@/components/niko-table/components/data-table-toolbar-section"
+import { DataTableSearchFilter } from "@/components/niko-table/components/data-table-search-filter"
+import { DataTablePagination } from "@/components/niko-table/components/data-table-pagination"
 
 <DataTableRoot data={largeData} columns={columns}>
   <DataTableToolbarSection>
@@ -486,10 +493,18 @@ Wrapper usage:
 Per-column overrides:
 
 ```tsx
+import { DataTableColumnHeaderRoot } from "@/components/niko-table/components/data-table-column-header"
+import { DataTableColumnTitle } from "@/components/niko-table/components/data-table-column-title"
+import type { DataTableColumnDef } from "@/components/niko-table/types"
+
 const columns: DataTableColumnDef<Product>[] = [
   {
     accessorKey: "status",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: ({ column }) => (
+      <DataTableColumnHeaderRoot column={column}>
+        <DataTableColumnTitle />
+      </DataTableColumnHeaderRoot>
+    ),
     enableColumnFilter: true,
     meta: {
       label: "Status",
@@ -505,7 +520,11 @@ const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "category",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: ({ column }) => (
+      <DataTableColumnHeaderRoot column={column}>
+        <DataTableColumnTitle />
+      </DataTableColumnHeaderRoot>
+    ),
     enableColumnFilter: true,
     meta: {
       label: "Category",
@@ -530,13 +549,13 @@ How counts update:
 For large datasets (10,000+ rows), use virtualization components for optimal performance:
 
 ```tsx
+import { DataTableRoot } from "@/components/niko-table/core/data-table-root"
+import { DataTable } from "@/components/niko-table/core/data-table"
 import {
-  DataTableRoot,
-  DataTable,
   DataTableVirtualizedHeader,
   DataTableVirtualizedBody,
   DataTableVirtualizedEmptyBody,
-} from "@/components/niko-table/core"
+} from "@/components/niko-table/core/data-table-virtualized-structure"
 
 <DataTableRoot data={largeData} columns={columns}>
   <DataTable>
@@ -575,7 +594,7 @@ const columns: DataTableColumnDef<Product>[] = [
 Show skeleton loading state during data fetching:
 
 ```tsx
-import { DataTableSkeleton } from "@/components/niko-table/core"
+import { DataTableSkeleton } from "@/components/niko-table/core/data-table-structure"
 
 const [isLoading, setIsLoading] = React.useState(false)
 
@@ -593,7 +612,13 @@ const [isLoading, setIsLoading] = React.useState(false)
 ### Custom Toolbar Actions
 
 ```tsx
-import { useDataTable } from "@/components/niko-table/core"
+import { useDataTable } from "@/components/niko-table/core/data-table-context"
+import { DataTableToolbarSection } from "@/components/niko-table/components/data-table-toolbar-section"
+import { DataTableSearchFilter } from "@/components/niko-table/components/data-table-search-filter"
+import { DataTableClearFilter } from "@/components/niko-table/components/data-table-clear-filter"
+import { DataTableRoot } from "@/components/niko-table/core/data-table-root"
+import { DataTable } from "@/components/niko-table/core/data-table"
+import { DataTableHeader, DataTableBody } from "@/components/niko-table/core/data-table-structure"
 
 function CustomToolbar() {
   const { table } = useDataTable()
@@ -628,7 +653,7 @@ function CustomToolbar() {
 ### Accessing Table Instance
 
 ```tsx
-import { useDataTable } from "@/components/niko-table/core"
+import { useDataTable } from "@/components/niko-table/core/data-table-context"
 
 function CustomComponent() {
   const { table, isLoading } = useDataTable()
@@ -667,14 +692,14 @@ function CustomComponent() {
 ### After (Composition)
 
 ```tsx
+import { DataTableRoot } from "@/components/niko-table/core/data-table-root"
+import { DataTable } from "@/components/niko-table/core/data-table"
+import { DataTableHeader } from "@/components/niko-table/core/data-table-structure"
 import {
-  DataTableRoot,
-  DataTable,
-  DataTableHeader,
   DataTableVirtualizedBody,
   DataTableVirtualizedEmptyBody,
-} from "@/components/niko-table/core"
-import { DataTablePagination } from "@/components/niko-table/components"
+} from "@/components/niko-table/core/data-table-virtualized-structure"
+import { DataTablePagination } from "@/components/niko-table/components/data-table-pagination"
 
 <DataTableRoot columns={columns} data={data}>
   <CustomToolbar />
@@ -859,26 +884,29 @@ The example demonstrates using nuqs directly with TanStack Table following the o
 ## Quick Start
 
 ```tsx
+import { DataTableRoot } from "@/components/niko-table/core/data-table-root"
+import { DataTable } from "@/components/niko-table/core/data-table"
 import {
-  DataTableRoot,
-  DataTable,
   DataTableHeader,
   DataTableBody,
-} from "@/components/niko-table/core"
-import {
-  DataTableToolbarSection,
-  DataTableSearchFilter,
-  DataTableViewMenu,
-  DataTablePagination,
-} from "@/components/niko-table/components"
-import { TableColumnHeader } from "@/components/niko-table/filters"
+} from "@/components/niko-table/core/data-table-structure"
+import { DataTableToolbarSection } from "@/components/niko-table/components/data-table-toolbar-section"
+import { DataTableSearchFilter } from "@/components/niko-table/components/data-table-search-filter"
+import { DataTableViewMenu } from "@/components/niko-table/components/data-table-view-menu"
+import { DataTablePagination } from "@/components/niko-table/components/data-table-pagination"
+import { DataTableColumnHeaderRoot } from "@/components/niko-table/components/data-table-column-header"
+import { DataTableColumnTitle } from "@/components/niko-table/components/data-table-column-title"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 
 // Define your columns with proper typing
 const columns: DataTableColumnDef<Product>[] = [
   {
     accessorKey: "name",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: ({ column }) => (
+      <DataTableColumnHeaderRoot column={column}>
+        <DataTableColumnTitle />
+      </DataTableColumnHeaderRoot>
+    ),
     enableColumnFilter: true,
     meta: {
       label: "Product Name",
@@ -888,7 +916,11 @@ const columns: DataTableColumnDef<Product>[] = [
   },
   {
     accessorKey: "price",
-    header: ({ column }) => <TableColumnHeader column={column} />,
+    header: ({ column }) => (
+      <DataTableColumnHeaderRoot column={column}>
+        <DataTableColumnTitle />
+      </DataTableColumnHeaderRoot>
+    ),
     enableColumnFilter: true,
     meta: {
       label: "Price",
@@ -935,14 +967,14 @@ The DataTable composition system includes built-in loading state support for bet
 ### Basic Loading Usage
 
 ```tsx
+import { DataTableRoot } from "@/components/niko-table/core/data-table-root"
+import { DataTable } from "@/components/niko-table/core/data-table"
 import {
-  DataTableRoot,
-  DataTable,
   DataTableHeader,
   DataTableBody,
   DataTableSkeleton,
   DataTableEmptyBody,
-} from "@/components/niko-table/core"
+} from "@/components/niko-table/core/data-table-structure"
 
 export function MyTable() {
   const [data, setData] = React.useState([])
@@ -979,7 +1011,7 @@ export function MyTable() {
 ### Accessing Loading State in Custom Components
 
 ```tsx
-import { useDataTable } from "@/components/niko-table/core"
+import { useDataTable } from "@/components/niko-table/core/data-table-context"
 
 function CustomComponent() {
   const { isLoading, setIsLoading } = useDataTable()
@@ -1021,7 +1053,7 @@ function CustomComponent() {
 
 ## Best Practices
 
-1. **Always use `TableColumnHeader`** for sortable columns instead of plain strings
+1. **Always use `DataTableColumnHeaderRoot` with `DataTableColumnTitle`** for sortable columns instead of plain strings
 2. **Define column meta properties** for consistent filtering and display behavior
 3. **Include `DataTableSkeleton` and `DataTableEmptyBody`** in your body for better UX
 4. **Use virtualization components** (`DataTableVirtualizedBody`) for datasets over 1,000 rows
@@ -1034,7 +1066,7 @@ function CustomComponent() {
 
 ### Sorting not working
 
-- Make sure you're using `<TableColumnHeader column={column} />` instead of plain strings
+- Make sure you're using `<DataTableColumnHeaderRoot column={column}><DataTableColumnTitle /></DataTableColumnHeaderRoot>` instead of plain strings
 - Check that `enableSorting` is not set to `false` on the column
 
 ### Filtering not showing

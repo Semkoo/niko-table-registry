@@ -114,14 +114,14 @@ Consistent styling for descriptions.
 ### Basic Example
 
 ```tsx
+import { DataTableBody } from "@/components/niko-table/core/data-table-structure"
 import {
-  DataTableBody,
   DataTableEmptyBody,
   DataTableEmptyIcon,
   DataTableEmptyMessage,
   DataTableEmptyTitle,
   DataTableEmptyDescription,
-} from "@/components/niko-table/components"
+} from "@/components/niko-table/components/data-table-empty-state"
 import { PackageOpen } from "lucide-react"
 
 <DataTableBody>
@@ -193,8 +193,8 @@ import { Button } from "@/components/ui/button"
 ### Complete Example with All Features
 
 ```tsx
+import { DataTableBody } from "@/components/niko-table/core/data-table-structure"
 import {
-  DataTableBody,
   DataTableEmptyBody,
   DataTableEmptyIcon,
   DataTableEmptyMessage,
@@ -202,7 +202,7 @@ import {
   DataTableEmptyActions,
   DataTableEmptyTitle,
   DataTableEmptyDescription,
-} from "@/components/niko-table/components"
+} from "@/components/niko-table/components/data-table-empty-state"
 import { PackageOpen, SearchX } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
@@ -261,11 +261,13 @@ Works exactly the same with `DataTableVirtualizedEmptyBody`:
 import {
   DataTableVirtualizedBody,
   DataTableVirtualizedEmptyBody,
+} from "@/components/niko-table/core/data-table-virtualized-structure"
+import {
   DataTableEmptyIcon,
   DataTableEmptyMessage,
   DataTableEmptyTitle,
   DataTableEmptyDescription,
-} from "@/components/niko-table/components"
+} from "@/components/niko-table/components/data-table-empty-state"
 import { Database } from "lucide-react"
 
 <DataTableVirtualizedBody height={600}>
@@ -333,7 +335,7 @@ import { PackageOpen, SearchX } from "lucide-react"
 </DataTableBody>
 
 // Or use the context to determine state:
-import { useDataTable } from "@/components/niko-table/core"
+import { useDataTable } from "@/components/niko-table/core/data-table-context"
 
 function CustomEmptyState() {
   const { table } = useDataTable()
@@ -443,7 +445,7 @@ import type {
   DataTableEmptyActionsProps,
   DataTableEmptyTitleProps,
   DataTableEmptyDescriptionProps,
-} from "@/components/niko-table/components"
+} from "@/components/niko-table/components/data-table-empty-state"
 
 // All accept children and className
 interface DataTableEmptyIconProps {
@@ -519,8 +521,8 @@ interface DataTableEmptyIconProps {
 All components are included in the data-table package:
 
 ```tsx
+import { DataTableBody } from "@/components/niko-table/core/data-table-structure"
 import {
-  DataTableBody,
   DataTableEmptyBody,
   DataTableEmptyIcon,
   DataTableEmptyMessage,
@@ -528,7 +530,7 @@ import {
   DataTableEmptyActions,
   DataTableEmptyTitle,
   DataTableEmptyDescription,
-} from "@/components/niko-table/components"
+} from "@/components/niko-table/components/data-table-empty-state"
 ```
 
 ### Step 2: Build Your Empty State

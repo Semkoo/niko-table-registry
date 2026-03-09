@@ -79,12 +79,12 @@ npm install @dnd-kit/core @dnd-kit/sortable @dnd-kit/modifiers @dnd-kit/utilitie
 ### Simple Table
 
 ```tsx
+import { DataTableRoot } from "@/components/niko-table/core/data-table-root"
+import { DataTable } from "@/components/niko-table/core/data-table"
 import {
-  DataTableRoot,
-  DataTable,
   DataTableHeader,
   DataTableBody,
-} from "@/components/niko-table/core"
+} from "@/components/niko-table/core/data-table-structure"
 
 const columns = [
   { accessorKey: "name", header: "Name" },
@@ -106,20 +106,18 @@ export function SimpleTable({ data }) {
 ### Add Features Incrementally
 
 ```tsx
+import { DataTableRoot } from "@/components/niko-table/core/data-table-root"
+import { DataTable } from "@/components/niko-table/core/data-table"
 import {
-  DataTableRoot,
-  DataTable,
   DataTableHeader,
   DataTableBody,
-} from "@/components/niko-table/core"
-import {
-  DataTableToolbarSection,
-  DataTableSearchFilter,
-  DataTableFilterMenu,
-  DataTableViewMenu,
-  DataTableSortMenu,
-  DataTablePagination,
-} from "@/components/niko-table/components"
+} from "@/components/niko-table/core/data-table-structure"
+import { DataTableToolbarSection } from "@/components/niko-table/components/data-table-toolbar-section"
+import { DataTableSearchFilter } from "@/components/niko-table/components/data-table-search-filter"
+import { DataTableFilterMenu } from "@/components/niko-table/components/data-table-filter-menu"
+import { DataTableViewMenu } from "@/components/niko-table/components/data-table-view-menu"
+import { DataTableSortMenu } from "@/components/niko-table/components/data-table-sort-menu"
+import { DataTablePagination } from "@/components/niko-table/components/data-table-pagination"
 
 export function AdvancedTable({ data, columns }) {
   return (
