@@ -87,7 +87,7 @@
     "react-day-picker": "^9.14.0",
     "react-dom": "^19.2.4",
     "react-hook-form": "^7.71.2",
-    "react-resizable-panels": "^4.7.1",
+    "react-resizable-panels": "^4.7.2",
     "satori": "^0.25.0",
     "sharp": "^0.34.5",
     "shiki": "^4.0.1",
