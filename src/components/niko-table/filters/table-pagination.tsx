@@ -74,6 +74,9 @@ export function TablePagination<TData>({
   const totalPages = table.getPageCount()
   const currentPage = pageIndex + 1
 
+  const [pageInput, setPageInput] = React.useState<string | null>(null)
+  const displayValue = pageInput ?? currentPage.toString()
+
   // Determine if buttons should be disabled
   // Default to isLoading for initial load, but allow explicit overrides
   // Also disable during fetching to prevent navigation while data is loading
@@ -95,34 +98,37 @@ export function TablePagination<TData>({
   const handlePageSizeChange = React.useCallback(
     (value: string) => {
       const newPageSize = Number(value)
+      const newPageIndex = Math.floor((pageIndex * pageSize) / newPageSize)
       table.setPageSize(newPageSize)
-      onPageSizeChange?.(newPageSize, pageIndex)
+      onPageSizeChange?.(newPageSize, newPageIndex)
     },
-    [table, pageIndex, onPageSizeChange],
+    [table, pageIndex, pageSize, onPageSizeChange],
   )
 
   const handlePageInputChange = React.useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      const page = Number(e.target.value)
-      if (page >= 1 && page <= totalPages) {
-        const newPageIndex = page - 1
-        table.setPageIndex(newPageIndex)
-        onPageChange?.(newPageIndex)
-      }
+      setPageInput(e.target.value)
     },
-    [table, totalPages, onPageChange],
+    [],
   )
 
-  const handlePageInputBlur = React.useCallback(
-    (e: React.FocusEvent<HTMLInputElement>) => {
-      const page = Number(e.target.value)
-      if (Number.isNaN(page) || page < 1 || page > totalPages) {
-        if (e.currentTarget) {
-          e.currentTarget.value = currentPage.toString()
-        }
+  const handlePageInputBlur = React.useCallback(() => {
+    const page = parseInt(pageInput ?? "", 10)
+    if (!Number.isNaN(page) && page >= 1 && page <= totalPages) {
+      const newPageIndex = page - 1
+      table.setPageIndex(newPageIndex)
+      onPageChange?.(newPageIndex)
+    }
+    setPageInput(null)
+  }, [pageInput, totalPages, table, onPageChange])
+
+  const handlePageInputKeyDown = React.useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === "Enter") {
+        e.currentTarget.blur()
       }
     },
-    [totalPages, currentPage],
+    [],
   )
 
   const handlePreviousPage = React.useCallback(() => {
@@ -216,9 +222,10 @@ export function TablePagination<TData>({
             type="number"
             min="1"
             max={totalPages}
-            value={currentPage}
+            value={displayValue}
             onChange={handlePageInputChange}
             onBlur={handlePageInputBlur}
+            onKeyDown={handlePageInputKeyDown}
             className="h-8 min-w-12 text-center"
             style={{
               width: `${Math.max(String(totalPages).length, 2) + 1}ch`,
