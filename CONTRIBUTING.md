@@ -10,6 +10,7 @@ This repository is an Astro Starlight project.
 
 - We use `pnpm` for development (npm also works).
 - We use `prettier` for code formatting (which is automatically run on commit).
+- We use **Conventional Commits** for commit messages; the changelog is generated from them.
 
 ## Structure
 
@@ -99,6 +100,43 @@ Then try installing any component from the registry in a new project using the `
 ```bash
 npx shadcn@latest add http://localhost:4321/r/<component-name>.json
 ```
+
+## Changelog
+
+The project uses **Conventional Commits** for commit messages. The changelog is generated automatically from git history.
+
+### Commit format
+
+Use the following format for commit messages:
+
+```
+<type>(<scope>): <description>
+
+[optional body]
+
+[optional footer]
+```
+
+**Types:** `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`
+
+**Examples:**
+
+- `feat(table): add row click handler`
+- `fix(pagination): correct page index on page size change`
+- `docs: update installation guide`
+- `BREAKING CHANGE:` in the body or footer for breaking changes
+
+Commit messages are validated on commit via `commitlint` (husky `commit-msg` hook).
+
+### Generating the changelog
+
+When cutting a release, run:
+
+```bash
+npm run changelog
+```
+
+This updates `src/components/niko-table/CHANGELOG.md` from git tags and commit messages. The docs site changelog page reads from this file.
 
 ## Requests for new components
 

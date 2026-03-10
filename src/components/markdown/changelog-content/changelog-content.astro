@@ -1,0 +1,49 @@
+---
+import changelogRaw from "../../niko-table/CHANGELOG.md?raw"
+import { marked } from "marked"
+
+const html = await marked.parse(changelogRaw)
+---
+
+<div class="changelog-content sl-markdown" set:html={html} />
+
+<style>
+  .changelog-content {
+    margin-top: 1rem;
+  }
+  .changelog-content :global(h2) {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.25rem;
+    border-bottom: 1px solid var(--sl-color-gray-5);
+  }
+  .changelog-content :global(h2:first-child) {
+    margin-top: 0;
+  }
+  .changelog-content :global(h3) {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+  .changelog-content :global(ul) {
+    margin-left: 1.25rem;
+    margin-bottom: 1rem;
+  }
+  .changelog-content :global(li) {
+    margin-bottom: 0.25rem;
+  }
+  .changelog-content :global(pre) {
+    margin: 1rem 0;
+    padding: 1rem;
+    border-radius: var(--sl-radius-md);
+    overflow-x: auto;
+  }
+  .changelog-content :global(hr) {
+    margin: 2rem 0;
+    border: none;
+    border-top: 1px solid var(--sl-color-gray-5);
+  }
+</style>
