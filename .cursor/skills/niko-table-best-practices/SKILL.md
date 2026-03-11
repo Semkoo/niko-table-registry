@@ -23,6 +23,8 @@ At a high level:
 - **Row/column DnD**: Row DnD needs `getRowId`, DataTableRowDndProvider outside DataTable; don’t combine row DnD with sorting/filtering. Column DnD is safe with everything.
 - **Server-side**: `config.manualPagination` (and/or manualSorting/manualFiltering), `config.pageCount`, pass `totalCount` to DataTablePagination.
 - **URL state (nuqs):** Wrap app with `NuqsAdapter`; use `useQueryStates` with parsers for pagination, sort, filters, search; pass URL-derived state into `DataTableRoot` and wire `onPaginationChange` / `onSortingChange` / `onColumnFiltersChange` / `onGlobalFilterChange` to `setUrlParams`.
+- **Large lists:** Use `DataTableVirtualizedBody` (from core/structure) instead of `DataTableBody` for 10k+ rows; same children (Skeleton, EmptyBody). See Virtualization Table example.
+- **Sidebar:** Use `DataTableAside` (and trigger) for a detail panel next to the table. See Aside Table example.
 
 Your job when using this skill is to figure out where the user is — new table, adding filters/DnD, fixing imports, wiring server-side, URL state (nuqs), row expansion, tree table, or row selection — and give them the right structure, imports, and patterns. If they’re vague (“I want a table”), suggest the minimal template and point to niko-table.com for examples. If they already have a table and want faceted filters or the advanced filter menu, jump to the Filtering section. Stay flexible: some users want copy-paste snippets; others want to understand the two-layer (DataTable* vs Table*) pattern.
 
@@ -35,7 +37,9 @@ Full docs and examples: **https://niko-table.com**. Registry: `https://niko-tabl
 
 ## Communicating with the user
 
-Users may be new to Niko Table or to the shadcn/TanStack stack. When in doubt, briefly explain why direct imports matter (tree-shaking, no barrel files) and why `getRowId` is needed for row DnD. For deep reference (all add-ons, full API), point to niko-table.com.
+Users may be new to Niko Table or to the shadcn/TanStack stack. When in doubt, briefly explain why direct imports matter (tree-shaking, no barrel files) and why `getRowId` is needed for row DnD. Mention that most DataTableRoot config is auto-detected from the components they use, so they only need to pass `config` when overriding or for manual/server-side. For deep reference (all add-ons, full API), point to niko-table.com.
+
+**When not to use:** If the project clearly uses another table library (e.g. AG Grid, MUI Data Grid, TanStack Table without this registry), don’t force Niko Table — suggest the appropriate pattern for their stack.
 
 ## Table Structure
 
@@ -51,6 +55,8 @@ DataTableRoot (required)
           → DataTableEmptyBody  (when no data)
   → DataTablePagination (optional)
 ```
+
+**Optional:** Wrap the table (or DataTableRoot) in `DataTableErrorBoundary` from `@/components/niko-table/core/data-table-error-boundary` so render errors show a fallback UI instead of breaking the page.
 
 ## Imports — No Barrel Exports
 
@@ -246,6 +252,6 @@ export function UsersTable({ data, isLoading }: { data: User[]; isLoading?: bool
 
 ## Where to Learn More
 
-- **Online**: https://niko-table.com — installation, examples, component overview, API. Example pages: Row Selection Table, Row Expansion Table, Tree Table; Faceted Filter Table, Advanced Filter Table; Advanced Nuqs Table, Server-Side Nuqs Table; Row DnD Table, Column DnD Table; Virtualization Table, Aside Table.
+- **Online**: https://niko-table.com — installation, examples, component overview, API. Example pages: Row Selection, Row Expansion, Tree Table; Faceted Filter, Advanced Filter; Advanced Nuqs, Server-Side Nuqs; Row DnD, Column DnD; Virtualization Table (DataTableVirtualizedBody), Aside Table (DataTableAside). For resilience: DataTableErrorBoundary (core/data-table-error-boundary).
 - **Skills (AI)**: https://niko-table.com/getting-started/skills/ — how to install and use this skill.
 - **In-repo** (when working in niko-table-registry): `src/content/docs/` — e.g. `niko-table/introduction.mdx`, `getting-started/installation.mdx`, `examples/row-selection-table.mdx`, `examples/row-expansion-table.mdx`, `examples/tree-table.mdx`, `examples/faceted-filter-table.mdx`, `examples/advanced-table.mdx`, `examples/advanced-nuqs-table.mdx`, `examples/server-side-nuqs-table.mdx`, `examples/row-dnd-table.mdx`, `examples/column-dnd-table.mdx`, `niko-table/overview/components.mdx`, `filters.mdx`.
