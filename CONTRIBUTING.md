@@ -100,6 +100,46 @@ Then try installing any component from the registry in a new project using the `
 npx shadcn@latest add http://localhost:4321/r/<component-name>.json
 ```
 
+## Changelog
+
+The project uses [Conventional Commits](https://www.conventionalcommits.org/) for commit messages. The changelog is generated from git history.
+
+### Commit message format
+
+Use this format for commits:
+
+```
+<type>(<scope>): <description>
+
+[optional body]
+
+[optional footer]
+```
+
+**Types:** `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`
+
+**Scope** (optional): e.g. `table`, `pagination`, `docs`
+
+**Examples:**
+
+- `feat(table): add row click delegation`
+- `fix(pagination): correct page index on page size change`
+- `docs: update installation guide`
+
+For breaking changes, add `BREAKING CHANGE:` in the body or footer.
+
+Commit messages are validated on commit via commitlint. If a message is rejected, fix it and try again.
+
+### Generating the changelog
+
+When cutting a release, run:
+
+```bash
+npm run changelog
+```
+
+This updates `src/components/niko-table/CHANGELOG.md` from git tags and commit messages. The docs site changelog page displays this file automatically.
+
 ## Requests for new components
 
 If you have a request for a new component, please open a discussion on GitHub. We'll be happy to help you out.
