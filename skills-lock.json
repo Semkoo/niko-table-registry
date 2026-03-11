@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "skills": {
+    "niko-table-best-practices": {
+      "source": "Semkoo/niko-table-registry",
+      "sourceType": "github",
+      "computedHash": "12d6d31e68fc967b66d8a0ab297dd85772432b536641bbdd73d6bbbea5615f1e"
+    }
+  }
+}
