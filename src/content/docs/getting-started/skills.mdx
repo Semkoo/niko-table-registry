@@ -1,0 +1,106 @@
+---
+title: Skills
+description: Give your AI assistant deep knowledge of Niko Table structure, filters, and patterns.
+---
+
+Give your AI assistant project-aware context about Niko Table. When the skill is installed, your assistant knows how to build tables with the correct structure, imports, and patterns — DataTableRoot, toolbar and column filters, DnD, and server-side config.
+
+For example, you can ask your AI assistant to:
+
+- _"Add a data table with search and pagination."_
+- _"Build a table with faceted filters for category and brand."_
+- _"Add the advanced filter menu and sort menu to my table."_
+- _"Implement row drag-and-drop for reordering."_
+- _"Wire up server-side pagination with totalCount."_
+- _"Add column-level filters (faceted, slider, date) to the header."_
+- _"Add row selection with a selection bar for bulk actions."_
+- _"Add expandable rows so I can show details per row."_
+- _"Build a tree table with nested rows (getSubRows)."_
+- _"Sync table state (filters, sort, pagination) to the URL with nuqs."_
+- _"Wrap my table in an error boundary so it fails gracefully."_
+- _"Use a virtualized body for 10k+ rows."_
+- _"Add a sidebar panel next to the table for row details (DataTableAside)."_
+
+The skill teaches the assistant Niko Table’s composition (no barrel exports, direct file paths), the two-layer pattern (DataTable* vs Table*), filter variants (search, faceted, advanced, column menus), and when to use `getRowId`, `config.pageCount`, and related options. Most DataTableRoot config is **auto-detected** from the components you render — you only pass `config` when overriding or for manual/server-side.
+
+---
+
+## Install
+
+The Niko Table skill is a **Cursor-compatible skill** (SKILL.md). You can use it in two ways:
+
+### Option 1: Project skill (this repo)
+
+If you work inside the [niko-table-registry](https://github.com/Semkoo/niko-table-registry) repo, the skill is already at `.cursor/skills/niko-table-best-practices/SKILL.md`. Cursor loads project skills automatically when the skill’s description matches the conversation.
+
+### Option 2: Your own project
+
+To use the skill in another project (e.g. your app that uses Niko Table):
+
+1. Copy the skill folder into your project:
+   - **Project scope:** `.cursor/skills/niko-table-best-practices/` (so everyone on the repo gets it)
+   - **User scope:** `~/.cursor/skills/niko-table-best-practices/` (so it’s available in all your projects)
+
+2. The folder should contain at least `SKILL.md`. You can copy it from the [niko-table-registry repo](https://github.com/Semkoo/niko-table-registry/tree/main/.cursor/skills/niko-table-best-practices).
+
+No CLI is required — Cursor discovers skills from the `skills` directory.
+
+---
+
+## What's Included
+
+The skill gives your AI assistant:
+
+### Table structure
+
+- **Composition:** DataTableRoot → DataTableToolbarSection (optional) → DataTable → DataTableHeader + DataTableBody (with DataTableSkeleton, DataTableEmptyBody) → DataTablePagination.
+- **Imports:** Direct file paths only (no barrel exports). Correct paths for core, structure, components, and types.
+- **Optional:** Wrap in `DataTableErrorBoundary` for production so render errors show a fallback instead of breaking the page. For large lists (10k+ rows), use `DataTableVirtualizedBody` instead of `DataTableBody`. For a detail sidebar, use `DataTableAside`.
+
+### Filtering
+
+- **Toolbar:** DataTableSearchFilter, DataTableFacetedFilter, DataTableFilterMenu, DataTableClearFilter, DataTableSliderFilter, DataTableDateFilter.
+- **Column headers:** DataTableColumnFacetedFilterMenu, DataTableColumnSliderFilterMenu, DataTableColumnDateFilterMenu; column `meta` (variant, options, showCounts, etc.) and `enableColumnFilter: true`.
+
+### Config and state
+
+- **Most config is auto-detected** from the components you use (e.g. DataTablePagination enables pagination, DataTableSearchFilter enables filtering). Pass `config` only when overriding or for manual/server-side (e.g. `pageCount`, `manualPagination`).
+- DataTableRoot `state` and callbacks for controlled state.
+- When to use `getRowId` (row DnD, selection, expansion) and how to set `config.pageCount` and `totalCount` for server-side.
+
+### Drag and drop
+
+- **Row DnD:** Requires `getRowId`; DataTableRowDndProvider must wrap from outside DataTable; do not combine with sorting/filtering.
+- **Column DnD:** Safe to combine with other features; correct components and structure.
+
+### Pitfalls
+
+- No barrel imports; row DnD without stable `getRowId`; DataTableRowDndProvider placement; row DnD + sort/filter conflicts.
+
+---
+
+## How It Works
+
+1. **Triggering** — The skill activates when the user talks about data tables, Niko Table, niko-table.com, sortable/filterable tables, faceted or advanced filters, row/column drag-and-drop, server-side pagination, nuqs/URL state, row selection, row expansion, or tree tables — even if they don’t name Niko Table.
+2. **Pattern enforcement** — The assistant follows Niko Table rules: DataTableRoot structure, direct imports, toolbar and column filter patterns, and DnD constraints.
+3. **Context-aware help** — The assistant infers whether you need a new table, more filters, DnD, or server-side wiring and responds with the right snippets and links.
+4. **Deep reference** — For full API and examples, the skill points to this site (niko-table.com) and the [Installation](/getting-started/installation/) and [Examples](/examples/simple-table/) docs.
+
+---
+
+## Learn More
+
+- [Installation](/getting-started/installation/) — Configure the registry and install core + add-ons
+- [Simple Table](/examples/simple-table/) — Minimal table example
+- [Row Selection Table](/examples/row-selection-table/) — Row selection and selection bar
+- [Row Expansion Table](/examples/row-expansion-table/) — Expandable rows
+- [Tree Table](/examples/tree-table/) — Hierarchical data with getSubRows
+- [Faceted Filter Table](/examples/faceted-filter-table/) — Inline and column-level faceted filters
+- [Advanced Filter Table](/examples/advanced-table/) — Rule-based filter menu
+- [Advanced Nuqs Table](/examples/advanced-nuqs-table/) — URL state with nuqs
+- [Row DnD Table](/examples/row-dnd-table/) — Row drag-and-drop
+- [Virtualization Table](/examples/virtualization-table/) — Virtualized body for large datasets
+- [Aside Table](/examples/aside-table/) — Sidebar panel for row details
+- [Server-Side Table](/examples/server-side-table/) — Server-side pagination and state
+
+For the full skill source, see the [niko-table-best-practices](https://github.com/Semkoo/niko-table-registry/tree/main/.cursor/skills/niko-table-best-practices) folder in the repo.
