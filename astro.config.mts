@@ -280,6 +280,7 @@ export default defineConfig({
     react(),
   ],
   vite: {
+    // @ts-expect-error - Type incompatibility between @tailwindcss/vite and Vite 8
     plugins: [tailwindcss()],
     ssr: {
       // FIXME: Once starlight supports Zod 4 we can probably remove this.

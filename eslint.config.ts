@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import js from "@eslint/js"
 import markdown from "@eslint/markdown"
 import json from "@eslint/json"
@@ -9,6 +10,7 @@ import astroParser from "astro-eslint-parser"
 import prettier from "eslint-config-prettier"
 import reactHooks from "eslint-plugin-react-hooks"
 import { defineConfig, globalIgnores } from "eslint/config"
+import { fixupConfigRules, fixupPluginRules } from "@eslint/compat"
 
 export default defineConfig([
   globalIgnores([
@@ -28,8 +30,7 @@ export default defineConfig([
   },
   {
     files: ["**/*.json"],
-    // @ts-expect-error -- @eslint/json plugin types are incompatible with defineConfig's Plugin type
-    plugins: { json },
+    plugins: { json: json as any },
     language: "json/json",
     extends: [json.configs.recommended],
   },
@@ -63,15 +64,15 @@ export default defineConfig([
       },
     },
     files: ["**/*.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"],
-    plugins: { react },
-    extends: [
+    plugins: { react: fixupPluginRules(react as any) },
+    extends: fixupConfigRules([
       reactHooks.configs.flat.recommended,
       react.configs.flat.recommended,
       react.configs.flat["jsx-runtime"],
-    ],
+    ] as any[]),
   },
   {
-    plugins: { astro },
+    plugins: { astro: fixupPluginRules(astro as any) },
     languageOptions: {
       parser: astroParser,
       parserOptions: {
@@ -79,10 +80,10 @@ export default defineConfig([
         extraFileExtensions: [".astro"],
       },
     },
-    extends: [
-      ...astro.configs.recommended.filter(c => !c.files),
-      ...astro.configs["jsx-a11y-strict"].filter(c => !c.files),
-    ],
+    extends: fixupConfigRules([
+      ...astro.configs.recommended.filter((c: any) => !c.files),
+      ...astro.configs["jsx-a11y-strict"].filter((c: any) => !c.files),
+    ] as any[]),
     files: ["**/*.astro"],
   },
   prettier,
