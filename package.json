@@ -101,15 +101,15 @@
   "devDependencies": {
     "@astrojs/check": "^0.9.8",
     "@astrojs/upgrade": "^0.7.1",
-    "@eslint/compat": "^2.0.3",
+    "@eslint/compat": "^2.0.4",
     "@eslint/js": "^10.0.1",
     "@eslint/json": "^1.2.0",
     "@eslint/markdown": "^8.0.1",
-    "@types/node": "^25.5.0",
+    "@types/node": "^25.5.2",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "astro-eslint-parser": "^1.4.0",
-    "eslint": "^10.1.0",
+    "eslint": "^10.2.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-astro": "^1.6.0",
     "eslint-plugin-jsx-a11y": "^6.10.2",
@@ -126,6 +126,6 @@
     "typescript": "^6.0.2",
     "typescript-eslint": "^8.58.0",
     "vite": "^8.0.3",
-    "wrangler": "^4.79.0"
+    "wrangler": "^4.80.0"
   }
 }
