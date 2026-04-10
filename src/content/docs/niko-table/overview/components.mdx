@@ -262,22 +262,22 @@ import { DataTableFacetedFilter } from "@/components/niko-table/components/data-
 
 #### Props
 
-| Name                  | Type                   | Default | Description                                              |
-| --------------------- | ---------------------- | ------- | -------------------------------------------------------- |
-| `accessorKey`         | `keyof TData & string` | -       | Column accessor key (required).                          |
-| `title`               | `string`               | -       | Custom title (uses `column.meta.label` if not provided). |
-| `options`             | `Option[]`             | -       | Static options array.                                    |
-| `multiple`            | `boolean`              | -       | Allow multiple selection.                                |
-| `showCounts`          | `boolean`              | `true`  | Show counts beside each option.                          |
-| `dynamicCounts`       | `boolean`              | `true`  | Recompute counts based on filtered rows.                 |
-| `limitToFilteredRows` | `boolean`              | `true`  | Show only options from filtered rows.                    |
+| Name                  | Type                   | Default     | Description                                              |
+| --------------------- | ---------------------- | ----------- | -------------------------------------------------------- |
+| `accessorKey`         | `keyof TData & string` | -           | Column accessor key (required).                          |
+| `title`               | `string`               | -           | Custom title (uses `column.meta.label` if not provided). |
+| `options`             | `Option[]`             | -           | Static options array.                                    |
+| `multiple`            | `boolean`              | -           | Allow multiple selection.                                |
+| `showCounts`          | `boolean`              | `true`      | Show counts beside each option.                          |
+| `dynamicCounts`       | `boolean`              | `true`      | Recompute counts based on filtered rows.                 |
+| `limitToFilteredRows` | `boolean`              | `!multiple` | Show only options from filtered rows.                    |
 
 #### limitToFilteredRows
 
 Controls whether the filter shows options from all data or only from filtered rows.
 
-- **`true` (default):** Options are generated from rows that match other active filters. Useful for filters like "Brand" where you want to see only relevant options.
-- **`false`:** Options are generated from all rows, regardless of other filters. Useful for filters like "Category" where you want to see all available options.
+- **`true`:** Options are generated from rows that match other active filters. Useful for filters like "Brand" where you want to see only relevant options. This is the default for single-select filters (`multiple={false}`).
+- **`false`:** Options are generated from all rows, regardless of other filters. Useful for filters like "Category" where you want to see all available options. This is the default for multi-select filters (`multiple={true}`).
 
 ### DataTableSortMenu
 
