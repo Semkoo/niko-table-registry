@@ -38,9 +38,26 @@ vi.mock("../hooks/use-generated-options", async () => {
   }
 })
 
+// Spy on `TableFacetedFilter` so tests can inspect the final `options` prop
+// that flows through after enrichment / narrowing.
+const facetedFilterSpy = vi.fn()
+vi.mock("./table-faceted-filter", async () => {
+  const actual = await vi.importActual<typeof import("./table-faceted-filter")>(
+    "./table-faceted-filter",
+  )
+  return {
+    ...actual,
+    TableFacetedFilter: (props: unknown) => {
+      facetedFilterSpy(props)
+      return null
+    },
+  }
+})
+
 import { useGeneratedOptionsForColumn } from "../hooks/use-generated-options"
 import { TableColumnFacetedFilterMenu } from "./table-column-faceted-filter"
 import { FILTER_VARIANTS } from "../lib/constants"
+import type { Option } from "../types"
 
 type Row = { id: number; status: "a" | "b" }
 
@@ -70,6 +87,7 @@ function Harness(props: {
   dynamicCounts?: boolean
   limitToFilteredRows?: boolean
   multiple?: boolean
+  options?: Option[]
 }) {
   // eslint-disable-next-line react-hooks/incompatible-library -- test harness, stability is irrelevant here
   const table = useReactTable({
@@ -135,5 +153,62 @@ describe("TableColumnFacetedFilterMenu — prop wiring to useGeneratedOptionsFor
     const spy = vi.mocked(useGeneratedOptionsForColumn)
     const config = spy.mock.calls.at(-1)?.[2]
     expect(config).toMatchObject({ limitToFilteredRows: false })
+  })
+})
+
+/**
+ * Behavior regression: when a caller passes explicit `options` to the menu,
+ * the component still has to enrich them with live counts and (optionally)
+ * narrow them to values present in the filtered row set. An earlier version
+ * returned caller options untouched — so `dynamicCounts` was silently
+ * ignored whenever static options were supplied.
+ */
+describe("TableColumnFacetedFilterMenu — explicit options count enrichment", () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    facetedFilterSpy.mockClear()
+  })
+
+  it("merges live counts into caller-supplied options on the multi-select path", () => {
+    const callerOptions: Option[] = [
+      { label: "A", value: "a" },
+      { label: "B", value: "b" },
+      { label: "C", value: "c" },
+    ]
+    render(<Harness multiple options={callerOptions} />)
+    const lastProps = facetedFilterSpy.mock.calls.at(-1)?.[0] as {
+      options: Option[]
+    }
+    expect(lastProps.options).toEqual([
+      { label: "A", value: "a", count: 2 },
+      { label: "B", value: "b", count: 1 },
+      { label: "C", value: "c", count: 0 },
+    ])
+  })
+
+  it("narrows and counts explicit options on the single-select path", () => {
+    const callerOptions: Option[] = [
+      { label: "A", value: "a" },
+      { label: "B", value: "b" },
+      { label: "C", value: "c" }, // not present in row data
+    ]
+    render(<Harness options={callerOptions} />)
+    const lastProps = facetedFilterSpy.mock.calls.at(-1)?.[0] as {
+      options: Option[]
+    }
+    expect(lastProps.options).toEqual([
+      { label: "A", value: "a", count: 2 },
+      { label: "B", value: "b", count: 1 },
+    ])
+  })
+
+  it("preserves an explicit empty array (does not fall through to generated)", () => {
+    // The original `options ?? fallback` semantics treat `[]` as "explicitly
+    // empty, don't auto-generate." The enrichment memo must preserve that.
+    render(<Harness multiple options={[]} />)
+    const lastProps = facetedFilterSpy.mock.calls.at(-1)?.[0] as {
+      options: Option[]
+    }
+    expect(lastProps.options).toEqual([])
   })
 })
