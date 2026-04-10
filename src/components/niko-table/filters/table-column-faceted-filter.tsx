@@ -276,82 +276,8 @@ export function TableColumnFacetedFilterMenu<TData, TValue>({
     filteredRows,
   ])
 
-  /**
-   * Enrich caller-supplied `options` with live counts and (optionally) narrow
-   * them to values that exist in the current row set. Mirrors the row-set
-   * split used by `fallbackOptions` so explicit and generated paths stay
-   * consistent — without this, `dynamicCounts` was silently ignored whenever
-   * a caller passed their own options.
-   */
-  const enrichedCallerOptions = React.useMemo(() => {
-    if (!options) return null
-    // Preserve the original `options ?? ...` semantics: an explicit empty
-    // array still wins over generated/fallback options.
-    if (options.length === 0 || !table || !column) return options
-
-    const showCounts =
-      (column.columnDef.meta as Record<string, unknown>)?.showCounts ?? true
-
-    // Fast path: no narrowing needed and no counts to compute — normalize
-    // `count` to undefined so output shape is consistent with the fallback
-    // path, which also strips counts when `showCounts` is false.
-    if (!limitToFilteredRows && !showCounts) {
-      return options.map(opt => ({ ...opt, count: undefined }))
-    }
-
-    const optionRows = limitToFilteredRows ? filteredRows : coreRows
-    const countRows = dynamicCounts ? filteredRows : coreRows
-
-    if (!optionRows || !countRows) return options
-
-    const availableOptions = limitToFilteredRows ? new Set<string>() : null
-    if (availableOptions) {
-      optionRows.forEach(row => {
-        const raw = row.getValue(column.id) as unknown
-        const values: unknown[] = Array.isArray(raw) ? raw : [raw]
-        values.forEach(v => {
-          if (v != null) {
-            const s = String(v)
-            if (s) availableOptions.add(s)
-          }
-        })
-      })
-    }
-
-    const valueCounts = showCounts ? new Map<string, number>() : null
-    if (valueCounts) {
-      countRows.forEach(row => {
-        const raw = row.getValue(column.id) as unknown
-        const values: unknown[] = Array.isArray(raw) ? raw : [raw]
-        values.forEach(v => {
-          if (v != null) {
-            const s = String(v)
-            valueCounts.set(s, (valueCounts.get(s) || 0) + 1)
-          }
-        })
-      })
-    }
-
-    const filtered = availableOptions
-      ? options.filter(opt => availableOptions.has(opt.value))
-      : options
-
-    return filtered.map(opt => ({
-      ...opt,
-      count: valueCounts ? (valueCounts.get(opt.value) ?? 0) : undefined,
-    }))
-  }, [
-    options,
-    table,
-    column,
-    limitToFilteredRows,
-    dynamicCounts,
-    coreRows,
-    filteredRows,
-  ])
-
   const resolvedOptions =
-    enrichedCallerOptions ??
+    options ??
     (generatedOptions.length > 0 ? generatedOptions : fallbackOptions)
 
   return (

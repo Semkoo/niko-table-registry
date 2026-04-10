@@ -213,79 +213,29 @@ function useFacetedOptions<TData>({
 
   // Final options selection priority: explicit props.options > meta-driven > fallback
   const dynamicOptions = React.useMemo(() => {
-    // If options are explicitly provided, we still need to enrich them with
-    // live counts (when `showCounts` is on) and optionally narrow them down
-    // to values that exist in the filtered rows (when `limitToFilteredRows`
-    // is on). This mirrors `fallbackGenerated`'s optionRows/countRows split
-    // so the explicit and generated paths behave consistently.
+    // If options are explicitly provided, we still need to respect limitToFilteredRows
     if (options && options.length > 0) {
-      if (!column) return options
-
-      // Fast path: no narrowing needed and no counts to compute — normalize
-      // `count` to undefined so output shape is consistent with the fallback
-      // path, which also strips counts when `showCounts` is false.
-      if (!limitToFilteredRows && !showCounts) {
-        return options.map(opt => ({ ...opt, count: undefined }))
-      }
-
-      const optionRows = limitToFilteredRows
-        ? getFilteredRowsExcludingColumn(
-            table,
-            coreRows,
-            accessorKey,
-            columnFilters,
-            globalFilter,
-          )
-        : coreRows
-
-      const countRows = dynamicCounts
-        ? getFilteredRowsExcludingColumn(
-            table,
-            coreRows,
-            accessorKey,
-            columnFilters,
-            globalFilter,
-          )
-        : coreRows
-
-      // Build availableOptions only when narrowing is needed
-      const availableOptions = limitToFilteredRows ? new Set<string>() : null
-      if (availableOptions) {
-        optionRows.forEach(row => {
+      if (limitToFilteredRows && column) {
+        // Filter options to only include those that exist in the relevant rows
+        // We reuse fallbackGenerated's logic of getting occurrenceMap from rows
+        const rows = getFilteredRowsExcludingColumn(
+          table,
+          coreRows,
+          accessorKey,
+          columnFilters,
+          globalFilter,
+        )
+        const occurrenceMap = new Map<string, boolean>()
+        rows.forEach(row => {
           const raw = row.getValue(accessorKey) as unknown
           const values: unknown[] = Array.isArray(raw) ? raw : [raw]
           values.forEach(v => {
-            if (v != null) {
-              const s = String(v)
-              if (s) availableOptions.add(s)
-            }
+            if (v != null) occurrenceMap.set(String(v), true)
           })
         })
+        return options.filter(opt => occurrenceMap.has(opt.value))
       }
-
-      // Build counts only when counts are being shown
-      const valueCounts = showCounts ? new Map<string, number>() : null
-      if (valueCounts) {
-        countRows.forEach(row => {
-          const raw = row.getValue(accessorKey) as unknown
-          const values: unknown[] = Array.isArray(raw) ? raw : [raw]
-          values.forEach(v => {
-            if (v != null) {
-              const s = String(v)
-              valueCounts.set(s, (valueCounts.get(s) || 0) + 1)
-            }
-          })
-        })
-      }
-
-      const filtered = availableOptions
-        ? options.filter(opt => availableOptions.has(opt.value))
-        : options
-
-      return filtered.map(opt => ({
-        ...opt,
-        count: valueCounts ? (valueCounts.get(opt.value) ?? 0) : undefined,
-      }))
+      return options
     }
 
     return generatedFromMeta.length ? generatedFromMeta : fallbackGenerated
@@ -294,8 +244,6 @@ function useFacetedOptions<TData>({
     generatedFromMeta,
     fallbackGenerated,
     limitToFilteredRows,
-    dynamicCounts,
-    showCounts,
     column,
     coreRows,
     table,
