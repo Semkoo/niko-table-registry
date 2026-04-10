@@ -45,7 +45,7 @@ type DataTableFacetedFilterProps<TData, TValue> = Omit<
    * If true, only show options that exist in the currently filtered table rows.
    * If false, show all options from the entire dataset (useful for multi-select filters
    * where you want to see all possible options even if they're not in the current filtered results).
-   * @default true
+   * @default !multiple (true for single-select, false for multi-select)
    */
   limitToFilteredRows?: boolean
 }
@@ -94,6 +94,9 @@ function useFacetedOptions<TData>({
   options,
   showCounts = true,
   dynamicCounts = true,
+  // Default matches the base `useGeneratedOptions` hook so the auto-generated
+  // path and the fallback path agree on what `undefined` means. Callers that
+  // want the `!multiple` behavior must resolve it before calling this hook.
   limitToFilteredRows = true,
 }: {
   table: Table<TData>
@@ -138,7 +141,18 @@ function useFacetedOptions<TData>({
     // limitToFilteredRows controls whether to generate options from filtered rows (true) or all rows (false)
     // When generating options, we exclude the current column's filter so we see all options
     // that exist in the filtered dataset (from other filters)
-    const rows = limitToFilteredRows
+    const optionRows = limitToFilteredRows
+      ? getFilteredRowsExcludingColumn(
+          table,
+          coreRows,
+          accessorKey,
+          columnFilters,
+          globalFilter,
+        )
+      : coreRows
+
+    // dynamicCounts controls whether counts are relative to other filters (true) or total (false)
+    const countRows = dynamicCounts
       ? getFilteredRowsExcludingColumn(
           table,
           coreRows,
@@ -150,28 +164,46 @@ function useFacetedOptions<TData>({
 
     const valueCounts = new Map<string, number>()
 
-    rows.forEach(row => {
+    // Determine the set of available options from optionRows
+    const availableOptions = new Set<string>()
+    optionRows.forEach(row => {
       const raw = row.getValue(accessorKey) as unknown
       const values: unknown[] = Array.isArray(raw) ? raw : [raw]
       values.forEach(v => {
-        if (v == null) return
-        const s = String(v)
-        if (!s) return
-        valueCounts.set(s, (valueCounts.get(s) || 0) + 1)
+        if (v != null) {
+          const s = String(v)
+          if (s) availableOptions.add(s)
+        }
       })
     })
 
-    return Array.from(valueCounts.entries())
-      .map(([value, count]) => ({
+    // Calculate counts from countRows (only for available options)
+    countRows.forEach(row => {
+      const raw = row.getValue(accessorKey) as unknown
+      const values: unknown[] = Array.isArray(raw) ? raw : [raw]
+      values.forEach(v => {
+        if (v != null) {
+          const s = String(v)
+          if (availableOptions.has(s)) {
+            valueCounts.set(s, (valueCounts.get(s) || 0) + 1)
+          }
+        }
+      })
+    })
+
+    // Return options with counts (ensuring all available options are present even if count is 0)
+    return Array.from(availableOptions)
+      .map(value => ({
         label: autoOptionsFormat ? formatLabel(value) : value,
         value,
-        count: showCounts ? count : undefined,
+        count: showCounts ? valueCounts.get(value) || 0 : undefined,
       }))
       .sort((a, b) => a.label.localeCompare(b.label))
   }, [
     accessorKey,
     column,
     limitToFilteredRows,
+    dynamicCounts,
     showCounts,
     coreRows,
     table,
@@ -228,12 +260,15 @@ export function DataTableFacetedFilter<TData, TValue = unknown>({
   options,
   showCounts = true,
   dynamicCounts = true,
-  limitToFilteredRows = true,
+  limitToFilteredRows,
   title,
   multiple,
   trigger,
   ...props
 }: DataTableFacetedFilterProps<TData, TValue>) {
+  // Default: multi-select shows all options, single-select filters to visible rows
+  limitToFilteredRows ??= !multiple
+
   const { table } = useDataTable<TData>()
   const column = table.getColumn(accessorKey as string)
 
@@ -280,11 +315,14 @@ export function DataTableFacetedFilterContent<TData, TValue = unknown>({
   options,
   showCounts = true,
   dynamicCounts = true,
-  limitToFilteredRows = true,
+  limitToFilteredRows,
   title,
   multiple,
   onValueChange,
 }: DataTableFacetedFilterProps<TData, TValue>) {
+  // Default: multi-select shows all options, single-select filters to visible rows
+  limitToFilteredRows ??= !multiple
+
   const { table } = useDataTable<TData>()
   const column = table.getColumn(accessorKey as string)
   const derivedTitle = useDerivedColumnTitle(column, String(accessorKey), title)
