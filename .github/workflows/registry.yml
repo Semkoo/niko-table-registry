@@ -18,8 +18,9 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          # Astro 6 requires Node >= 22.12.0
-          node-version: "22"
+          # Track the current Node LTS automatically. Astro 6 requires
+          # >= 22.12.0; LTS is already past that floor.
+          node-version: "lts/*"
           cache: "pnpm"
 
       - name: Install dependencies
