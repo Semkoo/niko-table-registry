@@ -147,7 +147,8 @@ export function TableColumnFacetedFilterMenu<TData, TValue>({
   options,
   onValueChange,
   multiple,
-  limitToFilteredRows = true,
+  limitToFilteredRows,
+  dynamicCounts = true,
   ...props
 }: Omit<
   React.ComponentProps<typeof TableFacetedFilter>,
@@ -160,17 +161,25 @@ export function TableColumnFacetedFilterMenu<TData, TValue>({
   /**
    * If true, only show options that exist in the currently filtered rows.
    * If false, show all options from the entire dataset.
-   * @default true
+   * @default !multiple (true for single-select, false for multi-select)
    */
   limitToFilteredRows?: boolean
+  /**
+   * Whether to update counts based on other active filters.
+   * @default true
+   */
+  dynamicCounts?: boolean
 }) {
+  // Default: multi-select shows all options, single-select filters to visible rows
+  limitToFilteredRows ??= !multiple
+
   const derivedTitle = useDerivedColumnTitle(column, column.id, title)
 
   // Auto-generate options from column meta (works for select/multi_select variants)
   const generatedOptions = useGeneratedOptionsForColumn(
     table as Table<TData>,
     column.id,
-    { limitToFilteredRows },
+    { limitToFilteredRows, dynamicCounts },
   )
 
   /**
@@ -191,18 +200,40 @@ export function TableColumnFacetedFilterMenu<TData, TValue>({
       (meta as Record<string, unknown>)?.autoOptionsFormat ?? true
     const showCounts = (meta as Record<string, unknown>)?.showCounts ?? true
 
-    const rows = limitToFilteredRows ? filteredRows : coreRows
-    if (!rows) return []
+    // optionRows used for the list of options
+    const optionRows = limitToFilteredRows ? filteredRows : coreRows
+
+    // countRows used for the counts
+    const countRows = dynamicCounts ? filteredRows : coreRows
+
+    if (!optionRows || !countRows) return []
+
     const valueCounts = new Map<string, number>()
 
-    rows.forEach(row => {
+    // Determine the set of available options
+    const availableOptions = new Set<string>()
+    optionRows.forEach(row => {
       const raw = row.getValue(column.id) as unknown
       const values: unknown[] = Array.isArray(raw) ? raw : [raw]
       values.forEach(v => {
-        if (v == null) return
-        const s = String(v)
-        if (!s) return
-        valueCounts.set(s, (valueCounts.get(s) || 0) + 1)
+        if (v != null) {
+          const s = String(v)
+          if (s) availableOptions.add(s)
+        }
+      })
+    })
+
+    // Calculate counts for available options
+    countRows.forEach(row => {
+      const raw = row.getValue(column.id) as unknown
+      const values: unknown[] = Array.isArray(raw) ? raw : [raw]
+      values.forEach(v => {
+        if (v != null) {
+          const s = String(v)
+          if (availableOptions.has(s)) {
+            valueCounts.set(s, (valueCounts.get(s) || 0) + 1)
+          }
+        }
       })
     })
 
@@ -215,24 +246,35 @@ export function TableColumnFacetedFilterMenu<TData, TValue>({
       | undefined
 
     if (metaOptions && metaOptions.length > 0 && mergeStrategy === "augment") {
-      return metaOptions.map(opt => ({
-        ...opt,
-        count: showCounts ? (valueCounts.get(opt.value) ?? 0) : undefined,
-      }))
+      return metaOptions
+        .filter(opt => !limitToFilteredRows || availableOptions.has(opt.value))
+        .map(opt => ({
+          ...opt,
+          count: showCounts ? (valueCounts.get(opt.value) ?? 0) : undefined,
+        }))
     }
 
     if (metaOptions && metaOptions.length > 0) {
-      return metaOptions
+      return limitToFilteredRows
+        ? metaOptions.filter(opt => availableOptions.has(opt.value))
+        : metaOptions
     }
 
-    return Array.from(valueCounts.entries())
-      .map(([value, count]) => ({
+    return Array.from(availableOptions)
+      .map(value => ({
         label: autoOptionsFormat ? formatLabel(value) : value,
         value,
-        count: showCounts ? count : undefined,
+        count: showCounts ? valueCounts.get(value) || 0 : undefined,
       }))
       .sort((a, b) => a.label.localeCompare(b.label))
-  }, [table, column, limitToFilteredRows, coreRows, filteredRows])
+  }, [
+    table,
+    column,
+    limitToFilteredRows,
+    dynamicCounts,
+    coreRows,
+    filteredRows,
+  ])
 
   const resolvedOptions =
     options ??

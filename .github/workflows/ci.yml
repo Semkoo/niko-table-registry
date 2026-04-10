@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Cancel superseded runs on the same ref — saves minutes on force-push / rebase.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: test · lint · build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          # Track the current Node LTS automatically so we don't have to
+          # bump this file each release cycle. Astro 6 requires >= 22.12.0;
+          # LTS has already crossed that floor, and the next LTS will too.
+          node-version: "lts/*"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Unit tests (vitest)
+        run: pnpm test
+
+      - name: Lint (eslint, non-fix)
+        # `pnpm lint` in this repo runs `eslint --fix`, which is the wrong
+        # shape for CI — CI should fail, not rewrite files. Invoke eslint
+        # directly without --fix so a lint regression breaks the build.
+        run: pnpm exec eslint .
+
+      - name: Build (astro check · shadcn build · astro build)
+        run: pnpm build
