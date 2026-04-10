@@ -72,10 +72,16 @@ export function useGeneratedOptions<TData>(
    * column definitions change (e.g., updated `meta.options` from server-side facets),
    * this memo recomputes. The `table` reference alone is stable across renders
    * and would cause stale column data.
+   *
+   * ESLINT: `react-hooks/exhaustive-deps` flags `table.options.columns` as an
+   * "unnecessary dependency" because the callback body doesn't read it directly.
+   * That is technically correct and semantically wrong — the dep is load-bearing
+   * for reactivity (see REACTIVITY above). Suppressing the rule on this memo only.
    */
 
   const columns = React.useMemo(
     () => table.getAllColumns(),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [table, table.options.columns],
   )
 
