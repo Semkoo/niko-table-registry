@@ -73,10 +73,12 @@ const columns: DataTableColumnDef<Product>[] = [
       <DataTableColumnHeader>
         <DataTableColumnTitle />
         <DataTableColumnSortMenu variant={FILTER_VARIANTS.TEXT} />
-        <DataTableColumnFacetedFilterMenu
-          multiple
-          limitToFilteredRows={false}
-        />
+        {/*
+         * Multi-select relies on the new `!multiple` default: `limitToFilteredRows`
+         * resolves to `false` automatically, so the full option universe stays
+         * visible as the user selects/deselects values. No explicit prop needed.
+         */}
+        <DataTableColumnFacetedFilterMenu multiple />
       </DataTableColumnHeader>
     ),
     meta: {
