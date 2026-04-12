@@ -33,6 +33,15 @@ import { DataTableViewMenu } from "@/components/niko-table/components/data-table
 import { FILTER_VARIANTS } from "@/components/niko-table/lib/constants"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import { PackageSearch, SearchX } from "lucide-react"
 
 // Example data type
@@ -126,6 +135,14 @@ export default function InfiniteScrollTableStateExample() {
       setIsFetching(false)
     }
   }, [isFetching, hasMore, loaded.length])
+
+  const resetAllState = React.useCallback(() => {
+    setGlobalFilter("")
+    setSorting([])
+    setColumnFilters([])
+    setColumnVisibility({})
+    setPagination({ pageIndex: 0, pageSize: 500 })
+  }, [])
 
   const columns: DataTableColumnDef<Product>[] = React.useMemo(
     () => [
@@ -280,34 +297,63 @@ export default function InfiniteScrollTableStateExample() {
         </div>
       </DataTableRoot>
 
-      {/* State inspector — mirror the virtualization-table-state example */}
-      <div className="rounded-lg border p-4">
-        <h3 className="mb-2 text-sm font-semibold">Table State</h3>
-        <div className="grid grid-cols-2 gap-4 text-xs text-muted-foreground sm:grid-cols-4">
-          <div>
-            <div className="font-medium text-foreground">Loaded rows</div>
-            <div>{loaded.length}</div>
-          </div>
-          <div>
-            <div className="font-medium text-foreground">Sorting</div>
-            <div>
-              {sorting.length ? sorting.map(s => s.id).join(", ") : "—"}
+      {/* State Display for demonstration */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Current Table State</CardTitle>
+          <CardDescription>
+            Live view of the current table state for demonstration purposes
+          </CardDescription>
+          <CardAction>
+            <Button variant="outline" size="sm" onClick={resetAllState}>
+              Reset All State
+            </Button>
+          </CardAction>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-2 text-xs text-muted-foreground">
+            <div className="flex justify-between">
+              <span className="font-medium">Search Query:</span>
+              <span className="text-foreground">
+                {typeof globalFilter === "string" && globalFilter.length > 0
+                  ? globalFilter
+                  : "None"}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="font-medium">Total Items:</span>
+              <span className="text-foreground">{TOTAL_POOL.length}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="font-medium">Loaded Rows:</span>
+              <span className="text-foreground">{loaded.length}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="font-medium">Sorting:</span>
+              <span className="text-foreground">
+                {sorting.length > 0
+                  ? sorting
+                      .map(s => `${s.id} ${s.desc ? "desc" : "asc"}`)
+                      .join(", ")
+                  : "None"}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="font-medium">Column Filters:</span>
+              <span className="text-foreground">
+                {columnFilters.length || "None"}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="font-medium">Hidden Columns:</span>
+              <span className="text-foreground">
+                {Object.values(columnVisibility).filter(v => v === false)
+                  .length || "None"}
+              </span>
             </div>
           </div>
-          <div>
-            <div className="font-medium text-foreground">Column filters</div>
-            <div>{columnFilters.length || "—"}</div>
-          </div>
-          <div>
-            <div className="font-medium text-foreground">Search</div>
-            <div>
-              {typeof globalFilter === "string" && globalFilter.length > 0
-                ? globalFilter
-                : "—"}
-            </div>
-          </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }
