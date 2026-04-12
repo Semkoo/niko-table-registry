@@ -7,6 +7,8 @@ import type {
   SortingState,
   ColumnFiltersState,
   VisibilityState,
+  ExpandedState,
+  ColumnPinningState,
 } from "@tanstack/react-table"
 import { DataTableRoot } from "@/components/niko-table/core/data-table-root"
 import { DataTable } from "@/components/niko-table/core/data-table"
@@ -146,6 +148,11 @@ export default function InfiniteScrollVirtualizedTableStateExample() {
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
+  const [expanded, setExpanded] = useState<ExpandedState>({})
+  const [columnPinning, setColumnPinning] = useState<ColumnPinningState>({
+    left: [],
+    right: [],
+  })
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 5000,
@@ -181,6 +188,8 @@ export default function InfiniteScrollVirtualizedTableStateExample() {
     setSorting([])
     setColumnFilters([])
     setColumnVisibility({})
+    setExpanded({})
+    setColumnPinning({ left: [], right: [] })
     setPagination({ pageIndex: 0, pageSize: 5000 })
   }, [])
 
@@ -311,6 +320,8 @@ export default function InfiniteScrollVirtualizedTableStateExample() {
           sorting,
           columnFilters,
           columnVisibility,
+          expanded,
+          columnPinning,
           pagination,
         }}
         onGlobalFilterChange={value => {
@@ -323,6 +334,8 @@ export default function InfiniteScrollVirtualizedTableStateExample() {
           setPagination(prev => ({ ...prev, pageIndex: 0 }))
         }}
         onColumnVisibilityChange={setColumnVisibility}
+        onExpandedChange={setExpanded}
+        onColumnPinningChange={setColumnPinning}
         onPaginationChange={setPagination}
       >
         <DataTableToolbarSection>
@@ -378,9 +391,10 @@ export default function InfiniteScrollVirtualizedTableStateExample() {
       {/* State Display for demonstration */}
       <Card>
         <CardHeader>
-          <CardTitle>Current Table State</CardTitle>
+          <CardTitle>Infinite Scroll Virtualized Table State</CardTitle>
           <CardDescription>
-            Live view of the current table state for demonstration purposes
+            Live view of the controlled table state with{" "}
+            {TOTAL_POOL.length.toLocaleString()} total products
           </CardDescription>
           <CardAction>
             <Button variant="outline" size="sm" onClick={resetAllState}>
@@ -388,24 +402,45 @@ export default function InfiniteScrollVirtualizedTableStateExample() {
             </Button>
           </CardAction>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
           <div className="grid gap-2 text-xs text-muted-foreground">
             <div className="flex justify-between">
               <span className="font-medium">Search Query:</span>
               <span className="text-foreground">
-                {typeof globalFilter === "string" && globalFilter.length > 0
-                  ? globalFilter
-                  : "None"}
+                {typeof globalFilter === "string"
+                  ? globalFilter || "None"
+                  : "Mixed Filters"}
               </span>
             </div>
+
             <div className="flex justify-between">
               <span className="font-medium">Total Items:</span>
-              <span className="text-foreground">{TOTAL_POOL.length}</span>
+              <span className="text-foreground">
+                {TOTAL_POOL.length.toLocaleString()}
+              </span>
             </div>
+
             <div className="flex justify-between">
               <span className="font-medium">Loaded Rows:</span>
-              <span className="text-foreground">{loaded.length}</span>
+              <span className="text-foreground">
+                {loaded.length.toLocaleString()}
+              </span>
             </div>
+
+            <div className="flex justify-between">
+              <span className="font-medium">Active Filters:</span>
+              <span className="text-foreground">
+                {columnFilters.length || "0 (Search Only)"}
+              </span>
+            </div>
+
+            <div className="flex justify-between">
+              <span className="font-medium">Expanded Rows:</span>
+              <span className="text-foreground">
+                {Object.keys(expanded).length}
+              </span>
+            </div>
+
             <div className="flex justify-between">
               <span className="font-medium">Sorting:</span>
               <span className="text-foreground">
@@ -416,20 +451,71 @@ export default function InfiniteScrollVirtualizedTableStateExample() {
                   : "None"}
               </span>
             </div>
+
             <div className="flex justify-between">
-              <span className="font-medium">Column Filters:</span>
+              <span className="font-medium">Page:</span>
               <span className="text-foreground">
-                {columnFilters.length || "None"}
+                {pagination.pageIndex + 1} (Size: {pagination.pageSize})
               </span>
             </div>
+
             <div className="flex justify-between">
               <span className="font-medium">Hidden Columns:</span>
               <span className="text-foreground">
-                {Object.values(columnVisibility).filter(v => v === false)
-                  .length || "None"}
+                {
+                  Object.values(columnVisibility).filter(v => v === false)
+                    .length
+                }
+              </span>
+            </div>
+
+            <div className="flex justify-between">
+              <span className="font-medium">Pinned Columns:</span>
+              <span className="text-foreground">
+                {columnPinning.left?.length || 0} Left,{" "}
+                {columnPinning.right?.length || 0} Right
               </span>
             </div>
           </div>
+
+          {/* Detailed state (collapsible) */}
+          <details className="border-t pt-4">
+            <summary className="cursor-pointer text-xs font-medium hover:text-foreground">
+              View Full State Object
+            </summary>
+            <div className="mt-4 space-y-3 text-xs">
+              <div>
+                <strong>Sorting:</strong>
+                <pre className="mt-1 overflow-auto rounded bg-muted p-2">
+                  {JSON.stringify(sorting, null, 2)}
+                </pre>
+              </div>
+              <div>
+                <strong>Expanded Rows:</strong>
+                <pre className="mt-1 overflow-auto rounded bg-muted p-2">
+                  {JSON.stringify(expanded, null, 2)}
+                </pre>
+              </div>
+              <div>
+                <strong>Pagination:</strong>
+                <pre className="mt-1 overflow-auto rounded bg-muted p-2">
+                  {JSON.stringify(pagination, null, 2)}
+                </pre>
+              </div>
+              <div>
+                <strong>Column Visibility:</strong>
+                <pre className="mt-1 overflow-auto rounded bg-muted p-2">
+                  {JSON.stringify(columnVisibility, null, 2)}
+                </pre>
+              </div>
+              <div>
+                <strong>Column Pinning:</strong>
+                <pre className="mt-1 overflow-auto rounded bg-muted p-2">
+                  {JSON.stringify(columnPinning, null, 2)}
+                </pre>
+              </div>
+            </div>
+          </details>
         </CardContent>
       </Card>
     </div>
