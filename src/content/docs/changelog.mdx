@@ -14,6 +14,10 @@ description: Latest updates and release notes for Niko Table.
 
 - **`onNearEnd` + `prefetchThreshold` on `DataTableVirtualizedBody`** — Virtualizer-index-driven prefetch trigger for infinite scroll. Fires when the last rendered virtual row is within `prefetchThreshold` rows (default 10) of the end of the dataset. Strictly better than `onScrolledBottom` for infinite scroll — catches fast scrolls, scrollbar drag, `scrollToIndex()` jumps, and initial renders where data doesn't fill the viewport. Called at most once per false→true transition.
 
+### Performance & Layout
+
+- **Virtualized table — native `<table>` layout with measure-and-lock column sizing** — Replaced `display: block/flex` on virtualized table rows and cells with native table layout. The browser's table layout algorithm now distributes column widths based on content. `DataTableVirtualizedBody` uses a `useLayoutEffect` to measure each `<th>`'s computed width after first data render, then locks the table to `table-layout: fixed` so columns stay stable during virtual scroll. The effect runs every render but the fast path (already locked, same column count) is two ref reads — negligible at 60 fps. Column visibility changes (toggle, reorder) trigger a fresh measurement cycle. Spacer rows use `<tr><td colSpan={n}>` to stay within the table layout context. All child components (`DataTableVirtualizedEmptyBody`, `DataTableVirtualizedSkeleton`, `DataTableVirtualizedLoading`, `DataTableVirtualizedLoadingMore`) updated to match.
+
 ### Bug Fixes
 
 - **Scroll listener — `onScrolledBottom` / `onScrolledTop` silently dead** — In all four body components (`DataTableBody`, `DataTableVirtualizedBody`, and both virtualized DnD bodies), the scroll-listener effect early-returned on `!onScroll`, which meant `onScrolledBottom` / `onScrolledTop` callbacks were never wired unless the consumer also passed `onScroll`. The listener now attaches whenever any of the three callbacks is provided, and `onScroll` is invoked conditionally.
