@@ -5,6 +5,14 @@ description: Latest updates and release notes for Niko Table.
 
 ## April 2026
 
+### Bug Fixes
+
+- **Virtualized table — column spacing no longer compresses on wide datasets** — `DataTableVirtualizedBody`'s column-lock `useLayoutEffect` now sets `tableEl.style.minWidth` to the sum of all visible `column.getSize()` values before measuring column widths. Without this, the `w-full` style on `<table>` forced the element to fit its scroll container, causing the auto-layout algorithm to distribute compressed widths and lock them in permanently. Setting `minWidth` lets the table expand beyond the container width so `overflow-auto` on the container handles horizontal scrolling, while auto-layout distributes space based on actual content. The `minWidth` is cleared on every unlock/reset cycle so toggling column visibility re-measures correctly. Explicit `size` values on column defs are respected — they raise the `minWidth` floor proportionally.
+
+### Examples
+
+- **All product-based examples enriched with four new columns** — `brand` (text), `rating` (1–5 with ★), `revenue` (price × stock, formatted with `toLocaleString`), and `releaseDate` (`toLocaleDateString`) added to all eight product example files: `basic`, `basic-state`, `infinite-scroll-table`, `infinite-scroll-table-state`, `infinite-scroll-virtualized-table`, `infinite-scroll-virtualized-table-state`, `virtualization-table`, and `virtualization-table-state`. The four infinite-scroll files use index-based deterministic generation (no `Math.random`) so the values are stable across SSR and client hydration. The two virtualization files retain `Math.random` for variety, consistent with their existing approach. The two state-variant files also gain a **Brand** `DataTableFacetedFilter` in the toolbar alongside the existing Status filter.
+
 ### New Components
 
 - **`DataTableLoadingMore`** — Composable "loading more" row for infinite-scroll standard tables. Self-gates on its `isFetching` prop — renders a spinner + label when true, nothing when false. Drop it as a child of `DataTableBody` alongside `DataTableSkeleton` and `DataTableEmptyBody`.
