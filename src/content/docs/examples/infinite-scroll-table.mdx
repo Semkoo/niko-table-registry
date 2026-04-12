@@ -13,6 +13,12 @@ import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-c
   <CodePreview demo="niko-table/infinite-scroll-table-state" />
 </CollapsiblePreview>
 
+:::caution[Prefer the virtualized variant]
+For most infinite-scroll use cases, use the [Infinite Scroll Virtualized Table](/examples/infinite-scroll-virtualized-table/) instead. The non-virtualized version renders **every loaded row to the DOM** — after a few hundred pages, you'll have thousands of DOM nodes and the browser will start to struggle. The virtualized variant only renders visible rows regardless of how many are loaded, so performance stays constant.
+
+Use this non-virtualized version only when your total dataset is small (under ~200 rows) or you have a specific reason to avoid virtualization (e.g. variable row heights that don't work well with `estimateSize`).
+:::
+
 ## Introduction
 
 The Infinite Scroll Table loads additional rows on demand as the user scrolls toward the bottom of the table — the standard UX for cursor-paginated APIs, activity feeds, and long product lists where loading everything upfront would be wasteful.
@@ -222,12 +228,13 @@ const loadMore = React.useCallback(async () => {
 
 ## When to Use
 
-**✅ Use Infinite Scroll Table when:**
+**✅ Use this non-virtualized variant when:**
 
-- Your API is paginated (cursor-based or offset-based)
-- The full dataset is too large to fetch upfront
-- You want a feed-style UX (social feeds, activity logs, search results)
-- Users don't need random access to arbitrary pages
+- Your total dataset is small (under ~200 rows) and virtualization is overkill
+- You need variable row heights that don't work well with `estimateSize`
+- You want the simplest possible setup with no `@tanstack/react-virtual` dependency
+
+**⚠️ For most infinite-scroll use cases, prefer the [Infinite Scroll Virtualized Table](/examples/infinite-scroll-virtualized-table/) instead.** It renders only visible rows regardless of how many are loaded, so performance stays constant even after accumulating thousands of rows.
 
 **❌ Don't use Infinite Scroll Table when:**
 
