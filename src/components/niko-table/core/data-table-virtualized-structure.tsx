@@ -196,6 +196,7 @@ export function DataTableVirtualizedBody<TData>({
       const tableEl = tbody?.closest<HTMLTableElement>('[data-slot="table"]')
       if (tableEl) {
         tableEl.style.tableLayout = ""
+        tableEl.style.minWidth = ""
         tableEl
           .querySelectorAll<HTMLTableCellElement>(
             "thead [data-slot='table-head']",
@@ -226,9 +227,20 @@ export function DataTableVirtualizedBody<TData>({
     )
     if (ths.length === 0) return
 
+    // Force the table to be at least as wide as the sum of all column
+    // sizes before measuring. Without this, `w-full` on <TableComponent>
+    // constrains the table to the scroll container's width and the
+    // auto-layout distributes compressed widths that then get locked in.
+    // Setting minWidth lets the table expand naturally so each column
+    // gets the space it needs, and the container scrolls horizontally.
+    const totalDesiredWidth = table
+      .getVisibleLeafColumns()
+      .reduce((sum, col) => sum + col.getSize(), 0)
+    tableEl.style.minWidth = `${totalDesiredWidth}px`
+
     // Measure auto-computed widths, then scale proportionally so they
-    // sum to exactly the container width — eliminates the subpixel
-    // rounding gap that `table-layout: fixed` + raw pixel widths leaves.
+    // sum to exactly the table's width (which is now at least
+    // totalDesiredWidth) — eliminates subpixel rounding gaps.
     const rawWidths: number[] = []
     ths.forEach(th => rawWidths.push(th.getBoundingClientRect().width))
 

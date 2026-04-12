@@ -55,9 +55,13 @@ interface Product {
   id: string
   name: string
   category: string
+  brand: string
   price: number
   stock: number
+  rating: number
+  revenue: number
   status: "in-stock" | "low-stock" | "out-of-stock"
+  releaseDate: Date
 }
 
 // Deterministic generator — see infinite-scroll-table.tsx for the
@@ -73,6 +77,17 @@ const CATEGORIES = [
   "Beauty",
 ] as const
 
+const BRANDS = [
+  "Apple",
+  "Samsung",
+  "Nike",
+  "Adidas",
+  "Sony",
+  "LG",
+  "Dell",
+  "HP",
+] as const
+
 function generateMockProducts(count: number): Product[] {
   return Array.from({ length: count }, (_, i) => {
     const stock = (i * 37) % 150
@@ -81,10 +96,14 @@ function generateMockProducts(count: number): Product[] {
       id: `product-${i + 1}`,
       name: `Product ${i + 1}`,
       category: CATEGORIES[i % CATEGORIES.length],
+      brand: BRANDS[i % BRANDS.length],
       price,
       stock,
+      rating: ((i * 7) % 5) + 1,
+      revenue: price * stock,
       status:
         stock === 0 ? "out-of-stock" : stock < 20 ? "low-stock" : "in-stock",
+      releaseDate: new Date(2024, (i * 3) % 12, ((i * 7) % 28) + 1),
     }
   })
 }
@@ -93,6 +112,17 @@ const statusOptions = [
   { label: "In Stock", value: "in-stock" },
   { label: "Low Stock", value: "low-stock" },
   { label: "Out of Stock", value: "out-of-stock" },
+]
+
+const brandOptions = [
+  { label: "Apple", value: "Apple" },
+  { label: "Samsung", value: "Samsung" },
+  { label: "Nike", value: "Nike" },
+  { label: "Adidas", value: "Adidas" },
+  { label: "Sony", value: "Sony" },
+  { label: "LG", value: "LG" },
+  { label: "Dell", value: "Dell" },
+  { label: "HP", value: "HP" },
 ]
 
 // Expanded content component for product details
@@ -301,6 +331,62 @@ export default function InfiniteScrollVirtualizedTableStateExample() {
           return value.includes(row.getValue(id))
         },
       },
+      {
+        accessorKey: "brand",
+        header: () => (
+          <DataTableColumnHeader>
+            <DataTableColumnTitle title="Brand" />
+            <DataTableColumnSortMenu variant={FILTER_VARIANTS.TEXT} />
+          </DataTableColumnHeader>
+        ),
+        cell: ({ row }) => (
+          <div className="capitalize">{row.getValue("brand")}</div>
+        ),
+      },
+      {
+        accessorKey: "rating",
+        header: () => (
+          <DataTableColumnHeader>
+            <DataTableColumnTitle title="Rating" />
+            <DataTableColumnSortMenu variant={FILTER_VARIANTS.NUMBER} />
+          </DataTableColumnHeader>
+        ),
+        cell: ({ row }) => {
+          const rating = row.getValue("rating") as number
+          return (
+            <div className="flex items-center gap-1">
+              <span>{rating}</span>
+              <span className="text-yellow-500">★</span>
+            </div>
+          )
+        },
+      },
+      {
+        accessorKey: "revenue",
+        header: () => (
+          <DataTableColumnHeader>
+            <DataTableColumnTitle title="Revenue" />
+            <DataTableColumnSortMenu variant={FILTER_VARIANTS.NUMBER} />
+          </DataTableColumnHeader>
+        ),
+        cell: ({ row }) => {
+          const revenue = row.getValue("revenue") as number
+          return <div className="font-mono">${revenue.toLocaleString()}</div>
+        },
+      },
+      {
+        accessorKey: "releaseDate",
+        header: () => (
+          <DataTableColumnHeader>
+            <DataTableColumnTitle title="Release Date" />
+            <DataTableColumnSortMenu />
+          </DataTableColumnHeader>
+        ),
+        cell: ({ row }) => {
+          const date = row.getValue("releaseDate") as Date
+          return <span>{date.toLocaleDateString()}</span>
+        },
+      },
     ],
     [],
   )
@@ -344,6 +430,11 @@ export default function InfiniteScrollVirtualizedTableStateExample() {
             accessorKey="status"
             title="Status"
             options={statusOptions}
+          />
+          <DataTableFacetedFilter
+            accessorKey="brand"
+            title="Brand"
+            options={brandOptions}
           />
           <DataTableViewMenu />
         </DataTableToolbarSection>
