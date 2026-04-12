@@ -57,9 +57,13 @@ interface Product {
   id: string
   name: string
   category: string
+  brand: string
   price: number
   stock: number
+  rating: number
+  revenue: number
   status: "in-stock" | "low-stock" | "out-of-stock"
+  releaseDate: Date
 }
 
 // Generate large dataset for virtualization demo
@@ -74,17 +78,36 @@ const generateLargeData = (count: number): Product[] => {
     "Toys",
     "Beauty",
   ]
+  const brands = [
+    "Apple",
+    "Samsung",
+    "Nike",
+    "Adidas",
+    "Sony",
+    "LG",
+    "Dell",
+    "HP",
+  ]
 
   return Array.from({ length: count }, (_, i) => {
     const stock = Math.floor(Math.random() * 150)
+    const price = Math.floor(Math.random() * 500) + 10
     return {
       id: `product-${i + 1}`,
       name: `Product ${i + 1}`,
       category: categories[Math.floor(Math.random() * categories.length)],
-      price: Math.floor(Math.random() * 500) + 10,
+      brand: brands[Math.floor(Math.random() * brands.length)],
+      price,
       stock,
+      rating: Math.floor(Math.random() * 5) + 1,
+      revenue: price * stock,
       status:
         stock === 0 ? "out-of-stock" : stock < 20 ? "low-stock" : "in-stock",
+      releaseDate: new Date(
+        2024,
+        Math.floor(Math.random() * 12),
+        Math.floor(Math.random() * 28) + 1,
+      ),
     }
   })
 }
@@ -247,6 +270,62 @@ export default function VirtualizedTableStateExample() {
         },
         filterFn: (row, id, value: string[]) => {
           return value.includes(row.getValue(id))
+        },
+      },
+      {
+        accessorKey: "brand",
+        header: () => (
+          <DataTableColumnHeader>
+            <DataTableColumnTitle title="Brand" />
+            <DataTableColumnSortMenu variant={FILTER_VARIANTS.TEXT} />
+          </DataTableColumnHeader>
+        ),
+        cell: ({ row }) => (
+          <div className="capitalize">{row.getValue("brand")}</div>
+        ),
+      },
+      {
+        accessorKey: "rating",
+        header: () => (
+          <DataTableColumnHeader>
+            <DataTableColumnTitle title="Rating" />
+            <DataTableColumnSortMenu variant={FILTER_VARIANTS.NUMBER} />
+          </DataTableColumnHeader>
+        ),
+        cell: ({ row }) => {
+          const rating = row.getValue("rating") as number
+          return (
+            <div className="flex items-center gap-1">
+              <span>{rating}</span>
+              <span className="text-yellow-500">★</span>
+            </div>
+          )
+        },
+      },
+      {
+        accessorKey: "revenue",
+        header: () => (
+          <DataTableColumnHeader>
+            <DataTableColumnTitle title="Revenue" />
+            <DataTableColumnSortMenu variant={FILTER_VARIANTS.NUMBER} />
+          </DataTableColumnHeader>
+        ),
+        cell: ({ row }) => {
+          const revenue = row.getValue("revenue") as number
+          return <div className="font-mono">${revenue.toLocaleString()}</div>
+        },
+      },
+      {
+        accessorKey: "releaseDate",
+        header: () => (
+          <DataTableColumnHeader>
+            <DataTableColumnTitle title="Release Date" />
+            <DataTableColumnSortMenu />
+          </DataTableColumnHeader>
+        ),
+        cell: ({ row }) => {
+          const date = row.getValue("releaseDate") as Date
+          return <span>{date.toLocaleDateString()}</span>
         },
       },
     ],
