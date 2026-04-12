@@ -5,6 +5,25 @@ description: Latest updates and release notes for Niko Table.
 
 ## April 2026
 
+### New Components
+
+- **`DataTableLoadingMore`** — Composable "loading more" row for infinite-scroll standard tables. Self-gates on its `isFetching` prop — renders a spinner + label when true, nothing when false. Drop it as a child of `DataTableBody` alongside `DataTableSkeleton` and `DataTableEmptyBody`.
+- **`DataTableVirtualizedLoadingMore`** — Virtualized variant. Sits outside the virtualizer's row count so it doesn't affect `estimateSize` math.
+
+### New Features
+
+- **`onNearEnd` + `prefetchThreshold` on `DataTableVirtualizedBody`** — Virtualizer-index-driven prefetch trigger for infinite scroll. Fires when the last rendered virtual row is within `prefetchThreshold` rows (default 10) of the end of the dataset. Strictly better than `onScrolledBottom` for infinite scroll — catches fast scrolls, scrollbar drag, `scrollToIndex()` jumps, and initial renders where data doesn't fill the viewport. Called at most once per false→true transition.
+
+### Bug Fixes
+
+- **Scroll listener — `onScrolledBottom` / `onScrolledTop` silently dead** — In all four body components (`DataTableBody`, `DataTableVirtualizedBody`, and both virtualized DnD bodies), the scroll-listener effect early-returned on `!onScroll`, which meant `onScrolledBottom` / `onScrolledTop` callbacks were never wired unless the consumer also passed `onScroll`. The listener now attaches whenever any of the three callbacks is provided, and `onScroll` is invoked conditionally.
+
+### Documentation
+
+- **Infinite Scroll Table** — New example page with full implementation guide for non-virtualized infinite scroll (500-row mock, `onScrolledBottom` + `DataTableLoadingMore`). Includes a caution callout recommending the virtualized variant for most use cases.
+- **Infinite Scroll Virtualized Table** — New example page for virtualized infinite scroll (5,000-row mock, `onNearEnd` + `DataTableVirtualizedLoadingMore`). Includes comparison table of `onNearEnd` vs `onScrolledBottom`, TanStack Query wiring pattern, and controlled-state variant.
+- **Core overview** — Added `DataTableLoadingMore`, `DataTableVirtualizedLoadingMore`, `onNearEnd`, and `prefetchThreshold` to the component and props reference.
+
 ### Bug Fixes
 
 - **Faceted filter — `dynamicCounts` silently ignored in key paths** — The prop was accepted on `DataTableFacetedFilter` and `useFacetedOptions` but the fallback `useMemo` and the auto-generated branch of `useGeneratedOptions` both computed counts from the wrong row set. Setting `dynamicCounts: false` while keeping `limitToFilteredRows: true` had no effect. Counts now come from `countSourceRows` in every branch, and the `useMemo` deps include `dynamicCounts` so React recomputes when it changes.
