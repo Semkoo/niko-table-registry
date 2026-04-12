@@ -186,7 +186,14 @@ export function DataTableVirtualizedDndBody<TData>({
   )
 
   React.useEffect(() => {
-    if (!scrollElement || !onScroll) return
+    // Skip if the scroll container hasn't attached yet, OR if no
+    // scroll-related callback is wired. Previously the early return
+    // required `onScroll` specifically, so `onScrolledBottom` /
+    // `onScrolledTop` were silently dead unless the consumer also
+    // passed `onScroll` — the listener never attached. Now we attach
+    // whenever *any* of the three callbacks is provided.
+    if (!scrollElement) return
+    if (!onScroll && !onScrolledTop && !onScrolledBottom) return
 
     const handleScroll = (event: Event) => {
       const element = event.currentTarget as HTMLDivElement
@@ -199,7 +206,7 @@ export function DataTableVirtualizedDndBody<TData>({
           ? (scrollTop / (scrollHeight - clientHeight)) * 100
           : 0
 
-      onScroll({
+      onScroll?.({
         scrollTop,
         scrollHeight,
         clientHeight,
@@ -217,6 +224,8 @@ export function DataTableVirtualizedDndBody<TData>({
   }, [
     scrollElement,
     onScroll,
+    onScrolledTop,
+    onScrolledBottom,
     handleScrollTop,
     handleScrollBottom,
     scrollThreshold,
@@ -497,7 +506,14 @@ export function DataTableVirtualizedDndColumnBody<TData>({
   }, [onScrolledBottom])
 
   React.useEffect(() => {
-    if (!scrollElement || !onScroll) return
+    // Skip if the scroll container hasn't attached yet, OR if no
+    // scroll-related callback is wired. Previously the early return
+    // required `onScroll` specifically, so `onScrolledBottom` /
+    // `onScrolledTop` were silently dead unless the consumer also
+    // passed `onScroll` — the listener never attached. Now we attach
+    // whenever *any* of the three callbacks is provided.
+    if (!scrollElement) return
+    if (!onScroll && !onScrolledTop && !onScrolledBottom) return
 
     const handleScroll = (event: Event) => {
       const element = event.currentTarget as HTMLDivElement
@@ -510,7 +526,7 @@ export function DataTableVirtualizedDndColumnBody<TData>({
           ? (scrollTop / (scrollHeight - clientHeight)) * 100
           : 0
 
-      onScroll({
+      onScroll?.({
         scrollTop,
         scrollHeight,
         clientHeight,
@@ -528,6 +544,8 @@ export function DataTableVirtualizedDndColumnBody<TData>({
   }, [
     scrollElement,
     onScroll,
+    onScrolledTop,
+    onScrolledBottom,
     handleScrollTop,
     handleScrollBottom,
     scrollThreshold,

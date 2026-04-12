@@ -117,6 +117,29 @@ export interface DataTableVirtualizedBodyProps<TData> {
   onScrolledTop?: () => void
   onScrolledBottom?: () => void
   scrollThreshold?: number
+  /**
+   * Fires when the last rendered virtual row is within
+   * `prefetchThreshold` rows of the end of the dataset. Intended
+   * as a prefetch trigger for infinite-scroll — pair it with
+   * `fetchNextPage()` so the next page starts loading *before* the
+   * user reaches the bottom. Called at most once per transition into
+   * the near-end zone (not every frame) so consumers can wire it
+   * directly without worrying about double-fires.
+   *
+   * Strictly better than `onScrolledBottom` for virtualized infinite
+   * scroll because it's virtualizer-index-driven (not scroll-event-
+   * driven), so it also catches: fast scrolls via scrollbar drag,
+   * programmatic `scrollToIndex()` jumps, and initial renders where
+   * the table isn't tall enough to require scrolling.
+   */
+  onNearEnd?: () => void
+  /**
+   * How many rows from the end of the dataset to trigger
+   * `onNearEnd`. Default `10` — fires when the user is rendering
+   * the last 10 loaded rows. Tune higher for more aggressive
+   * prefetching (pre-fetch earlier), lower for more conservative.
+   */
+  prefetchThreshold?: number
   onRowClick?: (
     row: TData,
     event: React.MouseEvent<HTMLTableRowElement>,
@@ -133,6 +156,8 @@ export function DataTableVirtualizedBody<TData>({
   onScrolledTop,
   onScrolledBottom,
   scrollThreshold = 50,
+  onNearEnd,
+  prefetchThreshold = 10,
 }: DataTableVirtualizedBodyProps<TData>) {
   const { table } = useDataTable()
   const { rows } = table.getRowModel()
@@ -238,7 +263,14 @@ export function DataTableVirtualizedBody<TData>({
    * WHAT: Adds scroll listener with { passive: true } flag.
    */
   React.useEffect(() => {
-    if (!scrollElement || !onScroll) return
+    // Skip if the scroll container hasn't attached yet, OR if no
+    // scroll-related callback is wired. Previously the early return
+    // required `onScroll` specifically, so `onScrolledBottom` /
+    // `onScrolledTop` were silently dead unless the consumer also
+    // passed `onScroll` — the listener never attached. Now we attach
+    // whenever *any* of the three callbacks is provided.
+    if (!scrollElement) return
+    if (!onScroll && !onScrolledTop && !onScrolledBottom) return
 
     const handleScroll = (event: Event) => {
       const element = event.currentTarget as HTMLDivElement
@@ -251,7 +283,7 @@ export function DataTableVirtualizedBody<TData>({
           ? (scrollTop / (scrollHeight - clientHeight)) * 100
           : 0
 
-      onScroll({
+      onScroll?.({
         scrollTop,
         scrollHeight,
         clientHeight,
@@ -270,6 +302,8 @@ export function DataTableVirtualizedBody<TData>({
   }, [
     scrollElement,
     onScroll,
+    onScrolledTop,
+    onScrolledBottom,
     handleScrollTop,
     handleScrollBottom,
     scrollThreshold,
@@ -286,6 +320,34 @@ export function DataTableVirtualizedBody<TData>({
   const bottomSpacerHeight = lastItem
     ? rowVirtualizer.getTotalSize() - lastItem.end
     : 0
+
+  /**
+   * Prefetch trigger — fires `onNearEnd` when the last rendered
+   * virtual row is within `prefetchThreshold` rows of the end of
+   * the dataset. This is virtualizer-index-driven (not scroll-event-
+   * driven) so it catches fast scrolls, scrollbar-drag jumps,
+   * `scrollToIndex()` calls, and initial renders where the first
+   * page doesn't fill the viewport.
+   *
+   * Only fires on the false→true transition (tracked via ref) so
+   * consumers can wire it directly without double-fire guards.
+   * Consumer still needs to check `hasNextPage && !isFetching` —
+   * we only de-duplicate the render-driven fires, not the stateful
+   * "should we fetch right now" decision.
+   */
+  const isNearEnd =
+    onNearEnd !== undefined &&
+    rows.length > 0 &&
+    lastItem !== null &&
+    lastItem.index >= rows.length - 1 - prefetchThreshold
+
+  const wasNearEndRef = React.useRef(false)
+  React.useEffect(() => {
+    if (isNearEnd && !wasNearEndRef.current) {
+      onNearEnd?.()
+    }
+    wasNearEndRef.current = isNearEnd
+  }, [isNearEnd, onNearEnd])
 
   return (
     <TableBody
@@ -606,3 +668,81 @@ export function DataTableVirtualizedLoading({
 }
 
 DataTableVirtualizedLoading.displayName = "DataTableVirtualizedLoading"
+
+// ============================================================================
+// DataTableVirtualizedLoadingMore
+// ============================================================================
+
+export interface DataTableVirtualizedLoadingMoreProps {
+  /**
+   * Whether a next-page fetch is currently in flight. Typically wired
+   * to a library state like TanStack Query's `isFetchingNextPage`,
+   * SWR's `isValidating`, or a plain `useState` flag. When false, this
+   * component renders nothing.
+   */
+  isFetching: boolean
+  /**
+   * Optional custom content. Defaults to a spinner + "Loading more..."
+   * label. Pass children to customize per-table (e.g. "Loading more
+   * products...").
+   */
+  children?: React.ReactNode
+  colSpan?: number
+  className?: string
+}
+
+/**
+ * Virtualized variant of `DataTableLoadingMore`. Composable "loading
+ * more" row for infinite-scroll virtualized tables. Renders at the end
+ * of the body when `isFetching` is true, and nothing when false.
+ *
+ * Sits OUTSIDE the virtualizer's row count (it's a plain child of
+ * `TableBody`, not a virtual row), so it does not affect `estimateSize`
+ * math. Designed to be dropped as a child of
+ * `DataTableVirtualizedBody` alongside `DataTableVirtualizedSkeleton`
+ * and `DataTableVirtualizedEmptyBody`.
+ *
+ * @example
+ * <DataTableVirtualizedBody
+ *   onScrolledBottom={() => {
+ *     if (hasMore && !isFetching) void loadMore()
+ *   }}
+ * >
+ *   <DataTableVirtualizedSkeleton rows={5} />
+ *   <DataTableVirtualizedEmptyBody>No results</DataTableVirtualizedEmptyBody>
+ *   <DataTableVirtualizedLoadingMore isFetching={isFetching}>
+ *     Loading more products...
+ *   </DataTableVirtualizedLoadingMore>
+ * </DataTableVirtualizedBody>
+ */
+export function DataTableVirtualizedLoadingMore({
+  isFetching,
+  children,
+  colSpan,
+  className,
+}: DataTableVirtualizedLoadingMoreProps) {
+  const { columns } = useDataTable()
+
+  // Self-gating — nothing to render when no fetch is in flight.
+  if (!isFetching) return null
+
+  return (
+    <TableRow className="flex w-full" data-slot="datatable-loading-more-row">
+      <TableCell
+        colSpan={colSpan ?? columns.length}
+        className={cn(
+          "flex w-full items-center justify-center gap-2 py-3 text-xs text-muted-foreground",
+          className,
+        )}
+      >
+        <span
+          className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-primary border-t-transparent"
+          aria-hidden="true"
+        />
+        <span>{children ?? "Loading more..."}</span>
+      </TableCell>
+    </TableRow>
+  )
+}
+
+DataTableVirtualizedLoadingMore.displayName = "DataTableVirtualizedLoadingMore"
