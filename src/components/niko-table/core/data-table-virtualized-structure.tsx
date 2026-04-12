@@ -58,43 +58,26 @@ export const DataTableVirtualizedHeader = React.memo(
 
     return (
       <TableHeader
-        className={cn(
-          "block",
-          sticky && "sticky top-0 z-30 bg-background",
-          // Ensure border is visible when sticky using pseudo-element
-          className,
-        )}
+        className={cn(sticky && "sticky top-0 z-30 bg-background", className)}
       >
         {headerGroups.map(headerGroup => (
-          <TableRow key={headerGroup.id} className="flex w-full border-b">
-            {headerGroup.headers.map(header => {
-              const size = header.column.columnDef.size
-              const headerStyle = {
-                width: size ? `${size}px` : undefined,
-                ...getCommonPinningStyles(header.column, true),
-              }
-
-              return (
-                <TableHead
-                  key={header.id}
-                  className={cn(
-                    size ? "shrink-0" : "min-w-0 flex-1",
-                    "flex items-center",
-                    header.column.getIsPinned() && "bg-background",
-                  )}
-                  style={headerStyle}
-                >
-                  {header.isPlaceholder ? null : (
-                    <DataTableColumnHeaderRoot column={header.column}>
-                      {flexRender(
-                        header.column.columnDef.header,
-                        header.getContext(),
-                      )}
-                    </DataTableColumnHeaderRoot>
-                  )}
-                </TableHead>
-              )
-            })}
+          <TableRow key={headerGroup.id}>
+            {headerGroup.headers.map(header => (
+              <TableHead
+                key={header.id}
+                className={cn(header.column.getIsPinned() && "bg-background")}
+                style={getCommonPinningStyles(header.column, true)}
+              >
+                {header.isPlaceholder ? null : (
+                  <DataTableColumnHeaderRoot column={header.column}>
+                    {flexRender(
+                      header.column.columnDef.header,
+                      header.getContext(),
+                    )}
+                  </DataTableColumnHeaderRoot>
+                )}
+              </TableHead>
+            ))}
           </TableRow>
         ))}
       </TableHeader>
@@ -163,9 +146,11 @@ export function DataTableVirtualizedBody<TData>({
   const { rows } = table.getRowModel()
   const [scrollElement, setScrollElement] =
     React.useState<HTMLDivElement | null>(null)
+  const tbodyRef = React.useRef<HTMLTableSectionElement | null>(null)
 
   const parentRef = React.useCallback(
     (node: HTMLTableSectionElement | null) => {
+      tbodyRef.current = node
       if (node !== null) {
         const container = node.closest(
           '[data-slot="table-container"]',
@@ -176,17 +161,97 @@ export function DataTableVirtualizedBody<TData>({
     [],
   )
 
+  /**
+   * STABILITY: Lock column widths after browser auto-sizing
+   *
+   * WHY: With `table-layout: auto`, the browser recalculates column widths
+   * based on currently visible content. During virtual scroll the visible rows
+   * change constantly, causing headers to shift as different content influences
+   * the auto-computed widths.
+   *
+   * HOW: Once the virtualizer has rendered data cells into the DOM, measure
+   * each <th>'s auto-computed width via getBoundingClientRect, apply those
+   * widths as inline styles, then switch the <table> to `table-layout: fixed`.
+   * Uses useLayoutEffect (runs after DOM commit, before paint) so there is no
+   * visual flash of the auto→fixed transition.
+   *
+   * IMPACT: Headers stay perfectly aligned during scroll. The effect runs on
+   * every render but returns instantly when already locked — the guard is two
+   * ref reads (~nanoseconds), negligible even at 60 fps during active scroll.
+   * Re-measures automatically when column visibility changes.
+   */
+  const columnLockRef = React.useRef(false)
+  const lockedColumnCountRef = React.useRef(0)
+
+  React.useLayoutEffect(() => {
+    const currentColCount = table.getVisibleLeafColumns().length
+
+    // Reset lock when column visibility changes (toggle columns on/off)
+    if (
+      columnLockRef.current &&
+      lockedColumnCountRef.current !== currentColCount
+    ) {
+      columnLockRef.current = false
+      const tbody = tbodyRef.current
+      const tableEl = tbody?.closest<HTMLTableElement>('[data-slot="table"]')
+      if (tableEl) {
+        tableEl.style.tableLayout = ""
+        tableEl
+          .querySelectorAll<HTMLTableCellElement>(
+            "thead [data-slot='table-head']",
+          )
+          .forEach(th => {
+            th.style.width = ""
+          })
+      }
+    }
+
+    // Fast path — already locked, skip all DOM queries
+    if (columnLockRef.current) return
+
+    const tbody = tbodyRef.current
+    if (!tbody || rows.length === 0 || !scrollElement) return
+
+    // Verify data cells are rendered — the virtualizer may need an
+    // extra render cycle after observing the scroll container before
+    // it produces virtual items. Without this check we'd measure
+    // header-only widths which are far too narrow.
+    if (!tbody.querySelector("[data-slot='table-cell']")) return
+
+    const tableEl = tbody.closest<HTMLTableElement>('[data-slot="table"]')
+    if (!tableEl) return
+
+    const ths = tableEl.querySelectorAll<HTMLTableCellElement>(
+      "thead [data-slot='table-head']",
+    )
+    if (ths.length === 0) return
+
+    // Measure auto-computed widths, then scale proportionally so they
+    // sum to exactly the container width — eliminates the subpixel
+    // rounding gap that `table-layout: fixed` + raw pixel widths leaves.
+    const rawWidths: number[] = []
+    ths.forEach(th => rawWidths.push(th.getBoundingClientRect().width))
+
+    const measuredSum = rawWidths.reduce((a, b) => a + b, 0)
+    const containerWidth = tableEl.getBoundingClientRect().width
+    const scale =
+      containerWidth > 0 && measuredSum > 0 ? containerWidth / measuredSum : 1
+
+    ths.forEach((th, i) => {
+      th.style.width = `${(rawWidths[i] ?? 0) * scale}px`
+    })
+    tableEl.style.tableLayout = "fixed"
+
+    columnLockRef.current = true
+    lockedColumnCountRef.current = currentColCount
+  })
+
   const rowVirtualizer = useVirtualizer({
     count: rows.length,
     getScrollElement: () => scrollElement,
     estimateSize: () => estimateSize,
     overscan,
     enabled: !!scrollElement,
-    measureElement:
-      typeof window !== "undefined" &&
-      navigator.userAgent.indexOf("Firefox") === -1
-        ? element => element?.getBoundingClientRect().height
-        : undefined,
   })
 
   /**
@@ -208,47 +273,6 @@ export function DataTableVirtualizedBody<TData>({
   const handleScrollBottom = React.useCallback(() => {
     onScrolledBottom?.()
   }, [onScrolledBottom])
-
-  /**
-   * PERFORMANCE: Single row-click handler with event delegation (useCallback)
-   *
-   * WHY: Avoids creating one inline arrow function per visible row on every render.
-   *
-   * WHAT: One stable callback; delegates from TableBody, reads data-row-index,
-   * skips interactive elements, then calls onRowClick(row, event).
-   */
-  const handleRowClick = React.useCallback(
-    (event: React.MouseEvent<HTMLTableSectionElement>) => {
-      if (!onRowClick) return
-      const target = event.target as HTMLElement
-      const rowElement = target.closest("tr[data-row-index]")
-      if (!rowElement) return
-
-      const isInteractiveElement =
-        target.closest("button") ||
-        target.closest("input") ||
-        target.closest("a") ||
-        target.closest('[role="button"]') ||
-        target.closest('[role="checkbox"]') ||
-        target.closest("[data-radix-collection-item]") ||
-        target.closest('[data-slot="checkbox"]') ||
-        target.tagName === "INPUT" ||
-        target.tagName === "BUTTON" ||
-        target.tagName === "A"
-      if (isInteractiveElement) return
-
-      const rowIndexAttr = rowElement.getAttribute("data-row-index")
-      if (rowIndexAttr === null) return
-      const index = parseInt(rowIndexAttr, 10)
-      if (Number.isNaN(index) || index < 0 || index >= rows.length) return
-      const row = rows[index]
-      onRowClick(
-        row.original as TData,
-        event as unknown as React.MouseEvent<HTMLTableRowElement>,
-      )
-    },
-    [onRowClick, rows],
-  )
 
   /**
    * PERFORMANCE: Use passive event listener for smoother scrolling
@@ -349,23 +373,64 @@ export function DataTableVirtualizedBody<TData>({
     wasNearEndRef.current = isNearEnd
   }, [isNearEnd, onNearEnd])
 
+  /**
+   * PERFORMANCE: Single stable click handler for all rows
+   *
+   * WHY: Inline onClick closures create a new function per row per render.
+   * With 20+ visible rows at 60fps during scroll, that's hundreds of
+   * allocations per second. A single stable handler reads the row from
+   * the DOM data attribute + table row model at click time.
+   */
+  const handleRowClick = React.useCallback(
+    (event: React.MouseEvent<HTMLTableRowElement>) => {
+      if (!onRowClick) return
+      const target = event.target as HTMLElement
+      if (
+        target.closest("button") ||
+        target.closest("input") ||
+        target.closest("a") ||
+        target.closest('[role="button"]') ||
+        target.closest('[role="checkbox"]') ||
+        target.closest("[data-radix-collection-item]") ||
+        target.closest('[data-slot="checkbox"]') ||
+        target.tagName === "INPUT" ||
+        target.tagName === "BUTTON" ||
+        target.tagName === "A"
+      )
+        return
+
+      const rowIndex = event.currentTarget.dataset.rowIndex
+      if (rowIndex == null) return
+      const row = rows[Number(rowIndex)]
+      if (row) {
+        onRowClick(row.original as TData, event)
+      }
+    },
+    [onRowClick, rows],
+  )
+
+  const visibleColumnCount = table.getVisibleLeafColumns().length
+
   return (
-    <TableBody
-      ref={parentRef}
-      className={cn("block", className)}
-      onClick={onRowClick ? handleRowClick : undefined}
-    >
-      {/* Top spacer for virtual scrolling offset */}
+    <TableBody ref={parentRef} className={cn(className)}>
+      {/* Top spacer — colSpan keeps it within native table layout */}
       {topSpacerHeight > 0 && (
-        <TableRow
-          style={{ height: `${topSpacerHeight}px`, display: "block" }}
-        />
+        <tr aria-hidden>
+          <td
+            colSpan={visibleColumnCount}
+            style={{
+              height: `${topSpacerHeight}px`,
+              padding: 0,
+              border: "none",
+            }}
+          />
+        </tr>
       )}
 
       {/* Render visible rows */}
       {virtualItems.map(virtualRow => {
         const row = rows[virtualRow.index]
-        const isClickable = !!onRowClick
+        if (!row) return null
         const isExpanded = row.getIsExpanded()
 
         // Find column with expandedContent meta
@@ -374,30 +439,20 @@ export function DataTableVirtualizedBody<TData>({
           .find(cell => cell.column.columnDef.meta?.expandedContent)
 
         return (
-          <React.Fragment key={`${row.id}-${isExpanded}`}>
+          <React.Fragment key={row.id}>
             {/* Main data row */}
             <TableRow
-              ref={node => {
-                // Measure element for dynamic height when expanded/collapsed
-                if (node) {
-                  // TableRow ref provides HTMLTableRowElement
-                  rowVirtualizer.measureElement(node)
-                }
-              }}
               data-index={virtualRow.index}
               data-row-index={row?.index}
               data-row-id={row?.id}
               data-state={row.getIsSelected() && "selected"}
-              className={cn(
-                "group flex w-full",
-                isClickable && "cursor-pointer",
-              )}
+              onClick={handleRowClick}
+              className={cn("group", onRowClick && "cursor-pointer")}
             >
               {row.getVisibleCells().map(cell => {
                 const size = cell.column.columnDef.size
                 const cellStyle = {
                   width: size ? `${size}px` : undefined,
-                  minHeight: `${estimateSize}px`,
                   ...getCommonPinningStyles(cell.column, false),
                 }
 
@@ -405,8 +460,6 @@ export function DataTableVirtualizedBody<TData>({
                   <TableCell
                     key={cell.id}
                     className={cn(
-                      size ? "shrink-0" : "min-w-0 flex-1",
-                      "flex items-center",
                       cell.column.getIsPinned() &&
                         "bg-background group-hover:bg-muted/50 group-data-[state=selected]:bg-muted",
                     )}
@@ -420,10 +473,10 @@ export function DataTableVirtualizedBody<TData>({
 
             {/* Expanded content row */}
             {isExpanded && expandColumn && (
-              <TableRow className="flex w-full">
+              <TableRow>
                 <TableCell
                   colSpan={row.getVisibleCells().length}
-                  className="w-full p-0"
+                  className="p-0"
                 >
                   {expandColumn.column.columnDef.meta?.expandedContent?.(
                     row.original,
@@ -435,14 +488,26 @@ export function DataTableVirtualizedBody<TData>({
         )
       })}
 
-      {/* Bottom spacer for remaining virtual height */}
+      {/* Bottom spacer */}
       {bottomSpacerHeight > 0 && (
-        <TableRow
-          style={{ height: `${bottomSpacerHeight}px`, display: "block" }}
-        />
+        <tr aria-hidden>
+          <td
+            colSpan={visibleColumnCount}
+            style={{
+              height: `${bottomSpacerHeight}px`,
+              padding: 0,
+              border: "none",
+            }}
+          />
+        </tr>
       )}
 
-      {/* Empty state and other children */}
+      {/*
+        Composable children — Skeleton, EmptyBody, LoadingMore, and
+        any other data-table body states are rendered here. Each
+        self-gates on its own visibility, so the consumer just drops
+        them in without needing conditional JSX.
+      */}
       {children}
     </TableBody>
   )
@@ -462,7 +527,6 @@ export interface DataTableVirtualizedEmptyBodyProps {
 
 /**
  * Empty state component specifically for virtualized tables.
- * Uses flex layout to properly center content in virtualized table bodies.
  * Use composition pattern with DataTableEmpty* components for full customization.
  *
  * @example
@@ -523,10 +587,10 @@ export function DataTableVirtualizedEmptyBody({
   if (isLoading || rowCount > 0) return null
 
   return (
-    <TableRow className="flex w-full">
+    <TableRow>
       <TableCell
         colSpan={colSpan ?? columns.length}
-        className={cn("flex w-full items-center justify-center", className)}
+        className={cn("text-center", className)}
       >
         <DataTableEmptyState isFiltered={isFiltered}>
           {children}
@@ -550,11 +614,6 @@ export interface DataTableVirtualizedSkeletonProps {
    * @recommendation Set this to match your visible viewport for better UX
    */
   rows?: number
-  /**
-   * Estimated row height (should match estimateSize prop of DataTableVirtualizedBody).
-   * @default 34
-   */
-  estimateSize?: number
   className?: string
   cellClassName?: string
   skeletonClassName?: string
@@ -563,7 +622,6 @@ export interface DataTableVirtualizedSkeletonProps {
 export function DataTableVirtualizedSkeleton({
   children,
   rows = 5,
-  estimateSize = 34,
   className,
   cellClassName,
   skeletonClassName,
@@ -579,13 +637,10 @@ export function DataTableVirtualizedSkeleton({
   // If custom children provided, show single row with custom content
   if (children) {
     return (
-      <TableRow className="flex w-full">
+      <TableRow>
         <TableCell
           colSpan={visibleColumns.length}
-          className={cn(
-            "flex h-24 w-full items-center justify-center",
-            className,
-          )}
+          className={cn("h-24 text-center", className)}
         >
           {children}
         </TableCell>
@@ -597,21 +652,15 @@ export function DataTableVirtualizedSkeleton({
   return (
     <>
       {Array.from({ length: rows }).map((_, rowIndex) => (
-        <TableRow key={rowIndex} className="flex w-full">
+        <TableRow key={rowIndex}>
           {visibleColumns.map((column, colIndex) => {
             const size = column.columnDef.size
-            const cellStyle = size
-              ? { width: `${size}px`, minHeight: `${estimateSize}px` }
-              : { minHeight: `${estimateSize}px` }
+            const cellStyle = size ? { width: `${size}px` } : undefined
 
             return (
               <TableCell
                 key={colIndex}
-                className={cn(
-                  size ? "" : "w-full",
-                  "flex items-center",
-                  cellClassName,
-                )}
+                className={cn(cellClassName)}
                 style={cellStyle}
               >
                 <Skeleton className={cn("h-4 w-full", skeletonClassName)} />
@@ -638,7 +687,6 @@ export interface DataTableVirtualizedLoadingProps {
 
 /**
  * Loading state component specifically for virtualized tables.
- * Uses flex layout to properly center content in virtualized table bodies.
  */
 export function DataTableVirtualizedLoading({
   children,
@@ -651,10 +699,10 @@ export function DataTableVirtualizedLoading({
   if (!isLoading) return null
 
   return (
-    <TableRow className="flex w-full">
+    <TableRow>
       <TableCell
         colSpan={colSpan ?? columns.length}
-        className={className ?? "flex h-24 w-full items-center justify-center"}
+        className={className ?? "h-24 text-center"}
       >
         {children ?? (
           <div className="flex items-center justify-center gap-2">
@@ -727,19 +775,21 @@ export function DataTableVirtualizedLoadingMore({
   if (!isFetching) return null
 
   return (
-    <TableRow className="flex w-full" data-slot="datatable-loading-more-row">
+    <TableRow data-slot="datatable-loading-more-row">
       <TableCell
         colSpan={colSpan ?? columns.length}
         className={cn(
-          "flex w-full items-center justify-center gap-2 py-3 text-xs text-muted-foreground",
+          "py-3 text-center text-xs text-muted-foreground",
           className,
         )}
       >
-        <span
-          className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-primary border-t-transparent"
-          aria-hidden="true"
-        />
-        <span>{children ?? "Loading more..."}</span>
+        <span className="inline-flex items-center justify-center gap-2">
+          <span
+            className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-primary border-t-transparent"
+            aria-hidden="true"
+          />
+          <span>{children ?? "Loading more..."}</span>
+        </span>
       </TableCell>
     </TableRow>
   )
