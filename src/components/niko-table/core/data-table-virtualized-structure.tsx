@@ -170,10 +170,12 @@ export function DataTableVirtualizedBody<TData>({
    * the auto-computed widths.
    *
    * HOW: Once the virtualizer has rendered data cells into the DOM, measure
-   * each <th>'s auto-computed width via getBoundingClientRect, apply those
-   * widths as inline styles, then switch the <table> to `table-layout: fixed`.
-   * Uses useLayoutEffect (runs after DOM commit, before paint) so there is no
-   * visual flash of the auto→fixed transition.
+   * each <th>'s auto-computed width via getBoundingClientRect, enforce each
+   * column's explicit `size` as a minimum (so `size: 180` is never locked
+   * narrower than 180px even when content is short), scale proportionally to
+   * fill the container, apply as inline styles, then switch the <table> to
+   * `table-layout: fixed`. Uses useLayoutEffect (runs after DOM commit,
+   * before paint) so there is no visual flash of the auto→fixed transition.
    *
    * IMPACT: Headers stay perfectly aligned during scroll. The effect runs on
    * every render but returns instantly when already locked — the guard is two
@@ -184,7 +186,8 @@ export function DataTableVirtualizedBody<TData>({
   const lockedColumnCountRef = React.useRef(0)
 
   React.useLayoutEffect(() => {
-    const currentColCount = table.getVisibleLeafColumns().length
+    const leafColumns = table.getVisibleLeafColumns()
+    const currentColCount = leafColumns.length
 
     // Reset lock when column visibility changes (toggle columns on/off)
     if (
@@ -231,26 +234,34 @@ export function DataTableVirtualizedBody<TData>({
     // sizes before measuring. Without this, `w-full` on <TableComponent>
     // constrains the table to the scroll container's width and the
     // auto-layout distributes compressed widths that then get locked in.
-    // Setting minWidth lets the table expand naturally so each column
-    // gets the space it needs, and the container scrolls horizontally.
-    const totalDesiredWidth = table
-      .getVisibleLeafColumns()
-      .reduce((sum, col) => sum + col.getSize(), 0)
+    const totalDesiredWidth = leafColumns.reduce(
+      (sum, col) => sum + col.getSize(),
+      0,
+    )
     tableEl.style.minWidth = `${totalDesiredWidth}px`
 
-    // Measure auto-computed widths, then scale proportionally so they
-    // sum to exactly the table's width (which is now at least
-    // totalDesiredWidth) — eliminates subpixel rounding gaps.
+    // Measure auto-computed widths. Auto-layout naturally gives content-heavy
+    // columns more space than narrow columns — keep that behavior but enforce
+    // each column's explicit `size` as a minimum so a column with `size: 180`
+    // is never locked narrower than 180px even when its visible content is short.
     const rawWidths: number[] = []
     ths.forEach(th => rawWidths.push(th.getBoundingClientRect().width))
 
-    const measuredSum = rawWidths.reduce((a, b) => a + b, 0)
+    const effectiveWidths = rawWidths.map((raw, i) => {
+      const explicitSize = leafColumns[i]?.columnDef.size
+      return explicitSize !== undefined ? Math.max(raw, explicitSize) : raw
+    })
+
+    // Scale proportionally so widths sum to exactly the container width —
+    // eliminates the subpixel rounding gap that `table-layout: fixed` +
+    // raw pixel widths leaves.
+    const effectiveSum = effectiveWidths.reduce((a, b) => a + b, 0)
     const containerWidth = tableEl.getBoundingClientRect().width
     const scale =
-      containerWidth > 0 && measuredSum > 0 ? containerWidth / measuredSum : 1
+      containerWidth > 0 && effectiveSum > 0 ? containerWidth / effectiveSum : 1
 
     ths.forEach((th, i) => {
-      th.style.width = `${(rawWidths[i] ?? 0) * scale}px`
+      th.style.width = `${(effectiveWidths[i] ?? 0) * scale}px`
     })
     tableEl.style.tableLayout = "fixed"
 
@@ -472,6 +483,7 @@ export function DataTableVirtualizedBody<TData>({
                   <TableCell
                     key={cell.id}
                     className={cn(
+                      "overflow-hidden",
                       cell.column.getIsPinned() &&
                         "bg-background group-hover:bg-muted/50 group-data-[state=selected]:bg-muted",
                     )}
@@ -626,6 +638,13 @@ export interface DataTableVirtualizedSkeletonProps {
    * @recommendation Set this to match your visible viewport for better UX
    */
   rows?: number
+  /**
+   * Estimated row height in pixels. Should match the `estimateSize` prop on
+   * `DataTableVirtualizedBody` so skeleton rows are the same height as real
+   * rows and the layout doesn't shift when data arrives.
+   * @default 34
+   */
+  estimateSize?: number
   className?: string
   cellClassName?: string
   skeletonClassName?: string
@@ -634,6 +653,7 @@ export interface DataTableVirtualizedSkeletonProps {
 export function DataTableVirtualizedSkeleton({
   children,
   rows = 5,
+  estimateSize = 34,
   className,
   cellClassName,
   skeletonClassName,
@@ -664,7 +684,7 @@ export function DataTableVirtualizedSkeleton({
   return (
     <>
       {Array.from({ length: rows }).map((_, rowIndex) => (
-        <TableRow key={rowIndex}>
+        <TableRow key={rowIndex} style={{ height: `${estimateSize}px` }}>
           {visibleColumns.map((column, colIndex) => {
             const size = column.columnDef.size
             const cellStyle = size ? { width: `${size}px` } : undefined
