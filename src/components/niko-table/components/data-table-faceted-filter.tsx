@@ -12,8 +12,7 @@ import { useDataTable } from "../core/data-table-context"
 import type { Option } from "../types"
 import { useDerivedColumnTitle } from "../hooks/use-derived-column-title"
 import { useGeneratedOptionsForColumn } from "../hooks/use-generated-options"
-import { formatLabel } from "../lib/format"
-import { getFilteredRowsExcludingColumn } from "../lib/filter-rows"
+import { buildFacetedOptions } from "../lib/build-faceted-options"
 
 type DataTableFacetedFilterProps<TData, TValue> = Omit<
   TableFacetedFilterProps<TData, TValue>,
@@ -84,39 +83,50 @@ type DataTableFacetedFilterProps<TData, TValue> = Omit<
  * />
  */
 
+interface UseFacetedOptionsArgs<TData> {
+  table: Table<TData>
+  accessorKey: string
+  options?: Option[]
+  showCounts: boolean
+  dynamicCounts: boolean
+  limitToFilteredRows: boolean
+}
+
 /**
- * Hook to generate options for faceted filter.
- * Refactored from DataTableFacetedFilter to be reusable.
+ * Resolves the option list surfaced by a faceted filter by choosing between
+ * three sources — in priority order:
+ *
+ *   1. Caller-supplied `options` (static), enriched via `buildFacetedOptions`.
+ *   2. The meta-aware generator (`useGeneratedOptionsForColumn`) for columns
+ *      declared as `select`/`multi_select` variants.
+ *   3. A data-derived fallback via `buildFacetedOptions`, for columns that
+ *      don't declare a select variant but are still being used with a
+ *      faceted filter (boolean/text/etc.).
+ *
+ * The helper is called at most once per render: the selection memo gates it
+ * behind "is this path actually needed?" so we don't walk the row set twice.
  */
 function useFacetedOptions<TData>({
   table,
   accessorKey,
   options,
-  showCounts = true,
-  dynamicCounts = true,
-  // Default matches the base `useGeneratedOptions` hook so the auto-generated
-  // path and the fallback path agree on what `undefined` means. Callers that
-  // want the `!multiple` behavior must resolve it before calling this hook.
-  limitToFilteredRows = true,
-}: {
-  table: Table<TData>
-  accessorKey: string
-  options?: Option[]
-  showCounts?: boolean
-  dynamicCounts?: boolean
-  limitToFilteredRows?: boolean
-}) {
+  showCounts,
+  dynamicCounts,
+  limitToFilteredRows,
+}: UseFacetedOptionsArgs<TData>): Option[] {
   const column = table.getColumn(accessorKey)
 
-  // Prefer shared generator that respects column meta (autoOptions, mergeStrategy, dynamicCounts, showCounts)
-  // limitToFilteredRows controls whether to generate options from filtered rows (true) or all rows (false)
-  const generatedFromMeta = useGeneratedOptionsForColumn(table, accessorKey, {
+  // The meta-aware generator is authoritative for declared select variants —
+  // it handles augment/preserve strategies and per-column meta overrides.
+  // It returns `[]` for columns that don't match a select variant, which is
+  // how we detect "fall back to data-derived options."
+  const metaGenerated = useGeneratedOptionsForColumn(table, accessorKey, {
     showCounts,
     dynamicCounts,
     limitToFilteredRows,
   })
 
-  // Get current filter state for reactivity
+  // Pull state slices for memo reactivity.
   const state = table.getState()
   const columnFilters = state.columnFilters
   const globalFilter = state.globalFilter
@@ -129,182 +139,100 @@ function useFacetedOptions<TData>({
    */
   const coreRows = table.getCoreRowModel().rows
 
-  // Fallback generator that works for any variant (text/boolean/etc.) to preserve
-  // the original behavior of faceted filter for quick categorical filtering.
-  const fallbackGenerated = React.useMemo((): Option[] => {
+  return React.useMemo((): Option[] => {
     if (!column) return []
 
     const meta = column.columnDef.meta
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const autoOptionsFormat = (meta as any)?.autoOptionsFormat ?? true
+    const autoOptionsFormat = meta?.autoOptionsFormat ?? true
 
-    // limitToFilteredRows controls whether to generate options from filtered rows (true) or all rows (false)
-    // When generating options, we exclude the current column's filter so we see all options
-    // that exist in the filtered dataset (from other filters)
-    const optionRows = limitToFilteredRows
-      ? getFilteredRowsExcludingColumn(
-          table,
-          coreRows,
-          accessorKey,
-          columnFilters,
-          globalFilter,
-        )
-      : coreRows
-
-    // dynamicCounts controls whether counts are relative to other filters (true) or total (false)
-    const countRows = dynamicCounts
-      ? getFilteredRowsExcludingColumn(
-          table,
-          coreRows,
-          accessorKey,
-          columnFilters,
-          globalFilter,
-        )
-      : coreRows
-
-    const valueCounts = new Map<string, number>()
-
-    // Determine the set of available options from optionRows
-    const availableOptions = new Set<string>()
-    optionRows.forEach(row => {
-      const raw = row.getValue(accessorKey) as unknown
-      const values: unknown[] = Array.isArray(raw) ? raw : [raw]
-      values.forEach(v => {
-        if (v != null) {
-          const s = String(v)
-          if (s) availableOptions.add(s)
-        }
-      })
-    })
-
-    // Calculate counts from countRows (only for available options)
-    countRows.forEach(row => {
-      const raw = row.getValue(accessorKey) as unknown
-      const values: unknown[] = Array.isArray(raw) ? raw : [raw]
-      values.forEach(v => {
-        if (v != null) {
-          const s = String(v)
-          if (availableOptions.has(s)) {
-            valueCounts.set(s, (valueCounts.get(s) || 0) + 1)
-          }
-        }
-      })
-    })
-
-    // Return options with counts (ensuring all available options are present even if count is 0)
-    return Array.from(availableOptions)
-      .map(value => ({
-        label: autoOptionsFormat ? formatLabel(value) : value,
-        value,
-        count: showCounts ? valueCounts.get(value) || 0 : undefined,
-      }))
-      .sort((a, b) => a.label.localeCompare(b.label))
-  }, [
-    accessorKey,
-    column,
-    limitToFilteredRows,
-    dynamicCounts,
-    showCounts,
-    coreRows,
-    table,
-    columnFilters,
-    globalFilter,
-  ])
-
-  // Final options selection priority: explicit props.options > meta-driven > fallback
-  const dynamicOptions = React.useMemo(() => {
-    // If options are explicitly provided, we still need to enrich them with
-    // live counts (when `showCounts` is on) and optionally narrow them down
-    // to values that exist in the filtered rows (when `limitToFilteredRows`
-    // is on). This mirrors `fallbackGenerated`'s optionRows/countRows split
-    // so the explicit and generated paths behave consistently.
+    // Priority 1: caller-supplied options — always wins over meta/data.
     if (options && options.length > 0) {
-      if (!column) return options
-
-      // Fast path: no narrowing needed and no counts to compute — normalize
-      // `count` to undefined so output shape is consistent with the fallback
-      // path, which also strips counts when `showCounts` is false.
-      if (!limitToFilteredRows && !showCounts) {
-        return options.map(opt => ({ ...opt, count: undefined }))
-      }
-
-      const optionRows = limitToFilteredRows
-        ? getFilteredRowsExcludingColumn(
-            table,
-            coreRows,
-            accessorKey,
-            columnFilters,
-            globalFilter,
-          )
-        : coreRows
-
-      const countRows = dynamicCounts
-        ? getFilteredRowsExcludingColumn(
-            table,
-            coreRows,
-            accessorKey,
-            columnFilters,
-            globalFilter,
-          )
-        : coreRows
-
-      // Build availableOptions only when narrowing is needed
-      const availableOptions = limitToFilteredRows ? new Set<string>() : null
-      if (availableOptions) {
-        optionRows.forEach(row => {
-          const raw = row.getValue(accessorKey) as unknown
-          const values: unknown[] = Array.isArray(raw) ? raw : [raw]
-          values.forEach(v => {
-            if (v != null) {
-              const s = String(v)
-              if (s) availableOptions.add(s)
-            }
-          })
-        })
-      }
-
-      // Build counts only when counts are being shown
-      const valueCounts = showCounts ? new Map<string, number>() : null
-      if (valueCounts) {
-        countRows.forEach(row => {
-          const raw = row.getValue(accessorKey) as unknown
-          const values: unknown[] = Array.isArray(raw) ? raw : [raw]
-          values.forEach(v => {
-            if (v != null) {
-              const s = String(v)
-              valueCounts.set(s, (valueCounts.get(s) || 0) + 1)
-            }
-          })
-        })
-      }
-
-      const filtered = availableOptions
-        ? options.filter(opt => availableOptions.has(opt.value))
-        : options
-
-      return filtered.map(opt => ({
-        ...opt,
-        count: valueCounts ? (valueCounts.get(opt.value) ?? 0) : undefined,
-      }))
+      return buildFacetedOptions(
+        table,
+        coreRows,
+        accessorKey,
+        columnFilters,
+        globalFilter,
+        {
+          staticOptions: options,
+          limitToFilteredRows,
+          dynamicCounts,
+          showCounts,
+          autoOptionsFormat,
+        },
+      )
     }
 
-    return generatedFromMeta.length ? generatedFromMeta : fallbackGenerated
+    // Priority 2: trust the meta-aware generator when it produced anything.
+    // (Preserved original "non-empty result wins" behavior so auto-generated
+    // columns with valid data don't get clobbered by the fallback.)
+    if (metaGenerated.length > 0) return metaGenerated
+
+    // Priority 3: data-derived fallback for non-select variants (or select
+    // variants that had no rows to work with — empty output either way).
+    return buildFacetedOptions(
+      table,
+      coreRows,
+      accessorKey,
+      columnFilters,
+      globalFilter,
+      {
+        limitToFilteredRows,
+        dynamicCounts,
+        showCounts,
+        autoOptionsFormat,
+      },
+    )
   }, [
-    options,
-    generatedFromMeta,
-    fallbackGenerated,
-    limitToFilteredRows,
-    dynamicCounts,
-    showCounts,
     column,
-    coreRows,
+    options,
+    metaGenerated,
     table,
+    coreRows,
     accessorKey,
     columnFilters,
     globalFilter,
+    limitToFilteredRows,
+    dynamicCounts,
+    showCounts,
   ])
+}
 
-  return dynamicOptions
+/**
+ * Shared setup for the two exported wrapper components. Keeps column lookup,
+ * title derivation, and options resolution in one place so the wrappers stay
+ * thin.
+ */
+function useFacetedFilterSetup<TData>({
+  accessorKey,
+  options,
+  showCounts,
+  dynamicCounts,
+  limitToFilteredRows,
+  title,
+}: {
+  accessorKey: string
+  options?: Option[]
+  showCounts: boolean
+  dynamicCounts: boolean
+  limitToFilteredRows: boolean
+  title?: string
+}) {
+  const { table } = useDataTable<TData>()
+  const column = table.getColumn(accessorKey)
+
+  const derivedTitle = useDerivedColumnTitle(column, accessorKey, title)
+
+  const dynamicOptions = useFacetedOptions({
+    table,
+    accessorKey,
+    options,
+    showCounts,
+    dynamicCounts,
+    limitToFilteredRows,
+  })
+
+  return { table, column, derivedTitle, dynamicOptions }
 }
 
 export function DataTableFacetedFilter<TData, TValue = unknown>({
@@ -319,21 +247,18 @@ export function DataTableFacetedFilter<TData, TValue = unknown>({
   ...props
 }: DataTableFacetedFilterProps<TData, TValue>) {
   // Default: multi-select shows all options, single-select filters to visible rows
-  limitToFilteredRows ??= !multiple
+  const resolvedLimitToFilteredRows = limitToFilteredRows ?? !multiple
 
-  const { table } = useDataTable<TData>()
-  const column = table.getColumn(accessorKey as string)
-
-  const derivedTitle = useDerivedColumnTitle(column, String(accessorKey), title)
-
-  const dynamicOptions = useFacetedOptions({
-    table,
-    accessorKey: accessorKey as string,
-    options,
-    showCounts,
-    dynamicCounts,
-    limitToFilteredRows,
-  })
+  const { column, derivedTitle, dynamicOptions } = useFacetedFilterSetup<TData>(
+    {
+      accessorKey: accessorKey as string,
+      options,
+      showCounts,
+      dynamicCounts,
+      limitToFilteredRows: resolvedLimitToFilteredRows,
+      title,
+    },
+  )
 
   // Early return if column not found
   if (!column) {
@@ -373,20 +298,18 @@ export function DataTableFacetedFilterContent<TData, TValue = unknown>({
   onValueChange,
 }: DataTableFacetedFilterProps<TData, TValue>) {
   // Default: multi-select shows all options, single-select filters to visible rows
-  limitToFilteredRows ??= !multiple
+  const resolvedLimitToFilteredRows = limitToFilteredRows ?? !multiple
 
-  const { table } = useDataTable<TData>()
-  const column = table.getColumn(accessorKey as string)
-  const derivedTitle = useDerivedColumnTitle(column, String(accessorKey), title)
-
-  const dynamicOptions = useFacetedOptions({
-    table,
-    accessorKey,
-    options,
-    showCounts,
-    dynamicCounts,
-    limitToFilteredRows,
-  })
+  const { column, derivedTitle, dynamicOptions } = useFacetedFilterSetup<TData>(
+    {
+      accessorKey: accessorKey as string,
+      options,
+      showCounts,
+      dynamicCounts,
+      limitToFilteredRows: resolvedLimitToFilteredRows,
+      title,
+    },
+  )
 
   // Use the shared hook for filter logic
   const { selectedValues, onItemSelect, onReset } = useTableFacetedFilter({

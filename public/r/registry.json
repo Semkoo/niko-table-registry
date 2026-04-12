@@ -353,6 +353,11 @@
           "path": "src/components/niko-table/filters/table-faceted-filter.tsx",
           "type": "registry:component",
           "target": "components/niko-table/filters/table-faceted-filter.tsx"
+        },
+        {
+          "path": "src/components/niko-table/lib/build-faceted-options.ts",
+          "type": "registry:lib",
+          "target": "components/niko-table/lib/build-faceted-options.ts"
         }
       ]
     },
