@@ -27,10 +27,14 @@ import {
   DataTableEmptyTitle,
   DataTableEmptyDescription,
 } from "@/components/niko-table/components/data-table-empty-state"
+import { DataTableFacetedFilter } from "@/components/niko-table/components/data-table-faceted-filter"
 import { DataTableSearchFilter } from "@/components/niko-table/components/data-table-search-filter"
 import { DataTableToolbarSection } from "@/components/niko-table/components/data-table-toolbar-section"
 import { DataTableViewMenu } from "@/components/niko-table/components/data-table-view-menu"
-import { FILTER_VARIANTS } from "@/components/niko-table/lib/constants"
+import {
+  FILTER_VARIANTS,
+  SYSTEM_COLUMN_IDS,
+} from "@/components/niko-table/lib/constants"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -42,7 +46,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { PackageSearch, SearchX } from "lucide-react"
+import { ChevronDown, ChevronRight, PackageSearch, SearchX } from "lucide-react"
 
 // Example data type
 interface Product {
@@ -81,6 +85,42 @@ function generateMockProducts(count: number): Product[] {
         stock === 0 ? "out-of-stock" : stock < 20 ? "low-stock" : "in-stock",
     }
   })
+}
+
+const statusOptions = [
+  { label: "In Stock", value: "in-stock" },
+  { label: "Low Stock", value: "low-stock" },
+  { label: "Out of Stock", value: "out-of-stock" },
+]
+
+// Expanded content component for product details
+function ProductDetails({ product }: { product: Product }) {
+  return (
+    <div className="bg-muted/30 p-4">
+      <h3 className="font-semibold">Product Details</h3>
+      <div className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
+        <div>
+          <div>
+            <span className="text-muted-foreground">ID:</span> {product.id}
+          </div>
+          <div>
+            <span className="text-muted-foreground">Category:</span>{" "}
+            {product.category}
+          </div>
+        </div>
+        <div>
+          <div>
+            <span className="text-muted-foreground">Price:</span> $
+            {product.price.toFixed(2)}
+          </div>
+          <div>
+            <span className="text-muted-foreground">Stock:</span>{" "}
+            {product.stock}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
 }
 
 const TOTAL_POOL = generateMockProducts(5000)
@@ -146,6 +186,35 @@ export default function InfiniteScrollVirtualizedTableStateExample() {
 
   const columns: DataTableColumnDef<Product>[] = React.useMemo(
     () => [
+      {
+        id: SYSTEM_COLUMN_IDS.EXPAND,
+        header: () => null,
+        cell: ({ row }) => {
+          if (!row.getCanExpand()) return null
+          return (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={row.getToggleExpandedHandler()}
+              className="h-6 w-6 p-0 hover:bg-accent"
+            >
+              {row.getIsExpanded() ? (
+                <ChevronDown className="h-3.5 w-3.5" />
+              ) : (
+                <ChevronRight className="h-3.5 w-3.5" />
+              )}
+            </Button>
+          )
+        },
+        size: 50,
+        enableSorting: false,
+        enableHiding: false,
+        meta: {
+          expandedContent: (product: Product) => (
+            <ProductDetails product={product} />
+          ),
+        },
+      },
       {
         accessorKey: "name",
         header: () => (
@@ -233,6 +302,10 @@ export default function InfiniteScrollVirtualizedTableStateExample() {
         data={loaded}
         columns={columns}
         isLoading={isLoading}
+        config={{
+          enableExpanding: true,
+        }}
+        getRowCanExpand={row => row.original.stock > 0}
         state={{
           globalFilter,
           sorting,
@@ -254,6 +327,11 @@ export default function InfiniteScrollVirtualizedTableStateExample() {
       >
         <DataTableToolbarSection>
           <DataTableSearchFilter placeholder="Search products..." />
+          <DataTableFacetedFilter
+            accessorKey="status"
+            title="Status"
+            options={statusOptions}
+          />
           <DataTableViewMenu />
         </DataTableToolbarSection>
         <DataTable height={600} className="rounded-lg border">
