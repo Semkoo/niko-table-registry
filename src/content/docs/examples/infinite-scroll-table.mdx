@@ -1,0 +1,242 @@
+---
+title: Infinite Scroll Table
+description: Load more rows on demand as the user scrolls — perfect for API-backed tables with paginated endpoints.
+---
+
+import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
+import CollapsiblePreview from "@/components/markdown/collapsible-preview.astro"
+import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
+
+<CodePreview demo="niko-table/infinite-scroll-table" />
+
+<CollapsiblePreview>
+  <CodePreview demo="niko-table/infinite-scroll-table-state" />
+</CollapsiblePreview>
+
+## Introduction
+
+The Infinite Scroll Table loads additional rows on demand as the user scrolls toward the bottom of the table — the standard UX for cursor-paginated APIs, activity feeds, and long product lists where loading everything upfront would be wasteful.
+
+Niko Table ships the scroll trigger (`onScrolledBottom` on `DataTableBody`) and the composable "loading more" indicator (`DataTableLoadingMore`) as first-class primitives, so wiring infinite scroll is just: **drop one child into the body, wire one callback, done**.
+
+This example uses a mocked in-memory API with artificial latency so you can see every state — initial skeleton, successive next-page spinner rows, and the end-of-results sentinel — without touching a real backend.
+
+## Installation
+
+Install the DataTable core and add-ons for this example:
+
+<CliCommandCode action="run" command="shadcn@latest add @niko-table/data-table @niko-table/data-table-search-filter @niko-table/data-table-view-menu @niko-table/data-table-column-sort" />
+
+> First time using `@niko-table`? See the [Installation Guide](/getting-started/installation#configure-the-niko-table-registry) to set up the registry.
+
+## Prerequisites
+
+We are going to build a table that paginates through a list of products. Here's what our data looks like:
+
+```tsx showLineNumbers
+type Product = {
+  id: string
+  name: string
+  category: string
+  price: number
+  stock: number
+  status: "in-stock" | "low-stock" | "out-of-stock"
+}
+```
+
+## Implementation
+
+### Deterministic mock data generator
+
+One important constraint when building demos: **don't use `Math.random()` or `Date.now()` in your mock data**. If a consumer copies this file into a Next.js / Remix / RSC app, those non-deterministic calls produce different values on the server render vs the client hydration — and React will log a hydration mismatch on every row. Use index-based deterministic values instead:
+
+```tsx showLineNumbers title="mock-data.ts"
+const CATEGORIES = [
+  "Electronics",
+  "Clothing",
+  "Food",
+  "Books",
+  "Sports",
+  "Home",
+  "Toys",
+  "Beauty",
+] as const
+
+function generateMockProducts(count: number): Product[] {
+  return Array.from({ length: count }, (_, i) => {
+    const stock = (i * 37) % 150
+    const price = ((i * 13) % 490) + 10
+    return {
+      id: `product-${i + 1}`,
+      name: `Product ${i + 1}`,
+      category: CATEGORIES[i % CATEGORIES.length],
+      price,
+      stock,
+      status:
+        stock === 0 ? "out-of-stock" : stock < 20 ? "low-stock" : "in-stock",
+    }
+  })
+}
+
+// The "server" — a 500-item pool we paginate through.
+const TOTAL_POOL = generateMockProducts(500)
+const PAGE_SIZE = 20
+const FAKE_LATENCY_MS = 800
+
+// Simulate a paginated API endpoint.
+function fetchNextPage(offset: number): Promise<Product[]> {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve(TOTAL_POOL.slice(offset, offset + PAGE_SIZE))
+    }, FAKE_LATENCY_MS)
+  })
+}
+```
+
+When you swap this out for a real API call (TanStack Query's `useInfiniteQuery`, SWR's `useSWRInfinite`, tRPC, a plain `fetch`, etc.) the hydration concern disappears — real API data is already stable.
+
+### Pagination state + `loadMore` handler
+
+The component tracks three pieces of state:
+
+- `loaded` — the accumulator of rows fetched so far.
+- `isLoading` — true during the very first fetch (drives `DataTableSkeleton`).
+- `isFetching` — true during any subsequent next-page fetch (drives `DataTableLoadingMore`).
+
+```tsx showLineNumbers
+const [loaded, setLoaded] = React.useState<Product[]>([])
+const [isLoading, setIsLoading] = React.useState(true)
+const [isFetching, setIsFetching] = React.useState(false)
+
+// Derive "is there more to fetch?" from the accumulator size.
+const hasMore = loaded.length < TOTAL_POOL.length
+
+// Kick off the first page on mount.
+React.useEffect(() => {
+  let cancelled = false
+  void fetchNextPage(0).then(page => {
+    if (cancelled) return
+    setLoaded(page)
+    setIsLoading(false)
+  })
+  return () => {
+    cancelled = true
+  }
+}, [])
+
+const loadMore = React.useCallback(async () => {
+  // Double-guard: never fire while a fetch is in flight, never
+  // fire when the pool is exhausted.
+  if (isFetching || !hasMore) return
+  setIsFetching(true)
+  try {
+    const nextPage = await fetchNextPage(loaded.length)
+    setLoaded(prev => [...prev, ...nextPage])
+  } finally {
+    setIsFetching(false)
+  }
+}, [isFetching, hasMore, loaded.length])
+```
+
+### `<DataTableBody />` with `onScrolledBottom` + `<DataTableLoadingMore />`
+
+The magic happens here. `DataTableBody` fires `onScrolledBottom` when the user scrolls within `scrollThreshold` pixels of the bottom. `DataTableLoadingMore` is a composable child that self-gates on its own `isFetching` prop — render it unconditionally, and it appears/disappears as fetches come and go.
+
+```tsx showLineNumbers title="infinite-scroll-table.tsx"
+"use client"
+
+import * as React from "react"
+import { DataTableRoot } from "@/components/niko-table/core/data-table-root"
+import { DataTable } from "@/components/niko-table/core/data-table"
+import {
+  DataTableHeader,
+  DataTableBody,
+  DataTableEmptyBody,
+  DataTableSkeleton,
+  DataTableLoadingMore,
+} from "@/components/niko-table/core/data-table-structure"
+import { DataTableSearchFilter } from "@/components/niko-table/components/data-table-search-filter"
+import { DataTableToolbarSection } from "@/components/niko-table/components/data-table-toolbar-section"
+import { DataTableViewMenu } from "@/components/niko-table/components/data-table-view-menu"
+
+export function InfiniteScrollTable() {
+  // ... state + loadMore from the previous section ...
+
+  return (
+    <DataTableRoot
+      data={loaded}
+      columns={columns}
+      isLoading={isLoading}
+      config={{ initialPageSize: 500 }}
+    >
+      <DataTableToolbarSection>
+        <DataTableSearchFilter placeholder="Search products..." />
+        <DataTableViewMenu />
+      </DataTableToolbarSection>
+
+      <DataTable className="max-h-[600px] rounded-lg border">
+        <DataTableHeader />
+        <DataTableBody
+          scrollThreshold={200}
+          onScrolledBottom={() => {
+            if (hasMore && !isFetching) void loadMore()
+          }}
+        >
+          <DataTableSkeleton rows={10} />
+          <DataTableEmptyBody />
+          <DataTableLoadingMore isFetching={isFetching}>
+            Loading more products...
+          </DataTableLoadingMore>
+        </DataTableBody>
+      </DataTable>
+    </DataTableRoot>
+  )
+}
+```
+
+## Required: Fixed Height
+
+**Infinite scroll needs a scroll container.** Without a fixed `max-h-*` (or `height`) on `<DataTable>`, the table grows with its content and there's no overflow to scroll — which means `onScrolledBottom` will never fire and your `loadMore` handler will silently do nothing.
+
+```tsx
+<DataTable className="max-h-[600px] rounded-lg border">
+  {/* ... */}
+</DataTable>
+```
+
+## Guard Against Double-Fetches
+
+Always guard your `loadMore` handler against re-entry. Scroll events can fire in rapid bursts (especially on momentum scroll on mobile), so even a well-placed `onScrolledBottom` can be triggered multiple times before React has a chance to flip `isFetching` to `true`.
+
+```tsx
+onScrolledBottom={() => {
+  if (hasMore && !isFetching) void loadMore()
+}}
+
+const loadMore = React.useCallback(async () => {
+  // Double-guard inside the handler itself.
+  if (isFetching || !hasMore) return
+  // ...
+}, [isFetching, hasMore])
+```
+
+## When to Use
+
+**✅ Use Infinite Scroll Table when:**
+
+- Your API is paginated (cursor-based or offset-based)
+- The full dataset is too large to fetch upfront
+- You want a feed-style UX (social feeds, activity logs, search results)
+- Users don't need random access to arbitrary pages
+
+**❌ Don't use Infinite Scroll Table when:**
+
+- You need client-side global sorting or filtering across the entire dataset (you can't sort what hasn't been fetched yet — prefer server-side sort/filter, or fetch all rows upfront)
+- Users need to bookmark or deep-link to a specific row (infinite scroll has no stable page URLs)
+- The dataset is small enough to fit in one round-trip (just use [Basic Table](/examples/basic-table/))
+
+## Next Steps
+
+- [Virtualization Table](/examples/virtualization-table/) — for large datasets already fully loaded
+- [Infinite Scroll Virtualized Table](/examples/infinite-scroll-virtualized-table/) — combine both for massive paginated datasets
+- [Server-Side Table](/examples/server-side-table/) — when you need server-driven sort/filter with traditional pagination
