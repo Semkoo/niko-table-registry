@@ -362,6 +362,47 @@ Shows a loading indicator when `isLoading` is `true`.
 | `colSpan`   | `number`          | -       | Number of columns (auto-detected if not provided). |
 | `className` | `string`          | -       | Additional CSS classes.                            |
 
+### DataTableLoadingMore
+
+Composable "loading more" row for infinite-scroll tables. Renders at the end of the body when `isFetching` is `true`, and nothing when `false`. Designed to be dropped as a child of `DataTableBody` alongside `DataTableSkeleton` and `DataTableEmptyBody`, combined with `onScrolledBottom` on the body to trigger next-page fetches.
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/core/data-table-structure.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+</div>
+
+```tsx showLineNumbers
+<DataTableBody
+  onScrolledBottom={() => {
+    if (hasMore && !isFetching) void loadMore()
+  }}
+>
+  <DataTableSkeleton rows={10} />
+  <DataTableEmptyBody />
+  <DataTableLoadingMore isFetching={isFetching}>
+    Loading more products...
+  </DataTableLoadingMore>
+</DataTableBody>
+```
+
+See [Infinite Scroll Table](/examples/infinite-scroll-table/) for a complete working example.
+
+#### Props
+
+| Name         | Type              | Default           | Description                                                                            |
+| ------------ | ----------------- | ----------------- | -------------------------------------------------------------------------------------- |
+| `isFetching` | `boolean`         | -                 | **Required.** Whether a next-page fetch is currently in flight. Self-gates on `false`. |
+| `children`   | `React.ReactNode` | `"Loading more…"` | Custom label content (e.g. `"Loading more products…"`).                                |
+| `colSpan`    | `number`          | -                 | Number of columns (auto-detected if not provided).                                     |
+| `className`  | `string`          | -                 | Additional CSS classes on the spinner cell.                                            |
+
 ### DataTableErrorBoundary
 
 Error boundary component that catches errors in the data table component tree and displays a fallback UI.
@@ -450,17 +491,19 @@ Virtualized table body for rendering thousands of rows efficiently.
 
 #### Props
 
-| Name               | Type                                            | Default | Description                                                   |
-| ------------------ | ----------------------------------------------- | ------- | ------------------------------------------------------------- |
-| `children`         | `React.ReactNode`                               | -       | Child components (VirtualizedSkeleton, VirtualizedEmptyBody). |
-| `estimateSize`     | `number`                                        | `34`    | Estimated row height in pixels.                               |
-| `overscan`         | `number`                                        | `20`    | Number of items to render outside visible area.               |
-| `className`        | `string`                                        | -       | Additional CSS classes.                                       |
-| `onScroll`         | `(event: ScrollEvent) => void`                  | -       | Scroll event handler.                                         |
-| `onScrolledTop`    | `() => void`                                    | -       | Called when scrolled to top.                                  |
-| `onScrolledBottom` | `() => void`                                    | -       | Called when scrolled to bottom.                               |
-| `scrollThreshold`  | `number`                                        | `50`    | Threshold for scroll events.                                  |
-| `onRowClick`       | `(row: TData, event: React.MouseEvent) => void` | -       | Called when a row is clicked.                                 |
+| Name                | Type                                            | Default | Description                                                                                                                                                                     |
+| ------------------- | ----------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `children`          | `React.ReactNode`                               | -       | Child components (VirtualizedSkeleton, VirtualizedEmptyBody).                                                                                                                   |
+| `estimateSize`      | `number`                                        | `34`    | Estimated row height in pixels.                                                                                                                                                 |
+| `overscan`          | `number`                                        | `20`    | Number of items to render outside visible area.                                                                                                                                 |
+| `className`         | `string`                                        | -       | Additional CSS classes.                                                                                                                                                         |
+| `onScroll`          | `(event: ScrollEvent) => void`                  | -       | Scroll event handler.                                                                                                                                                           |
+| `onScrolledTop`     | `() => void`                                    | -       | Called when scrolled to top.                                                                                                                                                    |
+| `onScrolledBottom`  | `() => void`                                    | -       | Called when scrolled to bottom (scroll-event-driven).                                                                                                                           |
+| `scrollThreshold`   | `number`                                        | `50`    | Pixel threshold for scroll events.                                                                                                                                              |
+| `onNearEnd`         | `() => void`                                    | -       | Fires when the last rendered virtual row is within `prefetchThreshold` rows of the end. Virtualizer-index-driven — strictly better than `onScrolledBottom` for infinite scroll. |
+| `prefetchThreshold` | `number`                                        | `10`    | How many rows from the end to trigger `onNearEnd`.                                                                                                                              |
+| `onRowClick`        | `(row: TData, event: React.MouseEvent) => void` | -       | Called when a row is clicked.                                                                                                                                                   |
 
 #### DataTableVirtualizedEmptyBody
 
@@ -556,6 +599,43 @@ import { Loader2 } from "lucide-react"
 | `children`  | `React.ReactNode` | -       | Custom loading content.                            |
 | `colSpan`   | `number`          | -       | Number of columns (auto-detected if not provided). |
 | `className` | `string`          | -       | Additional CSS classes.                            |
+
+#### DataTableVirtualizedLoadingMore
+
+Virtualized variant of `DataTableLoadingMore`. Composable "loading more" row for infinite-scroll virtualized tables. Sits **outside** the virtualizer's row count (it's a plain child of `TableBody`, not a virtual row), so it does not affect `estimateSize` math.
+
+```tsx showLineNumbers
+import {
+  DataTableVirtualizedBody,
+  DataTableVirtualizedSkeleton,
+  DataTableVirtualizedEmptyBody,
+  DataTableVirtualizedLoadingMore,
+} from "@/components/niko-table/core/data-table-virtualized-structure"
+
+<DataTableVirtualizedBody
+  prefetchThreshold={15}
+  onNearEnd={() => {
+    if (hasMore && !isFetching) void loadMore()
+  }}
+>
+  <DataTableVirtualizedSkeleton rows={15} />
+  <DataTableVirtualizedEmptyBody />
+  <DataTableVirtualizedLoadingMore isFetching={isFetching}>
+    Loading more products...
+  </DataTableVirtualizedLoadingMore>
+</DataTableVirtualizedBody>
+```
+
+See [Infinite Scroll Virtualized Table](/examples/infinite-scroll-virtualized-table/) for a complete working example.
+
+#### Props
+
+| Name         | Type              | Default           | Description                                                                            |
+| ------------ | ----------------- | ----------------- | -------------------------------------------------------------------------------------- |
+| `isFetching` | `boolean`         | -                 | **Required.** Whether a next-page fetch is currently in flight. Self-gates on `false`. |
+| `children`   | `React.ReactNode` | `"Loading more…"` | Custom label content (e.g. `"Loading more products…"`).                                |
+| `colSpan`    | `number`          | -                 | Number of columns (auto-detected if not provided).                                     |
+| `className`  | `string`          | -                 | Additional CSS classes on the spinner cell.                                            |
 
 ### DnD Components
 

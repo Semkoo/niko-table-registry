@@ -200,7 +200,14 @@ export function DataTableBody<TData>({
     const container = containerRef.current?.closest(
       '[data-slot="table-container"]',
     ) as HTMLDivElement
-    if (!container || !onScroll) return
+    // Skip if container hasn't mounted yet, OR if no scroll-related
+    // callback is wired. Previously the early return required `onScroll`
+    // specifically, so `onScrolledBottom` / `onScrolledTop` were silently
+    // dead unless the consumer also passed `onScroll` — the listener
+    // never attached. Now we attach whenever *any* of the three callbacks
+    // is provided.
+    if (!container) return
+    if (!onScroll && !onScrolledTop && !onScrolledBottom) return
 
     const handleScroll = (event: Event) => {
       const element = event.currentTarget as HTMLDivElement
@@ -213,7 +220,7 @@ export function DataTableBody<TData>({
           ? (scrollTop / (scrollHeight - clientHeight)) * 100
           : 0
 
-      onScroll({
+      onScroll?.({
         scrollTop,
         scrollHeight,
         clientHeight,
@@ -229,7 +236,14 @@ export function DataTableBody<TData>({
     // Use passive flag to improve scroll performance
     container.addEventListener("scroll", handleScroll, { passive: true })
     return () => container.removeEventListener("scroll", handleScroll)
-  }, [onScroll, handleScrollTop, handleScrollBottom, scrollThreshold])
+  }, [
+    onScroll,
+    onScrolledTop,
+    onScrolledBottom,
+    handleScrollTop,
+    handleScrollBottom,
+    scrollThreshold,
+  ])
 
   return (
     <TableBody
@@ -501,3 +515,81 @@ export function DataTableLoading({
 }
 
 DataTableLoading.displayName = "DataTableLoading"
+
+// ============================================================================
+// DataTableLoadingMore
+// ============================================================================
+
+export interface DataTableLoadingMoreProps {
+  /**
+   * Whether a next-page fetch is currently in flight. Typically wired
+   * to a library state like TanStack Query's `isFetchingNextPage`,
+   * SWR's `isValidating`, or a plain `useState` flag. When false, this
+   * component renders nothing.
+   */
+  isFetching: boolean
+  /**
+   * Optional custom content. Defaults to a spinner + "Loading more..."
+   * label. Pass children to customize per-table (e.g. "Loading more
+   * products...").
+   */
+  children?: React.ReactNode
+  colSpan?: number
+  className?: string
+}
+
+/**
+ * Composable "loading more" row for infinite-scroll tables. Renders at
+ * the end of the body when `isFetching` is true, and nothing when
+ * false — designed to be dropped as a child of `DataTableBody`
+ * alongside `DataTableSkeleton` and `DataTableEmptyBody`.
+ *
+ * Self-gates on its own `isFetching` prop. Combine with
+ * `onScrolledBottom` on `DataTableBody` to trigger next-page fetches.
+ *
+ * @example
+ * <DataTableBody
+ *   onScrolledBottom={() => {
+ *     if (hasMore && !isFetching) void loadMore()
+ *   }}
+ * >
+ *   <DataTableSkeleton rows={5} />
+ *   <DataTableEmptyBody>No results</DataTableEmptyBody>
+ *   <DataTableLoadingMore isFetching={isFetching}>
+ *     Loading more products...
+ *   </DataTableLoadingMore>
+ * </DataTableBody>
+ */
+export function DataTableLoadingMore({
+  isFetching,
+  children,
+  colSpan,
+  className,
+}: DataTableLoadingMoreProps) {
+  const { columns } = useDataTable()
+
+  // Self-gating — nothing to render when no fetch is in flight.
+  if (!isFetching) return null
+
+  return (
+    <TableRow data-slot="datatable-loading-more-row">
+      <TableCell
+        colSpan={colSpan ?? columns.length}
+        className={cn(
+          "py-3 text-center text-xs text-muted-foreground",
+          className,
+        )}
+      >
+        <span className="inline-flex items-center justify-center gap-2">
+          <span
+            className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-primary border-t-transparent"
+            aria-hidden="true"
+          />
+          <span>{children ?? "Loading more..."}</span>
+        </span>
+      </TableCell>
+    </TableRow>
+  )
+}
+
+DataTableLoadingMore.displayName = "DataTableLoadingMore"
