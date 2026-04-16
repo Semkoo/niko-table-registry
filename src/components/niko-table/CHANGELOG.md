@@ -6,6 +6,17 @@ All notable changes to the data-table component.
 
 ## Unreleased
 
+### 🐛 Bug Fixes
+
+#### Core
+
+- **`DataTableVirtualizedBody` — column lock no longer compresses columns on wide datasets** (`core/data-table-virtualized-structure.tsx`)
+  - The column-lock `useLayoutEffect` now sets `tableEl.style.minWidth` to the sum of all visible `column.getSize()` values before measuring `<th>` widths.
+  - **Root cause**: `<TableComponent>` carries `w-full` (100% width), which forced the `<table>` element to fit inside its scroll container. The auto-layout algorithm then distributed compressed widths, and the lock mechanism permanently captured those compressed values.
+  - **Fix**: Expanding the table beyond the container width via `minWidth` lets `overflow-auto` on the `<DataTable>` container handle horizontal scrolling, while auto-layout distributes column widths proportionally based on content.
+  - `minWidth` is reset to `""` on every unlock/reset cycle (column visibility change, unmount) so measurement starts clean.
+  - Explicit `size` values on column defs raise the `minWidth` floor proportionally — no per-column configuration required.
+
 ### ⚡ Performance & consistency
 
 #### Core

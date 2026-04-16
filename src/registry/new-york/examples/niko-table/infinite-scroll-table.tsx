@@ -4,10 +4,12 @@ import * as React from "react"
 import { DataTableRoot } from "@/components/niko-table/core/data-table-root"
 import { DataTable } from "@/components/niko-table/core/data-table"
 import {
-  DataTableVirtualizedHeader,
-  DataTableVirtualizedBody,
-  DataTableVirtualizedEmptyBody,
-} from "@/components/niko-table/core/data-table-virtualized-structure"
+  DataTableHeader,
+  DataTableBody,
+  DataTableEmptyBody,
+  DataTableSkeleton,
+  DataTableLoadingMore,
+} from "@/components/niko-table/core/data-table-structure"
 import { DataTableColumnHeader } from "@/components/niko-table/components/data-table-column-header"
 import { DataTableColumnTitle } from "@/components/niko-table/components/data-table-column-title"
 import { DataTableColumnSortMenu } from "@/components/niko-table/components/data-table-column-sort"
@@ -18,7 +20,7 @@ import {
   DataTableEmptyTitle,
   DataTableEmptyDescription,
 } from "@/components/niko-table/components/data-table-empty-state"
-import { DataTablePagination } from "@/components/niko-table/components/data-table-pagination"
+import { DataTableFacetedFilter } from "@/components/niko-table/components/data-table-faceted-filter"
 import { DataTableSearchFilter } from "@/components/niko-table/components/data-table-search-filter"
 import { DataTableToolbarSection } from "@/components/niko-table/components/data-table-toolbar-section"
 import { DataTableViewMenu } from "@/components/niko-table/components/data-table-view-menu"
@@ -29,7 +31,7 @@ import {
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { ChevronRight, ChevronDown, UserSearch, SearchX } from "lucide-react"
+import { ChevronDown, ChevronRight, PackageSearch, SearchX } from "lucide-react"
 
 // Example data type
 interface Product {
@@ -45,55 +47,69 @@ interface Product {
   releaseDate: Date
 }
 
-// Generate large dataset for virtualization demo
-const generateLargeData = (count: number): Product[] => {
-  const categories = [
-    "Electronics",
-    "Clothing",
-    "Food",
-    "Books",
-    "Sports",
-    "Home",
-    "Toys",
-    "Beauty",
-  ]
-  const brands = [
-    "Apple",
-    "Samsung",
-    "Nike",
-    "Adidas",
-    "Sony",
-    "LG",
-    "Dell",
-    "HP",
-  ]
+/**
+ * Deterministic mock data generator — no Math.random, no Date.now.
+ *
+ * WHY DETERMINISTIC: The first thing a consumer does is copy this
+ * example into their own app. If the generator used Math.random() at
+ * module scope, every SSR/RSC-rendered cell would diff from its
+ * client-rendered counterpart on first hydration (different prices,
+ * stock counts, statuses on server vs client) and React would log a
+ * hydration mismatch for every row. Index-based values sidestep that
+ * entirely and are safe to run at module scope, inside useState
+ * initializers, or under React Strict Mode double-invocation.
+ *
+ * When you swap this out for a real API call, the concern disappears
+ * — real data is already stable.
+ */
+const CATEGORIES = [
+  "Electronics",
+  "Clothing",
+  "Food",
+  "Books",
+  "Sports",
+  "Home",
+  "Toys",
+  "Beauty",
+] as const
 
+const BRANDS = [
+  "Apple",
+  "Samsung",
+  "Nike",
+  "Adidas",
+  "Sony",
+  "LG",
+  "Dell",
+  "HP",
+] as const
+
+function generateMockProducts(count: number): Product[] {
   return Array.from({ length: count }, (_, i) => {
-    const stock = Math.floor(Math.random() * 150)
-    const price = Math.floor(Math.random() * 500) + 10
+    const stock = (i * 37) % 150
+    const price = ((i * 13) % 490) + 10
     return {
       id: `product-${i + 1}`,
       name: `Product ${i + 1}`,
-      category: categories[Math.floor(Math.random() * categories.length)],
-      brand: brands[Math.floor(Math.random() * brands.length)],
+      category: CATEGORIES[i % CATEGORIES.length],
+      brand: BRANDS[i % BRANDS.length],
       price,
       stock,
-      rating: Math.floor(Math.random() * 5) + 1,
+      rating: ((i * 7) % 5) + 1,
       revenue: price * stock,
       status:
         stock === 0 ? "out-of-stock" : stock < 20 ? "low-stock" : "in-stock",
-      releaseDate: new Date(
-        2024,
-        Math.floor(Math.random() * 12),
-        Math.floor(Math.random() * 28) + 1,
-      ),
+      releaseDate: new Date(2024, (i * 3) % 12, ((i * 7) % 28) + 1),
     }
   })
 }
 
-const largeData = generateLargeData(10000) // 10,000 items
+const statusOptions = [
+  { label: "In Stock", value: "in-stock" },
+  { label: "Low Stock", value: "low-stock" },
+  { label: "Out of Stock", value: "out-of-stock" },
+]
 
-// Expanded content component for product details
 function ProductDetails({ product }: { product: Product }) {
   return (
     <div className="bg-muted/30 p-4">
@@ -110,7 +126,7 @@ function ProductDetails({ product }: { product: Product }) {
         </div>
         <div>
           <div>
-            <span className="text-muted-foreground">Price:</span> ${""}
+            <span className="text-muted-foreground">Price:</span> $
             {product.price.toFixed(2)}
           </div>
           <div>
@@ -123,7 +139,62 @@ function ProductDetails({ product }: { product: Product }) {
   )
 }
 
-export default function VirtualizedTableExample() {
+// Total pool the server "knows about" — deterministic at module scope.
+const TOTAL_POOL = generateMockProducts(500)
+const PAGE_SIZE = 20
+const FAKE_LATENCY_MS = 800
+
+/**
+ * Simulate a paginated API call. Returns the next page of rows after
+ * the given offset, with a short artificial delay so the loading
+ * spinner is visibly rendered.
+ */
+function fetchNextPage(offset: number): Promise<Product[]> {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve(TOTAL_POOL.slice(offset, offset + PAGE_SIZE))
+    }, FAKE_LATENCY_MS)
+  })
+}
+
+export default function InfiniteScrollTableExample() {
+  // Accumulated rows so far. Starts empty and grows as pages arrive.
+  const [loaded, setLoaded] = React.useState<Product[]>([])
+  // True during the very first page fetch — drives the <DataTableSkeleton> row.
+  const [isLoading, setIsLoading] = React.useState(true)
+  // True during any subsequent next-page fetch — drives <DataTableLoadingMore>.
+  const [isFetching, setIsFetching] = React.useState(false)
+
+  // Derive whether the server has more rows. When the accumulator
+  // reaches the total pool size, we stop firing next-page requests.
+  const hasMore = loaded.length < TOTAL_POOL.length
+
+  // Kick off the initial page fetch on mount.
+  React.useEffect(() => {
+    let cancelled = false
+    void fetchNextPage(0).then(page => {
+      if (cancelled) return
+      setLoaded(page)
+      setIsLoading(false)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  const loadMore = React.useCallback(async () => {
+    // Double-guard: never fire while a fetch is already in flight,
+    // and never fire when we've exhausted the pool.
+    if (isFetching || !hasMore) return
+    setIsFetching(true)
+    try {
+      const nextPage = await fetchNextPage(loaded.length)
+      setLoaded(prev => [...prev, ...nextPage])
+    } finally {
+      setIsFetching(false)
+    }
+  }, [isFetching, hasMore, loaded.length])
+
   const columns: DataTableColumnDef<Product>[] = React.useMemo(
     () => [
       {
@@ -294,25 +365,50 @@ export default function VirtualizedTableExample() {
 
   return (
     <DataTableRoot
-      data={largeData}
+      data={loaded}
       columns={columns}
+      isLoading={isLoading}
       config={{
+        // High page size so client-side pagination doesn't clip
+        // the infinite-scroll viewport. We still render the
+        // pagination component below for filter/sort access, but
+        // the scroll container is what drives row loading.
+        initialPageSize: 500,
         enableExpanding: true,
-        initialPageSize: 50,
       }}
       getRowCanExpand={row => row.original.stock > 0}
     >
       <DataTableToolbarSection>
         <DataTableSearchFilter placeholder="Search products..." />
+        <DataTableFacetedFilter
+          accessorKey="status"
+          title="Status"
+          options={statusOptions}
+        />
         <DataTableViewMenu />
       </DataTableToolbarSection>
-      <DataTable height={600} className="rounded-lg border">
-        <DataTableVirtualizedHeader />
-        <DataTableVirtualizedBody>
-          <DataTableVirtualizedEmptyBody>
+      {/*
+        IMPORTANT: the `<DataTable>` MUST have a fixed height
+        (`max-h-*` or `height`). Without it there's no scroll
+        container at all, `onScrolledBottom` never fires, and
+        infinite scroll silently does nothing.
+      */}
+      <DataTable className="max-h-[600px] rounded-lg border">
+        <DataTableHeader />
+        <DataTableBody
+          scrollThreshold={200}
+          onScrolledBottom={() => {
+            // Fire-and-forget — the loadMore handler is itself
+            // guarded against re-entry, so a trigger-happy
+            // scroll callback can't double-fetch.
+            if (hasMore && !isFetching) void loadMore()
+          }}
+        >
+          <DataTableSkeleton rows={10} />
+          <DataTableEmptyBody>
             <DataTableEmptyMessage>
               <DataTableEmptyIcon>
-                <UserSearch className="size-12" />
+                <PackageSearch className="size-12" />
               </DataTableEmptyIcon>
               <DataTableEmptyTitle>No products found</DataTableEmptyTitle>
               <DataTableEmptyDescription>
@@ -328,10 +424,23 @@ export default function VirtualizedTableExample() {
                 Try adjusting your search to find what you&apos;re looking for.
               </DataTableEmptyDescription>
             </DataTableEmptyFilteredMessage>
-          </DataTableVirtualizedEmptyBody>
-        </DataTableVirtualizedBody>
+          </DataTableEmptyBody>
+          {/*
+            Composable "loading more" row — self-gates on
+            `isFetching`. Sits alongside Skeleton + EmptyBody
+            following niko-table's mix-and-match children
+            pattern, so adding / removing the indicator is just
+            adding / removing this child.
+          */}
+          <DataTableLoadingMore isFetching={isFetching}>
+            Loading more products...
+          </DataTableLoadingMore>
+        </DataTableBody>
       </DataTable>
-      <DataTablePagination pageSizeOptions={[50, 100, 200, 500]} />
+      <div className="px-1 pt-2 text-right text-xs text-muted-foreground">
+        Loaded {loaded.length} of {TOTAL_POOL.length} products
+        {!hasMore && loaded.length > 0 && " — end of results"}
+      </div>
     </DataTableRoot>
   )
 }

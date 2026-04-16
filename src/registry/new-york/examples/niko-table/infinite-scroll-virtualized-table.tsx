@@ -7,6 +7,8 @@ import {
   DataTableVirtualizedHeader,
   DataTableVirtualizedBody,
   DataTableVirtualizedEmptyBody,
+  DataTableVirtualizedSkeleton,
+  DataTableVirtualizedLoadingMore,
 } from "@/components/niko-table/core/data-table-virtualized-structure"
 import { DataTableColumnHeader } from "@/components/niko-table/components/data-table-column-header"
 import { DataTableColumnTitle } from "@/components/niko-table/components/data-table-column-title"
@@ -18,7 +20,7 @@ import {
   DataTableEmptyTitle,
   DataTableEmptyDescription,
 } from "@/components/niko-table/components/data-table-empty-state"
-import { DataTablePagination } from "@/components/niko-table/components/data-table-pagination"
+import { DataTableFacetedFilter } from "@/components/niko-table/components/data-table-faceted-filter"
 import { DataTableSearchFilter } from "@/components/niko-table/components/data-table-search-filter"
 import { DataTableToolbarSection } from "@/components/niko-table/components/data-table-toolbar-section"
 import { DataTableViewMenu } from "@/components/niko-table/components/data-table-view-menu"
@@ -29,7 +31,7 @@ import {
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { ChevronRight, ChevronDown, UserSearch, SearchX } from "lucide-react"
+import { ChevronDown, ChevronRight, PackageSearch, SearchX } from "lucide-react"
 
 // Example data type
 interface Product {
@@ -45,53 +47,62 @@ interface Product {
   releaseDate: Date
 }
 
-// Generate large dataset for virtualization demo
-const generateLargeData = (count: number): Product[] => {
-  const categories = [
-    "Electronics",
-    "Clothing",
-    "Food",
-    "Books",
-    "Sports",
-    "Home",
-    "Toys",
-    "Beauty",
-  ]
-  const brands = [
-    "Apple",
-    "Samsung",
-    "Nike",
-    "Adidas",
-    "Sony",
-    "LG",
-    "Dell",
-    "HP",
-  ]
+/**
+ * Deterministic mock data generator — no Math.random, no Date.now.
+ *
+ * WHY DETERMINISTIC: See [infinite-scroll-table.tsx] for the full
+ * explanation. TL;DR: index-based values are safe to run at module
+ * scope / useState initializers under Next.js RSC + React Strict
+ * Mode, while Math.random would trigger a hydration mismatch on
+ * every cell on first render.
+ */
+const CATEGORIES = [
+  "Electronics",
+  "Clothing",
+  "Food",
+  "Books",
+  "Sports",
+  "Home",
+  "Toys",
+  "Beauty",
+] as const
 
+const BRANDS = [
+  "Apple",
+  "Samsung",
+  "Nike",
+  "Adidas",
+  "Sony",
+  "LG",
+  "Dell",
+  "HP",
+] as const
+
+function generateMockProducts(count: number): Product[] {
   return Array.from({ length: count }, (_, i) => {
-    const stock = Math.floor(Math.random() * 150)
-    const price = Math.floor(Math.random() * 500) + 10
+    const stock = (i * 37) % 150
+    const price = ((i * 13) % 490) + 10
     return {
       id: `product-${i + 1}`,
       name: `Product ${i + 1}`,
-      category: categories[Math.floor(Math.random() * categories.length)],
-      brand: brands[Math.floor(Math.random() * brands.length)],
+      category: CATEGORIES[i % CATEGORIES.length],
+      brand: BRANDS[i % BRANDS.length],
       price,
       stock,
-      rating: Math.floor(Math.random() * 5) + 1,
+      rating: ((i * 7) % 5) + 1,
       revenue: price * stock,
       status:
         stock === 0 ? "out-of-stock" : stock < 20 ? "low-stock" : "in-stock",
-      releaseDate: new Date(
-        2024,
-        Math.floor(Math.random() * 12),
-        Math.floor(Math.random() * 28) + 1,
-      ),
+      releaseDate: new Date(2024, (i * 3) % 12, ((i * 7) % 28) + 1),
     }
   })
 }
 
-const largeData = generateLargeData(10000) // 10,000 items
+const statusOptions = [
+  { label: "In Stock", value: "in-stock" },
+  { label: "Low Stock", value: "low-stock" },
+  { label: "Out of Stock", value: "out-of-stock" },
+]
 
 // Expanded content component for product details
 function ProductDetails({ product }: { product: Product }) {
@@ -110,7 +121,7 @@ function ProductDetails({ product }: { product: Product }) {
         </div>
         <div>
           <div>
-            <span className="text-muted-foreground">Price:</span> ${""}
+            <span className="text-muted-foreground">Price:</span> $
             {product.price.toFixed(2)}
           </div>
           <div>
@@ -123,7 +134,50 @@ function ProductDetails({ product }: { product: Product }) {
   )
 }
 
-export default function VirtualizedTableExample() {
+// Larger pool so virtualization value is actually demonstrated —
+// 5,000 rows, 50 pages of 100 each.
+const TOTAL_POOL = generateMockProducts(5000)
+const PAGE_SIZE = 100
+const FAKE_LATENCY_MS = 800
+
+function fetchNextPage(offset: number): Promise<Product[]> {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve(TOTAL_POOL.slice(offset, offset + PAGE_SIZE))
+    }, FAKE_LATENCY_MS)
+  })
+}
+
+export default function InfiniteScrollVirtualizedTableExample() {
+  const [loaded, setLoaded] = React.useState<Product[]>([])
+  const [isLoading, setIsLoading] = React.useState(true)
+  const [isFetching, setIsFetching] = React.useState(false)
+
+  const hasMore = loaded.length < TOTAL_POOL.length
+
+  React.useEffect(() => {
+    let cancelled = false
+    void fetchNextPage(0).then(page => {
+      if (cancelled) return
+      setLoaded(page)
+      setIsLoading(false)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  const loadMore = React.useCallback(async () => {
+    if (isFetching || !hasMore) return
+    setIsFetching(true)
+    try {
+      const nextPage = await fetchNextPage(loaded.length)
+      setLoaded(prev => [...prev, ...nextPage])
+    } finally {
+      setIsFetching(false)
+    }
+  }, [isFetching, hasMore, loaded.length])
+
   const columns: DataTableColumnDef<Product>[] = React.useMemo(
     () => [
       {
@@ -294,25 +348,48 @@ export default function VirtualizedTableExample() {
 
   return (
     <DataTableRoot
-      data={largeData}
+      data={loaded}
       columns={columns}
+      isLoading={isLoading}
       config={{
+        // Large page size so client-side pagination never clips
+        // the virtualized viewport — the scroll container is
+        // what drives row loading here, not the pagination bar.
+        initialPageSize: 5000,
         enableExpanding: true,
-        initialPageSize: 50,
       }}
       getRowCanExpand={row => row.original.stock > 0}
     >
       <DataTableToolbarSection>
         <DataTableSearchFilter placeholder="Search products..." />
+        <DataTableFacetedFilter
+          accessorKey="status"
+          title="Status"
+          options={statusOptions}
+        />
         <DataTableViewMenu />
       </DataTableToolbarSection>
+      {/*
+        Virtualized tables REQUIRE a fixed height on <DataTable>
+        for the virtualizer scroll container to exist. `onNearEnd`
+        is virtualizer-index-driven (not scroll-event-driven) so
+        it catches fast scrolls, scrollbar drag, and initial
+        renders where data doesn't fill the viewport — strictly
+        better than `onScrolledBottom` for infinite scroll.
+      */}
       <DataTable height={600} className="rounded-lg border">
         <DataTableVirtualizedHeader />
-        <DataTableVirtualizedBody>
+        <DataTableVirtualizedBody
+          prefetchThreshold={15}
+          onNearEnd={() => {
+            if (hasMore && !isFetching) void loadMore()
+          }}
+        >
+          <DataTableVirtualizedSkeleton rows={15} />
           <DataTableVirtualizedEmptyBody>
             <DataTableEmptyMessage>
               <DataTableEmptyIcon>
-                <UserSearch className="size-12" />
+                <PackageSearch className="size-12" />
               </DataTableEmptyIcon>
               <DataTableEmptyTitle>No products found</DataTableEmptyTitle>
               <DataTableEmptyDescription>
@@ -329,9 +406,20 @@ export default function VirtualizedTableExample() {
               </DataTableEmptyDescription>
             </DataTableEmptyFilteredMessage>
           </DataTableVirtualizedEmptyBody>
+          {/*
+            DataTableVirtualizedLoadingMore sits OUTSIDE the
+            virtualizer's row count — it does not affect
+            `estimateSize` math. Self-gates on `isFetching`.
+          */}
+          <DataTableVirtualizedLoadingMore isFetching={isFetching}>
+            Loading more products...
+          </DataTableVirtualizedLoadingMore>
         </DataTableVirtualizedBody>
       </DataTable>
-      <DataTablePagination pageSizeOptions={[50, 100, 200, 500]} />
+      <div className="px-1 pt-2 text-right text-xs text-muted-foreground">
+        Loaded {loaded.length} of {TOTAL_POOL.length} products
+        {!hasMore && loaded.length > 0 && " — end of results"}
+      </div>
     </DataTableRoot>
   )
 }

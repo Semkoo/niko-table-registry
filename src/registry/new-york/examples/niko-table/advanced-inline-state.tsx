@@ -688,12 +688,9 @@ export default function AdvancedInlineStateTableExample() {
       {/* State Display for demonstration */}
       <Card>
         <CardHeader>
-          <CardTitle>
-            Enhanced Table State with Individual Join Operators
-          </CardTitle>
+          <CardTitle>Current Table State</CardTitle>
           <CardDescription>
-            Live view of the current table state including enhanced filters with
-            individual join operators support
+            Live view of the current table state for demonstration purposes
           </CardDescription>
           <CardAction>
             <Button variant="outline" size="sm" onClick={resetAllState}>

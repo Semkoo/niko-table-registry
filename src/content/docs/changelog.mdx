@@ -7,6 +7,37 @@ description: Latest updates and release notes for Niko Table.
 
 ### Bug Fixes
 
+- **Virtualized table — column spacing no longer compresses on wide datasets** — `DataTableVirtualizedBody`'s column-lock `useLayoutEffect` now sets `tableEl.style.minWidth` to the sum of all visible `column.getSize()` values before measuring column widths. Without this, the `w-full` style on `<table>` forced the element to fit its scroll container, causing the auto-layout algorithm to distribute compressed widths and lock them in permanently. Setting `minWidth` lets the table expand beyond the container width so `overflow-auto` on the container handles horizontal scrolling, while auto-layout distributes space based on actual content. The `minWidth` is cleared on every unlock/reset cycle so toggling column visibility re-measures correctly. Explicit `size` values on column defs are respected — they raise the `minWidth` floor proportionally.
+
+### Examples
+
+- **All product-based examples enriched with four new columns** — `brand` (text), `rating` (1–5 with ★), `revenue` (price × stock, formatted with `toLocaleString`), and `releaseDate` (`toLocaleDateString`) added to all eight product example files: `basic`, `basic-state`, `infinite-scroll-table`, `infinite-scroll-table-state`, `infinite-scroll-virtualized-table`, `infinite-scroll-virtualized-table-state`, `virtualization-table`, and `virtualization-table-state`. The four infinite-scroll files use index-based deterministic generation (no `Math.random`) so the values are stable across SSR and client hydration. The two virtualization files retain `Math.random` for variety, consistent with their existing approach. The two state-variant files also gain a **Brand** `DataTableFacetedFilter` in the toolbar alongside the existing Status filter.
+
+### New Components
+
+- **`DataTableLoadingMore`** — Composable "loading more" row for infinite-scroll standard tables. Self-gates on its `isFetching` prop — renders a spinner + label when true, nothing when false. Drop it as a child of `DataTableBody` alongside `DataTableSkeleton` and `DataTableEmptyBody`.
+- **`DataTableVirtualizedLoadingMore`** — Virtualized variant. Sits outside the virtualizer's row count so it doesn't affect `estimateSize` math.
+
+### New Features
+
+- **`onNearEnd` + `prefetchThreshold` on `DataTableVirtualizedBody`** — Virtualizer-index-driven prefetch trigger for infinite scroll. Fires when the last rendered virtual row is within `prefetchThreshold` rows (default 10) of the end of the dataset. Strictly better than `onScrolledBottom` for infinite scroll — catches fast scrolls, scrollbar drag, `scrollToIndex()` jumps, and initial renders where data doesn't fill the viewport. Called at most once per false→true transition.
+
+### Performance & Layout
+
+- **Virtualized table — native `<table>` layout with measure-and-lock column sizing** — Replaced `display: block/flex` on virtualized table rows and cells with native table layout. The browser's table layout algorithm now distributes column widths based on content. `DataTableVirtualizedBody` uses a `useLayoutEffect` to measure each `<th>`'s computed width after first data render, then locks the table to `table-layout: fixed` so columns stay stable during virtual scroll. The effect runs every render but the fast path (already locked, same column count) is two ref reads — negligible at 60 fps. Column visibility changes (toggle, reorder) trigger a fresh measurement cycle. Spacer rows use `<tr><td colSpan={n}>` to stay within the table layout context. All child components (`DataTableVirtualizedEmptyBody`, `DataTableVirtualizedSkeleton`, `DataTableVirtualizedLoading`, `DataTableVirtualizedLoadingMore`) updated to match.
+
+### Bug Fixes
+
+- **Scroll listener — `onScrolledBottom` / `onScrolledTop` silently dead** — In all four body components (`DataTableBody`, `DataTableVirtualizedBody`, and both virtualized DnD bodies), the scroll-listener effect early-returned on `!onScroll`, which meant `onScrolledBottom` / `onScrolledTop` callbacks were never wired unless the consumer also passed `onScroll`. The listener now attaches whenever any of the three callbacks is provided, and `onScroll` is invoked conditionally.
+
+### Documentation
+
+- **Infinite Scroll Table** — New example page with full implementation guide for non-virtualized infinite scroll (500-row mock, `onScrolledBottom` + `DataTableLoadingMore`). Includes a caution callout recommending the virtualized variant for most use cases.
+- **Infinite Scroll Virtualized Table** — New example page for virtualized infinite scroll (5,000-row mock, `onNearEnd` + `DataTableVirtualizedLoadingMore`). Includes comparison table of `onNearEnd` vs `onScrolledBottom`, TanStack Query wiring pattern, and controlled-state variant.
+- **Core overview** — Added `DataTableLoadingMore`, `DataTableVirtualizedLoadingMore`, `onNearEnd`, and `prefetchThreshold` to the component and props reference.
+
+### Bug Fixes
+
 - **Faceted filter — `dynamicCounts` silently ignored in key paths** — The prop was accepted on `DataTableFacetedFilter` and `useFacetedOptions` but the fallback `useMemo` and the auto-generated branch of `useGeneratedOptions` both computed counts from the wrong row set. Setting `dynamicCounts: false` while keeping `limitToFilteredRows: true` had no effect. Counts now come from `countSourceRows` in every branch, and the `useMemo` deps include `dynamicCounts` so React recomputes when it changes.
 - **Faceted filter — explicit `options` bypassed count enrichment entirely** — When a caller passed static `options` to `DataTableFacetedFilter` or `TableColumnFacetedFilterMenu`, both components short-circuited and returned the caller array untouched. `dynamicCounts` was a no-op on that path, so multi-select filters with static options never showed live counts, and the single-select path only filtered options by presence without populating `count`. Both entry points now enrich caller-supplied options through the same `optionRows` / `countRows` split used for auto-generated options, and honor `limitToFilteredRows` and `showCounts` on both the fast and slow paths.
 - **Faceted filter — `TableColumnFacetedFilterMenu` dropped `dynamicCounts` on the way to the hook** — The column menu wired the prop into its fallback path but called `useGeneratedOptionsForColumn({ limitToFilteredRows })`, silently omitting `dynamicCounts`. The base hook always saw the default `true`. It now forwards `{ limitToFilteredRows, dynamicCounts }`, matching the parallel wiring in `DataTableFacetedFilter`.

@@ -13,17 +13,15 @@ import type {
 import { DataTableRoot } from "@/components/niko-table/core/data-table-root"
 import { DataTable } from "@/components/niko-table/core/data-table"
 import {
-  DataTableVirtualizedHeader,
-  DataTableVirtualizedBody,
-  DataTableVirtualizedEmptyBody,
-} from "@/components/niko-table/core/data-table-virtualized-structure"
-import { DataTableColumnActions } from "@/components/niko-table/components/data-table-column-actions"
+  DataTableHeader,
+  DataTableBody,
+  DataTableEmptyBody,
+  DataTableSkeleton,
+  DataTableLoadingMore,
+} from "@/components/niko-table/core/data-table-structure"
 import { DataTableColumnHeader } from "@/components/niko-table/components/data-table-column-header"
 import { DataTableColumnTitle } from "@/components/niko-table/components/data-table-column-title"
-import {
-  DataTableColumnSortMenu,
-  DataTableColumnSortOptions,
-} from "@/components/niko-table/components/data-table-column-sort"
+import { DataTableColumnSortMenu } from "@/components/niko-table/components/data-table-column-sort"
 import {
   DataTableEmptyIcon,
   DataTableEmptyMessage,
@@ -31,7 +29,7 @@ import {
   DataTableEmptyTitle,
   DataTableEmptyDescription,
 } from "@/components/niko-table/components/data-table-empty-state"
-import { DataTablePagination } from "@/components/niko-table/components/data-table-pagination"
+import { DataTableFacetedFilter } from "@/components/niko-table/components/data-table-faceted-filter"
 import { DataTableSearchFilter } from "@/components/niko-table/components/data-table-search-filter"
 import { DataTableToolbarSection } from "@/components/niko-table/components/data-table-toolbar-section"
 import { DataTableViewMenu } from "@/components/niko-table/components/data-table-view-menu"
@@ -42,7 +40,6 @@ import {
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { ChevronRight, ChevronDown, UserSearch, SearchX } from "lucide-react"
 import {
   Card,
   CardAction,
@@ -51,6 +48,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import { ChevronDown, ChevronRight, PackageSearch, SearchX } from "lucide-react"
 
 // Example data type
 interface Product {
@@ -66,55 +64,67 @@ interface Product {
   releaseDate: Date
 }
 
-// Generate large dataset for virtualization demo
-const generateLargeData = (count: number): Product[] => {
-  const categories = [
-    "Electronics",
-    "Clothing",
-    "Food",
-    "Books",
-    "Sports",
-    "Home",
-    "Toys",
-    "Beauty",
-  ]
-  const brands = [
-    "Apple",
-    "Samsung",
-    "Nike",
-    "Adidas",
-    "Sony",
-    "LG",
-    "Dell",
-    "HP",
-  ]
+// Deterministic generator — see infinite-scroll-table.tsx for the
+// full explanation of why we avoid Math.random / Date.now here.
+const CATEGORIES = [
+  "Electronics",
+  "Clothing",
+  "Food",
+  "Books",
+  "Sports",
+  "Home",
+  "Toys",
+  "Beauty",
+] as const
 
+const BRANDS = [
+  "Apple",
+  "Samsung",
+  "Nike",
+  "Adidas",
+  "Sony",
+  "LG",
+  "Dell",
+  "HP",
+] as const
+
+function generateMockProducts(count: number): Product[] {
   return Array.from({ length: count }, (_, i) => {
-    const stock = Math.floor(Math.random() * 150)
-    const price = Math.floor(Math.random() * 500) + 10
+    const stock = (i * 37) % 150
+    const price = ((i * 13) % 490) + 10
     return {
       id: `product-${i + 1}`,
       name: `Product ${i + 1}`,
-      category: categories[Math.floor(Math.random() * categories.length)],
-      brand: brands[Math.floor(Math.random() * brands.length)],
+      category: CATEGORIES[i % CATEGORIES.length],
+      brand: BRANDS[i % BRANDS.length],
       price,
       stock,
-      rating: Math.floor(Math.random() * 5) + 1,
+      rating: ((i * 7) % 5) + 1,
       revenue: price * stock,
       status:
         stock === 0 ? "out-of-stock" : stock < 20 ? "low-stock" : "in-stock",
-      releaseDate: new Date(
-        2024,
-        Math.floor(Math.random() * 12),
-        Math.floor(Math.random() * 28) + 1,
-      ),
+      releaseDate: new Date(2024, (i * 3) % 12, ((i * 7) % 28) + 1),
     }
   })
 }
 
-const largeData = generateLargeData(10000) // 10,000 items
+const statusOptions = [
+  { label: "In Stock", value: "in-stock" },
+  { label: "Low Stock", value: "low-stock" },
+  { label: "Out of Stock", value: "out-of-stock" },
+]
 
-// Expanded content component for product details
+const brandOptions = [
+  { label: "Apple", value: "Apple" },
+  { label: "Samsung", value: "Samsung" },
+  { label: "Nike", value: "Nike" },
+  { label: "Adidas", value: "Adidas" },
+  { label: "Sony", value: "Sony" },
+  { label: "LG", value: "LG" },
+  { label: "Dell", value: "Dell" },
+  { label: "HP", value: "HP" },
+]
+
 function ProductDetails({ product }: { product: Product }) {
   return (
     <div className="bg-muted/30 p-4">
@@ -131,7 +141,7 @@ function ProductDetails({ product }: { product: Product }) {
         </div>
         <div>
           <div>
-            <span className="text-muted-foreground">Price:</span> ${""}
+            <span className="text-muted-foreground">Price:</span> $
             {product.price.toFixed(2)}
           </div>
           <div>
@@ -144,22 +154,73 @@ function ProductDetails({ product }: { product: Product }) {
   )
 }
 
-export default function VirtualizedTableStateExample() {
-  // Controlled state management for all table state
-  const [data] = useState<Product[]>(largeData)
+const TOTAL_POOL = generateMockProducts(500)
+const PAGE_SIZE = 20
+const FAKE_LATENCY_MS = 800
+
+function fetchNextPage(offset: number): Promise<Product[]> {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve(TOTAL_POOL.slice(offset, offset + PAGE_SIZE))
+    }, FAKE_LATENCY_MS)
+  })
+}
+
+export default function InfiniteScrollTableStateExample() {
+  // Infinite-scroll data state
+  const [loaded, setLoaded] = React.useState<Product[]>([])
+  const [isLoading, setIsLoading] = React.useState(true)
+  const [isFetching, setIsFetching] = React.useState(false)
+
+  // Fully controlled table state
   const [globalFilter, setGlobalFilter] = useState<string | object>("")
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
-  const [pagination, setPagination] = useState<PaginationState>({
-    pageIndex: 0,
-    pageSize: 100, // Larger page size for virtualization
-  })
   const [expanded, setExpanded] = useState<ExpandedState>({})
   const [columnPinning, setColumnPinning] = useState<ColumnPinningState>({
     left: [],
     right: [],
   })
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 500,
+  })
+
+  const hasMore = loaded.length < TOTAL_POOL.length
+
+  React.useEffect(() => {
+    let cancelled = false
+    void fetchNextPage(0).then(page => {
+      if (cancelled) return
+      setLoaded(page)
+      setIsLoading(false)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  const loadMore = React.useCallback(async () => {
+    if (isFetching || !hasMore) return
+    setIsFetching(true)
+    try {
+      const nextPage = await fetchNextPage(loaded.length)
+      setLoaded(prev => [...prev, ...nextPage])
+    } finally {
+      setIsFetching(false)
+    }
+  }, [isFetching, hasMore, loaded.length])
+
+  const resetAllState = React.useCallback(() => {
+    setGlobalFilter("")
+    setSorting([])
+    setColumnFilters([])
+    setColumnVisibility({})
+    setExpanded({})
+    setColumnPinning({ left: [], right: [] })
+    setPagination({ pageIndex: 0, pageSize: 500 })
+  }, [])
 
   const columns: DataTableColumnDef<Product>[] = React.useMemo(
     () => [
@@ -195,8 +256,8 @@ export default function VirtualizedTableStateExample() {
       {
         accessorKey: "name",
         header: () => (
-          <DataTableColumnHeader className="justify-start">
-            <span className="mr-2 text-sm font-semibold">Name</span>
+          <DataTableColumnHeader>
+            <DataTableColumnTitle title="Name" />
             <DataTableColumnSortMenu />
           </DataTableColumnHeader>
         ),
@@ -208,11 +269,8 @@ export default function VirtualizedTableStateExample() {
         accessorKey: "category",
         header: () => (
           <DataTableColumnHeader>
-            <DataTableColumnTitle />
+            <DataTableColumnTitle title="Category" />
             <DataTableColumnSortMenu variant={FILTER_VARIANTS.TEXT} />
-            <DataTableColumnActions>
-              <DataTableColumnSortOptions variant={FILTER_VARIANTS.TEXT} />
-            </DataTableColumnActions>
           </DataTableColumnHeader>
         ),
         cell: ({ row }) => (
@@ -332,52 +390,26 @@ export default function VirtualizedTableStateExample() {
     [],
   )
 
-  const resetAllState = () => {
-    setGlobalFilter("")
-    setSorting([])
-    setColumnFilters([])
-    setColumnVisibility({})
-    setPagination({ pageIndex: 0, pageSize: 100 })
-    setExpanded({})
-    setColumnPinning({ left: [], right: [] })
-  }
-
-  // Calculate filtered data for display metrics
-  const filteredRowCount = React.useMemo(() => {
-    let filtered = data
-
-    // Apply global filter
-    if (globalFilter && typeof globalFilter === "string") {
-      filtered = filtered.filter(item =>
-        Object.values(item).some(value =>
-          String(value).toLowerCase().includes(globalFilter.toLowerCase()),
-        ),
-      )
-    }
-
-    return filtered.length
-  }, [data, globalFilter])
-
   return (
     <div className="w-full space-y-4">
       <DataTableRoot
-        data={data}
+        data={loaded}
         columns={columns}
+        isLoading={isLoading}
         config={{
+          initialPageSize: 500,
           enableExpanding: true,
         }}
         getRowCanExpand={row => row.original.stock > 0}
-        // Controlled state
         state={{
           globalFilter,
           sorting,
           columnFilters,
           columnVisibility,
-          pagination,
           expanded,
           columnPinning,
+          pagination,
         }}
-        // State updaters
         onGlobalFilterChange={value => {
           setGlobalFilter(value)
           setPagination(prev => ({ ...prev, pageIndex: 0 }))
@@ -388,21 +420,37 @@ export default function VirtualizedTableStateExample() {
           setPagination(prev => ({ ...prev, pageIndex: 0 }))
         }}
         onColumnVisibilityChange={setColumnVisibility}
-        onPaginationChange={setPagination}
         onExpandedChange={setExpanded}
         onColumnPinningChange={setColumnPinning}
+        onPaginationChange={setPagination}
       >
         <DataTableToolbarSection>
           <DataTableSearchFilter placeholder="Search products..." />
+          <DataTableFacetedFilter
+            accessorKey="status"
+            title="Status"
+            options={statusOptions}
+          />
+          <DataTableFacetedFilter
+            accessorKey="brand"
+            title="Brand"
+            options={brandOptions}
+          />
           <DataTableViewMenu />
         </DataTableToolbarSection>
-        <DataTable height={600} className="rounded-lg border">
-          <DataTableVirtualizedHeader />
-          <DataTableVirtualizedBody>
-            <DataTableVirtualizedEmptyBody>
+        <DataTable className="max-h-[600px] rounded-lg border">
+          <DataTableHeader />
+          <DataTableBody
+            scrollThreshold={200}
+            onScrolledBottom={() => {
+              if (hasMore && !isFetching) void loadMore()
+            }}
+          >
+            <DataTableSkeleton rows={10} />
+            <DataTableEmptyBody>
               <DataTableEmptyMessage>
                 <DataTableEmptyIcon>
-                  <UserSearch className="size-12" />
+                  <PackageSearch className="size-12" />
                 </DataTableEmptyIcon>
                 <DataTableEmptyTitle>No products found</DataTableEmptyTitle>
                 <DataTableEmptyDescription>
@@ -419,19 +467,25 @@ export default function VirtualizedTableStateExample() {
                   for.
                 </DataTableEmptyDescription>
               </DataTableEmptyFilteredMessage>
-            </DataTableVirtualizedEmptyBody>
-          </DataTableVirtualizedBody>
+            </DataTableEmptyBody>
+            <DataTableLoadingMore isFetching={isFetching}>
+              Loading more products...
+            </DataTableLoadingMore>
+          </DataTableBody>
         </DataTable>
-        <DataTablePagination pageSizeOptions={[50, 100, 200, 500]} />
+        <div className="px-1 pt-2 text-right text-xs text-muted-foreground">
+          Loaded {loaded.length} of {TOTAL_POOL.length} products
+          {!hasMore && loaded.length > 0 && " — end of results"}
+        </div>
       </DataTableRoot>
 
       {/* State Display for demonstration */}
       <Card>
         <CardHeader>
-          <CardTitle>Virtualized Table State</CardTitle>
+          <CardTitle>Infinite Scroll Table State</CardTitle>
           <CardDescription>
-            Live view of the virtualized table state with{" "}
-            {data.length.toLocaleString()} total items
+            Live view of the controlled table state with{" "}
+            {TOTAL_POOL.length.toLocaleString()} total products
           </CardDescription>
           <CardAction>
             <Button variant="outline" size="sm" onClick={resetAllState}>
@@ -453,20 +507,22 @@ export default function VirtualizedTableStateExample() {
             <div className="flex justify-between">
               <span className="font-medium">Total Items:</span>
               <span className="text-foreground">
-                {data.length.toLocaleString()}
+                {TOTAL_POOL.length.toLocaleString()}
               </span>
             </div>
 
             <div className="flex justify-between">
-              <span className="font-medium">Filtered Items:</span>
+              <span className="font-medium">Loaded Rows:</span>
               <span className="text-foreground">
-                {filteredRowCount.toLocaleString()}
+                {loaded.length.toLocaleString()}
               </span>
             </div>
 
             <div className="flex justify-between">
               <span className="font-medium">Active Filters:</span>
-              <span className="text-foreground">0 (Search Only)</span>
+              <span className="text-foreground">
+                {columnFilters.length || "0 (Search Only)"}
+              </span>
             </div>
 
             <div className="flex justify-between">

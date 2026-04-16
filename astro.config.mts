@@ -204,6 +204,14 @@ export default defineConfig({
               label: "Virtualization Table",
               slug: "examples/virtualization-table",
             },
+            {
+              label: "Infinite Scroll Table",
+              slug: "examples/infinite-scroll-table",
+            },
+            {
+              label: "Infinite Scroll Virtualized Table",
+              slug: "examples/infinite-scroll-virtualized-table",
+            },
 
             // Filtering
             {
