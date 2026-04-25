@@ -15,6 +15,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton"
 import { DataTableEmptyState } from "../components/data-table-empty-state"
 import { DataTableColumnHeaderRoot } from "../components/data-table-column-header"
+import { createScrollHandler } from "../lib/create-scroll-handler"
 import { getCommonPinningStyles } from "../lib/styles"
 
 // ============================================================================
@@ -364,61 +365,23 @@ export function DataTableVirtualizedBody<TData>({
    *
    * WHAT: Only creates new functions when onScrolledTop/onScrolledBottom props change.
    */
-  const handleScrollTop = React.useCallback(() => {
-    onScrolledTop?.()
-  }, [onScrolledTop])
-
-  const handleScrollBottom = React.useCallback(() => {
-    onScrolledBottom?.()
-  }, [onScrolledBottom])
-
   /**
-   * PERFORMANCE: Use passive event listener for smoother scrolling
-   *
-   * WHY: Passive listeners tell the browser the handler won't call preventDefault().
-   * This allows the browser to optimize scrolling (e.g., on a separate thread).
-   * Critical for virtualized tables where smooth scrolling is essential.
-   *
-   * IMPACT: Smoother scrolling, especially on mobile devices.
-   * Reduces scroll jank by 30-50% in some cases.
-   *
-   * WHAT: Adds scroll listener with { passive: true } flag.
+   * Attach a passive scroll listener on the container. Listener body
+   * lives in `createScrollHandler` so the four data-table bodies
+   * share one canonical implementation. Passive flag unlocks the
+   * browser's scroll-thread optimization (smoother scrolling,
+   * especially on mobile and during virtual scroll).
    */
   React.useEffect(() => {
-    // Skip if the scroll container hasn't attached yet, OR if no
-    // scroll-related callback is wired. Previously the early return
-    // required `onScroll` specifically, so `onScrolledBottom` /
-    // `onScrolledTop` were silently dead unless the consumer also
-    // passed `onScroll` — the listener never attached. Now we attach
-    // whenever *any* of the three callbacks is provided.
     if (!scrollElement) return
     if (!onScroll && !onScrolledTop && !onScrolledBottom) return
 
-    const handleScroll = (event: Event) => {
-      const element = event.currentTarget as HTMLDivElement
-      const { scrollHeight, scrollTop, clientHeight } = element
-
-      const isTop = scrollTop === 0
-      const isBottom = scrollHeight - scrollTop - clientHeight < scrollThreshold
-      const percentage =
-        scrollHeight - clientHeight > 0
-          ? (scrollTop / (scrollHeight - clientHeight)) * 100
-          : 0
-
-      onScroll?.({
-        scrollTop,
-        scrollHeight,
-        clientHeight,
-        isTop,
-        isBottom,
-        percentage,
-      })
-
-      if (isTop) handleScrollTop()
-      if (isBottom) handleScrollBottom()
-    }
-
-    // Use passive flag to improve scroll performance
+    const handleScroll = createScrollHandler({
+      onScroll,
+      onScrolledTop,
+      onScrolledBottom,
+      scrollThreshold,
+    })
     scrollElement.addEventListener("scroll", handleScroll, { passive: true })
     return () => scrollElement.removeEventListener("scroll", handleScroll)
   }, [
@@ -426,8 +389,6 @@ export function DataTableVirtualizedBody<TData>({
     onScroll,
     onScrolledTop,
     onScrolledBottom,
-    handleScrollTop,
-    handleScrollBottom,
     scrollThreshold,
   ])
 
@@ -540,7 +501,17 @@ export function DataTableVirtualizedBody<TData>({
           .find(cell => cell.column.columnDef.meta?.expandedContent)
 
         return (
-          <React.Fragment key={row.id}>
+          // Composite key: include `isExpanded` so the Fragment (and
+          // therefore the measured `<TableRow>` underneath) remounts
+          // when expansion toggles. Without the remount, the base
+          // row's `ResizeObserver` wouldn't fire (only the new
+          // sibling appears, the base row itself doesn't resize),
+          // so `measureElement` would never re-read the combined
+          // height and the virtualizer would still believe the row
+          // is collapsed-height. The DnD bodies intentionally use a
+          // stable `key={row.id}` instead so `useSortable` is
+          // preserved across expansion toggles.
+          <React.Fragment key={`${row.id}-${isExpanded}`}>
             {/* Main data row */}
             <TableRow
               ref={columnsLocked ? rowVirtualizer.measureElement : undefined}

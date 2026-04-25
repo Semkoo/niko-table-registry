@@ -30,7 +30,13 @@ import {
 export interface DataTableDndBodyProps<TData> {
   children?: React.ReactNode
   className?: string
-  onRowClick?: (row: TData) => void
+  /**
+   * Click is delegated on `<tbody>`. The event's `currentTarget`
+   * is therefore the `<tbody>` — typed as `HTMLElement` to stay
+   * consistent with the virtualized variants. Consumers needing
+   * the row element can `event.target.closest("tr[data-row-id]")`.
+   */
+  onRowClick?: (row: TData, event: React.MouseEvent<HTMLElement>) => void
 }
 
 /**
@@ -89,7 +95,7 @@ export function DataTableDndBody<TData>({
       if (rowId === null) return
       const row = table.getRow(rowId)
       if (!row) return
-      onRowClick(row.original)
+      onRowClick(row.original, event)
     },
     [onRowClick, table],
   )
@@ -242,7 +248,13 @@ DataTableDndHeader.displayName = "DataTableDndHeader"
 export interface DataTableDndColumnBodyProps<TData> {
   children?: React.ReactNode
   className?: string
-  onRowClick?: (row: TData) => void
+  /**
+   * Click is delegated on `<tbody>`. The event's `currentTarget`
+   * is therefore the `<tbody>` — typed as `HTMLElement` to stay
+   * consistent with the virtualized variants. Consumers needing
+   * the row element can `event.target.closest("tr[data-row-id]")`.
+   */
+  onRowClick?: (row: TData, event: React.MouseEvent<HTMLElement>) => void
 }
 
 /**
@@ -296,7 +308,7 @@ export function DataTableDndColumnBody<TData>({
       if (rowId === null) return
       const row = table.getRow(rowId)
       if (!row) return
-      onRowClick(row.original)
+      onRowClick(row.original, event)
     },
     [onRowClick, table],
   )

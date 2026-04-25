@@ -1,5 +1,13 @@
 "use client"
 
+/**
+ * @internal Deep-import only.
+ * Intentionally not re-exported from the package barrel — the DnD
+ * virtualized variants are an opt-in advanced surface; the deep
+ * path keeps consumers explicit about pulling them in and avoids
+ * bloating the barrel for the common (non-DnD) case.
+ */
+
 import React from "react"
 import { useVirtualizer } from "@tanstack/react-virtual"
 import { flexRender } from "@tanstack/react-table"
@@ -12,6 +20,7 @@ import {
   TableCell,
 } from "@/components/ui/table"
 import { DataTableColumnHeaderRoot } from "../components/data-table-column-header"
+import { createScrollHandler } from "../lib/create-scroll-handler"
 import { getCommonPinningStyles } from "../lib/styles"
 import {
   SortableContext,
@@ -216,14 +225,6 @@ export function DataTableVirtualizedDndBody<TData>({
     measureElement,
   })
 
-  const handleScrollTop = React.useCallback(() => {
-    onScrolledTop?.()
-  }, [onScrolledTop])
-
-  const handleScrollBottom = React.useCallback(() => {
-    onScrolledBottom?.()
-  }, [onScrolledBottom])
-
   /** Single row-click handler with event delegation (useCallback). */
   const handleRowClick = React.useCallback(
     (event: React.MouseEvent<HTMLTableSectionElement>) => {
@@ -259,39 +260,15 @@ export function DataTableVirtualizedDndBody<TData>({
   )
 
   React.useEffect(() => {
-    // Skip if the scroll container hasn't attached yet, OR if no
-    // scroll-related callback is wired. Previously the early return
-    // required `onScroll` specifically, so `onScrolledBottom` /
-    // `onScrolledTop` were silently dead unless the consumer also
-    // passed `onScroll` — the listener never attached. Now we attach
-    // whenever *any* of the three callbacks is provided.
     if (!scrollElement) return
     if (!onScroll && !onScrolledTop && !onScrolledBottom) return
 
-    const handleScroll = (event: Event) => {
-      const element = event.currentTarget as HTMLDivElement
-      const { scrollHeight, scrollTop, clientHeight } = element
-
-      const isTop = scrollTop === 0
-      const isBottom = scrollHeight - scrollTop - clientHeight < scrollThreshold
-      const percentage =
-        scrollHeight - clientHeight > 0
-          ? (scrollTop / (scrollHeight - clientHeight)) * 100
-          : 0
-
-      onScroll?.({
-        scrollTop,
-        scrollHeight,
-        clientHeight,
-        isTop,
-        isBottom,
-        percentage,
-      })
-
-      if (isTop) handleScrollTop()
-      if (isBottom) handleScrollBottom()
-    }
-
+    const handleScroll = createScrollHandler({
+      onScroll,
+      onScrolledTop,
+      onScrolledBottom,
+      scrollThreshold,
+    })
     scrollElement.addEventListener("scroll", handleScroll, { passive: true })
     return () => scrollElement.removeEventListener("scroll", handleScroll)
   }, [
@@ -299,8 +276,6 @@ export function DataTableVirtualizedDndBody<TData>({
     onScroll,
     onScrolledTop,
     onScrolledBottom,
-    handleScrollTop,
-    handleScrollBottom,
     scrollThreshold,
   ])
 
@@ -345,7 +320,7 @@ export function DataTableVirtualizedDndBody<TData>({
             .find(cell => cell.column.columnDef.meta?.expandedContent)
 
           return (
-            <React.Fragment key={`${row.id}-${isExpanded}`}>
+            <React.Fragment key={row.id}>
               <VirtualizedDraggableRow
                 rowId={row.id}
                 virtualIndex={virtualRow.index}
@@ -579,48 +554,16 @@ export function DataTableVirtualizedDndColumnBody<TData>({
     measureElement,
   })
 
-  const handleScrollTop = React.useCallback(() => {
-    onScrolledTop?.()
-  }, [onScrolledTop])
-
-  const handleScrollBottom = React.useCallback(() => {
-    onScrolledBottom?.()
-  }, [onScrolledBottom])
-
   React.useEffect(() => {
-    // Skip if the scroll container hasn't attached yet, OR if no
-    // scroll-related callback is wired. Previously the early return
-    // required `onScroll` specifically, so `onScrolledBottom` /
-    // `onScrolledTop` were silently dead unless the consumer also
-    // passed `onScroll` — the listener never attached. Now we attach
-    // whenever *any* of the three callbacks is provided.
     if (!scrollElement) return
     if (!onScroll && !onScrolledTop && !onScrolledBottom) return
 
-    const handleScroll = (event: Event) => {
-      const element = event.currentTarget as HTMLDivElement
-      const { scrollHeight, scrollTop, clientHeight } = element
-
-      const isTop = scrollTop === 0
-      const isBottom = scrollHeight - scrollTop - clientHeight < scrollThreshold
-      const percentage =
-        scrollHeight - clientHeight > 0
-          ? (scrollTop / (scrollHeight - clientHeight)) * 100
-          : 0
-
-      onScroll?.({
-        scrollTop,
-        scrollHeight,
-        clientHeight,
-        isTop,
-        isBottom,
-        percentage,
-      })
-
-      if (isTop) handleScrollTop()
-      if (isBottom) handleScrollBottom()
-    }
-
+    const handleScroll = createScrollHandler({
+      onScroll,
+      onScrolledTop,
+      onScrolledBottom,
+      scrollThreshold,
+    })
     scrollElement.addEventListener("scroll", handleScroll, { passive: true })
     return () => scrollElement.removeEventListener("scroll", handleScroll)
   }, [
@@ -628,8 +571,6 @@ export function DataTableVirtualizedDndColumnBody<TData>({
     onScroll,
     onScrolledTop,
     onScrolledBottom,
-    handleScrollTop,
-    handleScrollBottom,
     scrollThreshold,
   ])
 
@@ -709,7 +650,7 @@ export function DataTableVirtualizedDndColumnBody<TData>({
           .find(cell => cell.column.columnDef.meta?.expandedContent)
 
         return (
-          <React.Fragment key={`${row.id}-${isExpanded}`}>
+          <React.Fragment key={row.id}>
             <TableRow
               ref={rowVirtualizer.measureElement}
               data-index={virtualRow.index}

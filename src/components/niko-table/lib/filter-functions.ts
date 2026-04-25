@@ -505,12 +505,21 @@ function applyFilterOperator(
 
     // Date operators (basic implementation)
     case FILTER_OPERATORS.RELATIVE:
+      // Not yet implemented — but still wired into the UI via
+      // `dateOperators` in `config/data-table.ts`. Throw in dev so
+      // the gap is loud during development; in production fall back
+      // to returning *no* matches (safer than silently passing every
+      // row, which made the date filter look broken to end users).
+      // Replace this branch with the real comparison once implemented.
       if (process.env.NODE_ENV !== "production") {
-        console.warn(
-          "FILTER_OPERATORS.RELATIVE is not yet implemented — all rows will pass this filter.",
+        throw new Error(
+          "FILTER_OPERATORS.RELATIVE is not yet implemented. Either remove the 'Is relative to today' option from the date filter UI or implement this case.",
         )
       }
-      return true
+      console.error(
+        "FILTER_OPERATORS.RELATIVE is not yet implemented — returning no matches in production to avoid silently passing all rows.",
+      )
+      return false
 
     default:
       // Fallback to contains behavior using regex
