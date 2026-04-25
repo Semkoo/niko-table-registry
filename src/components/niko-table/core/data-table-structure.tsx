@@ -131,6 +131,8 @@ interface BodyRowProps {
   isClickable: boolean
   isExpanded: boolean
   isSelected: boolean
+  /** Column layout signature — invalidates React.memo on visibility/order/pinning change. */
+  columnLayoutSignature: string
 }
 
 const BodyRow = React.memo(function BodyRow({
@@ -263,6 +265,19 @@ export function DataTableBody<TData>({
     [table, columns],
   )
 
+  // Encodes visible column ids + pinning so memoized rows re-render on layout changes.
+  const columnLayoutSignature = React.useMemo(
+    () =>
+      table
+        .getVisibleLeafColumns()
+        .map(c => {
+          const pinned = c.getIsPinned()
+          return pinned ? `${c.id}:${pinned}` : c.id
+        })
+        .join(","),
+    [table, columns],
+  )
+
   const isClickable = !!onRowClick
 
   return (
@@ -281,6 +296,7 @@ export function DataTableBody<TData>({
               isClickable={isClickable}
               isExpanded={row.getIsExpanded()}
               isSelected={row.getIsSelected()}
+              columnLayoutSignature={columnLayoutSignature}
             />
           ))
         : null}

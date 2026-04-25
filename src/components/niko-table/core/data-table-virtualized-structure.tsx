@@ -241,6 +241,8 @@ interface VirtualizedBodyRowProps<TData> {
   isClickable: boolean
   measureRef: ((node: HTMLTableRowElement | null) => void) | undefined
   onClick: (event: React.MouseEvent<HTMLElement>) => void
+  /** Column layout signature — invalidates React.memo on visibility/order/pinning change. */
+  columnLayoutSignature: string
 }
 
 const VirtualizedBodyRowInner = function VirtualizedBodyRow<TData>({
@@ -379,6 +381,20 @@ export function DataTableVirtualizedBody<TData>({
         ?.id,
     [table, columns],
   )
+
+  // Encodes visible column ids + pinning so memoized rows re-render on layout changes.
+  const columnLayoutSignature = React.useMemo(
+    () =>
+      table
+        .getVisibleLeafColumns()
+        .map(c => {
+          const pinned = c.getIsPinned()
+          return pinned ? `${c.id}:${pinned}` : c.id
+        })
+        .join(","),
+    [table, columns],
+  )
+
   const [scrollElement, setScrollElement] =
     React.useState<HTMLDivElement | null>(null)
   const tbodyRef = React.useRef<HTMLTableSectionElement | null>(null)
@@ -630,6 +646,7 @@ export function DataTableVirtualizedBody<TData>({
             isClickable={isClickable}
             measureRef={columnsLocked ? stableMeasureElement : undefined}
             onClick={handleRowClick}
+            columnLayoutSignature={columnLayoutSignature}
           />
         )
       })}

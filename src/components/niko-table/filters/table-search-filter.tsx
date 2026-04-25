@@ -75,16 +75,22 @@ export function TableSearchFilter<TData>({
   const [pendingValue, setPendingValue] =
     React.useState<string>(globalFilterValue)
 
-  React.useEffect(() => {
-    if (!debounceEnabled) return
-    setPendingValue(globalFilterValue)
-  }, [globalFilterValue, debounceEnabled])
-
   // Stable timeout ref — debounce state lives outside the React tree
   // so input renders aren't gated on it.
   const debounceTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(
     null,
   )
+
+  React.useEffect(() => {
+    if (!debounceEnabled) return
+    // Cancel any pending debounce flush before syncing — an out-of-band reset
+    // (URL nav, programmatic clear) must win over a stale keystroke timer.
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current)
+      debounceTimerRef.current = null
+    }
+    setPendingValue(globalFilterValue)
+  }, [globalFilterValue, debounceEnabled])
 
   // Cancel any pending flush on unmount so we don't write to a torn-down table.
   React.useEffect(() => {

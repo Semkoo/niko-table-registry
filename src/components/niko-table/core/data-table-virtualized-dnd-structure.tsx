@@ -200,6 +200,8 @@ interface VirtualizedDndBodyRowProps<TData> {
   isClickable: boolean
   estimateSize: number
   measureRef: ((node: HTMLTableRowElement | null) => void) | undefined
+  /** Column layout signature — invalidates React.memo on visibility/order/pinning change. */
+  columnLayoutSignature: string
 }
 
 const VirtualizedDndBodyRowInner = function VirtualizedDndBodyRow<TData>({
@@ -284,6 +286,8 @@ interface VirtualizedDndColumnBodyRowProps<TData> {
   isClickable: boolean
   estimateSize: number
   measureRef: ((node: HTMLTableRowElement | null) => void) | undefined
+  /** Column layout signature — invalidates React.memo on visibility/order/pinning change. */
+  columnLayoutSignature: string
 }
 
 const VirtualizedDndColumnBodyRowInner = function VirtualizedDndColumnBodyRow<
@@ -305,10 +309,29 @@ const VirtualizedDndColumnBodyRowInner = function VirtualizedDndColumnBodyRow<
 
   const visibleCells = row.getVisibleCells()
 
+  // Cache the row DOM node so the isExpanded effect can re-trigger measureRef
+  // without unmounting. Same pattern as VirtualizedDraggableRow.
+  const elementRef = React.useRef<HTMLTableRowElement | null>(null)
+  const setRef = React.useCallback(
+    (node: HTMLTableRowElement | null) => {
+      elementRef.current = node
+      if (measureRef) measureRef(node)
+    },
+    [measureRef],
+  )
+
+  // Re-measure on expansion toggle so the virtualizer picks up the combined
+  // base + expanded-pane height without remounting the row (stable key = no
+  // useSortable re-registration). Column-DnD rows don't have useSortable on
+  // the row itself but we keep key stable for consistency.
+  React.useEffect(() => {
+    if (measureRef && elementRef.current) measureRef(elementRef.current)
+  }, [isExpanded, measureRef])
+
   return (
     <>
       <TableRow
-        ref={measureRef}
+        ref={setRef}
         data-index={virtualIndex}
         data-row-id={row.id}
         data-state={isSelected ? "selected" : undefined}
@@ -423,6 +446,19 @@ export function DataTableVirtualizedDndBody<TData>({
     () =>
       table.getAllColumns().find(col => col.columnDef.meta?.expandedContent)
         ?.id,
+    [table, columns],
+  )
+
+  // Encodes visible column ids + pinning so memoized rows re-render on layout changes.
+  const columnLayoutSignature = React.useMemo(
+    () =>
+      table
+        .getVisibleLeafColumns()
+        .map(c => {
+          const pinned = c.getIsPinned()
+          return pinned ? `${c.id}:${pinned}` : c.id
+        })
+        .join(","),
     [table, columns],
   )
 
@@ -558,6 +594,7 @@ export function DataTableVirtualizedDndBody<TData>({
               isClickable={isClickable}
               estimateSize={estimateSize}
               measureRef={stableMeasureElement}
+              columnLayoutSignature={columnLayoutSignature}
             />
           )
         })}
@@ -736,6 +773,19 @@ export function DataTableVirtualizedDndColumnBody<TData>({
     [table, columns],
   )
 
+  // Encodes visible column ids + pinning so memoized rows re-render on layout changes.
+  const columnLayoutSignature = React.useMemo(
+    () =>
+      table
+        .getVisibleLeafColumns()
+        .map(c => {
+          const pinned = c.getIsPinned()
+          return pinned ? `${c.id}:${pinned}` : c.id
+        })
+        .join(","),
+    [table, columns],
+  )
+
   const [scrollElement, setScrollElement] =
     React.useState<HTMLDivElement | null>(null)
 
@@ -861,6 +911,7 @@ export function DataTableVirtualizedDndColumnBody<TData>({
             isClickable={isClickable}
             estimateSize={estimateSize}
             measureRef={stableMeasureElement}
+            columnLayoutSignature={columnLayoutSignature}
           />
         )
       })}

@@ -53,6 +53,10 @@ interface DndBodyRowProps {
   expandColumnId: string | undefined
   isClickable: boolean
   isExpanded: boolean
+  /** Selection state — read by `TableDraggableRow` internally; prop exists to invalidate React.memo. */
+  isSelected: boolean
+  /** Column layout signature — invalidates React.memo on visibility/order/pinning change. */
+  columnLayoutSignature: string
 }
 
 const DndBodyRow = React.memo(function DndBodyRow({
@@ -119,6 +123,8 @@ interface DndColumnBodyRowProps {
   isClickable: boolean
   isExpanded: boolean
   isSelected: boolean
+  /** Column layout signature — invalidates React.memo on visibility/order/pinning change. */
+  columnLayoutSignature: string
 }
 
 const DndColumnBodyRow = React.memo(function DndColumnBodyRow({
@@ -226,6 +232,19 @@ export function DataTableDndBody<TData>({
     [table, columns],
   )
 
+  // Encodes visible column ids + pinning so memoized rows re-render on layout changes.
+  const columnLayoutSignature = React.useMemo(
+    () =>
+      table
+        .getVisibleLeafColumns()
+        .map(c => {
+          const pinned = c.getIsPinned()
+          return pinned ? `${c.id}:${pinned}` : c.id
+        })
+        .join(","),
+    [table, columns],
+  )
+
   const isClickable = !!onRowClick
 
   return (
@@ -242,6 +261,8 @@ export function DataTableDndBody<TData>({
               expandColumnId={expandColumnId}
               isClickable={isClickable}
               isExpanded={row.getIsExpanded()}
+              isSelected={row.getIsSelected()}
+              columnLayoutSignature={columnLayoutSignature}
             />
           ))}
         </SortableContext>
@@ -384,6 +405,19 @@ export function DataTableDndColumnBody<TData>({
     [table, columns],
   )
 
+  // Encodes visible column ids + pinning so memoized rows re-render on layout changes.
+  const columnLayoutSignature = React.useMemo(
+    () =>
+      table
+        .getVisibleLeafColumns()
+        .map(c => {
+          const pinned = c.getIsPinned()
+          return pinned ? `${c.id}:${pinned}` : c.id
+        })
+        .join(","),
+    [table, columns],
+  )
+
   const isClickable = !!onRowClick
 
   return (
@@ -400,6 +434,7 @@ export function DataTableDndColumnBody<TData>({
               isClickable={isClickable}
               isExpanded={row.getIsExpanded()}
               isSelected={row.getIsSelected()}
+              columnLayoutSignature={columnLayoutSignature}
             />
           ))
         : null}
