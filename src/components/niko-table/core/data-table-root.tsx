@@ -456,11 +456,21 @@ function DataTableRootInternal<TData, TValue>({
    */
   const handleRowSelectionChange = React.useCallback(
     (valueFn: Updater<RowSelectionState>) => {
-      if (typeof valueFn === "function") {
-        const updatedRowSelection = valueFn(rowSelection)
-        // Mount-guard the local state write (see `isMountedRef`
-        // comment in the useState block above).
-        if (isMountedRef.current) setRowSelection(updatedRowSelection)
+      if (typeof valueFn !== "function") return
+      // Mount-guard outer (see `isMountedRef` comment above).
+      if (!isMountedRef.current) return
+
+      // Functional updater pattern. Reads `prev` from React's
+      // setter rather than capturing `rowSelection` from the
+      // closure — that capture used to put `rowSelection` in this
+      // useCallback's deps, so the callback identity changed on
+      // every selection click → `tableOptions` memo invalidated
+      // → `useReactTable` saw "options changed" on every click
+      // → cascading internal state syncs. Reading from `prev`
+      // keeps the callback identity stable across selection state
+      // changes.
+      setRowSelection(prev => {
+        const updatedRowSelection = valueFn(prev)
 
         // Use Map for O(1) lookup instead of O(n) Array.find()
         // With 10,000 rows and 100 selected: ~500ms -> ~5ms (100x faster)
@@ -470,9 +480,10 @@ function DataTableRootInternal<TData, TValue>({
           .filter((row): row is TData => row !== undefined)
 
         onRowSelection?.(selectedRows)
-      }
+        return updatedRowSelection
+      })
     },
-    [rowIdMap, onRowSelection, rowSelection],
+    [rowIdMap, onRowSelection],
   )
 
   /**

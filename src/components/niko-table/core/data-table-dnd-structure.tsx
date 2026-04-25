@@ -111,6 +111,19 @@ export function DataTableDndBody<TData>({
     [onRowClick, table],
   )
 
+  /**
+   * Resolve the expand column once at the table level. Previously
+   * `getAllCells().find(...)` ran inside the row map — O(rows × cols)
+   * per render even though the expand column is stable for the
+   * lifetime of the column set.
+   */
+  const expandColumnId = React.useMemo(
+    () =>
+      table.getAllColumns().find(col => col.columnDef.meta?.expandedContent)
+        ?.id,
+    [table],
+  )
+
   return (
     <TableBody
       className={className}
@@ -122,10 +135,13 @@ export function DataTableDndBody<TData>({
             const isClickable = !!onRowClick
             const isExpanded = row.getIsExpanded()
 
-            // Find if any column has expandedContent meta
-            const expandColumn = row
-              .getAllCells()
-              .find(cell => cell.column.columnDef.meta?.expandedContent)
+            // Resolve the expand cell only when expanded, using the
+            // memoized `expandColumnId` (computed once at the table
+            // level above this map).
+            const expandCell =
+              isExpanded && expandColumnId
+                ? row.getAllCells().find(c => c.column.id === expandColumnId)
+                : undefined
 
             return (
               <React.Fragment key={row.id}>
@@ -157,13 +173,13 @@ export function DataTableDndBody<TData>({
                 </TableDraggableRow>
 
                 {/* Expanded content row */}
-                {isExpanded && expandColumn && (
+                {expandCell && (
                   <TableRow>
                     <TableCell
                       colSpan={row.getVisibleCells().length}
                       className="p-0"
                     >
-                      {expandColumn.column.columnDef.meta?.expandedContent?.(
+                      {expandCell.column.columnDef.meta?.expandedContent?.(
                         row.original,
                       )}
                     </TableCell>
@@ -324,6 +340,15 @@ export function DataTableDndColumnBody<TData>({
     [onRowClick, table],
   )
 
+  // Resolve the expand column once at the table level (see comment
+  // on the equivalent memo in `DataTableDndBody` above).
+  const expandColumnId = React.useMemo(
+    () =>
+      table.getAllColumns().find(col => col.columnDef.meta?.expandedContent)
+        ?.id,
+    [table],
+  )
+
   return (
     <TableBody
       className={className}
@@ -334,13 +359,10 @@ export function DataTableDndColumnBody<TData>({
             const isClickable = !!onRowClick
             const isExpanded = row.getIsExpanded()
 
-            // Find a column that defines `meta.expandedContent` —
-            // same contract used by `DataTableBody` and the row-DnD
-            // body. Without rendering this expanded sibling, column-
-            // DnD tables silently dropped row-expansion support.
-            const expandColumn = row
-              .getAllCells()
-              .find(cell => cell.column.columnDef.meta?.expandedContent)
+            const expandCell =
+              isExpanded && expandColumnId
+                ? row.getAllCells().find(c => c.column.id === expandColumnId)
+                : undefined
 
             return (
               <React.Fragment key={row.id}>
@@ -359,13 +381,13 @@ export function DataTableDndColumnBody<TData>({
                   ))}
                 </TableRow>
 
-                {isExpanded && expandColumn && (
+                {expandCell && (
                   <TableRow>
                     <TableCell
                       colSpan={row.getVisibleCells().length}
                       className="p-0"
                     >
-                      {expandColumn.column.columnDef.meta?.expandedContent?.(
+                      {expandCell.column.columnDef.meta?.expandedContent?.(
                         row.original,
                       )}
                     </TableCell>

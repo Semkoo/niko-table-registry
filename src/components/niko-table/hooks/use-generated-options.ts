@@ -160,25 +160,24 @@ export function useGeneratedOptions<TData>(
       // dynamicCounts controls which rows to use for calculating counts
       // When generating options for a column, we want to exclude that column's own filter
       // so we see all options that exist in the filtered dataset (from other filters)
-      const optionSourceRows = limitToFilteredRows
-        ? getFilteredRowsExcludingColumn(
-            table,
-            coreRows,
-            colId,
-            columnFilters,
-            globalFilter,
-          )
-        : coreRows
-
-      const countSourceRows = colDynamicCounts
-        ? getFilteredRowsExcludingColumn(
-            table,
-            coreRows,
-            colId,
-            columnFilters,
-            globalFilter,
-          )
-        : coreRows
+      //
+      // When BOTH flags are true (the common default) the inputs to
+      // `getFilteredRowsExcludingColumn` are identical — so compute once
+      // and reuse for both `optionSourceRows` and `countSourceRows`.
+      // Without this, large tables paid the filter walk twice per
+      // generated-options column on every options-recompute.
+      const filteredRowsExcl =
+        limitToFilteredRows || colDynamicCounts
+          ? getFilteredRowsExcludingColumn(
+              table,
+              coreRows,
+              colId,
+              columnFilters,
+              globalFilter,
+            )
+          : coreRows
+      const optionSourceRows = limitToFilteredRows ? filteredRowsExcl : coreRows
+      const countSourceRows = colDynamicCounts ? filteredRowsExcl : coreRows
 
       // If we have static options with augment strategy, we use static options and only calculate counts
       if (meta.options && meta.options.length > 0 && colMerge === "augment") {

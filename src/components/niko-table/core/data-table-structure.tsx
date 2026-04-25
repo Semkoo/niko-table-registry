@@ -226,6 +226,19 @@ export function DataTableBody<TData>({
     return () => container.removeEventListener("scroll", handleScroll)
   }, [onScroll, onScrolledTop, onScrolledBottom, scrollThreshold])
 
+  /**
+   * Resolve the expand column once at the table level. Previously
+   * `getAllCells().find(...)` ran inside the row map — O(rows × cols)
+   * per render even though the expand column is stable for the
+   * lifetime of the column set.
+   */
+  const expandColumnId = React.useMemo(
+    () =>
+      table.getAllColumns().find(col => col.columnDef.meta?.expandedContent)
+        ?.id,
+    [table],
+  )
+
   return (
     <TableBody
       ref={containerRef}
@@ -238,10 +251,12 @@ export function DataTableBody<TData>({
             const isClickable = !!onRowClick
             const isExpanded = row.getIsExpanded()
 
-            // Find if any column has expandedContent meta
-            const expandColumn = row
-              .getAllCells()
-              .find(cell => cell.column.columnDef.meta?.expandedContent)
+            // Resolve the expand cell only when expanded, using the
+            // memoized `expandColumnId`.
+            const expandCell =
+              isExpanded && expandColumnId
+                ? row.getAllCells().find(c => c.column.id === expandColumnId)
+                : undefined
 
             return (
               <React.Fragment key={row.id}>
@@ -277,13 +292,13 @@ export function DataTableBody<TData>({
                 </TableRow>
 
                 {/* Expanded content row */}
-                {isExpanded && expandColumn && (
+                {expandCell && (
                   <TableRow>
                     <TableCell
                       colSpan={row.getVisibleCells().length}
                       className="p-0"
                     >
-                      {expandColumn.column.columnDef.meta?.expandedContent?.(
+                      {expandCell.column.columnDef.meta?.expandedContent?.(
                         row.original,
                       )}
                     </TableCell>
@@ -476,7 +491,14 @@ export function DataTableLoading({
   colSpan,
   className,
 }: DataTableLoadingProps) {
-  const { columns } = useDataTable()
+  const { columns, isLoading } = useDataTable()
+
+  // Self-gate on `isLoading` like every peer composable child
+  // (`DataTableSkeleton`, `DataTableEmptyBody`,
+  // `DataTableVirtualizedLoading`). Without this guard the loading
+  // row stays visible after data resolves, defeating the
+  // self-gating composition contract.
+  if (!isLoading) return null
 
   return (
     <TableRow>
