@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Performance — round 2 (CodeRabbit follow-up)
+
+- **`expandColumnId` memo deps now include `columns`** in `DataTableBody`, `DataTableDndBody`, and `DataTableDndColumnBody`. The memo previously depended only on `[table]` — but TanStack reuses the table instance reference across column updates, so the cached `expandColumnId` could go stale if the consumer passed a new column set. Now keyed on `[table, columns]` (where `columns` comes from `useDataTable()`).
+- **`handleRowSelectionChange` honors the full TanStack `Updater<T>` contract + side effects moved out of the state updater.** Previously the handler rejected non-function `Updater` forms (TanStack's contract is `Updater<T> = T | ((old: T) => T)` — value form is legal) and called `onRowSelection` from inside `setRowSelection` (React docs: state updaters must be pure; concurrent / strict mode may invoke them multiple times → consumer callback would double-fire). The handler now accepts both forms and the `setRowSelection` body is pure; a separate `useEffect` watching `rowSelection` notifies `onRowSelection` (gated by `isMountedRef`). **Behavior nuance:** the effect now fires `onRowSelection` on _any_ `rowSelection` change, including consumer-controlled changes via `onRowSelectionChange`. Previously it only fired when our own handler ran.
+
+### Performance
+
+- **`DataTableLoading` — added missing `isLoading` self-gate.** Peer composables (`DataTableSkeleton`, `DataTableEmptyBody`, `DataTableVirtualizedLoading`) self-gate on `isLoading` but `DataTableLoading` rendered unconditionally — leaving a loading row visible after data resolved. **Real bug fix.**
+- **`handleRowSelectionChange` — switched to functional updater.** The `useCallback` previously read `rowSelection` from the closure and listed it in deps, so the callback identity changed on every selection click → `tableOptions` memo invalidated → `useReactTable` saw "options changed" on every click → cascading TanStack internal state syncs. `setRowSelection(prev => ...)` reads `prev` from React's setter and drops `rowSelection` from the deps, keeping the callback identity stable across selection changes.
+- **`expandColumn` detection hoisted out of the row map.** All three non-virtualized bodies (`DataTableBody`, `DataTableDndBody`, `DataTableDndColumnBody`) called `row.getAllCells().find(cell => cell.column.columnDef.meta?.expandedContent)` inside the row map — O(rows × cols) per render even though the expand column is stable for the lifetime of the column set. Hoisted to a memo keyed on `table` so we walk columns once per render instead of once per row × column.
+- **`useGeneratedOptions` — eliminated double `getFilteredRowsExcludingColumn` walk.** When both `limitToFilteredRows` and `dynamicCounts` are true (the default), the filter walk ran twice per generated-options column with identical inputs. Now compute once and reuse for both `optionSourceRows` and `countSourceRows`.
+
 ### Fixed
 
 - **Virtualized non-DnD body — `onRowClick` event type unified with the other body variants** — Was the lone outlier still using `React.MouseEvent<HTMLTableRowElement>`; the other four bodies (`DataTableBody`, `DataTableDndBody`, `DataTableDndColumnBody`, `DataTableVirtualizedDndBody`, `DataTableVirtualizedDndColumnBody`) all use `React.MouseEvent<HTMLElement>`. Now consistent — a single handler can be passed through wrappers that switch between bodies. Backward-compatible (function arguments are contravariant; `HTMLElement` is a supertype of `HTMLTableRowElement`).

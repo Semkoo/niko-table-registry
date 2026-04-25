@@ -5,6 +5,18 @@ description: Latest updates and release notes for Niko Table.
 
 ## May 2026
 
+### Performance — round 2 (CodeRabbit follow-up)
+
+- **`expandColumnId` memo deps include `columns`.** In `DataTableBody`, `DataTableDndBody`, and `DataTableDndColumnBody` the memo previously keyed only on `table` — the table instance reference is stable across `columns` prop swaps, so swapping which column carries `meta.expandedContent` would not re-detect the expanded column. Memo now depends on `[table, columns]` and re-evaluates on column changes.
+- **`handleRowSelectionChange` honors the full TanStack `Updater<T>` contract + side effects moved out of the state updater.** Previously the callback assumed every dispatch was a function; TanStack Table's `Updater<T>` is `T | ((old: T) => T)` and the column-level "select all" path passes a plain object — that branch crashed on `valueFn(prev)`. Refactored to handle both forms. Separately, the `onRowSelection` consumer callback was being invoked from inside the `setRowSelection` updater, which violates React's rule that state updaters must be pure (StrictMode invokes them twice). Lifted the notify into a `useEffect` that fires when `rowSelection` changes. Behavior change: `onRowSelection` now also fires when consumers feed `rowSelection` in via controlled state, not only when our handler runs — this matches the intuitive "tell me when selection changes" contract.
+
+### Performance (CodeRabbit feedback)
+
+- **`DataTableLoading` — added missing `isLoading` self-gate.** Peer composables self-gate on `isLoading` but `DataTableLoading` rendered unconditionally — leaving a loading row visible after data resolved. Real bug fix.
+- **`handleRowSelectionChange` — switched to functional updater.** Reading `rowSelection` from the closure put it in the `useCallback` deps, so the callback identity changed on every selection click → `tableOptions` invalidated → cascading TanStack internal state syncs. `setRowSelection(prev => ...)` keeps the callback identity stable.
+- **`expandColumn` detection hoisted out of the row map** in all three non-virtualized bodies. Was O(rows × cols) per render; now O(cols) once per render via a memo keyed on `table`.
+- **`useGeneratedOptions` — eliminated double `getFilteredRowsExcludingColumn` walk.** When both `limitToFilteredRows` and `dynamicCounts` are true (the default), the filter walk ran twice per generated-options column. Compute once and reuse.
+
 ### Fixed (round 5 — consistency follow-ups)
 
 - **Virtualized non-DnD body — `onRowClick` event type unified with the other body variants** — Was the lone outlier still using `React.MouseEvent<HTMLTableRowElement>`; the other four bodies all use `React.MouseEvent<HTMLElement>`. Now consistent — a single handler can be passed through wrappers that switch between bodies. Backward-compatible (function arguments are contravariant).

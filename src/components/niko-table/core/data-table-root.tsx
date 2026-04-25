@@ -456,35 +456,50 @@ function DataTableRootInternal<TData, TValue>({
    */
   const handleRowSelectionChange = React.useCallback(
     (valueFn: Updater<RowSelectionState>) => {
-      if (typeof valueFn !== "function") return
       // Mount-guard outer (see `isMountedRef` comment above).
       if (!isMountedRef.current) return
 
-      // Functional updater pattern. Reads `prev` from React's
-      // setter rather than capturing `rowSelection` from the
-      // closure — that capture used to put `rowSelection` in this
-      // useCallback's deps, so the callback identity changed on
-      // every selection click → `tableOptions` memo invalidated
-      // → `useReactTable` saw "options changed" on every click
-      // → cascading internal state syncs. Reading from `prev`
-      // keeps the callback identity stable across selection state
-      // changes.
-      setRowSelection(prev => {
-        const updatedRowSelection = valueFn(prev)
-
-        // Use Map for O(1) lookup instead of O(n) Array.find()
-        // With 10,000 rows and 100 selected: ~500ms -> ~5ms (100x faster)
-        const selectedRows = Object.keys(updatedRowSelection)
-          .filter(key => updatedRowSelection[key])
-          .map(key => rowIdMap.get(key))
-          .filter((row): row is TData => row !== undefined)
-
-        onRowSelection?.(selectedRows)
-        return updatedRowSelection
-      })
+      // Honor the full TanStack `Updater<T> = T | ((old: T) => T)`
+      // contract — accept BOTH a value and a functional updater.
+      // The functional path uses the `prev => ...` pattern (rather
+      // than capturing `rowSelection` from the closure) so this
+      // useCallback doesn't need `rowSelection` in deps and stays
+      // identity-stable across selection clicks.
+      //
+      // Pure state updater: NO side effects (e.g. `onRowSelection`)
+      // inside the setter callback — they get fired by the
+      // `useEffect` below that watches the resolved `rowSelection`.
+      // React may invoke the updater multiple times in dev /
+      // concurrent mode; calling consumer callbacks from inside
+      // would double-fire.
+      if (typeof valueFn === "function") {
+        setRowSelection(prev => valueFn(prev))
+      } else {
+        setRowSelection(valueFn)
+      }
     },
-    [rowIdMap, onRowSelection],
+    [],
   )
+
+  /**
+   * Notify the consumer's `onRowSelection` callback with the
+   * resolved selected-row data whenever the selection changes.
+   * Lifted out of the state-updater (per React docs: "your updater
+   * functions must be pure") and gated on `isMountedRef`.
+   *
+   * Uses `rowIdMap` for O(1) lookup — with 10,000 rows × 100
+   * selected this drops from ~500ms to ~5ms vs the previous
+   * `Array.find()` approach.
+   */
+  React.useEffect(() => {
+    if (!isMountedRef.current) return
+    if (!onRowSelection) return
+    const selectedRows = Object.keys(rowSelection)
+      .filter(key => rowSelection[key])
+      .map(key => rowIdMap.get(key))
+      .filter((row): row is TData => row !== undefined)
+    onRowSelection(selectedRows)
+  }, [rowSelection, rowIdMap, onRowSelection])
 
   /**
    * PERFORMANCE: Memoize default column pinning handler with useCallback

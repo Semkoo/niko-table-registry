@@ -140,7 +140,7 @@ export function DataTableBody<TData>({
   scrollThreshold = 50,
   onRowClick,
 }: DataTableBodyProps<TData>) {
-  const { table, isLoading } = useDataTable<TData>()
+  const { table, columns, isLoading } = useDataTable<TData>()
   const { rows } = table.getRowModel()
   const containerRef = React.useRef<HTMLTableSectionElement>(null)
 
@@ -231,12 +231,18 @@ export function DataTableBody<TData>({
    * `getAllCells().find(...)` ran inside the row map — O(rows × cols)
    * per render even though the expand column is stable for the
    * lifetime of the column set.
+   *
+   * Deps include `columns` (from `useDataTable()`) so the memo
+   * recomputes when the consumer passes a new column set —
+   * `table` alone is too stable (TanStack reuses the same
+   * instance across column updates) and would leave the cached
+   * `expandColumnId` stale.
    */
   const expandColumnId = React.useMemo(
     () =>
       table.getAllColumns().find(col => col.columnDef.meta?.expandedContent)
         ?.id,
-    [table],
+    [table, columns],
   )
 
   return (

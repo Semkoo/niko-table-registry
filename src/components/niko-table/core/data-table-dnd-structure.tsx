@@ -69,7 +69,7 @@ export function DataTableDndBody<TData>({
   className,
   onRowClick,
 }: DataTableDndBodyProps<TData>) {
-  const { table, isLoading } = useDataTable<TData>()
+  const { table, columns, isLoading } = useDataTable<TData>()
   const { rows } = table.getRowModel()
 
   const dataIds = React.useMemo<UniqueIdentifier[]>(
@@ -121,7 +121,11 @@ export function DataTableDndBody<TData>({
     () =>
       table.getAllColumns().find(col => col.columnDef.meta?.expandedContent)
         ?.id,
-    [table],
+    // `columns` (from `useDataTable()`) is included so the memo
+    // recomputes when the consumer passes a new column set —
+    // `table` alone is too stable (TanStack reuses the same
+    // instance across column updates).
+    [table, columns],
   )
 
   return (
@@ -303,7 +307,7 @@ export function DataTableDndColumnBody<TData>({
   className,
   onRowClick,
 }: DataTableDndColumnBodyProps<TData>) {
-  const { table, isLoading } = useDataTable<TData>()
+  const { table, columns, isLoading } = useDataTable<TData>()
   const { rows } = table.getRowModel()
 
   /** Single row-click handler with event delegation (useCallback). */
@@ -346,7 +350,11 @@ export function DataTableDndColumnBody<TData>({
     () =>
       table.getAllColumns().find(col => col.columnDef.meta?.expandedContent)
         ?.id,
-    [table],
+    // `columns` (from `useDataTable()`) is included so the memo
+    // recomputes when the consumer passes a new column set —
+    // `table` alone is too stable (TanStack reuses the same
+    // instance across column updates).
+    [table, columns],
   )
 
   return (
