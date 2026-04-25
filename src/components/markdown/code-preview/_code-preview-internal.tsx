@@ -37,6 +37,8 @@ export type Demo =
   | "niko-table/column-dnd-state"
   | "niko-table/virtualized-row-dnd"
   | "niko-table/virtualized-column-dnd"
+  | "niko-table/inline-edit"
+  | "niko-table/inline-edit-state"
 
 export function CodePreviewInternal({
   demo,

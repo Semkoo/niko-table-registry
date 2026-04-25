@@ -29,46 +29,7 @@ This example also uses `input` and `badge` from Shadcn UI:
 
 > First time using `@niko-table`? See the [Installation Guide](/getting-started/installation#configure-the-niko-table-registry) to set up the registry.
 
-## The React.memo problem
-
-All six body row components in Niko Table are wrapped with `React.memo`. This means a row only re-renders when its props change — selection state, expansion state, column layout. It does **not** re-render just because state in the parent component changed.
-
-This is normally great for performance, but it creates a subtle bug with inline editing:
-
-```tsx
-// ❌ Bug: typing into the name input does nothing visible
-function MyTable() {
-  const [editingId, setEditingId] = useState<string | null>(null)
-  const [draft, setDraft] = useState({ name: "", price: "" })
-
-  const columns = useMemo(() => [{
-    id: "name",
-    cell: ({ row }) => {
-      const isEditing = row.original.id === editingId
-      // This closure captures `draft` at memo creation time.
-      // Typing calls setDraft → parent re-renders → but BodyRow props
-      // haven't changed → React.memo skips the row → input stays frozen.
-      if (isEditing) return <Input value={draft.name} onChange={...} />
-      return row.original.name
-    }
-  }], [editingId, draft]) // ← columns rebuild, but BodyRow's props don't change
-
-  return <DataTableBody /> // ← React.memo blocks the re-render
-}
-```
-
-The column definitions rebuild on every `draft` change, but the memoized `BodyRow` component only receives `row`, `columnLayoutSignature`, and other stable props. Without a signal that something changed for this specific row, React.memo correctly skips it.
-
-## The fix: `getRowMemoKey`
-
-`getRowMemoKey` is a prop on all six body components that gives you a hook into React.memo's comparison:
-
-```tsx
-// ✅ Correct: each keystroke produces a new key for the editing row only
-<DataTableBody getRowMemoKey={getRowMemoKey} />
-```
-
-Internally, the string you return becomes a `rowMemoKey` prop on `BodyRow`. React.memo compares it like any other prop — when it changes, the row re-renders. When it stays the same, the row is skipped.
+For other add-ons or manual copy-paste, see the [Installation Guide](/getting-started/installation/).
 
 ## Prerequisites
 
