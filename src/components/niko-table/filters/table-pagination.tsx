@@ -90,11 +90,10 @@ export function TablePagination<TData>({
   const [pageInput, setPageInput] = React.useState<string | null>(null)
   const displayValue = pageInput ?? currentPage.toString()
 
-  // Determine if buttons should be disabled
-  // Default to isLoading for initial load, but allow explicit overrides
-  // Also disable during fetching to prevent navigation while data is loading
+  // Only initial load disables nav; background fetches keep controls responsive.
+  // Consumers can force-disable per-button via disableNextPage / disablePreviousPage.
   const canNextPage = table.getCanNextPage()
-  const isDisabled = isLoading || isFetching
+  const isDisabled = !!isLoading
   const canGoNext = !disableNextPage && !isDisabled && canNextPage
   const canGoPrevious =
     !disablePreviousPage && !isDisabled && table.getCanPreviousPage()
