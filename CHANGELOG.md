@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- **Faceted filter — caller-supplied options with `count: 0` are hidden by default.** Server-side tables that pass cross-filter counts now get automatic narrowing — selecting Category=Electronics hides "Brand: Nike" without each caller writing a filter helper. Pure label-only callers (no counts anywhere) are unaffected. Opt-out per option by passing `count: undefined`.
+- **Faceted filter, filter menu, inline filter — options with `count: 0` are hidden by default.** Server-side tables that pass cross-filter counts now get automatic narrowing across every filter UI — selecting Category=Electronics hides "Brand: Nike" in the column-header faceted filter, the `<DataTableFilterMenu />` builder, and the inline filter, without each caller writing a filter helper. Pure label-only callers (no counts anywhere) are unaffected. Opt-out per option by passing `count: undefined`.
 
 ### Fixed
 

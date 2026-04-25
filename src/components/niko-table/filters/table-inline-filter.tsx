@@ -860,21 +860,27 @@ function FilterValueSelector<TData>({
     case FILTER_VARIANTS.MULTI_SELECT:
       return (
         <CommandGroup>
-          {column.columnDef.meta?.options?.map((option: Option) => (
-            <CommandItem
-              key={option.value}
-              value={option.value}
-              onSelect={() => onSelect(option.value)}
-            >
-              {option.icon && <option.icon />}
-              <span className="truncate">{option.label}</span>
-              {option.count && (
-                <span className="ml-auto font-mono text-xs">
-                  {option.count}
-                </span>
-              )}
-            </CommandItem>
-          ))}
+          {/* Cross-filter narrowing: hide options at count 0 (matches the
+              rule used by `TableColumnFacetedFilterMenu` and the filter
+              menu). Pure label-only option lists (no counts) render
+              unchanged. */}
+          {column.columnDef.meta?.options
+            ?.filter((option: Option) => option.count !== 0)
+            .map((option: Option) => (
+              <CommandItem
+                key={option.value}
+                value={option.value}
+                onSelect={() => onSelect(option.value)}
+              >
+                {option.icon && <option.icon />}
+                <span className="truncate">{option.label}</span>
+                {option.count && (
+                  <span className="ml-auto font-mono text-xs">
+                    {option.count}
+                  </span>
+                )}
+              </CommandItem>
+            ))}
         </CommandGroup>
       )
 

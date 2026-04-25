@@ -15,7 +15,7 @@ description: Latest updates and release notes for Niko Table.
 
 ### Changed
 
-- **Faceted filter — caller-supplied options with `count: 0` are hidden by default.** Server-side tables that pass cross-filter counts get automatic narrowing — selecting Category=Electronics hides "Brand: Nike" without each caller writing a filter helper. Pure label-only callers (no counts anywhere) are unaffected. Opt-out per option by passing `count: undefined`.
+- **Faceted filter, filter menu, inline filter — options with `count: 0` are hidden by default.** Cross-filter narrowing is now consistent across every filter UI: column-header faceted filter, `<DataTableFilterMenu />` builder, and inline filter all hide options whose count resolved to 0. Pure label-only callers (no counts anywhere) are unaffected. Opt-out per option by passing `count: undefined`.
 
 ### Fixed
 

@@ -1321,17 +1321,22 @@ function FilterFacetedSelect<TData>({
         <FacetedList>
           <FacetedEmpty>No options found.</FacetedEmpty>
           <FacetedGroup>
-            {columnMeta?.options?.map((option: Option) => (
-              <FacetedItem key={option.value} value={option.value}>
-                {option.icon && <option.icon />}
-                <span>{option.label}</span>
-                {option.count && (
-                  <span className="ml-auto font-mono text-xs">
-                    {option.count}
-                  </span>
-                )}
-              </FacetedItem>
-            ))}
+            {/* Cross-filter narrowing: hide options at count 0 (matches the
+                rule used by `TableColumnFacetedFilterMenu`). Pure label-only
+                option lists (no counts) render unchanged. */}
+            {columnMeta?.options
+              ?.filter((option: Option) => option.count !== 0)
+              .map((option: Option) => (
+                <FacetedItem key={option.value} value={option.value}>
+                  {option.icon && <option.icon />}
+                  <span>{option.label}</span>
+                  {option.count && (
+                    <span className="ml-auto font-mono text-xs">
+                      {option.count}
+                    </span>
+                  )}
+                </FacetedItem>
+              ))}
           </FacetedGroup>
         </FacetedList>
       </FacetedContent>
