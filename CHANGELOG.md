@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `DataTableVirtualizedBody` — `getRowMemoKey` prop. Return a string per row that encodes external row-level state (e.g. inline edit mode, optimistic overlays). When the string changes for a row, React.memo re-renders only that row — without this, closures captured in column `cell` definitions update silently while the memoized row holds stale output until an unrelated prop (selection, expansion) triggers a re-render.
 - `DataTableVirtualizedFlexHeader` — flex-layout header for `DataTableVirtualizedDndBody`. Pick by body: plain → `DataTableVirtualizedHeader`, row-DnD → `DataTableVirtualizedFlexHeader`, column-DnD → `DataTableVirtualizedDndHeader`.
 - `TableSearchFilter` — `debounceMs` prop (default `0`). Keystrokes update the input immediately; `table.setGlobalFilter` is delayed by the configured amount. Recommended at `200`+ for large client-side datasets; leave at `0` for server-driven tables where the network is already the rate limiter. In controlled mode, debounce in the consumer's `onChange` instead.
 

@@ -243,6 +243,12 @@ interface VirtualizedBodyRowProps<TData> {
   onClick: (event: React.MouseEvent<HTMLElement>) => void
   /** Column layout signature — invalidates React.memo on visibility/order/pinning change. */
   columnLayoutSignature: string
+  /**
+   * Per-row memo key. Change this string to force React.memo to re-render a
+   * specific row when row-level state changes outside of TanStack Table's
+   * tracked props (e.g. inline edit mode, optimistic state).
+   */
+  rowMemoKey: string
 }
 
 const VirtualizedBodyRowInner = function VirtualizedBodyRow<TData>({
@@ -255,6 +261,8 @@ const VirtualizedBodyRowInner = function VirtualizedBodyRow<TData>({
   measureRef,
   onClick,
   columnLayoutSignature,
+  // rowMemoKey is intentionally not used inside — it exists solely so
+  // React.memo re-renders this row when per-row external state changes.
 }: VirtualizedBodyRowProps<TData>) {
   const expandCell =
     isExpanded && expandColumnId
@@ -376,6 +384,19 @@ export interface DataTableVirtualizedBodyProps<TData> {
    * needing the row element can `event.target.closest("tr[data-row-id]")`.
    */
   onRowClick?: (row: TData, event: React.MouseEvent<HTMLElement>) => void
+  /**
+   * Return a per-row memo invalidation key. When the returned string changes
+   * for a specific row, React.memo re-renders that row even if TanStack Table
+   * props (selection, expansion, column layout) are unchanged. Use this for
+   * row-level external state that cell renderers depend on — e.g. inline edit
+   * mode, optimistic overlays, or any closure-captured state in column
+   * definitions that changes independently of the table's own state.
+   *
+   * @example
+   * // Trigger re-render on inline edit toggle (only the edited row re-renders)
+   * getRowMemoKey={(row) => (isEditing(row.id) ? "editing" : "")}
+   */
+  getRowMemoKey?: (row: TData) => string
 }
 
 export function DataTableVirtualizedBody<TData>({
@@ -390,6 +411,7 @@ export function DataTableVirtualizedBody<TData>({
   scrollThreshold = 50,
   onNearEnd,
   prefetchThreshold = 10,
+  getRowMemoKey,
 }: DataTableVirtualizedBodyProps<TData>) {
   const { table, columns } = useDataTable()
   const { rows } = table.getRowModel()
@@ -668,6 +690,9 @@ export function DataTableVirtualizedBody<TData>({
             measureRef={columnsLocked ? stableMeasureElement : undefined}
             onClick={handleRowClick}
             columnLayoutSignature={columnLayoutSignature}
+            rowMemoKey={
+              getRowMemoKey ? getRowMemoKey(row.original as TData) : ""
+            }
           />
         )
       })}
