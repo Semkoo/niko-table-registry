@@ -152,14 +152,9 @@ function VirtualizedDraggableRow({
     [setNodeRef, measureRef],
   )
 
-  // Re-measure on expansion toggle. `measureRef` (the virtualizer's
-  // `measureElement` callback) is idempotent — calling it again with
-  // the same node re-attaches its `ResizeObserver` and triggers a
-  // fresh height read, which walks `nextElementSibling` to include
-  // the expanded pane. This is the DnD-body counterpart to the
-  // non-DnD body's composite-key remount strategy: we keep
-  // `key={row.id}` to preserve `useSortable`, and pay the cost of
-  // one imperative re-measure per toggle instead.
+  // Re-measure on expansion toggle — `measureRef` is idempotent and
+  // re-walks `nextElementSibling` to include the expanded pane.
+  // Keeps `key={row.id}` stable so `useSortable` registration survives.
   React.useEffect(() => {
     if (measureRef && elementRef.current) {
       measureRef(elementRef.current)
@@ -281,15 +276,8 @@ export function DataTableVirtualizedDndBody<TData>({
     [],
   )
 
-  // `measureElement` is attached unconditionally here (no
-  // `columnsLocked` gate as in the non-DnD body). Reason: DnD bodies
-  // use flex layout (`block` on tbody, `flex w-full` on rows) instead
-  // of `table-layout: auto → fixed`, so they don't go through the
-  // initial auto-layout pass that produces inflated row heights for
-  // the non-DnD body. Without that transition there's no window in
-  // which `ResizeObserver` could lock in wrong measurements, so a
-  // gate would only add complexity (a `columnsLocked` state + a lock
-  // effect that has nothing to lock).
+  // No `columnsLocked` gate — DnD bodies use flex layout (no auto-layout
+  // pass to mismeasure during), so `ResizeObserver` can attach immediately.
   const rowVirtualizer = useVirtualizer({
     count: rows.length,
     getScrollElement: () => scrollElement,
@@ -633,15 +621,8 @@ export function DataTableVirtualizedDndColumnBody<TData>({
     [],
   )
 
-  // `measureElement` is attached unconditionally here (no
-  // `columnsLocked` gate as in the non-DnD body). Reason: DnD bodies
-  // use flex layout (`block` on tbody, `flex w-full` on rows) instead
-  // of `table-layout: auto → fixed`, so they don't go through the
-  // initial auto-layout pass that produces inflated row heights for
-  // the non-DnD body. Without that transition there's no window in
-  // which `ResizeObserver` could lock in wrong measurements, so a
-  // gate would only add complexity (a `columnsLocked` state + a lock
-  // effect that has nothing to lock).
+  // No `columnsLocked` gate — DnD bodies use flex layout (no auto-layout
+  // pass to mismeasure during), so `ResizeObserver` can attach immediately.
   const rowVirtualizer = useVirtualizer({
     count: rows.length,
     getScrollElement: () => scrollElement,

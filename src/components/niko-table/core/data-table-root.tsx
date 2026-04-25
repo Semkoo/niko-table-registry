@@ -126,17 +126,10 @@ function DataTableRootInternal<TData, TValue>({
   onColumnOrderChange,
   onColumnPinningChange,
   onRowSelection,
-  // Destructured by name (instead of leaving in `...rest`) so the
-  // `tableOptions` memo can depend on the specific values that
-  // actually affect it. Previously the memo depended on the whole
-  // `rest` bag — `rest` is a fresh object every render, so the memo
-  // invalidated every render, `useReactTable` saw "options changed"
-  // every commit, and TanStack Table dispatched internal state syncs
-  // (e.g. `onSortingChange`, `onPaginationChange` for `autoResetX`)
-  // through our local useState setters. Under React 19 + Strict Mode
-  // + Turbopack HMR those queued dispatches could land on a torn-
-  // down fiber, producing the "state update on a component that
-  // hasn't mounted yet" warning across every table.
+  // Destructured by name so the `tableOptions` memo depends on stable values
+  // — depending on the whole `rest` bag invalidated the memo every render
+  // and triggered the "state update on a component that hasn't mounted yet"
+  // warning under React 19 + Strict Mode + Turbopack HMR.
   state: restState,
   initialState: restInitialState,
   globalFilterFn: restGlobalFilterFn,
@@ -210,20 +203,10 @@ function DataTableRootInternal<TData, TValue>({
       pageCount: config?.pageCount,
       initialPageSize: config?.initialPageSize,
       initialPageIndex: config?.initialPageIndex,
-      // Default `false`. Previously `true` for non-manual-pagination
-      // tables (TanStack Table's own default), which auto-reset
-      // `pageIndex` to 0 whenever sort / global filter / column
-      // filter state changed. That auto-reset fires
-      // `onPaginationChange` asynchronously after data arrives from
-      // a server query — and the queued `setPagination` dispatch can
-      // land on a StrictMode-unmounted fiber under React 19 +
-      // Turbopack, producing the cross-table "state update on a
-      // component that hasn't mounted yet" warning. Defaulting to
-      // `false` removes the most common source of that warning while
-      // also preserving the user's pagination cursor across filter
-      // changes (often the better UX). Consumers with client-side
-      // pagination who want auto-reset can opt back in via
-      // `config={{ autoResetPageIndex: true }}`.
+      // Default `false` — preserves pagination cursor across filter changes
+      // (better UX for server-side / infinite scroll) and avoids the async
+      // `onPaginationChange` race that fires "state update on unmounted
+      // component" warnings. Opt in via `config={{ autoResetPageIndex: true }}`.
       autoResetPageIndex: config?.autoResetPageIndex ?? false,
       autoResetExpanded: config?.autoResetExpanded ?? false,
     }),
@@ -730,13 +713,9 @@ function DataTableRootInternal<TData, TValue>({
       autoResetExpanded: finalConfig.autoResetExpanded,
       onGlobalFilterChange: handleGlobalFilterChange,
       onRowSelectionChange: onRowSelectionChange ?? handleRowSelectionChange,
-      // Default state setters wrapped with mount-ref guard so
-      // TanStack Table's async auto-reset dispatches (e.g.
-      // `onPaginationChange(0)` after data lands from a server
-      // query) don't land on a StrictMode-unmounted fiber. See the
-      // `isMountedRef` block above for full context. Consumer-
-      // supplied handlers are NOT guarded — caller's responsibility
-      // to make their own dispatchers mount-safe.
+      // Default state setters are mount-ref guarded so TanStack's async
+      // auto-reset dispatches don't land on a StrictMode-unmounted fiber.
+      // Consumer-supplied handlers are NOT guarded — caller's responsibility.
       onSortingChange:
         onSortingChange ??
         (u => {
@@ -820,22 +799,9 @@ function DataTableRootInternal<TData, TValue>({
             : -1
       })(),
     }),
-    // Dependencies: state values and stable callbacks
-    // Note: processedColumns is already memoized, so it's safe to include here
-    // Note: Callbacks like setSorting, setExpanded are stable from useState
-    // External callbacks (onSortingChange, etc.) should be memoized by consumer
-    // Note: we depend on the *destructured* `restState`,
-    // `restInitialState`, `restGlobalFilterFn`, NOT on the whole rest
-    // bag. The previous version listed `rest` itself, which is a fresh
-    // object every render — invalidating the memo every render and
-    // forcing `useReactTable` to see "options changed" on every commit.
-    // That cascade was the root cause of the cross-table
-    // "state update on a component that hasn't mounted yet" warning
-    // (TanStack Table dispatches internal `onSortingChange` /
-    // `onPaginationChange` syncs through our useState setters, and
-    // those queued dispatches raced StrictMode's unmount/remount).
-    // `passthroughTableOptions` is intentionally NOT a dep — see the
-    // destructure-site comment for the trade-off.
+    // Deps are the *destructured* rest props, NOT the whole rest bag — see
+    // destructure-site comment. `passthroughTableOptions` is intentionally
+    // NOT a dep (lift any option that needs to invalidate the memo).
     [
       restState,
       restGlobalFilterFn,

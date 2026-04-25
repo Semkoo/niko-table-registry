@@ -153,16 +153,8 @@ export function DataTableProvider<TData>({
    * WHAT: Creates hash object that changes when any state value changes.
    */
   const tableStateKey = React.useMemo(() => {
-    // Full sorted-keys hash. Earlier this used "key count + first 3
-    // sorted keys" as a lightweight signature, but that produced
-    // false negatives for selection state with sequential / similar-
-    // prefix row IDs — e.g. selecting {"r1","r2","r3"} vs selecting
-    // {"r1","r2","r4"} both hash to "3:r1,r2,r3" (only the *first*
-    // three sorted keys are read), so the cache reuses stale memo
-    // results and downstream effects don't fire. Sorted full-key
-    // join is O(n log n) per state slice but n is small (selection,
-    // visibility, expanded all bounded by visible rows / column
-    // count) and runs only when its source object reference changes.
+    // Full sorted-keys hash — the previous "first 3 keys" signature
+    // collided on sequential row IDs (e.g. `r1,r2,r3` vs `r1,r2,r4`).
     const getObjectHash = (
       obj: Record<string, unknown> | undefined,
     ): string => {

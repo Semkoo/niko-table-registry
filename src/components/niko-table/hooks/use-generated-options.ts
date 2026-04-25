@@ -156,16 +156,9 @@ export function useGeneratedOptions<TData>(
         continue
       }
 
-      // limitToFilteredRows controls which rows to use for generating options
-      // dynamicCounts controls which rows to use for calculating counts
-      // When generating options for a column, we want to exclude that column's own filter
-      // so we see all options that exist in the filtered dataset (from other filters)
-      //
-      // When BOTH flags are true (the common default) the inputs to
-      // `getFilteredRowsExcludingColumn` are identical — so compute once
-      // and reuse for both `optionSourceRows` and `countSourceRows`.
-      // Without this, large tables paid the filter walk twice per
-      // generated-options column on every options-recompute.
+      // `limitToFilteredRows` selects rows for option discovery; `dynamicCounts`
+      // selects rows for count computation. Both exclude this column's own
+      // filter. When both are true, compute once and reuse — was a double walk.
       const filteredRowsExcl =
         limitToFilteredRows || colDynamicCounts
           ? getFilteredRowsExcludingColumn(

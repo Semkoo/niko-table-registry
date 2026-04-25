@@ -253,13 +253,8 @@ export function useKeyboardShortcuts(shortcuts: UseKeyboardShortcutOptions[]) {
   }, [])
 
   useEffect(() => {
-    // Always attach — gating on `hasEnabledShortcuts` here would
-    // read `shortcutsRef.current` once on mount, and since the
-    // effect's deps are stable (`handleKeyDown` is identity-stable
-    // by design) it would never re-run if a caller later flipped
-    // a shortcut from `enabled: false` to `enabled: true`. The
-    // handler itself short-circuits per-shortcut on `enabled ===
-    // false`, so an attached-but-idle listener costs nothing.
+    // Attach unconditionally — the handler short-circuits per-shortcut on
+    // `enabled === false`, so an idle listener is free.
     window.addEventListener("keydown", handleKeyDown)
 
     return () => {

@@ -383,15 +383,9 @@ export function DataTableVirtualizedBody<TData>({
             th.style.width = ""
           })
       }
-      // Bail so React can commit the unlocked render before the lock
-      // branch runs. Without this, both `setColumnsLocked(false)` and
-      // the `setColumnsLocked(true)` further down would be batched
-      // into the same render — the row's `ref` would never detach
-      // and ResizeObserver would keep measuring during the brief
-      // auto-layout pass, locking in inflated heights and re-creating
-      // the giant top-spacer gap whenever column visibility changes.
-      // The next render (with `columnsLocked=false`) will re-enter
-      // this effect and fall through to the lock logic below.
+      // Bail so React commits the unlocked render before re-locking —
+      // batching both updates would let `ResizeObserver` capture
+      // inflated heights during the auto-layout pass.
       return
     }
 
@@ -601,16 +595,10 @@ export function DataTableVirtualizedBody<TData>({
             : undefined
 
         return (
-          // Composite key: include `isExpanded` so the Fragment (and
-          // therefore the measured `<TableRow>` underneath) remounts
-          // when expansion toggles. Without the remount, the base
-          // row's `ResizeObserver` wouldn't fire (only the new
-          // sibling appears, the base row itself doesn't resize),
-          // so `measureElement` would never re-read the combined
-          // height and the virtualizer would still believe the row
-          // is collapsed-height. The DnD bodies intentionally use a
-          // stable `key={row.id}` instead so `useSortable` is
-          // preserved across expansion toggles.
+          // Composite key forces a remount on expansion toggle so
+          // `ResizeObserver` re-attaches and re-reads the combined height.
+          // DnD bodies use a stable key (preserving `useSortable`) and
+          // re-measure imperatively instead.
           <React.Fragment key={`${row.id}-${isExpanded}`}>
             {/* Main data row */}
             <TableRow
