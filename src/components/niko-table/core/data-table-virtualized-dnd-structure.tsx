@@ -99,6 +99,16 @@ interface VirtualizedDraggableRowProps {
    * actually fire.
    */
   isSelected?: boolean
+  /**
+   * Whether the row is currently expanded. Used to imperatively
+   * re-trigger `measureRef` (the virtualizer's `measureElement`)
+   * when expansion toggles — the DnD body intentionally uses a
+   * stable `key={row.id}` so `useSortable`'s registration is
+   * preserved across expand/collapse, but that means `setRefs`
+   * doesn't re-run on toggle and the virtualizer would otherwise
+   * keep the stale collapsed-height measurement.
+   */
+  isExpanded?: boolean
   className?: string
   measureRef?: (node: HTMLTableRowElement | null) => void
 }
@@ -108,6 +118,7 @@ function VirtualizedDraggableRow({
   rowId,
   virtualIndex,
   isSelected,
+  isExpanded,
   className,
   measureRef,
 }: VirtualizedDraggableRowProps) {
@@ -115,13 +126,33 @@ function VirtualizedDraggableRow({
     id: rowId,
   })
 
+  // Cache the row DOM node so the `isExpanded` effect can pass it
+  // back to `measureRef` (the virtualizer's `measureElement`) on
+  // demand — without unmounting the row.
+  const elementRef = React.useRef<HTMLTableRowElement | null>(null)
+
   const setRefs = React.useCallback(
     (node: HTMLTableRowElement | null) => {
       setNodeRef(node)
+      elementRef.current = node
       if (measureRef) measureRef(node)
     },
     [setNodeRef, measureRef],
   )
+
+  // Re-measure on expansion toggle. `measureRef` (the virtualizer's
+  // `measureElement` callback) is idempotent — calling it again with
+  // the same node re-attaches its `ResizeObserver` and triggers a
+  // fresh height read, which walks `nextElementSibling` to include
+  // the expanded pane. This is the DnD-body counterpart to the
+  // non-DnD body's composite-key remount strategy: we keep
+  // `key={row.id}` to preserve `useSortable`, and pay the cost of
+  // one imperative re-measure per toggle instead.
+  React.useEffect(() => {
+    if (measureRef && elementRef.current) {
+      measureRef(elementRef.current)
+    }
+  }, [isExpanded, measureRef])
 
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
@@ -334,6 +365,7 @@ export function DataTableVirtualizedDndBody<TData>({
                 rowId={row.id}
                 virtualIndex={virtualRow.index}
                 isSelected={row.getIsSelected()}
+                isExpanded={isExpanded}
                 measureRef={rowVirtualizer.measureElement}
               >
                 {row.getVisibleCells().map(cell => {

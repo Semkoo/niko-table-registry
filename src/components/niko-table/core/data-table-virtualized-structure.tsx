@@ -173,10 +173,15 @@ export interface DataTableVirtualizedBodyProps<TData> {
    * prefetching (pre-fetch earlier), lower for more conservative.
    */
   prefetchThreshold?: number
-  onRowClick?: (
-    row: TData,
-    event: React.MouseEvent<HTMLTableRowElement>,
-  ) => void
+  /**
+   * Click is dispatched per-row from each row's `onClick`. Typed as
+   * `React.MouseEvent<HTMLElement>` to match the other body
+   * variants (`DataTableBody`, `DataTableDndBody`,
+   * `DataTableVirtualizedDndBody`, etc.) so a single handler can be
+   * passed through wrappers that switch between bodies. Consumers
+   * needing the row element can `event.target.closest("tr[data-row-id]")`.
+   */
+  onRowClick?: (row: TData, event: React.MouseEvent<HTMLElement>) => void
 }
 
 export function DataTableVirtualizedBody<TData>({
@@ -441,7 +446,7 @@ export function DataTableVirtualizedBody<TData>({
    * the DOM data attribute + table row model at click time.
    */
   const handleRowClick = React.useCallback(
-    (event: React.MouseEvent<HTMLTableRowElement>) => {
+    (event: React.MouseEvent<HTMLElement>) => {
       if (!onRowClick) return
       const target = event.target as HTMLElement
       if (
