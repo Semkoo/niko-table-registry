@@ -216,6 +216,15 @@ export function DataTableVirtualizedDndBody<TData>({
     [],
   )
 
+  // `measureElement` is attached unconditionally here (no
+  // `columnsLocked` gate as in the non-DnD body). Reason: DnD bodies
+  // use flex layout (`block` on tbody, `flex w-full` on rows) instead
+  // of `table-layout: auto → fixed`, so they don't go through the
+  // initial auto-layout pass that produces inflated row heights for
+  // the non-DnD body. Without that transition there's no window in
+  // which `ResizeObserver` could lock in wrong measurements, so a
+  // gate would only add complexity (a `columnsLocked` state + a lock
+  // effect that has nothing to lock).
   const rowVirtualizer = useVirtualizer({
     count: rows.length,
     getScrollElement: () => scrollElement,
@@ -545,6 +554,15 @@ export function DataTableVirtualizedDndColumnBody<TData>({
     [],
   )
 
+  // `measureElement` is attached unconditionally here (no
+  // `columnsLocked` gate as in the non-DnD body). Reason: DnD bodies
+  // use flex layout (`block` on tbody, `flex w-full` on rows) instead
+  // of `table-layout: auto → fixed`, so they don't go through the
+  // initial auto-layout pass that produces inflated row heights for
+  // the non-DnD body. Without that transition there's no window in
+  // which `ResizeObserver` could lock in wrong measurements, so a
+  // gate would only add complexity (a `columnsLocked` state + a lock
+  // effect that has nothing to lock).
   const rowVirtualizer = useVirtualizer({
     count: rows.length,
     getScrollElement: () => scrollElement,

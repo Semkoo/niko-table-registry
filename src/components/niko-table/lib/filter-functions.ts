@@ -30,6 +30,16 @@ const regexCache = new Map<string, RegExp>()
 const MAX_REGEX_CACHE_SIZE = 100
 
 /**
+ * Module-scoped guard so the RELATIVE-not-implemented warning fires
+ * at most once per page load. `applyFilterOperator` runs per row ×
+ * per filter, so an unguarded `console.error` would emit a line for
+ * every cell evaluated against a RELATIVE filter — easily thousands
+ * of lines per filter render. The first error is enough to surface
+ * the gap; subsequent rows return `false` silently.
+ */
+let hasLoggedRelativeFilterWarning = false
+
+/**
  * PERFORMANCE: Get or create a cached regex pattern
  *
  * WHY: Avoids expensive regex compilation by caching compiled patterns.
@@ -516,9 +526,12 @@ function applyFilterOperator(
           "FILTER_OPERATORS.RELATIVE is not yet implemented. Either remove the 'Is relative to today' option from the date filter UI or implement this case.",
         )
       }
-      console.error(
-        "FILTER_OPERATORS.RELATIVE is not yet implemented — returning no matches in production to avoid silently passing all rows.",
-      )
+      if (!hasLoggedRelativeFilterWarning) {
+        hasLoggedRelativeFilterWarning = true
+        console.error(
+          "FILTER_OPERATORS.RELATIVE is not yet implemented — returning no matches in production to avoid silently passing all rows.",
+        )
+      }
       return false
 
     default:

@@ -5,6 +5,15 @@ description: Latest updates and release notes for Niko Table.
 
 ## May 2026
 
+### Bug Fixes (round 4)
+
+- **`FILTER_OPERATORS.RELATIVE` removed from date-filter UI** — The "Is relative to today" entry in `dateOperators` (config/data-table.ts) was selectable in the filter dropdown, but the filter implementation wasn't done — picking it threw in dev / returned no matches in prod. Hidden the entry from the dropdown until the comparison logic ships. The constant itself stays in the operator catalogue so server-side consumers can keep their wiring; the inline comment explains why and how to re-add it.
+- **Per-row `console.error` for unimplemented RELATIVE filter throttled** — The previous fix logged once per cell evaluated, flooding production logs with thousands of lines per filter render. Added a module-scoped `hasLoggedRelativeFilterWarning` flag so the warning fires at most once per page load; subsequent rows return `false` silently.
+
+### Notes (round 4)
+
+- **DnD virtualized bodies intentionally do not gate `measureElement` on `columnsLocked`** — Added an inline comment at each `useVirtualizer` call site explaining why. DnD bodies use flex layout (`block` on tbody, `flex w-full` on rows) instead of `table-layout: auto → fixed`, so they don't go through the initial auto-layout pass that produces inflated row heights for the non-DnD body. There's no transition in which `ResizeObserver` could lock in wrong measurements, and adding a `columnsLocked` state would mean introducing a column-lock effect that has nothing to lock.
+
 ### Bug Fixes
 
 - **Virtualized DnD row body — selected row styling silently dead** — `VirtualizedDraggableRow` (used by `DataTableVirtualizedDndBody`) didn't emit `data-state` and didn't carry a `group` class, so the row's own `data-[state=selected]:bg-muted` and the pinned-cell `group-data-[state=selected]:bg-muted` never matched — selected rows looked unselected. Added an `isSelected` prop; the row now renders `group flex w-full` plus `data-state={isSelected ? "selected" : undefined}`. Caller passes `isSelected={row.getIsSelected()}`.
