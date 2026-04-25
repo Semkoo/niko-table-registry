@@ -14,14 +14,14 @@ import { fixupConfigRules, fixupPluginRules } from "@eslint/compat"
 
 export default defineConfig([
   globalIgnores([
-    "node_modules/",
-    ".astro/",
-    ".github/",
-    ".vscode/",
-    "dist/",
-    "public/r/",
-    "package-lock.json",
-    "scripts/fixtures/",
+    "**/node_modules/",
+    "**/.astro/",
+    "**/.github/",
+    "**/.vscode/",
+    "**/dist/",
+    "**/public/r/",
+    "**/package-lock.json",
+    "**/scripts/fixtures/",
   ]),
   {
     files: ["**/*.{md}"], // ,mdx
@@ -70,6 +70,9 @@ export default defineConfig([
       react.configs.flat.recommended,
       react.configs.flat["jsx-runtime"],
     ] as any[]),
+    rules: {
+      "react-hooks/set-state-in-effect": "off",
+    },
   },
   {
     plugins: { astro: fixupPluginRules(astro as any) },
