@@ -172,13 +172,16 @@ export function useGeneratedOptions<TData>(
           )
         }
 
-        // Caller-supplied `count` wins so server-side tables can pass true
-        // dataset-wide counts; only fall back to client-derived countMap.
+        // Fresh `countMap` always wins. The wrapper component mutates
+        // `meta.options` to inject counts, so on subsequent renders
+        // `opt.count` here is whatever was pinned last render — using it
+        // would freeze counts at their first-render value.
+        // Server-side tables that need true dataset-wide counts should pass
+        // them through the faceted column-header `options` prop instead,
+        // where caller-supplied counts are honored without mutation.
         result[colId] = filteredStaticOptions.map((opt: Option) => ({
           ...opt,
-          count: colShowCounts
-            ? (opt.count ?? countMap.get(opt.value))
-            : undefined,
+          count: colShowCounts ? (countMap.get(opt.value) ?? 0) : undefined,
         }))
         continue
       }

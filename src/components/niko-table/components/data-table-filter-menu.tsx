@@ -94,8 +94,24 @@ export function DataTableFilterMenu<TData>({
     limitPerColumn,
   })
 
-  // Apply generated options according to mergeStrategy.
-  // We mutate columnDef.meta.options safely inside memo to avoid extra renders.
+  /**
+   * BUG: stale counts on filter changes
+   *
+   * WHY: We mutate `column.columnDef.meta.options` to inject counts. After
+   * the first augment pass, every option already carries `count`. On the
+   * next render we'd read those (now-stale) counts back, so a `count: 5`
+   * pinned at first render would survive even after a filter narrowed the
+   * matching rows to 0.
+   *
+   * IMPACT: Cross-filter narrowing (count-0 hide rule) couldn't fire because
+   * counts were frozen at their first-render value.
+   *
+   * WHAT: Capture each column's caller-supplied options ONCE in a ref and
+   * rebuild `meta.options` from that pristine source on every augment pass.
+   * Counts always come from the fresh `countMap`, with `0` filled in for
+   * values absent from the cross-filtered row set so the count-0 hide rule
+   * has something to act on.
+   */
   React.useMemo(() => {
     if (!autoOptions) return
     table.getAllColumns().forEach(column => {
@@ -120,13 +136,21 @@ export function DataTableFilterMenu<TData>({
       }
 
       if (mergeStrategy === "augment") {
+        // Stash the caller's pristine options on the meta object itself
+        // (private prop) the first time we see this column — subsequent
+        // augments rebuild from this stash so counts can refresh instead
+        // of being pinned at first-render values.
+        const metaWithStash = meta as typeof meta & {
+          __nikoOriginalOptions?: Option[]
+        }
+        if (!metaWithStash.__nikoOriginalOptions) {
+          metaWithStash.__nikoOriginalOptions = meta.options
+        }
+        const original = metaWithStash.__nikoOriginalOptions
         const countMap = new Map(gen.map(o => [o.value, o.count]))
-        meta.options = meta.options.map((opt: Option) => ({
+        meta.options = original.map((opt: Option) => ({
           ...opt,
-          // Caller-supplied count wins (true on server-side tables).
-          count: showCounts
-            ? (opt.count ?? countMap.get(opt.value))
-            : undefined,
+          count: showCounts ? (countMap.get(opt.value) ?? 0) : undefined,
         }))
       }
       // preserve: do nothing

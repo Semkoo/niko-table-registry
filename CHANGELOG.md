@@ -11,59 +11,52 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `DataTableVirtualizedFlexHeader` — flex-layout header for `DataTableVirtualizedDndBody`. Pick by body: plain → `DataTableVirtualizedHeader`, row-DnD → `DataTableVirtualizedFlexHeader`, column-DnD → `DataTableVirtualizedDndHeader`.
 
-### Refactor
-
-- Row-click guard moved to `lib/row-click.ts` — `isInteractiveClickTarget()` + `resolveRowFromClick()`. Was inlined in 6 places.
-
 ### Changed
 
-- **Faceted filter, filter menu, inline filter — options with `count: 0` are hidden by default.** Server-side tables that pass cross-filter counts now get automatic narrowing across every filter UI — selecting Category=Electronics hides "Brand: Nike" in the column-header faceted filter, the `<DataTableFilterMenu />` builder, and the inline filter, without each caller writing a filter helper. Pure label-only callers (no counts anywhere) are unaffected. Opt-out per option by passing `count: undefined`.
+- **Options with `count: 0` are hidden across every filter UI** (faceted filter, filter menu, inline filter). Server-side tables that pass cross-filter counts get automatic narrowing without writing helpers. Pure label-only callers (no counts) unaffected. Opt-out per option by passing `count: undefined`.
+- **`autoResetPageIndex` defaults to `false`** (was `true`). Sort/filter changes now preserve the pagination cursor. Opt back in via `config={{ autoResetPageIndex: true }}`.
 
 ### Fixed
 
-- **Faceted filter — caller-supplied options no longer narrowed to current row set.** Previously the `enrichedCallerOptions` memo silently filtered options to values present in `filteredRows`/`coreRows`, which on server-side tables meant the dropdown only ever showed values from the current page. Caller is now the source of truth for the option list; cross-filter counts (above) handle narrowing.
-- **`TableColumnFacetedFilterMenu` `multiple` default** documented (`true`). Previously `undefined`, which made `limitToFilteredRows ??= !multiple` resolve to `true` and silently hide options not present in the current row set. The `enrichedCallerOptions` rewrite makes this default-decoupled — `limitToFilteredRows` only applies to auto-generated/fallback options now.
+- **Filter menu / inline filter — stale counts on filter changes.** `<DataTableFilterMenu />` and `<DataTableInlineFilter />` mutate `meta.options` to inject counts; once a count was pinned on first render it survived later filter changes, so the count-0 hide rule never fired (e.g. selecting Category=Clothing left every Brand option visible). Pristine options are now captured in a ref and `meta.options` is rebuilt from that source each render, so cross-filter narrowing works in both filter UIs (matching the column-header faceted filter).
+- Faceted filter — caller-supplied options no longer narrowed to current row set; caller is the source of truth.
+- `TableColumnFacetedFilterMenu` — `limitToFilteredRows` decoupled from `multiple` default for caller options (still applies to auto-generated/fallback).
+- Cross-table "state update on unmounted component" warning silenced via mount-ref guards on every default state setter.
+- `onRowClick` event type unified to `React.MouseEvent<HTMLElement>` across all bodies.
+- Virtualized DnD body — expanded-row height re-measured on toggle without losing `useSortable` registration.
+- Virtualized non-DnD body — `setColumnsLocked` race fixed; `columnsLocked` gates `measureElement`.
+- Virtualized bodies — `data-index` uses `virtualRow.index`; click delegation via stable `data-row-id` + `table.getRow(rowId)`.
+- Virtualized bodies — expanded-row height included in virtualizer measurement.
+- Virtualized Row-DnD body — selected row styling applies (`data-state="selected"`).
+- Virtualized DnD bodies — `onRowClick` widened to `React.MouseEvent<HTMLElement>`.
+- Column-DnD bodies (virtualized + non-virtualized) — expanded-row rendering matched to other bodies.
+- `VirtualizedDraggableRow` — added `data-index` alongside `data-row-index`.
+- `FILTER_OPERATORS.RELATIVE` hidden from the date-filter dropdown (kept in catalogue for server-side consumers); per-row `console.error` throttled.
+- `getObjectHash` — full sorted-keys join (was first-3 keys, false-negatived row selection with sequential IDs).
 
 ### Performance
 
-- **Scroll handler — rAF-coalesced + edge-transition gated.** Scroll fires up to ~120 events/sec on high-refresh displays; `createScrollHandler` now batches callback work to one dispatch per frame, and `onScrolledTop` / `onScrolledBottom` fire only on the leading edge (false→true) instead of re-firing while pinned at the edge.
-- **Row-click guard hardened.** `isInteractiveClickTarget` now also suppresses clicks while there's an active text selection (drag-selecting cell text on a clickable row no longer navigates), and recognizes `textarea`, `select`, `label`, `[contenteditable]`, and a wider set of ARIA roles (`combobox`, `menuitem`, `textbox`).
-- Slider filters (`TableColumnSliderFilter`, `TableSliderFilter`) — `facetedMin`/`facetedMax` hoisted into memo deps so `[min, max]` stays reactive when filters or row data change.
-- `TableViewMenu` — visible-columns memo now keys on `table.options.columns` (table ref alone was too stable).
-- `DataTableBody` — row clicks delegated to `<tbody>` via `resolveRowFromClick`, matching the DnD bodies and removing one listener per row.
-- `tableOptions` memo: 6 inline fallback setters extracted to stable `useCallback`s; `setX` setters dropped from dep array.
-- `tableOptions` memo deps now use destructured `state` / `initialState` / `globalFilterFn` instead of the `rest` bag — silences the React-19 + StrictMode "state update on unmounted component" warning class.
+- Scroll handler rAF-coalesced; `onScrolledTop` / `onScrolledBottom` fire only on the leading edge (false→true).
+- Row-click guard hardened — suppresses clicks during active text selection; recognizes `textarea`, `select`, `label`, `[contenteditable]`, and ARIA `combobox`/`menuitem`/`textbox`.
+- Slider filters — `facetedMin`/`facetedMax` hoisted into memo deps so `[min, max]` stays reactive on data change.
+- `TableViewMenu` visible-columns memo keys on `table.options.columns` (was just table ref).
+- `DataTableBody` — row clicks delegated to `<tbody>`, removing one listener per row.
+- `tableOptions` — 6 inline fallback setters extracted to stable `useCallback`s; deps trimmed to destructured `state` / `initialState` / `globalFilterFn`.
 - `expandColumnId` memoized in all six bodies (was O(rows × cols) per render).
 - `DataTableColumnHeaderRoot` context value memoized.
-- `useKeyboardShortcuts` listener no longer re-attaches every render (shortcuts mirrored into a ref).
+- `useKeyboardShortcuts` listener no longer re-attaches every render.
 - `onRowSelection` no longer fires on initial mount — user-driven changes only.
-- `handleRowSelectionChange` honors full `Updater<T>` contract; side effects moved into a `useEffect`.
+- `handleRowSelectionChange` honors full `Updater<T>` contract; side effects moved to `useEffect`.
 - `DataTableLoading` self-gates on `isLoading`.
 - `useGeneratedOptions` — eliminated double `getFilteredRowsExcludingColumn` walk.
 
-### Fixed
+### Refactor
 
-- `onRowClick` event type unified to `React.MouseEvent<HTMLElement>` across all bodies (backward compatible).
-- Virtualized DnD body — expanded-row height re-measured on toggle without losing `useSortable` registration.
-- Cross-table "state update on unmounted component" warning silenced. `autoResetPageIndex` now defaults to `false`. **Behavior change:** sort/filter changes preserve pagination cursor. Opt back in via `config={{ autoResetPageIndex: true }}`.
-- `FILTER_OPERATORS.RELATIVE` hidden from the date-filter dropdown (kept in catalogue for server-side consumers).
-- RELATIVE filter `console.error` throttled to once per page load.
-- Virtualized Row-DnD body — selected row styling applies (`data-state="selected"`).
-- Virtualized bodies — `data-index` uses `virtualRow.index`; click delegation via stable `data-row-id` + `table.getRow(rowId)`.
-- Virtualized non-DnD body — `setColumnsLocked` race fixed and `columnsLocked` gates `measureElement`.
-- Column-DnD bodies (virtualized + non-virtualized) — expanded-row rendering matched to other bodies.
-- Virtualized DnD bodies — `onRowClick` widened to `React.MouseEvent<HTMLElement>`.
-- `VirtualizedDraggableRow` — added `data-index` alongside `data-row-index`.
-- Virtualized bodies — expanded-row height included in virtualizer measurement.
-- `getObjectHash` — full sorted-keys join (was first-3 keys, false-negatived row selection with sequential IDs).
+- Row-click guard moved to `lib/row-click.ts` (was inlined in 6 places); body-scroll listener extracted to `lib/create-scroll-handler.ts`.
 
 ### Internal
 
 - `data-table-virtualized-dnd-structure.tsx` marked `@internal`.
-- Body-scroll listener extracted to `lib/create-scroll-handler.ts`.
-
-### Notes
-
 - DnD virtualized bodies don't gate `measureElement` on `columnsLocked` — flex layout has no auto-layout pass.
 
 ## April 2026

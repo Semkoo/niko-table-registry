@@ -65,9 +65,12 @@ export function DataTableInlineFilter<TData>({
     limitPerColumn,
   })
 
-  // Mutate meta.options for select/multi-select columns similar to menu wrapper
-  // This keeps TableInline copy-paste friendly without extra props.
-  // Memo to avoid repeated mutation on every render.
+  /**
+   * BUG: stale counts on filter changes — see `data-table-filter-menu.tsx`
+   * for full doc. We capture pristine caller options in a ref and rebuild
+   * `meta.options` from that source on every augment so counts refresh
+   * (and zeroes get filled in for the count-0 hide rule).
+   */
   React.useMemo(() => {
     if (!autoOptions) return null
     table.getAllColumns().forEach(column => {
@@ -92,13 +95,20 @@ export function DataTableInlineFilter<TData>({
       }
 
       if (mergeStrategy === "augment") {
+        // See `data-table-filter-menu.tsx` for the staleness rationale.
+        // We stash the pristine options on `meta` so the next augment can
+        // rebuild from them instead of from the previous augment's output.
+        const metaWithStash = meta as typeof meta & {
+          __nikoOriginalOptions?: Option[]
+        }
+        if (!metaWithStash.__nikoOriginalOptions) {
+          metaWithStash.__nikoOriginalOptions = meta.options
+        }
+        const original = metaWithStash.__nikoOriginalOptions
         const countMap = new Map(gen.map(o => [o.value, o.count]))
-        meta.options = meta.options.map((opt: Option) => ({
+        meta.options = original.map((opt: Option) => ({
           ...opt,
-          // Caller-supplied count wins (true on server-side tables).
-          count: showCounts
-            ? (opt.count ?? countMap.get(opt.value))
-            : undefined,
+          count: showCounts ? (countMap.get(opt.value) ?? 0) : undefined,
         }))
       }
     })
