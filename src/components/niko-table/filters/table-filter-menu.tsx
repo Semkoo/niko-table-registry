@@ -99,7 +99,7 @@ function createFilterId<TData>(
       : JSON.stringify(filter.value)
 
   // Include index as a fallback to ensure uniqueness for URL sharing
-  const indexSuffix = typeof index === FILTER_VARIANTS.NUMBER ? `-${index}` : ""
+  const indexSuffix = typeof index === "number" ? `-${index}` : ""
 
   return `${filter.id}-${filter.operator}-${filter.variant}-${valueStr}${indexSuffix}`
     .toLowerCase()
@@ -811,7 +811,9 @@ export function TableFilterMenu<TData>({
     return table
       .getAllColumns()
       .filter(column => column.columnDef.enableColumnFilter)
-  }, [table])
+    // Depend on the column set, not just the (stable) table ref.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [table, table.options.columns])
 
   const onFilterAdd = React.useCallback(() => {
     const column = columns[0]

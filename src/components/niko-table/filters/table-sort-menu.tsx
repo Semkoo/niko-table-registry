@@ -247,12 +247,17 @@ export function TableSortMenu<TData>({
   // ============================================================================
   const onSortingChange = React.useCallback(
     (updater: React.SetStateAction<ColumnSort[]>) => {
-      table.setSorting(updater)
-      const newSorting =
-        typeof updater === "function" ? updater(sorting) : updater
-      externalOnSortingChange?.(newSorting)
+      // Resolve the next sorting against the table's current state, not the
+      // closure-captured `sorting` — eliminates any chance of drift if the
+      // callback fires from an interaction queued before the latest render.
+      const nextSorting =
+        typeof updater === "function"
+          ? updater(table.getState().sorting)
+          : updater
+      table.setSorting(nextSorting)
+      externalOnSortingChange?.(nextSorting)
     },
-    [table, sorting, externalOnSortingChange],
+    [table, externalOnSortingChange],
   )
 
   // ============================================================================
@@ -278,7 +283,9 @@ export function TableSortMenu<TData>({
       columnLabels: labels,
       columns: availableColumns,
     }
-  }, [sorting, table])
+    // Depend on the column set, not just the (stable) table ref.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sorting, table, table.options.columns])
 
   // ============================================================================
   // Sort Actions

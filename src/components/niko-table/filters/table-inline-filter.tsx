@@ -89,7 +89,7 @@ function createFilterId<TData>(
       : JSON.stringify(filter.value)
 
   // Include index as a fallback to ensure uniqueness for URL sharing
-  const indexSuffix = typeof index === FILTER_VARIANTS.NUMBER ? `-${index}` : ""
+  const indexSuffix = typeof index === "number" ? `-${index}` : ""
 
   return `${filter.id}-${filter.operator}-${filter.variant}-${valueStr}${indexSuffix}`
     .toLowerCase()
@@ -348,7 +348,9 @@ export function TableInline<TData>({
 
   const columns = React.useMemo(
     () => table.getAllColumns().filter(column => column.getCanFilter()),
-    [table],
+    // Depend on the column set, not just the (stable) table ref.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [table, table.options.columns],
   )
 
   const [open, setOpen] = React.useState(false)

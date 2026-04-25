@@ -18,6 +18,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **`TableRangeFilter`** — `[min, max]` memo now depends on faceted scalars, so the range refreshes when row data changes. `formatValue` no longer locale-formats numbers (`type="number"` inputs reject localized output).
+- **`TableSliderFilter` clear button** — always `stopPropagation()` (was DIV-only, so SVG/icon clicks bubbled and re-opened the popover).
+- **Sort / filter / inline-filter column memos** — now key on `table.options.columns` (table ref alone is too stable across column rebuilds).
+- **`TableSortMenu`** — derives the next sorting from `table.getState().sorting` instead of the closure-captured `sorting`, eliminating drift if the callback fires across renders.
+- **CSV export** — plain objects are now JSON-encoded instead of serializing as `[object Object]`.
 - **Filter menu / inline filter — stale counts on filter changes.** `<DataTableFilterMenu />` and `<DataTableInlineFilter />` mutate `meta.options` to inject counts; once a count was pinned on first render it survived later filter changes, so the count-0 hide rule never fired (e.g. selecting Category=Clothing left every Brand option visible). Pristine options are now captured in a ref and `meta.options` is rebuilt from that source each render, so cross-filter narrowing works in both filter UIs (matching the column-header faceted filter).
 - Faceted filter — caller-supplied options no longer narrowed to current row set; caller is the source of truth.
 - `TableColumnFacetedFilterMenu` — `limitToFilteredRows` decoupled from `multiple` default for caller options (still applies to auto-generated/fallback).

@@ -213,9 +213,9 @@ export function TableSliderFilter<TData>({
 
   const onReset = React.useCallback(
     (event: React.MouseEvent) => {
-      if (event.target instanceof HTMLDivElement) {
-        event.stopPropagation()
-      }
+      // Always stop the bubble — the previous DIV-only check let SVG/icon
+      // clicks reach the popover trigger and re-open it on Clear.
+      event.stopPropagation()
       applyFilterValue(undefined)
     },
     [applyFilterValue],
