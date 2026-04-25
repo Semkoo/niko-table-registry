@@ -184,6 +184,8 @@ export function DataTableBody<TData>({
     [table, columns],
   )
 
+  const isClickable = !!onRowClick
+
   return (
     <TableBody
       ref={containerRef}
@@ -193,7 +195,6 @@ export function DataTableBody<TData>({
       {/* Only show rows when not loading */}
       {!isLoading && rows?.length
         ? rows.map(row => {
-            const isClickable = !!onRowClick
             const isExpanded = row.getIsExpanded()
 
             // Resolve the expand cell only when expanded, using the

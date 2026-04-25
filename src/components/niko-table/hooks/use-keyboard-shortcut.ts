@@ -103,51 +103,21 @@ export function useKeyboardShortcut({
   stopPropagation = false,
   condition,
 }: UseKeyboardShortcutOptions) {
-  const handleKeyDown = useCallback(
-    (event: KeyboardEvent) => {
-      // Skip if disabled
-      if (!enabled) return
-
-      // Skip if wrong key
-      if (event.key.toLowerCase() !== key.toLowerCase()) return
-
-      // Skip if modifier requirements not met
-      if (requireShift && !event.shiftKey) return
-      if (requireCtrl && !(event.ctrlKey || event.metaKey)) return
-      if (requireAlt && !event.altKey) return
-
-      // Skip if modifiers are present when not required
-      if (!requireShift && event.shiftKey) return
-      if (!requireCtrl && (event.ctrlKey || event.metaKey)) return
-      if (!requireAlt && event.altKey) return
-
-      // Skip if custom condition fails
-      if (condition && !condition()) return
-
-      // Skip if user is typing in an input field
-      if (
-        event.target instanceof HTMLInputElement ||
-        event.target instanceof HTMLTextAreaElement ||
-        event.target instanceof HTMLSelectElement ||
-        (event.target as HTMLElement)?.isContentEditable
-      ) {
-        return
-      }
-
-      // Prevent default behavior if requested
-      if (preventDefault) {
-        event.preventDefault()
-      }
-
-      // Stop propagation if requested
-      if (stopPropagation) {
-        event.stopPropagation()
-      }
-
-      // Trigger the callback
-      onTrigger()
-    },
-    [
+  // Mirror params into a ref so callers can pass inline `onTrigger` /
+  // `condition` without the listener detaching every render.
+  const paramsRef = useRef({
+    key,
+    onTrigger,
+    enabled,
+    requireShift,
+    requireCtrl,
+    requireAlt,
+    preventDefault,
+    stopPropagation,
+    condition,
+  })
+  useLayoutEffect(() => {
+    paramsRef.current = {
       key,
       onTrigger,
       enabled,
@@ -157,18 +127,44 @@ export function useKeyboardShortcut({
       preventDefault,
       stopPropagation,
       condition,
-    ],
-  )
+    }
+  })
+
+  const handleKeyDown = useCallback((event: KeyboardEvent) => {
+    const p = paramsRef.current
+    if (!p.enabled) return
+
+    if (event.key.toLowerCase() !== p.key.toLowerCase()) return
+
+    if (p.requireShift && !event.shiftKey) return
+    if (p.requireCtrl && !(event.ctrlKey || event.metaKey)) return
+    if (p.requireAlt && !event.altKey) return
+
+    if (!p.requireShift && event.shiftKey) return
+    if (!p.requireCtrl && (event.ctrlKey || event.metaKey)) return
+    if (!p.requireAlt && event.altKey) return
+
+    if (p.condition && !p.condition()) return
+
+    if (
+      event.target instanceof HTMLInputElement ||
+      event.target instanceof HTMLTextAreaElement ||
+      event.target instanceof HTMLSelectElement ||
+      (event.target as HTMLElement)?.isContentEditable
+    ) {
+      return
+    }
+
+    if (p.preventDefault) event.preventDefault()
+    if (p.stopPropagation) event.stopPropagation()
+    p.onTrigger()
+  }, [])
 
   useEffect(() => {
-    if (!enabled) return
-
+    // Attach unconditionally — handler short-circuits on `enabled === false`.
     window.addEventListener("keydown", handleKeyDown)
-
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown)
-    }
-  }, [handleKeyDown, enabled])
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [handleKeyDown])
 }
 
 /**
