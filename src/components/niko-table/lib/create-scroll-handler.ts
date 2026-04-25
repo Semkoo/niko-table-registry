@@ -54,9 +54,10 @@ export function createScrollHandler({
    * No rAF: iOS Safari pauses `requestAnimationFrame` during momentum
    * scroll, which delayed edge callbacks until the finger lifted and
    * momentum settled — broke infinite-scroll triggering on touch.
-   * Synchronous dispatch matches what ag-grid does (rAF is reserved for
-   * DOM writes, not consumer callbacks); the math is cheap and edge
-   * gating already prevents redundant consumer renders.
+   * Dispatch synchronously instead; the scroll math is cheap and edge
+   * gating already prevents redundant consumer renders. rAF is better
+   * reserved for DOM writes (row virtualization translateY), not
+   * consumer callbacks.
    */
   let prevAtTop = false
   let prevAtBottom = false
