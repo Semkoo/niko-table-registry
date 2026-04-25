@@ -1331,31 +1331,27 @@ function ServerSideStateTableContent() {
   //   still be widened back after an active filter narrows the row set.
   const dynamicColumns = useMemo(() => {
     /**
-     * Cross-filter narrowing — the server's facet for column X is computed by
-     * applying every active filter EXCEPT X's own. So:
+     * Cross-filter narrowing — server's facet for column X excludes X's own
+     * filter, so its values are exactly the cross-filter survivors. We just
+     * merge counts onto the full static label list; the faceted filter's
+     * default `count === 0 → hide` rule handles the narrowing. So:
      *
-     *   - For the column the user is currently filtering on, the facet still
-     *     contains all values (own filter is excluded) → all options remain
-     *     visible, the user can pivot.
-     *   - For every other column, the facet only contains values present
-     *     given the current filter set → impossible-result options (e.g.
-     *     "Brand: Nike" while "Category: Electronics" is active) are hidden.
-     *
-     * The static option list is the source of human-readable labels; the
-     * server facet decides which values are reachable right now.
+     *   - Column being filtered: facet still includes every value → user can
+     *     pivot to any other option.
+     *   - Other columns: facet only includes reachable values → impossible
+     *     options (e.g. Brand=Nike while Category=Electronics) get count 0
+     *     and disappear automatically.
      */
-    const buildOpts = (
+    const mergeCounts = (
       staticOpts: typeof categoryOptions,
       facet: Array<{ value: string; count: number }> | undefined,
     ) => {
       if (!facet) return staticOpts
       const m = new Map(facet.map(f => [f.value, f.count]))
-      return staticOpts
-        .filter(opt => m.has(opt.value))
-        .map(opt => ({ ...opt, count: m.get(opt.value) ?? 0 }))
+      return staticOpts.map(opt => ({ ...opt, count: m.get(opt.value) ?? 0 }))
     }
-    const categoryOpts = buildOpts(categoryOptions, facets?.select.category)
-    const brandOpts = buildOpts(brandOptions, facets?.select.brand)
+    const categoryOpts = mergeCounts(categoryOptions, facets?.select.category)
+    const brandOpts = mergeCounts(brandOptions, facets?.select.brand)
     const priceRange = facets?.range.price
 
     return columns.map(col => {

@@ -326,12 +326,23 @@ export function TableColumnFacetedFilterMenu<TData, TValue>({
       })
     }
 
-    // Caller-supplied `count` wins (server-side tables compute true counts on
-    // the server; client-derived `valueCounts` only sees the current page).
-    return options.map(opt => ({
-      ...opt,
-      count: opt.count ?? valueCounts.get(opt.value) ?? 0,
-    }))
+    /**
+     * Cross-filter narrowing default — caller-supplied `count` wins (server-
+     * side tables compute true cross-filter counts on the server; client-
+     * derived `valueCounts` only sees the current page). After merging,
+     * options with explicit `count: 0` are hidden so server-side tables get
+     * automatic cross-filter narrowing without each caller writing a helper.
+     *
+     * Opt-out: pass `count: undefined` (or omit it) on options you want
+     * visible regardless. Pure label-only callers (no counts anywhere) are
+     * unaffected — `valueCounts` falls back to client rows.
+     */
+    return options
+      .map(opt => ({
+        ...opt,
+        count: opt.count ?? valueCounts.get(opt.value) ?? 0,
+      }))
+      .filter(opt => opt.count !== 0)
   }, [options, table, column, dynamicCounts, coreRows, filteredRows])
 
   const resolvedOptions =

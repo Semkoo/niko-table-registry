@@ -13,6 +13,14 @@ description: Latest updates and release notes for Niko Table.
 
 - **Row-click guard moved to `lib/row-click.ts`** — `isInteractiveClickTarget()` + `resolveRowFromClick()`. Was inlined in 6 places.
 
+### Changed
+
+- **Faceted filter — caller-supplied options with `count: 0` are hidden by default.** Server-side tables that pass cross-filter counts get automatic narrowing — selecting Category=Electronics hides "Brand: Nike" without each caller writing a filter helper. Pure label-only callers (no counts anywhere) are unaffected. Opt-out per option by passing `count: undefined`.
+
+### Fixed
+
+- **Faceted filter — caller-supplied options no longer narrowed to current row set.** The `enrichedCallerOptions` memo silently filtered options to values present in `filteredRows`/`coreRows`; on server-side tables that meant the dropdown only ever showed values from the current page. Caller is now the source of truth.
+
 ### Performance
 
 - **Slider filters (`TableColumnSliderFilter`, `TableSliderFilter`)** — `facetedMin`/`facetedMax` hoisted into memo deps so `[min, max]` stays reactive when filters or row data change.

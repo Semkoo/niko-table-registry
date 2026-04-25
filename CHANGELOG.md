@@ -15,6 +15,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Row-click guard moved to `lib/row-click.ts` — `isInteractiveClickTarget()` + `resolveRowFromClick()`. Was inlined in 6 places.
 
+### Changed
+
+- **Faceted filter — caller-supplied options with `count: 0` are hidden by default.** Server-side tables that pass cross-filter counts now get automatic narrowing — selecting Category=Electronics hides "Brand: Nike" without each caller writing a filter helper. Pure label-only callers (no counts anywhere) are unaffected. Opt-out per option by passing `count: undefined`.
+
+### Fixed
+
+- **Faceted filter — caller-supplied options no longer narrowed to current row set.** Previously the `enrichedCallerOptions` memo silently filtered options to values present in `filteredRows`/`coreRows`, which on server-side tables meant the dropdown only ever showed values from the current page. Caller is now the source of truth for the option list; cross-filter counts (above) handle narrowing.
+- **`TableColumnFacetedFilterMenu` `multiple` default** documented (`true`). Previously `undefined`, which made `limitToFilteredRows ??= !multiple` resolve to `true` and silently hide options not present in the current row set. The `enrichedCallerOptions` rewrite makes this default-decoupled — `limitToFilteredRows` only applies to auto-generated/fallback options now.
+
 ### Performance
 
 - Slider filters (`TableColumnSliderFilter`, `TableSliderFilter`) — `facetedMin`/`facetedMax` hoisted into memo deps so `[min, max]` stays reactive when filters or row data change.
