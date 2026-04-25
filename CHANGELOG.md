@@ -26,6 +26,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Performance
 
+- **Scroll handler — rAF-coalesced + edge-transition gated.** Scroll fires up to ~120 events/sec on high-refresh displays; `createScrollHandler` now batches callback work to one dispatch per frame, and `onScrolledTop` / `onScrolledBottom` fire only on the leading edge (false→true) instead of re-firing while pinned at the edge.
+- **Row-click guard hardened.** `isInteractiveClickTarget` now also suppresses clicks while there's an active text selection (drag-selecting cell text on a clickable row no longer navigates), and recognizes `textarea`, `select`, `label`, `[contenteditable]`, and a wider set of ARIA roles (`combobox`, `menuitem`, `textbox`).
 - Slider filters (`TableColumnSliderFilter`, `TableSliderFilter`) — `facetedMin`/`facetedMax` hoisted into memo deps so `[min, max]` stays reactive when filters or row data change.
 - `TableViewMenu` — visible-columns memo now keys on `table.options.columns` (table ref alone was too stable).
 - `DataTableBody` — row clicks delegated to `<tbody>` via `resolveRowFromClick`, matching the DnD bodies and removing one listener per row.

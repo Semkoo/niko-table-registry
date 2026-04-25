@@ -42,8 +42,32 @@ export function createScrollHandler({
   onScrolledBottom?: () => void
   scrollThreshold?: number
 }): (event: Event) => void {
-  return (event: Event) => {
-    const element = event.currentTarget as HTMLDivElement
+  /**
+   * PERFORMANCE: rAF-coalesced dispatch + edge-transition gating.
+   *
+   * WHY: Scroll fires up to ~120 events/sec on high-refresh displays, and
+   * `onScrolledTop` / `onScrolledBottom` previously fired on EVERY event
+   * while sitting at the edge — pinning at the bottom while data streamed
+   * in would re-fire `onScrolledBottom` dozens of times per second.
+   *
+   * IMPACT: One callback dispatch per frame instead of per scroll event;
+   * top/bottom callbacks fire only on the leading edge (false→true).
+   *
+   * WHAT: Stash the latest scroll target each event, schedule a rAF if
+   * none pending; the rAF reads the (current) scroll metrics and dispatches.
+   * Track previous edge state so re-firing is suppressed.
+   */
+  let prevAtTop = false
+  let prevAtBottom = false
+  let rafId: number | null = null
+  let pending: HTMLDivElement | null = null
+
+  const dispatch = () => {
+    rafId = null
+    const element = pending
+    pending = null
+    if (!element) return
+
     const { scrollHeight, scrollTop, clientHeight } = element
 
     const isTop = scrollTop === 0
@@ -62,7 +86,21 @@ export function createScrollHandler({
       percentage,
     })
 
-    if (isTop) onScrolledTop?.()
-    if (isBottom) onScrolledBottom?.()
+    // Edge transition: only fire on false→true. Pinned at top/bottom
+    // does not re-fire.
+    if (isTop && !prevAtTop) onScrolledTop?.()
+    if (isBottom && !prevAtBottom) onScrolledBottom?.()
+
+    prevAtTop = isTop
+    prevAtBottom = isBottom
+  }
+
+  return (event: Event) => {
+    pending = event.currentTarget as HTMLDivElement
+    if (rafId !== null) return
+    rafId =
+      typeof requestAnimationFrame !== "undefined"
+        ? requestAnimationFrame(dispatch)
+        : (setTimeout(dispatch, 16) as unknown as number)
   }
 }
