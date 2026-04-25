@@ -1,0 +1,28 @@
+{
+  "name": "niko-table-mcp",
+  "version": "1.0.0",
+  "description": "Model Context Protocol (MCP) server for the Niko Table Registry.",
+  "type": "module",
+  "bin": {
+    "niko-table-mcp": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.6.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0",
+    "@types/node": "^22.0.0"
+  },
+  "keywords": [
+    "mcp",
+    "niko-table",
+    "react",
+    "shadcn"
+  ],
+  "author": "Semir N.",
+  "license": "MIT"
+}
