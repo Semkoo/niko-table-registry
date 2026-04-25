@@ -463,10 +463,12 @@ export default function InlineEditStateTable() {
                 {inlineEdit.editingId ?? "None"}
               </span>
             </div>
+
             <div className="flex justify-between">
               <span className="font-medium">Total Items:</span>
               <span className="text-foreground">{data.length}</span>
             </div>
+
             <div className="flex justify-between">
               <span className="font-medium">Sorting:</span>
               <span className="text-foreground">
@@ -477,33 +479,31 @@ export default function InlineEditStateTable() {
                   : "None"}
               </span>
             </div>
+
             <div className="flex justify-between">
               <span className="font-medium">Page:</span>
               <span className="text-foreground">
                 {pagination.pageIndex + 1} (Size: {pagination.pageSize})
               </span>
             </div>
+
             <div className="flex justify-between">
               <span className="font-medium">Hidden Columns:</span>
               <span className="text-foreground">
-                {Object.values(columnVisibility).filter(v => v === false).length}
+                {
+                  Object.values(columnVisibility).filter(v => v === false)
+                    .length
+                }
               </span>
             </div>
           </div>
 
+          {/* Detailed state (collapsible) */}
           <details className="border-t pt-4">
             <summary className="cursor-pointer text-xs font-medium hover:text-foreground">
               View Full State Object
             </summary>
             <div className="mt-4 space-y-3 text-xs">
-              <div>
-                <strong>Edit Draft:</strong>
-                <pre className="mt-1 overflow-auto rounded bg-muted p-2">
-                  {inlineEdit.editingId
-                    ? JSON.stringify(inlineEdit.draft, null, 2)
-                    : "null"}
-                </pre>
-              </div>
               <div>
                 <strong>Sorting:</strong>
                 <pre className="mt-1 overflow-auto rounded bg-muted p-2">
