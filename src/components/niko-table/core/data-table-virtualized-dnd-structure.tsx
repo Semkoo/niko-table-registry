@@ -219,6 +219,8 @@ const VirtualizedDndBodyRowInner = function VirtualizedDndBodyRow<TData>({
   isClickable,
   estimateSize,
   measureRef,
+  columnLayoutSignature,
+  rowMemoKey,
 }: VirtualizedDndBodyRowProps<TData>) {
   const expandCell =
     isExpanded && expandColumnId
@@ -235,6 +237,8 @@ const VirtualizedDndBodyRowInner = function VirtualizedDndBodyRow<TData>({
         isSelected={isSelected}
         isExpanded={isExpanded}
         measureRef={measureRef}
+        columnLayoutSignature={columnLayoutSignature}
+        rowMemoKey={rowMemoKey}
       >
         {visibleCells.map(cell => {
           const size = cell.column.columnDef.size
