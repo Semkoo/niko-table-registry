@@ -36,7 +36,8 @@ export interface TablePaginationProps<TData> {
   isLoading?: boolean
   /**
    * External fetching state (e.g., from TanStack Query).
-   * Used for displaying loading indicators, but doesn't disable pagination by default.
+   * Disables nav while a request is in flight so users can't advance the
+   * cursor before the next page resolves.
    */
   isFetching?: boolean
   /**
@@ -90,10 +91,10 @@ export function TablePagination<TData>({
   const [pageInput, setPageInput] = React.useState<string | null>(null)
   const displayValue = pageInput ?? currentPage.toString()
 
-  // Only initial load disables nav; background fetches keep controls responsive.
-  // Consumers can force-disable per-button via disableNextPage / disablePreviousPage.
+  // Disable nav during any in-flight load (initial OR background fetch) so
+  // users can't advance the cursor while the next page is still resolving.
   const canNextPage = table.getCanNextPage()
-  const isDisabled = !!isLoading
+  const isDisabled = isLoading || isFetching
   const canGoNext = !disableNextPage && !isDisabled && canNextPage
   const canGoPrevious =
     !disablePreviousPage && !isDisabled && table.getCanPreviousPage()

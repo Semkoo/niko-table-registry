@@ -19,7 +19,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Slider filters (`TableColumnSliderFilter`, `TableSliderFilter`) — `facetedMin`/`facetedMax` hoisted into memo deps so `[min, max]` stays reactive when filters or row data change.
 - `TableViewMenu` — visible-columns memo now keys on `table.options.columns` (table ref alone was too stable).
-- `TablePagination` — only `isLoading` disables nav. Background `isFetching` no longer disables controls (matches the existing JSDoc); consumers can still force-disable via `disableNextPage` / `disablePreviousPage`.
 - `DataTableBody` — row clicks delegated to `<tbody>` via `resolveRowFromClick`, matching the DnD bodies and removing one listener per row.
 - `tableOptions` memo: 6 inline fallback setters extracted to stable `useCallback`s; `setX` setters dropped from dep array.
 - `tableOptions` memo deps now use destructured `state` / `initialState` / `globalFilterFn` instead of the `rest` bag — silences the React-19 + StrictMode "state update on unmounted component" warning class.
