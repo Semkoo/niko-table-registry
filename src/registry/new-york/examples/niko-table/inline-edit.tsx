@@ -371,10 +371,10 @@ export default function InlineEditTable() {
 
   return (
     <DataTableRoot data={data} columns={columns}>
+      <DataTableToolbarSection>
+        <DataTableSearchFilter placeholder="Search products…" />
+      </DataTableToolbarSection>
       <DataTable>
-        <DataTableToolbarSection>
-          <DataTableSearchFilter placeholder="Search products…" />
-        </DataTableToolbarSection>
         <DataTableHeader />
         {/*
          * getRowMemoKey is the key integration point.
@@ -384,20 +384,21 @@ export default function InlineEditTable() {
          * re-render it. All other rows keep the same "" string and are
          * skipped entirely, giving you surgical per-row updates.
          */}
-        <DataTableBody getRowMemoKey={getRowMemoKey} />
-        <DataTableEmptyBody>
-          <DataTableEmptyMessage>
-            <DataTableEmptyIcon>
-              <PackageSearch />
-            </DataTableEmptyIcon>
-            <DataTableEmptyTitle>No products found</DataTableEmptyTitle>
-            <DataTableEmptyDescription>
-              Try adjusting your search.
-            </DataTableEmptyDescription>
-          </DataTableEmptyMessage>
-        </DataTableEmptyBody>
-        <DataTablePagination />
+        <DataTableBody getRowMemoKey={getRowMemoKey}>
+          <DataTableEmptyBody>
+            <DataTableEmptyMessage>
+              <DataTableEmptyIcon>
+                <PackageSearch />
+              </DataTableEmptyIcon>
+              <DataTableEmptyTitle>No products found</DataTableEmptyTitle>
+              <DataTableEmptyDescription>
+                Try adjusting your search.
+              </DataTableEmptyDescription>
+            </DataTableEmptyMessage>
+          </DataTableEmptyBody>
+        </DataTableBody>
       </DataTable>
+      <DataTablePagination />
     </DataTableRoot>
   )
 }

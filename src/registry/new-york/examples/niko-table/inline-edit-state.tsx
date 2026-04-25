@@ -425,26 +425,27 @@ export default function InlineEditStateTable() {
         onSortingChange={setSorting}
         onColumnVisibilityChange={setColumnVisibility}
       >
+        <DataTableToolbarSection>
+          <DataTableSearchFilter placeholder="Search products…" />
+          <DataTableViewMenu />
+        </DataTableToolbarSection>
         <DataTable>
-          <DataTableToolbarSection>
-            <DataTableSearchFilter placeholder="Search products…" />
-            <DataTableViewMenu />
-          </DataTableToolbarSection>
           <DataTableHeader />
-          <DataTableBody getRowMemoKey={inlineEdit.getRowMemoKey} />
-          <DataTableEmptyBody>
-            <DataTableEmptyMessage>
-              <DataTableEmptyIcon>
-                <PackageSearch />
-              </DataTableEmptyIcon>
-              <DataTableEmptyTitle>No products found</DataTableEmptyTitle>
-              <DataTableEmptyDescription>
-                Try adjusting your search.
-              </DataTableEmptyDescription>
-            </DataTableEmptyMessage>
-          </DataTableEmptyBody>
-          <DataTablePagination />
+          <DataTableBody getRowMemoKey={inlineEdit.getRowMemoKey}>
+            <DataTableEmptyBody>
+              <DataTableEmptyMessage>
+                <DataTableEmptyIcon>
+                  <PackageSearch />
+                </DataTableEmptyIcon>
+                <DataTableEmptyTitle>No products found</DataTableEmptyTitle>
+                <DataTableEmptyDescription>
+                  Try adjusting your search.
+                </DataTableEmptyDescription>
+              </DataTableEmptyMessage>
+            </DataTableEmptyBody>
+          </DataTableBody>
         </DataTable>
+        <DataTablePagination />
       </DataTableRoot>
     </div>
   )
