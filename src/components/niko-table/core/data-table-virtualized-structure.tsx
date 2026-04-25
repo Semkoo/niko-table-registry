@@ -261,8 +261,7 @@ const VirtualizedBodyRowInner = function VirtualizedBodyRow<TData>({
   measureRef,
   onClick,
   columnLayoutSignature,
-  // rowMemoKey is intentionally not used inside — it exists solely so
-  // React.memo re-renders this row when per-row external state changes.
+  rowMemoKey,
 }: VirtualizedBodyRowProps<TData>) {
   const expandCell =
     isExpanded && expandColumnId
@@ -288,7 +287,7 @@ const VirtualizedBodyRowInner = function VirtualizedBodyRow<TData>({
     if (isExpanded && measureRef && elementRef.current) {
       measureRef(elementRef.current)
     }
-  }, [isExpanded, columnLayoutSignature, measureRef])
+  }, [isExpanded, rowMemoKey, columnLayoutSignature, measureRef])
 
   return (
     <>

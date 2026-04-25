@@ -202,6 +202,12 @@ interface VirtualizedDndBodyRowProps<TData> {
   measureRef: ((node: HTMLTableRowElement | null) => void) | undefined
   /** Column layout signature — invalidates React.memo on visibility/order/pinning change. */
   columnLayoutSignature: string
+  /**
+   * Per-row memo key. Change this string to force React.memo to re-render a
+   * specific row when row-level state changes outside of TanStack Table's
+   * tracked props (e.g. inline edit mode, optimistic state).
+   */
+  rowMemoKey: string
 }
 
 const VirtualizedDndBodyRowInner = function VirtualizedDndBodyRow<TData>({
@@ -288,6 +294,12 @@ interface VirtualizedDndColumnBodyRowProps<TData> {
   measureRef: ((node: HTMLTableRowElement | null) => void) | undefined
   /** Column layout signature — invalidates React.memo on visibility/order/pinning change. */
   columnLayoutSignature: string
+  /**
+   * Per-row memo key. Change this string to force React.memo to re-render a
+   * specific row when row-level state changes outside of TanStack Table's
+   * tracked props (e.g. inline edit mode, optimistic state).
+   */
+  rowMemoKey: string
 }
 
 const VirtualizedDndColumnBodyRowInner = function VirtualizedDndColumnBodyRow<
@@ -302,6 +314,7 @@ const VirtualizedDndColumnBodyRowInner = function VirtualizedDndColumnBodyRow<
   estimateSize,
   measureRef,
   columnLayoutSignature,
+  rowMemoKey,
 }: VirtualizedDndColumnBodyRowProps<TData>) {
   const expandCell =
     isExpanded && expandColumnId
@@ -327,7 +340,7 @@ const VirtualizedDndColumnBodyRowInner = function VirtualizedDndColumnBodyRow<
   // the row itself but we keep key stable for consistency.
   React.useEffect(() => {
     if (measureRef && elementRef.current) measureRef(elementRef.current)
-  }, [isExpanded, columnLayoutSignature, measureRef])
+  }, [isExpanded, rowMemoKey, columnLayoutSignature, measureRef])
 
   return (
     <>
@@ -409,6 +422,11 @@ export interface DataTableVirtualizedDndBodyProps<TData> {
   onNearEnd?: () => void
   /** Default `10`. See `DataTableVirtualizedBody.prefetchThreshold`. */
   prefetchThreshold?: number
+  /**
+   * Return a per-row memo invalidation key. When this key changes for a
+   * specific row, only that row re-renders.
+   */
+  getRowMemoKey?: (row: TData) => string
 }
 
 /**
@@ -438,6 +456,7 @@ export function DataTableVirtualizedDndBody<TData>({
   scrollThreshold = 50,
   onNearEnd,
   prefetchThreshold = 10,
+  getRowMemoKey,
 }: DataTableVirtualizedDndBodyProps<TData>) {
   const { table, columns } = useDataTable()
   const { rows } = table.getRowModel()
@@ -597,6 +616,9 @@ export function DataTableVirtualizedDndBody<TData>({
               estimateSize={estimateSize}
               measureRef={stableMeasureElement}
               columnLayoutSignature={columnLayoutSignature}
+              rowMemoKey={
+                getRowMemoKey ? getRowMemoKey(row.original as TData) : ""
+              }
             />
           )
         })}
@@ -735,6 +757,11 @@ export interface DataTableVirtualizedDndColumnBodyProps<TData> {
   onNearEnd?: () => void
   /** Default `10`. See `DataTableVirtualizedBody.prefetchThreshold`. */
   prefetchThreshold?: number
+  /**
+   * Return a per-row memo invalidation key. When this key changes for a
+   * specific row, only that row re-renders.
+   */
+  getRowMemoKey?: (row: TData) => string
 }
 
 /**
@@ -763,6 +790,7 @@ export function DataTableVirtualizedDndColumnBody<TData>({
   scrollThreshold = 50,
   onNearEnd,
   prefetchThreshold = 10,
+  getRowMemoKey,
 }: DataTableVirtualizedDndColumnBodyProps<TData>) {
   const { table, columns } = useDataTable()
   const { rows } = table.getRowModel()
@@ -915,6 +943,9 @@ export function DataTableVirtualizedDndColumnBody<TData>({
             estimateSize={estimateSize}
             measureRef={stableMeasureElement}
             columnLayoutSignature={columnLayoutSignature}
+            rowMemoKey={
+              getRowMemoKey ? getRowMemoKey(row.original as TData) : ""
+            }
           />
         )
       })}

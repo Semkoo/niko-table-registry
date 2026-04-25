@@ -57,6 +57,12 @@ interface DndBodyRowProps {
   isSelected: boolean
   /** Column layout signature — invalidates React.memo on visibility/order/pinning change. */
   columnLayoutSignature: string
+  /**
+   * Per-row memo key. Change this string to force React.memo to re-render a
+   * specific row when row-level state changes outside of TanStack Table's
+   * tracked props (e.g. inline edit mode, optimistic state).
+   */
+  rowMemoKey: string
 }
 
 const DndBodyRow = React.memo(function DndBodyRow({
@@ -125,6 +131,12 @@ interface DndColumnBodyRowProps {
   isSelected: boolean
   /** Column layout signature — invalidates React.memo on visibility/order/pinning change. */
   columnLayoutSignature: string
+  /**
+   * Per-row memo key. Change this string to force React.memo to re-render a
+   * specific row when row-level state changes outside of TanStack Table's
+   * tracked props (e.g. inline edit mode, optimistic state).
+   */
+  rowMemoKey: string
 }
 
 const DndColumnBodyRow = React.memo(function DndColumnBodyRow({
@@ -182,6 +194,11 @@ export interface DataTableDndBodyProps<TData> {
    * the row element can `event.target.closest("tr[data-row-id]")`.
    */
   onRowClick?: (row: TData, event: React.MouseEvent<HTMLElement>) => void
+  /**
+   * Return a per-row memo invalidation key. When this key changes for a
+   * specific row, only that row re-renders.
+   */
+  getRowMemoKey?: (row: TData) => string
 }
 
 /**
@@ -202,6 +219,7 @@ export function DataTableDndBody<TData>({
   children,
   className,
   onRowClick,
+  getRowMemoKey,
 }: DataTableDndBodyProps<TData>) {
   const { table, columns, isLoading } = useDataTable<TData>()
   const { rows } = table.getRowModel()
@@ -264,6 +282,9 @@ export function DataTableDndBody<TData>({
               isExpanded={row.getIsExpanded()}
               isSelected={row.getIsSelected()}
               columnLayoutSignature={columnLayoutSignature}
+              rowMemoKey={
+                getRowMemoKey ? getRowMemoKey(row.original as TData) : ""
+              }
             />
           ))}
         </SortableContext>
@@ -360,6 +381,11 @@ export interface DataTableDndColumnBodyProps<TData> {
    * the row element can `event.target.closest("tr[data-row-id]")`.
    */
   onRowClick?: (row: TData, event: React.MouseEvent<HTMLElement>) => void
+  /**
+   * Return a per-row memo invalidation key. When this key changes for a
+   * specific row, only that row re-renders.
+   */
+  getRowMemoKey?: (row: TData) => string
 }
 
 /**
@@ -380,6 +406,7 @@ export function DataTableDndColumnBody<TData>({
   children,
   className,
   onRowClick,
+  getRowMemoKey,
 }: DataTableDndColumnBodyProps<TData>) {
   const { table, columns, isLoading } = useDataTable<TData>()
   const { rows } = table.getRowModel()
@@ -437,6 +464,9 @@ export function DataTableDndColumnBody<TData>({
               isExpanded={row.getIsExpanded()}
               isSelected={row.getIsSelected()}
               columnLayoutSignature={columnLayoutSignature}
+              rowMemoKey={
+                getRowMemoKey ? getRowMemoKey(row.original as TData) : ""
+              }
             />
           ))
         : null}
