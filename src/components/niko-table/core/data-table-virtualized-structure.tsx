@@ -34,12 +34,8 @@ import { getCommonPinningStyles } from "../lib/styles"
 // Stable measureElement — computed once at module level
 // ============================================================================
 
-// Sums base row height + adjacent expanded-row height. The virtualizer's
-// ResizeObserver only attaches to the base row, so expanded-pane height
-// is otherwise invisible to `getTotalSize()`. Disabled in Firefox where
-// stale `getBoundingClientRect` values during virtual scroll cause
-// measurement loops. Module-scoped so every virtualizer shares one stable
-// reference.
+// Sums base + expanded sibling height (ResizeObserver only sees the base row).
+// Disabled in Firefox where stale `getBoundingClientRect` causes measure loops.
 const measureElement: ((element: Element) => number) | undefined =
   typeof window !== "undefined" && navigator.userAgent.indexOf("Firefox") === -1
     ? (element: Element) => {

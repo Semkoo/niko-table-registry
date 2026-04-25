@@ -117,11 +117,8 @@ export function buildFacetedOptions<TData>(
     return baseOptions.map(opt => ({ ...opt, count: undefined }))
   }
 
-  // Count occurrences, scoped to the values that appear in `baseOptions`.
-  // Scoping up-front (instead of counting everything and filtering later)
-  // keeps the invariant: "every returned option has a count, and every
-  // accumulated count maps to a returned option." This is the same scoping
-  // used by the meta-aware generator in `useGeneratedOptions`.
+  // Scope counts to baseOptions values up-front so every returned option
+  // has a count and every count maps to a returned option.
   const targetValues = new Set(baseOptions.map(opt => opt.value))
   const valueCounts = new Map<string, number>()
   for (const row of countRows) {
