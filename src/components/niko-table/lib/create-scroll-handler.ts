@@ -43,29 +43,26 @@ export function createScrollHandler({
   scrollThreshold?: number
 }): (event: Event) => void {
   /**
-   * PERFORMANCE: rAF-coalesced dispatch + edge-transition gating.
+   * Edge-transition gating only — no rAF coalescing.
    *
-   * WHY: Scroll fires up to ~120 events/sec on high-refresh displays, and
-   * `onScrolledTop` / `onScrolledBottom` previously fired on EVERY event
-   * while sitting at the edge — pinning at the bottom while data streamed
-   * in would re-fire `onScrolledBottom` dozens of times per second.
+   * Edge gating: `onScrolledTop` / `onScrolledBottom` previously fired on
+   * EVERY scroll event while sitting at the edge — pinning at the bottom
+   * while data streamed in re-fired `onScrolledBottom` dozens of times per
+   * second. Tracking previous edge state limits firing to the leading edge
+   * (false→true) and is the actual source of the perf win.
    *
-   * IMPACT: One callback dispatch per frame instead of per scroll event;
-   * top/bottom callbacks fire only on the leading edge (false→true).
-   *
-   * WHAT: Stash the latest scroll target each event, schedule a rAF if
-   * none pending; the rAF reads the (current) scroll metrics and dispatches.
-   * Track previous edge state so re-firing is suppressed.
+   * No rAF: iOS Safari pauses `requestAnimationFrame` during momentum
+   * scroll, which delayed edge callbacks until the finger lifted and
+   * momentum settled — broke infinite-scroll triggering on touch.
+   * Synchronous dispatch matches what ag-grid does (rAF is reserved for
+   * DOM writes, not consumer callbacks); the math is cheap and edge
+   * gating already prevents redundant consumer renders.
    */
   let prevAtTop = false
   let prevAtBottom = false
-  let rafId: number | null = null
-  let pending: HTMLDivElement | null = null
 
-  const dispatch = () => {
-    rafId = null
-    const element = pending
-    pending = null
+  return (event: Event) => {
+    const element = event.currentTarget as HTMLDivElement | null
     if (!element) return
 
     const { scrollHeight, scrollTop, clientHeight } = element
@@ -86,21 +83,10 @@ export function createScrollHandler({
       percentage,
     })
 
-    // Edge transition: only fire on false→true. Pinned at top/bottom
-    // does not re-fire.
     if (isTop && !prevAtTop) onScrolledTop?.()
     if (isBottom && !prevAtBottom) onScrolledBottom?.()
 
     prevAtTop = isTop
     prevAtBottom = isBottom
-  }
-
-  return (event: Event) => {
-    pending = event.currentTarget as HTMLDivElement
-    if (rafId !== null) return
-    rafId =
-      typeof requestAnimationFrame !== "undefined"
-        ? requestAnimationFrame(dispatch)
-        : (setTimeout(dispatch, 16) as unknown as number)
   }
 }
