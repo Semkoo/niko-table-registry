@@ -213,6 +213,17 @@ export interface DataTableVirtualizedDndBodyProps<TData> {
    * with `HTMLTableRowElement`.
    */
   onRowClick?: (row: TData, event: React.MouseEvent<HTMLElement>) => void
+  /**
+   * Virtualizer-index-driven prefetch trigger — fires when the
+   * last rendered virtual row is within `prefetchThreshold` rows
+   * of the end. See `DataTableVirtualizedBody.onNearEnd` for the
+   * full rationale (strictly better than `onScrolledBottom` for
+   * infinite scroll: catches scrollbar drags, programmatic
+   * `scrollToIndex` jumps, and short initial renders).
+   */
+  onNearEnd?: () => void
+  /** Default `10`. See `DataTableVirtualizedBody.prefetchThreshold`. */
+  prefetchThreshold?: number
 }
 
 /**
@@ -240,6 +251,8 @@ export function DataTableVirtualizedDndBody<TData>({
   onScrolledTop,
   onScrolledBottom,
   scrollThreshold = 50,
+  onNearEnd,
+  prefetchThreshold = 10,
 }: DataTableVirtualizedDndBodyProps<TData>) {
   const { table, columns } = useDataTable()
   const { rows } = table.getRowModel()
@@ -358,6 +371,22 @@ export function DataTableVirtualizedDndBody<TData>({
     ? rowVirtualizer.getTotalSize() - lastItem.end
     : 0
 
+  const isNearEnd =
+    onNearEnd !== undefined &&
+    rows.length > 0 &&
+    lastItem !== null &&
+    lastItem.index >= rows.length - 1 - prefetchThreshold
+
+  const wasNearEndRef = React.useRef(false)
+  React.useEffect(() => {
+    if (isNearEnd && !wasNearEndRef.current) {
+      onNearEnd?.()
+    }
+    wasNearEndRef.current = isNearEnd
+  }, [isNearEnd, onNearEnd])
+
+  const isClickable = !!onRowClick
+
   return (
     <TableBody
       ref={parentRef}
@@ -375,7 +404,6 @@ export function DataTableVirtualizedDndBody<TData>({
         {/* Render visible rows as draggable */}
         {virtualItems.map(virtualRow => {
           const row = rows[virtualRow.index]
-          const isClickable = !!onRowClick
           const isExpanded = row.getIsExpanded()
 
           const expandCell =
@@ -566,6 +594,15 @@ export interface DataTableVirtualizedDndColumnBodyProps<TData> {
    * with `HTMLTableRowElement`.
    */
   onRowClick?: (row: TData, event: React.MouseEvent<HTMLElement>) => void
+  /**
+   * Virtualizer-index-driven prefetch trigger — fires when the
+   * last rendered virtual row is within `prefetchThreshold` rows
+   * of the end. See `DataTableVirtualizedBody.onNearEnd` for the
+   * full rationale.
+   */
+  onNearEnd?: () => void
+  /** Default `10`. See `DataTableVirtualizedBody.prefetchThreshold`. */
+  prefetchThreshold?: number
 }
 
 /**
@@ -592,6 +629,8 @@ export function DataTableVirtualizedDndColumnBody<TData>({
   onScrolledTop,
   onScrolledBottom,
   scrollThreshold = 50,
+  onNearEnd,
+  prefetchThreshold = 10,
 }: DataTableVirtualizedDndColumnBodyProps<TData>) {
   const { table, columns } = useDataTable()
   const { rows } = table.getRowModel()
@@ -705,6 +744,22 @@ export function DataTableVirtualizedDndColumnBody<TData>({
     ? rowVirtualizer.getTotalSize() - lastItem.end
     : 0
 
+  const isNearEnd =
+    onNearEnd !== undefined &&
+    rows.length > 0 &&
+    lastItem !== null &&
+    lastItem.index >= rows.length - 1 - prefetchThreshold
+
+  const wasNearEndRef = React.useRef(false)
+  React.useEffect(() => {
+    if (isNearEnd && !wasNearEndRef.current) {
+      onNearEnd?.()
+    }
+    wasNearEndRef.current = isNearEnd
+  }, [isNearEnd, onNearEnd])
+
+  const isClickable = !!onRowClick
+
   return (
     <TableBody
       ref={parentRef}
@@ -722,7 +777,6 @@ export function DataTableVirtualizedDndColumnBody<TData>({
       {virtualItems.map(virtualRow => {
         const row = rows[virtualRow.index]
         if (!row) return null
-        const isClickable = !!onRowClick
         const isExpanded = row.getIsExpanded()
 
         // Resolve the expand cell only when expanded, using the

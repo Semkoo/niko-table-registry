@@ -128,6 +128,8 @@ export function DataTableDndBody<TData>({
     [table, columns],
   )
 
+  const isClickable = !!onRowClick
+
   return (
     <TableBody
       className={className}
@@ -136,7 +138,6 @@ export function DataTableDndBody<TData>({
       {!isLoading && rows?.length ? (
         <SortableContext items={dataIds} strategy={verticalListSortingStrategy}>
           {rows.map(row => {
-            const isClickable = !!onRowClick
             const isExpanded = row.getIsExpanded()
 
             // Resolve the expand cell only when expanded, using the
@@ -357,6 +358,8 @@ export function DataTableDndColumnBody<TData>({
     [table, columns],
   )
 
+  const isClickable = !!onRowClick
+
   return (
     <TableBody
       className={className}
@@ -364,7 +367,6 @@ export function DataTableDndColumnBody<TData>({
     >
       {!isLoading && rows?.length
         ? rows.map(row => {
-            const isClickable = !!onRowClick
             const isExpanded = row.getIsExpanded()
 
             const expandCell =
