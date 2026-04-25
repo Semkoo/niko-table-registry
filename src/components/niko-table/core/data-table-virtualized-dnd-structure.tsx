@@ -116,6 +116,8 @@ interface VirtualizedDraggableRowProps {
   isExpanded?: boolean
   className?: string
   measureRef?: (node: HTMLTableRowElement | null) => void
+  columnLayoutSignature?: string
+  rowMemoKey?: string
 }
 
 function VirtualizedDraggableRow({
@@ -126,6 +128,8 @@ function VirtualizedDraggableRow({
   isExpanded,
   className,
   measureRef,
+  columnLayoutSignature,
+  rowMemoKey,
 }: VirtualizedDraggableRowProps) {
   const { transform, transition, setNodeRef, isDragging } = useSortable({
     id: rowId,
@@ -152,7 +156,7 @@ function VirtualizedDraggableRow({
     if (measureRef && elementRef.current) {
       measureRef(elementRef.current)
     }
-  }, [isExpanded, measureRef])
+  }, [isExpanded, columnLayoutSignature, rowMemoKey, measureRef])
 
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
