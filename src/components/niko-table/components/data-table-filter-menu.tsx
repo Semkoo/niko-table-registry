@@ -123,8 +123,9 @@ export function DataTableFilterMenu<TData>({
         const countMap = new Map(gen.map(o => [o.value, o.count]))
         meta.options = meta.options.map((opt: Option) => ({
           ...opt,
+          // Caller-supplied count wins (true on server-side tables).
           count: showCounts
-            ? (countMap.get(opt.value) ?? opt.count)
+            ? (opt.count ?? countMap.get(opt.value))
             : undefined,
         }))
       }

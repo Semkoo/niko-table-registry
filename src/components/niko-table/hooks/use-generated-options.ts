@@ -172,11 +172,12 @@ export function useGeneratedOptions<TData>(
           )
         }
 
-        // Return static options with augmented counts
+        // Caller-supplied `count` wins so server-side tables can pass true
+        // dataset-wide counts; only fall back to client-derived countMap.
         result[colId] = filteredStaticOptions.map((opt: Option) => ({
           ...opt,
           count: colShowCounts
-            ? (countMap.get(opt.value) ?? opt.count)
+            ? (opt.count ?? countMap.get(opt.value))
             : undefined,
         }))
         continue

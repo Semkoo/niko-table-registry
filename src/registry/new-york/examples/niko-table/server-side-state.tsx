@@ -398,7 +398,7 @@ type ServerResponse<T> = {
    * Cross-filter facets — see ServerResponse in server-side-nuqs-state.tsx.
    */
   facets: {
-    select: Record<string, string[]>
+    select: Record<string, Array<{ value: string; count: number }>>
     range: Record<string, [number, number]>
   }
 }
@@ -648,11 +648,15 @@ function fetchProducts(
         }
         for (const col of selectColumns) {
           const facetFiltered = filterProductsByParams(allProducts, params, col)
-          facets.select[col] = [
-            ...new Set(facetFiltered.map(p => String(p[col as keyof Product]))),
-          ]
-            .filter(v => v.trim() !== "")
-            .sort()
+          const counts = new Map<string, number>()
+          for (const p of facetFiltered) {
+            const v = String(p[col as keyof Product])
+            if (!v.trim()) continue
+            counts.set(v, (counts.get(v) ?? 0) + 1)
+          }
+          facets.select[col] = [...counts.entries()]
+            .map(([value, count]) => ({ value, count }))
+            .sort((a, b) => a.value.localeCompare(b.value))
         }
         for (const col of rangeColumns) {
           const facetFiltered = filterProductsByParams(allProducts, params, col)
@@ -1091,14 +1095,20 @@ function ServerSideStateTableContent() {
   // so the slider can still be widened back. Each column's own filter is
   // excluded from its facet computation server-side.
   const dynamicColumns = useMemo(() => {
-    const categoryOpts = facets?.select.category
-      ? categoryOptions.filter(opt =>
-          facets.select.category.includes(opt.value),
-        )
-      : categoryOptions
-    const brandOpts = facets?.select.brand
-      ? brandOptions.filter(opt => facets.select.brand.includes(opt.value))
-      : brandOptions
+    /**
+     * Always render the full static option list with cross-filter counts
+     * (0 if a value isn't represented). Filtering the list would hide pivots.
+     */
+    const mergeCounts = (
+      staticOpts: typeof categoryOptions,
+      facet: Array<{ value: string; count: number }> | undefined,
+    ) => {
+      if (!facet) return staticOpts
+      const m = new Map(facet.map(f => [f.value, f.count]))
+      return staticOpts.map(opt => ({ ...opt, count: m.get(opt.value) ?? 0 }))
+    }
+    const categoryOpts = mergeCounts(categoryOptions, facets?.select.category)
+    const brandOpts = mergeCounts(brandOptions, facets?.select.brand)
     const priceRange = facets?.range.price
 
     return columns.map(col => {

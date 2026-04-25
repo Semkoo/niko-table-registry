@@ -347,9 +347,13 @@ export function TableColumnFacetedFilterMenu<TData, TValue>({
       ? options.filter(opt => availableOptions.has(opt.value))
       : options
 
+    // Caller-supplied `count` wins (server-side tables compute true counts on
+    // the server; client-derived `valueCounts` only sees the current page).
     return filtered.map(opt => ({
       ...opt,
-      count: valueCounts ? (valueCounts.get(opt.value) ?? 0) : undefined,
+      count: showCounts
+        ? (opt.count ?? (valueCounts ? (valueCounts.get(opt.value) ?? 0) : 0))
+        : undefined,
     }))
   }, [
     options,
