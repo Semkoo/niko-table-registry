@@ -25,6 +25,25 @@ export interface TableSearchFilterProps<TData> {
   showClearButton?: boolean
   onChange?: (value: string) => void
   value?: string
+  /**
+   * Debounce ms before pushing the typed value into table state. The
+   * input reflects keystrokes immediately; only the call to
+   * `table.setGlobalFilter` (and the supplied `onChange`) is delayed.
+   * Useful for client-side filtering of larger fully-loaded datasets
+   * (e.g. 1k+ rows) where each keystroke would otherwise re-walk the
+   * row model synchronously.
+   *
+   * Server-driven search (small `data` array, infinite-query-backed)
+   * usually wants this OFF because the network request is already
+   * the natural rate limiter — keep at the default.
+   *
+   * Only applies in uncontrolled mode (when neither `value` nor
+   * `onChange` is supplied). In controlled mode, debounce in the
+   * consumer's `onChange` instead.
+   *
+   * @default 0
+   */
+  debounceMs?: number
 }
 
 export function TableSearchFilter<TData>({
@@ -34,6 +53,7 @@ export function TableSearchFilter<TData>({
   showClearButton = true,
   onChange,
   value,
+  debounceMs = 0,
 }: TableSearchFilterProps<TData>) {
   // Determine if we're in controlled mode
   const isControlled = value !== undefined
@@ -44,47 +64,74 @@ export function TableSearchFilter<TData>({
   const globalFilterValue =
     typeof tableGlobalFilter === "string" ? tableGlobalFilter : ""
 
-  // Use controlled value if provided, otherwise use table's globalFilter
-  // The context will trigger re-renders when table state changes, so we don't need internal state
-  const currentValue = isControlled ? value : globalFilterValue
+  // Debounce only kicks in for uncontrolled use; the consumer owns
+  // rate-limiting in controlled mode.
+  const debounceEnabled = !isControlled && debounceMs > 0
 
-  /**
-   * PERFORMANCE: Memoize clear handler with useCallback
-   *
-   * WHY: This callback is passed to the clear button's onClick.
-   * Without useCallback, a new function is created on every render, causing
-   * the button to re-render unnecessarily.
-   *
-   * IMPACT: Prevents unnecessary button re-renders (~0.1-0.3ms saved per render).
-   *
-   * WHAT: Only creates new function when table or onChange prop changes.
-   */
+  // Local input value lets keystrokes render at 60fps even when the
+  // expensive `setGlobalFilter` call is delayed. Seeded from table
+  // state on mount and re-synced whenever table state changes
+  // out-of-band (e.g. URL update, programmatic clear).
+  const [pendingValue, setPendingValue] =
+    React.useState<string>(globalFilterValue)
+
+  React.useEffect(() => {
+    if (!debounceEnabled) return
+    setPendingValue(globalFilterValue)
+  }, [globalFilterValue, debounceEnabled])
+
+  // Stable timeout ref — debounce state lives outside the React tree
+  // so input renders aren't gated on it.
+  const debounceTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  )
+
+  // Cancel any pending flush on unmount so we don't write to a torn-down table.
+  React.useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current)
+    }
+  }, [])
+
+  // Use controlled value if provided; otherwise the locally-tracked
+  // input value when debouncing, falling back to live table state.
+  const currentValue = isControlled
+    ? value
+    : debounceEnabled
+      ? pendingValue
+      : globalFilterValue
+
   const handleClear = React.useCallback(() => {
     const emptyValue = ""
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current)
+      debounceTimerRef.current = null
+    }
+    if (debounceEnabled) setPendingValue(emptyValue)
     table.setGlobalFilter(emptyValue)
     onChange?.(emptyValue)
-  }, [table, onChange])
+  }, [table, onChange, debounceEnabled])
 
-  /**
-   * PERFORMANCE: Memoize change handler with useCallback
-   *
-   * WHY: This callback is passed to the input's onChange.
-   * Without useCallback, a new function is created on every render, causing
-   * the input to re-render unnecessarily.
-   *
-   * IMPACT: Prevents unnecessary input re-renders (~0.1-0.3ms saved per render).
-   * Important for smooth typing experience.
-   *
-   * WHAT: Only creates new function when table or onChange prop changes.
-   */
   const handleChange = React.useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       const newValue = event.target.value
-      // Update table state - context will trigger re-render
-      table.setGlobalFilter(newValue)
-      onChange?.(newValue)
+
+      if (!debounceEnabled) {
+        table.setGlobalFilter(newValue)
+        onChange?.(newValue)
+        return
+      }
+
+      // Render the keystroke immediately, defer the table mutation.
+      setPendingValue(newValue)
+      if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current)
+      debounceTimerRef.current = setTimeout(() => {
+        debounceTimerRef.current = null
+        table.setGlobalFilter(newValue)
+        onChange?.(newValue)
+      }, debounceMs)
     },
-    [table, onChange],
+    [table, onChange, debounceEnabled, debounceMs],
   )
 
   const hasValue = currentValue.length > 0

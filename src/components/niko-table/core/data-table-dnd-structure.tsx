@@ -20,7 +20,7 @@ import {
   TableBody,
   TableCell,
 } from "@/components/ui/table"
-import { flexRender } from "@tanstack/react-table"
+import { flexRender, type Row } from "@tanstack/react-table"
 import { DataTableColumnHeaderRoot } from "../components/data-table-column-header"
 import { resolveRowFromClick } from "../lib/row-click"
 import { getCommonPinningStyles } from "../lib/styles"
@@ -34,6 +34,133 @@ import {
   TableDraggableHeader,
   TableDragAlongCell,
 } from "../filters/table-column-dnd"
+
+// ============================================================================
+// DndBodyRow / DndColumnBodyRow — memoized rows
+// ============================================================================
+
+/**
+ * Per-row component for `DataTableDndBody` (row-DnD). Memoized to keep a
+ * single-row state change (selection toggle, expansion) from reconciling
+ * every visible row.
+ *
+ * `TableDraggableRow` already manages its own `useSortable` state, so the
+ * memoization here only guards against extrinsic re-renders triggered by
+ * the parent body.
+ */
+interface DndBodyRowProps {
+  row: Row<unknown>
+  expandColumnId: string | undefined
+  isClickable: boolean
+  isExpanded: boolean
+}
+
+const DndBodyRow = React.memo(function DndBodyRow({
+  row,
+  expandColumnId,
+  isClickable,
+  isExpanded,
+}: DndBodyRowProps) {
+  const expandCell =
+    isExpanded && expandColumnId
+      ? row.getAllCells().find(c => c.column.id === expandColumnId)
+      : undefined
+
+  const visibleCells = row.getVisibleCells()
+
+  return (
+    <>
+      <TableDraggableRow row={row}>
+        {visibleCells.map(cell => {
+          const size = cell.column.columnDef.size
+          const cellStyle = {
+            width: size ? `${size}px` : undefined,
+            ...getCommonPinningStyles(cell.column, false),
+          }
+
+          return (
+            <TableCell
+              key={cell.id}
+              style={cellStyle}
+              className={cn(
+                isClickable && "cursor-pointer",
+                cell.column.getIsPinned() &&
+                  "bg-background group-hover:bg-muted/50 group-data-[state=selected]:bg-muted",
+              )}
+            >
+              {flexRender(cell.column.columnDef.cell, cell.getContext())}
+            </TableCell>
+          )
+        })}
+      </TableDraggableRow>
+
+      {expandCell && (
+        <TableRow>
+          <TableCell colSpan={visibleCells.length} className="p-0">
+            {expandCell.column.columnDef.meta?.expandedContent?.(row.original)}
+          </TableCell>
+        </TableRow>
+      )}
+    </>
+  )
+})
+
+DndBodyRow.displayName = "DndBodyRow"
+
+/**
+ * Per-row component for `DataTableDndColumnBody` (column-DnD). Memoized
+ * to avoid cascading reconciliation across all visible rows on selection
+ * or expansion changes. `TableDragAlongCell` handles per-cell drag state
+ * internally, so cell-level memoization isn't required here.
+ */
+interface DndColumnBodyRowProps {
+  row: Row<unknown>
+  expandColumnId: string | undefined
+  isClickable: boolean
+  isExpanded: boolean
+  isSelected: boolean
+}
+
+const DndColumnBodyRow = React.memo(function DndColumnBodyRow({
+  row,
+  expandColumnId,
+  isClickable,
+  isExpanded,
+  isSelected,
+}: DndColumnBodyRowProps) {
+  const expandCell =
+    isExpanded && expandColumnId
+      ? row.getAllCells().find(c => c.column.id === expandColumnId)
+      : undefined
+
+  const visibleCells = row.getVisibleCells()
+
+  return (
+    <>
+      <TableRow
+        data-row-id={row.id}
+        data-state={isSelected ? "selected" : undefined}
+        className={cn(isClickable && "cursor-pointer", "group")}
+      >
+        {visibleCells.map(cell => (
+          <TableDragAlongCell key={cell.id} cell={cell}>
+            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+          </TableDragAlongCell>
+        ))}
+      </TableRow>
+
+      {expandCell && (
+        <TableRow>
+          <TableCell colSpan={visibleCells.length} className="p-0">
+            {expandCell.column.columnDef.meta?.expandedContent?.(row.original)}
+          </TableCell>
+        </TableRow>
+      )}
+    </>
+  )
+})
+
+DndColumnBodyRow.displayName = "DndColumnBodyRow"
 
 // ============================================================================
 // DataTableDndBody (Row DnD)
@@ -108,62 +235,15 @@ export function DataTableDndBody<TData>({
     >
       {!isLoading && rows?.length ? (
         <SortableContext items={dataIds} strategy={verticalListSortingStrategy}>
-          {rows.map(row => {
-            const isExpanded = row.getIsExpanded()
-
-            // Resolve the expand cell only when expanded, using the
-            // memoized `expandColumnId` (computed once at the table
-            // level above this map).
-            const expandCell =
-              isExpanded && expandColumnId
-                ? row.getAllCells().find(c => c.column.id === expandColumnId)
-                : undefined
-
-            return (
-              <React.Fragment key={row.id}>
-                <TableDraggableRow row={row}>
-                  {row.getVisibleCells().map(cell => {
-                    const size = cell.column.columnDef.size
-                    const cellStyle = {
-                      width: size ? `${size}px` : undefined,
-                      ...getCommonPinningStyles(cell.column, false),
-                    }
-
-                    return (
-                      <TableCell
-                        key={cell.id}
-                        style={cellStyle}
-                        className={cn(
-                          isClickable && "cursor-pointer",
-                          cell.column.getIsPinned() &&
-                            "bg-background group-hover:bg-muted/50 group-data-[state=selected]:bg-muted",
-                        )}
-                      >
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext(),
-                        )}
-                      </TableCell>
-                    )
-                  })}
-                </TableDraggableRow>
-
-                {/* Expanded content row */}
-                {expandCell && (
-                  <TableRow>
-                    <TableCell
-                      colSpan={row.getVisibleCells().length}
-                      className="p-0"
-                    >
-                      {expandCell.column.columnDef.meta?.expandedContent?.(
-                        row.original,
-                      )}
-                    </TableCell>
-                  </TableRow>
-                )}
-              </React.Fragment>
-            )
-          })}
+          {rows.map(row => (
+            <DndBodyRow
+              key={row.id}
+              row={row as Row<unknown>}
+              expandColumnId={expandColumnId}
+              isClickable={isClickable}
+              isExpanded={row.getIsExpanded()}
+            />
+          ))}
         </SortableContext>
       ) : null}
 
@@ -312,46 +392,16 @@ export function DataTableDndColumnBody<TData>({
       onClick={onRowClick ? handleRowClick : undefined}
     >
       {!isLoading && rows?.length
-        ? rows.map(row => {
-            const isExpanded = row.getIsExpanded()
-
-            const expandCell =
-              isExpanded && expandColumnId
-                ? row.getAllCells().find(c => c.column.id === expandColumnId)
-                : undefined
-
-            return (
-              <React.Fragment key={row.id}>
-                <TableRow
-                  data-row-id={row?.id}
-                  data-state={row.getIsSelected() ? "selected" : undefined}
-                  className={cn(isClickable && "cursor-pointer", "group")}
-                >
-                  {row.getVisibleCells().map(cell => (
-                    <TableDragAlongCell key={cell.id} cell={cell}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
-                    </TableDragAlongCell>
-                  ))}
-                </TableRow>
-
-                {expandCell && (
-                  <TableRow>
-                    <TableCell
-                      colSpan={row.getVisibleCells().length}
-                      className="p-0"
-                    >
-                      {expandCell.column.columnDef.meta?.expandedContent?.(
-                        row.original,
-                      )}
-                    </TableCell>
-                  </TableRow>
-                )}
-              </React.Fragment>
-            )
-          })
+        ? rows.map(row => (
+            <DndColumnBodyRow
+              key={row.id}
+              row={row as Row<unknown>}
+              expandColumnId={expandColumnId}
+              isClickable={isClickable}
+              isExpanded={row.getIsExpanded()}
+              isSelected={row.getIsSelected()}
+            />
+          ))
         : null}
 
       {children}
