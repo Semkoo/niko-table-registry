@@ -520,6 +520,58 @@ Single options object:
 - For _virtualized_ infinite scroll, prefer `DataTableVirtualizedBody`'s `onNearEnd` + `prefetchThreshold` props over `onScrolledBottom` — `onNearEnd` is virtualizer-index-driven (catches fast scrolls, scrollbar drag, programmatic `scrollToIndex()` jumps, and initial renders where the dataset doesn't fill the viewport).
 - The handler reads `event.currentTarget`, so it must be attached directly to the scroll container — not to a parent.
 
+## Row Click Guard
+
+Shared row-click guard used by every body component (`DataTableBody`, `DataTableDndBody`, `DataTableDndColumnBody`, `DataTableVirtualizedBody`, `DataTableVirtualizedDndBody`, `DataTableVirtualizedDndColumnBody`). Centralized so the interactive-element list (action buttons, checkboxes, links, radix collection items, etc.) stays in sync — adding a new `data-slot` to ignore means editing one file instead of six.
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/lib/row-click.ts`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+</div>
+
+### isInteractiveClickTarget
+
+Returns `true` when the click landed on (or inside) an interactive element that should suppress the row-level `onRowClick`. Used by the per-row variants (`DataTableBody`, `DataTableVirtualizedBody`) which already know which row was clicked from `event.currentTarget.dataset.rowId`.
+
+```tsx showLineNumbers
+import { isInteractiveClickTarget } from "@/components/niko-table/lib/row-click"
+
+const handleRowClick = (event: React.MouseEvent<HTMLElement>) => {
+  if (isInteractiveClickTarget(event.target as HTMLElement)) return
+  const rowId = event.currentTarget.dataset.rowId
+  if (!rowId) return
+  const row = table.getRow(rowId)
+  if (!row) return
+  onRowClick(row.original, event)
+}
+```
+
+### resolveRowFromClick
+
+For delegated `<tbody>` handlers (used by the DnD bodies). Returns the matched row, or `null` if the click should be ignored — either it landed on an interactive descendant or no row could be resolved from the closest `tr[data-row-id]`.
+
+```tsx showLineNumbers
+import { resolveRowFromClick } from "@/components/niko-table/lib/row-click"
+
+const handleRowClick = (event: React.MouseEvent<HTMLElement>) => {
+  const row = resolveRowFromClick(event.target as HTMLElement, table)
+  if (!row) return
+  onRowClick(row.original, event)
+}
+```
+
+#### Notes
+
+- The interactive-element list lives in `isInteractiveClickTarget` — extend it there to add new ignored elements.
+- Rows must carry `data-row-id={row.id}` for delegated resolution to work. All built-in bodies do this; custom bodies should follow suit.
+
 ## Additional Constants
 
 ### SYSTEM_COLUMN_IDS
