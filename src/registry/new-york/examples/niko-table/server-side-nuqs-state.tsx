@@ -1331,21 +1331,31 @@ function ServerSideStateTableContent() {
   //   still be widened back after an active filter narrows the row set.
   const dynamicColumns = useMemo(() => {
     /**
-     * Always render the full static option list; merge in cross-filter counts
-     * from the server (0 if a value isn't represented in the current facet
-     * window). Filtering the list down would hide pivots — users couldn't
-     * select "Clothing" once they'd narrowed the row set to "Electronics".
+     * Cross-filter narrowing — the server's facet for column X is computed by
+     * applying every active filter EXCEPT X's own. So:
+     *
+     *   - For the column the user is currently filtering on, the facet still
+     *     contains all values (own filter is excluded) → all options remain
+     *     visible, the user can pivot.
+     *   - For every other column, the facet only contains values present
+     *     given the current filter set → impossible-result options (e.g.
+     *     "Brand: Nike" while "Category: Electronics" is active) are hidden.
+     *
+     * The static option list is the source of human-readable labels; the
+     * server facet decides which values are reachable right now.
      */
-    const mergeCounts = (
+    const buildOpts = (
       staticOpts: typeof categoryOptions,
       facet: Array<{ value: string; count: number }> | undefined,
     ) => {
       if (!facet) return staticOpts
       const m = new Map(facet.map(f => [f.value, f.count]))
-      return staticOpts.map(opt => ({ ...opt, count: m.get(opt.value) ?? 0 }))
+      return staticOpts
+        .filter(opt => m.has(opt.value))
+        .map(opt => ({ ...opt, count: m.get(opt.value) ?? 0 }))
     }
-    const categoryOpts = mergeCounts(categoryOptions, facets?.select.category)
-    const brandOpts = mergeCounts(brandOptions, facets?.select.brand)
+    const categoryOpts = buildOpts(categoryOptions, facets?.select.category)
+    const brandOpts = buildOpts(brandOptions, facets?.select.brand)
     const priceRange = facets?.range.price
 
     return columns.map(col => {

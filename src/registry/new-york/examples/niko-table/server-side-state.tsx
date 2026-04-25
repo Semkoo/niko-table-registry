@@ -1096,19 +1096,23 @@ function ServerSideStateTableContent() {
   // excluded from its facet computation server-side.
   const dynamicColumns = useMemo(() => {
     /**
-     * Always render the full static option list with cross-filter counts
-     * (0 if a value isn't represented). Filtering the list would hide pivots.
+     * Cross-filter narrowing — see server-side-nuqs-state.tsx for the full
+     * doc. Server's facet for column X excludes X's own filter, so the user
+     * can always pivot on the column they're filtering, while other columns
+     * hide options that would produce zero results.
      */
-    const mergeCounts = (
+    const buildOpts = (
       staticOpts: typeof categoryOptions,
       facet: Array<{ value: string; count: number }> | undefined,
     ) => {
       if (!facet) return staticOpts
       const m = new Map(facet.map(f => [f.value, f.count]))
-      return staticOpts.map(opt => ({ ...opt, count: m.get(opt.value) ?? 0 }))
+      return staticOpts
+        .filter(opt => m.has(opt.value))
+        .map(opt => ({ ...opt, count: m.get(opt.value) ?? 0 }))
     }
-    const categoryOpts = mergeCounts(categoryOptions, facets?.select.category)
-    const brandOpts = mergeCounts(brandOptions, facets?.select.brand)
+    const categoryOpts = buildOpts(categoryOptions, facets?.select.category)
+    const brandOpts = buildOpts(brandOptions, facets?.select.brand)
     const priceRange = facets?.range.price
 
     return columns.map(col => {
