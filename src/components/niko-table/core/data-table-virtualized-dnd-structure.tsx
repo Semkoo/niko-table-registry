@@ -92,6 +92,7 @@ function VirtualizedDraggableRow({
       ref={setRefs}
       style={style}
       className={cn("flex w-full", isDragging && "bg-muted/50", className)}
+      data-index={rowIndex}
       data-row-index={rowIndex}
     >
       {children}
@@ -112,10 +113,15 @@ export interface DataTableVirtualizedDndBodyProps<TData> {
   onScrolledTop?: () => void
   onScrolledBottom?: () => void
   scrollThreshold?: number
-  onRowClick?: (
-    row: TData,
-    event: React.MouseEvent<HTMLTableRowElement>,
-  ) => void
+  /**
+   * Click is delegated on `<tbody>` (so a single listener serves all
+   * virtual rows). The event therefore arrives with `currentTarget`
+   * = the `<tbody>`. If you need the row element, query
+   * `event.target.closest("tr[data-row-index]")` — typed as
+   * `HTMLElement` to reflect that runtime shape rather than lying
+   * with `HTMLTableRowElement`.
+   */
+  onRowClick?: (row: TData, event: React.MouseEvent<HTMLElement>) => void
 }
 
 /**
@@ -204,10 +210,8 @@ export function DataTableVirtualizedDndBody<TData>({
       const index = parseInt(rowIndexAttr, 10)
       if (Number.isNaN(index) || index < 0 || index >= rows.length) return
       const row = rows[index]
-      onRowClick(
-        row.original as TData,
-        event as unknown as React.MouseEvent<HTMLTableRowElement>,
-      )
+      if (!row) return
+      onRowClick(row.original as TData, event)
     },
     [onRowClick, rows],
   )
@@ -467,10 +471,15 @@ export interface DataTableVirtualizedDndColumnBodyProps<TData> {
   onScrolledTop?: () => void
   onScrolledBottom?: () => void
   scrollThreshold?: number
-  onRowClick?: (
-    row: TData,
-    event: React.MouseEvent<HTMLTableRowElement>,
-  ) => void
+  /**
+   * Click is delegated on `<tbody>` (so a single listener serves all
+   * virtual rows). The event therefore arrives with `currentTarget`
+   * = the `<tbody>`. If you need the row element, query
+   * `event.target.closest("tr[data-row-index]")` — typed as
+   * `HTMLElement` to reflect that runtime shape rather than lying
+   * with `HTMLTableRowElement`.
+   */
+  onRowClick?: (row: TData, event: React.MouseEvent<HTMLElement>) => void
 }
 
 /**
@@ -604,10 +613,8 @@ export function DataTableVirtualizedDndColumnBody<TData>({
       const index = parseInt(rowIndexAttr, 10)
       if (Number.isNaN(index) || index < 0 || index >= rows.length) return
       const row = rows[index]
-      onRowClick(
-        row.original as TData,
-        event as unknown as React.MouseEvent<HTMLTableRowElement>,
-      )
+      if (!row) return
+      onRowClick(row.original as TData, event)
     },
     [onRowClick, rows],
   )
