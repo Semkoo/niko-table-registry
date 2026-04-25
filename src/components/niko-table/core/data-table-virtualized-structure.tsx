@@ -27,6 +27,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { DataTableEmptyState } from "../components/data-table-empty-state"
 import { DataTableColumnHeaderRoot } from "../components/data-table-column-header"
 import { createScrollHandler } from "../lib/create-scroll-handler"
+import { isInteractiveClickTarget } from "../lib/row-click"
 import { getCommonPinningStyles } from "../lib/styles"
 
 // ============================================================================
@@ -147,6 +148,106 @@ export const DataTableVirtualizedHeader = React.memo(
 )
 
 DataTableVirtualizedHeader.displayName = "DataTableVirtualizedHeader"
+
+// ============================================================================
+// DataTableVirtualizedFlexHeader
+// ============================================================================
+
+export interface DataTableVirtualizedFlexHeaderProps {
+  className?: string
+  /**
+   * Makes the header sticky at the top when scrolling.
+   * @default true
+   */
+  sticky?: boolean
+}
+
+/**
+ * Flex-layout variant of `DataTableVirtualizedHeader` — pairs with
+ * `DataTableVirtualizedDndBody` (row-DnD virtualized body).
+ *
+ * **Why this exists:** the row-DnD virtualized body uses flex
+ * layout (`display: block` on `<tbody>`, `flex w-full` on rows)
+ * because `useSortable` transforms don't compose cleanly with
+ * native `display: table-row`. A standard table-layout header
+ * computes column widths via the table-auto algorithm and the two
+ * disagree on any column without an explicit `size`, drifting
+ * columns out of alignment with the body.
+ *
+ * Cell sizing mirrors the body exactly: `shrink-0` +
+ * `width: ${size}px` when `columnDef.size` is set, otherwise
+ * `min-w-0 flex-1`. Drop-in replacement when used with
+ * `DataTableVirtualizedDndBody`.
+ *
+ * For **column-DnD** virtualized tables use
+ * `DataTableVirtualizedDndHeader` instead — same flex layout, but
+ * each cell is wrapped in `TableDraggableHeader` for column drag.
+ *
+ * @example
+ * <DataTableRowDndProvider data={data} onReorder={setData}>
+ *   <DataTable height={500}>
+ *     <DataTableVirtualizedFlexHeader />
+ *     <DataTableVirtualizedDndBody />
+ *   </DataTable>
+ * </DataTableRowDndProvider>
+ */
+export const DataTableVirtualizedFlexHeader = React.memo(
+  function DataTableVirtualizedFlexHeader({
+    className,
+    sticky = true,
+  }: DataTableVirtualizedFlexHeaderProps) {
+    const { table } = useDataTable()
+
+    const headerGroups = table?.getHeaderGroups() ?? []
+
+    if (headerGroups.length === 0) {
+      return null
+    }
+
+    return (
+      <TableHeader
+        className={cn(
+          "block",
+          sticky && "sticky top-0 z-30 bg-background",
+          className,
+        )}
+      >
+        {headerGroups.map(headerGroup => (
+          <TableRow key={headerGroup.id} className="flex w-full border-b">
+            {headerGroup.headers.map(header => {
+              const size = header.column.columnDef.size
+              return (
+                <TableHead
+                  key={header.id}
+                  className={cn(
+                    size ? "shrink-0" : "min-w-0 flex-1",
+                    "flex items-center",
+                    header.column.getIsPinned() && "bg-background",
+                  )}
+                  style={{
+                    width: size ? `${size}px` : undefined,
+                    ...getCommonPinningStyles(header.column, true),
+                  }}
+                >
+                  {header.isPlaceholder ? null : (
+                    <DataTableColumnHeaderRoot column={header.column}>
+                      {flexRender(
+                        header.column.columnDef.header,
+                        header.getContext(),
+                      )}
+                    </DataTableColumnHeaderRoot>
+                  )}
+                </TableHead>
+              )
+            })}
+          </TableRow>
+        ))}
+      </TableHeader>
+    )
+  },
+)
+
+DataTableVirtualizedFlexHeader.displayName = "DataTableVirtualizedFlexHeader"
 
 // ============================================================================
 // DataTableVirtualizedBody
@@ -475,20 +576,7 @@ export function DataTableVirtualizedBody<TData>({
   const handleRowClick = React.useCallback(
     (event: React.MouseEvent<HTMLElement>) => {
       if (!onRowClick) return
-      const target = event.target as HTMLElement
-      if (
-        target.closest("button") ||
-        target.closest("input") ||
-        target.closest("a") ||
-        target.closest('[role="button"]') ||
-        target.closest('[role="checkbox"]') ||
-        target.closest("[data-radix-collection-item]") ||
-        target.closest('[data-slot="checkbox"]') ||
-        target.tagName === "INPUT" ||
-        target.tagName === "BUTTON" ||
-        target.tagName === "A"
-      )
-        return
+      if (isInteractiveClickTarget(event.target as HTMLElement)) return
 
       // Resolve via stable `row.id` rather than a positional index —
       // sort/filter/reorder leave indices unstable but ids are

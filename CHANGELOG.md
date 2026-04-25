@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **`DataTableVirtualizedFlexHeader` — flex-layout header for row-DnD virtualized tables.** The row-DnD virtualized body (`DataTableVirtualizedDndBody`) uses flex layout (`display: block` on `<tbody>`, `flex w-full` on rows) because `useSortable` transforms don't compose cleanly with native `display: table-row`. Pairing it with the standard `DataTableVirtualizedHeader` (table layout) made the header use the table-auto algorithm for column widths while the body used flex sizing — the two disagreed on any column without an explicit `size` and columns drifted apart visibly. New component mirrors the body's cell sizing exactly (`shrink-0` + `width: ${size}px` when `size` is set, otherwise `min-w-0 flex-1`). Composable: pick the header that matches your body — `DataTableVirtualizedHeader` for plain, `DataTableVirtualizedFlexHeader` for row-DnD, `DataTableVirtualizedDndHeader` for column-DnD.
+
+### Refactor — round 4 (CodeRabbit follow-up)
+
+- **Row-click guard + row resolution extracted to `lib/row-click.ts`.** The interactive-element list (`button`/`input`/`a`/`role="button"`/`role="checkbox"`/`data-radix-collection-item`/`data-slot="checkbox"`) was inlined in **6 places** across the four body files — `data-table-structure`, `data-table-dnd-structure` (×2), `data-table-virtualized-structure`, and `data-table-virtualized-dnd-structure` (×2). Adding a new `data-slot` to ignore meant editing six files. Now exposed as two module helpers: `isInteractiveClickTarget(target)` for the per-row variants (which resolve the row id from `event.currentTarget.dataset.rowId`) and `resolveRowFromClick(target, table)` for the delegated `<tbody>` variants (which walk `target.closest("tr[data-row-id]")` and call `table.getRow(rowId)`). No behavior change.
+
 ### Performance — round 3 (CodeRabbit follow-up)
 
 - **`expandColumnId` memo hoisted in all three virtualized bodies** (`DataTableVirtualizedBody`, `DataTableVirtualizedDndBody`, `DataTableVirtualizedDndColumnBody`). Round 1 hoisted this lookup in the non-virtualized bodies; the virtualized variants kept doing `row.getAllCells().find(...)` per row inside `virtualItems.map(...)` — O(virtual_rows × cols) every frame during scroll. Same `[table, columns]` memo pattern.

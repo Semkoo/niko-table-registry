@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/table"
 import { DataTableColumnHeaderRoot } from "../components/data-table-column-header"
 import { createScrollHandler } from "../lib/create-scroll-handler"
+import { resolveRowFromClick } from "../lib/row-click"
 import { getCommonPinningStyles } from "../lib/styles"
 import {
   SortableContext,
@@ -305,30 +306,7 @@ export function DataTableVirtualizedDndBody<TData>({
   const handleRowClick = React.useCallback(
     (event: React.MouseEvent<HTMLTableSectionElement>) => {
       if (!onRowClick) return
-      const target = event.target as HTMLElement
-      const rowElement = target.closest("tr[data-row-id]")
-      if (!rowElement) return
-
-      const isInteractiveElement =
-        target.closest("button") ||
-        target.closest("input") ||
-        target.closest("a") ||
-        target.closest('[role="button"]') ||
-        target.closest('[role="checkbox"]') ||
-        target.closest("[data-radix-collection-item]") ||
-        target.closest('[data-slot="checkbox"]') ||
-        target.tagName === "INPUT" ||
-        target.tagName === "BUTTON" ||
-        target.tagName === "A"
-      if (isInteractiveElement) return
-
-      // Resolve via stable `row.id` rather than a positional index —
-      // sort/filter/reorder leave indices unstable but ids are
-      // canonical. `table.getRow` is a Map lookup internally so this
-      // stays O(1).
-      const rowId = rowElement.getAttribute("data-row-id")
-      if (rowId === null) return
-      const row = table.getRow(rowId)
+      const row = resolveRowFromClick(event.target as HTMLElement, table)
       if (!row) return
       onRowClick(row.original as TData, event)
     },
@@ -703,30 +681,7 @@ export function DataTableVirtualizedDndColumnBody<TData>({
   const handleRowClick = React.useCallback(
     (event: React.MouseEvent<HTMLTableSectionElement>) => {
       if (!onRowClick) return
-      const target = event.target as HTMLElement
-      const rowElement = target.closest("tr[data-row-id]")
-      if (!rowElement) return
-
-      const isInteractiveElement =
-        target.closest("button") ||
-        target.closest("input") ||
-        target.closest("a") ||
-        target.closest('[role="button"]') ||
-        target.closest('[role="checkbox"]') ||
-        target.closest("[data-radix-collection-item]") ||
-        target.closest('[data-slot="checkbox"]') ||
-        target.tagName === "INPUT" ||
-        target.tagName === "BUTTON" ||
-        target.tagName === "A"
-      if (isInteractiveElement) return
-
-      // Resolve via stable `row.id` rather than a positional index —
-      // sort/filter/reorder leave indices unstable but ids are
-      // canonical. `table.getRow` is a Map lookup internally so this
-      // stays O(1).
-      const rowId = rowElement.getAttribute("data-row-id")
-      if (rowId === null) return
-      const row = table.getRow(rowId)
+      const row = resolveRowFromClick(event.target as HTMLElement, table)
       if (!row) return
       onRowClick(row.original as TData, event)
     },
