@@ -39,6 +39,14 @@ import type { DataTableColumnDef } from "@/components/niko-table/types"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import { Pencil, Check, X, PackageSearch, AlertCircle } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -394,36 +402,130 @@ export default function InlineEditStateTable() {
     [inlineEdit.editingId, inlineEdit.draft, inlineEdit.errors],
   )
 
+  const resetAllState = React.useCallback(() => {
+    setPagination({ pageIndex: 0, pageSize: 10 })
+    setSorting([])
+    setColumnVisibility({})
+    inlineEdit.cancel()
+  }, [inlineEdit])
+
   return (
-    <DataTableRoot
-      data={data}
-      columns={columns}
-      state={{ pagination, sorting, columnVisibility }}
-      onPaginationChange={setPagination}
-      onSortingChange={setSorting}
-      onColumnVisibilityChange={setColumnVisibility}
-    >
-      <DataTableToolbarSection>
-        <DataTableSearchFilter placeholder="Search products…" />
-        <DataTableViewMenu />
-      </DataTableToolbarSection>
-      <DataTable>
-        <DataTableHeader />
-        <DataTableBody getRowMemoKey={inlineEdit.getRowMemoKey}>
-          <DataTableEmptyBody>
-            <DataTableEmptyMessage>
-              <DataTableEmptyIcon>
-                <PackageSearch />
-              </DataTableEmptyIcon>
-              <DataTableEmptyTitle>No products found</DataTableEmptyTitle>
-              <DataTableEmptyDescription>
-                Try adjusting your search.
-              </DataTableEmptyDescription>
-            </DataTableEmptyMessage>
-          </DataTableEmptyBody>
-        </DataTableBody>
-      </DataTable>
-      <DataTablePagination />
-    </DataTableRoot>
+    <div className="space-y-4">
+      <DataTableRoot
+        data={data}
+        columns={columns}
+        state={{ pagination, sorting, columnVisibility }}
+        onPaginationChange={setPagination}
+        onSortingChange={setSorting}
+        onColumnVisibilityChange={setColumnVisibility}
+      >
+        <DataTableToolbarSection>
+          <DataTableSearchFilter placeholder="Search products…" />
+          <DataTableViewMenu />
+        </DataTableToolbarSection>
+        <DataTable>
+          <DataTableHeader />
+          <DataTableBody getRowMemoKey={inlineEdit.getRowMemoKey}>
+            <DataTableEmptyBody>
+              <DataTableEmptyMessage>
+                <DataTableEmptyIcon>
+                  <PackageSearch />
+                </DataTableEmptyIcon>
+                <DataTableEmptyTitle>No products found</DataTableEmptyTitle>
+                <DataTableEmptyDescription>
+                  Try adjusting your search.
+                </DataTableEmptyDescription>
+              </DataTableEmptyMessage>
+            </DataTableEmptyBody>
+          </DataTableBody>
+        </DataTable>
+        <DataTablePagination />
+      </DataTableRoot>
+
+      {/* State Display for demonstration */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Current Table State</CardTitle>
+          <CardDescription>
+            Live view of the current table state for demonstration purposes
+          </CardDescription>
+          <CardAction>
+            <Button variant="outline" size="sm" onClick={resetAllState}>
+              Reset All State
+            </Button>
+          </CardAction>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-2 text-xs text-muted-foreground">
+            <div className="flex justify-between">
+              <span className="font-medium">Editing Row:</span>
+              <span className="text-foreground">
+                {inlineEdit.editingId ?? "None"}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="font-medium">Total Items:</span>
+              <span className="text-foreground">{data.length}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="font-medium">Sorting:</span>
+              <span className="text-foreground">
+                {sorting.length > 0
+                  ? sorting
+                      .map(s => `${s.id} ${s.desc ? "desc" : "asc"}`)
+                      .join(", ")
+                  : "None"}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="font-medium">Page:</span>
+              <span className="text-foreground">
+                {pagination.pageIndex + 1} (Size: {pagination.pageSize})
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="font-medium">Hidden Columns:</span>
+              <span className="text-foreground">
+                {Object.values(columnVisibility).filter(v => v === false).length}
+              </span>
+            </div>
+          </div>
+
+          <details className="border-t pt-4">
+            <summary className="cursor-pointer text-xs font-medium hover:text-foreground">
+              View Full State Object
+            </summary>
+            <div className="mt-4 space-y-3 text-xs">
+              <div>
+                <strong>Edit Draft:</strong>
+                <pre className="mt-1 overflow-auto rounded bg-muted p-2">
+                  {inlineEdit.editingId
+                    ? JSON.stringify(inlineEdit.draft, null, 2)
+                    : "null"}
+                </pre>
+              </div>
+              <div>
+                <strong>Sorting:</strong>
+                <pre className="mt-1 overflow-auto rounded bg-muted p-2">
+                  {JSON.stringify(sorting, null, 2)}
+                </pre>
+              </div>
+              <div>
+                <strong>Pagination:</strong>
+                <pre className="mt-1 overflow-auto rounded bg-muted p-2">
+                  {JSON.stringify(pagination, null, 2)}
+                </pre>
+              </div>
+              <div>
+                <strong>Column Visibility:</strong>
+                <pre className="mt-1 overflow-auto rounded bg-muted p-2">
+                  {JSON.stringify(columnVisibility, null, 2)}
+                </pre>
+              </div>
+            </div>
+          </details>
+        </CardContent>
+      </Card>
+    </div>
   )
 }
