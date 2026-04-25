@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Performance
+
+- **`DataTableRootInternal` — `tableOptions` memo no longer invalidates every render** — The memo previously depended on `rest` (the unmemoized rest bag from props destructuring), which is a fresh object every render. Each render: `tableOptions` rebuilt → `useReactTable` saw "options changed" → TanStack Table dispatched internal state syncs through our local useState setters. Destructured the three rest props that are read by name in the body (`state`, `initialState`, `globalFilterFn`) and depend on those specifically; remaining props go through `passthroughTableOptions` which is spread but intentionally not in the deps (lift specific keys into the destructure list if their identity must invalidate the memo). Eliminates the "state update on a component that hasn't mounted yet" warning class that fired across every consumer table under React 19 + Strict Mode + Turbopack HMR.
+
 ### Fixed
 
 - **`FILTER_OPERATORS.RELATIVE` removed from date-filter UI** — The "Is relative to today" entry in `dateOperators` (config/data-table.ts) was selectable in the filter dropdown, but the filter implementation wasn't done — picking it threw in dev / returned no matches in prod. Hidden the entry from the dropdown until the comparison logic ships. The constant itself stays in the operator catalogue so server-side consumers can keep their wiring; the inline comment explains why and how to re-add it.

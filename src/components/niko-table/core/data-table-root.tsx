@@ -115,7 +115,28 @@ function DataTableRootInternal<TData, TValue>({
   onColumnOrderChange,
   onColumnPinningChange,
   onRowSelection,
-  ...rest
+  // Destructured by name (instead of leaving in `...rest`) so the
+  // `tableOptions` memo can depend on the specific values that
+  // actually affect it. Previously the memo depended on the whole
+  // `rest` bag — `rest` is a fresh object every render, so the memo
+  // invalidated every render, `useReactTable` saw "options changed"
+  // every commit, and TanStack Table dispatched internal state syncs
+  // (e.g. `onSortingChange`, `onPaginationChange` for `autoResetX`)
+  // through our local useState setters. Under React 19 + Strict Mode
+  // + Turbopack HMR those queued dispatches could land on a torn-
+  // down fiber, producing the "state update on a component that
+  // hasn't mounted yet" warning across every table.
+  state: restState,
+  initialState: restInitialState,
+  globalFilterFn: restGlobalFilterFn,
+  // Anything else passed through to TanStack Table (plain
+  // `useReactTable` options — rare in practice; consumers normally
+  // route enable/manual flags through `config` and state through
+  // `state` / handlers). Still spread into `tableOptions` for
+  // forward compatibility, but NOT in the memo deps — if you start
+  // relying on a passthrough option that needs to invalidate the
+  // memo, lift it into the destructure list above.
+  ...passthroughTableOptions
 }: Omit<TableRootProps<TData, TValue>, "table"> & {
   columns: DataTableColumnDef<TData, TValue>[]
   data: TData[]
@@ -285,40 +306,40 @@ function DataTableRootInternal<TData, TValue>({
 
   // State management
   const [globalFilter, setGlobalFilter] = React.useState<GlobalFilter>(
-    rest.initialState?.globalFilter ?? "",
+    restInitialState?.globalFilter ?? "",
   )
   const [rowSelection, setRowSelection] = React.useState<RowSelectionState>(
-    rest.initialState?.rowSelection ?? {},
+    restInitialState?.rowSelection ?? {},
   )
   const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>(rest.initialState?.columnVisibility ?? {})
+    React.useState<VisibilityState>(restInitialState?.columnVisibility ?? {})
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    rest.initialState?.columnFilters ?? [],
+    restInitialState?.columnFilters ?? [],
   )
   const [sorting, setSorting] = React.useState<SortingState>(
-    rest.initialState?.sorting ?? [],
+    restInitialState?.sorting ?? [],
   )
   const [expanded, setExpanded] = React.useState<ExpandedState>(
-    rest.initialState?.expanded ?? {},
+    restInitialState?.expanded ?? {},
   )
   const [columnPinning, setColumnPinning] = React.useState<{
     left: string[]
     right: string[]
   }>({
-    left: rest.initialState?.columnPinning?.left ?? [],
-    right: rest.initialState?.columnPinning?.right ?? [],
+    left: restInitialState?.columnPinning?.left ?? [],
+    right: restInitialState?.columnPinning?.right ?? [],
   })
   const [columnOrder, setColumnOrder] = React.useState<ColumnOrderState>(
-    rest.initialState?.columnOrder ?? [],
+    restInitialState?.columnOrder ?? [],
   )
   const [pagination, setPagination] = React.useState<PaginationState>({
     pageIndex:
       finalConfig.initialPageIndex ??
-      rest.initialState?.pagination?.pageIndex ??
+      restInitialState?.pagination?.pageIndex ??
       0,
     pageSize:
       finalConfig.initialPageSize ??
-      rest.initialState?.pagination?.pageSize ??
+      restInitialState?.pagination?.pageSize ??
       10,
   })
 
@@ -497,26 +518,26 @@ function DataTableRootInternal<TData, TValue>({
   /**
    * PERFORMANCE: Extract controlled state values for dependency tracking
    *
-   * WHY: When using controlled state (rest.state), we need to track those values
+   * WHY: When using controlled state (restState), we need to track those values
    * in the dependency array. Extracting them here makes the dependency array cleaner
    * and ensures the table updates when external state changes.
    *
    * IMPORTANT: Memoize pagination to prevent infinite loops when the object reference
    * changes but values are the same. Use deep comparison for pagination state.
    */
-  const controlledSorting = rest.state?.sorting ?? sorting
+  const controlledSorting = restState?.sorting ?? sorting
   const controlledColumnVisibility =
-    rest.state?.columnVisibility ?? columnVisibility
-  const controlledRowSelection = rest.state?.rowSelection ?? rowSelection
-  const controlledColumnFilters = rest.state?.columnFilters ?? columnFilters
+    restState?.columnVisibility ?? columnVisibility
+  const controlledRowSelection = restState?.rowSelection ?? rowSelection
+  const controlledColumnFilters = restState?.columnFilters ?? columnFilters
   const controlledGlobalFilter =
-    rest.state?.globalFilter !== undefined
-      ? rest.state.globalFilter
+    restState?.globalFilter !== undefined
+      ? restState.globalFilter
       : globalFilter
-  const controlledColumnPinning = rest.state?.columnPinning ?? columnPinning
-  const controlledColumnOrder = rest.state?.columnOrder ?? columnOrder
-  const controlledExpanded = rest.state?.expanded ?? expanded
-  const controlledPagination = rest.state?.pagination ?? pagination
+  const controlledColumnPinning = restState?.columnPinning ?? columnPinning
+  const controlledColumnOrder = restState?.columnOrder ?? columnOrder
+  const controlledExpanded = restState?.expanded ?? expanded
+  const controlledPagination = restState?.pagination ?? pagination
 
   /**
    * SMART PINNING LOGIC:
@@ -622,14 +643,14 @@ function DataTableRootInternal<TData, TValue>({
    */
   const tableOptions = React.useMemo<TableOptions<TData>>(
     () => ({
-      ...rest,
+      ...passthroughTableOptions,
       data,
       columns: processedColumns,
       defaultColumn,
       state: {
-        ...rest.state,
+        ...restState,
         // Always use our local state as the source of truth
-        // External state (rest.state) takes precedence only if explicitly provided
+        // External state (restState) takes precedence only if explicitly provided
         sorting: controlledSorting,
         columnVisibility: controlledColumnVisibility,
         columnPinning: finalColumnPinning,
@@ -691,7 +712,7 @@ function DataTableRootInternal<TData, TValue>({
       },
       // Allow globalFilterFn to be overridden via rest props, otherwise use default
       globalFilterFn:
-        (rest.globalFilterFn as FilterFn<TData>) ??
+        (restGlobalFilterFn as FilterFn<TData>) ??
         (globalFilterFn as unknown as FilterFn<TData>),
       // Use provided getRowId or fallback to checking for 'id' property, then index
       getRowId:
@@ -718,12 +739,21 @@ function DataTableRootInternal<TData, TValue>({
     // Note: processedColumns is already memoized, so it's safe to include here
     // Note: Callbacks like setSorting, setExpanded are stable from useState
     // External callbacks (onSortingChange, etc.) should be memoized by consumer
-    // Note: 'rest' is included because it's spread into tableOptions
-    // Consumers should memoize rest props if they change frequently
-    // IMPORTANT: When using controlled state (rest.state), we need to include those values
-    // in the dependency array so the table updates when external state changes
+    // Note: we depend on the *destructured* `restState`,
+    // `restInitialState`, `restGlobalFilterFn`, NOT on the whole rest
+    // bag. The previous version listed `rest` itself, which is a fresh
+    // object every render — invalidating the memo every render and
+    // forcing `useReactTable` to see "options changed" on every commit.
+    // That cascade was the root cause of the cross-table
+    // "state update on a component that hasn't mounted yet" warning
+    // (TanStack Table dispatches internal `onSortingChange` /
+    // `onPaginationChange` syncs through our useState setters, and
+    // those queued dispatches raced StrictMode's unmount/remount).
+    // `passthroughTableOptions` is intentionally NOT a dep — see the
+    // destructure-site comment for the trade-off.
     [
-      rest,
+      restState,
+      restGlobalFilterFn,
       data,
       processedColumns,
       defaultColumn,
