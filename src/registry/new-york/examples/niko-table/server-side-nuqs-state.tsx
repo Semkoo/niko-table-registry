@@ -417,7 +417,20 @@ type ServerResponse<T> = {
   total: number
   page: number
   pageSize: number
-  facets: Record<string, string[]>
+  /**
+   * Cross-filter facets keyed by column id.
+   * - select columns → list of distinct values still available given other filters
+   * - numeric/date columns → [min, max] tuple still available given other filters
+   *
+   * "Cross-filter" means each column's facet is computed by re-applying ALL
+   * filters EXCEPT this column's own — so a user who's already filtered on
+   * price can still expand the slider back, and the available brand options
+   * still reflect the rest of the filter set.
+   */
+  facets: {
+    select: Record<string, string[]>
+    range: Record<string, [number, number]>
+  }
 }
 
 type FetchParams = {
@@ -686,18 +699,42 @@ function fetchProducts(
         // Apply all filters
         const filtered = filterProductsByParams(allProducts, params)
 
-        // Compute facets: for each select column, get distinct values from
-        // data filtered by all OTHER column filters (excluding that column's own)
-        // This enables cross-filter behavior in the UI
-        const facetColumns = ["category", "brand"] as const
-        const facets: Record<string, string[]> = {}
-        for (const col of facetColumns) {
+        // Cross-filter facets — each column's facet is computed against the
+        // dataset filtered by ALL OTHER column filters (excluding the column's
+        // own). Lets the user widen a slider back / unselect a faceted option
+        // without losing the rest of the filter set.
+        const selectColumns = ["category", "brand"] as const
+        // Add more columns here when you wire `DataTableColumnSliderFilterMenu`
+        // into their headers — the dispatcher in `dynamicColumns` will pick
+        // up the range automatically.
+        const rangeColumns = ["price"] as const
+        const facets: ServerResponse<Product>["facets"] = {
+          select: {},
+          range: {},
+        }
+        for (const col of selectColumns) {
           const facetFiltered = filterProductsByParams(allProducts, params, col)
-          facets[col] = [
+          facets.select[col] = [
             ...new Set(facetFiltered.map(p => String(p[col as keyof Product]))),
           ]
             .filter(v => v.trim() !== "")
             .sort()
+        }
+        for (const col of rangeColumns) {
+          const facetFiltered = filterProductsByParams(allProducts, params, col)
+          if (facetFiltered.length === 0) continue
+          let lo = Infinity
+          let hi = -Infinity
+          for (const p of facetFiltered) {
+            const v = Number(p[col as keyof Product])
+            if (Number.isFinite(v)) {
+              if (v < lo) lo = v
+              if (v > hi) hi = v
+            }
+          }
+          if (Number.isFinite(lo) && Number.isFinite(hi)) {
+            facets.range[col] = [lo, hi]
+          }
         }
 
         // Apply server-side sorting
@@ -1281,16 +1318,20 @@ function ServerSideStateTableContent() {
   const totalCount = queryData?.total ?? 0
   const facets = queryData?.facets
 
-  // Create dynamic columns with faceted options passed directly to filter menus.
-  // The `options` prop on DataTableColumnFacetedFilterMenu bypasses useGeneratedOptions
-  // entirely, avoiding stale memo issues with table.getAllColumns().
+  // Create dynamic columns with cross-filter facets piped in from the server.
+  // - Faceted columns receive `options` so unselected values stay visible.
+  // - Slider columns receive `range={facets.range[col]}` so the slider can
+  //   still be widened back after an active filter narrows the row set.
   const dynamicColumns = useMemo(() => {
-    const categoryOpts = facets?.category
-      ? categoryOptions.filter(opt => facets.category.includes(opt.value))
+    const categoryOpts = facets?.select.category
+      ? categoryOptions.filter(opt =>
+          facets.select.category.includes(opt.value),
+        )
       : categoryOptions
-    const brandOpts = facets?.brand
-      ? brandOptions.filter(opt => facets.brand.includes(opt.value))
+    const brandOpts = facets?.select.brand
+      ? brandOptions.filter(opt => facets.select.brand.includes(opt.value))
       : brandOptions
+    const priceRange = facets?.range.price
 
     return columns.map(col => {
       const key = (col as { accessorKey?: string }).accessorKey
@@ -1314,6 +1355,18 @@ function ServerSideStateTableContent() {
               <DataTableColumnTitle />
               <DataTableColumnSortMenu variant={FILTER_VARIANTS.TEXT} />
               <DataTableColumnFacetedFilterMenu options={brandOpts} />
+            </DataTableColumnHeader>
+          ),
+        } as DataTableColumnDef<Product>
+      }
+      if (key === "price" && priceRange) {
+        return {
+          ...col,
+          header: () => (
+            <DataTableColumnHeader>
+              <DataTableColumnTitle />
+              <DataTableColumnSortMenu variant={FILTER_VARIANTS.NUMBER} />
+              <DataTableColumnSliderFilterMenu range={priceRange} />
             </DataTableColumnHeader>
           ),
         } as DataTableColumnDef<Product>

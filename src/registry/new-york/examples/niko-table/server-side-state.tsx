@@ -394,7 +394,13 @@ type ServerResponse<T> = {
   total: number
   page: number
   pageSize: number
-  facets: Record<string, string[]>
+  /**
+   * Cross-filter facets — see ServerResponse in server-side-nuqs-state.tsx.
+   */
+  facets: {
+    select: Record<string, string[]>
+    range: Record<string, [number, number]>
+  }
 }
 
 type FetchParams = {
@@ -633,18 +639,36 @@ function fetchProducts(
         // Apply all filters
         const filtered = filterProductsByParams(allProducts, params)
 
-        // Compute facets: for each select column, get distinct values from
-        // data filtered by all OTHER column filters (excluding that column's own)
-        // This enables cross-filter behavior in the UI
-        const facetColumns = ["category", "brand"] as const
-        const facets: Record<string, string[]> = {}
-        for (const col of facetColumns) {
+        // Cross-filter facets — see server-side-nuqs-state.tsx for the full doc.
+        const selectColumns = ["category", "brand"] as const
+        const rangeColumns = ["price"] as const
+        const facets: ServerResponse<Product>["facets"] = {
+          select: {},
+          range: {},
+        }
+        for (const col of selectColumns) {
           const facetFiltered = filterProductsByParams(allProducts, params, col)
-          facets[col] = [
+          facets.select[col] = [
             ...new Set(facetFiltered.map(p => String(p[col as keyof Product]))),
           ]
             .filter(v => v.trim() !== "")
             .sort()
+        }
+        for (const col of rangeColumns) {
+          const facetFiltered = filterProductsByParams(allProducts, params, col)
+          if (facetFiltered.length === 0) continue
+          let lo = Infinity
+          let hi = -Infinity
+          for (const p of facetFiltered) {
+            const v = Number(p[col as keyof Product])
+            if (Number.isFinite(v)) {
+              if (v < lo) lo = v
+              if (v > hi) hi = v
+            }
+          }
+          if (Number.isFinite(lo) && Number.isFinite(hi)) {
+            facets.range[col] = [lo, hi]
+          }
         }
 
         // Apply server-side sorting
@@ -1061,19 +1085,21 @@ function ServerSideStateTableContent() {
   const totalCount = queryData?.total ?? 0
   const facets = queryData?.facets
 
-  // Create dynamic columns with faceted options passed directly to filter menus.
-  // The `options` prop on DataTableColumnFacetedFilterMenu bypasses useGeneratedOptions
-  // entirely, avoiding stale memo issues with table.getAllColumns().
-  // When Category=Electronics is active, Brand facets only include electronics brands,
-  // so Nike/Adidas won't appear. Each column's own facets exclude its own filter,
-  // so all categories still show even when one is selected.
+  // Create dynamic columns with cross-filter facets piped in from the server.
+  // Faceted columns receive `options` so unselected values stay visible after
+  // a filter narrows the row set. Slider columns receive `range={facets.range[col]}`
+  // so the slider can still be widened back. Each column's own filter is
+  // excluded from its facet computation server-side.
   const dynamicColumns = useMemo(() => {
-    const categoryOpts = facets?.category
-      ? categoryOptions.filter(opt => facets.category.includes(opt.value))
+    const categoryOpts = facets?.select.category
+      ? categoryOptions.filter(opt =>
+          facets.select.category.includes(opt.value),
+        )
       : categoryOptions
-    const brandOpts = facets?.brand
-      ? brandOptions.filter(opt => facets.brand.includes(opt.value))
+    const brandOpts = facets?.select.brand
+      ? brandOptions.filter(opt => facets.select.brand.includes(opt.value))
       : brandOptions
+    const priceRange = facets?.range.price
 
     return columns.map(col => {
       const key = (col as { accessorKey?: string }).accessorKey
@@ -1097,6 +1123,18 @@ function ServerSideStateTableContent() {
               <DataTableColumnTitle />
               <DataTableColumnSortMenu variant={FILTER_VARIANTS.TEXT} />
               <DataTableColumnFacetedFilterMenu options={brandOpts} />
+            </DataTableColumnHeader>
+          ),
+        } as DataTableColumnDef<Product>
+      }
+      if (key === "price" && priceRange) {
+        return {
+          ...col,
+          header: () => (
+            <DataTableColumnHeader>
+              <DataTableColumnTitle />
+              <DataTableColumnSortMenu variant={FILTER_VARIANTS.NUMBER} />
+              <DataTableColumnSliderFilterMenu range={priceRange} />
             </DataTableColumnHeader>
           ),
         } as DataTableColumnDef<Product>
