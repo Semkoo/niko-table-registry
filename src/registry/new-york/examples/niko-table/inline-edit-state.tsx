@@ -231,8 +231,8 @@ export default function InlineEditStateTable() {
       {
         id: "name",
         accessorKey: "name",
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column}>
+        header: () => (
+          <DataTableColumnHeader>
             <DataTableColumnTitle>Name</DataTableColumnTitle>
             <DataTableColumnSortMenu />
           </DataTableColumnHeader>
@@ -271,8 +271,8 @@ export default function InlineEditStateTable() {
       {
         id: "category",
         accessorKey: "category",
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column}>
+        header: () => (
+          <DataTableColumnHeader>
             <DataTableColumnTitle>Category</DataTableColumnTitle>
             <DataTableColumnSortMenu />
           </DataTableColumnHeader>
@@ -286,8 +286,8 @@ export default function InlineEditStateTable() {
       {
         id: "price",
         accessorKey: "price",
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column}>
+        header: () => (
+          <DataTableColumnHeader>
             <DataTableColumnTitle>Price</DataTableColumnTitle>
             <DataTableColumnSortMenu />
           </DataTableColumnHeader>
@@ -336,8 +336,8 @@ export default function InlineEditStateTable() {
       {
         id: "stock",
         accessorKey: "stock",
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column}>
+        header: () => (
+          <DataTableColumnHeader>
             <DataTableColumnTitle>Stock</DataTableColumnTitle>
             <DataTableColumnSortMenu />
           </DataTableColumnHeader>
@@ -416,11 +416,13 @@ export default function InlineEditStateTable() {
       <DataTableRoot
         data={data}
         columns={columns}
-        pagination={pagination}
+        state={{
+          pagination,
+          sorting,
+          columnVisibility,
+        }}
         onPaginationChange={setPagination}
-        sorting={sorting}
         onSortingChange={setSorting}
-        columnVisibility={columnVisibility}
         onColumnVisibilityChange={setColumnVisibility}
       >
         <DataTable>

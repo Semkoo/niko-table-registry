@@ -105,7 +105,7 @@ const initialData: Product[] = [
 // ---------------------------------------------------------------------------
 
 function useInlineEdit(
-  data: Product[],
+  _data: Product[],
   setData: React.Dispatch<React.SetStateAction<Product[]>>,
 ) {
   const [editingId, setEditingId] = React.useState<string | null>(null)
@@ -205,8 +205,8 @@ export default function InlineEditTable() {
       {
         id: "name",
         accessorKey: "name",
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column}>
+        header: () => (
+          <DataTableColumnHeader>
             <DataTableColumnTitle>Name</DataTableColumnTitle>
             <DataTableColumnSortMenu />
           </DataTableColumnHeader>
@@ -245,8 +245,8 @@ export default function InlineEditTable() {
       {
         id: "category",
         accessorKey: "category",
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column}>
+        header: () => (
+          <DataTableColumnHeader>
             <DataTableColumnTitle>Category</DataTableColumnTitle>
             <DataTableColumnSortMenu />
           </DataTableColumnHeader>
@@ -260,8 +260,8 @@ export default function InlineEditTable() {
       {
         id: "price",
         accessorKey: "price",
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column}>
+        header: () => (
+          <DataTableColumnHeader>
             <DataTableColumnTitle>Price</DataTableColumnTitle>
             <DataTableColumnSortMenu />
           </DataTableColumnHeader>
@@ -310,8 +310,8 @@ export default function InlineEditTable() {
       {
         id: "stock",
         accessorKey: "stock",
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column}>
+        header: () => (
+          <DataTableColumnHeader>
             <DataTableColumnTitle>Stock</DataTableColumnTitle>
             <DataTableColumnSortMenu />
           </DataTableColumnHeader>
