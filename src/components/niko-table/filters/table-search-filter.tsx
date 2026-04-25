@@ -82,13 +82,13 @@ export function TableSearchFilter<TData>({
   )
 
   React.useEffect(() => {
-    if (!debounceEnabled) return
-    // Cancel any pending debounce flush before syncing — an out-of-band reset
-    // (URL nav, programmatic clear) must win over a stale keystroke timer.
+    // Cancel any pending debounce flush before checking mode — if debounceEnabled
+    // just switched to false, a stale timer from the previous mode must be cleared.
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current)
       debounceTimerRef.current = null
     }
+    if (!debounceEnabled) return
     setPendingValue(globalFilterValue)
   }, [globalFilterValue, debounceEnabled])
 

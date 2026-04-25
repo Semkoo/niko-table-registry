@@ -254,6 +254,7 @@ const VirtualizedBodyRowInner = function VirtualizedBodyRow<TData>({
   isClickable,
   measureRef,
   onClick,
+  columnLayoutSignature,
 }: VirtualizedBodyRowProps<TData>) {
   const expandCell =
     isExpanded && expandColumnId
@@ -262,10 +263,29 @@ const VirtualizedBodyRowInner = function VirtualizedBodyRow<TData>({
 
   const visibleCells = row.getVisibleCells()
 
+  // Cache the base-row DOM node so we can re-trigger measureRef when column
+  // layout changes while the row is expanded (no remount = no automatic re-measure).
+  const elementRef = React.useRef<HTMLTableRowElement | null>(null)
+  const setRef = React.useCallback(
+    (node: HTMLTableRowElement | null) => {
+      elementRef.current = node
+      if (measureRef) measureRef(node)
+    },
+    [measureRef],
+  )
+
+  // Re-measure when column layout changes while expanded so the virtualizer
+  // picks up the updated combined base + expanded-pane height.
+  React.useEffect(() => {
+    if (isExpanded && measureRef && elementRef.current) {
+      measureRef(elementRef.current)
+    }
+  }, [isExpanded, columnLayoutSignature, measureRef])
+
   return (
     <>
       <TableRow
-        ref={measureRef}
+        ref={setRef}
         data-index={virtualIndex}
         data-row-id={row.id}
         data-state={isSelected ? "selected" : undefined}
@@ -382,6 +402,7 @@ export function DataTableVirtualizedBody<TData>({
     [table, columns],
   )
 
+  const { columnVisibility, columnOrder, columnPinning } = table.getState()
   // Encodes visible column ids + pinning so memoized rows re-render on layout changes.
   const columnLayoutSignature = React.useMemo(
     () =>
@@ -392,7 +413,7 @@ export function DataTableVirtualizedBody<TData>({
           return pinned ? `${c.id}:${pinned}` : c.id
         })
         .join(","),
-    [table, columns],
+    [table, columnVisibility, columnOrder, columnPinning],
   )
 
   const [scrollElement, setScrollElement] =

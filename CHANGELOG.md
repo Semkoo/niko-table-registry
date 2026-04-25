@@ -43,6 +43,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `VirtualizedDndColumnBodyRow` — expansion toggle no longer silently skips the virtualizer re-measure. Added `elementRef` + `useEffect` matching the pattern in `VirtualizedDraggableRow`, so the combined base + expanded-pane height is measured without remounting the row.
 - `TableSearchFilter` `debounceMs` — out-of-band table state resets (URL nav, programmatic clear) now cancel any pending debounce flush before syncing `pendingValue`, preventing a stale keystroke timer from overwriting the reset.
 
+### Fixed
+
+- **`columnLayoutSignature` memo deps** — all six body components now depend on `columnVisibility`, `columnOrder`, and `columnPinning` from `table.getState()` instead of the stable `columns` array. The memo previously never recomputed on toggle/reorder/pin changes because `table` and `columns` are both stable references; visible column IDs and pinning are now correctly reactive.
+- **`VirtualizedBodyRowInner` expanded-row re-measure** — base row now uses `setRef`/`elementRef` and a `useEffect([isExpanded, columnLayoutSignature, measureRef])` so the virtualizer re-measures when column layout changes while a row is expanded (no remount, so the earlier `ref={measureRef}` was never re-called).
+- **`VirtualizedDndColumnBodyRowInner` re-measure effect** — `columnLayoutSignature` added to `useEffect` deps so the virtualizer picks up the updated combined height when column layout changes while a row is expanded.
+- **`TableSearchFilter` debounce timer cancel order** — pending timer is now cancelled before the `!debounceEnabled` early return. Previously, switching `debounceEnabled` from `true` to `false` left a stale timer running that could overwrite the cleared state.
+
 ### Performance
 
 - Scroll handler rAF-coalesced; `onScrolledTop` / `onScrolledBottom` fire only on the leading edge (false→true).

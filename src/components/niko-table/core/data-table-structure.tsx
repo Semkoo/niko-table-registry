@@ -265,6 +265,7 @@ export function DataTableBody<TData>({
     [table, columns],
   )
 
+  const { columnVisibility, columnOrder, columnPinning } = table.getState()
   // Encodes visible column ids + pinning so memoized rows re-render on layout changes.
   const columnLayoutSignature = React.useMemo(
     () =>
@@ -275,7 +276,7 @@ export function DataTableBody<TData>({
           return pinned ? `${c.id}:${pinned}` : c.id
         })
         .join(","),
-    [table, columns],
+    [table, columnVisibility, columnOrder, columnPinning],
   )
 
   const isClickable = !!onRowClick

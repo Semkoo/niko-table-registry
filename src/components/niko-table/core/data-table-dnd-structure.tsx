@@ -232,6 +232,7 @@ export function DataTableDndBody<TData>({
     [table, columns],
   )
 
+  const { columnVisibility, columnOrder, columnPinning } = table.getState()
   // Encodes visible column ids + pinning so memoized rows re-render on layout changes.
   const columnLayoutSignature = React.useMemo(
     () =>
@@ -242,7 +243,7 @@ export function DataTableDndBody<TData>({
           return pinned ? `${c.id}:${pinned}` : c.id
         })
         .join(","),
-    [table, columns],
+    [table, columnVisibility, columnOrder, columnPinning],
   )
 
   const isClickable = !!onRowClick
@@ -405,6 +406,7 @@ export function DataTableDndColumnBody<TData>({
     [table, columns],
   )
 
+  const { columnVisibility, columnOrder, columnPinning } = table.getState()
   // Encodes visible column ids + pinning so memoized rows re-render on layout changes.
   const columnLayoutSignature = React.useMemo(
     () =>
@@ -415,7 +417,7 @@ export function DataTableDndColumnBody<TData>({
           return pinned ? `${c.id}:${pinned}` : c.id
         })
         .join(","),
-    [table, columns],
+    [table, columnVisibility, columnOrder, columnPinning],
   )
 
   const isClickable = !!onRowClick

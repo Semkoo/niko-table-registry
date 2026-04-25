@@ -301,6 +301,7 @@ const VirtualizedDndColumnBodyRowInner = function VirtualizedDndColumnBodyRow<
   isClickable,
   estimateSize,
   measureRef,
+  columnLayoutSignature,
 }: VirtualizedDndColumnBodyRowProps<TData>) {
   const expandCell =
     isExpanded && expandColumnId
@@ -326,7 +327,7 @@ const VirtualizedDndColumnBodyRowInner = function VirtualizedDndColumnBodyRow<
   // the row itself but we keep key stable for consistency.
   React.useEffect(() => {
     if (measureRef && elementRef.current) measureRef(elementRef.current)
-  }, [isExpanded, measureRef])
+  }, [isExpanded, columnLayoutSignature, measureRef])
 
   return (
     <>
@@ -449,6 +450,7 @@ export function DataTableVirtualizedDndBody<TData>({
     [table, columns],
   )
 
+  const { columnVisibility, columnOrder, columnPinning } = table.getState()
   // Encodes visible column ids + pinning so memoized rows re-render on layout changes.
   const columnLayoutSignature = React.useMemo(
     () =>
@@ -459,7 +461,7 @@ export function DataTableVirtualizedDndBody<TData>({
           return pinned ? `${c.id}:${pinned}` : c.id
         })
         .join(","),
-    [table, columns],
+    [table, columnVisibility, columnOrder, columnPinning],
   )
 
   const [scrollElement, setScrollElement] =
@@ -773,6 +775,7 @@ export function DataTableVirtualizedDndColumnBody<TData>({
     [table, columns],
   )
 
+  const { columnVisibility, columnOrder, columnPinning } = table.getState()
   // Encodes visible column ids + pinning so memoized rows re-render on layout changes.
   const columnLayoutSignature = React.useMemo(
     () =>
@@ -783,7 +786,7 @@ export function DataTableVirtualizedDndColumnBody<TData>({
           return pinned ? `${c.id}:${pinned}` : c.id
         })
         .join(","),
-    [table, columns],
+    [table, columnVisibility, columnOrder, columnPinning],
   )
 
   const [scrollElement, setScrollElement] =
