@@ -78,26 +78,13 @@ export function getValidFilters<TData>(
 }
 
 /**
- * Process filters to detect OR logic and same-column filters
- *
- * This utility function centralizes the logic for determining whether filters
- * should use OR/MIXED logic (via globalFilter) or AND logic (via columnFilters).
- *
- * It detects:
- * 1. Explicit OR operators (filters with joinOperator === "or")
- * 2. Same-column filters (multiple filters targeting the same column)
- *
- * For same-column filters, it automatically converts AND to OR for better UX,
- * since "brand is apple AND brand is samsung" is impossible and should become
- * "brand is apple OR brand is samsung".
+ * Process filters to detect OR logic and same-column filters. Auto-converts
+ * same-column AND to OR for UX (e.g. "brand=apple AND brand=samsung" is
+ * impossible).
  *
  * @param filters - Array of filters to process
- * @returns Object containing:
- *   - processedFilters: Filters with same-column AND converted to OR
- *   - hasOrFilters: Whether explicit OR operators are present
- *   - hasSameColumnFilters: Whether multiple filters target the same column
- *   - shouldUseGlobalFilter: Whether filters should be routed to globalFilter
- *   - joinOperator: The effective join operator (MIXED or AND)
+ * @returns Object with `processedFilters`, `hasOrFilters`,
+ *   `hasSameColumnFilters`, `shouldUseGlobalFilter`, and effective `joinOperator`.
  *
  * @example
  * ```ts

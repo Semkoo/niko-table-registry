@@ -50,26 +50,10 @@ export interface BuildFacetedOptionsConfig {
 }
 
 /**
- * Pure builder for the option list surfaced by a faceted filter.
- *
- * A faceted filter component produces enriched options in two distinct
- * scenarios:
- *
- *  1. The caller passed an explicit `options` array — we treat it as the
- *     source of truth, optionally narrow it to values present in the
- *     filtered dataset, and attach live counts.
- *  2. No static options were provided and the column is not a declared
- *     `select`/`multi_select` variant (so the meta-aware generator in
- *     `useGeneratedOptions` returns nothing). We derive options directly
- *     from the row data and attach counts.
- *
- * Both scenarios share the same row-walking, filtering, and counting logic —
- * this helper is the single implementation. The wrapper component just
- * decides which config to pass.
- *
- * This function is intentionally a plain function (not a hook) so it can be
- * called inside a single `useMemo` in the wrapper, making it trivial to gate
- * work behind the "is this path actually needed?" check.
+ * Pure builder for the option list surfaced by a faceted filter. Handles
+ * both explicit `staticOptions` (narrow + enrich with counts) and
+ * row-derived options. Plain function (not a hook) so the wrapper can
+ * gate it behind a single `useMemo`.
  */
 export function buildFacetedOptions<TData>(
   table: Table<TData>,

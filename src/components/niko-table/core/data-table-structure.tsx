@@ -145,30 +145,7 @@ export function DataTableBody<TData>({
   const { rows } = table.getRowModel()
   const containerRef = React.useRef<HTMLTableSectionElement>(null)
 
-  /**
-   * PERFORMANCE: Memoize scroll callbacks to prevent effect re-runs
-   *
-   * WHY: These callbacks are used in the scroll event listener's dependency array.
-   * Without useCallback, new functions are created on every render, causing the
-   * effect to re-run and re-attach event listeners unnecessarily.
-   *
-   * IMPACT: Prevents event listener re-attachment on every render (~1-3ms saved).
-   * Also prevents potential memory leaks from multiple listeners.
-   *
-   * WHAT: Only creates new functions when onScrolledTop/onScrolledBottom props change.
-   */
-
-  /**
-   * PERFORMANCE: Single row-click handler with event delegation (useCallback)
-   *
-   * WHY: Without this, we create one inline arrow function per row in the map,
-   * causing N new function references every render and preventing row memoization.
-   *
-   * IMPACT: One stable callback (when deps don't change) instead of N per render.
-   *
-   * WHAT: Delegates click on TableBody, reads data-row-index from the clicked row,
-   * skips if click target is interactive, then calls onRowClick with the row data.
-   */
+  // Single delegated click handler — avoids one inline fn per row.
   const handleRowClick = React.useCallback(
     (event: React.MouseEvent<HTMLTableSectionElement>) => {
       if (!onRowClick) return
@@ -179,12 +156,8 @@ export function DataTableBody<TData>({
     [onRowClick, table],
   )
 
-  /**
-   * Attach a passive scroll listener on the container. Listener body
-   * lives in `createScrollHandler` so the four data-table bodies
-   * share one canonical implementation. Passive flag unlocks the
-   * browser's scroll-thread optimization (smoother scrolling).
-   */
+  // Passive scroll listener — shared `createScrollHandler` keeps all four body
+  // variants in sync; passive flag unlocks the browser's scroll-thread path.
   React.useEffect(() => {
     const container = containerRef.current?.closest(
       '[data-slot="table-container"]',
@@ -328,25 +301,8 @@ export function DataTableEmptyBody({
 }: DataTableEmptyBodyProps) {
   const { table, columns, isLoading } = useDataTable()
 
-  /**
-   * PERFORMANCE: Memoize filter state check and early return optimization
-   *
-   * WHY: Without memoization, filter state is recalculated on every render.
-   * Without early return, expensive operations (getState(), getRowModel()) run
-   * even when the empty state isn't visible (table has rows).
-   *
-   * OPTIMIZATION PATTERN:
-   * 1. Call hooks first (React rules - hooks must be called in same order)
-   * 2. Memoize expensive computations (isFiltered)
-   * 3. Early return to skip rendering when not needed
-   *
-   * IMPACT:
-   * - Without early return: ~5-10ms wasted per render when table has rows
-   * - With optimization: ~0ms when table has rows (early return)
-   * - Memoization: Prevents recalculation when filter state hasn't changed
-   *
-   * WHAT: Only computes filter state when empty state is actually visible.
-   */
+  // Hooks first (rules-of-hooks), then early-return below skips work when
+  // the empty state isn't visible.
   const tableState = table.getState()
   const isFiltered = React.useMemo(
     () =>
@@ -465,11 +421,8 @@ export function DataTableLoading({
 }: DataTableLoadingProps) {
   const { columns, isLoading } = useDataTable()
 
-  // Self-gate on `isLoading` like every peer composable child
-  // (`DataTableSkeleton`, `DataTableEmptyBody`,
-  // `DataTableVirtualizedLoading`). Without this guard the loading
-  // row stays visible after data resolves, defeating the
-  // self-gating composition contract.
+  // Self-gate on `isLoading` to match peer composables — otherwise the row
+  // stays visible after data resolves.
   if (!isLoading) return null
 
   return (

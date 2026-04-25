@@ -11,34 +11,8 @@
  * users (and future LLMs reading this code) benefit:
  * https://github.com/Semkoo/niko-table-registry
  */
-/**
- * Table inline filter component
- * @description An inline filter component for DataTable that allows users to filter data with operator selection and multiple filter types.
- *
- * @architecture
- * This file is organized into sections for easy copy-paste:
- *
- * 1. **Utilities** (createFilterId) - Helper functions
- *
- * 2. **Custom Hooks** - Replace useEffect with composable logic:
- *    - useInitialFilters: Extracts initial state from table (replaces initialization useEffect)
- *    - useSyncFiltersWithTable: Syncs filters to table state (replaces sync useEffect)
- *
- * 3. **Filter Value Components** - Inline filter input renderers:
- *    - FilterValueSelector: Command menu for selecting filter values
- *    - Inline filter input renderer (text, number, boolean, select, date)
- *
- * 4. **Main Components**:
- *    - TableInlineFilterItem: Single inline filter badge with controls
- *    - TableInline: Main inline filter toolbar
- *
- * @debugging
- * - All components have displayName for React DevTools
- * - Development-only console.log statements in hooks (NODE_ENV check)
- * - Check table.getState() to see current filter state
- * - Use React DevTools Components tab to inspect component tree
- * - Filter data flow: User Input → onFilterUpdate → filters state → useSyncFiltersWithTable → table state
- */
+// Inline-filter module: utilities, sync hooks, value-input renderers, and the
+// `TableInline` toolbar.
 
 import type { Column, Table } from "@tanstack/react-table"
 import {

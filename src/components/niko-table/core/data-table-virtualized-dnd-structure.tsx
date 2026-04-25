@@ -51,23 +51,10 @@ import type { ScrollEvent } from "./data-table-virtualized-structure"
 // Stable measureElement — computed once at module level
 // ============================================================================
 
-/**
- * Custom element measurer for the row virtualizer. Returns the
- * base row height plus, when present, the height of an adjacent
- * expanded-content row (`<tr data-slot="datatable-expanded-row">`).
- * See the equivalent helper in `data-table-virtualized-structure.tsx`
- * for the full rationale — short version: the virtualizer's
- * `ResizeObserver` only attaches to the base row, so expanded
- * sibling content goes unmeasured and `getTotalSize()` drifts.
- *
- * Disabled in Firefox where `getBoundingClientRect` returns stale
- * values during virtual-scroll reflows, causing measurement loops.
- *
- * Defined at module scope so every virtualizer instance shares the
- * same stable function reference — no `useCallback` / `useMemo`
- * overhead, and React never detaches/reattaches the ref due to a
- * changed identity.
- */
+// See `data-table-virtualized-structure.tsx` for full rationale: sums base +
+// adjacent expanded-row height since ResizeObserver only attaches to the base.
+// Disabled in Firefox (stale getBoundingClientRect during scroll). Module-scoped
+// for stable reference identity.
 const measureElement: ((element: Element) => number) | undefined =
   typeof window !== "undefined" && navigator.userAgent.indexOf("Firefox") === -1
     ? (element: Element) => {

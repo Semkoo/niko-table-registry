@@ -89,12 +89,7 @@ export function DataTableDndBody<TData>({
     [onRowClick, table],
   )
 
-  /**
-   * Resolve the expand column once at the table level. Previously
-   * `getAllCells().find(...)` ran inside the row map — O(rows × cols)
-   * per render even though the expand column is stable for the
-   * lifetime of the column set.
-   */
+  // Hoisted: per-row find was O(rows × cols) per render despite stable column set.
   const expandColumnId = React.useMemo(
     () =>
       table.getAllColumns().find(col => col.columnDef.meta?.expandedContent)
