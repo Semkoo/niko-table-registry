@@ -186,7 +186,9 @@ describe("TableColumnFacetedFilterMenu — explicit options count enrichment", (
     ])
   })
 
-  it("narrows and counts explicit options on the single-select path", () => {
+  it("never narrows caller-supplied options regardless of multiple/limitToFilteredRows", () => {
+    // Caller-supplied options are the source of truth — narrowing them would
+    // hide cross-filter pivots on server-side tables.
     const callerOptions: Option[] = [
       { label: "A", value: "a" },
       { label: "B", value: "b" },
@@ -199,6 +201,7 @@ describe("TableColumnFacetedFilterMenu — explicit options count enrichment", (
     expect(lastProps.options).toEqual([
       { label: "A", value: "a", count: 2 },
       { label: "B", value: "b", count: 1 },
+      { label: "C", value: "c", count: 0 },
     ])
   })
 
