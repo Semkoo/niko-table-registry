@@ -191,6 +191,7 @@ export function useKeyboardShortcuts(shortcuts: UseKeyboardShortcutOptions[]) {
   // render, removing and re-adding the window-level listener
   // constantly.
   const shortcutsRef = useRef(shortcuts)
+   
   useLayoutEffect(() => {
     shortcutsRef.current = shortcuts
   })
@@ -256,16 +257,13 @@ export function useKeyboardShortcuts(shortcuts: UseKeyboardShortcutOptions[]) {
   }, [])
 
   useEffect(() => {
-    // Read enabled-state from the ref so this effect doesn't
-    // re-attach when the array identity changes. If a caller
-    // toggles every shortcut to `enabled: false` we'll still have
-    // the listener attached, but the handler itself short-circuits
-    // on `enabled === false`, so no callbacks fire.
-    const hasEnabledShortcuts = shortcutsRef.current.some(
-      s => s.enabled !== false,
-    )
-    if (!hasEnabledShortcuts) return
-
+    // Always attach — gating on `hasEnabledShortcuts` here would
+    // read `shortcutsRef.current` once on mount, and since the
+    // effect's deps are stable (`handleKeyDown` is identity-stable
+    // by design) it would never re-run if a caller later flipped
+    // a shortcut from `enabled: false` to `enabled: true`. The
+    // handler itself short-circuits per-shortcut on `enabled ===
+    // false`, so an attached-but-idle listener costs nothing.
     window.addEventListener("keydown", handleKeyDown)
 
     return () => {
