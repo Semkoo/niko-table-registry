@@ -184,14 +184,10 @@ export function useKeyboardShortcut({
  * ```
  */
 export function useKeyboardShortcuts(shortcuts: UseKeyboardShortcutOptions[]) {
-  // Stash the latest `shortcuts` array in a ref so the keydown
-  // handler stays referentially stable across renders. Callers
-  // commonly pass an inline array literal — without the ref, both
-  // the `useCallback` and the `useEffect` deps would change every
-  // render, removing and re-adding the window-level listener
-  // constantly.
+  // Mirror `shortcuts` into a ref so callers can pass inline array literals
+  // without the window-level listener detaching on every render.
   const shortcutsRef = useRef(shortcuts)
-   
+
   useLayoutEffect(() => {
     shortcutsRef.current = shortcuts
   })

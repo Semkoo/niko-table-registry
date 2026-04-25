@@ -163,25 +163,11 @@ export interface DataTableVirtualizedFlexHeaderProps {
 }
 
 /**
- * Flex-layout variant of `DataTableVirtualizedHeader` — pairs with
- * `DataTableVirtualizedDndBody` (row-DnD virtualized body).
+ * Flex-layout header — pairs with `DataTableVirtualizedDndBody` (row-DnD).
+ * Mirrors the body's cell sizing so columns stay aligned.
  *
- * **Why this exists:** the row-DnD virtualized body uses flex
- * layout (`display: block` on `<tbody>`, `flex w-full` on rows)
- * because `useSortable` transforms don't compose cleanly with
- * native `display: table-row`. A standard table-layout header
- * computes column widths via the table-auto algorithm and the two
- * disagree on any column without an explicit `size`, drifting
- * columns out of alignment with the body.
- *
- * Cell sizing mirrors the body exactly: `shrink-0` +
- * `width: ${size}px` when `columnDef.size` is set, otherwise
- * `min-w-0 flex-1`. Drop-in replacement when used with
- * `DataTableVirtualizedDndBody`.
- *
- * For **column-DnD** virtualized tables use
- * `DataTableVirtualizedDndHeader` instead — same flex layout, but
- * each cell is wrapped in `TableDraggableHeader` for column drag.
+ * Use `DataTableVirtualizedHeader` for plain tables and
+ * `DataTableVirtualizedDndHeader` for column-DnD tables.
  *
  * @example
  * <DataTableRowDndProvider data={data} onReorder={setData}>
@@ -312,15 +298,7 @@ export function DataTableVirtualizedBody<TData>({
   const { table, columns } = useDataTable()
   const { rows } = table.getRowModel()
 
-  /**
-   * Hoist the expand-column lookup above the virtualizer render
-   * loop. Inside `virtualItems.map(...)` the previous code did
-   * `row.getAllCells().find(...)` per row per render — O(virtual_rows
-   * × cols) every frame during scroll. Deps include `columns` so
-   * the memo recomputes when the consumer passes a new column set
-   * (TanStack reuses the same `table` instance across column
-   * updates, so `table` alone is too stable).
-   */
+  // Hoist expand-column lookup above the virtualizer loop (was O(virtual_rows × cols) per frame).
   const expandColumnId = React.useMemo(
     () =>
       table.getAllColumns().find(col => col.columnDef.meta?.expandedContent)

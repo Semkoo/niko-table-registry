@@ -5,164 +5,112 @@ description: Latest updates and release notes for Niko Table.
 
 ## May 2026
 
-### Fixed
+### Added
 
-- **`DataTableVirtualizedFlexHeader` — flex-layout header for row-DnD virtualized tables.** The row-DnD virtualized body (`DataTableVirtualizedDndBody`) uses flex layout (`display: block` on `<tbody>`, `flex w-full` on rows) because `useSortable` transforms don't compose cleanly with native `display: table-row`. Pairing it with the standard `DataTableVirtualizedHeader` (table layout) made the header use the table-auto algorithm for column widths while the body used flex sizing — the two disagreed on any column without an explicit `size` and columns drifted apart visibly. New component mirrors the body's cell sizing exactly (`shrink-0` + `width: ${size}px` when `size` is set, otherwise `min-w-0 flex-1`). Composable: pick the header that matches your body — `DataTableVirtualizedHeader` for plain, `DataTableVirtualizedFlexHeader` for row-DnD, `DataTableVirtualizedDndHeader` for column-DnD.
-
-### Refactor — round 4 (CodeRabbit follow-up)
-
-- **Row-click guard + row resolution extracted to `lib/row-click.ts`.** The interactive-element list (`button`/`input`/`a`/`role="button"`/`role="checkbox"`/`data-radix-collection-item`/`data-slot="checkbox"`) was inlined in **6 places** across the four body files — `data-table-structure`, `data-table-dnd-structure` (×2), `data-table-virtualized-structure`, and `data-table-virtualized-dnd-structure` (×2). Adding a new `data-slot` to ignore meant editing six files. Now exposed as two module helpers: `isInteractiveClickTarget(target)` for the per-row variants (which resolve the row id from `event.currentTarget.dataset.rowId`) and `resolveRowFromClick(target, table)` for the delegated `<tbody>` variants (which walk `target.closest("tr[data-row-id]")` and call `table.getRow(rowId)`). No behavior change.
-
-### Performance — round 3 (CodeRabbit follow-up)
-
-- **`expandColumnId` memo hoisted in all three virtualized bodies** (`DataTableVirtualizedBody`, `DataTableVirtualizedDndBody`, `DataTableVirtualizedDndColumnBody`). Round 1 hoisted this lookup out of the row map in the non-virtualized bodies; the virtualized variants kept doing `row.getAllCells().find(...)` per row inside `virtualItems.map(...)` — O(virtual_rows × cols) every frame during scroll. Same `[table, columns]` memo pattern.
-- **`DataTableColumnHeaderRoot` — context value memoized.** The provider previously created a fresh `{ column }` object every render, propagating to every header-cell context subscriber (`DataTableColumnSort`, `DataTableColumnFilter`, etc.) on every header re-render. Wrapped in `React.useMemo(() => ({ column }), [column])` so consumers only re-render on actual column-identity change.
-- **`useKeyboardShortcuts` (multi-shortcut variant) — listener no longer re-attaches every render.** Callers commonly pass an inline array literal, which is a fresh reference each render — the previous `useCallback([shortcuts])` and `useEffect([handleKeyDown, shortcuts])` removed and re-added the window-level `keydown` listener constantly. Stashed `shortcuts` in a `useRef` mirrored via `useLayoutEffect`; deps reduced to `[]` and `[handleKeyDown]`. The single `useKeyboardShortcut` variant was left as-is per the original CodeRabbit note (most callers memoize `onTrigger`, low impact).
-- **`onRowSelection` no longer fires on initial mount.** Round 2 lifted the consumer notification into a `useEffect` watching `rowSelection`, but `isMountedRef` is initialized to `true`, so the existing guard didn't skip the first run — the effect fired once on mount with the initial (typically empty) selection. Added a dedicated `skipInitialRowSelectionRef` (initialized to `true`, flipped to `false` after the first run) so the callback only fires on _changes_, matching the pre-round-2 semantics where it only fired from inside the user's selection handler.
-
-### Performance — round 2 (CodeRabbit follow-up)
-
-- **`expandColumnId` memo deps include `columns`.** In `DataTableBody`, `DataTableDndBody`, and `DataTableDndColumnBody` the memo previously keyed only on `table` — the table instance reference is stable across `columns` prop swaps, so swapping which column carries `meta.expandedContent` would not re-detect the expanded column. Memo now depends on `[table, columns]` and re-evaluates on column changes.
-- **`handleRowSelectionChange` honors the full TanStack `Updater<T>` contract + side effects moved out of the state updater.** Previously the callback assumed every dispatch was a function; TanStack Table's `Updater<T>` is `T | ((old: T) => T)` and the column-level "select all" path passes a plain object — that branch crashed on `valueFn(prev)`. Refactored to handle both forms. Separately, the `onRowSelection` consumer callback was being invoked from inside the `setRowSelection` updater, which violates React's rule that state updaters must be pure (StrictMode invokes them twice). Lifted the notify into a `useEffect` that fires when `rowSelection` changes. Behavior change: `onRowSelection` now also fires when consumers feed `rowSelection` in via controlled state, not only when our handler runs — this matches the intuitive "tell me when selection changes" contract.
-
-### Performance (CodeRabbit feedback)
-
-- **`DataTableLoading` — added missing `isLoading` self-gate.** Peer composables self-gate on `isLoading` but `DataTableLoading` rendered unconditionally — leaving a loading row visible after data resolved. Real bug fix.
-- **`handleRowSelectionChange` — switched to functional updater.** Reading `rowSelection` from the closure put it in the `useCallback` deps, so the callback identity changed on every selection click → `tableOptions` invalidated → cascading TanStack internal state syncs. `setRowSelection(prev => ...)` keeps the callback identity stable.
-- **`expandColumn` detection hoisted out of the row map** in all three non-virtualized bodies. Was O(rows × cols) per render; now O(cols) once per render via a memo keyed on `table`.
-- **`useGeneratedOptions` — eliminated double `getFilteredRowsExcludingColumn` walk.** When both `limitToFilteredRows` and `dynamicCounts` are true (the default), the filter walk ran twice per generated-options column. Compute once and reuse.
-
-### Fixed (round 5 — consistency follow-ups)
-
-- **Virtualized non-DnD body — `onRowClick` event type unified with the other body variants** — Was the lone outlier still using `React.MouseEvent<HTMLTableRowElement>`; the other four bodies all use `React.MouseEvent<HTMLElement>`. Now consistent — a single handler can be passed through wrappers that switch between bodies. Backward-compatible (function arguments are contravariant).
-- **Virtualized DnD body — expanded-row height re-measured on toggle without losing `useSortable` registration** — The DnD body uses a stable `key={row.id}` (so `useSortable` stays registered across expand/collapse), but as a side effect `setRefs` doesn't re-run on toggle and the virtualizer's cached row height stays at the collapsed measurement. Added an `isExpanded` prop on `VirtualizedDraggableRow` plus a `useEffect` that imperatively calls `measureRef(elementRef.current)` when it changes — the virtualizer's `measureElement` callback is idempotent so re-calling with the same node re-reads the height. DnD-body counterpart to the non-DnD body's composite-key remount strategy.
-
-### Fixed (root warning)
-
-- **Cross-table "state update on a component that hasn't mounted yet" warning silenced** — Two layered fixes. (1) Default `autoResetPageIndex` to `false` (was `true` for non-manual-pagination tables, matching TanStack's own default). The auto-reset fired `onPaginationChange` asynchronously after data arrived from a server query, and the queued `setPagination` dispatch could land on a StrictMode-unmounted fiber under React 19 + Turbopack. Stack trace pinpointed `onPaginationChange` as the culprit. Behavior change: tables that previously reset to page 0 on sort/filter changes now preserve their pagination cursor — for most modern apps (server-side pagination, infinite scroll) this is the better UX. Consumers wanting the old behavior can opt back in via `config={{ autoResetPageIndex: true }}`. (2) Added a mount-ref guard around every default state setter wired into `tableOptions.onXChange`. Defense-in-depth that silences the warning in production HMR scenarios; consumer-supplied handlers are not guarded — caller's responsibility to make their own dispatchers mount-safe.
-
-### Performance (round 4)
-
-- **`DataTableRootInternal` — `tableOptions` memo no longer invalidates every render** — The memo previously depended on `rest` (the unmemoized rest bag from props destructuring), which is a fresh object every render. Each render: `tableOptions` rebuilt → `useReactTable` saw "options changed" → TanStack Table dispatched internal state syncs through our local useState setters. Destructured the three rest props that are read by name in the body (`state`, `initialState`, `globalFilterFn`) and depend on those specifically; remaining props go through `passthroughTableOptions` which is spread but intentionally not in the deps (lift specific keys into the destructure list if their identity must invalidate the memo). Eliminates the "state update on a component that hasn't mounted yet" warning class that fired across every consumer table under React 19 + Strict Mode + Turbopack HMR.
-
-### Bug Fixes (round 4)
-
-- **`FILTER_OPERATORS.RELATIVE` removed from date-filter UI** — The "Is relative to today" entry in `dateOperators` (config/data-table.ts) was selectable in the filter dropdown, but the filter implementation wasn't done — picking it threw in dev / returned no matches in prod. Hidden the entry from the dropdown until the comparison logic ships. The constant itself stays in the operator catalogue so server-side consumers can keep their wiring; the inline comment explains why and how to re-add it.
-- **Per-row `console.error` for unimplemented RELATIVE filter throttled** — The previous fix logged once per cell evaluated, flooding production logs with thousands of lines per filter render. Added a module-scoped `hasLoggedRelativeFilterWarning` flag so the warning fires at most once per page load; subsequent rows return `false` silently.
-
-### Notes (round 4)
-
-- **DnD virtualized bodies intentionally do not gate `measureElement` on `columnsLocked`** — Added an inline comment at each `useVirtualizer` call site explaining why. DnD bodies use flex layout (`block` on tbody, `flex w-full` on rows) instead of `table-layout: auto → fixed`, so they don't go through the initial auto-layout pass that produces inflated row heights for the non-DnD body. There's no transition in which `ResizeObserver` could lock in wrong measurements, and adding a `columnsLocked` state would mean introducing a column-lock effect that has nothing to lock.
-
-### Bug Fixes
-
-- **Virtualized DnD row body — selected row styling silently dead** — `VirtualizedDraggableRow` (used by `DataTableVirtualizedDndBody`) didn't emit `data-state` and didn't carry a `group` class, so the row's own `data-[state=selected]:bg-muted` and the pinned-cell `group-data-[state=selected]:bg-muted` never matched — selected rows looked unselected. Added an `isSelected` prop; the row now renders `group flex w-full` plus `data-state={isSelected ? "selected" : undefined}`. Caller passes `isSelected={row.getIsSelected()}`.
-- **Virtualized DnD body — Fragment key forced remount on row expansion** — The Fragment key was a composite of `row.id` and `isExpanded`, so toggling expansion unmounted/remounted `VirtualizedDraggableRow` and threw away its `useSortable` registration mid-interaction. Switched to a stable key based on `row.id` alone for both DnD bodies. The non-DnD virtualized body intentionally takes the _opposite_ approach (composite key) — see below.
-- **Virtualized non-DnD body — expanded-row height never re-measured** — Conversely, the non-DnD body was using a stable `row.id` key which prevented the measured `<TableRow>` from remounting when expansion toggled. The base row's `ResizeObserver` doesn't fire when a sibling appears (only the base row's own size changes trigger it), so the expanded sibling's height was never re-read — the virtualizer kept using the collapsed-height measurement. Switched to a composite key combining `row.id` and `isExpanded` so the Fragment remounts on expansion change and `ResizeObserver` re-attaches.
-- **Virtualized + DnD bodies — `data-index` semantics + click delegation by stable id** — All three virtualized bodies set `data-index` and resolved click targets using the source-data `row.index`, then looked up `rows[index]`. Both are unstable under sort/filter/reorder: `row.index` is the original data index (so `rows[row.index]` is the wrong row after sorting), and TanStack Virtual's `measureElement` reads `data-index` as the _virtualizer slot_ (so passing `row.index` corrupts the measurement map under sort/filter). Switched `data-index` to `virtualRow.index`, replaced `data-row-index` with `data-row-id={row.id}`, and changed click handlers to `table.getRow(rowId)` (Map lookup, O(1), id-stable across reorderings). Same id-based resolution applied to `DataTableBody` and `DataTableDndBody` / `DataTableDndColumnBody` where they used delegated `tbody` clicks.
-- **Virtualized non-DnD body — `setColumnsLocked` race left the column-toggle gap unfixed** — The column-lock `useLayoutEffect` called `setColumnsLocked(false)` in the unlock branch and `setColumnsLocked(true)` after re-locking, both within the same synchronous effect. React batched the two updates, so the row's `ref` never detached between layouts and `ResizeObserver` kept measuring during the brief auto-layout pass after a column-visibility toggle — bringing back the giant top-spacer gap the gate was supposed to prevent. Added an explicit `return` after the unlock branch so React commits the unlocked render first; the next render falls through to the lock logic with `columnsLocked=false` and the ref properly detached.
-- **Virtualized non-DnD body — `columnsLocked` gate around `measureElement`** — Without it, `ResizeObserver` could attach during the auto-layout pass that precedes column-lock, capture inflated row heights (narrow auto-columns wrap text), and lock those heights into `getTotalSize()`, producing huge initial-render top-spacer gaps. The ref now attaches only after the lock effect completes.
-- **Virtualized + non-virtualized column-DnD bodies — expanded-row rendering missing** — `DataTableVirtualizedDndColumnBody` and `DataTableDndColumnBody` never emitted the sibling `<tr>` for `meta.expandedContent`, so row expansion silently did nothing in column-DnD tables. Added the same expanded block used by the other bodies; for the virtualized variant it also lets the shared `measureElement` callback include the expanded pane's height in the virtualizer's measurement.
-- **Virtualized DnD bodies — `onRowClick` event type was wrong** — Typed as `React.MouseEvent<HTMLTableRowElement>` but click is delegated on `<tbody>` — `event.currentTarget` is actually `HTMLTableSectionElement`. Widened to `React.MouseEvent<HTMLElement>` and removed the unsafe cast.
-- **`VirtualizedDraggableRow` — `data-index` missing** — The wrapper attached `rowVirtualizer.measureElement` but only set `data-row-index`. `measureElement` reads `data-index` to map measured nodes back to virtualizer slots, so dynamic measurements were silently dropped. Added `data-index` alongside.
-- **Virtualized bodies — expanded-row height ignored by virtualizer** — Tagged the expanded `<TableRow>` with `data-slot="datatable-expanded-row"` and replaced the inline `measureElement` with a module-level helper that walks `nextElementSibling` and adds its height when it carries that slot. Trade-off: `ResizeObserver` only fires on the base row, so async height changes inside the expanded pane won't trigger re-measure until something else does — for synchronous/static expanded panes (the common case) this is correct and cheap.
-- **`getObjectHash` — collision risk on row selection** — The lightweight hash used "key count + first 3 sorted keys" as a signature. False negatives for selection state with sequential / similar-prefix row IDs (e.g. `{"r1","r2","r3"}` vs `{"r1","r2","r4"}` both hash to `"3:r1,r2,r3"`) suppressed re-renders. Switched to a full sorted-keys join — O(n log n) per state slice but n is small.
-- **`FILTER_OPERATORS.RELATIVE` — silent pass-through in production** — The "Is relative to today" date operator was wired into the UI but its filter case returned `true` for every row with only a dev `console.warn`. Now throws in dev (loud during development) and returns `false` (no matches) in production with a `console.error` — safer than silently passing every row.
-
-### API Consistency
-
-- **`onRowClick` signatures unified across all four body components** — `DataTableBody`, `DataTableDndBody`, `DataTableDndColumnBody` widened from `(row) => void` to `(row, event: React.MouseEvent<HTMLElement>) => void`, matching the virtualized variants. Backward-compatible — TS allows callers to omit trailing params.
+- **`DataTableVirtualizedFlexHeader`** — flex-layout header that pairs with `DataTableVirtualizedDndBody`. The standard `DataTableVirtualizedHeader` uses table layout; pairing it with the row-DnD body (which uses flex because `useSortable` transforms don't compose with `display: table-row`) made columns drift apart. New header mirrors the body's cell sizing exactly. Pick the header that matches your body: plain → `DataTableVirtualizedHeader`, row-DnD → `DataTableVirtualizedFlexHeader`, column-DnD → `DataTableVirtualizedDndHeader`.
 
 ### Refactor
 
-- **Scroll-handler logic extracted to `lib/create-scroll-handler.ts`** — The body-scroll listener was duplicated byte-for-byte across the four bodies. Extracted into a single helper so scroll-math changes propagate everywhere.
+- **Row-click guard moved to `lib/row-click.ts`.** The interactive-element list was inlined in 6 places across the four body files. Now exposed as `isInteractiveClickTarget(target)` and `resolveRowFromClick(target, table)`. No behavior change.
+
+### Performance
+
+- **`expandColumnId` lookup memoized** in all six bodies — was O(rows × cols) per render.
+- **`DataTableColumnHeaderRoot` context value memoized** — consumers only re-render on column-identity change.
+- **`useKeyboardShortcuts` (multi-shortcut)** — listener no longer re-attaches every render. `shortcuts` mirrored into a ref.
+- **`onRowSelection`** no longer fires on initial mount — only on user-driven changes.
+- **`handleRowSelectionChange`** honors the full TanStack `Updater<T>` contract (value or function); side effects moved out of the state updater into a `useEffect`. Behavior nuance: `onRowSelection` now fires on _any_ `rowSelection` change, including controlled updates.
+- **`tableOptions` memo** trimmed to specific destructured props (`state`, `initialState`, `globalFilterFn`) instead of the unmemoized `rest` bag — eliminates the React-19 + Strict Mode + Turbopack "state update on a component that hasn't mounted yet" warning class.
+- **`DataTableLoading`** now self-gates on `isLoading`.
+- **`useGeneratedOptions`** — eliminated double `getFilteredRowsExcludingColumn` walk when both `limitToFilteredRows` and `dynamicCounts` are true.
+
+### Fixed
+
+- **`onRowClick` event type unified** to `React.MouseEvent<HTMLElement>` across all bodies. Backward compatible.
+- **Virtualized DnD body — expanded-row height re-measured on toggle** without losing `useSortable` registration. An `isExpanded` prop drives a `useEffect` that imperatively re-calls `measureRef`.
+- **Cross-table "state update on a component that hasn't mounted yet" warning silenced.** `autoResetPageIndex` now defaults to `false` (matches TanStack's own default) and a mount-ref guards every default state setter. **Behavior change:** tables that previously reset to page 0 on sort/filter changes now preserve the cursor — better UX for server-side / infinite scroll. Opt back in via `config={{ autoResetPageIndex: true }}`.
+- **`FILTER_OPERATORS.RELATIVE`** hidden from the date-filter dropdown until the comparison logic ships. Constant kept for server-side consumers.
+- **Per-row `console.error` for unimplemented RELATIVE filter throttled** — module-scoped flag so the warning fires at most once per page load.
+- **Virtualized Row-DnD body — selected row styling now applies.** `VirtualizedDraggableRow` carries `group flex w-full` and emits `data-state={isSelected ? "selected" : undefined}`.
+- **Virtualized bodies — `data-index` set to `virtualRow.index`** (TanStack Virtual's slot index, not source-data index). Click delegation switched to stable `data-row-id` + `table.getRow(rowId)`.
+- **Virtualized non-DnD body — `setColumnsLocked` race fixed.** Explicit `return` after the unlock branch lets React commit the unlocked render before re-locking.
+- **Virtualized non-DnD body — `columnsLocked` gate added** around `measureElement` so `ResizeObserver` can't capture inflated row heights during the auto-layout pass.
+- **Column-DnD bodies — expanded-row rendering matched** to the other bodies (was missing entirely).
+- **Virtualized DnD bodies — `onRowClick` event type widened** to `React.MouseEvent<HTMLElement>` (delegated on `<tbody>`; the prior `HTMLTableRowElement` typing was a lie).
+- **`VirtualizedDraggableRow`** — added `data-index` so `measureElement` can map measured nodes back to virtualizer slots.
+- **Virtualized bodies — expanded-row height included in virtualizer measurement** via a module-level helper that walks `nextElementSibling` for `data-slot="datatable-expanded-row"`.
+- **`getObjectHash` collision risk** — full sorted-keys join instead of "first 3 keys", which false-negatived row selection state with sequential IDs.
+
+### Notes
+
+- DnD virtualized bodies intentionally do not gate `measureElement` on `columnsLocked` — they use flex layout (no auto-layout pass to mismeasure during).
 
 ### Internal
 
-- **`data-table-virtualized-dnd-structure.tsx` marked `@internal`** — JSDoc tag clarifies that the virtualized DnD components are deep-import only (intentionally not re-exported from the package barrel).
+- `data-table-virtualized-dnd-structure.tsx` marked `@internal` — deep-import only, not re-exported from the package barrel.
+- Body-scroll listener extracted to `lib/create-scroll-handler.ts` (was duplicated across four bodies).
 
 ## April 2026
 
-### Bug Fixes
+### Fixed
 
-- **Virtualized table — column spacing no longer compresses on wide datasets** — `DataTableVirtualizedBody`'s column-lock `useLayoutEffect` now sets `tableEl.style.minWidth` to the sum of all visible `column.getSize()` values before measuring column widths. Without this, the `w-full` style on `<table>` forced the element to fit its scroll container, causing the auto-layout algorithm to distribute compressed widths and lock them in permanently. Setting `minWidth` lets the table expand beyond the container width so `overflow-auto` on the container handles horizontal scrolling, while auto-layout distributes space based on actual content. The `minWidth` is cleared on every unlock/reset cycle so toggling column visibility re-measures correctly. Explicit `size` values on column defs are respected — they raise the `minWidth` floor proportionally.
+- **Virtualized table — column spacing no longer compresses on wide datasets.** The column-lock effect now sets `tableEl.style.minWidth` to the sum of visible `column.getSize()` values before measuring, so the table can expand beyond its scroll container instead of being squeezed by `w-full`.
 
-### Examples
+### Added
 
-- **All product-based examples enriched with four new columns** — `brand` (text), `rating` (1–5 with ★), `revenue` (price × stock, formatted with `toLocaleString`), and `releaseDate` (`toLocaleDateString`) added to all eight product example files: `basic`, `basic-state`, `infinite-scroll-table`, `infinite-scroll-table-state`, `infinite-scroll-virtualized-table`, `infinite-scroll-virtualized-table-state`, `virtualization-table`, and `virtualization-table-state`. The four infinite-scroll files use index-based deterministic generation (no `Math.random`) so the values are stable across SSR and client hydration. The two virtualization files retain `Math.random` for variety, consistent with their existing approach. The two state-variant files also gain a **Brand** `DataTableFacetedFilter` in the toolbar alongside the existing Status filter.
+- **`DataTableLoadingMore`** and **`DataTableVirtualizedLoadingMore`** — composable "loading more" rows for infinite-scroll tables. Self-gate on `isFetching`.
+- **`onNearEnd` + `prefetchThreshold`** on `DataTableVirtualizedBody` — virtualizer-index-driven prefetch trigger for infinite scroll. Strictly better than `onScrolledBottom`: catches fast scrolls, scrollbar drag, `scrollToIndex()` jumps, and short initial renders.
 
-### New Components
+### Changed
 
-- **`DataTableLoadingMore`** — Composable "loading more" row for infinite-scroll standard tables. Self-gates on its `isFetching` prop — renders a spinner + label when true, nothing when false. Drop it as a child of `DataTableBody` alongside `DataTableSkeleton` and `DataTableEmptyBody`.
-- **`DataTableVirtualizedLoadingMore`** — Virtualized variant. Sits outside the virtualizer's row count so it doesn't affect `estimateSize` math.
+- **Virtualized table — switched to native `<table>` layout with measure-and-lock column sizing.** The browser distributes column widths from content; `DataTableVirtualizedBody` measures each `<th>` after first data render and locks to `table-layout: fixed`.
 
-### New Features
+### Fixed
 
-- **`onNearEnd` + `prefetchThreshold` on `DataTableVirtualizedBody`** — Virtualizer-index-driven prefetch trigger for infinite scroll. Fires when the last rendered virtual row is within `prefetchThreshold` rows (default 10) of the end of the dataset. Strictly better than `onScrolledBottom` for infinite scroll — catches fast scrolls, scrollbar drag, `scrollToIndex()` jumps, and initial renders where data doesn't fill the viewport. Called at most once per false→true transition.
+- **Scroll listener** — `onScrolledBottom` / `onScrolledTop` now wire up even when `onScroll` isn't provided (was silently dead in all four bodies).
+- **Faceted filter — `dynamicCounts` honored on every code path** (was silently ignored in fallback `useMemo` and the auto-generated branch).
+- **Faceted filter — caller-supplied `options` go through count enrichment** instead of short-circuiting.
+- **Faceted filter — `TableColumnFacetedFilterMenu` forwards `dynamicCounts`** to the underlying hook.
+- **Faceted filter — zero-count options no longer disappear.**
 
-### Performance & Layout
+### Changed
 
-- **Virtualized table — native `<table>` layout with measure-and-lock column sizing** — Replaced `display: block/flex` on virtualized table rows and cells with native table layout. The browser's table layout algorithm now distributes column widths based on content. `DataTableVirtualizedBody` uses a `useLayoutEffect` to measure each `<th>`'s computed width after first data render, then locks the table to `table-layout: fixed` so columns stay stable during virtual scroll. The effect runs every render but the fast path (already locked, same column count) is two ref reads — negligible at 60 fps. Column visibility changes (toggle, reorder) trigger a fresh measurement cycle. Spacer rows use `<tr><td colSpan={n}>` to stay within the table layout context. All child components (`DataTableVirtualizedEmptyBody`, `DataTableVirtualizedSkeleton`, `DataTableVirtualizedLoading`, `DataTableVirtualizedLoadingMore`) updated to match.
-
-### Bug Fixes
-
-- **Scroll listener — `onScrolledBottom` / `onScrolledTop` silently dead** — In all four body components (`DataTableBody`, `DataTableVirtualizedBody`, and both virtualized DnD bodies), the scroll-listener effect early-returned on `!onScroll`, which meant `onScrolledBottom` / `onScrolledTop` callbacks were never wired unless the consumer also passed `onScroll`. The listener now attaches whenever any of the three callbacks is provided, and `onScroll` is invoked conditionally.
-
-### Documentation
-
-- **Infinite Scroll Table** — New example page with full implementation guide for non-virtualized infinite scroll (500-row mock, `onScrolledBottom` + `DataTableLoadingMore`). Includes a caution callout recommending the virtualized variant for most use cases.
-- **Infinite Scroll Virtualized Table** — New example page for virtualized infinite scroll (5,000-row mock, `onNearEnd` + `DataTableVirtualizedLoadingMore`). Includes comparison table of `onNearEnd` vs `onScrolledBottom`, TanStack Query wiring pattern, and controlled-state variant.
-- **Core overview** — Added `DataTableLoadingMore`, `DataTableVirtualizedLoadingMore`, `onNearEnd`, and `prefetchThreshold` to the component and props reference.
-
-### Bug Fixes
-
-- **Faceted filter — `dynamicCounts` silently ignored in key paths** — The prop was accepted on `DataTableFacetedFilter` and `useFacetedOptions` but the fallback `useMemo` and the auto-generated branch of `useGeneratedOptions` both computed counts from the wrong row set. Setting `dynamicCounts: false` while keeping `limitToFilteredRows: true` had no effect. Counts now come from `countSourceRows` in every branch, and the `useMemo` deps include `dynamicCounts` so React recomputes when it changes.
-- **Faceted filter — explicit `options` bypassed count enrichment entirely** — When a caller passed static `options` to `DataTableFacetedFilter` or `TableColumnFacetedFilterMenu`, both components short-circuited and returned the caller array untouched. `dynamicCounts` was a no-op on that path, so multi-select filters with static options never showed live counts, and the single-select path only filtered options by presence without populating `count`. Both entry points now enrich caller-supplied options through the same `optionRows` / `countRows` split used for auto-generated options, and honor `limitToFilteredRows` and `showCounts` on both the fast and slow paths.
-- **Faceted filter — `TableColumnFacetedFilterMenu` dropped `dynamicCounts` on the way to the hook** — The column menu wired the prop into its fallback path but called `useGeneratedOptionsForColumn({ limitToFilteredRows })`, silently omitting `dynamicCounts`. The base hook always saw the default `true`. It now forwards `{ limitToFilteredRows, dynamicCounts }`, matching the parallel wiring in `DataTableFacetedFilter`.
-- **Faceted filter — zero-count options no longer disappear** — Options discovered in the filtered row set were silently dropped when their count in the count row set was `0`. Only visible when `limitToFilteredRows !== dynamicCounts`, but when it surfaced it looked like options were flickering in and out. Fixed by separating option discovery from count computation.
-
-### Behavior Changes
-
-- **Faceted filter — multi-select now defaults `limitToFilteredRows` to `false`** — Single-select keeps the previous `true` default. A narrowing multi-select facet produces a broken UX: un-checking the last selected value can also remove _other_ still-selected values from the visible list, because their rows were just filtered away. Expressed as `limitToFilteredRows ??= !multiple`, so explicit props always win. `DataTableFacetedFilter`, `DataTableFacetedFilterContent`, and `TableColumnFacetedFilterMenu` all apply the default at their component entry points.
-- **`preserve` merge strategy contract clarified** — `preserve` returns user-defined `meta.options` **untouched** (no count injection), respecting `limitToFilteredRows` only to hide values not present in the current row set. Only `augment` injects counts. An earlier refactor draft blurred the distinction; reverted before shipping.
+- **Faceted filter — multi-select defaults `limitToFilteredRows` to `false`** (single-select keeps `true`). Expressed as `limitToFilteredRows ??= !multiple`.
+- **`preserve` merge strategy** — returns user-defined `meta.options` untouched. Only `augment` injects counts.
 
 ### Tests
 
-- **First behavioral test suite for the library** — Introduced [Vitest](https://vitest.dev) as the unit/component runner. Added `vitest`, `@vitejs/plugin-react`, `@testing-library/react`, `@testing-library/dom`, `jsdom`, and `@vitest/ui` as dev dependencies. New scripts: `pnpm test` (run once) and `pnpm test:watch`.
-- **23 tests across three files** — Every `(limitToFilteredRows × dynamicCounts)` permutation on a real TanStack table, the `preserve` / `augment` merge-strategy branches, zero-count options, and prop-wiring regressions for both `TableColumnFacetedFilterMenu` and `DataTableFacetedFilter`. Each fix above is pinned by at least one test. Fixture columns declare explicit `filterFn`s so row filtering actually happens — a subtlety worth noting for future contributors.
-- **GitHub Actions CI workflow** — [`.github/workflows/ci.yml`](https://github.com/Semkoo/niko-table-registry/tree/main/.github/workflows/ci.yml) runs `pnpm test`, `eslint`, and `pnpm build` on every push to `main` and PR targeting `main`. Tracks Node LTS automatically via `node-version: "lts/*"`. Complements the existing [`registry.yml`](https://github.com/Semkoo/niko-table-registry/tree/main/.github/workflows/registry.yml) post-deploy smoke workflow.
-- **Registry example exercises the new default** — [`faceted.tsx`](https://github.com/Semkoo/niko-table-registry/tree/main/src/registry/new-york/examples/niko-table/faceted.tsx)'s multi-select category filter previously set `limitToFilteredRows={false}` explicitly; it now relies on the `!multiple` default, so any regression will surface visually on the docs site's Faceted Filter Table example page.
+- **Vitest introduced.** 23 tests covering every `(limitToFilteredRows × dynamicCounts)` permutation, merge-strategy branches, zero-count options, and prop-wiring regressions.
+- **GitHub Actions CI** runs `pnpm test`, `eslint`, and `pnpm build` on every PR and push to `main`.
 
 ### Documentation
 
-- **`DataTableFacetedFilter` — `limitToFilteredRows` default** now shown as `!multiple` in the props table with both single-select and multi-select branches described.
+- **New example pages:** Infinite Scroll Table (non-virtualized) and Infinite Scroll Virtualized Table.
+- **Core overview reference** adds `DataTableLoadingMore`, `DataTableVirtualizedLoadingMore`, `onNearEnd`, `prefetchThreshold`.
 
 ---
 
 ## March 2026
 
-### Performance & consistency
+### Performance
 
-- **Row click: event delegation** — All table body components (standard, virtualized, and DnD variants) now use a single delegated row-click handler instead of one handler per row or per cell. This reduces allocations and keeps behavior consistent across `DataTableBody`, `DataTableVirtualizedBody`, `DataTableVirtualizedDndBody`, `DataTableVirtualizedDndColumnBody`, `DataTableDndBody`, and `DataTableDndColumnBody`.
-- **DataTableRoot** — Global filter and default column-pinning handlers are memoized with `useCallback` so table options stay stable and the table does not re-initialize unnecessarily.
-- **TablePagination** — Page size, page input, and prev/next button handlers are memoized with `useCallback` for stable references when pagination state changes.
-- **DataTableAside** — Trigger toggle and close button handlers are memoized with `useCallback`.
+- **Row click delegated at `<tbody>`** instead of per-row across all six body components.
+- **`DataTableRoot`, `TablePagination`, `DataTableAside`** — handlers memoized with `useCallback` for stable references.
+
+### Fixed
+
+- **`TablePagination`** — page input uses local draft state. Page index commits on blur or Enter.
+- **`TablePagination`** — `onPageSizeChange` now receives the recalculated page index.
+- **Sticky header z-index** — pinned body cells no longer overlap the sticky header (`z-30` > `z-20` > `z-10`).
+- **Pinned header cells** get `top: 0` so they stick vertically when the header is sticky.
 
 ### Documentation
 
-- **DataTableRoot** — Docs now list the required `children` prop and the optional `state` prop for controlled mode. The introduction page also documents `className`.
-- Props tables and examples were reviewed for accuracy against the current implementation.
-
-### Bug Fixes
-
-- **TablePagination — page input draft state** — The page number input now uses local draft state so users can type intermediate values (e.g. `"1"` before completing `"12"`) without the table jumping mid-edit. The page index is only committed on blur or Enter; invalid input resets to the current page.
-- **TablePagination — stale page index on page size change** — `onPageSizeChange` now receives the recalculated page index (`Math.floor((pageIndex * pageSize) / newPageSize)`) instead of the stale pre-change index.
-- **Sticky header z-index** — Fixed an issue where pinned body cells could overlap the sticky header during scroll. The sticky header container now uses `z-30`, above header pinned cells (`z-20`) and body pinned cells (`z-10`).
-- **Pinned header cell `top` style** — Added `top: 0` to pinned header cells in `getCommonPinningStyles` so they stick vertically when the header is sticky.
+- **`DataTableRoot`** — docs list the required `children` prop and the optional `state` prop.
 
 ---
 
-## February 2026 - Initial Release
+## February 2026 — Initial Release
 
 The first public release of Niko Table — a composable, shadcn-compatible data table component registry built with TanStack Table and React.
 

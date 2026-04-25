@@ -62,11 +62,7 @@ export function DataTableColumnHeaderRoot<TData, TValue>({
   column: Column<TData, TValue>
   children: React.ReactNode
 }) {
-  // Memoize the context value so consumers (DataTableColumnSort,
-  // DataTableColumnFilter, etc.) only re-render when `column`
-  // identity changes — without this, every header re-render
-  // creates a fresh `{ column }` object and propagates through
-  // every header cell's context subscribers.
+  // Memoize so context subscribers only re-render when `column` identity changes.
   const contextValue = React.useMemo(
     () => ({ column }) as TableColumnHeaderContextValue<unknown, unknown>,
     [column],

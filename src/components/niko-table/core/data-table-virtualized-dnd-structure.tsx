@@ -258,10 +258,7 @@ export function DataTableVirtualizedDndBody<TData>({
   const { table, columns } = useDataTable()
   const { rows } = table.getRowModel()
 
-  /**
-   * Hoist the expand-column lookup above the virtualizer render
-   * loop. See `DataTableVirtualizedBody` for the full rationale.
-   */
+  // Hoist expand-column lookup above the virtualizer loop. See `DataTableVirtualizedBody`.
   const expandColumnId = React.useMemo(
     () =>
       table.getAllColumns().find(col => col.columnDef.meta?.expandedContent)
@@ -613,10 +610,7 @@ export function DataTableVirtualizedDndColumnBody<TData>({
   const { table, columns } = useDataTable()
   const { rows } = table.getRowModel()
 
-  /**
-   * Hoist the expand-column lookup above the virtualizer render
-   * loop. See `DataTableVirtualizedBody` for the full rationale.
-   */
+  // Hoist expand-column lookup above the virtualizer loop. See `DataTableVirtualizedBody`.
   const expandColumnId = React.useMemo(
     () =>
       table.getAllColumns().find(col => col.columnDef.meta?.expandedContent)
@@ -734,13 +728,7 @@ export function DataTableVirtualizedDndColumnBody<TData>({
         if (!row) return null
         const isExpanded = row.getIsExpanded()
 
-        // Resolve the expand cell only when expanded, using the
-        // memoized `expandColumnId`. Same contract used by
-        // `DataTableVirtualizedBody` and the row-DnD body. Without
-        // rendering the expanded sibling here, column-DnD tables
-        // lost the row-expansion feature entirely; adding it also
-        // lets the shared `measureElement` callback include the
-        // expanded pane's height in the virtualizer's measurement.
+        // Resolve the expand cell only when expanded, using the memoized `expandColumnId`.
         const expandCell =
           isExpanded && expandColumnId
             ? row.getAllCells().find(c => c.column.id === expandColumnId)

@@ -140,13 +140,8 @@ function DataTableRootInternal<TData, TValue>({
   state: restState,
   initialState: restInitialState,
   globalFilterFn: restGlobalFilterFn,
-  // Anything else passed through to TanStack Table (plain
-  // `useReactTable` options — rare in practice; consumers normally
-  // route enable/manual flags through `config` and state through
-  // `state` / handlers). Still spread into `tableOptions` for
-  // forward compatibility, but NOT in the memo deps — if you start
-  // relying on a passthrough option that needs to invalidate the
-  // memo, lift it into the destructure list above.
+  // Spread into `tableOptions` but NOT in the memo deps. Lift any passthrough
+  // option that needs to invalidate the memo into the destructure list above.
   ...passthroughTableOptions
 }: Omit<TableRootProps<TData, TValue>, "table"> & {
   columns: DataTableColumnDef<TData, TValue>[]
@@ -454,24 +449,12 @@ function DataTableRootInternal<TData, TValue>({
    *
    * WHAT: Only creates new function when dependencies (rowIdMap, callbacks, state) change.
    */
+  // Honors the full TanStack `Updater<T> = T | ((old: T) => T)` contract.
+  // Pure setter — `onRowSelection` is fired from the effect below so React
+  // can call this multiple times in concurrent mode without double-firing.
   const handleRowSelectionChange = React.useCallback(
     (valueFn: Updater<RowSelectionState>) => {
-      // Mount-guard outer (see `isMountedRef` comment above).
       if (!isMountedRef.current) return
-
-      // Honor the full TanStack `Updater<T> = T | ((old: T) => T)`
-      // contract — accept BOTH a value and a functional updater.
-      // The functional path uses the `prev => ...` pattern (rather
-      // than capturing `rowSelection` from the closure) so this
-      // useCallback doesn't need `rowSelection` in deps and stays
-      // identity-stable across selection clicks.
-      //
-      // Pure state updater: NO side effects (e.g. `onRowSelection`)
-      // inside the setter callback — they get fired by the
-      // `useEffect` below that watches the resolved `rowSelection`.
-      // React may invoke the updater multiple times in dev /
-      // concurrent mode; calling consumer callbacks from inside
-      // would double-fire.
       if (typeof valueFn === "function") {
         setRowSelection(prev => valueFn(prev))
       } else {
@@ -481,24 +464,10 @@ function DataTableRootInternal<TData, TValue>({
     [],
   )
 
-  /**
-   * Notify the consumer's `onRowSelection` callback with the
-   * resolved selected-row data whenever the selection changes.
-   * Lifted out of the state-updater (per React docs: "your updater
-   * functions must be pure") and gated on `isMountedRef`.
-   *
-   * Uses `rowIdMap` for O(1) lookup — with 10,000 rows × 100
-   * selected this drops from ~500ms to ~5ms vs the previous
-   * `Array.find()` approach.
-   */
+  // Fire `onRowSelection` only on user-driven changes — skip the initial mount.
   const skipInitialRowSelectionRef = React.useRef(true)
   React.useEffect(() => {
     if (!isMountedRef.current) return
-    // Skip the initial mount — `isMountedRef` is initialized to
-    // `true`, so without this guard the effect would fire once with
-    // the initial (typically empty) `rowSelection`, surprising
-    // consumers that expect `onRowSelection` to mean "user changed
-    // selection" rather than "selection was initialized."
     if (skipInitialRowSelectionRef.current) {
       skipInitialRowSelectionRef.current = false
       return

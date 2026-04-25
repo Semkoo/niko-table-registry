@@ -1,19 +1,14 @@
 /**
  * niko-table — created by Semir N. (Semkoo, https://github.com/Semkoo) with AI assistance.
  *
- * Shared row-click guard + row resolution used by every body variant
- * (`data-table-structure`, `data-table-dnd-structure`, and the two
- * virtualized counterparts). The exact same interactive-element list
- * was inlined in 6 places — adding a new `data-slot` to ignore meant
- * editing six files. Centralized here so the guard stays in sync.
+ * Shared row-click guard. Centralized so the interactive-element list
+ * stays in sync across all body variants.
  */
 import type { Table } from "@tanstack/react-table"
 
 /**
- * `true` when the click landed on (or inside) an interactive element
- * that should suppress the row-level `onRowClick` — e.g. action
- * buttons, links, checkboxes, or any radix collection item that
- * dispatches its own behavior on click.
+ * Returns `true` when the click landed on (or inside) an interactive
+ * element that should suppress `onRowClick`.
  */
 export function isInteractiveClickTarget(target: HTMLElement): boolean {
   return Boolean(
@@ -31,10 +26,8 @@ export function isInteractiveClickTarget(target: HTMLElement): boolean {
 }
 
 /**
- * For delegated `<tbody>` handlers: returns the matched row (typed
- * against the caller's `TData`) or `null` when the click should be
- * ignored — either it landed on an interactive descendant or no row
- * could be resolved from the closest `tr[data-row-id]`.
+ * For delegated `<tbody>` handlers. Returns the matched row, or `null`
+ * if the click should be ignored (interactive target or no row found).
  */
 export function resolveRowFromClick<TData>(
   target: HTMLElement,

@@ -202,18 +202,8 @@ export function DataTableBody<TData>({
     return () => container.removeEventListener("scroll", handleScroll)
   }, [onScroll, onScrolledTop, onScrolledBottom, scrollThreshold])
 
-  /**
-   * Resolve the expand column once at the table level. Previously
-   * `getAllCells().find(...)` ran inside the row map — O(rows × cols)
-   * per render even though the expand column is stable for the
-   * lifetime of the column set.
-   *
-   * Deps include `columns` (from `useDataTable()`) so the memo
-   * recomputes when the consumer passes a new column set —
-   * `table` alone is too stable (TanStack reuses the same
-   * instance across column updates) and would leave the cached
-   * `expandColumnId` stale.
-   */
+  // Hoist expand-column lookup above the row map (was O(rows × cols) per render).
+  // `columns` is in deps because the table reference is too stable on its own.
   const expandColumnId = React.useMemo(
     () =>
       table.getAllColumns().find(col => col.columnDef.meta?.expandedContent)

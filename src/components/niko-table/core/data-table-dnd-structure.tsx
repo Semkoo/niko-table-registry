@@ -99,10 +99,8 @@ export function DataTableDndBody<TData>({
     () =>
       table.getAllColumns().find(col => col.columnDef.meta?.expandedContent)
         ?.id,
-    // `columns` (from `useDataTable()`) is included so the memo
-    // recomputes when the consumer passes a new column set —
-    // `table` alone is too stable (TanStack reuses the same
-    // instance across column updates).
+    // `columns` keeps the memo in sync when consumers swap column sets —
+    // `table` alone is too stable (TanStack reuses the same instance).
     [table, columns],
   )
 
@@ -306,10 +304,8 @@ export function DataTableDndColumnBody<TData>({
     () =>
       table.getAllColumns().find(col => col.columnDef.meta?.expandedContent)
         ?.id,
-    // `columns` (from `useDataTable()`) is included so the memo
-    // recomputes when the consumer passes a new column set —
-    // `table` alone is too stable (TanStack reuses the same
-    // instance across column updates).
+    // `columns` keeps the memo in sync when consumers swap column sets —
+    // `table` alone is too stable (TanStack reuses the same instance).
     [table, columns],
   )
 
