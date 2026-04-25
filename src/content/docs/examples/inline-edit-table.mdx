@@ -17,6 +17,23 @@ import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-c
 
 The Inline Edit Table lets users edit row fields directly in the table without opening a dialog or navigating away. It demonstrates the `getRowMemoKey` prop — the mechanism that keeps React.memo'd body rows in sync with external state like edit drafts, validation errors, and optimistic updates.
 
+## Design decisions
+
+This example follows the **TanStack Table v8** idiom for inline editing, which differs meaningfully from the v7 approach.
+
+**v7 (old pattern):** Edit state lives inside the data array — each row object carries an `isEditing: boolean` flag. Triggering an edit means calling `setData` to flip that flag, which replaces the entire array and causes every memoized row to re-render.
+
+**v8 (our pattern):** Edit state lives *outside* the data. `editingId`, `draft`, and `errors` are separate `useState` variables. The data array is only updated once on `save()` — not on every keystroke. Callbacks are threaded into column `cell` closures (or optionally via `table.options.meta`) rather than through the data shape.
+
+The result is that typing in an input field touches exactly one memoized row, and only because `getRowMemoKey` returns a new string for it. All other rows are completely skipped by React reconciliation.
+
+| Concern | v7 | v8 (this example) |
+|---|---|---|
+| Edit state location | Inside the data array (`isEditing` on each row) | Outside data (`editingId` + `draft` state) |
+| Update on keystroke | `setData` replaces the whole array → all rows re-render | Only `draft` changes → one row re-renders via `getRowMemoKey` |
+| Draft & validation | No concept — blur writes directly to data | Staged draft with error validation before committing |
+| Data mutation | On every keystroke | Once, on explicit `save()` |
+
 ## Installation
 
 Install the DataTable core and add-ons for this example:
