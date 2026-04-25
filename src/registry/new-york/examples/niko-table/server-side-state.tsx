@@ -478,6 +478,80 @@ function matchesFilter(
   }
 }
 
+/**
+ * Dispatch a TanStack column-filter value against a product.
+ *
+ * WHY: The column header carries multiple filter UIs (slider, date, faceted
+ * multi-select, boolean, text) that all call `column.setFilterValue(rawValue)`.
+ * The filter menu, by contrast, stuffs an `ExtendedColumnFilter` object into
+ * `filter.value`. Both shapes flow through the same TanStack columnFilters
+ * array — this function picks the right matcher per value shape.
+ *
+ * IMPACT: Slider/date/faceted/boolean filters now actually filter rows on the
+ * server (previously the early-return at the call site silently dropped them).
+ *
+ * WHAT: Detects ExtendedColumnFilter via `operator` field. Falls back to value
+ * shape: number tuple → range, date tuple → date range, string[] → IN,
+ * boolean → equals, string → ILIKE.
+ */
+function matchesColumnFilter(
+  product: Product,
+  columnId: string,
+  value: unknown,
+): boolean {
+  if (value === null || value === undefined || value === "") return true
+
+  if (
+    typeof value === "object" &&
+    !Array.isArray(value) &&
+    "operator" in value
+  ) {
+    return matchesFilter(product, value as ExtendedColumnFilter<Product>)
+  }
+
+  const productValue = product[columnId as keyof Product]
+
+  if (Array.isArray(value) && value.length === 2 && !isStringArray(value)) {
+    const [a, b] = value as [unknown, unknown]
+    if (a == null && b == null) return true
+    const productNum =
+      productValue instanceof Date
+        ? productValue.getTime()
+        : Number(productValue)
+    const lo = a == null ? -Infinity : toNumber(a)
+    const hi = b == null ? Infinity : toNumber(b)
+    return productNum >= lo && productNum <= hi
+  }
+
+  if (Array.isArray(value)) {
+    if (value.length === 0) return true
+    return value.some(
+      v => String(productValue).toLowerCase() === String(v).toLowerCase(),
+    )
+  }
+
+  if (typeof value === "boolean") {
+    return Boolean(productValue) === value
+  }
+
+  if (typeof value === "string" || typeof value === "number") {
+    return String(productValue)
+      .toLowerCase()
+      .includes(String(value).toLowerCase())
+  }
+
+  return true
+}
+
+function isStringArray(arr: unknown[]): boolean {
+  return arr.every(v => typeof v === "string")
+}
+
+function toNumber(v: unknown): number {
+  if (v instanceof Date) return v.getTime()
+  return Number(v)
+}
+
 // Filter products using all filter params, optionally excluding one column's filter.
 // Used for both main data filtering and facet computation (where we exclude the
 // facet column's own filter so users can see all available values for that column).
@@ -522,30 +596,16 @@ function filterProductsByParams(
     }
   }
 
-  // Apply AND filters from columnFilters (server-side)
+  // Apply AND filters from columnFilters (server-side).
+  // Values can be either an `ExtendedColumnFilter` (from the filter menu) or a
+  // plain TanStack column-filter value (tuple from slider/date, array from
+  // multi-select, boolean, string). Dispatch on shape so all column-header
+  // filter UIs actually filter the row set.
   if (params.columnFilters.length > 0) {
     filtered = filtered.filter(product => {
       return params.columnFilters.every(filter => {
-        // Skip excluded column
         if (excludeColumnId && filter.id === excludeColumnId) return true
-
-        const value = filter.value
-
-        // Skip empty filters
-        if (
-          !value ||
-          (typeof value === "object" && "value" in value && !value.value)
-        ) {
-          return true
-        }
-
-        // Handle ExtendedColumnFilter format
-        if (typeof value === "object" && "id" in value) {
-          const extendedFilter = value as ExtendedColumnFilter<Product>
-          return matchesFilter(product, extendedFilter)
-        }
-
-        return true
+        return matchesColumnFilter(product, filter.id, filter.value)
       })
     })
   }

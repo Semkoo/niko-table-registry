@@ -501,6 +501,109 @@ function matchesFilter(
   }
 }
 
+/**
+ * Dispatch a TanStack column-filter value against a product.
+ *
+ * WHY: The column header carries multiple filter UIs (slider, date, faceted
+ * multi-select, boolean, text) that all call `column.setFilterValue(rawValue)`.
+ * The filter menu, by contrast, stuffs an `ExtendedColumnFilter` object into
+ * `filter.value`. Both shapes flow through the same TanStack columnFilters
+ * array — this function picks the right matcher per value shape.
+ *
+ * IMPACT: Slider/date/faceted/boolean filters now actually filter rows on the
+ * server (previously the early-return at the call site silently dropped them).
+ *
+ * WHAT: Detects ExtendedColumnFilter via `operator` field. Falls back to value
+ * shape: number tuple → range, date tuple → date range, string[] → IN,
+ * boolean → equals, string → ILIKE.
+ */
+function matchesColumnFilter(
+  product: Product,
+  columnId: string,
+  value: unknown,
+): boolean {
+  if (value === null || value === undefined || value === "") return true
+
+  // ExtendedColumnFilter (from filter menu) — has an `operator` field.
+  if (
+    typeof value === "object" &&
+    !Array.isArray(value) &&
+    "operator" in value
+  ) {
+    return matchesFilter(product, value as ExtendedColumnFilter<Product>)
+  }
+
+  const productValue = product[columnId as keyof Product]
+
+  // Tuple from slider or date filter: [min, max] or [start, end].
+  if (Array.isArray(value) && value.length === 2 && !isStringArray(value)) {
+    const [a, b] = value as [unknown, unknown]
+    if (a == null && b == null) return true
+    const productNum =
+      productValue instanceof Date
+        ? productValue.getTime()
+        : Number(productValue)
+    const lo = a == null ? -Infinity : toNumber(a)
+    const hi = b == null ? Infinity : toNumber(b)
+    return productNum >= lo && productNum <= hi
+  }
+
+  // Multi-select array: string[] from faceted filter.
+  if (Array.isArray(value)) {
+    if (value.length === 0) return true
+    return value.some(
+      v => String(productValue).toLowerCase() === String(v).toLowerCase(),
+    )
+  }
+
+  // Boolean filter.
+  if (typeof value === "boolean") {
+    return Boolean(productValue) === value
+  }
+
+  // Text filter — case-insensitive contains.
+  if (typeof value === "string" || typeof value === "number") {
+    return String(productValue)
+      .toLowerCase()
+      .includes(String(value).toLowerCase())
+  }
+
+  return true
+}
+
+function isStringArray(arr: unknown[]): boolean {
+  return arr.every(v => typeof v === "string")
+}
+
+function toNumber(v: unknown): number {
+  if (v instanceof Date) return v.getTime()
+  return Number(v)
+}
+
+/**
+ * Pull an `ExtendedColumnFilter` out of a URL entry, regardless of which
+ * shape was written. Used by the filter-menu memos to ignore raw column
+ * filters (slider tuples, etc.) that don't belong to the menu.
+ */
+function extractExtendedFilter(
+  entry: unknown,
+): ExtendedColumnFilter<Product> | null {
+  if (!entry || typeof entry !== "object") return null
+  const e = entry as { id?: string; value?: unknown }
+  // New shape: { id, value: ExtendedColumnFilter }
+  if (typeof e.id === "string" && e.value && typeof e.value === "object") {
+    if ("operator" in (e.value as Record<string, unknown>)) {
+      return e.value as ExtendedColumnFilter<Product>
+    }
+    return null
+  }
+  // Legacy shape: the entry IS an ExtendedColumnFilter
+  if ("operator" in (e as Record<string, unknown>)) {
+    return e as unknown as ExtendedColumnFilter<Product>
+  }
+  return null
+}
+
 // Filter products using all filter params, optionally excluding one column's filter.
 // Used for both main data filtering and facet computation (where we exclude the
 // facet column's own filter so users can see all available values for that column).
@@ -545,30 +648,17 @@ function filterProductsByParams(
     }
   }
 
-  // Apply AND filters from columnFilters (server-side)
+  // Apply AND filters from columnFilters (server-side).
+  // Values can be either an `ExtendedColumnFilter` (from the filter menu) or a
+  // plain TanStack column-filter value (tuple from slider/date, array from
+  // multi-select, boolean from boolean filter, string from text). Both shapes
+  // are produced by the round-trip in `handleStandardColumnFiltersChange` and
+  // both must be honored here so the server filters the row set in either flow.
   if (params.columnFilters.length > 0) {
     filtered = filtered.filter(product => {
       return params.columnFilters.every(filter => {
-        // Skip excluded column
         if (excludeColumnId && filter.id === excludeColumnId) return true
-
-        const value = filter.value
-
-        // Skip empty filters
-        if (
-          !value ||
-          (typeof value === "object" && "value" in value && !value.value)
-        ) {
-          return true
-        }
-
-        // Handle ExtendedColumnFilter format
-        if (typeof value === "object" && "id" in value) {
-          const extendedFilter = value as ExtendedColumnFilter<Product>
-          return matchesFilter(product, extendedFilter)
-        }
-
-        return true
+        return matchesColumnFilter(product, filter.id, filter.value)
       })
     })
   }
@@ -1075,6 +1165,30 @@ function ServerSideStateTableContent() {
     return urlParams.sort || []
   }, [urlParams.sort])
 
+  /**
+   * Convert a URL-stored filter entry back into a TanStack `ColumnFilter`.
+   *
+   * URL entries are `{id, value}` objects (see `serializeColumnFiltersForUrl`).
+   * The `value` is either a raw TanStack value (tuple/array/string/boolean) or
+   * an ExtendedColumnFilter sans `filterId`. Either way, TanStack just needs
+   * `{id, value}` — it doesn't care what `value` is.
+   */
+  const urlEntryToColumnFilter = useCallback(
+    (entry: unknown): { id: string; value: unknown } | null => {
+      if (!entry || typeof entry !== "object") return null
+      const e = entry as { id?: string; value?: unknown }
+      // Entries written by the new serializer carry top-level `id` + `value`.
+      if (typeof e.id === "string") return { id: e.id, value: e.value }
+      // Legacy / filter-menu format: the entry IS an ExtendedColumnFilter.
+      if ("operator" in (e as Record<string, unknown>)) {
+        const f = e as ExtendedColumnFilter<Product>
+        return { id: f.id, value: f }
+      }
+      return null
+    },
+    [],
+  )
+
   // Standard mode filters - convert from URL format to ColumnFiltersState
   const standardColumnFilters: ColumnFiltersState = useMemo(() => {
     // If globalFilter has OR/mixed filters, keep columnFilters EMPTY
@@ -1086,12 +1200,10 @@ function ServerSideStateTableContent() {
     ) {
       return [] // Empty - filters are in globalFilter
     }
-    // Otherwise use regular filters (AND logic via columnFilters)
-    return urlParams.filters.map((filter: ExtendedColumnFilter<Product>) => ({
-      id: filter.id,
-      value: filter,
-    }))
-  }, [urlParams.filters, globalFilter, filterMode])
+    return (urlParams.filters as unknown[])
+      .map(urlEntryToColumnFilter)
+      .filter((f): f is { id: string; value: unknown } => f !== null)
+  }, [urlParams.filters, globalFilter, filterMode, urlEntryToColumnFilter])
 
   // Inline mode filters - convert from URL format to ColumnFiltersState
   const inlineColumnFilters: ColumnFiltersState = useMemo(() => {
@@ -1104,14 +1216,15 @@ function ServerSideStateTableContent() {
     ) {
       return [] // Empty - filters are in globalFilter
     }
-    // Otherwise use regular inline filters (AND logic via columnFilters)
-    return urlParams.inlineFilters.map(
-      (filter: ExtendedColumnFilter<Product>) => ({
-        id: filter.id,
-        value: filter,
-      }),
-    )
-  }, [urlParams.inlineFilters, globalFilter, filterMode])
+    return (urlParams.inlineFilters as unknown[])
+      .map(urlEntryToColumnFilter)
+      .filter((f): f is { id: string; value: unknown } => f !== null)
+  }, [
+    urlParams.inlineFilters,
+    globalFilter,
+    filterMode,
+    urlEntryToColumnFilter,
+  ])
 
   // Column pinning state from URL
   const columnPinning: ColumnPinningState = useMemo(() => {
@@ -1533,24 +1646,55 @@ function ServerSideStateTableContent() {
     [columnPinning, setUrlParams],
   )
 
+  /**
+   * Serialize a TanStack columnFilters array for URL storage.
+   *
+   * WHY: Column-header filters (slider, date, faceted, etc.) write raw
+   * TanStack values via `column.setFilterValue(rawValue)`, while the filter
+   * menu writes an `ExtendedColumnFilter` object into `filter.value`. The old
+   * handler unwrapped `filter.value` and pushed it through `serializeFiltersForUrl`,
+   * which destructures arrays into `{0: x, 1: y}` objects — that's why slider
+   * drags kept appending garbage to the URL.
+   *
+   * IMPACT: Round-trip now lossless for both shapes. Slider/date/faceted
+   * filters update the URL once per change instead of accumulating entries.
+   *
+   * WHAT: Writes the full TanStack `{id, value}` shape. If `value` is itself
+   * an `ExtendedColumnFilter`, strip its `filterId` for URL brevity (regenerated
+   * on read via `normalizeFiltersFromUrl`).
+   */
+  const serializeColumnFiltersForUrl = useCallback(
+    (newFilters: ColumnFiltersState) => {
+      return newFilters.map(filter => {
+        const value = filter.value
+        if (
+          value &&
+          typeof value === "object" &&
+          !Array.isArray(value) &&
+          "filterId" in (value as Record<string, unknown>)
+        ) {
+          // Filter-menu ExtendedColumnFilter — strip filterId.
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { filterId, ...rest } = value as ExtendedColumnFilter<Product>
+          return { id: filter.id, value: rest }
+        }
+        return { id: filter.id, value }
+      }) as unknown as ExtendedColumnFilter<Product>[]
+    },
+    [],
+  )
+
   // Handlers for filters (standard mode)
   const handleStandardColumnFiltersChange = useCallback(
     (updater: Updater<ColumnFiltersState>) => {
       const newFilters =
         typeof updater === "function" ? updater(standardColumnFilters) : updater
-
-      // Extract the ExtendedColumnFilter from filter.value
-      const filters = newFilters.map(
-        filter => filter.value,
-      ) as ExtendedColumnFilter<Product>[]
-
-      // Exclude filterId from URL to keep URLs shorter
-      const urlFilters = serializeFiltersForUrl(
-        filters,
-      ) as ExtendedColumnFilter<Product>[]
-      void setUrlParams({ filters: urlFilters, pageIndex: 0 })
+      void setUrlParams({
+        filters: serializeColumnFiltersForUrl(newFilters),
+        pageIndex: 0,
+      })
     },
-    [standardColumnFilters, setUrlParams],
+    [standardColumnFilters, setUrlParams, serializeColumnFiltersForUrl],
   )
 
   // Handlers for filters (inline mode)
@@ -1558,19 +1702,12 @@ function ServerSideStateTableContent() {
     (updater: Updater<ColumnFiltersState>) => {
       const newFilters =
         typeof updater === "function" ? updater(inlineColumnFilters) : updater
-
-      // Extract the ExtendedColumnFilter from filter.value
-      const filters = newFilters.map(
-        filter => filter.value,
-      ) as ExtendedColumnFilter<Product>[]
-
-      // Exclude filterId from URL to keep URLs shorter
-      const urlFilters = serializeFiltersForUrl(
-        filters,
-      ) as ExtendedColumnFilter<Product>[]
-      void setUrlParams({ inlineFilters: urlFilters, pageIndex: 0 })
+      void setUrlParams({
+        inlineFilters: serializeColumnFiltersForUrl(newFilters),
+        pageIndex: 0,
+      })
     },
-    [inlineColumnFilters, setUrlParams],
+    [inlineColumnFilters, setUrlParams, serializeColumnFiltersForUrl],
   )
 
   // Track previous globalFilter value to prevent infinite loops
@@ -1632,9 +1769,11 @@ function ServerSideStateTableContent() {
     [urlParams.columnVisibility, setUrlParams],
   )
 
-  // Extract ExtendedColumnFilter from globalFilter or urlParams.filters (standard mode)
+  // Extract ExtendedColumnFilter list for the filter menu UI.
+  // URL entries are `{id, value}` shape; only entries whose `value` is itself
+  // an ExtendedColumnFilter (has `operator`) belong to the filter menu — raw
+  // column-header values (slider tuples, etc.) are filtered out here.
   const currentStandardFilters = useMemo(() => {
-    // Check if filters are in globalFilter (OR/MIXED logic)
     if (
       typeof globalFilter === "object" &&
       globalFilter &&
@@ -1646,9 +1785,9 @@ function ServerSideStateTableContent() {
       }
       return filterObj.filters || []
     }
-
-    // Otherwise use urlParams.filters directly (AND logic)
-    return urlParams.filters || []
+    return ((urlParams.filters as unknown[]) || [])
+      .map(entry => extractExtendedFilter(entry))
+      .filter((f): f is ExtendedColumnFilter<Product> => f !== null)
   }, [urlParams.filters, globalFilter, filterMode])
 
   // Normalize filters to ensure they have unique filterIds
@@ -1659,9 +1798,8 @@ function ServerSideStateTableContent() {
     [currentStandardFilters],
   )
 
-  // Extract ExtendedColumnFilter from globalFilter or urlParams.inlineFilters (inline mode)
+  // Same as currentStandardFilters, but for the inline filter mode.
   const currentInlineFilters = useMemo(() => {
-    // Check if filters are in globalFilter (OR/MIXED logic)
     if (
       typeof globalFilter === "object" &&
       globalFilter &&
@@ -1673,9 +1811,9 @@ function ServerSideStateTableContent() {
       }
       return filterObj.filters || []
     }
-
-    // Otherwise use urlParams.inlineFilters directly (AND logic)
-    return urlParams.inlineFilters || []
+    return ((urlParams.inlineFilters as unknown[]) || [])
+      .map(entry => extractExtendedFilter(entry))
+      .filter((f): f is ExtendedColumnFilter<Product> => f !== null)
   }, [urlParams.inlineFilters, globalFilter, filterMode])
 
   // Normalize filters to ensure they have unique filterIds
