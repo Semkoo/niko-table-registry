@@ -5,6 +5,10 @@ description: Latest updates and release notes for Niko Table.
 
 ## May 2026
 
+### Fixed (root warning)
+
+- **Cross-table "state update on a component that hasn't mounted yet" warning silenced** — Two layered fixes. (1) Default `autoResetPageIndex` to `false` (was `true` for non-manual-pagination tables, matching TanStack's own default). The auto-reset fired `onPaginationChange` asynchronously after data arrived from a server query, and the queued `setPagination` dispatch could land on a StrictMode-unmounted fiber under React 19 + Turbopack. Stack trace pinpointed `onPaginationChange` as the culprit. Behavior change: tables that previously reset to page 0 on sort/filter changes now preserve their pagination cursor — for most modern apps (server-side pagination, infinite scroll) this is the better UX. Consumers wanting the old behavior can opt back in via `config={{ autoResetPageIndex: true }}`. (2) Added a mount-ref guard around every default state setter wired into `tableOptions.onXChange`. Defense-in-depth that silences the warning in production HMR scenarios; consumer-supplied handlers are not guarded — caller's responsibility to make their own dispatchers mount-safe.
+
 ### Performance (round 4)
 
 - **`DataTableRootInternal` — `tableOptions` memo no longer invalidates every render** — The memo previously depended on `rest` (the unmemoized rest bag from props destructuring), which is a fresh object every render. Each render: `tableOptions` rebuilt → `useReactTable` saw "options changed" → TanStack Table dispatched internal state syncs through our local useState setters. Destructured the three rest props that are read by name in the body (`state`, `initialState`, `globalFilterFn`) and depend on those specifically; remaining props go through `passthroughTableOptions` which is spread but intentionally not in the deps (lift specific keys into the destructure list if their identity must invalidate the memo). Eliminates the "state update on a component that hasn't mounted yet" warning class that fired across every consumer table under React 19 + Strict Mode + Turbopack HMR.

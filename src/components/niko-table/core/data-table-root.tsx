@@ -204,9 +204,21 @@ function DataTableRootInternal<TData, TValue>({
       pageCount: config?.pageCount,
       initialPageSize: config?.initialPageSize,
       initialPageIndex: config?.initialPageIndex,
-      // Default to false for manual pagination (server-side), true for client-side
-      autoResetPageIndex:
-        config?.autoResetPageIndex ?? (config?.manualPagination ? false : true),
+      // Default `false`. Previously `true` for non-manual-pagination
+      // tables (TanStack Table's own default), which auto-reset
+      // `pageIndex` to 0 whenever sort / global filter / column
+      // filter state changed. That auto-reset fires
+      // `onPaginationChange` asynchronously after data arrives from
+      // a server query — and the queued `setPagination` dispatch can
+      // land on a StrictMode-unmounted fiber under React 19 +
+      // Turbopack, producing the cross-table "state update on a
+      // component that hasn't mounted yet" warning. Defaulting to
+      // `false` removes the most common source of that warning while
+      // also preserving the user's pagination cursor across filter
+      // changes (often the better UX). Consumers with client-side
+      // pagination who want auto-reset can opt back in via
+      // `config={{ autoResetPageIndex: true }}`.
+      autoResetPageIndex: config?.autoResetPageIndex ?? false,
       autoResetExpanded: config?.autoResetExpanded ?? false,
     }),
     [
@@ -344,6 +356,26 @@ function DataTableRootInternal<TData, TValue>({
   })
 
   /**
+   * Mount tracking for the default state setters wired into
+   * `tableOptions.onXChange`. TanStack Table dispatches those
+   * callbacks asynchronously when its internal state-sync detects a
+   * difference (e.g. `autoResetPageIndex` after `data` lands from a
+   * server query). Under React 19 + Strict Mode + Turbopack HMR,
+   * those queued dispatches can land on the StrictMode-unmounted
+   * fiber, producing the cross-table "state update on a component
+   * that hasn't mounted yet" warning. Guarding each default setter
+   * on `isMountedRef.current` is a no-op in production and silently
+   * drops the queued dispatch on the dead fiber in dev.
+   */
+  const isMountedRef = React.useRef(true)
+  React.useEffect(() => {
+    isMountedRef.current = true
+    return () => {
+      isMountedRef.current = false
+    }
+  }, [])
+
+  /**
    * PERFORMANCE: Memoize global filter change handler with useCallback
    *
    * WHY: This callback is passed to tableOptions.onGlobalFilterChange.
@@ -357,11 +389,12 @@ function DataTableRootInternal<TData, TValue>({
    */
   const handleGlobalFilterChange = React.useCallback(
     (value: GlobalFilter) => {
-      // Always update local state to keep it in sync with table
-      // Preserve both string and object values (object values are used for complex filters)
-      setGlobalFilter(value)
-
-      // Also call external handler if provided
+      // Mount-guard the local state write (see `isMountedRef`
+      // comment above). The external handler is invoked
+      // unconditionally — caller's lifecycle to manage.
+      if (isMountedRef.current) {
+        setGlobalFilter(value)
+      }
       onGlobalFilterChange?.(value)
     },
     [onGlobalFilterChange],
@@ -414,7 +447,9 @@ function DataTableRootInternal<TData, TValue>({
     (valueFn: Updater<RowSelectionState>) => {
       if (typeof valueFn === "function") {
         const updatedRowSelection = valueFn(rowSelection)
-        setRowSelection(updatedRowSelection)
+        // Mount-guard the local state write (see `isMountedRef`
+        // comment in the useState block above).
+        if (isMountedRef.current) setRowSelection(updatedRowSelection)
 
         // Use Map for O(1) lookup instead of O(n) Array.find()
         // With 10,000 rows and 100 selected: ~500ms -> ~5ms (100x faster)
@@ -439,6 +474,9 @@ function DataTableRootInternal<TData, TValue>({
    */
   const handleColumnPinningChange = React.useCallback(
     (updater: Updater<ColumnPinningState>) => {
+      // Mount-guard the local state write (see `isMountedRef`
+      // comment in the useState block above).
+      if (!isMountedRef.current) return
       setColumnPinning(prev => {
         const next = typeof updater === "function" ? updater(prev) : updater
         return {
@@ -676,13 +714,44 @@ function DataTableRootInternal<TData, TValue>({
       autoResetExpanded: finalConfig.autoResetExpanded,
       onGlobalFilterChange: handleGlobalFilterChange,
       onRowSelectionChange: onRowSelectionChange ?? handleRowSelectionChange,
-      onSortingChange: onSortingChange ?? setSorting,
-      onColumnFiltersChange: onColumnFiltersChange ?? setColumnFilters,
-      onColumnVisibilityChange: onColumnVisibilityChange ?? setColumnVisibility,
+      // Default state setters wrapped with mount-ref guard so
+      // TanStack Table's async auto-reset dispatches (e.g.
+      // `onPaginationChange(0)` after data lands from a server
+      // query) don't land on a StrictMode-unmounted fiber. See the
+      // `isMountedRef` block above for full context. Consumer-
+      // supplied handlers are NOT guarded — caller's responsibility
+      // to make their own dispatchers mount-safe.
+      onSortingChange:
+        onSortingChange ??
+        (u => {
+          if (isMountedRef.current) setSorting(u)
+        }),
+      onColumnFiltersChange:
+        onColumnFiltersChange ??
+        (u => {
+          if (isMountedRef.current) setColumnFilters(u)
+        }),
+      onColumnVisibilityChange:
+        onColumnVisibilityChange ??
+        (u => {
+          if (isMountedRef.current) setColumnVisibility(u)
+        }),
       onColumnPinningChange: onColumnPinningChange ?? handleColumnPinningChange,
-      onColumnOrderChange: onColumnOrderChange ?? setColumnOrder,
-      onExpandedChange: onExpandedChange ?? setExpanded,
-      onPaginationChange: onPaginationChange ?? setPagination,
+      onColumnOrderChange:
+        onColumnOrderChange ??
+        (u => {
+          if (isMountedRef.current) setColumnOrder(u)
+        }),
+      onExpandedChange:
+        onExpandedChange ??
+        (u => {
+          if (isMountedRef.current) setExpanded(u)
+        }),
+      onPaginationChange:
+        onPaginationChange ??
+        (u => {
+          if (isMountedRef.current) setPagination(u)
+        }),
       getCoreRowModel: getCoreRowModel(),
       getFacetedRowModel: detectFeatures.enableFilters
         ? getFacetedRowModel()
