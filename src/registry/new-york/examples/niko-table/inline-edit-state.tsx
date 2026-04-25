@@ -39,7 +39,6 @@ import type { DataTableColumnDef } from "@/components/niko-table/types"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Pencil, Check, X, PackageSearch, AlertCircle } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -396,57 +395,35 @@ export default function InlineEditStateTable() {
   )
 
   return (
-    <div className="space-y-4">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-sm font-medium">Edit state</CardTitle>
-        </CardHeader>
-        <CardContent className="font-mono text-xs text-muted-foreground">
-          {inlineEdit.editingId ? (
-            <span>
-              Editing <strong>{inlineEdit.editingId}</strong> —{" "}
-              {JSON.stringify(inlineEdit.draft)}
-            </span>
-          ) : (
-            "No row being edited"
-          )}
-        </CardContent>
-      </Card>
-
-      <DataTableRoot
-        data={data}
-        columns={columns}
-        state={{
-          pagination,
-          sorting,
-          columnVisibility,
-        }}
-        onPaginationChange={setPagination}
-        onSortingChange={setSorting}
-        onColumnVisibilityChange={setColumnVisibility}
-      >
-        <DataTableToolbarSection>
-          <DataTableSearchFilter placeholder="Search products…" />
-          <DataTableViewMenu />
-        </DataTableToolbarSection>
-        <DataTable>
-          <DataTableHeader />
-          <DataTableBody getRowMemoKey={inlineEdit.getRowMemoKey}>
-            <DataTableEmptyBody>
-              <DataTableEmptyMessage>
-                <DataTableEmptyIcon>
-                  <PackageSearch />
-                </DataTableEmptyIcon>
-                <DataTableEmptyTitle>No products found</DataTableEmptyTitle>
-                <DataTableEmptyDescription>
-                  Try adjusting your search.
-                </DataTableEmptyDescription>
-              </DataTableEmptyMessage>
-            </DataTableEmptyBody>
-          </DataTableBody>
-        </DataTable>
-        <DataTablePagination />
-      </DataTableRoot>
-    </div>
+    <DataTableRoot
+      data={data}
+      columns={columns}
+      state={{ pagination, sorting, columnVisibility }}
+      onPaginationChange={setPagination}
+      onSortingChange={setSorting}
+      onColumnVisibilityChange={setColumnVisibility}
+    >
+      <DataTableToolbarSection>
+        <DataTableSearchFilter placeholder="Search products…" />
+        <DataTableViewMenu />
+      </DataTableToolbarSection>
+      <DataTable>
+        <DataTableHeader />
+        <DataTableBody getRowMemoKey={inlineEdit.getRowMemoKey}>
+          <DataTableEmptyBody>
+            <DataTableEmptyMessage>
+              <DataTableEmptyIcon>
+                <PackageSearch />
+              </DataTableEmptyIcon>
+              <DataTableEmptyTitle>No products found</DataTableEmptyTitle>
+              <DataTableEmptyDescription>
+                Try adjusting your search.
+              </DataTableEmptyDescription>
+            </DataTableEmptyMessage>
+          </DataTableEmptyBody>
+        </DataTableBody>
+      </DataTable>
+      <DataTablePagination />
+    </DataTableRoot>
   )
 }
