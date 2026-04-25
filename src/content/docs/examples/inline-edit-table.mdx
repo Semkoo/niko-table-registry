@@ -15,7 +15,9 @@ import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-c
 
 ## Introduction
 
-The Inline Edit Table lets users edit row fields directly in the table without opening a dialog or navigating away. It demonstrates the `getRowMemoKey` prop — the mechanism that keeps React.memo'd body rows in sync with external state like edit drafts, validation errors, and optimistic updates.
+The Inline Edit Table lets users edit row fields directly in the table without opening a dialog or navigating away.
+
+Niko Table wraps each body row in `React.memo` for performance — rows only re-render when their props change. This is great for large tables, but it creates a problem for inline editing: the edit draft and validation errors live outside the row's props, so memo'd rows won't pick up changes by default. The `getRowMemoKey` prop solves this — it lets you return a row-specific string that encodes whatever external state that row depends on. When the string changes, React.memo allows the re-render; when it doesn't, the row stays frozen.
 
 ## Design decisions
 
