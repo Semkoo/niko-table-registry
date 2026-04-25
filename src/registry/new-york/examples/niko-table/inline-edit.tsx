@@ -353,7 +353,7 @@ export default function InlineEditTable() {
             <Button
               size="icon"
               variant="ghost"
-              className="h-7 w-7 opacity-0 group-hover/row:opacity-100 focus:opacity-100"
+              className="h-7 w-7 opacity-0 group-hover:opacity-100 focus:opacity-100"
               onClick={() => startEditing(row.original)}
               title="Edit"
             >
