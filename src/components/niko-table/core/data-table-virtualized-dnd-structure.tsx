@@ -68,9 +68,28 @@ const measureElement: ((element: Element) => number) | undefined =
 
 interface VirtualizedDraggableRowProps {
   children: React.ReactNode
+  /**
+   * Stable row identity from `row.id`. Used by event delegation to
+   * resolve which row was clicked via `table.getRow(rowId)` —
+   * survives sort/filter/reorder, unlike `row.index`.
+   */
   rowId: string
-  /** Used for event delegation (row click); forwarded as data-row-index. */
-  rowIndex?: number
+  /**
+   * Virtualizer slot index (`virtualRow.index`). Forwarded to
+   * `data-index`, which TanStack Virtual's `measureElement` reads to
+   * map a measured DOM node back to its virtualizer slot. Must be
+   * the virtualizer's index, not the source-data `row.index` —
+   * under sort/filter those drift apart.
+   */
+  virtualIndex: number
+  /**
+   * Whether this row is currently selected. Used to set `data-state`
+   * + a `group` class on the row so the existing
+   * `data-[state=selected]` and `group-data-[state=selected]`
+   * selectors (on the row itself and on pinned-column cells)
+   * actually fire.
+   */
+  isSelected?: boolean
   className?: string
   measureRef?: (node: HTMLTableRowElement | null) => void
 }
@@ -78,7 +97,8 @@ interface VirtualizedDraggableRowProps {
 function VirtualizedDraggableRow({
   children,
   rowId,
-  rowIndex,
+  virtualIndex,
+  isSelected,
   className,
   measureRef,
 }: VirtualizedDraggableRowProps) {
@@ -106,9 +126,14 @@ function VirtualizedDraggableRow({
     <TableRow
       ref={setRefs}
       style={style}
-      className={cn("flex w-full", isDragging && "bg-muted/50", className)}
-      data-index={rowIndex}
-      data-row-index={rowIndex}
+      className={cn(
+        "group flex w-full",
+        isDragging && "bg-muted/50",
+        className,
+      )}
+      data-index={virtualIndex}
+      data-row-id={rowId}
+      data-state={isSelected ? "selected" : undefined}
     >
       {children}
     </TableRow>
@@ -132,7 +157,7 @@ export interface DataTableVirtualizedDndBodyProps<TData> {
    * Click is delegated on `<tbody>` (so a single listener serves all
    * virtual rows). The event therefore arrives with `currentTarget`
    * = the `<tbody>`. If you need the row element, query
-   * `event.target.closest("tr[data-row-index]")` — typed as
+   * `event.target.closest("tr[data-row-id]")` — typed as
    * `HTMLElement` to reflect that runtime shape rather than lying
    * with `HTMLTableRowElement`.
    */
@@ -204,7 +229,7 @@ export function DataTableVirtualizedDndBody<TData>({
     (event: React.MouseEvent<HTMLTableSectionElement>) => {
       if (!onRowClick) return
       const target = event.target as HTMLElement
-      const rowElement = target.closest("tr[data-row-index]")
+      const rowElement = target.closest("tr[data-row-id]")
       if (!rowElement) return
 
       const isInteractiveElement =
@@ -220,15 +245,17 @@ export function DataTableVirtualizedDndBody<TData>({
         target.tagName === "A"
       if (isInteractiveElement) return
 
-      const rowIndexAttr = rowElement.getAttribute("data-row-index")
-      if (rowIndexAttr === null) return
-      const index = parseInt(rowIndexAttr, 10)
-      if (Number.isNaN(index) || index < 0 || index >= rows.length) return
-      const row = rows[index]
+      // Resolve via stable `row.id` rather than a positional index —
+      // sort/filter/reorder leave indices unstable but ids are
+      // canonical. `table.getRow` is a Map lookup internally so this
+      // stays O(1).
+      const rowId = rowElement.getAttribute("data-row-id")
+      if (rowId === null) return
+      const row = table.getRow(rowId)
       if (!row) return
       onRowClick(row.original as TData, event)
     },
-    [onRowClick, rows],
+    [onRowClick, table],
   )
 
   React.useEffect(() => {
@@ -321,7 +348,8 @@ export function DataTableVirtualizedDndBody<TData>({
             <React.Fragment key={`${row.id}-${isExpanded}`}>
               <VirtualizedDraggableRow
                 rowId={row.id}
-                rowIndex={row?.index}
+                virtualIndex={virtualRow.index}
+                isSelected={row.getIsSelected()}
                 measureRef={rowVirtualizer.measureElement}
               >
                 {row.getVisibleCells().map(cell => {
@@ -493,7 +521,7 @@ export interface DataTableVirtualizedDndColumnBodyProps<TData> {
    * Click is delegated on `<tbody>` (so a single listener serves all
    * virtual rows). The event therefore arrives with `currentTarget`
    * = the `<tbody>`. If you need the row element, query
-   * `event.target.closest("tr[data-row-index]")` — typed as
+   * `event.target.closest("tr[data-row-id]")` — typed as
    * `HTMLElement` to reflect that runtime shape rather than lying
    * with `HTMLTableRowElement`.
    */
@@ -610,7 +638,7 @@ export function DataTableVirtualizedDndColumnBody<TData>({
     (event: React.MouseEvent<HTMLTableSectionElement>) => {
       if (!onRowClick) return
       const target = event.target as HTMLElement
-      const rowElement = target.closest("tr[data-row-index]")
+      const rowElement = target.closest("tr[data-row-id]")
       if (!rowElement) return
 
       const isInteractiveElement =
@@ -626,15 +654,17 @@ export function DataTableVirtualizedDndColumnBody<TData>({
         target.tagName === "A"
       if (isInteractiveElement) return
 
-      const rowIndexAttr = rowElement.getAttribute("data-row-index")
-      if (rowIndexAttr === null) return
-      const index = parseInt(rowIndexAttr, 10)
-      if (Number.isNaN(index) || index < 0 || index >= rows.length) return
-      const row = rows[index]
+      // Resolve via stable `row.id` rather than a positional index —
+      // sort/filter/reorder leave indices unstable but ids are
+      // canonical. `table.getRow` is a Map lookup internally so this
+      // stays O(1).
+      const rowId = rowElement.getAttribute("data-row-id")
+      if (rowId === null) return
+      const row = table.getRow(rowId)
       if (!row) return
       onRowClick(row.original as TData, event)
     },
-    [onRowClick, rows],
+    [onRowClick, table],
   )
 
   const virtualItems = rowVirtualizer.getVirtualItems()
@@ -664,40 +694,73 @@ export function DataTableVirtualizedDndColumnBody<TData>({
       {/* Render visible rows with drag-along cells */}
       {virtualItems.map(virtualRow => {
         const row = rows[virtualRow.index]
+        if (!row) return null
         const isClickable = !!onRowClick
+        const isExpanded = row.getIsExpanded()
+
+        // Find a column that defines `meta.expandedContent` — same
+        // contract used by `DataTableVirtualizedBody` and the row-DnD
+        // body. Without rendering the expanded sibling here, column-DnD
+        // tables lost the row-expansion feature entirely; adding it
+        // also lets the shared `measureElement` callback include the
+        // expanded pane's height in the virtualizer's measurement.
+        const expandColumn = row
+          .getAllCells()
+          .find(cell => cell.column.columnDef.meta?.expandedContent)
 
         return (
-          <TableRow
-            key={row.id}
-            ref={rowVirtualizer.measureElement}
-            data-index={virtualRow.index}
-            data-row-index={row?.index}
-            data-row-id={row?.id}
-            data-state={row.getIsSelected() && "selected"}
-            className={cn("group flex w-full", isClickable && "cursor-pointer")}
-          >
-            {row.getVisibleCells().map(cell => {
-              const size = cell.column.columnDef.size
-              return (
-                <TableDragAlongCell
-                  key={cell.id}
-                  cell={cell}
-                  className={cn(
-                    size ? "shrink-0" : "min-w-0 flex-1",
-                    "flex items-center",
-                    cell.column.getIsPinned() &&
-                      "bg-background group-hover:bg-muted/50 group-data-[state=selected]:bg-muted",
-                  )}
-                  style={{
-                    width: size ? `${size}px` : undefined,
-                    minHeight: `${estimateSize}px`,
-                  }}
+          <React.Fragment key={`${row.id}-${isExpanded}`}>
+            <TableRow
+              ref={rowVirtualizer.measureElement}
+              data-index={virtualRow.index}
+              data-row-id={row?.id}
+              data-state={row.getIsSelected() ? "selected" : undefined}
+              className={cn(
+                "group flex w-full",
+                isClickable && "cursor-pointer",
+              )}
+            >
+              {row.getVisibleCells().map(cell => {
+                const size = cell.column.columnDef.size
+                return (
+                  <TableDragAlongCell
+                    key={cell.id}
+                    cell={cell}
+                    className={cn(
+                      size ? "shrink-0" : "min-w-0 flex-1",
+                      "flex items-center",
+                      cell.column.getIsPinned() &&
+                        "bg-background group-hover:bg-muted/50 group-data-[state=selected]:bg-muted",
+                    )}
+                    style={{
+                      width: size ? `${size}px` : undefined,
+                      minHeight: `${estimateSize}px`,
+                    }}
+                  >
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableDragAlongCell>
+                )
+              })}
+            </TableRow>
+
+            {/* Expanded content row — measured into the base row's
+                slot via the shared `measureElement` (sibling lookup). */}
+            {isExpanded && expandColumn && (
+              <TableRow
+                data-slot="datatable-expanded-row"
+                className="flex w-full"
+              >
+                <TableCell
+                  colSpan={row.getVisibleCells().length}
+                  className="w-full p-0"
                 >
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </TableDragAlongCell>
-              )
-            })}
-          </TableRow>
+                  {expandColumn.column.columnDef.meta?.expandedContent?.(
+                    row.original,
+                  )}
+                </TableCell>
+              </TableRow>
+            )}
+          </React.Fragment>
         )
       })}
 

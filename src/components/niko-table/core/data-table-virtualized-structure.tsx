@@ -233,6 +233,19 @@ export function DataTableVirtualizedBody<TData>({
    */
   const columnLockRef = React.useRef(false)
   const lockedColumnCountRef = React.useRef(0)
+  /**
+   * Mirrors `columnLockRef` as React state so the row-render code can
+   * gate `measureElement` on it. Why a separate state and not just
+   * the ref: ResizeObserver-based measurement (which `measureElement`
+   * installs) reads heights *while columns are still auto-sized*,
+   * before this effect locks them. Those measurements are wrong —
+   * narrow auto-columns wrap text, inflating row heights, which the
+   * virtualizer then locks in and uses to compute spacer offsets,
+   * producing huge empty gaps. Attaching the ref only after the lock
+   * succeeds means the first ResizeObserver reading already sees the
+   * stable, post-lock layout.
+   */
+  const [columnsLocked, setColumnsLocked] = React.useState(false)
 
   React.useLayoutEffect(() => {
     const leafColumns = table.getVisibleLeafColumns()
@@ -244,6 +257,7 @@ export function DataTableVirtualizedBody<TData>({
       lockedColumnCountRef.current !== currentColCount
     ) {
       columnLockRef.current = false
+      setColumnsLocked(false)
       const tbody = tbodyRef.current
       const tableEl = tbody?.closest<HTMLTableElement>('[data-slot="table"]')
       if (tableEl) {
@@ -257,6 +271,16 @@ export function DataTableVirtualizedBody<TData>({
             th.style.width = ""
           })
       }
+      // Bail so React can commit the unlocked render before the lock
+      // branch runs. Without this, both `setColumnsLocked(false)` and
+      // the `setColumnsLocked(true)` further down would be batched
+      // into the same render — the row's `ref` would never detach
+      // and ResizeObserver would keep measuring during the brief
+      // auto-layout pass, locking in inflated heights and re-creating
+      // the giant top-spacer gap whenever column visibility changes.
+      // The next render (with `columnsLocked=false`) will re-enter
+      // this effect and fall through to the lock logic below.
+      return
     }
 
     // Fast path — already locked, skip all DOM queries
@@ -316,6 +340,7 @@ export function DataTableVirtualizedBody<TData>({
 
     columnLockRef.current = true
     lockedColumnCountRef.current = currentColCount
+    setColumnsLocked(true)
   })
 
   const rowVirtualizer = useVirtualizer({
@@ -472,14 +497,17 @@ export function DataTableVirtualizedBody<TData>({
       )
         return
 
-      const rowIndex = event.currentTarget.dataset.rowIndex
-      if (rowIndex == null) return
-      const row = rows[Number(rowIndex)]
-      if (row) {
-        onRowClick(row.original as TData, event)
-      }
+      // Resolve via stable `row.id` rather than a positional index —
+      // sort/filter/reorder leave indices unstable but ids are
+      // canonical. `table.getRow` is a Map lookup internally so this
+      // stays O(1).
+      const rowId = event.currentTarget.dataset.rowId
+      if (rowId == null) return
+      const row = table.getRow(rowId)
+      if (!row) return
+      onRowClick(row.original as TData, event)
     },
-    [onRowClick, rows],
+    [onRowClick, table],
   )
 
   const visibleColumnCount = table.getVisibleLeafColumns().length
@@ -515,11 +543,10 @@ export function DataTableVirtualizedBody<TData>({
           <React.Fragment key={row.id}>
             {/* Main data row */}
             <TableRow
-              ref={rowVirtualizer.measureElement}
+              ref={columnsLocked ? rowVirtualizer.measureElement : undefined}
               data-index={virtualRow.index}
-              data-row-index={row?.index}
               data-row-id={row?.id}
-              data-state={row.getIsSelected() && "selected"}
+              data-state={row.getIsSelected() ? "selected" : undefined}
               onClick={handleRowClick}
               className={cn("group", onRowClick && "cursor-pointer")}
             >

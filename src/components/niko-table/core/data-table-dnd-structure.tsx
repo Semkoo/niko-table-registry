@@ -65,7 +65,7 @@ export function DataTableDndBody<TData>({
     (event: React.MouseEvent<HTMLTableSectionElement>) => {
       if (!onRowClick) return
       const target = event.target as HTMLElement
-      const rowElement = target.closest("tr[data-row-index]")
+      const rowElement = target.closest("tr[data-row-id]")
       if (!rowElement) return
 
       const isInteractiveElement =
@@ -81,13 +81,17 @@ export function DataTableDndBody<TData>({
         target.tagName === "A"
       if (isInteractiveElement) return
 
-      const rowIndexAttr = rowElement.getAttribute("data-row-index")
-      if (rowIndexAttr === null) return
-      const index = parseInt(rowIndexAttr, 10)
-      if (Number.isNaN(index) || index < 0 || index >= rows.length) return
-      onRowClick(rows[index].original)
+      // Resolve via stable `row.id` rather than a positional index —
+      // sort/filter/reorder leave indices unstable but ids are
+      // canonical. `table.getRow` is a Map lookup internally so this
+      // stays O(1).
+      const rowId = rowElement.getAttribute("data-row-id")
+      if (rowId === null) return
+      const row = table.getRow(rowId)
+      if (!row) return
+      onRowClick(row.original)
     },
-    [onRowClick, rows],
+    [onRowClick, table],
   )
 
   return (
@@ -268,7 +272,7 @@ export function DataTableDndColumnBody<TData>({
     (event: React.MouseEvent<HTMLTableSectionElement>) => {
       if (!onRowClick) return
       const target = event.target as HTMLElement
-      const rowElement = target.closest("tr[data-row-index]")
+      const rowElement = target.closest("tr[data-row-id]")
       if (!rowElement) return
 
       const isInteractiveElement =
@@ -284,13 +288,17 @@ export function DataTableDndColumnBody<TData>({
         target.tagName === "A"
       if (isInteractiveElement) return
 
-      const rowIndexAttr = rowElement.getAttribute("data-row-index")
-      if (rowIndexAttr === null) return
-      const index = parseInt(rowIndexAttr, 10)
-      if (Number.isNaN(index) || index < 0 || index >= rows.length) return
-      onRowClick(rows[index].original)
+      // Resolve via stable `row.id` rather than a positional index —
+      // sort/filter/reorder leave indices unstable but ids are
+      // canonical. `table.getRow` is a Map lookup internally so this
+      // stays O(1).
+      const rowId = rowElement.getAttribute("data-row-id")
+      if (rowId === null) return
+      const row = table.getRow(rowId)
+      if (!row) return
+      onRowClick(row.original)
     },
-    [onRowClick, rows],
+    [onRowClick, table],
   )
 
   return (
@@ -301,21 +309,46 @@ export function DataTableDndColumnBody<TData>({
       {!isLoading && rows?.length
         ? rows.map(row => {
             const isClickable = !!onRowClick
+            const isExpanded = row.getIsExpanded()
+
+            // Find a column that defines `meta.expandedContent` —
+            // same contract used by `DataTableBody` and the row-DnD
+            // body. Without rendering this expanded sibling, column-
+            // DnD tables silently dropped row-expansion support.
+            const expandColumn = row
+              .getAllCells()
+              .find(cell => cell.column.columnDef.meta?.expandedContent)
 
             return (
-              <TableRow
-                key={row.id}
-                data-row-index={row?.index}
-                data-row-id={row?.id}
-                data-state={row.getIsSelected() && "selected"}
-                className={cn(isClickable && "cursor-pointer", "group")}
-              >
-                {row.getVisibleCells().map(cell => (
-                  <TableDragAlongCell key={cell.id} cell={cell}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableDragAlongCell>
-                ))}
-              </TableRow>
+              <React.Fragment key={row.id}>
+                <TableRow
+                  data-row-id={row?.id}
+                  data-state={row.getIsSelected() ? "selected" : undefined}
+                  className={cn(isClickable && "cursor-pointer", "group")}
+                >
+                  {row.getVisibleCells().map(cell => (
+                    <TableDragAlongCell key={cell.id} cell={cell}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
+                    </TableDragAlongCell>
+                  ))}
+                </TableRow>
+
+                {isExpanded && expandColumn && (
+                  <TableRow>
+                    <TableCell
+                      colSpan={row.getVisibleCells().length}
+                      className="p-0"
+                    >
+                      {expandColumn.column.columnDef.meta?.expandedContent?.(
+                        row.original,
+                      )}
+                    </TableCell>
+                  </TableRow>
+                )}
+              </React.Fragment>
             )
           })
         : null}
