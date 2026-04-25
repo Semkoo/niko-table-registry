@@ -10,7 +10,7 @@
  * https://github.com/Semkoo/niko-table-registry
  */
 
-import { useEffect, useCallback } from "react"
+import { useEffect, useCallback, useLayoutEffect, useRef } from "react"
 
 export interface UseKeyboardShortcutOptions {
   /**
@@ -184,71 +184,86 @@ export function useKeyboardShortcut({
  * ```
  */
 export function useKeyboardShortcuts(shortcuts: UseKeyboardShortcutOptions[]) {
-  const handleKeyDown = useCallback(
-    (event: KeyboardEvent) => {
-      // Check each shortcut
-      for (const shortcut of shortcuts) {
-        const {
-          key,
-          onTrigger,
-          enabled = true,
-          requireShift = false,
-          requireCtrl = false,
-          requireAlt = false,
-          preventDefault = true,
-          stopPropagation = false,
-          condition,
-        } = shortcut
+  // Stash the latest `shortcuts` array in a ref so the keydown
+  // handler stays referentially stable across renders. Callers
+  // commonly pass an inline array literal — without the ref, both
+  // the `useCallback` and the `useEffect` deps would change every
+  // render, removing and re-adding the window-level listener
+  // constantly.
+  const shortcutsRef = useRef(shortcuts)
+  useLayoutEffect(() => {
+    shortcutsRef.current = shortcuts
+  })
 
-        // Skip if disabled
-        if (!enabled) continue
+  const handleKeyDown = useCallback((event: KeyboardEvent) => {
+    // Check each shortcut
+    for (const shortcut of shortcutsRef.current) {
+      const {
+        key,
+        onTrigger,
+        enabled = true,
+        requireShift = false,
+        requireCtrl = false,
+        requireAlt = false,
+        preventDefault = true,
+        stopPropagation = false,
+        condition,
+      } = shortcut
 
-        // Skip if wrong key
-        if (event.key.toLowerCase() !== key.toLowerCase()) continue
+      // Skip if disabled
+      if (!enabled) continue
 
-        // Skip if modifier requirements not met
-        if (requireShift && !event.shiftKey) continue
-        if (requireCtrl && !(event.ctrlKey || event.metaKey)) continue
-        if (requireAlt && !event.altKey) continue
+      // Skip if wrong key
+      if (event.key.toLowerCase() !== key.toLowerCase()) continue
 
-        // Skip if modifiers are present when not required
-        if (!requireShift && event.shiftKey) continue
-        if (!requireCtrl && (event.ctrlKey || event.metaKey)) continue
-        if (!requireAlt && event.altKey) continue
+      // Skip if modifier requirements not met
+      if (requireShift && !event.shiftKey) continue
+      if (requireCtrl && !(event.ctrlKey || event.metaKey)) continue
+      if (requireAlt && !event.altKey) continue
 
-        // Skip if custom condition fails
-        if (condition && !condition()) continue
+      // Skip if modifiers are present when not required
+      if (!requireShift && event.shiftKey) continue
+      if (!requireCtrl && (event.ctrlKey || event.metaKey)) continue
+      if (!requireAlt && event.altKey) continue
 
-        // Skip if user is typing in an input field
-        if (
-          event.target instanceof HTMLInputElement ||
-          event.target instanceof HTMLTextAreaElement ||
-          event.target instanceof HTMLSelectElement ||
-          (event.target as HTMLElement)?.isContentEditable
-        ) {
-          continue
-        }
+      // Skip if custom condition fails
+      if (condition && !condition()) continue
 
-        // Prevent default behavior if requested
-        if (preventDefault) {
-          event.preventDefault()
-        }
-
-        // Stop propagation if requested
-        if (stopPropagation) {
-          event.stopPropagation()
-        }
-
-        // Trigger the callback and break (only one shortcut should trigger)
-        onTrigger()
-        break
+      // Skip if user is typing in an input field
+      if (
+        event.target instanceof HTMLInputElement ||
+        event.target instanceof HTMLTextAreaElement ||
+        event.target instanceof HTMLSelectElement ||
+        (event.target as HTMLElement)?.isContentEditable
+      ) {
+        continue
       }
-    },
-    [shortcuts],
-  )
+
+      // Prevent default behavior if requested
+      if (preventDefault) {
+        event.preventDefault()
+      }
+
+      // Stop propagation if requested
+      if (stopPropagation) {
+        event.stopPropagation()
+      }
+
+      // Trigger the callback and break (only one shortcut should trigger)
+      onTrigger()
+      break
+    }
+  }, [])
 
   useEffect(() => {
-    const hasEnabledShortcuts = shortcuts.some(s => s.enabled !== false)
+    // Read enabled-state from the ref so this effect doesn't
+    // re-attach when the array identity changes. If a caller
+    // toggles every shortcut to `enabled: false` we'll still have
+    // the listener attached, but the handler itself short-circuits
+    // on `enabled === false`, so no callbacks fire.
+    const hasEnabledShortcuts = shortcutsRef.current.some(
+      s => s.enabled !== false,
+    )
     if (!hasEnabledShortcuts) return
 
     window.addEventListener("keydown", handleKeyDown)
@@ -256,5 +271,5 @@ export function useKeyboardShortcuts(shortcuts: UseKeyboardShortcutOptions[]) {
     return () => {
       window.removeEventListener("keydown", handleKeyDown)
     }
-  }, [handleKeyDown, shortcuts])
+  }, [handleKeyDown])
 }

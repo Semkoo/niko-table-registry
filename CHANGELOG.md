@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Performance — round 3 (CodeRabbit follow-up)
+
+- **`expandColumnId` memo hoisted in all three virtualized bodies** (`DataTableVirtualizedBody`, `DataTableVirtualizedDndBody`, `DataTableVirtualizedDndColumnBody`). Round 1 hoisted this lookup in the non-virtualized bodies; the virtualized variants kept doing `row.getAllCells().find(...)` per row inside `virtualItems.map(...)` — O(virtual_rows × cols) every frame during scroll. Same `[table, columns]` memo pattern.
+- **`DataTableColumnHeaderRoot` — context value memoized.** The provider previously created a fresh `{ column }` object every render, propagating to every header-cell context subscriber (`DataTableColumnSort`, `DataTableColumnFilter`, etc.) on every header re-render. Wrapped in `React.useMemo(() => ({ column }), [column])` so consumers only re-render on actual column-identity change.
+- **`useKeyboardShortcuts` (multi-shortcut variant) — listener no longer re-attaches every render.** Callers commonly pass an inline array literal, which is a fresh reference each render — the previous `useCallback([shortcuts])` and `useEffect([handleKeyDown, shortcuts])` removed and re-added the window-level `keydown` listener constantly. Stashed `shortcuts` in a `useRef` mirrored via `useLayoutEffect`; deps reduced to `[]` and `[handleKeyDown]`. The single `useKeyboardShortcut` variant was left as-is per the original CodeRabbit note (most callers memoize `onTrigger`, low impact).
+- **`onRowSelection` no longer fires on initial mount.** Round 2 lifted the consumer notification into a `useEffect` watching `rowSelection`, but `isMountedRef` is initialized to `true`, so the existing guard didn't skip the first run — the effect fired once on mount with the initial (typically empty) selection. Added a dedicated `skipInitialRowSelectionRef` (initialized to `true`, flipped to `false` after the first run) so the callback only fires on _changes_, matching the pre-round-2 semantics where it only fired from inside the user's selection handler.
+
 ### Performance — round 2 (CodeRabbit follow-up)
 
 - **`expandColumnId` memo deps now include `columns`** in `DataTableBody`, `DataTableDndBody`, and `DataTableDndColumnBody`. The memo previously depended only on `[table]` — but TanStack reuses the table instance reference across column updates, so the cached `expandColumnId` could go stale if the consumer passed a new column set. Now keyed on `[table, columns]` (where `columns` comes from `useDataTable()`).

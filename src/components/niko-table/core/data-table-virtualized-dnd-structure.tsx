@@ -241,8 +241,20 @@ export function DataTableVirtualizedDndBody<TData>({
   onScrolledBottom,
   scrollThreshold = 50,
 }: DataTableVirtualizedDndBodyProps<TData>) {
-  const { table } = useDataTable()
+  const { table, columns } = useDataTable()
   const { rows } = table.getRowModel()
+
+  /**
+   * Hoist the expand-column lookup above the virtualizer render
+   * loop. See `DataTableVirtualizedBody` for the full rationale.
+   */
+  const expandColumnId = React.useMemo(
+    () =>
+      table.getAllColumns().find(col => col.columnDef.meta?.expandedContent)
+        ?.id,
+    [table, columns],
+  )
+
   const [scrollElement, setScrollElement] =
     React.useState<HTMLDivElement | null>(null)
 
@@ -366,9 +378,10 @@ export function DataTableVirtualizedDndBody<TData>({
           const isClickable = !!onRowClick
           const isExpanded = row.getIsExpanded()
 
-          const expandColumn = row
-            .getAllCells()
-            .find(cell => cell.column.columnDef.meta?.expandedContent)
+          const expandCell =
+            isExpanded && expandColumnId
+              ? row.getAllCells().find(c => c.column.id === expandColumnId)
+              : undefined
 
           return (
             <React.Fragment key={row.id}>
@@ -409,7 +422,7 @@ export function DataTableVirtualizedDndBody<TData>({
               </VirtualizedDraggableRow>
 
               {/* Expanded content row */}
-              {isExpanded && expandColumn && (
+              {isExpanded && expandCell && (
                 <TableRow
                   data-slot="datatable-expanded-row"
                   className="flex w-full"
@@ -418,7 +431,7 @@ export function DataTableVirtualizedDndBody<TData>({
                     colSpan={row.getVisibleCells().length}
                     className="w-full p-0"
                   >
-                    {expandColumn.column.columnDef.meta?.expandedContent?.(
+                    {expandCell.column.columnDef.meta?.expandedContent?.(
                       row.original,
                     )}
                   </TableCell>
@@ -580,8 +593,20 @@ export function DataTableVirtualizedDndColumnBody<TData>({
   onScrolledBottom,
   scrollThreshold = 50,
 }: DataTableVirtualizedDndColumnBodyProps<TData>) {
-  const { table } = useDataTable()
+  const { table, columns } = useDataTable()
   const { rows } = table.getRowModel()
+
+  /**
+   * Hoist the expand-column lookup above the virtualizer render
+   * loop. See `DataTableVirtualizedBody` for the full rationale.
+   */
+  const expandColumnId = React.useMemo(
+    () =>
+      table.getAllColumns().find(col => col.columnDef.meta?.expandedContent)
+        ?.id,
+    [table, columns],
+  )
+
   const [scrollElement, setScrollElement] =
     React.useState<HTMLDivElement | null>(null)
 
@@ -700,15 +725,17 @@ export function DataTableVirtualizedDndColumnBody<TData>({
         const isClickable = !!onRowClick
         const isExpanded = row.getIsExpanded()
 
-        // Find a column that defines `meta.expandedContent` — same
-        // contract used by `DataTableVirtualizedBody` and the row-DnD
-        // body. Without rendering the expanded sibling here, column-DnD
-        // tables lost the row-expansion feature entirely; adding it
-        // also lets the shared `measureElement` callback include the
+        // Resolve the expand cell only when expanded, using the
+        // memoized `expandColumnId`. Same contract used by
+        // `DataTableVirtualizedBody` and the row-DnD body. Without
+        // rendering the expanded sibling here, column-DnD tables
+        // lost the row-expansion feature entirely; adding it also
+        // lets the shared `measureElement` callback include the
         // expanded pane's height in the virtualizer's measurement.
-        const expandColumn = row
-          .getAllCells()
-          .find(cell => cell.column.columnDef.meta?.expandedContent)
+        const expandCell =
+          isExpanded && expandColumnId
+            ? row.getAllCells().find(c => c.column.id === expandColumnId)
+            : undefined
 
         return (
           <React.Fragment key={row.id}>
@@ -747,7 +774,7 @@ export function DataTableVirtualizedDndColumnBody<TData>({
 
             {/* Expanded content row — measured into the base row's
                 slot via the shared `measureElement` (sibling lookup). */}
-            {isExpanded && expandColumn && (
+            {isExpanded && expandCell && (
               <TableRow
                 data-slot="datatable-expanded-row"
                 className="flex w-full"
@@ -756,7 +783,7 @@ export function DataTableVirtualizedDndColumnBody<TData>({
                   colSpan={row.getVisibleCells().length}
                   className="w-full p-0"
                 >
-                  {expandColumn.column.columnDef.meta?.expandedContent?.(
+                  {expandCell.column.columnDef.meta?.expandedContent?.(
                     row.original,
                   )}
                 </TableCell>

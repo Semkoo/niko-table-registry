@@ -491,8 +491,18 @@ function DataTableRootInternal<TData, TValue>({
    * selected this drops from ~500ms to ~5ms vs the previous
    * `Array.find()` approach.
    */
+  const skipInitialRowSelectionRef = React.useRef(true)
   React.useEffect(() => {
     if (!isMountedRef.current) return
+    // Skip the initial mount — `isMountedRef` is initialized to
+    // `true`, so without this guard the effect would fire once with
+    // the initial (typically empty) `rowSelection`, surprising
+    // consumers that expect `onRowSelection` to mean "user changed
+    // selection" rather than "selection was initialized."
+    if (skipInitialRowSelectionRef.current) {
+      skipInitialRowSelectionRef.current = false
+      return
+    }
     if (!onRowSelection) return
     const selectedRows = Object.keys(rowSelection)
       .filter(key => rowSelection[key])

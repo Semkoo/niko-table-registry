@@ -208,8 +208,24 @@ export function DataTableVirtualizedBody<TData>({
   onNearEnd,
   prefetchThreshold = 10,
 }: DataTableVirtualizedBodyProps<TData>) {
-  const { table } = useDataTable()
+  const { table, columns } = useDataTable()
   const { rows } = table.getRowModel()
+
+  /**
+   * Hoist the expand-column lookup above the virtualizer render
+   * loop. Inside `virtualItems.map(...)` the previous code did
+   * `row.getAllCells().find(...)` per row per render — O(virtual_rows
+   * × cols) every frame during scroll. Deps include `columns` so
+   * the memo recomputes when the consumer passes a new column set
+   * (TanStack reuses the same `table` instance across column
+   * updates, so `table` alone is too stable).
+   */
+  const expandColumnId = React.useMemo(
+    () =>
+      table.getAllColumns().find(col => col.columnDef.meta?.expandedContent)
+        ?.id,
+    [table, columns],
+  )
   const [scrollElement, setScrollElement] =
     React.useState<HTMLDivElement | null>(null)
   const tbodyRef = React.useRef<HTMLTableSectionElement | null>(null)
@@ -511,10 +527,12 @@ export function DataTableVirtualizedBody<TData>({
         if (!row) return null
         const isExpanded = row.getIsExpanded()
 
-        // Find column with expandedContent meta
-        const expandColumn = row
-          .getAllCells()
-          .find(cell => cell.column.columnDef.meta?.expandedContent)
+        // Resolve the expand cell only when expanded, using the
+        // memoized `expandColumnId`.
+        const expandCell =
+          isExpanded && expandColumnId
+            ? row.getAllCells().find(c => c.column.id === expandColumnId)
+            : undefined
 
         return (
           // Composite key: include `isExpanded` so the Fragment (and
@@ -561,13 +579,13 @@ export function DataTableVirtualizedBody<TData>({
             </TableRow>
 
             {/* Expanded content row */}
-            {isExpanded && expandColumn && (
+            {isExpanded && expandCell && (
               <TableRow data-slot="datatable-expanded-row">
                 <TableCell
                   colSpan={row.getVisibleCells().length}
                   className="p-0"
                 >
-                  {expandColumn.column.columnDef.meta?.expandedContent?.(
+                  {expandCell.column.columnDef.meta?.expandedContent?.(
                     row.original,
                   )}
                 </TableCell>
