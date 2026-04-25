@@ -362,7 +362,37 @@ function DataTableRootInternal<TData, TValue>({
     onRowSelection(selectedRows)
   }, [rowSelection, rowIdMap, onRowSelection])
 
-  // Stable fallback identity for tableOptions deps.
+  /**
+   * PERFORMANCE: Stable mount-guarded fallback setters
+   *
+   * WHY: Inline `(u) => isMounted && setX(u)` closures inside `tableOptions` get
+   * recreated on every memo invalidation, and the 6 setX refs added noise to the
+   * dep array (state setters are already stable by React contract).
+   *
+   * IMPACT: tableOptions memo no longer depends on 6 setters; fallback handlers
+   * keep referential identity across renders.
+   *
+   * WHAT: Hoists each fallback to a `useCallback([])`. Mount-guard preserved so
+   * StrictMode-unmounted fibers don't receive setState calls.
+   */
+  const handleSortingChange = React.useCallback((u: Updater<SortingState>) => {
+    if (isMountedRef.current) setSorting(u)
+  }, [])
+
+  const handleColumnFiltersChange = React.useCallback(
+    (u: Updater<ColumnFiltersState>) => {
+      if (isMountedRef.current) setColumnFilters(u)
+    },
+    [],
+  )
+
+  const handleColumnVisibilityChange = React.useCallback(
+    (u: Updater<VisibilityState>) => {
+      if (isMountedRef.current) setColumnVisibility(u)
+    },
+    [],
+  )
+
   const handleColumnPinningChange = React.useCallback(
     (updater: Updater<ColumnPinningState>) => {
       if (!isMountedRef.current) return
@@ -373,6 +403,27 @@ function DataTableRootInternal<TData, TValue>({
           right: next.right ?? [],
         }
       })
+    },
+    [],
+  )
+
+  const handleColumnOrderChange = React.useCallback(
+    (u: Updater<ColumnOrderState>) => {
+      if (isMountedRef.current) setColumnOrder(u)
+    },
+    [],
+  )
+
+  const handleExpandedChange = React.useCallback(
+    (u: Updater<ExpandedState>) => {
+      if (isMountedRef.current) setExpanded(u)
+    },
+    [],
+  )
+
+  const handlePaginationChange = React.useCallback(
+    (u: Updater<PaginationState>) => {
+      if (isMountedRef.current) setPagination(u)
     },
     [],
   )
@@ -558,37 +609,14 @@ function DataTableRootInternal<TData, TValue>({
       // Default state setters are mount-ref guarded so TanStack's async
       // auto-reset dispatches don't land on a StrictMode-unmounted fiber.
       // Consumer-supplied handlers are NOT guarded — caller's responsibility.
-      onSortingChange:
-        onSortingChange ??
-        (u => {
-          if (isMountedRef.current) setSorting(u)
-        }),
-      onColumnFiltersChange:
-        onColumnFiltersChange ??
-        (u => {
-          if (isMountedRef.current) setColumnFilters(u)
-        }),
+      onSortingChange: onSortingChange ?? handleSortingChange,
+      onColumnFiltersChange: onColumnFiltersChange ?? handleColumnFiltersChange,
       onColumnVisibilityChange:
-        onColumnVisibilityChange ??
-        (u => {
-          if (isMountedRef.current) setColumnVisibility(u)
-        }),
+        onColumnVisibilityChange ?? handleColumnVisibilityChange,
       onColumnPinningChange: onColumnPinningChange ?? handleColumnPinningChange,
-      onColumnOrderChange:
-        onColumnOrderChange ??
-        (u => {
-          if (isMountedRef.current) setColumnOrder(u)
-        }),
-      onExpandedChange:
-        onExpandedChange ??
-        (u => {
-          if (isMountedRef.current) setExpanded(u)
-        }),
-      onPaginationChange:
-        onPaginationChange ??
-        (u => {
-          if (isMountedRef.current) setPagination(u)
-        }),
+      onColumnOrderChange: onColumnOrderChange ?? handleColumnOrderChange,
+      onExpandedChange: onExpandedChange ?? handleExpandedChange,
+      onPaginationChange: onPaginationChange ?? handlePaginationChange,
       getCoreRowModel: getCoreRowModel(),
       getFacetedRowModel: detectFeatures.enableFilters
         ? getFacetedRowModel()
@@ -644,6 +672,7 @@ function DataTableRootInternal<TData, TValue>({
     // Deps are the *destructured* rest props, NOT the whole rest bag — see
     // destructure-site comment. `passthroughTableOptions` is intentionally
     // NOT a dep (lift any option that needs to invalidate the memo).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       restState,
       restGlobalFilterFn,
@@ -656,19 +685,19 @@ function DataTableRootInternal<TData, TValue>({
       onRowSelectionChange,
       handleRowSelectionChange,
       onSortingChange,
-      setSorting,
-      setColumnFilters,
+      handleSortingChange,
       onColumnFiltersChange,
-      setColumnVisibility,
+      handleColumnFiltersChange,
       onColumnVisibilityChange,
+      handleColumnVisibilityChange,
       onColumnPinningChange,
       handleColumnPinningChange,
       onColumnOrderChange,
-      setColumnOrder,
-      setExpanded,
+      handleColumnOrderChange,
       onExpandedChange,
-      setPagination,
+      handleExpandedChange,
       onPaginationChange,
+      handlePaginationChange,
       getRowId,
       // Use controlled state values - these update when either external or local state changes
       controlledSorting,

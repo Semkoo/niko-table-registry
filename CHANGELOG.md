@@ -9,48 +9,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `DataTableVirtualizedFlexHeader` — flex-layout header that pairs with `DataTableVirtualizedDndBody`. The standard `DataTableVirtualizedHeader` uses table layout; pairing it with the row-DnD body (which uses flex because `useSortable` transforms don't compose with `display: table-row`) made columns drift apart. New header mirrors the body's cell sizing exactly. Pick the header that matches your body: plain → `DataTableVirtualizedHeader`, row-DnD → `DataTableVirtualizedFlexHeader`, column-DnD → `DataTableVirtualizedDndHeader`.
+- `DataTableVirtualizedFlexHeader` — flex-layout header for `DataTableVirtualizedDndBody`. Pick by body: plain → `DataTableVirtualizedHeader`, row-DnD → `DataTableVirtualizedFlexHeader`, column-DnD → `DataTableVirtualizedDndHeader`.
 
 ### Refactor
 
-- Row-click guard + row resolution moved to `lib/row-click.ts`. The interactive-element list was inlined in 6 places across the four body files. Now exposed as `isInteractiveClickTarget(target)` (per-row variants) and `resolveRowFromClick(target, table)` (delegated `<tbody>` variants). No behavior change.
+- Row-click guard moved to `lib/row-click.ts` — `isInteractiveClickTarget()` + `resolveRowFromClick()`. Was inlined in 6 places.
 
 ### Performance
 
-- `expandColumnId` lookup memoized in all six bodies (was O(rows × cols) per render).
-- `DataTableColumnHeaderRoot` context value memoized — consumers only re-render on column-identity change.
-- `useKeyboardShortcuts` (multi-shortcut variant) — listener no longer re-attaches every render. `shortcuts` mirrored into a ref so callers can pass inline arrays without churn.
-- `onRowSelection` no longer fires on initial mount — only on user-driven changes.
-- `handleRowSelectionChange` honors the full TanStack `Updater<T>` contract (value or function) and side effects moved out of the state updater into a `useEffect` (React requires updaters to be pure). Behavior nuance: `onRowSelection` now fires on _any_ `rowSelection` change, including controlled updates.
-- `tableOptions` memo deps trimmed to specific destructured props (`state`, `initialState`, `globalFilterFn`) instead of the unmemoized `rest` bag — eliminates the React-19 + Strict Mode + Turbopack "state update on a component that hasn't mounted yet" warning class.
-- `DataTableLoading` now self-gates on `isLoading` (was rendering unconditionally).
-- `useGeneratedOptions` — eliminated double `getFilteredRowsExcludingColumn` walk when both `limitToFilteredRows` and `dynamicCounts` are true.
+- `tableOptions` memo: 6 inline fallback setters extracted to stable `useCallback`s; `setX` setters dropped from dep array.
+- `tableOptions` memo deps now use destructured `state` / `initialState` / `globalFilterFn` instead of the `rest` bag — silences the React-19 + StrictMode "state update on unmounted component" warning class.
+- `expandColumnId` memoized in all six bodies (was O(rows × cols) per render).
+- `DataTableColumnHeaderRoot` context value memoized.
+- `useKeyboardShortcuts` listener no longer re-attaches every render (shortcuts mirrored into a ref).
+- `onRowSelection` no longer fires on initial mount — user-driven changes only.
+- `handleRowSelectionChange` honors full `Updater<T>` contract; side effects moved into a `useEffect`.
+- `DataTableLoading` self-gates on `isLoading`.
+- `useGeneratedOptions` — eliminated double `getFilteredRowsExcludingColumn` walk.
 
 ### Fixed
 
-- Virtualized non-DnD body — `onRowClick` event type unified to `React.MouseEvent<HTMLElement>` across all bodies. A single handler now works through wrappers that switch between bodies. Backward compatible.
-- Virtualized DnD body — expanded-row height re-measured on toggle without losing `useSortable` registration. Stable `key={row.id}` is preserved; an `isExpanded` prop drives a `useEffect` that imperatively re-calls `measureRef`.
-- Cross-table "state update on a component that hasn't mounted yet" warning silenced. `autoResetPageIndex` now defaults to `false` (matches TanStack's own default) and a mount-ref guards every default state setter. **Behavior change:** tables that previously reset to page 0 on sort/filter changes now preserve the cursor — better UX for server-side / infinite scroll. Opt back in via `config={{ autoResetPageIndex: true }}`.
-- `FILTER_OPERATORS.RELATIVE` hidden from the date-filter dropdown until the comparison logic ships. Constant kept in the operator catalogue for server-side consumers.
-- Per-row `console.error` for unimplemented RELATIVE filter throttled — module-scoped flag so the warning fires at most once per page load.
-- Virtualized Row-DnD body — selected row styling now applies. `VirtualizedDraggableRow` carries `group flex w-full` and emits `data-state={isSelected ? "selected" : undefined}`; caller passes `isSelected={row.getIsSelected()}`.
-- Virtualized bodies — `data-index` set to `virtualRow.index` (TanStack Virtual's slot index, not the source-data index) so dynamic measurements survive sort/filter/reorder. Click delegation switched to stable `data-row-id` + `table.getRow(rowId)`.
-- Virtualized non-DnD body — `setColumnsLocked` race fixed; explicit `return` after the unlock branch lets React commit the unlocked render before re-locking.
-- Virtualized non-DnD body — `columnsLocked` gate added around `measureElement` so `ResizeObserver` can't capture inflated row heights during the auto-layout pass.
-- Column-DnD bodies (virtualized + non-virtualized) — expanded-row rendering now matches the other bodies. Same `data-slot="datatable-expanded-row"` block for measurement parity.
-- Virtualized DnD bodies — `onRowClick` event type widened to `React.MouseEvent<HTMLElement>` (delegated on `<tbody>` at runtime; the prior `HTMLTableRowElement` typing was a lie).
-- `VirtualizedDraggableRow` — added `data-index` alongside `data-row-index` so `measureElement` can map measured nodes back to virtualizer slots.
-- Virtualized bodies — expanded-row height included in virtualizer measurement via a module-level helper that walks `nextElementSibling` for `data-slot="datatable-expanded-row"`.
-- `getObjectHash` collision risk fixed — full sorted-keys join instead of "first 3 keys", which false-negatived row selection state with sequential IDs.
-
-### Notes
-
-- DnD virtualized bodies intentionally do not gate `measureElement` on `columnsLocked` — they use flex layout (no auto-layout pass to mismeasure during).
+- `onRowClick` event type unified to `React.MouseEvent<HTMLElement>` across all bodies (backward compatible).
+- Virtualized DnD body — expanded-row height re-measured on toggle without losing `useSortable` registration.
+- Cross-table "state update on unmounted component" warning silenced. `autoResetPageIndex` now defaults to `false`. **Behavior change:** sort/filter changes preserve pagination cursor. Opt back in via `config={{ autoResetPageIndex: true }}`.
+- `FILTER_OPERATORS.RELATIVE` hidden from the date-filter dropdown (kept in catalogue for server-side consumers).
+- RELATIVE filter `console.error` throttled to once per page load.
+- Virtualized Row-DnD body — selected row styling applies (`data-state="selected"`).
+- Virtualized bodies — `data-index` uses `virtualRow.index`; click delegation via stable `data-row-id` + `table.getRow(rowId)`.
+- Virtualized non-DnD body — `setColumnsLocked` race fixed and `columnsLocked` gates `measureElement`.
+- Column-DnD bodies (virtualized + non-virtualized) — expanded-row rendering matched to other bodies.
+- Virtualized DnD bodies — `onRowClick` widened to `React.MouseEvent<HTMLElement>`.
+- `VirtualizedDraggableRow` — added `data-index` alongside `data-row-index`.
+- Virtualized bodies — expanded-row height included in virtualizer measurement.
+- `getObjectHash` — full sorted-keys join (was first-3 keys, false-negatived row selection with sequential IDs).
 
 ### Internal
 
-- `data-table-virtualized-dnd-structure.tsx` marked `@internal` — deep-import only, not re-exported from the package barrel.
-- Body-scroll listener extracted to `lib/create-scroll-handler.ts` (was duplicated across four bodies).
+- `data-table-virtualized-dnd-structure.tsx` marked `@internal`.
+- Body-scroll listener extracted to `lib/create-scroll-handler.ts`.
+
+### Notes
+
+- DnD virtualized bodies don't gate `measureElement` on `columnsLocked` — flex layout has no auto-layout pass.
 
 ## April 2026
 
