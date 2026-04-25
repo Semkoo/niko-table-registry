@@ -22,20 +22,48 @@ import { getCommonPinningStyles } from "../lib/styles"
 // ============================================================================
 
 /**
- * Custom element measurer for the row virtualizer. Uses
- * `getBoundingClientRect().height` for accurate dynamic-height measurement.
+ * Custom element measurer for the row virtualizer. Returns the
+ * base row height plus, when present, the height of an adjacent
+ * expanded-content row (`<tr data-slot="datatable-expanded-row">`).
  *
- * Disabled in Firefox where `getBoundingClientRect` returns stale values
- * during virtual-scroll reflows, causing measurement loops. In Firefox the
- * virtualizer falls back to its built-in `estimateSize` heuristic instead.
+ * Why the sibling lookup: with `row.getIsExpanded()` +
+ * `meta.expandedContent`, we render the expanded pane as a second
+ * `<tr>` next to the base row. The virtualizer's `ResizeObserver`
+ * only attaches to the base row, so without this helper the
+ * expanded pane's height is invisible — `getTotalSize()` falls
+ * short by exactly that height, drifting scroll math and leaving
+ * spacers misaligned.
  *
- * Defined at module scope so every virtualizer instance shares the same
- * stable function reference — no `useCallback` / `useMemo` overhead, and
- * React never detaches/reattaches the ref due to a changed identity.
+ * Trade-off vs. structural fix (one `<tbody>` per virtual row):
+ * `ResizeObserver` only fires on the base row, so if the expanded
+ * pane resizes async (e.g. data-loaded content), the virtualizer
+ * won't re-measure until something else triggers it. For
+ * synchronous/static expanded content (the common case) this is
+ * correct and cheap.
+ *
+ * Disabled in Firefox where `getBoundingClientRect` returns stale
+ * values during virtual-scroll reflows, causing measurement loops.
+ * In Firefox the virtualizer falls back to its built-in
+ * `estimateSize` heuristic instead.
+ *
+ * Defined at module scope so every virtualizer instance shares the
+ * same stable function reference — no `useCallback` / `useMemo`
+ * overhead, and React never detaches/reattaches the ref due to a
+ * changed identity.
  */
 const measureElement: ((element: Element) => number) | undefined =
   typeof window !== "undefined" && navigator.userAgent.indexOf("Firefox") === -1
-    ? (element: Element) => element.getBoundingClientRect().height
+    ? (element: Element) => {
+        const baseHeight = element.getBoundingClientRect().height
+        const next = element.nextElementSibling
+        if (
+          next &&
+          next.getAttribute("data-slot") === "datatable-expanded-row"
+        ) {
+          return baseHeight + next.getBoundingClientRect().height
+        }
+        return baseHeight
+      }
     : undefined
 
 // ============================================================================
@@ -520,7 +548,7 @@ export function DataTableVirtualizedBody<TData>({
 
             {/* Expanded content row */}
             {isExpanded && expandColumn && (
-              <TableRow>
+              <TableRow data-slot="datatable-expanded-row">
                 <TableCell
                   colSpan={row.getVisibleCells().length}
                   className="p-0"

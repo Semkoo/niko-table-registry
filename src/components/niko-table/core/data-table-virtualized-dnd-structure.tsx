@@ -31,20 +31,35 @@ import type { ScrollEvent } from "./data-table-virtualized-structure"
 // ============================================================================
 
 /**
- * Custom element measurer for the row virtualizer. Uses
- * `getBoundingClientRect().height` for accurate dynamic-height measurement.
+ * Custom element measurer for the row virtualizer. Returns the
+ * base row height plus, when present, the height of an adjacent
+ * expanded-content row (`<tr data-slot="datatable-expanded-row">`).
+ * See the equivalent helper in `data-table-virtualized-structure.tsx`
+ * for the full rationale — short version: the virtualizer's
+ * `ResizeObserver` only attaches to the base row, so expanded
+ * sibling content goes unmeasured and `getTotalSize()` drifts.
  *
- * Disabled in Firefox where `getBoundingClientRect` returns stale values
- * during virtual-scroll reflows, causing measurement loops. In Firefox the
- * virtualizer falls back to its built-in `estimateSize` heuristic instead.
+ * Disabled in Firefox where `getBoundingClientRect` returns stale
+ * values during virtual-scroll reflows, causing measurement loops.
  *
- * Defined at module scope so every virtualizer instance shares the same
- * stable function reference — no `useCallback` / `useMemo` overhead, and
- * React never detaches/reattaches the ref due to a changed identity.
+ * Defined at module scope so every virtualizer instance shares the
+ * same stable function reference — no `useCallback` / `useMemo`
+ * overhead, and React never detaches/reattaches the ref due to a
+ * changed identity.
  */
 const measureElement: ((element: Element) => number) | undefined =
   typeof window !== "undefined" && navigator.userAgent.indexOf("Firefox") === -1
-    ? (element: Element) => element.getBoundingClientRect().height
+    ? (element: Element) => {
+        const baseHeight = element.getBoundingClientRect().height
+        const next = element.nextElementSibling
+        if (
+          next &&
+          next.getAttribute("data-slot") === "datatable-expanded-row"
+        ) {
+          return baseHeight + next.getBoundingClientRect().height
+        }
+        return baseHeight
+      }
     : undefined
 
 // ============================================================================
@@ -340,7 +355,10 @@ export function DataTableVirtualizedDndBody<TData>({
 
               {/* Expanded content row */}
               {isExpanded && expandColumn && (
-                <TableRow className="flex w-full">
+                <TableRow
+                  data-slot="datatable-expanded-row"
+                  className="flex w-full"
+                >
                   <TableCell
                     colSpan={row.getVisibleCells().length}
                     className="w-full p-0"
