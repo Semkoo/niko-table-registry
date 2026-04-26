@@ -157,10 +157,15 @@ export const dataTableConfig = {
     { label: "Is on or before", value: FILTER_OPERATORS.LTE },
     { label: "Is on or after", value: FILTER_OPERATORS.GTE },
     { label: "Is between", value: FILTER_OPERATORS.BETWEEN },
-    {
-      label: "Is relative to today",
-      value: FILTER_OPERATORS.RELATIVE,
-    },
+    // "Is relative to today" (FILTER_OPERATORS.RELATIVE) is intentionally
+    // hidden from the UI until its filter case is implemented in
+    // `lib/filter-functions.ts`. The constant is kept in the operators
+    // catalogue (line ~211) so server-side consumers that already wire
+    // their own RELATIVE handling can still reference the enum, but the
+    // date-filter dropdown should not surface it as a selectable option
+    // (the client-side filter currently throws in dev / returns no
+    // matches in prod). Re-add this entry when implementing the
+    // comparison logic.
     { label: "Is empty", value: FILTER_OPERATORS.EMPTY },
     { label: "Is not empty", value: FILTER_OPERATORS.NOT_EMPTY },
   ] satisfies { label: string; value: FilterOperator }[],

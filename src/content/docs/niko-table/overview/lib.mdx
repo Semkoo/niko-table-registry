@@ -455,6 +455,71 @@ const pinningStyles = getCommonPinningStyles(column, false)
 - `backgroundColor` - Uses `var(--background)` for opaque overlay
 - `boxShadow` - Visual separator using `var(--border)` for pinned column edges
 
+## Scroll Handler Factory
+
+Shared scroll-listener body used by every data-table body component (`DataTableBody`, `DataTableVirtualizedBody`, `DataTableVirtualizedDndBody`, `DataTableVirtualizedDndColumnBody`). Extracted so scroll math changes propagate to all four bodies and so consumers writing custom bodies can reuse the canonical implementation.
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/lib/create-scroll-handler.ts`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+</div>
+
+### createScrollHandler
+
+Builds a passive-listener-friendly scroll handler that reads container metrics on each `scroll` event and dispatches:
+
+- `onScroll` with a `ScrollEvent` snapshot (`scrollTop`, `scrollHeight`, `clientHeight`, `isTop`, `isBottom`, `percentage`)
+- `onScrolledTop` when `scrollTop === 0`
+- `onScrolledBottom` when within `scrollThreshold` pixels of the end
+
+Returned listener is intended to be attached with `addEventListener("scroll", handler, { passive: true })` so the browser can keep scroll on its compositor thread (smoother on mobile and during virtual scroll).
+
+```tsx showLineNumbers
+import { createScrollHandler } from "@/components/niko-table/lib/create-scroll-handler"
+
+React.useEffect(() => {
+  const container = containerRef.current
+  if (!container) return
+  if (!onScroll && !onScrolledTop && !onScrolledBottom) return
+
+  const handleScroll = createScrollHandler({
+    onScroll,
+    onScrolledTop,
+    onScrolledBottom,
+    scrollThreshold: 50,
+  })
+  container.addEventListener("scroll", handleScroll, { passive: true })
+  return () => container.removeEventListener("scroll", handleScroll)
+}, [onScroll, onScrolledTop, onScrolledBottom])
+```
+
+#### Parameters
+
+Single options object:
+
+| Name               | Type                                      | Default | Description                                                                                                  |
+| ------------------ | ----------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------ |
+| `onScroll`         | `(event: ScrollEvent) => void` (optional) | -       | Called on every scroll event with a snapshot of container metrics                                            |
+| `onScrolledTop`    | `() => void` (optional)                   | -       | Called when `scrollTop === 0`                                                                                |
+| `onScrolledBottom` | `() => void` (optional)                   | -       | Called when within `scrollThreshold` of the bottom                                                           |
+| `scrollThreshold`  | `number`                                  | `50`    | Pixel distance from the bottom that triggers `onScrolledBottom` (use a higher value for earlier prefetching) |
+
+#### Returns
+
+`(event: Event) => void` — the listener to attach. Closure deps are stable across renders (the consumer-supplied callbacks are passed once at construction time), so wrap the construction in a `useEffect` keyed on the same callbacks.
+
+#### Notes
+
+- For _virtualized_ infinite scroll, prefer `DataTableVirtualizedBody`'s `onNearEnd` + `prefetchThreshold` props over `onScrolledBottom` — `onNearEnd` is virtualizer-index-driven (catches fast scrolls, scrollbar drag, programmatic `scrollToIndex()` jumps, and initial renders where the dataset doesn't fill the viewport).
+- The handler reads `event.currentTarget`, so it must be attached directly to the scroll container — not to a parent.
+
 ## Additional Constants
 
 ### SYSTEM_COLUMN_IDS
