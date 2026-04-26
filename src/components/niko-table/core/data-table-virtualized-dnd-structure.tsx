@@ -25,7 +25,27 @@ import {
 import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 import type { ScrollEvent } from "./data-table-virtualized-structure"
-import { measureElement } from "./data-table-virtualized-structure"
+
+// ============================================================================
+// Stable measureElement — computed once at module level
+// ============================================================================
+
+/**
+ * Custom element measurer for the row virtualizer. Uses
+ * `getBoundingClientRect().height` for accurate dynamic-height measurement.
+ *
+ * Disabled in Firefox where `getBoundingClientRect` returns stale values
+ * during virtual-scroll reflows, causing measurement loops. In Firefox the
+ * virtualizer falls back to its built-in `estimateSize` heuristic instead.
+ *
+ * Defined at module scope so every virtualizer instance shares the same
+ * stable function reference — no `useCallback` / `useMemo` overhead, and
+ * React never detaches/reattaches the ref due to a changed identity.
+ */
+const measureElement: ((element: Element) => number) | undefined =
+  typeof window !== "undefined" && navigator.userAgent.indexOf("Firefox") === -1
+    ? (element: Element) => element.getBoundingClientRect().height
+    : undefined
 
 // ============================================================================
 // VirtualizedDraggableRow — internal row component for virtualized DnD

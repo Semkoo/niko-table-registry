@@ -33,7 +33,7 @@ import { getCommonPinningStyles } from "../lib/styles"
  * stable function reference — no `useCallback` / `useMemo` overhead, and
  * React never detaches/reattaches the ref due to a changed identity.
  */
-export const measureElement: ((element: Element) => number) | undefined =
+const measureElement: ((element: Element) => number) | undefined =
   typeof window !== "undefined" && navigator.userAgent.indexOf("Firefox") === -1
     ? (element: Element) => element.getBoundingClientRect().height
     : undefined
