@@ -115,7 +115,28 @@ function DataTableRootInternal<TData, TValue>({
   onColumnOrderChange,
   onColumnPinningChange,
   onRowSelection,
-  ...rest
+  // Destructured by name (instead of leaving in `...rest`) so the
+  // `tableOptions` memo can depend on the specific values that
+  // actually affect it. Previously the memo depended on the whole
+  // `rest` bag — `rest` is a fresh object every render, so the memo
+  // invalidated every render, `useReactTable` saw "options changed"
+  // every commit, and TanStack Table dispatched internal state syncs
+  // (e.g. `onSortingChange`, `onPaginationChange` for `autoResetX`)
+  // through our local useState setters. Under React 19 + Strict Mode
+  // + Turbopack HMR those queued dispatches could land on a torn-
+  // down fiber, producing the "state update on a component that
+  // hasn't mounted yet" warning across every table.
+  state: restState,
+  initialState: restInitialState,
+  globalFilterFn: restGlobalFilterFn,
+  // Anything else passed through to TanStack Table (plain
+  // `useReactTable` options — rare in practice; consumers normally
+  // route enable/manual flags through `config` and state through
+  // `state` / handlers). Still spread into `tableOptions` for
+  // forward compatibility, but NOT in the memo deps — if you start
+  // relying on a passthrough option that needs to invalidate the
+  // memo, lift it into the destructure list above.
+  ...passthroughTableOptions
 }: Omit<TableRootProps<TData, TValue>, "table"> & {
   columns: DataTableColumnDef<TData, TValue>[]
   data: TData[]
@@ -183,9 +204,21 @@ function DataTableRootInternal<TData, TValue>({
       pageCount: config?.pageCount,
       initialPageSize: config?.initialPageSize,
       initialPageIndex: config?.initialPageIndex,
-      // Default to false for manual pagination (server-side), true for client-side
-      autoResetPageIndex:
-        config?.autoResetPageIndex ?? (config?.manualPagination ? false : true),
+      // Default `false`. Previously `true` for non-manual-pagination
+      // tables (TanStack Table's own default), which auto-reset
+      // `pageIndex` to 0 whenever sort / global filter / column
+      // filter state changed. That auto-reset fires
+      // `onPaginationChange` asynchronously after data arrives from
+      // a server query — and the queued `setPagination` dispatch can
+      // land on a StrictMode-unmounted fiber under React 19 +
+      // Turbopack, producing the cross-table "state update on a
+      // component that hasn't mounted yet" warning. Defaulting to
+      // `false` removes the most common source of that warning while
+      // also preserving the user's pagination cursor across filter
+      // changes (often the better UX). Consumers with client-side
+      // pagination who want auto-reset can opt back in via
+      // `config={{ autoResetPageIndex: true }}`.
+      autoResetPageIndex: config?.autoResetPageIndex ?? false,
       autoResetExpanded: config?.autoResetExpanded ?? false,
     }),
     [
@@ -285,42 +318,62 @@ function DataTableRootInternal<TData, TValue>({
 
   // State management
   const [globalFilter, setGlobalFilter] = React.useState<GlobalFilter>(
-    rest.initialState?.globalFilter ?? "",
+    restInitialState?.globalFilter ?? "",
   )
   const [rowSelection, setRowSelection] = React.useState<RowSelectionState>(
-    rest.initialState?.rowSelection ?? {},
+    restInitialState?.rowSelection ?? {},
   )
   const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>(rest.initialState?.columnVisibility ?? {})
+    React.useState<VisibilityState>(restInitialState?.columnVisibility ?? {})
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    rest.initialState?.columnFilters ?? [],
+    restInitialState?.columnFilters ?? [],
   )
   const [sorting, setSorting] = React.useState<SortingState>(
-    rest.initialState?.sorting ?? [],
+    restInitialState?.sorting ?? [],
   )
   const [expanded, setExpanded] = React.useState<ExpandedState>(
-    rest.initialState?.expanded ?? {},
+    restInitialState?.expanded ?? {},
   )
   const [columnPinning, setColumnPinning] = React.useState<{
     left: string[]
     right: string[]
   }>({
-    left: rest.initialState?.columnPinning?.left ?? [],
-    right: rest.initialState?.columnPinning?.right ?? [],
+    left: restInitialState?.columnPinning?.left ?? [],
+    right: restInitialState?.columnPinning?.right ?? [],
   })
   const [columnOrder, setColumnOrder] = React.useState<ColumnOrderState>(
-    rest.initialState?.columnOrder ?? [],
+    restInitialState?.columnOrder ?? [],
   )
   const [pagination, setPagination] = React.useState<PaginationState>({
     pageIndex:
       finalConfig.initialPageIndex ??
-      rest.initialState?.pagination?.pageIndex ??
+      restInitialState?.pagination?.pageIndex ??
       0,
     pageSize:
       finalConfig.initialPageSize ??
-      rest.initialState?.pagination?.pageSize ??
+      restInitialState?.pagination?.pageSize ??
       10,
   })
+
+  /**
+   * Mount tracking for the default state setters wired into
+   * `tableOptions.onXChange`. TanStack Table dispatches those
+   * callbacks asynchronously when its internal state-sync detects a
+   * difference (e.g. `autoResetPageIndex` after `data` lands from a
+   * server query). Under React 19 + Strict Mode + Turbopack HMR,
+   * those queued dispatches can land on the StrictMode-unmounted
+   * fiber, producing the cross-table "state update on a component
+   * that hasn't mounted yet" warning. Guarding each default setter
+   * on `isMountedRef.current` is a no-op in production and silently
+   * drops the queued dispatch on the dead fiber in dev.
+   */
+  const isMountedRef = React.useRef(true)
+  React.useEffect(() => {
+    isMountedRef.current = true
+    return () => {
+      isMountedRef.current = false
+    }
+  }, [])
 
   /**
    * PERFORMANCE: Memoize global filter change handler with useCallback
@@ -336,11 +389,12 @@ function DataTableRootInternal<TData, TValue>({
    */
   const handleGlobalFilterChange = React.useCallback(
     (value: GlobalFilter) => {
-      // Always update local state to keep it in sync with table
-      // Preserve both string and object values (object values are used for complex filters)
-      setGlobalFilter(value)
-
-      // Also call external handler if provided
+      // Mount-guard the local state write (see `isMountedRef`
+      // comment above). The external handler is invoked
+      // unconditionally — caller's lifecycle to manage.
+      if (isMountedRef.current) {
+        setGlobalFilter(value)
+      }
       onGlobalFilterChange?.(value)
     },
     [onGlobalFilterChange],
@@ -393,7 +447,9 @@ function DataTableRootInternal<TData, TValue>({
     (valueFn: Updater<RowSelectionState>) => {
       if (typeof valueFn === "function") {
         const updatedRowSelection = valueFn(rowSelection)
-        setRowSelection(updatedRowSelection)
+        // Mount-guard the local state write (see `isMountedRef`
+        // comment in the useState block above).
+        if (isMountedRef.current) setRowSelection(updatedRowSelection)
 
         // Use Map for O(1) lookup instead of O(n) Array.find()
         // With 10,000 rows and 100 selected: ~500ms -> ~5ms (100x faster)
@@ -418,6 +474,9 @@ function DataTableRootInternal<TData, TValue>({
    */
   const handleColumnPinningChange = React.useCallback(
     (updater: Updater<ColumnPinningState>) => {
+      // Mount-guard the local state write (see `isMountedRef`
+      // comment in the useState block above).
+      if (!isMountedRef.current) return
       setColumnPinning(prev => {
         const next = typeof updater === "function" ? updater(prev) : updater
         return {
@@ -497,26 +556,26 @@ function DataTableRootInternal<TData, TValue>({
   /**
    * PERFORMANCE: Extract controlled state values for dependency tracking
    *
-   * WHY: When using controlled state (rest.state), we need to track those values
+   * WHY: When using controlled state (restState), we need to track those values
    * in the dependency array. Extracting them here makes the dependency array cleaner
    * and ensures the table updates when external state changes.
    *
    * IMPORTANT: Memoize pagination to prevent infinite loops when the object reference
    * changes but values are the same. Use deep comparison for pagination state.
    */
-  const controlledSorting = rest.state?.sorting ?? sorting
+  const controlledSorting = restState?.sorting ?? sorting
   const controlledColumnVisibility =
-    rest.state?.columnVisibility ?? columnVisibility
-  const controlledRowSelection = rest.state?.rowSelection ?? rowSelection
-  const controlledColumnFilters = rest.state?.columnFilters ?? columnFilters
+    restState?.columnVisibility ?? columnVisibility
+  const controlledRowSelection = restState?.rowSelection ?? rowSelection
+  const controlledColumnFilters = restState?.columnFilters ?? columnFilters
   const controlledGlobalFilter =
-    rest.state?.globalFilter !== undefined
-      ? rest.state.globalFilter
+    restState?.globalFilter !== undefined
+      ? restState.globalFilter
       : globalFilter
-  const controlledColumnPinning = rest.state?.columnPinning ?? columnPinning
-  const controlledColumnOrder = rest.state?.columnOrder ?? columnOrder
-  const controlledExpanded = rest.state?.expanded ?? expanded
-  const controlledPagination = rest.state?.pagination ?? pagination
+  const controlledColumnPinning = restState?.columnPinning ?? columnPinning
+  const controlledColumnOrder = restState?.columnOrder ?? columnOrder
+  const controlledExpanded = restState?.expanded ?? expanded
+  const controlledPagination = restState?.pagination ?? pagination
 
   /**
    * SMART PINNING LOGIC:
@@ -622,14 +681,14 @@ function DataTableRootInternal<TData, TValue>({
    */
   const tableOptions = React.useMemo<TableOptions<TData>>(
     () => ({
-      ...rest,
+      ...passthroughTableOptions,
       data,
       columns: processedColumns,
       defaultColumn,
       state: {
-        ...rest.state,
+        ...restState,
         // Always use our local state as the source of truth
-        // External state (rest.state) takes precedence only if explicitly provided
+        // External state (restState) takes precedence only if explicitly provided
         sorting: controlledSorting,
         columnVisibility: controlledColumnVisibility,
         columnPinning: finalColumnPinning,
@@ -655,13 +714,44 @@ function DataTableRootInternal<TData, TValue>({
       autoResetExpanded: finalConfig.autoResetExpanded,
       onGlobalFilterChange: handleGlobalFilterChange,
       onRowSelectionChange: onRowSelectionChange ?? handleRowSelectionChange,
-      onSortingChange: onSortingChange ?? setSorting,
-      onColumnFiltersChange: onColumnFiltersChange ?? setColumnFilters,
-      onColumnVisibilityChange: onColumnVisibilityChange ?? setColumnVisibility,
+      // Default state setters wrapped with mount-ref guard so
+      // TanStack Table's async auto-reset dispatches (e.g.
+      // `onPaginationChange(0)` after data lands from a server
+      // query) don't land on a StrictMode-unmounted fiber. See the
+      // `isMountedRef` block above for full context. Consumer-
+      // supplied handlers are NOT guarded — caller's responsibility
+      // to make their own dispatchers mount-safe.
+      onSortingChange:
+        onSortingChange ??
+        (u => {
+          if (isMountedRef.current) setSorting(u)
+        }),
+      onColumnFiltersChange:
+        onColumnFiltersChange ??
+        (u => {
+          if (isMountedRef.current) setColumnFilters(u)
+        }),
+      onColumnVisibilityChange:
+        onColumnVisibilityChange ??
+        (u => {
+          if (isMountedRef.current) setColumnVisibility(u)
+        }),
       onColumnPinningChange: onColumnPinningChange ?? handleColumnPinningChange,
-      onColumnOrderChange: onColumnOrderChange ?? setColumnOrder,
-      onExpandedChange: onExpandedChange ?? setExpanded,
-      onPaginationChange: onPaginationChange ?? setPagination,
+      onColumnOrderChange:
+        onColumnOrderChange ??
+        (u => {
+          if (isMountedRef.current) setColumnOrder(u)
+        }),
+      onExpandedChange:
+        onExpandedChange ??
+        (u => {
+          if (isMountedRef.current) setExpanded(u)
+        }),
+      onPaginationChange:
+        onPaginationChange ??
+        (u => {
+          if (isMountedRef.current) setPagination(u)
+        }),
       getCoreRowModel: getCoreRowModel(),
       getFacetedRowModel: detectFeatures.enableFilters
         ? getFacetedRowModel()
@@ -691,7 +781,7 @@ function DataTableRootInternal<TData, TValue>({
       },
       // Allow globalFilterFn to be overridden via rest props, otherwise use default
       globalFilterFn:
-        (rest.globalFilterFn as FilterFn<TData>) ??
+        (restGlobalFilterFn as FilterFn<TData>) ??
         (globalFilterFn as unknown as FilterFn<TData>),
       // Use provided getRowId or fallback to checking for 'id' property, then index
       getRowId:
@@ -718,12 +808,21 @@ function DataTableRootInternal<TData, TValue>({
     // Note: processedColumns is already memoized, so it's safe to include here
     // Note: Callbacks like setSorting, setExpanded are stable from useState
     // External callbacks (onSortingChange, etc.) should be memoized by consumer
-    // Note: 'rest' is included because it's spread into tableOptions
-    // Consumers should memoize rest props if they change frequently
-    // IMPORTANT: When using controlled state (rest.state), we need to include those values
-    // in the dependency array so the table updates when external state changes
+    // Note: we depend on the *destructured* `restState`,
+    // `restInitialState`, `restGlobalFilterFn`, NOT on the whole rest
+    // bag. The previous version listed `rest` itself, which is a fresh
+    // object every render — invalidating the memo every render and
+    // forcing `useReactTable` to see "options changed" on every commit.
+    // That cascade was the root cause of the cross-table
+    // "state update on a component that hasn't mounted yet" warning
+    // (TanStack Table dispatches internal `onSortingChange` /
+    // `onPaginationChange` syncs through our useState setters, and
+    // those queued dispatches raced StrictMode's unmount/remount).
+    // `passthroughTableOptions` is intentionally NOT a dep — see the
+    // destructure-site comment for the trade-off.
     [
-      rest,
+      restState,
+      restGlobalFilterFn,
       data,
       processedColumns,
       defaultColumn,

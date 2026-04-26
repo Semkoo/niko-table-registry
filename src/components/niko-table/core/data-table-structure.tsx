@@ -14,6 +14,7 @@ import { flexRender } from "@tanstack/react-table"
 import { Skeleton } from "@/components/ui/skeleton"
 import { DataTableEmptyState } from "../components/data-table-empty-state"
 import { DataTableColumnHeaderRoot } from "../components/data-table-column-header"
+import { createScrollHandler } from "../lib/create-scroll-handler"
 import { getCommonPinningStyles } from "../lib/styles"
 
 // ============================================================================
@@ -109,7 +110,14 @@ export interface DataTableBodyProps<TData> {
   onScrolledTop?: () => void
   onScrolledBottom?: () => void
   scrollThreshold?: number
-  onRowClick?: (row: TData) => void
+  /**
+   * Click is dispatched per-row from each cell's onClick. The
+   * event's `currentTarget` is the `<td>` cell — typed as
+   * `HTMLElement` to stay consistent with the virtualized variants
+   * (which delegate on `<tbody>`). Consumers needing the row
+   * element can `event.target.closest("tr[data-row-id]")`.
+   */
+  onRowClick?: (row: TData, event: React.MouseEvent<HTMLElement>) => void
 }
 
 export function DataTableBody<TData>({
@@ -137,13 +145,6 @@ export function DataTableBody<TData>({
    *
    * WHAT: Only creates new functions when onScrolledTop/onScrolledBottom props change.
    */
-  const handleScrollTop = React.useCallback(() => {
-    onScrolledTop?.()
-  }, [onScrolledTop])
-
-  const handleScrollBottom = React.useCallback(() => {
-    onScrolledBottom?.()
-  }, [onScrolledBottom])
 
   /**
    * PERFORMANCE: Single row-click handler with event delegation (useCallback)
@@ -160,7 +161,7 @@ export function DataTableBody<TData>({
     (event: React.MouseEvent<HTMLTableSectionElement>) => {
       if (!onRowClick) return
       const target = event.target as HTMLElement
-      const rowElement = target.closest("tr[data-row-index]")
+      const rowElement = target.closest("tr[data-row-id]")
       if (!rowElement) return
 
       const isInteractiveElement =
@@ -176,74 +177,43 @@ export function DataTableBody<TData>({
         target.tagName === "A"
       if (isInteractiveElement) return
 
-      const rowIndex = rowElement.getAttribute("data-row-index")
-      if (rowIndex === null) return
-      const index = parseInt(rowIndex, 10)
-      if (Number.isNaN(index) || index < 0 || index >= rows.length) return
-      onRowClick(rows[index].original)
+      // Resolve via stable `row.id` rather than a positional index —
+      // sort/filter/reorder leave indices unstable but ids are
+      // canonical. `table.getRow` is a Map lookup internally so this
+      // stays O(1) — and importantly the closure depends only on
+      // `table` (stable across renders) not on `rows`, so the
+      // useCallback identity stays stable across data updates.
+      const rowId = rowElement.getAttribute("data-row-id")
+      if (rowId === null) return
+      const row = table.getRow(rowId)
+      if (!row) return
+      onRowClick(row.original, event)
     },
-    [onRowClick, rows],
+    [onRowClick, table],
   )
 
   /**
-   * PERFORMANCE: Use passive event listener for smoother scrolling
-   *
-   * WHY: Passive listeners tell the browser the handler won't call preventDefault().
-   * This allows the browser to optimize scrolling (e.g., on a separate thread).
-   *
-   * IMPACT: Smoother scrolling, especially on mobile devices.
-   * Reduces scroll jank by 30-50% in some cases.
-   *
-   * WHAT: Adds scroll listener with { passive: true } flag.
+   * Attach a passive scroll listener on the container. Listener body
+   * lives in `createScrollHandler` so the four data-table bodies
+   * share one canonical implementation. Passive flag unlocks the
+   * browser's scroll-thread optimization (smoother scrolling).
    */
   React.useEffect(() => {
     const container = containerRef.current?.closest(
       '[data-slot="table-container"]',
     ) as HTMLDivElement
-    // Skip if container hasn't mounted yet, OR if no scroll-related
-    // callback is wired. Previously the early return required `onScroll`
-    // specifically, so `onScrolledBottom` / `onScrolledTop` were silently
-    // dead unless the consumer also passed `onScroll` — the listener
-    // never attached. Now we attach whenever *any* of the three callbacks
-    // is provided.
     if (!container) return
     if (!onScroll && !onScrolledTop && !onScrolledBottom) return
 
-    const handleScroll = (event: Event) => {
-      const element = event.currentTarget as HTMLDivElement
-      const { scrollHeight, scrollTop, clientHeight } = element
-
-      const isTop = scrollTop === 0
-      const isBottom = scrollHeight - scrollTop - clientHeight < scrollThreshold
-      const percentage =
-        scrollHeight - clientHeight > 0
-          ? (scrollTop / (scrollHeight - clientHeight)) * 100
-          : 0
-
-      onScroll?.({
-        scrollTop,
-        scrollHeight,
-        clientHeight,
-        isTop,
-        isBottom,
-        percentage,
-      })
-
-      if (isTop) handleScrollTop()
-      if (isBottom) handleScrollBottom()
-    }
-
-    // Use passive flag to improve scroll performance
+    const handleScroll = createScrollHandler({
+      onScroll,
+      onScrolledTop,
+      onScrolledBottom,
+      scrollThreshold,
+    })
     container.addEventListener("scroll", handleScroll, { passive: true })
     return () => container.removeEventListener("scroll", handleScroll)
-  }, [
-    onScroll,
-    onScrolledTop,
-    onScrolledBottom,
-    handleScrollTop,
-    handleScrollBottom,
-    scrollThreshold,
-  ])
+  }, [onScroll, onScrolledTop, onScrolledBottom, scrollThreshold])
 
   return (
     <TableBody

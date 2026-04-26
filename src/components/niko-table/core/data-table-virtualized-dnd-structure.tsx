@@ -1,5 +1,13 @@
 "use client"
 
+/**
+ * @internal Deep-import only.
+ * Intentionally not re-exported from the package barrel — the DnD
+ * virtualized variants are an opt-in advanced surface; the deep
+ * path keeps consumers explicit about pulling them in and avoids
+ * bloating the barrel for the common (non-DnD) case.
+ */
+
 import React from "react"
 import { useVirtualizer } from "@tanstack/react-virtual"
 import { flexRender } from "@tanstack/react-table"
@@ -12,6 +20,7 @@ import {
   TableCell,
 } from "@/components/ui/table"
 import { DataTableColumnHeaderRoot } from "../components/data-table-column-header"
+import { createScrollHandler } from "../lib/create-scroll-handler"
 import { getCommonPinningStyles } from "../lib/styles"
 import {
   SortableContext,
@@ -27,26 +36,123 @@ import { CSS } from "@dnd-kit/utilities"
 import type { ScrollEvent } from "./data-table-virtualized-structure"
 
 // ============================================================================
+// Stable measureElement — computed once at module level
+// ============================================================================
+
+/**
+ * Custom element measurer for the row virtualizer. Returns the
+ * base row height plus, when present, the height of an adjacent
+ * expanded-content row (`<tr data-slot="datatable-expanded-row">`).
+ * See the equivalent helper in `data-table-virtualized-structure.tsx`
+ * for the full rationale — short version: the virtualizer's
+ * `ResizeObserver` only attaches to the base row, so expanded
+ * sibling content goes unmeasured and `getTotalSize()` drifts.
+ *
+ * Disabled in Firefox where `getBoundingClientRect` returns stale
+ * values during virtual-scroll reflows, causing measurement loops.
+ *
+ * Defined at module scope so every virtualizer instance shares the
+ * same stable function reference — no `useCallback` / `useMemo`
+ * overhead, and React never detaches/reattaches the ref due to a
+ * changed identity.
+ */
+const measureElement: ((element: Element) => number) | undefined =
+  typeof window !== "undefined" && navigator.userAgent.indexOf("Firefox") === -1
+    ? (element: Element) => {
+        const baseHeight = element.getBoundingClientRect().height
+        const next = element.nextElementSibling
+        if (
+          next &&
+          next.getAttribute("data-slot") === "datatable-expanded-row"
+        ) {
+          return baseHeight + next.getBoundingClientRect().height
+        }
+        return baseHeight
+      }
+    : undefined
+
+// ============================================================================
 // VirtualizedDraggableRow — internal row component for virtualized DnD
 // ============================================================================
 
 interface VirtualizedDraggableRowProps {
   children: React.ReactNode
+  /**
+   * Stable row identity from `row.id`. Used by event delegation to
+   * resolve which row was clicked via `table.getRow(rowId)` —
+   * survives sort/filter/reorder, unlike `row.index`.
+   */
   rowId: string
-  /** Used for event delegation (row click); forwarded as data-row-index. */
-  rowIndex?: number
+  /**
+   * Virtualizer slot index (`virtualRow.index`). Forwarded to
+   * `data-index`, which TanStack Virtual's `measureElement` reads to
+   * map a measured DOM node back to its virtualizer slot. Must be
+   * the virtualizer's index, not the source-data `row.index` —
+   * under sort/filter those drift apart.
+   */
+  virtualIndex: number
+  /**
+   * Whether this row is currently selected. Used to set `data-state`
+   * + a `group` class on the row so the existing
+   * `data-[state=selected]` and `group-data-[state=selected]`
+   * selectors (on the row itself and on pinned-column cells)
+   * actually fire.
+   */
+  isSelected?: boolean
+  /**
+   * Whether the row is currently expanded. Used to imperatively
+   * re-trigger `measureRef` (the virtualizer's `measureElement`)
+   * when expansion toggles — the DnD body intentionally uses a
+   * stable `key={row.id}` so `useSortable`'s registration is
+   * preserved across expand/collapse, but that means `setRefs`
+   * doesn't re-run on toggle and the virtualizer would otherwise
+   * keep the stale collapsed-height measurement.
+   */
+  isExpanded?: boolean
   className?: string
+  measureRef?: (node: HTMLTableRowElement | null) => void
 }
 
 function VirtualizedDraggableRow({
   children,
   rowId,
-  rowIndex,
+  virtualIndex,
+  isSelected,
+  isExpanded,
   className,
+  measureRef,
 }: VirtualizedDraggableRowProps) {
   const { transform, transition, setNodeRef, isDragging } = useSortable({
     id: rowId,
   })
+
+  // Cache the row DOM node so the `isExpanded` effect can pass it
+  // back to `measureRef` (the virtualizer's `measureElement`) on
+  // demand — without unmounting the row.
+  const elementRef = React.useRef<HTMLTableRowElement | null>(null)
+
+  const setRefs = React.useCallback(
+    (node: HTMLTableRowElement | null) => {
+      setNodeRef(node)
+      elementRef.current = node
+      if (measureRef) measureRef(node)
+    },
+    [setNodeRef, measureRef],
+  )
+
+  // Re-measure on expansion toggle. `measureRef` (the virtualizer's
+  // `measureElement` callback) is idempotent — calling it again with
+  // the same node re-attaches its `ResizeObserver` and triggers a
+  // fresh height read, which walks `nextElementSibling` to include
+  // the expanded pane. This is the DnD-body counterpart to the
+  // non-DnD body's composite-key remount strategy: we keep
+  // `key={row.id}` to preserve `useSortable`, and pay the cost of
+  // one imperative re-measure per toggle instead.
+  React.useEffect(() => {
+    if (measureRef && elementRef.current) {
+      measureRef(elementRef.current)
+    }
+  }, [isExpanded, measureRef])
 
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
@@ -58,10 +164,16 @@ function VirtualizedDraggableRow({
 
   return (
     <TableRow
-      ref={setNodeRef}
+      ref={setRefs}
       style={style}
-      className={cn("flex w-full", isDragging && "bg-muted/50", className)}
-      data-row-index={rowIndex}
+      className={cn(
+        "group flex w-full",
+        isDragging && "bg-muted/50",
+        className,
+      )}
+      data-index={virtualIndex}
+      data-row-id={rowId}
+      data-state={isSelected ? "selected" : undefined}
     >
       {children}
     </TableRow>
@@ -81,10 +193,15 @@ export interface DataTableVirtualizedDndBodyProps<TData> {
   onScrolledTop?: () => void
   onScrolledBottom?: () => void
   scrollThreshold?: number
-  onRowClick?: (
-    row: TData,
-    event: React.MouseEvent<HTMLTableRowElement>,
-  ) => void
+  /**
+   * Click is delegated on `<tbody>` (so a single listener serves all
+   * virtual rows). The event therefore arrives with `currentTarget`
+   * = the `<tbody>`. If you need the row element, query
+   * `event.target.closest("tr[data-row-id]")` — typed as
+   * `HTMLElement` to reflect that runtime shape rather than lying
+   * with `HTMLTableRowElement`.
+   */
+  onRowClick?: (row: TData, event: React.MouseEvent<HTMLElement>) => void
 }
 
 /**
@@ -130,33 +247,30 @@ export function DataTableVirtualizedDndBody<TData>({
     [],
   )
 
+  // `measureElement` is attached unconditionally here (no
+  // `columnsLocked` gate as in the non-DnD body). Reason: DnD bodies
+  // use flex layout (`block` on tbody, `flex w-full` on rows) instead
+  // of `table-layout: auto → fixed`, so they don't go through the
+  // initial auto-layout pass that produces inflated row heights for
+  // the non-DnD body. Without that transition there's no window in
+  // which `ResizeObserver` could lock in wrong measurements, so a
+  // gate would only add complexity (a `columnsLocked` state + a lock
+  // effect that has nothing to lock).
   const rowVirtualizer = useVirtualizer({
     count: rows.length,
     getScrollElement: () => scrollElement,
     estimateSize: () => estimateSize,
     overscan,
     enabled: !!scrollElement,
-    measureElement:
-      typeof window !== "undefined" &&
-      navigator.userAgent.indexOf("Firefox") === -1
-        ? element => element?.getBoundingClientRect().height
-        : undefined,
+    measureElement,
   })
-
-  const handleScrollTop = React.useCallback(() => {
-    onScrolledTop?.()
-  }, [onScrolledTop])
-
-  const handleScrollBottom = React.useCallback(() => {
-    onScrolledBottom?.()
-  }, [onScrolledBottom])
 
   /** Single row-click handler with event delegation (useCallback). */
   const handleRowClick = React.useCallback(
     (event: React.MouseEvent<HTMLTableSectionElement>) => {
       if (!onRowClick) return
       const target = event.target as HTMLElement
-      const rowElement = target.closest("tr[data-row-index]")
+      const rowElement = target.closest("tr[data-row-id]")
       if (!rowElement) return
 
       const isInteractiveElement =
@@ -172,53 +286,29 @@ export function DataTableVirtualizedDndBody<TData>({
         target.tagName === "A"
       if (isInteractiveElement) return
 
-      const rowIndexAttr = rowElement.getAttribute("data-row-index")
-      if (rowIndexAttr === null) return
-      const index = parseInt(rowIndexAttr, 10)
-      if (Number.isNaN(index) || index < 0 || index >= rows.length) return
-      const row = rows[index]
-      onRowClick(
-        row.original as TData,
-        event as unknown as React.MouseEvent<HTMLTableRowElement>,
-      )
+      // Resolve via stable `row.id` rather than a positional index —
+      // sort/filter/reorder leave indices unstable but ids are
+      // canonical. `table.getRow` is a Map lookup internally so this
+      // stays O(1).
+      const rowId = rowElement.getAttribute("data-row-id")
+      if (rowId === null) return
+      const row = table.getRow(rowId)
+      if (!row) return
+      onRowClick(row.original as TData, event)
     },
-    [onRowClick, rows],
+    [onRowClick, table],
   )
 
   React.useEffect(() => {
-    // Skip if the scroll container hasn't attached yet, OR if no
-    // scroll-related callback is wired. Previously the early return
-    // required `onScroll` specifically, so `onScrolledBottom` /
-    // `onScrolledTop` were silently dead unless the consumer also
-    // passed `onScroll` — the listener never attached. Now we attach
-    // whenever *any* of the three callbacks is provided.
     if (!scrollElement) return
     if (!onScroll && !onScrolledTop && !onScrolledBottom) return
 
-    const handleScroll = (event: Event) => {
-      const element = event.currentTarget as HTMLDivElement
-      const { scrollHeight, scrollTop, clientHeight } = element
-
-      const isTop = scrollTop === 0
-      const isBottom = scrollHeight - scrollTop - clientHeight < scrollThreshold
-      const percentage =
-        scrollHeight - clientHeight > 0
-          ? (scrollTop / (scrollHeight - clientHeight)) * 100
-          : 0
-
-      onScroll?.({
-        scrollTop,
-        scrollHeight,
-        clientHeight,
-        isTop,
-        isBottom,
-        percentage,
-      })
-
-      if (isTop) handleScrollTop()
-      if (isBottom) handleScrollBottom()
-    }
-
+    const handleScroll = createScrollHandler({
+      onScroll,
+      onScrolledTop,
+      onScrolledBottom,
+      scrollThreshold,
+    })
     scrollElement.addEventListener("scroll", handleScroll, { passive: true })
     return () => scrollElement.removeEventListener("scroll", handleScroll)
   }, [
@@ -226,8 +316,6 @@ export function DataTableVirtualizedDndBody<TData>({
     onScroll,
     onScrolledTop,
     onScrolledBottom,
-    handleScrollTop,
-    handleScrollBottom,
     scrollThreshold,
   ])
 
@@ -272,8 +360,14 @@ export function DataTableVirtualizedDndBody<TData>({
             .find(cell => cell.column.columnDef.meta?.expandedContent)
 
           return (
-            <React.Fragment key={`${row.id}-${isExpanded}`}>
-              <VirtualizedDraggableRow rowId={row.id} rowIndex={row?.index}>
+            <React.Fragment key={row.id}>
+              <VirtualizedDraggableRow
+                rowId={row.id}
+                virtualIndex={virtualRow.index}
+                isSelected={row.getIsSelected()}
+                isExpanded={isExpanded}
+                measureRef={rowVirtualizer.measureElement}
+              >
                 {row.getVisibleCells().map(cell => {
                   const size = cell.column.columnDef.size
                   const cellStyle = {
@@ -305,7 +399,10 @@ export function DataTableVirtualizedDndBody<TData>({
 
               {/* Expanded content row */}
               {isExpanded && expandColumn && (
-                <TableRow className="flex w-full">
+                <TableRow
+                  data-slot="datatable-expanded-row"
+                  className="flex w-full"
+                >
                   <TableCell
                     colSpan={row.getVisibleCells().length}
                     className="w-full p-0"
@@ -436,10 +533,15 @@ export interface DataTableVirtualizedDndColumnBodyProps<TData> {
   onScrolledTop?: () => void
   onScrolledBottom?: () => void
   scrollThreshold?: number
-  onRowClick?: (
-    row: TData,
-    event: React.MouseEvent<HTMLTableRowElement>,
-  ) => void
+  /**
+   * Click is delegated on `<tbody>` (so a single listener serves all
+   * virtual rows). The event therefore arrives with `currentTarget`
+   * = the `<tbody>`. If you need the row element, query
+   * `event.target.closest("tr[data-row-id]")` — typed as
+   * `HTMLElement` to reflect that runtime shape rather than lying
+   * with `HTMLTableRowElement`.
+   */
+  onRowClick?: (row: TData, event: React.MouseEvent<HTMLElement>) => void
 }
 
 /**
@@ -484,61 +586,34 @@ export function DataTableVirtualizedDndColumnBody<TData>({
     [],
   )
 
+  // `measureElement` is attached unconditionally here (no
+  // `columnsLocked` gate as in the non-DnD body). Reason: DnD bodies
+  // use flex layout (`block` on tbody, `flex w-full` on rows) instead
+  // of `table-layout: auto → fixed`, so they don't go through the
+  // initial auto-layout pass that produces inflated row heights for
+  // the non-DnD body. Without that transition there's no window in
+  // which `ResizeObserver` could lock in wrong measurements, so a
+  // gate would only add complexity (a `columnsLocked` state + a lock
+  // effect that has nothing to lock).
   const rowVirtualizer = useVirtualizer({
     count: rows.length,
     getScrollElement: () => scrollElement,
     estimateSize: () => estimateSize,
     overscan,
     enabled: !!scrollElement,
-    measureElement:
-      typeof window !== "undefined" &&
-      navigator.userAgent.indexOf("Firefox") === -1
-        ? element => element?.getBoundingClientRect().height
-        : undefined,
+    measureElement,
   })
 
-  const handleScrollTop = React.useCallback(() => {
-    onScrolledTop?.()
-  }, [onScrolledTop])
-
-  const handleScrollBottom = React.useCallback(() => {
-    onScrolledBottom?.()
-  }, [onScrolledBottom])
-
   React.useEffect(() => {
-    // Skip if the scroll container hasn't attached yet, OR if no
-    // scroll-related callback is wired. Previously the early return
-    // required `onScroll` specifically, so `onScrolledBottom` /
-    // `onScrolledTop` were silently dead unless the consumer also
-    // passed `onScroll` — the listener never attached. Now we attach
-    // whenever *any* of the three callbacks is provided.
     if (!scrollElement) return
     if (!onScroll && !onScrolledTop && !onScrolledBottom) return
 
-    const handleScroll = (event: Event) => {
-      const element = event.currentTarget as HTMLDivElement
-      const { scrollHeight, scrollTop, clientHeight } = element
-
-      const isTop = scrollTop === 0
-      const isBottom = scrollHeight - scrollTop - clientHeight < scrollThreshold
-      const percentage =
-        scrollHeight - clientHeight > 0
-          ? (scrollTop / (scrollHeight - clientHeight)) * 100
-          : 0
-
-      onScroll?.({
-        scrollTop,
-        scrollHeight,
-        clientHeight,
-        isTop,
-        isBottom,
-        percentage,
-      })
-
-      if (isTop) handleScrollTop()
-      if (isBottom) handleScrollBottom()
-    }
-
+    const handleScroll = createScrollHandler({
+      onScroll,
+      onScrolledTop,
+      onScrolledBottom,
+      scrollThreshold,
+    })
     scrollElement.addEventListener("scroll", handleScroll, { passive: true })
     return () => scrollElement.removeEventListener("scroll", handleScroll)
   }, [
@@ -546,8 +621,6 @@ export function DataTableVirtualizedDndColumnBody<TData>({
     onScroll,
     onScrolledTop,
     onScrolledBottom,
-    handleScrollTop,
-    handleScrollBottom,
     scrollThreshold,
   ])
 
@@ -556,7 +629,7 @@ export function DataTableVirtualizedDndColumnBody<TData>({
     (event: React.MouseEvent<HTMLTableSectionElement>) => {
       if (!onRowClick) return
       const target = event.target as HTMLElement
-      const rowElement = target.closest("tr[data-row-index]")
+      const rowElement = target.closest("tr[data-row-id]")
       if (!rowElement) return
 
       const isInteractiveElement =
@@ -572,17 +645,17 @@ export function DataTableVirtualizedDndColumnBody<TData>({
         target.tagName === "A"
       if (isInteractiveElement) return
 
-      const rowIndexAttr = rowElement.getAttribute("data-row-index")
-      if (rowIndexAttr === null) return
-      const index = parseInt(rowIndexAttr, 10)
-      if (Number.isNaN(index) || index < 0 || index >= rows.length) return
-      const row = rows[index]
-      onRowClick(
-        row.original as TData,
-        event as unknown as React.MouseEvent<HTMLTableRowElement>,
-      )
+      // Resolve via stable `row.id` rather than a positional index —
+      // sort/filter/reorder leave indices unstable but ids are
+      // canonical. `table.getRow` is a Map lookup internally so this
+      // stays O(1).
+      const rowId = rowElement.getAttribute("data-row-id")
+      if (rowId === null) return
+      const row = table.getRow(rowId)
+      if (!row) return
+      onRowClick(row.original as TData, event)
     },
-    [onRowClick, rows],
+    [onRowClick, table],
   )
 
   const virtualItems = rowVirtualizer.getVirtualItems()
@@ -612,44 +685,73 @@ export function DataTableVirtualizedDndColumnBody<TData>({
       {/* Render visible rows with drag-along cells */}
       {virtualItems.map(virtualRow => {
         const row = rows[virtualRow.index]
+        if (!row) return null
         const isClickable = !!onRowClick
+        const isExpanded = row.getIsExpanded()
+
+        // Find a column that defines `meta.expandedContent` — same
+        // contract used by `DataTableVirtualizedBody` and the row-DnD
+        // body. Without rendering the expanded sibling here, column-DnD
+        // tables lost the row-expansion feature entirely; adding it
+        // also lets the shared `measureElement` callback include the
+        // expanded pane's height in the virtualizer's measurement.
+        const expandColumn = row
+          .getAllCells()
+          .find(cell => cell.column.columnDef.meta?.expandedContent)
 
         return (
-          <TableRow
-            key={row.id}
-            ref={node => {
-              if (node) {
-                rowVirtualizer.measureElement(node)
-              }
-            }}
-            data-index={virtualRow.index}
-            data-row-index={row?.index}
-            data-row-id={row?.id}
-            data-state={row.getIsSelected() && "selected"}
-            className={cn("group flex w-full", isClickable && "cursor-pointer")}
-          >
-            {row.getVisibleCells().map(cell => {
-              const size = cell.column.columnDef.size
-              return (
-                <TableDragAlongCell
-                  key={cell.id}
-                  cell={cell}
-                  className={cn(
-                    size ? "shrink-0" : "min-w-0 flex-1",
-                    "flex items-center",
-                    cell.column.getIsPinned() &&
-                      "bg-background group-hover:bg-muted/50 group-data-[state=selected]:bg-muted",
-                  )}
-                  style={{
-                    width: size ? `${size}px` : undefined,
-                    minHeight: `${estimateSize}px`,
-                  }}
+          <React.Fragment key={row.id}>
+            <TableRow
+              ref={rowVirtualizer.measureElement}
+              data-index={virtualRow.index}
+              data-row-id={row?.id}
+              data-state={row.getIsSelected() ? "selected" : undefined}
+              className={cn(
+                "group flex w-full",
+                isClickable && "cursor-pointer",
+              )}
+            >
+              {row.getVisibleCells().map(cell => {
+                const size = cell.column.columnDef.size
+                return (
+                  <TableDragAlongCell
+                    key={cell.id}
+                    cell={cell}
+                    className={cn(
+                      size ? "shrink-0" : "min-w-0 flex-1",
+                      "flex items-center",
+                      cell.column.getIsPinned() &&
+                        "bg-background group-hover:bg-muted/50 group-data-[state=selected]:bg-muted",
+                    )}
+                    style={{
+                      width: size ? `${size}px` : undefined,
+                      minHeight: `${estimateSize}px`,
+                    }}
+                  >
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableDragAlongCell>
+                )
+              })}
+            </TableRow>
+
+            {/* Expanded content row — measured into the base row's
+                slot via the shared `measureElement` (sibling lookup). */}
+            {isExpanded && expandColumn && (
+              <TableRow
+                data-slot="datatable-expanded-row"
+                className="flex w-full"
+              >
+                <TableCell
+                  colSpan={row.getVisibleCells().length}
+                  className="w-full p-0"
                 >
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </TableDragAlongCell>
-              )
-            })}
-          </TableRow>
+                  {expandColumn.column.columnDef.meta?.expandedContent?.(
+                    row.original,
+                  )}
+                </TableCell>
+              </TableRow>
+            )}
+          </React.Fragment>
         )
       })}
 
