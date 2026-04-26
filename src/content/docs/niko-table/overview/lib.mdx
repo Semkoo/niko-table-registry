@@ -555,3 +555,61 @@ import { ERROR_MESSAGES } from "@/components/niko-table/lib/constants"
 // Available messages:
 ERROR_MESSAGES.DEPRECATED_GLOBAL_JOIN_OPERATOR
 ```
+
+## Faceted Options Builder
+
+Used internally by faceted-filter components to translate a raw column dataset into the `{ label, value, count }` shape the filter UI consumes. Documented for completeness — most consumers won't import it directly.
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/lib/build-faceted-options.ts`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+</div>
+
+### buildFacetedOptions
+
+Walks a TanStack Table column / row set and produces deduplicated `{ label, value, count }` entries for the faceted-filter dropdown. Honors the `dynamicCounts` flag so counts update reactively when other filters change. Used internally by `DataTableFacetedFilter` and `TableColumnFacetedFilter`.
+
+```tsx showLineNumbers
+import { buildFacetedOptions } from "@/components/niko-table/lib/build-faceted-options"
+
+const options = buildFacetedOptions({
+  rows: table.getCoreRowModel().rows,
+  columnId: "category",
+  dynamicCounts: true,
+})
+// → [{ label: "Electronics", value: "electronics", count: 12 }, ...]
+```
+
+#### Notes
+
+- This module is consumed by the faceted-filter wrappers; if you're building a custom faceted UI, `useGeneratedOptions` (in `hooks/`) is the consumer-facing surface that wraps this helper with React state.
+- Runs in O(n) over the column's cell values; safe to call per render for typical column counts.
+
+## Row Filtering Helpers
+
+Internal helpers that resolve `globalFilter` / column-filter combinations to a final visible row set. Used by `DataTableRoot` when wiring `tableOptions.getFilteredRowModel`.
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/lib/filter-rows.ts`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+</div>
+
+### filter-rows.ts
+
+Provides the row-filtering logic that backs the table's filtered row model — combines per-column filters with the global filter, applies the right `extendedFilter` / `globalFilter` / `numberRangeFilter` / `dateRangeFilter` based on column meta, and returns the visible row set.
+
+This module is internal to the table's filter pipeline. Consumers normally interact with it indirectly via `tableOptions.filterFns` (which `DataTableRoot` wires automatically). If you're building a fully custom filter pipeline you can import the named helpers from this file directly — see the source for the current export surface.

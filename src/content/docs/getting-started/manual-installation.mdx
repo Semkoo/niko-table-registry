@@ -113,18 +113,19 @@ your-project/
 │   │   │   └── ...                # Other Shadcn components
 │   │   │
 │   │   └── niko-table/
-│   │       ├── index.tsx                    # Main exports
 │   │       │
 │   │       ├── core/                        # Core table components
-│   │       │   ├── data-table-root.tsx
-│   │       │   ├── data-table.tsx
-│   │       │   ├── data-table-context.tsx
-│   │       │   ├── data-table-structure.tsx  # Header, Body, EmptyBody, Skeleton, Loading (consolidated)
-│   │       │   ├── data-table-virtualized-structure.tsx  # VirtualizedHeader, VirtualizedBody, VirtualizedEmptyBody, VirtualizedSkeleton, VirtualizedLoading (consolidated)
-│   │       │   └── index.tsx
+│   │       │   ├── data-table.tsx                                  # Container + scroll wrapper
+│   │       │   ├── data-table-root.tsx                             # Top-level provider + table options
+│   │       │   ├── data-table-context.tsx                          # useDataTable() context
+│   │       │   ├── data-table-error-boundary.tsx                   # Error boundary wrapper
+│   │       │   ├── data-table-structure.tsx                        # Header, Body, EmptyBody, Skeleton, Loading, LoadingMore
+│   │       │   ├── data-table-dnd-structure.tsx                    # Row-DnD + Column-DnD non-virtualized bodies
+│   │       │   ├── data-table-virtualized-structure.tsx            # VirtualizedHeader, VirtualizedBody, VirtualizedEmptyBody, VirtualizedSkeleton, VirtualizedLoading, VirtualizedLoadingMore
+│   │       │   └── data-table-virtualized-dnd-structure.tsx        # VirtualizedDndBody, VirtualizedDndHeader, VirtualizedDndColumnBody (deep-import only)
 │   │       │
-│   │       ├── components/                  # All user-facing components
-│   │       │   ├── data-table-search-filter.tsx      # Context-aware components
+│   │       ├── components/                  # Context-aware user-facing components
+│   │       │   ├── data-table-search-filter.tsx
 │   │       │   ├── data-table-view-menu.tsx
 │   │       │   ├── data-table-filter-menu.tsx
 │   │       │   ├── data-table-sort-menu.tsx
@@ -135,43 +136,66 @@ your-project/
 │   │       │   ├── data-table-inline-filter.tsx
 │   │       │   ├── data-table-pagination.tsx
 │   │       │   ├── data-table-export-button.tsx
-│   │       │   ├── table-column-header.tsx            # Reusable UI components
+│   │       │   ├── data-table-row-dnd.tsx
+│   │       │   ├── data-table-column-dnd.tsx
+│   │       │   ├── data-table-column-actions.tsx
+│   │       │   ├── data-table-column-header.tsx
+│   │       │   ├── data-table-column-title.tsx
+│   │       │   ├── data-table-column-sort.tsx
+│   │       │   ├── data-table-column-hide.tsx
+│   │       │   ├── data-table-column-pin.tsx
+│   │       │   ├── data-table-column-filter.tsx
+│   │       │   ├── data-table-column-filter-trigger.tsx
+│   │       │   ├── data-table-column-faceted-filter.tsx
+│   │       │   ├── data-table-column-date-filter-options.tsx
+│   │       │   ├── data-table-column-slider-filter-options.tsx
 │   │       │   ├── data-table-aside.tsx
 │   │       │   ├── data-table-selection-bar.tsx
 │   │       │   ├── data-table-toolbar-section.tsx
-│   │       │   ├── data-table-empty-state.tsx
-│   │       │   └── index.tsx
+│   │       │   └── data-table-empty-state.tsx
 │   │       │
-│   │       ├── filters/                     # Core implementation components
+│   │       ├── filters/                     # Core filter implementations (accept `table` prop directly)
 │   │       │   ├── table-search-filter.tsx
 │   │       │   ├── table-faceted-filter.tsx
 │   │       │   ├── table-slider-filter.tsx
+│   │       │   ├── table-range-filter.tsx
 │   │       │   ├── table-date-filter.tsx
 │   │       │   ├── table-inline-filter.tsx
 │   │       │   ├── table-filter-menu.tsx
+│   │       │   ├── table-clear-filter.tsx
 │   │       │   ├── table-view-menu.tsx
-│   │       │   ├── table-sort-menu.tsx
-│   │       │   ├── table-range-filter.tsx
 │   │       │   ├── table-pagination.tsx
 │   │       │   ├── table-export-button.tsx
-│   │       │   └── index.tsx
+│   │       │   ├── table-row-dnd.tsx
+│   │       │   ├── table-column-dnd.tsx
+│   │       │   ├── table-column-actions.tsx
+│   │       │   ├── table-column-title.tsx
+│   │       │   ├── table-column-sort.tsx
+│   │       │   ├── table-column-hide.tsx
+│   │       │   ├── table-column-pin.tsx
+│   │       │   ├── table-column-faceted-filter.tsx
+│   │       │   ├── table-column-slider-filter.tsx
+│   │       │   └── table-column-date-filter.tsx
 │   │       │
-│   │       ├── config/                      # Configuration
+│   │       ├── config/                      # Configuration + feature detection
 │   │       │   ├── data-table.ts
-│   │       │   ├── feature-detection.ts
-│   │       │   └── index.tsx
+│   │       │   └── feature-detection.ts
 │   │       │
 │   │       ├── hooks/                       # Custom React hooks
+│   │       │   ├── use-debounce.ts
 │   │       │   ├── use-derived-column-title.ts
-│   │       │   ├── use-keyboard-shortcut.ts
-│   │       │   └── index.ts
+│   │       │   ├── use-generated-options.ts
+│   │       │   └── use-keyboard-shortcut.ts
 │   │       │
 │   │       ├── lib/                         # Utility functions
 │   │       │   ├── constants.ts
 │   │       │   ├── data-table.ts
 │   │       │   ├── filter-functions.ts
+│   │       │   ├── filter-rows.ts
+│   │       │   ├── build-faceted-options.ts
 │   │       │   ├── format.ts
-│   │       │   └── index.ts
+│   │       │   ├── styles.ts
+│   │       │   └── create-scroll-handler.ts                        # Shared scroll-listener factory used by every body
 │   │       │
 │   │       └── types/                       # TypeScript types
 │   │           └── index.ts
