@@ -11,43 +11,9 @@
  * users (and future LLMs reading this code) benefit:
  * https://github.com/Semkoo/niko-table-registry
  */
-/**
- * Table filter menu component
- * @description A filter menu component for DataTable that allows users to manage multiple filtering criteria. Users can add, remove, and reorder filters, select fields, operators, and input values.
- *
- * @architecture
- * This file is organized into sections for easy copy-paste:
- *
- * 1. **Utilities** (createFilterId) - Helper functions
- *
- * 2. **Custom Hooks** - Replace useEffect with composable logic:
- *    - useInitialFilters: Extracts initial state from table (replaces initialization useEffect)
- *    - useSyncFiltersWithTable: Syncs filters to table state (replaces sync useEffect)
- *
- * 3. **Filter Input Components** - Small, focused components for each input type:
- *    - FilterEmptyInput: Empty state for isEmpty/isNotEmpty
- *    - FilterTextNumberInput: Text/number inputs
- *    - FilterBooleanSelect: Boolean dropdown
- *    - FilterFacetedSelect: Single/multi-select faceted component
- *    - FilterDatePicker: Date/date range picker
- *    - FilterValueInput: Main router component that renders correct input
- *
- * 4. **Filter Item Sub-Components** - Break down filter row UI:
- *    - FilterJoinOperator: AND/OR selector
- *    - FilterFieldSelector: Column field picker
- *    - FilterOperatorSelector: Operator picker (equals, contains, etc.)
- *
- * 5. **Main Components**:
- *    - DataTableFilterItem: Single filter row (uses sub-components)
- *    - TableFilterMenu: Main popover with filter list
- *
- * @debugging
- * - All components have displayName for React DevTools
- * - Development-only console.log statements in hooks (NODE_ENV check)
- * - Check table.getState() to see current filter state
- * - Use React DevTools Components tab to inspect component tree
- * - Filter data flow: User Input → onFilterUpdate → filters state → useSyncFiltersWithTable → table state
- */
+// Filter menu module: utilities, hooks (useInitialFilters,
+// useSyncFiltersWithTable), filter input components, sub-components, and the
+// `TableFilterMenu` popover.
 
 import type { Column, Table } from "@tanstack/react-table"
 import {
@@ -133,7 +99,7 @@ function createFilterId<TData>(
       : JSON.stringify(filter.value)
 
   // Include index as a fallback to ensure uniqueness for URL sharing
-  const indexSuffix = typeof index === FILTER_VARIANTS.NUMBER ? `-${index}` : ""
+  const indexSuffix = typeof index === "number" ? `-${index}` : ""
 
   return `${filter.id}-${filter.operator}-${filter.variant}-${valueStr}${indexSuffix}`
     .toLowerCase()
@@ -477,32 +443,9 @@ function FacetedItem(props: FacetedItemProps) {
 }
 
 /**
- * Normalize join operators when filters are reordered
- *
- * This function ensures that filter order changes don't break the filter logic.
- * The joinOperator on each filter (except the first) determines how it joins
- * with the PREVIOUS filter in the array. When filters are reordered, we need
- * to preserve the logical relationship.
- *
- * Strategy:
- * 1. First filter always has joinOperator="and" (it's ignored anyway)
- * 2. For each subsequent filter, determine the joinOperator based on:
- *    - If the current filter and previous filter were adjacent in original order,
- *      use the joinOperator that was on the current filter in original order
- *    - If they were not adjacent, trace the path between them in original order
- *      to determine the relationship
- *
- * Example:
- * Original: [A(and), B(or), C(and)]
- *   Logic: A OR B AND C → (A OR B) AND C (AND has precedence)
- * After swapping A and B: [B(and), A(?), C(?)]
- *   We want to preserve: (B OR A) AND C
- *   So: [B(and), A(or), C(and)]
- *
- * ROBUSTNESS:
- * This function uses filter properties (id, operator, variant, value) to match
- * filters, not just filterId. This means it will work even if filterId is
- * changed in the URL, as long as the filter properties remain the same.
+ * Normalize join operators after a reorder so the logical relationships
+ * (AND/OR) on adjacent filters survive the move. Matches by filter properties
+ * (not just filterId) so URL-driven filterId changes still work.
  *
  * @param originalFilters - Filters in their original order
  * @param reorderedFilters - Filters in their new order
@@ -703,30 +646,10 @@ function useInitialFilters<TData>(
   return initialFilters
 }
 
-/**
- * Hook to sync filters with table state - COLUMNFILTERS-ONLY ARCHITECTURE
- *
- * @description This hook uses ONLY columnFilters (not globalFilter) for all filtering:
- * - Stores individual filter objects in each column's filter value
- * - Each column uses the `extendedFilter` filterFn that respects filter operators
- * - For OR/MIXED logic: Still uses separate columnFilters per column, but table evaluates them
- * - In uncontrolled mode: updates table's columnFilters with all filters
- * - In controlled mode: only updates table.meta (parent handles table state)
- * - globalFilter remains FREE for other purposes (e.g., separate global search feature)
- *
- * @architecture
- * TanStack Table's columnFilters work like this:
- * - Multiple filters on SAME column → evaluated by that column's filterFn
- * - Multiple filters on DIFFERENT columns → combined with AND logic
- * - To achieve OR logic across columns, we need custom evaluation
- *
- * SOLUTION: Store filter metadata in table.meta and use it in a custom pre-filter
- *
- * @debug
- * - Check table.getState().columnFilters to see all filters
- * - Check table.options.meta.joinOperator to see current join logic
- * - globalFilter should remain empty/unused
- */
+// columnFilters-only sync (globalFilter stays free for other uses). OR/MIXED
+// logic is encoded by writing `joinOperator` into `table.options.meta` and
+// reading it from a custom pre-filter, since TanStack combines cross-column
+// filters with AND by default.
 function useSyncFiltersWithTable<TData>(
   table: Table<TData>,
   filters: ExtendedColumnFilter<TData>[],
@@ -888,7 +811,9 @@ export function TableFilterMenu<TData>({
     return table
       .getAllColumns()
       .filter(column => column.columnDef.enableColumnFilter)
-  }, [table])
+    // Depend on the column set, not just the (stable) table ref.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [table, table.options.columns])
 
   const onFilterAdd = React.useCallback(() => {
     const column = columns[0]
@@ -1398,17 +1323,22 @@ function FilterFacetedSelect<TData>({
         <FacetedList>
           <FacetedEmpty>No options found.</FacetedEmpty>
           <FacetedGroup>
-            {columnMeta?.options?.map((option: Option) => (
-              <FacetedItem key={option.value} value={option.value}>
-                {option.icon && <option.icon />}
-                <span>{option.label}</span>
-                {option.count && (
-                  <span className="ml-auto font-mono text-xs">
-                    {option.count}
-                  </span>
-                )}
-              </FacetedItem>
-            ))}
+            {/* Cross-filter narrowing: hide options at count 0 (matches the
+                rule used by `TableColumnFacetedFilterMenu`). Pure label-only
+                option lists (no counts) render unchanged. */}
+            {columnMeta?.options
+              ?.filter((option: Option) => option.count !== 0)
+              .map((option: Option) => (
+                <FacetedItem key={option.value} value={option.value}>
+                  {option.icon && <option.icon />}
+                  <span>{option.label}</span>
+                  {option.count && (
+                    <span className="ml-auto font-mono text-xs">
+                      {option.count}
+                    </span>
+                  )}
+                </FacetedItem>
+              ))}
           </FacetedGroup>
         </FacetedList>
       </FacetedContent>

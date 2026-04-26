@@ -43,25 +43,30 @@ export function TableRangeFilter<TData>({
 }: TableRangeFilterProps<TData>) {
   const meta = column.columnDef.meta
 
-  const [min, max] = React.useMemo(() => {
-    const range = column.columnDef.meta?.range
-    if (range) return range
+  // Capture faceted min/max as scalars so the memo refreshes on data change
+  // (column ref alone is stable across faceted-row updates).
+  const metaRange = column.columnDef.meta?.range
+  const facetedValues = column.getFacetedMinMaxValues()
+  const facetedMin = facetedValues?.[0]
+  const facetedMax = facetedValues?.[1]
+  const [min, max] = React.useMemo<[number, number]>(() => {
+    if (Array.isArray(metaRange) && metaRange.length === 2) {
+      const [a, b] = metaRange as [number, number]
+      return [a, b]
+    }
+    if (facetedMin != null && facetedMax != null) {
+      return [Number(facetedMin), Number(facetedMax)]
+    }
+    return [0, 100]
+  }, [metaRange, facetedMin, facetedMax])
 
-    const values = column.getFacetedMinMaxValues()
-    if (!values) return [0, 100]
-
-    return [values[0], values[1]]
-  }, [column])
-
+  // Plain-string formatter — `<input type="number">` requires a parsable
+  // value, so locale-formatted output (commas, NBSPs) breaks the input.
   const formatValue = React.useCallback(
     (value: string | number | undefined) => {
       if (value === undefined || value === "") return ""
       const numValue = Number(value)
-      return Number.isNaN(numValue)
-        ? ""
-        : numValue.toLocaleString(undefined, {
-            maximumFractionDigits: 0,
-          })
+      return Number.isNaN(numValue) ? "" : String(numValue)
     },
     [],
   )

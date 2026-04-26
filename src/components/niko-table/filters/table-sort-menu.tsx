@@ -69,6 +69,7 @@ interface TableSortItemProps {
   columnLabels: Map<string, string>
   onSortUpdate: (sortId: string, updates: Partial<ColumnSort>) => void
   onSortRemove: (sortId: string) => void
+  getVariantForColumn?: (id: string) => string | undefined
   className?: string
 }
 
@@ -79,6 +80,7 @@ function TableSortItem({
   columnLabels,
   onSortUpdate,
   onSortRemove,
+  getVariantForColumn,
 }: TableSortItemProps) {
   const fieldListboxId = `${sortItemId}-field-listbox`
   const fieldTriggerId = `${sortItemId}-field-trigger`
@@ -109,19 +111,9 @@ function TableSortItem({
     [sort.id, showFieldSelector, showDirectionSelector, onSortRemove],
   )
 
-  // Try to get the column's variant for sort label
-  // This assumes the table instance is available in closure (from parent TableSortMenu)
-  let variant = FILTER_VARIANTS.TEXT
-  try {
-    // @ts-expect-error: Accessing global window property for table instance variant detection
-    const col = (window.__tableSortMenuTable || null)
-      ?.getAllColumns?.()
-      .find?.((c: { id: string }) => c.id === sort.id)
-    variant = col?.columnDef?.meta?.variant || FILTER_VARIANTS.TEXT
-  } catch {
-    // ignore
-  }
-
+  const variant =
+    (getVariantForColumn?.(sort.id) as keyof typeof SORT_LABELS | undefined) ??
+    FILTER_VARIANTS.TEXT
   const labels = SORT_LABELS[variant] || SORT_LABELS[FILTER_VARIANTS.TEXT]
 
   return (
@@ -234,11 +226,11 @@ export function TableSortMenu<TData>({
   className,
   ...props
 }: TableSortMenuProps<TData>) {
-  // Expose table instance globally for TableSortItem variant detection
-  // (This is a workaround for passing table to deeply nested TableSortItem)
-  // @ts-expect-error: Assigning table instance to window for deep sort label access
-  // eslint-disable-next-line react-hooks/immutability
-  if (typeof window !== "undefined") window.__tableSortMenuTable = table
+  const getVariantForColumn = React.useCallback(
+    (id: string): string | undefined =>
+      table.getAllColumns().find(c => c.id === id)?.columnDef?.meta?.variant,
+    [table],
+  )
   // ============================================================================
   // State & Refs
   // ============================================================================
@@ -255,12 +247,17 @@ export function TableSortMenu<TData>({
   // ============================================================================
   const onSortingChange = React.useCallback(
     (updater: React.SetStateAction<ColumnSort[]>) => {
-      table.setSorting(updater)
-      const newSorting =
-        typeof updater === "function" ? updater(sorting) : updater
-      externalOnSortingChange?.(newSorting)
+      // Resolve the next sorting against the table's current state, not the
+      // closure-captured `sorting` — eliminates any chance of drift if the
+      // callback fires from an interaction queued before the latest render.
+      const nextSorting =
+        typeof updater === "function"
+          ? updater(table.getState().sorting)
+          : updater
+      table.setSorting(nextSorting)
+      externalOnSortingChange?.(nextSorting)
     },
-    [table, sorting, externalOnSortingChange],
+    [table, externalOnSortingChange],
   )
 
   // ============================================================================
@@ -286,7 +283,9 @@ export function TableSortMenu<TData>({
       columnLabels: labels,
       columns: availableColumns,
     }
-  }, [sorting, table])
+    // Depend on the column set, not just the (stable) table ref.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sorting, table, table.options.columns])
 
   // ============================================================================
   // Sort Actions
@@ -434,6 +433,7 @@ export function TableSortMenu<TData>({
                     columnLabels={columnLabels}
                     onSortUpdate={onSortUpdate}
                     onSortRemove={onSortRemove}
+                    getVariantForColumn={getVariantForColumn}
                   />
                 ))}
               </ul>

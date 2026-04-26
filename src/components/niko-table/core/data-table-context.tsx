@@ -105,28 +105,10 @@ export function DataTableProvider<TData>({
     }
   }, [externalIsLoading, state.isLoading, setIsLoading])
 
-  /**
-   * PERFORMANCE: Track table state changes to trigger context updates
-   *
-   * PROBLEM: The table instance reference doesn't change when its internal state changes.
-   * Without tracking state, context consumers don't re-render when:
-   * - User types in search (globalFilter changes)
-   * - User sorts columns (sorting changes)
-   * - User expands rows (expanded changes)
-   * - User selects rows (rowSelection changes)
-   *
-   * SOLUTION: Extract state values and create a lightweight hash that changes
-   * when any state changes. This hash is included in context value dependencies.
-   *
-   * WHY NOT JSON.stringify: Too expensive for large objects (10-50ms per render).
-   * Our hash uses key count + first 3 keys (sufficient for change detection).
-   *
-   * IMPACT: Enables proper reactivity - without this, search/filter/sort don't work.
-   * Also 70-90% faster than JSON.stringify for large state objects.
-   */
+  // Table instance ref is stable across state changes — extract individual
+  // state slices so context consumers re-render on filter/sort/select.
   const tableState = table.getState()
 
-  // Extract state values for dependency tracking (more efficient than JSON.stringify)
   const globalFilter = tableState.globalFilter
   const sorting = tableState.sorting
   const columnFilters = tableState.columnFilters
@@ -137,32 +119,11 @@ export function DataTableProvider<TData>({
   const columnPinning = tableState.columnPinning
   const columnOrder = tableState.columnOrder
 
-  /**
-   * PERFORMANCE: Create lightweight state hash instead of JSON.stringify
-   *
-   * WHY: JSON.stringify is expensive for large objects:
-   * - 100 selected rows: ~5-10ms per render
-   * - 1000 selected rows: ~20-50ms per render
-   *
-   * OUR APPROACH: Use key count + first 3 keys as hash
-   * - Fast: ~0.1-0.5ms regardless of object size
-   * - Sufficient: Detects changes accurately (collisions are rare)
-   *
-   * IMPACT: 70-90% faster context updates, especially with large selections.
-   *
-   * WHAT: Creates hash object that changes when any state value changes.
-   */
+  // Lightweight state hash beats JSON.stringify for large selections
+  // (~0.1ms vs 20-50ms at 1k rows) while still triggering consumer updates.
   const tableStateKey = React.useMemo(() => {
-    // Full sorted-keys hash. Earlier this used "key count + first 3
-    // sorted keys" as a lightweight signature, but that produced
-    // false negatives for selection state with sequential / similar-
-    // prefix row IDs — e.g. selecting {"r1","r2","r3"} vs selecting
-    // {"r1","r2","r4"} both hash to "3:r1,r2,r3" (only the *first*
-    // three sorted keys are read), so the cache reuses stale memo
-    // results and downstream effects don't fire. Sorted full-key
-    // join is O(n log n) per state slice but n is small (selection,
-    // visibility, expanded all bounded by visible rows / column
-    // count) and runs only when its source object reference changes.
+    // Full sorted-keys hash — a "first 3 keys" signature collided on
+    // sequential row IDs (`r1,r2,r3` vs `r1,r2,r4`).
     const getObjectHash = (
       obj: Record<string, unknown> | undefined,
     ): string => {
@@ -211,20 +172,8 @@ export function DataTableProvider<TData>({
     columnOrder,
   ])
 
-  /**
-   * PERFORMANCE: Memoize context value to prevent unnecessary consumer re-renders
-   *
-   * WHY: Without memoization, a new value object is created on every render.
-   * React Context uses Object.is() to compare values - new object = all consumers re-render.
-   *
-   * IMPACT: With 10+ filter/action components using useDataTable():
-   * - Without memo: 100+ unnecessary re-renders per keystroke
-   * - With memo: Only re-renders when actual dependencies change
-   * - Improvement: 60-80% reduction in unnecessary renders
-   *
-   * WHAT: Only creates new value object when table, columns, loading, or state changes.
-   * tableStateKey ensures consumers update when table state (filter/sort/select) changes.
-   */
+  // Memoize so context consumers (10+ filter/action components) only re-render
+  // when table, columns, loading, or actual table state changes.
   const value = React.useMemo(
     () =>
       ({

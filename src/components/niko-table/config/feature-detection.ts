@@ -35,38 +35,13 @@ export interface FeatureRequirements {
   pageCount?: number
 }
 
-/**
- * PERFORMANCE: Map cache for feature detection results
- *
- * WHY: Feature detection recursively walks the entire React tree, which is expensive:
- * - Deep trees: 50-150ms per detection
- * - Shallow trees: 10-30ms per detection
- *
- * Without caching, this runs on every columns/config change, causing noticeable lag.
- *
- * CACHING STRATEGY:
- * - Uses Map (not WeakMap) because ReactNode can include primitives (strings, numbers)
- * - LRU-style eviction when cache exceeds MAX_CACHE_SIZE
- * - Client-side only to prevent hydration mismatches (SSR/CSR differences)
- * - Disabled when columns provided (column-based detection changes frequently)
- *
- * IMPACT: Reduces detection time by 80-95% for cached children structures.
- * First detection: 50-150ms, subsequent: ~0ms (cached).
- *
- * WHAT: Caches detection results keyed by children structure.
- */
+// Tree-walk detection is 50-150ms; cache by `children` identity. Client-only
+// (SSR cache would mismatch) and skipped when `columns` provided (changes too
+// often). Map (not WeakMap) since ReactNode can be primitive.
 const detectionCache =
   typeof window !== "undefined" ? new Map<unknown, FeatureRequirements>() : null
 
-/**
- * PERFORMANCE: Maximum cache size to prevent memory leaks
- *
- * WHY: Without a limit, cache grows indefinitely as different component trees are detected.
- * This can cause memory leaks in long-running applications.
- *
- * SIZE: 50 entries is sufficient for most applications (typically 1-5 different table configs).
- * Each entry is small (~100 bytes), so 50 entries = ~5KB total.
- */
+// LRU cap so long-running apps don't leak.
 const MAX_CACHE_SIZE = 50
 
 /**
@@ -126,44 +101,15 @@ const COMPONENT_FEATURES: Record<string, FeatureRequirements> = {
 }
 
 /**
- * PERFORMANCE: Recursively searches for components and aggregates feature requirements
- *
- * WHY: This function walks the entire React tree to detect which features are enabled.
- * It's expensive because it:
- * - Recursively traverses all children
- * - Checks displayNames against COMPONENT_FEATURES registry
- * - Checks column definitions for filter/sort capabilities
- *
- * OPTIMIZATION: Uses Map caching to avoid re-detecting the same component tree.
- * - First detection: 50-150ms (full tree walk)
- * - Cached detection: ~0ms (instant lookup)
- *
- * CACHING RULES:
- * - Only caches on client-side (prevents SSR/CSR hydration mismatches)
- * - Only caches when no columns provided (column-based detection changes frequently)
- * - Only caches when children is an object (can be used as Map key)
- *
- * IMPACT: 80-95% reduction in detection time for repeated component structures.
- *
- * WHAT: Returns feature requirements object indicating which table features to enable.
+ * Walks the React tree to aggregate feature requirements declared by child
+ * components (via displayName) and column header functions.
  */
 export function detectFeaturesFromChildren(
   children: ReactNode,
   columns?: Array<{ header?: unknown; enableColumnFilter?: boolean }>,
 ): FeatureRequirements {
-  /**
-   * PERFORMANCE: Conditional caching based on detection type
-   *
-   * WHY: We can't cache when columns are provided because:
-   * - Column-based detection depends on column content (header, enableColumnFilter)
-   * - Columns change frequently (user adds/removes columns, changes config)
-   * - Caching would return stale results
-   *
-   * Children-only detection is stable (component structure rarely changes),
-   * so it's safe to cache.
-   *
-   * WHAT: Determines if we should use cache based on detection type.
-   */
+  // Skip cache when `columns` provided — column content drives detection and
+  // changes frequently, would return stale results.
   const shouldCache =
     detectionCache && !columns && children && typeof children === "object"
 

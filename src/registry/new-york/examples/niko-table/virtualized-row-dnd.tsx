@@ -4,7 +4,7 @@ import * as React from "react"
 import { DataTableRoot } from "@/components/niko-table/core/data-table-root"
 import { DataTable } from "@/components/niko-table/core/data-table"
 import {
-  DataTableVirtualizedHeader,
+  DataTableVirtualizedFlexHeader,
   DataTableVirtualizedEmptyBody,
 } from "@/components/niko-table/core/data-table-virtualized-structure"
 import { DataTableVirtualizedDndBody } from "@/components/niko-table/core/data-table-virtualized-dnd-structure"
@@ -212,7 +212,7 @@ export default function VirtualizedRowDndExample() {
     <DataTableRoot data={data} columns={columns} getRowId={row => row.id}>
       <DataTableRowDndProvider data={data} onReorder={setData}>
         <DataTable height={500}>
-          <DataTableVirtualizedHeader />
+          <DataTableVirtualizedFlexHeader />
           <DataTableVirtualizedDndBody estimateSize={40} overscan={10}>
             <DataTableVirtualizedEmptyBody>
               <DataTableEmptyMessage>

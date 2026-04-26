@@ -78,7 +78,9 @@ export function TableViewMenu<TData>({
           column =>
             typeof column.accessorFn !== "undefined" && column.getCanHide(),
         ),
-    [table],
+    // Depend on the column set, not just the (stable) table ref.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [table, table.options.columns],
   )
 
   return (

@@ -121,6 +121,11 @@ export function TableColumnSliderFilterOptions<TData, TValue>({
   const defaultRange = column.columnDef.meta?.range
   const unit = manualUnit ?? column.columnDef.meta?.unit
 
+  // Capture faceted min/max as scalars so the memo re-runs when filters/data change.
+  const facetedValues = column.getFacetedMinMaxValues()
+  const facetedMin = facetedValues?.[0]
+  const facetedMax = facetedValues?.[1]
+
   // Compute range values - memoized to avoid recalculation
   const { min, max, step } = React.useMemo<{
     min: number
@@ -146,12 +151,9 @@ export function TableColumnSliderFilterOptions<TData, TValue>({
       maxValue = defaultRange[1]
     }
     // Priority 4: Get min/max from faceted values
-    else {
-      const facetedValues = column.getFacetedMinMaxValues()
-      if (facetedValues?.[0] != null && facetedValues?.[1] != null) {
-        minValue = Number(facetedValues[0])
-        maxValue = Number(facetedValues[1])
-      }
+    else if (facetedMin != null && facetedMax != null) {
+      minValue = Number(facetedMin)
+      maxValue = Number(facetedMax)
     }
 
     // Calculate appropriate step size based on range
@@ -168,7 +170,15 @@ export function TableColumnSliderFilterOptions<TData, TValue>({
       max: maxValue,
       step: manualStep ?? calculatedStep,
     }
-  }, [column, defaultRange, manualRange, manualMin, manualMax, manualStep])
+  }, [
+    defaultRange,
+    manualRange,
+    manualMin,
+    manualMax,
+    manualStep,
+    facetedMin,
+    facetedMax,
+  ])
 
   const range = React.useMemo((): RangeValue => {
     return columnFilterValue ?? [min, max]

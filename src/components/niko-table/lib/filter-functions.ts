@@ -18,49 +18,16 @@ import { JOIN_OPERATORS, FILTER_OPERATORS, FILTER_VARIANTS } from "./constants"
 // Regex Cache for Performance
 // ============================================================================
 
-/**
- * PERFORMANCE: Cache for compiled regex patterns
- *
- * WHY: Filter functions create regex patterns for every cell in every row.
- * Without caching:
- * - 1,000 rows × 10 columns = 10,000 regex creations per search keystroke
- * - Each `new RegExp()` is ~0.01-0.05ms
- * - Total: 100-500ms per keystroke (noticeable lag)
- *
- * WITH caching:
- * - First search: Creates regex once, caches it
- * - Subsequent searches: Reuses cached regex
- * - Total: 5-20ms per keystroke (70-90% faster)
- *
- * IMPACT: Critical for search performance - without this, typing feels laggy.
- * Especially important for large tables (1000+ rows).
- *
- * CACHE STRATEGY: LRU-like eviction - removes oldest entries when limit reached.
- * MAX_REGEX_CACHE_SIZE = 100 is sufficient for most use cases.
- */
+// LRU-style regex cache. At 1k rows × 10 cols, naive `new RegExp` per cell
+// burns 100-500ms per keystroke; reuse drops it to 5-20ms.
 const regexCache = new Map<string, RegExp>()
 const MAX_REGEX_CACHE_SIZE = 100
 
-/**
- * Module-scoped guard so the RELATIVE-not-implemented warning fires
- * at most once per page load. `applyFilterOperator` runs per row ×
- * per filter, so an unguarded `console.error` would emit a line for
- * every cell evaluated against a RELATIVE filter — easily thousands
- * of lines per filter render. The first error is enough to surface
- * the gap; subsequent rows return `false` silently.
- */
+// Module-scoped guard so the RELATIVE-not-implemented warning fires once,
+// not once per row × filter (would emit thousands of lines).
 let hasLoggedRelativeFilterWarning = false
 
-/**
- * PERFORMANCE: Get or create a cached regex pattern
- *
- * WHY: Avoids expensive regex compilation by caching compiled patterns.
- * Uses LRU-like eviction to prevent memory leaks.
- *
- * IMPACT: 70-90% faster filter execution for repeated search patterns.
- *
- * WHAT: Returns cached regex if exists, otherwise creates and caches new one.
- */
+// LRU-evicted regex cache lookup.
 function getOrCreateRegex(pattern: string, flags: string): RegExp {
   const key = `${pattern}:${flags}`
 
@@ -169,31 +136,9 @@ export const extendedFilter: FilterFn<RowData> = (
 }
 
 /**
- * Global filter function that handles complex filter logic with proper operator precedence
- *
- * This function supports multiple filtering modes:
- * 1. Simple string search across all columns
- * 2. Pure OR logic (legacy support)
- * 3. Mixed AND/OR logic with mathematical precedence
- *
- * MATHEMATICAL PRECEDENCE (BODMAS/PEMDAS):
- * AND operators have higher precedence than OR operators, creating implicit grouping.
- *
- * Examples:
- *
- * Filter: name contains "phone" AND price < 500 OR category is "electronics"
- * Evaluates as: (name contains "phone" AND price < 500) OR (category is "electronics")
- *
- * Filter: name contains "a" AND name contains "b" OR brand is "apple" AND price > 100
- * Evaluates as: (name contains "a" AND name contains "b") OR (brand is "apple" AND price > 100)
- *
- * Filter: status is "active" OR priority is "high" AND category is "urgent"
- * Evaluates as: (status is "active") OR (priority is "high" AND category is "urgent")
- *
- * ALGORITHM:
- * 1. Split filters by OR operators to create AND-groups
- * 2. Evaluate each AND-group (all conditions must be true)
- * 3. OR all group results together (at least one group must be true)
+ * Global filter with operator precedence. Supports plain string search,
+ * pure OR, and mixed AND/OR (AND has higher precedence than OR — splits
+ * filters into OR-separated AND-groups).
  */
 export const globalFilter: FilterFn<RowData> = (
   row,
@@ -527,12 +472,8 @@ function applyFilterOperator(
 
     // Date operators (basic implementation)
     case FILTER_OPERATORS.RELATIVE:
-      // Not yet implemented — but still wired into the UI via
-      // `dateOperators` in `config/data-table.ts`. Throw in dev so
-      // the gap is loud during development; in production fall back
-      // to returning *no* matches (safer than silently passing every
-      // row, which made the date filter look broken to end users).
-      // Replace this branch with the real comparison once implemented.
+      // Not implemented — throw in dev (loud), return no matches in prod
+      // (safer than silently passing every row).
       if (process.env.NODE_ENV !== "production") {
         throw new Error(
           "FILTER_OPERATORS.RELATIVE is not yet implemented. Either remove the 'Is relative to today' option from the date filter UI or implement this case.",
@@ -692,23 +633,5 @@ export const createFilterValue = <TData extends RowData = RowData>(
     joinOperator: JOIN_OPERATORS.AND, // Default join operator
   }
 }
-/**
- * MIXED FILTER LOGIC IMPLEMENTATION NOTES:
- *
- * Both table-filter-menu.tsx and table-inline-filter.tsx now support mixed AND/OR logic:
- *
- * 1. Each filter (except the first) can have its own joinOperator: JOIN_OPERATORS.AND | JOIN_OPERATORS.OR
- * 2. When mixed operators are detected, filters are stored in globalFilter with joinOperator: JOIN_OPERATORS.MIXED
- * 3. The globalFilter function applies mathematical precedence (AND before OR)
- * 4. Pure AND logic continues to use columnFilters for optimal performance
- *
- * UI BEHAVIOR:
- * - Filter Menu: Individual dropdowns for each filter's join operator
- * - Inline Filter: Supports mixed logic but uses programmatic join operators
- * - State Display: Shows "MIXED" mode when individual operators are used
- *
- * PRECEDENCE EXAMPLES:
- * "A AND B OR C AND D" → "(A AND B) OR (C AND D)"
- * "A OR B AND C" → "(A) OR (B AND C)"
- * "A AND B AND C OR D" → "(A AND B AND C) OR (D)"
- */
+// Mixed AND/OR: filters tagged JOIN_OPERATORS.MIXED apply AND-before-OR
+// precedence. Pure AND still goes through columnFilters for perf.

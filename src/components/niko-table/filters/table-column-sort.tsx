@@ -110,12 +110,7 @@ export function TableColumnSortOptions<TData, TValue>({
           nativeEvent?: { shiftKey?: boolean }
         },
   ) => {
-    // Detect multi-sort (Shift key)
-    // We check multiple sources in order of reliability:
-    // 1. Ref from global listener (most reliable - synchronous access, no batching issues)
-    // 2. State from global listener (backup, may have timing issues)
-    // 3. Direct event property (for native mouse/keyboard events)
-    // 4. Radix CustomEvent detail (specifically for DropdownMenuItem selection)
+    // Detect Shift across event sources (ref → state → native event → Radix CustomEvent.detail).
     const isMulti =
       isShiftPressedRef.current ||
       isShiftPressed ||

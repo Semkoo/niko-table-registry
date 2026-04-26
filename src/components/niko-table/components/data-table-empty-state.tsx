@@ -80,15 +80,7 @@ export interface DataTableEmptyIconProps {
 }
 
 /**
- * PERFORMANCE: Icon component for empty state - memoized with React.memo
- *
- * WHY: Empty state components re-render whenever table state changes (filter, sort, etc.).
- * Without memoization, these components re-render even when their props haven't changed.
- *
- * IMPACT: Prevents unnecessary re-renders when table state changes but empty state props are stable.
- * With 5-10 empty state sub-components, this saves ~2-5ms per table state change.
- *
- * WHAT: Only re-renders when props (children, className) actually change.
+ * Icon component for empty state. Memoized so table-state changes don't re-render it.
  *
  * @example
  * <DataTableEmptyIcon>
@@ -116,14 +108,7 @@ export interface DataTableEmptyMessageProps {
 }
 
 /**
- * PERFORMANCE: Message component for empty state - memoized with React.memo
- *
- * WHY: Re-renders on every table state change. Memoization prevents unnecessary
- * re-renders when props haven't changed.
- *
- * IMPACT: Prevents ~1-2ms of work per table state change when props are stable.
- *
- * WHAT: Only re-renders when props (children, className) or filter state changes.
+ * Message component for empty state. Memoized; renders only when not filtered.
  *
  * @example
  * <DataTableEmptyMessage>
@@ -165,14 +150,7 @@ export interface DataTableEmptyFilteredMessageProps {
 }
 
 /**
- * PERFORMANCE: Filtered message component - memoized with React.memo
- *
- * WHY: Re-renders on every table state change. Memoization prevents unnecessary
- * re-renders when props haven't changed.
- *
- * IMPACT: Prevents ~1-2ms of work per table state change when props are stable.
- *
- * WHAT: Only re-renders when props (children, className) or filter state changes.
+ * Filtered-state message — renders only when a filter is active. Memoized.
  *
  * @example
  * <DataTableEmptyFilteredMessage>

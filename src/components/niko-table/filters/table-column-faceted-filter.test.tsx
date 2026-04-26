@@ -169,11 +169,11 @@ describe("TableColumnFacetedFilterMenu — explicit options count enrichment", (
     facetedFilterSpy.mockClear()
   })
 
-  it("merges live counts into caller-supplied options on the multi-select path", () => {
+  it("merges live counts into caller-supplied options and hides zero-count entries", () => {
     const callerOptions: Option[] = [
       { label: "A", value: "a" },
       { label: "B", value: "b" },
-      { label: "C", value: "c" },
+      { label: "C", value: "c" }, // resolves to count 0 — hidden by default
     ]
     render(<Harness multiple options={callerOptions} />)
     const lastProps = facetedFilterSpy.mock.calls.at(-1)?.[0] as {
@@ -182,11 +182,13 @@ describe("TableColumnFacetedFilterMenu — explicit options count enrichment", (
     expect(lastProps.options).toEqual([
       { label: "A", value: "a", count: 2 },
       { label: "B", value: "b", count: 1 },
-      { label: "C", value: "c", count: 0 },
     ])
   })
 
-  it("narrows and counts explicit options on the single-select path", () => {
+  it("hides caller-supplied options whose count resolves to 0 (cross-filter default)", () => {
+    // The default cross-filter rule hides options at count 0. Server-side
+    // tables exploit this: pass the full static list with cross-filter counts,
+    // and impossible-result options disappear automatically.
     const callerOptions: Option[] = [
       { label: "A", value: "a" },
       { label: "B", value: "b" },

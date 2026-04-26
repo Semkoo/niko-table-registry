@@ -73,56 +73,23 @@ export function useGeneratedOptions<TData>(
   const columnFilters = state.columnFilters
   const globalFilter = state.globalFilter
 
-  /**
-   * PERFORMANCE: Memoize columns to avoid recalculating on every render
-   *
-   * WHY: `table.getAllColumns()` may return a new array reference on every call,
-   * even when columns haven't changed. This causes downstream useMemo to recalculate.
-   *
-   * REACTIVITY: We include `table.options.columns` as a dependency so that when
-   * column definitions change (e.g., updated `meta.options` from server-side facets),
-   * this memo recomputes. The `table` reference alone is stable across renders
-   * and would cause stale column data.
-   */
-
+  // `table.options.columns` in deps so updated `meta.options` (e.g. from
+  // server-side facets) invalidate the memo — `table` ref alone is too stable.
   const columns = React.useMemo(
     () => table.getAllColumns(),
     [table, table.options.columns],
   )
 
-  /**
-   * REACTIVITY FIX: Extract coreRows outside memos so that when async data
-   * arrives, the new rows array reference triggers memo recomputation.
-   * Without this, `table` reference is stable across data changes and memos
-   * would return stale (empty) results after initial render with no data.
-   */
+  // Extract `coreRows` so async-data row-array identity changes drive recompute;
+  // the `table` ref is stable and would otherwise hold stale (empty) results.
   const coreRows = table.getCoreRowModel().rows
 
   // Normalize array deps to stable strings for React hook linting
   const includeKey = includeColumns?.join(",") ?? ""
   const excludeKey = excludeColumns?.join(",") ?? ""
 
-  /**
-   * PERFORMANCE: Memoize option generation - expensive computation
-   *
-   * WHY: Option generation is expensive:
-   * - Iterates through all columns
-   * - For each select/multi_select column: iterates through all rows
-   * - Counts occurrences, formats labels, sorts options
-   * - With 1,000 rows and 5 select columns: ~50-100ms per generation
-   *
-   * WITHOUT memoization: Runs on every render, causing noticeable lag.
-   *
-   * WITH memoization: Only recalculates when:
-   * - Columns change
-   * - Filters change (if dynamicCounts is true)
-   * - Config changes (includeColumns, excludeColumns, etc.)
-   *
-   * IMPACT: 80-95% reduction in unnecessary option regeneration.
-   * Critical for tables with many select columns and large datasets.
-   *
-   * WHAT: Generates options map keyed by column ID, only when dependencies change.
-   */
+  // Expensive: walks all columns × all rows (~50-100ms at 1k rows × 5 selects).
+  // Memoize so generation only runs when columns, filters, or config change.
   const optionsByColumn = React.useMemo(() => {
     const result: Record<string, Option[]> = {}
 
@@ -156,29 +123,21 @@ export function useGeneratedOptions<TData>(
         continue
       }
 
-      // limitToFilteredRows controls which rows to use for generating options
-      // dynamicCounts controls which rows to use for calculating counts
-      // When generating options for a column, we want to exclude that column's own filter
-      // so we see all options that exist in the filtered dataset (from other filters)
-      const optionSourceRows = limitToFilteredRows
-        ? getFilteredRowsExcludingColumn(
-            table,
-            coreRows,
-            colId,
-            columnFilters,
-            globalFilter,
-          )
-        : coreRows
-
-      const countSourceRows = colDynamicCounts
-        ? getFilteredRowsExcludingColumn(
-            table,
-            coreRows,
-            colId,
-            columnFilters,
-            globalFilter,
-          )
-        : coreRows
+      // `limitToFilteredRows` selects rows for option discovery; `dynamicCounts`
+      // selects rows for count computation. Both exclude this column's own
+      // filter. When both are true, compute once and reuse — was a double walk.
+      const filteredRowsExcl =
+        limitToFilteredRows || colDynamicCounts
+          ? getFilteredRowsExcludingColumn(
+              table,
+              coreRows,
+              colId,
+              columnFilters,
+              globalFilter,
+            )
+          : coreRows
+      const optionSourceRows = limitToFilteredRows ? filteredRowsExcl : coreRows
+      const countSourceRows = colDynamicCounts ? filteredRowsExcl : coreRows
 
       // If we have static options with augment strategy, we use static options and only calculate counts
       if (meta.options && meta.options.length > 0 && colMerge === "augment") {
@@ -213,12 +172,16 @@ export function useGeneratedOptions<TData>(
           )
         }
 
-        // Return static options with augmented counts
+        // Fresh `countMap` always wins. The wrapper component mutates
+        // `meta.options` to inject counts, so on subsequent renders
+        // `opt.count` here is whatever was pinned last render — using it
+        // would freeze counts at their first-render value.
+        // Server-side tables that need true dataset-wide counts should pass
+        // them through the faceted column-header `options` prop instead,
+        // where caller-supplied counts are honored without mutation.
         result[colId] = filteredStaticOptions.map((opt: Option) => ({
           ...opt,
-          count: colShowCounts
-            ? (countMap.get(opt.value) ?? opt.count)
-            : undefined,
+          count: colShowCounts ? (countMap.get(opt.value) ?? 0) : undefined,
         }))
         continue
       }
