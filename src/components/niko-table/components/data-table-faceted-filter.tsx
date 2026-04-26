@@ -103,20 +103,9 @@ interface UseFacetedOptionsArgs<TData> {
   limitToFilteredRows: boolean
 }
 
-/**
- * Resolves the option list surfaced by a faceted filter by choosing between
- * three sources — in priority order:
- *
- *   1. Caller-supplied `options` (static), enriched via `buildFacetedOptions`.
- *   2. The meta-aware generator (`useGeneratedOptionsForColumn`) for columns
- *      declared as `select`/`multi_select` variants.
- *   3. A data-derived fallback via `buildFacetedOptions`, for columns that
- *      don't declare a select variant but are still being used with a
- *      faceted filter (boolean/text/etc.).
- *
- * The helper is called at most once per render: the selection memo gates it
- * behind "is this path actually needed?" so we don't walk the row set twice.
- */
+// Resolves option list in priority order: 1) caller `options`, 2) meta-aware
+// generator (select/multi_select), 3) data-derived fallback. Memo gates it so
+// we don't walk rows twice.
 function useFacetedOptions<TData>({
   table,
   accessorKey,
@@ -142,12 +131,8 @@ function useFacetedOptions<TData>({
   const columnFilters = state.columnFilters
   const globalFilter = state.globalFilter
 
-  /**
-   * REACTIVITY FIX: Extract coreRows outside memos so that when async data
-   * arrives, the new rows array reference triggers memo recomputation.
-   * Without this, `table` reference is stable across data changes and memos
-   * would return stale (empty) results after initial render with no data.
-   */
+  // Extract `coreRows` so async-data row-array identity drives recompute;
+  // `table` ref is stable and would hold stale (empty) results.
   const coreRows = table.getCoreRowModel().rows
 
   return React.useMemo((): Option[] => {

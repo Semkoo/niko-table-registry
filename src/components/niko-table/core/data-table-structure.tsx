@@ -26,6 +26,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { DataTableEmptyState } from "../components/data-table-empty-state"
 import { DataTableColumnHeaderRoot } from "../components/data-table-column-header"
 import { createScrollHandler } from "../lib/create-scroll-handler"
+import { resolveRowFromClick } from "../lib/row-click"
 import { getCommonPinningStyles } from "../lib/styles"
 
 // ============================================================================
@@ -140,75 +141,23 @@ export function DataTableBody<TData>({
   scrollThreshold = 50,
   onRowClick,
 }: DataTableBodyProps<TData>) {
-  const { table, isLoading } = useDataTable<TData>()
+  const { table, columns, isLoading } = useDataTable<TData>()
   const { rows } = table.getRowModel()
   const containerRef = React.useRef<HTMLTableSectionElement>(null)
 
-  /**
-   * PERFORMANCE: Memoize scroll callbacks to prevent effect re-runs
-   *
-   * WHY: These callbacks are used in the scroll event listener's dependency array.
-   * Without useCallback, new functions are created on every render, causing the
-   * effect to re-run and re-attach event listeners unnecessarily.
-   *
-   * IMPACT: Prevents event listener re-attachment on every render (~1-3ms saved).
-   * Also prevents potential memory leaks from multiple listeners.
-   *
-   * WHAT: Only creates new functions when onScrolledTop/onScrolledBottom props change.
-   */
-
-  /**
-   * PERFORMANCE: Single row-click handler with event delegation (useCallback)
-   *
-   * WHY: Without this, we create one inline arrow function per row in the map,
-   * causing N new function references every render and preventing row memoization.
-   *
-   * IMPACT: One stable callback (when deps don't change) instead of N per render.
-   *
-   * WHAT: Delegates click on TableBody, reads data-row-index from the clicked row,
-   * skips if click target is interactive, then calls onRowClick with the row data.
-   */
+  // Single delegated click handler — avoids one inline fn per row.
   const handleRowClick = React.useCallback(
     (event: React.MouseEvent<HTMLTableSectionElement>) => {
       if (!onRowClick) return
-      const target = event.target as HTMLElement
-      const rowElement = target.closest("tr[data-row-id]")
-      if (!rowElement) return
-
-      const isInteractiveElement =
-        target.closest("button") ||
-        target.closest("input") ||
-        target.closest("a") ||
-        target.closest('[role="button"]') ||
-        target.closest('[role="checkbox"]') ||
-        target.closest("[data-radix-collection-item]") ||
-        target.closest('[data-slot="checkbox"]') ||
-        target.tagName === "INPUT" ||
-        target.tagName === "BUTTON" ||
-        target.tagName === "A"
-      if (isInteractiveElement) return
-
-      // Resolve via stable `row.id` rather than a positional index —
-      // sort/filter/reorder leave indices unstable but ids are
-      // canonical. `table.getRow` is a Map lookup internally so this
-      // stays O(1) — and importantly the closure depends only on
-      // `table` (stable across renders) not on `rows`, so the
-      // useCallback identity stays stable across data updates.
-      const rowId = rowElement.getAttribute("data-row-id")
-      if (rowId === null) return
-      const row = table.getRow(rowId)
+      const row = resolveRowFromClick(event.target as HTMLElement, table)
       if (!row) return
       onRowClick(row.original, event)
     },
     [onRowClick, table],
   )
 
-  /**
-   * Attach a passive scroll listener on the container. Listener body
-   * lives in `createScrollHandler` so the four data-table bodies
-   * share one canonical implementation. Passive flag unlocks the
-   * browser's scroll-thread optimization (smoother scrolling).
-   */
+  // Passive scroll listener — shared `createScrollHandler` keeps all four body
+  // variants in sync; passive flag unlocks the browser's scroll-thread path.
   React.useEffect(() => {
     const container = containerRef.current?.closest(
       '[data-slot="table-container"]',
@@ -226,6 +175,17 @@ export function DataTableBody<TData>({
     return () => container.removeEventListener("scroll", handleScroll)
   }, [onScroll, onScrolledTop, onScrolledBottom, scrollThreshold])
 
+  // Hoist expand-column lookup above the row map (was O(rows × cols) per render).
+  // `columns` is in deps because the table reference is too stable on its own.
+  const expandColumnId = React.useMemo(
+    () =>
+      table.getAllColumns().find(col => col.columnDef.meta?.expandedContent)
+        ?.id,
+    [table, columns],
+  )
+
+  const isClickable = !!onRowClick
+
   return (
     <TableBody
       ref={containerRef}
@@ -235,13 +195,14 @@ export function DataTableBody<TData>({
       {/* Only show rows when not loading */}
       {!isLoading && rows?.length
         ? rows.map(row => {
-            const isClickable = !!onRowClick
             const isExpanded = row.getIsExpanded()
 
-            // Find if any column has expandedContent meta
-            const expandColumn = row
-              .getAllCells()
-              .find(cell => cell.column.columnDef.meta?.expandedContent)
+            // Resolve the expand cell only when expanded, using the
+            // memoized `expandColumnId`.
+            const expandCell =
+              isExpanded && expandColumnId
+                ? row.getAllCells().find(c => c.column.id === expandColumnId)
+                : undefined
 
             return (
               <React.Fragment key={row.id}>
@@ -277,13 +238,13 @@ export function DataTableBody<TData>({
                 </TableRow>
 
                 {/* Expanded content row */}
-                {isExpanded && expandColumn && (
+                {expandCell && (
                   <TableRow>
                     <TableCell
                       colSpan={row.getVisibleCells().length}
                       className="p-0"
                     >
-                      {expandColumn.column.columnDef.meta?.expandedContent?.(
+                      {expandCell.column.columnDef.meta?.expandedContent?.(
                         row.original,
                       )}
                     </TableCell>
@@ -341,25 +302,8 @@ export function DataTableEmptyBody({
 }: DataTableEmptyBodyProps) {
   const { table, columns, isLoading } = useDataTable()
 
-  /**
-   * PERFORMANCE: Memoize filter state check and early return optimization
-   *
-   * WHY: Without memoization, filter state is recalculated on every render.
-   * Without early return, expensive operations (getState(), getRowModel()) run
-   * even when the empty state isn't visible (table has rows).
-   *
-   * OPTIMIZATION PATTERN:
-   * 1. Call hooks first (React rules - hooks must be called in same order)
-   * 2. Memoize expensive computations (isFiltered)
-   * 3. Early return to skip rendering when not needed
-   *
-   * IMPACT:
-   * - Without early return: ~5-10ms wasted per render when table has rows
-   * - With optimization: ~0ms when table has rows (early return)
-   * - Memoization: Prevents recalculation when filter state hasn't changed
-   *
-   * WHAT: Only computes filter state when empty state is actually visible.
-   */
+  // Hooks first (rules-of-hooks), then early-return below skips work when
+  // the empty state isn't visible.
   const tableState = table.getState()
   const isFiltered = React.useMemo(
     () =>
@@ -476,7 +420,11 @@ export function DataTableLoading({
   colSpan,
   className,
 }: DataTableLoadingProps) {
-  const { columns } = useDataTable()
+  const { columns, isLoading } = useDataTable()
+
+  // Self-gate on `isLoading` to match peer composables — otherwise the row
+  // stays visible after data resolves.
+  if (!isLoading) return null
 
   return (
     <TableRow>

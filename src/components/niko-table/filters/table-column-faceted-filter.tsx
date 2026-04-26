@@ -303,34 +303,17 @@ export function TableColumnFacetedFilterMenu<TData, TValue>({
     const showCounts =
       (column.columnDef.meta as Record<string, unknown>)?.showCounts ?? true
 
-    // Fast path: no narrowing needed and no counts to compute — normalize
-    // `count` to undefined so output shape is consistent with the fallback
-    // path, which also strips counts when `showCounts` is false.
-    if (!limitToFilteredRows && !showCounts) {
+    // Caller-supplied options are never narrowed — the caller is the source
+    // of truth for which values can ever appear (e.g. server-side tables
+    // pass the full static option list every render). Narrowing here would
+    // hide cross-filter pivots.
+    if (!showCounts) {
       return options.map(opt => ({ ...opt, count: undefined }))
     }
 
-    const optionRows = limitToFilteredRows ? filteredRows : coreRows
     const countRows = dynamicCounts ? filteredRows : coreRows
-
-    if (!optionRows || !countRows) return options
-
-    const availableOptions = limitToFilteredRows ? new Set<string>() : null
-    if (availableOptions) {
-      optionRows.forEach(row => {
-        const raw = row.getValue(column.id) as unknown
-        const values: unknown[] = Array.isArray(raw) ? raw : [raw]
-        values.forEach(v => {
-          if (v != null) {
-            const s = String(v)
-            if (s) availableOptions.add(s)
-          }
-        })
-      })
-    }
-
-    const valueCounts = showCounts ? new Map<string, number>() : null
-    if (valueCounts) {
+    const valueCounts = new Map<string, number>()
+    if (countRows) {
       countRows.forEach(row => {
         const raw = row.getValue(column.id) as unknown
         const values: unknown[] = Array.isArray(raw) ? raw : [raw]
@@ -343,23 +326,24 @@ export function TableColumnFacetedFilterMenu<TData, TValue>({
       })
     }
 
-    const filtered = availableOptions
-      ? options.filter(opt => availableOptions.has(opt.value))
-      : options
-
-    return filtered.map(opt => ({
-      ...opt,
-      count: valueCounts ? (valueCounts.get(opt.value) ?? 0) : undefined,
-    }))
-  }, [
-    options,
-    table,
-    column,
-    limitToFilteredRows,
-    dynamicCounts,
-    coreRows,
-    filteredRows,
-  ])
+    /**
+     * Cross-filter narrowing default — caller-supplied `count` wins (server-
+     * side tables compute true cross-filter counts on the server; client-
+     * derived `valueCounts` only sees the current page). After merging,
+     * options with explicit `count: 0` are hidden so server-side tables get
+     * automatic cross-filter narrowing without each caller writing a helper.
+     *
+     * Opt-out: pass `count: undefined` (or omit it) on options you want
+     * visible regardless. Pure label-only callers (no counts anywhere) are
+     * unaffected — `valueCounts` falls back to client rows.
+     */
+    return options
+      .map(opt => ({
+        ...opt,
+        count: opt.count ?? valueCounts.get(opt.value) ?? 0,
+      }))
+      .filter(opt => opt.count !== 0)
+  }, [options, table, column, dynamicCounts, coreRows, filteredRows])
 
   const resolvedOptions =
     enrichedCallerOptions ??

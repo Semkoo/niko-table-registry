@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/table"
 import { DataTableColumnHeaderRoot } from "../components/data-table-column-header"
 import { createScrollHandler } from "../lib/create-scroll-handler"
+import { resolveRowFromClick } from "../lib/row-click"
 import { getCommonPinningStyles } from "../lib/styles"
 import {
   SortableContext,
@@ -50,23 +51,10 @@ import type { ScrollEvent } from "./data-table-virtualized-structure"
 // Stable measureElement — computed once at module level
 // ============================================================================
 
-/**
- * Custom element measurer for the row virtualizer. Returns the
- * base row height plus, when present, the height of an adjacent
- * expanded-content row (`<tr data-slot="datatable-expanded-row">`).
- * See the equivalent helper in `data-table-virtualized-structure.tsx`
- * for the full rationale — short version: the virtualizer's
- * `ResizeObserver` only attaches to the base row, so expanded
- * sibling content goes unmeasured and `getTotalSize()` drifts.
- *
- * Disabled in Firefox where `getBoundingClientRect` returns stale
- * values during virtual-scroll reflows, causing measurement loops.
- *
- * Defined at module scope so every virtualizer instance shares the
- * same stable function reference — no `useCallback` / `useMemo`
- * overhead, and React never detaches/reattaches the ref due to a
- * changed identity.
- */
+// See `data-table-virtualized-structure.tsx` for full rationale: sums base +
+// adjacent expanded-row height since ResizeObserver only attaches to the base.
+// Disabled in Firefox (stale getBoundingClientRect during scroll). Module-scoped
+// for stable reference identity.
 const measureElement: ((element: Element) => number) | undefined =
   typeof window !== "undefined" && navigator.userAgent.indexOf("Firefox") === -1
     ? (element: Element) => {
@@ -151,14 +139,9 @@ function VirtualizedDraggableRow({
     [setNodeRef, measureRef],
   )
 
-  // Re-measure on expansion toggle. `measureRef` (the virtualizer's
-  // `measureElement` callback) is idempotent — calling it again with
-  // the same node re-attaches its `ResizeObserver` and triggers a
-  // fresh height read, which walks `nextElementSibling` to include
-  // the expanded pane. This is the DnD-body counterpart to the
-  // non-DnD body's composite-key remount strategy: we keep
-  // `key={row.id}` to preserve `useSortable`, and pay the cost of
-  // one imperative re-measure per toggle instead.
+  // Re-measure on expansion toggle — `measureRef` is idempotent and
+  // re-walks `nextElementSibling` to include the expanded pane.
+  // Keeps `key={row.id}` stable so `useSortable` registration survives.
   React.useEffect(() => {
     if (measureRef && elementRef.current) {
       measureRef(elementRef.current)
@@ -213,6 +196,17 @@ export interface DataTableVirtualizedDndBodyProps<TData> {
    * with `HTMLTableRowElement`.
    */
   onRowClick?: (row: TData, event: React.MouseEvent<HTMLElement>) => void
+  /**
+   * Virtualizer-index-driven prefetch trigger — fires when the
+   * last rendered virtual row is within `prefetchThreshold` rows
+   * of the end. See `DataTableVirtualizedBody.onNearEnd` for the
+   * full rationale (strictly better than `onScrolledBottom` for
+   * infinite scroll: catches scrollbar drags, programmatic
+   * `scrollToIndex` jumps, and short initial renders).
+   */
+  onNearEnd?: () => void
+  /** Default `10`. See `DataTableVirtualizedBody.prefetchThreshold`. */
+  prefetchThreshold?: number
 }
 
 /**
@@ -240,9 +234,20 @@ export function DataTableVirtualizedDndBody<TData>({
   onScrolledTop,
   onScrolledBottom,
   scrollThreshold = 50,
+  onNearEnd,
+  prefetchThreshold = 10,
 }: DataTableVirtualizedDndBodyProps<TData>) {
-  const { table } = useDataTable()
+  const { table, columns } = useDataTable()
   const { rows } = table.getRowModel()
+
+  // Hoist expand-column lookup above the virtualizer loop. See `DataTableVirtualizedBody`.
+  const expandColumnId = React.useMemo(
+    () =>
+      table.getAllColumns().find(col => col.columnDef.meta?.expandedContent)
+        ?.id,
+    [table, columns],
+  )
+
   const [scrollElement, setScrollElement] =
     React.useState<HTMLDivElement | null>(null)
 
@@ -258,15 +263,8 @@ export function DataTableVirtualizedDndBody<TData>({
     [],
   )
 
-  // `measureElement` is attached unconditionally here (no
-  // `columnsLocked` gate as in the non-DnD body). Reason: DnD bodies
-  // use flex layout (`block` on tbody, `flex w-full` on rows) instead
-  // of `table-layout: auto → fixed`, so they don't go through the
-  // initial auto-layout pass that produces inflated row heights for
-  // the non-DnD body. Without that transition there's no window in
-  // which `ResizeObserver` could lock in wrong measurements, so a
-  // gate would only add complexity (a `columnsLocked` state + a lock
-  // effect that has nothing to lock).
+  // No `columnsLocked` gate — DnD bodies use flex layout (no auto-layout
+  // pass to mismeasure during), so `ResizeObserver` can attach immediately.
   const rowVirtualizer = useVirtualizer({
     count: rows.length,
     getScrollElement: () => scrollElement,
@@ -280,30 +278,7 @@ export function DataTableVirtualizedDndBody<TData>({
   const handleRowClick = React.useCallback(
     (event: React.MouseEvent<HTMLTableSectionElement>) => {
       if (!onRowClick) return
-      const target = event.target as HTMLElement
-      const rowElement = target.closest("tr[data-row-id]")
-      if (!rowElement) return
-
-      const isInteractiveElement =
-        target.closest("button") ||
-        target.closest("input") ||
-        target.closest("a") ||
-        target.closest('[role="button"]') ||
-        target.closest('[role="checkbox"]') ||
-        target.closest("[data-radix-collection-item]") ||
-        target.closest('[data-slot="checkbox"]') ||
-        target.tagName === "INPUT" ||
-        target.tagName === "BUTTON" ||
-        target.tagName === "A"
-      if (isInteractiveElement) return
-
-      // Resolve via stable `row.id` rather than a positional index —
-      // sort/filter/reorder leave indices unstable but ids are
-      // canonical. `table.getRow` is a Map lookup internally so this
-      // stays O(1).
-      const rowId = rowElement.getAttribute("data-row-id")
-      if (rowId === null) return
-      const row = table.getRow(rowId)
+      const row = resolveRowFromClick(event.target as HTMLElement, table)
       if (!row) return
       onRowClick(row.original as TData, event)
     },
@@ -346,6 +321,22 @@ export function DataTableVirtualizedDndBody<TData>({
     ? rowVirtualizer.getTotalSize() - lastItem.end
     : 0
 
+  const isNearEnd =
+    onNearEnd !== undefined &&
+    rows.length > 0 &&
+    lastItem !== null &&
+    lastItem.index >= rows.length - 1 - prefetchThreshold
+
+  const wasNearEndRef = React.useRef(false)
+  React.useEffect(() => {
+    if (isNearEnd && !wasNearEndRef.current) {
+      onNearEnd?.()
+    }
+    wasNearEndRef.current = isNearEnd
+  }, [isNearEnd, onNearEnd])
+
+  const isClickable = !!onRowClick
+
   return (
     <TableBody
       ref={parentRef}
@@ -363,12 +354,12 @@ export function DataTableVirtualizedDndBody<TData>({
         {/* Render visible rows as draggable */}
         {virtualItems.map(virtualRow => {
           const row = rows[virtualRow.index]
-          const isClickable = !!onRowClick
           const isExpanded = row.getIsExpanded()
 
-          const expandColumn = row
-            .getAllCells()
-            .find(cell => cell.column.columnDef.meta?.expandedContent)
+          const expandCell =
+            isExpanded && expandColumnId
+              ? row.getAllCells().find(c => c.column.id === expandColumnId)
+              : undefined
 
           return (
             <React.Fragment key={row.id}>
@@ -409,7 +400,7 @@ export function DataTableVirtualizedDndBody<TData>({
               </VirtualizedDraggableRow>
 
               {/* Expanded content row */}
-              {isExpanded && expandColumn && (
+              {isExpanded && expandCell && (
                 <TableRow
                   data-slot="datatable-expanded-row"
                   className="flex w-full"
@@ -418,7 +409,7 @@ export function DataTableVirtualizedDndBody<TData>({
                     colSpan={row.getVisibleCells().length}
                     className="w-full p-0"
                   >
-                    {expandColumn.column.columnDef.meta?.expandedContent?.(
+                    {expandCell.column.columnDef.meta?.expandedContent?.(
                       row.original,
                     )}
                   </TableCell>
@@ -553,6 +544,15 @@ export interface DataTableVirtualizedDndColumnBodyProps<TData> {
    * with `HTMLTableRowElement`.
    */
   onRowClick?: (row: TData, event: React.MouseEvent<HTMLElement>) => void
+  /**
+   * Virtualizer-index-driven prefetch trigger — fires when the
+   * last rendered virtual row is within `prefetchThreshold` rows
+   * of the end. See `DataTableVirtualizedBody.onNearEnd` for the
+   * full rationale.
+   */
+  onNearEnd?: () => void
+  /** Default `10`. See `DataTableVirtualizedBody.prefetchThreshold`. */
+  prefetchThreshold?: number
 }
 
 /**
@@ -579,9 +579,20 @@ export function DataTableVirtualizedDndColumnBody<TData>({
   onScrolledTop,
   onScrolledBottom,
   scrollThreshold = 50,
+  onNearEnd,
+  prefetchThreshold = 10,
 }: DataTableVirtualizedDndColumnBodyProps<TData>) {
-  const { table } = useDataTable()
+  const { table, columns } = useDataTable()
   const { rows } = table.getRowModel()
+
+  // Hoist expand-column lookup above the virtualizer loop. See `DataTableVirtualizedBody`.
+  const expandColumnId = React.useMemo(
+    () =>
+      table.getAllColumns().find(col => col.columnDef.meta?.expandedContent)
+        ?.id,
+    [table, columns],
+  )
+
   const [scrollElement, setScrollElement] =
     React.useState<HTMLDivElement | null>(null)
 
@@ -597,15 +608,8 @@ export function DataTableVirtualizedDndColumnBody<TData>({
     [],
   )
 
-  // `measureElement` is attached unconditionally here (no
-  // `columnsLocked` gate as in the non-DnD body). Reason: DnD bodies
-  // use flex layout (`block` on tbody, `flex w-full` on rows) instead
-  // of `table-layout: auto → fixed`, so they don't go through the
-  // initial auto-layout pass that produces inflated row heights for
-  // the non-DnD body. Without that transition there's no window in
-  // which `ResizeObserver` could lock in wrong measurements, so a
-  // gate would only add complexity (a `columnsLocked` state + a lock
-  // effect that has nothing to lock).
+  // No `columnsLocked` gate — DnD bodies use flex layout (no auto-layout
+  // pass to mismeasure during), so `ResizeObserver` can attach immediately.
   const rowVirtualizer = useVirtualizer({
     count: rows.length,
     getScrollElement: () => scrollElement,
@@ -639,30 +643,7 @@ export function DataTableVirtualizedDndColumnBody<TData>({
   const handleRowClick = React.useCallback(
     (event: React.MouseEvent<HTMLTableSectionElement>) => {
       if (!onRowClick) return
-      const target = event.target as HTMLElement
-      const rowElement = target.closest("tr[data-row-id]")
-      if (!rowElement) return
-
-      const isInteractiveElement =
-        target.closest("button") ||
-        target.closest("input") ||
-        target.closest("a") ||
-        target.closest('[role="button"]') ||
-        target.closest('[role="checkbox"]') ||
-        target.closest("[data-radix-collection-item]") ||
-        target.closest('[data-slot="checkbox"]') ||
-        target.tagName === "INPUT" ||
-        target.tagName === "BUTTON" ||
-        target.tagName === "A"
-      if (isInteractiveElement) return
-
-      // Resolve via stable `row.id` rather than a positional index —
-      // sort/filter/reorder leave indices unstable but ids are
-      // canonical. `table.getRow` is a Map lookup internally so this
-      // stays O(1).
-      const rowId = rowElement.getAttribute("data-row-id")
-      if (rowId === null) return
-      const row = table.getRow(rowId)
+      const row = resolveRowFromClick(event.target as HTMLElement, table)
       if (!row) return
       onRowClick(row.original as TData, event)
     },
@@ -679,6 +660,22 @@ export function DataTableVirtualizedDndColumnBody<TData>({
   const bottomSpacerHeight = lastItem
     ? rowVirtualizer.getTotalSize() - lastItem.end
     : 0
+
+  const isNearEnd =
+    onNearEnd !== undefined &&
+    rows.length > 0 &&
+    lastItem !== null &&
+    lastItem.index >= rows.length - 1 - prefetchThreshold
+
+  const wasNearEndRef = React.useRef(false)
+  React.useEffect(() => {
+    if (isNearEnd && !wasNearEndRef.current) {
+      onNearEnd?.()
+    }
+    wasNearEndRef.current = isNearEnd
+  }, [isNearEnd, onNearEnd])
+
+  const isClickable = !!onRowClick
 
   return (
     <TableBody
@@ -697,18 +694,13 @@ export function DataTableVirtualizedDndColumnBody<TData>({
       {virtualItems.map(virtualRow => {
         const row = rows[virtualRow.index]
         if (!row) return null
-        const isClickable = !!onRowClick
         const isExpanded = row.getIsExpanded()
 
-        // Find a column that defines `meta.expandedContent` — same
-        // contract used by `DataTableVirtualizedBody` and the row-DnD
-        // body. Without rendering the expanded sibling here, column-DnD
-        // tables lost the row-expansion feature entirely; adding it
-        // also lets the shared `measureElement` callback include the
-        // expanded pane's height in the virtualizer's measurement.
-        const expandColumn = row
-          .getAllCells()
-          .find(cell => cell.column.columnDef.meta?.expandedContent)
+        // Resolve the expand cell only when expanded, using the memoized `expandColumnId`.
+        const expandCell =
+          isExpanded && expandColumnId
+            ? row.getAllCells().find(c => c.column.id === expandColumnId)
+            : undefined
 
         return (
           <React.Fragment key={row.id}>
@@ -747,7 +739,7 @@ export function DataTableVirtualizedDndColumnBody<TData>({
 
             {/* Expanded content row — measured into the base row's
                 slot via the shared `measureElement` (sibling lookup). */}
-            {isExpanded && expandColumn && (
+            {isExpanded && expandCell && (
               <TableRow
                 data-slot="datatable-expanded-row"
                 className="flex w-full"
@@ -756,7 +748,7 @@ export function DataTableVirtualizedDndColumnBody<TData>({
                   colSpan={row.getVisibleCells().length}
                   className="w-full p-0"
                 >
-                  {expandColumn.column.columnDef.meta?.expandedContent?.(
+                  {expandCell.column.columnDef.meta?.expandedContent?.(
                     row.original,
                   )}
                 </TableCell>

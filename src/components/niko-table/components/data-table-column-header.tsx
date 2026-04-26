@@ -62,10 +62,13 @@ export function DataTableColumnHeaderRoot<TData, TValue>({
   column: Column<TData, TValue>
   children: React.ReactNode
 }) {
+  // Memoize so context subscribers only re-render when `column` identity changes.
+  const contextValue = React.useMemo(
+    () => ({ column }) as TableColumnHeaderContextValue<unknown, unknown>,
+    [column],
+  )
   return (
-    <TableColumnHeaderContext.Provider
-      value={{ column } as TableColumnHeaderContextValue<unknown, unknown>}
-    >
+    <TableColumnHeaderContext.Provider value={contextValue}>
       {children}
     </TableColumnHeaderContext.Provider>
   )

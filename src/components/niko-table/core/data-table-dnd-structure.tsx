@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/table"
 import { flexRender } from "@tanstack/react-table"
 import { DataTableColumnHeaderRoot } from "../components/data-table-column-header"
+import { resolveRowFromClick } from "../lib/row-click"
 import { getCommonPinningStyles } from "../lib/styles"
 import {
   TableDraggableRow,
@@ -69,7 +70,7 @@ export function DataTableDndBody<TData>({
   className,
   onRowClick,
 }: DataTableDndBodyProps<TData>) {
-  const { table, isLoading } = useDataTable<TData>()
+  const { table, columns, isLoading } = useDataTable<TData>()
   const { rows } = table.getRowModel()
 
   const dataIds = React.useMemo<UniqueIdentifier[]>(
@@ -81,35 +82,24 @@ export function DataTableDndBody<TData>({
   const handleRowClick = React.useCallback(
     (event: React.MouseEvent<HTMLTableSectionElement>) => {
       if (!onRowClick) return
-      const target = event.target as HTMLElement
-      const rowElement = target.closest("tr[data-row-id]")
-      if (!rowElement) return
-
-      const isInteractiveElement =
-        target.closest("button") ||
-        target.closest("input") ||
-        target.closest("a") ||
-        target.closest('[role="button"]') ||
-        target.closest('[role="checkbox"]') ||
-        target.closest("[data-radix-collection-item]") ||
-        target.closest('[data-slot="checkbox"]') ||
-        target.tagName === "INPUT" ||
-        target.tagName === "BUTTON" ||
-        target.tagName === "A"
-      if (isInteractiveElement) return
-
-      // Resolve via stable `row.id` rather than a positional index —
-      // sort/filter/reorder leave indices unstable but ids are
-      // canonical. `table.getRow` is a Map lookup internally so this
-      // stays O(1).
-      const rowId = rowElement.getAttribute("data-row-id")
-      if (rowId === null) return
-      const row = table.getRow(rowId)
+      const row = resolveRowFromClick(event.target as HTMLElement, table)
       if (!row) return
       onRowClick(row.original, event)
     },
     [onRowClick, table],
   )
+
+  // Hoisted: per-row find was O(rows × cols) per render despite stable column set.
+  const expandColumnId = React.useMemo(
+    () =>
+      table.getAllColumns().find(col => col.columnDef.meta?.expandedContent)
+        ?.id,
+    // `columns` keeps the memo in sync when consumers swap column sets —
+    // `table` alone is too stable (TanStack reuses the same instance).
+    [table, columns],
+  )
+
+  const isClickable = !!onRowClick
 
   return (
     <TableBody
@@ -119,13 +109,15 @@ export function DataTableDndBody<TData>({
       {!isLoading && rows?.length ? (
         <SortableContext items={dataIds} strategy={verticalListSortingStrategy}>
           {rows.map(row => {
-            const isClickable = !!onRowClick
             const isExpanded = row.getIsExpanded()
 
-            // Find if any column has expandedContent meta
-            const expandColumn = row
-              .getAllCells()
-              .find(cell => cell.column.columnDef.meta?.expandedContent)
+            // Resolve the expand cell only when expanded, using the
+            // memoized `expandColumnId` (computed once at the table
+            // level above this map).
+            const expandCell =
+              isExpanded && expandColumnId
+                ? row.getAllCells().find(c => c.column.id === expandColumnId)
+                : undefined
 
             return (
               <React.Fragment key={row.id}>
@@ -157,13 +149,13 @@ export function DataTableDndBody<TData>({
                 </TableDraggableRow>
 
                 {/* Expanded content row */}
-                {isExpanded && expandColumn && (
+                {expandCell && (
                   <TableRow>
                     <TableCell
                       colSpan={row.getVisibleCells().length}
                       className="p-0"
                     >
-                      {expandColumn.column.columnDef.meta?.expandedContent?.(
+                      {expandCell.column.columnDef.meta?.expandedContent?.(
                         row.original,
                       )}
                     </TableCell>
@@ -287,42 +279,32 @@ export function DataTableDndColumnBody<TData>({
   className,
   onRowClick,
 }: DataTableDndColumnBodyProps<TData>) {
-  const { table, isLoading } = useDataTable<TData>()
+  const { table, columns, isLoading } = useDataTable<TData>()
   const { rows } = table.getRowModel()
 
   /** Single row-click handler with event delegation (useCallback). */
   const handleRowClick = React.useCallback(
     (event: React.MouseEvent<HTMLTableSectionElement>) => {
       if (!onRowClick) return
-      const target = event.target as HTMLElement
-      const rowElement = target.closest("tr[data-row-id]")
-      if (!rowElement) return
-
-      const isInteractiveElement =
-        target.closest("button") ||
-        target.closest("input") ||
-        target.closest("a") ||
-        target.closest('[role="button"]') ||
-        target.closest('[role="checkbox"]') ||
-        target.closest("[data-radix-collection-item]") ||
-        target.closest('[data-slot="checkbox"]') ||
-        target.tagName === "INPUT" ||
-        target.tagName === "BUTTON" ||
-        target.tagName === "A"
-      if (isInteractiveElement) return
-
-      // Resolve via stable `row.id` rather than a positional index —
-      // sort/filter/reorder leave indices unstable but ids are
-      // canonical. `table.getRow` is a Map lookup internally so this
-      // stays O(1).
-      const rowId = rowElement.getAttribute("data-row-id")
-      if (rowId === null) return
-      const row = table.getRow(rowId)
+      const row = resolveRowFromClick(event.target as HTMLElement, table)
       if (!row) return
       onRowClick(row.original, event)
     },
     [onRowClick, table],
   )
+
+  // Resolve the expand column once at the table level (see comment
+  // on the equivalent memo in `DataTableDndBody` above).
+  const expandColumnId = React.useMemo(
+    () =>
+      table.getAllColumns().find(col => col.columnDef.meta?.expandedContent)
+        ?.id,
+    // `columns` keeps the memo in sync when consumers swap column sets —
+    // `table` alone is too stable (TanStack reuses the same instance).
+    [table, columns],
+  )
+
+  const isClickable = !!onRowClick
 
   return (
     <TableBody
@@ -331,16 +313,12 @@ export function DataTableDndColumnBody<TData>({
     >
       {!isLoading && rows?.length
         ? rows.map(row => {
-            const isClickable = !!onRowClick
             const isExpanded = row.getIsExpanded()
 
-            // Find a column that defines `meta.expandedContent` —
-            // same contract used by `DataTableBody` and the row-DnD
-            // body. Without rendering this expanded sibling, column-
-            // DnD tables silently dropped row-expansion support.
-            const expandColumn = row
-              .getAllCells()
-              .find(cell => cell.column.columnDef.meta?.expandedContent)
+            const expandCell =
+              isExpanded && expandColumnId
+                ? row.getAllCells().find(c => c.column.id === expandColumnId)
+                : undefined
 
             return (
               <React.Fragment key={row.id}>
@@ -359,13 +337,13 @@ export function DataTableDndColumnBody<TData>({
                   ))}
                 </TableRow>
 
-                {isExpanded && expandColumn && (
+                {expandCell && (
                   <TableRow>
                     <TableCell
                       colSpan={row.getVisibleCells().length}
                       className="p-0"
                     >
-                      {expandColumn.column.columnDef.meta?.expandedContent?.(
+                      {expandCell.column.columnDef.meta?.expandedContent?.(
                         row.original,
                       )}
                     </TableCell>

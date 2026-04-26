@@ -720,6 +720,49 @@ function normalizeFiltersWithUniqueIds<TData>(
   })
 }
 
+/**
+ * Convert a URL-stored filter entry back into a TanStack `ColumnFilter`.
+ *
+ * URL entries are `{id, value}` objects (see `serializeColumnFiltersForUrl`).
+ * The `value` may be either a raw TanStack value (tuple/array/string/boolean)
+ * or an ExtendedColumnFilter sans `filterId` — TanStack only needs `{id, value}`.
+ */
+function urlEntryToColumnFilter(
+  entry: unknown,
+): { id: string; value: unknown } | null {
+  if (!entry || typeof entry !== "object") return null
+  const e = entry as { id?: string; value?: unknown }
+  if (typeof e.id === "string") return { id: e.id, value: e.value }
+  // Legacy: entry IS an ExtendedColumnFilter
+  if ("operator" in (e as Record<string, unknown>)) {
+    const f = e as ExtendedColumnFilter<unknown>
+    return { id: f.id, value: f }
+  }
+  return null
+}
+
+/**
+ * Pull an `ExtendedColumnFilter` out of a URL entry, regardless of which
+ * shape was written. Used by filter-menu memos to ignore raw column-filter
+ * entries (slider tuples, etc.) that don't belong to the menu.
+ */
+function extractExtendedFilter<TData>(
+  entry: unknown,
+): ExtendedColumnFilter<TData> | null {
+  if (!entry || typeof entry !== "object") return null
+  const e = entry as { id?: string; value?: unknown }
+  if (typeof e.id === "string" && e.value && typeof e.value === "object") {
+    if ("operator" in (e.value as Record<string, unknown>)) {
+      return e.value as ExtendedColumnFilter<TData>
+    }
+    return null
+  }
+  if ("operator" in (e as Record<string, unknown>)) {
+    return e as unknown as ExtendedColumnFilter<TData>
+  }
+  return null
+}
+
 function AdvancedNuqsTableContent() {
   const [data] = useState<Product[]>(initialData)
 
@@ -789,11 +832,9 @@ function AdvancedNuqsTableContent() {
     ) {
       return [] // Empty - filters are in globalFilter
     }
-    // Otherwise use regular filters (AND logic via columnFilters)
-    return urlParams.filters.map((filter: ExtendedColumnFilter<Product>) => ({
-      id: filter.id,
-      value: filter,
-    }))
+    return ((urlParams.filters as unknown[]) || [])
+      .map(urlEntryToColumnFilter)
+      .filter((f): f is { id: string; value: unknown } => f !== null)
   }, [urlParams.filters, globalFilter, filterMode])
 
   // Inline mode filters - convert from URL format to ColumnFiltersState
@@ -809,13 +850,9 @@ function AdvancedNuqsTableContent() {
     ) {
       return [] // Empty - filters are in globalFilter
     }
-    // Otherwise use regular inline filters (AND logic via columnFilters)
-    return urlParams.inlineFilters.map(
-      (filter: ExtendedColumnFilter<Product>) => ({
-        id: filter.id,
-        value: filter,
-      }),
-    )
+    return ((urlParams.inlineFilters as unknown[]) || [])
+      .map(urlEntryToColumnFilter)
+      .filter((f): f is { id: string; value: unknown } => f !== null)
   }, [urlParams.inlineFilters, globalFilter, filterMode])
 
   // Column pinning state from URL
@@ -857,24 +894,39 @@ function AdvancedNuqsTableContent() {
     [columnPinning, setUrlParams],
   )
 
+  // See `serializeColumnFiltersForUrl` doc in server-side-nuqs-state.tsx.
+  // Same round-trip: write `{id, value}` shape, strip `filterId` if value is
+  // an ExtendedColumnFilter (filter-menu case).
+  const serializeColumnFiltersForUrl = useCallback(
+    (newFilters: ColumnFiltersState) => {
+      return newFilters.map(filter => {
+        const value = filter.value
+        if (
+          value &&
+          typeof value === "object" &&
+          !Array.isArray(value) &&
+          "filterId" in (value as Record<string, unknown>)
+        ) {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { filterId, ...rest } = value as ExtendedColumnFilter<Product>
+          return { id: filter.id, value: rest }
+        }
+        return { id: filter.id, value }
+      }) as unknown as ExtendedColumnFilter<Product>[]
+    },
+    [],
+  )
+
   // Handlers for filters (standard mode)
   const handleStandardColumnFiltersChange = useCallback(
     (updater: Updater<ColumnFiltersState>) => {
       const newFilters =
         typeof updater === "function" ? updater(standardColumnFilters) : updater
-
-      // Extract the ExtendedColumnFilter from filter.value
-      const filters = newFilters.map(
-        filter => filter.value,
-      ) as ExtendedColumnFilter<Product>[]
-
-      // Exclude filterId from URL to keep URLs shorter
-      const urlFilters = serializeFiltersForUrl(
-        filters,
-      ) as ExtendedColumnFilter<Product>[]
-      void setUrlParams({ filters: urlFilters })
+      void setUrlParams({
+        filters: serializeColumnFiltersForUrl(newFilters),
+      })
     },
-    [standardColumnFilters, setUrlParams],
+    [standardColumnFilters, setUrlParams, serializeColumnFiltersForUrl],
   )
 
   // Handlers for filters (inline mode)
@@ -882,19 +934,11 @@ function AdvancedNuqsTableContent() {
     (updater: Updater<ColumnFiltersState>) => {
       const newFilters =
         typeof updater === "function" ? updater(inlineColumnFilters) : updater
-
-      // Extract the ExtendedColumnFilter from filter.value
-      const filters = newFilters.map(
-        filter => filter.value,
-      ) as ExtendedColumnFilter<Product>[]
-
-      // Exclude filterId from URL to keep URLs shorter
-      const urlFilters = serializeFiltersForUrl(
-        filters,
-      ) as ExtendedColumnFilter<Product>[]
-      void setUrlParams({ inlineFilters: urlFilters })
+      void setUrlParams({
+        inlineFilters: serializeColumnFiltersForUrl(newFilters),
+      })
     },
-    [inlineColumnFilters, setUrlParams],
+    [inlineColumnFilters, setUrlParams, serializeColumnFiltersForUrl],
   )
 
   // Track previous globalFilter value to prevent infinite loops
@@ -1132,9 +1176,11 @@ function AdvancedNuqsTableContent() {
     })
   }, [setUrlParams])
 
-  // Extract current filters from URL state (handles both filters param and globalFilter)
+  // Extract ExtendedColumnFilter list for the filter menu UI.
+  // URL entries are `{id, value}` shape; only entries whose `value` is itself
+  // an ExtendedColumnFilter (has `operator`) belong to the filter menu — raw
+  // column-header values (slider tuples, etc.) are filtered out here.
   const currentStandardFilters = useMemo(() => {
-    // Check if filters are in globalFilter (OR/MIXED logic)
     if (
       urlParams.globalFilter &&
       typeof urlParams.globalFilter === "object" &&
@@ -1146,8 +1192,9 @@ function AdvancedNuqsTableContent() {
       }
       return filterObj.filters || []
     }
-    // Otherwise use regular filters (AND logic)
-    return urlParams.filters
+    return ((urlParams.filters as unknown[]) || [])
+      .map(entry => extractExtendedFilter<Product>(entry))
+      .filter((f): f is ExtendedColumnFilter<Product> => f !== null)
   }, [urlParams.filters, urlParams.globalFilter, filterMode])
 
   // Normalize filters to ensure they have unique filterIds
@@ -1158,9 +1205,8 @@ function AdvancedNuqsTableContent() {
     [currentStandardFilters],
   )
 
-  // Extract current inline filters from URL state (handles both inlineFilters param and globalFilter)
+  // Same as currentStandardFilters, but for the inline filter mode.
   const currentInlineFilters = useMemo(() => {
-    // Check if filters are in globalFilter (OR/MIXED logic)
     if (
       urlParams.globalFilter &&
       typeof urlParams.globalFilter === "object" &&
@@ -1172,8 +1218,9 @@ function AdvancedNuqsTableContent() {
       }
       return filterObj.filters || []
     }
-    // Otherwise use regular inline filters (AND logic)
-    return urlParams.inlineFilters
+    return ((urlParams.inlineFilters as unknown[]) || [])
+      .map(entry => extractExtendedFilter<Product>(entry))
+      .filter((f): f is ExtendedColumnFilter<Product> => f !== null)
   }, [urlParams.inlineFilters, urlParams.globalFilter, filterMode])
 
   // Normalize filters to ensure they have unique filterIds

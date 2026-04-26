@@ -105,6 +105,11 @@ export function TableSliderFilter<TData>({
   const unit = manualUnit ?? column.columnDef.meta?.unit
   const label = title ?? column.columnDef.meta?.label ?? column.id
 
+  // Capture faceted min/max as scalars so the memo re-runs when filters/data change.
+  const facetedValues = column.getFacetedMinMaxValues()
+  const facetedMin = facetedValues?.[0]
+  const facetedMax = facetedValues?.[1]
+
   // Compute range values - memoized to avoid recalculation
   // This is safe because we're not triggering state updates, just reading values
   const { min, max, step } = React.useMemo<Range & { step: number }>(() => {
@@ -128,12 +133,9 @@ export function TableSliderFilter<TData>({
     }
     // Priority 4: Get min/max from faceted values
     // This is safe in useMemo as long as we're not calling setFilterValue
-    else {
-      const facetedValues = column.getFacetedMinMaxValues()
-      if (facetedValues?.[0] != null && facetedValues?.[1] != null) {
-        minValue = Number(facetedValues[0])
-        maxValue = Number(facetedValues[1])
-      }
+    else if (facetedMin != null && facetedMax != null) {
+      minValue = Number(facetedMin)
+      maxValue = Number(facetedMax)
     }
 
     // Calculate appropriate step size based on range
@@ -150,7 +152,15 @@ export function TableSliderFilter<TData>({
       max: maxValue,
       step: manualStep ?? calculatedStep,
     }
-  }, [column, defaultRange, manualRange, manualMin, manualMax, manualStep])
+  }, [
+    defaultRange,
+    manualRange,
+    manualMin,
+    manualMax,
+    manualStep,
+    facetedMin,
+    facetedMax,
+  ])
 
   const range = React.useMemo((): RangeValue => {
     return columnFilterValue ?? [min, max]
@@ -203,9 +213,9 @@ export function TableSliderFilter<TData>({
 
   const onReset = React.useCallback(
     (event: React.MouseEvent) => {
-      if (event.target instanceof HTMLDivElement) {
-        event.stopPropagation()
-      }
+      // Always stop the bubble — the previous DIV-only check let SVG/icon
+      // clicks reach the popover trigger and re-open it on Clear.
+      event.stopPropagation()
       applyFilterValue(undefined)
     },
     [applyFilterValue],

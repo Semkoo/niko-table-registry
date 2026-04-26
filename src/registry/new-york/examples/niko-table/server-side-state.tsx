@@ -394,7 +394,13 @@ type ServerResponse<T> = {
   total: number
   page: number
   pageSize: number
-  facets: Record<string, string[]>
+  /**
+   * Cross-filter facets — see ServerResponse in server-side-nuqs-state.tsx.
+   */
+  facets: {
+    select: Record<string, Array<{ value: string; count: number }>>
+    range: Record<string, [number, number]>
+  }
 }
 
 type FetchParams = {
@@ -478,6 +484,80 @@ function matchesFilter(
   }
 }
 
+/**
+ * Dispatch a TanStack column-filter value against a product.
+ *
+ * WHY: The column header carries multiple filter UIs (slider, date, faceted
+ * multi-select, boolean, text) that all call `column.setFilterValue(rawValue)`.
+ * The filter menu, by contrast, stuffs an `ExtendedColumnFilter` object into
+ * `filter.value`. Both shapes flow through the same TanStack columnFilters
+ * array — this function picks the right matcher per value shape.
+ *
+ * IMPACT: Slider/date/faceted/boolean filters now actually filter rows on the
+ * server (previously the early-return at the call site silently dropped them).
+ *
+ * WHAT: Detects ExtendedColumnFilter via `operator` field. Falls back to value
+ * shape: number tuple → range, date tuple → date range, string[] → IN,
+ * boolean → equals, string → ILIKE.
+ */
+function matchesColumnFilter(
+  product: Product,
+  columnId: string,
+  value: unknown,
+): boolean {
+  if (value === null || value === undefined || value === "") return true
+
+  if (
+    typeof value === "object" &&
+    !Array.isArray(value) &&
+    "operator" in value
+  ) {
+    return matchesFilter(product, value as ExtendedColumnFilter<Product>)
+  }
+
+  const productValue = product[columnId as keyof Product]
+
+  if (Array.isArray(value) && value.length === 2 && !isStringArray(value)) {
+    const [a, b] = value as [unknown, unknown]
+    if (a == null && b == null) return true
+    const productNum =
+      productValue instanceof Date
+        ? productValue.getTime()
+        : Number(productValue)
+    const lo = a == null ? -Infinity : toNumber(a)
+    const hi = b == null ? Infinity : toNumber(b)
+    return productNum >= lo && productNum <= hi
+  }
+
+  if (Array.isArray(value)) {
+    if (value.length === 0) return true
+    return value.some(
+      v => String(productValue).toLowerCase() === String(v).toLowerCase(),
+    )
+  }
+
+  if (typeof value === "boolean") {
+    return Boolean(productValue) === value
+  }
+
+  if (typeof value === "string" || typeof value === "number") {
+    return String(productValue)
+      .toLowerCase()
+      .includes(String(value).toLowerCase())
+  }
+
+  return true
+}
+
+function isStringArray(arr: unknown[]): boolean {
+  return arr.every(v => typeof v === "string")
+}
+
+function toNumber(v: unknown): number {
+  if (v instanceof Date) return v.getTime()
+  return Number(v)
+}
+
 // Filter products using all filter params, optionally excluding one column's filter.
 // Used for both main data filtering and facet computation (where we exclude the
 // facet column's own filter so users can see all available values for that column).
@@ -522,30 +602,16 @@ function filterProductsByParams(
     }
   }
 
-  // Apply AND filters from columnFilters (server-side)
+  // Apply AND filters from columnFilters (server-side).
+  // Values can be either an `ExtendedColumnFilter` (from the filter menu) or a
+  // plain TanStack column-filter value (tuple from slider/date, array from
+  // multi-select, boolean, string). Dispatch on shape so all column-header
+  // filter UIs actually filter the row set.
   if (params.columnFilters.length > 0) {
     filtered = filtered.filter(product => {
       return params.columnFilters.every(filter => {
-        // Skip excluded column
         if (excludeColumnId && filter.id === excludeColumnId) return true
-
-        const value = filter.value
-
-        // Skip empty filters
-        if (
-          !value ||
-          (typeof value === "object" && "value" in value && !value.value)
-        ) {
-          return true
-        }
-
-        // Handle ExtendedColumnFilter format
-        if (typeof value === "object" && "id" in value) {
-          const extendedFilter = value as ExtendedColumnFilter<Product>
-          return matchesFilter(product, extendedFilter)
-        }
-
-        return true
+        return matchesColumnFilter(product, filter.id, filter.value)
       })
     })
   }
@@ -573,18 +639,40 @@ function fetchProducts(
         // Apply all filters
         const filtered = filterProductsByParams(allProducts, params)
 
-        // Compute facets: for each select column, get distinct values from
-        // data filtered by all OTHER column filters (excluding that column's own)
-        // This enables cross-filter behavior in the UI
-        const facetColumns = ["category", "brand"] as const
-        const facets: Record<string, string[]> = {}
-        for (const col of facetColumns) {
+        // Cross-filter facets — see server-side-nuqs-state.tsx for the full doc.
+        const selectColumns = ["category", "brand"] as const
+        const rangeColumns = ["price"] as const
+        const facets: ServerResponse<Product>["facets"] = {
+          select: {},
+          range: {},
+        }
+        for (const col of selectColumns) {
           const facetFiltered = filterProductsByParams(allProducts, params, col)
-          facets[col] = [
-            ...new Set(facetFiltered.map(p => String(p[col as keyof Product]))),
-          ]
-            .filter(v => v.trim() !== "")
-            .sort()
+          const counts = new Map<string, number>()
+          for (const p of facetFiltered) {
+            const v = String(p[col as keyof Product])
+            if (!v.trim()) continue
+            counts.set(v, (counts.get(v) ?? 0) + 1)
+          }
+          facets.select[col] = [...counts.entries()]
+            .map(([value, count]) => ({ value, count }))
+            .sort((a, b) => a.value.localeCompare(b.value))
+        }
+        for (const col of rangeColumns) {
+          const facetFiltered = filterProductsByParams(allProducts, params, col)
+          if (facetFiltered.length === 0) continue
+          let lo = Infinity
+          let hi = -Infinity
+          for (const p of facetFiltered) {
+            const v = Number(p[col as keyof Product])
+            if (Number.isFinite(v)) {
+              if (v < lo) lo = v
+              if (v > hi) hi = v
+            }
+          }
+          if (Number.isFinite(lo) && Number.isFinite(hi)) {
+            facets.range[col] = [lo, hi]
+          }
         }
 
         // Apply server-side sorting
@@ -1001,19 +1089,28 @@ function ServerSideStateTableContent() {
   const totalCount = queryData?.total ?? 0
   const facets = queryData?.facets
 
-  // Create dynamic columns with faceted options passed directly to filter menus.
-  // The `options` prop on DataTableColumnFacetedFilterMenu bypasses useGeneratedOptions
-  // entirely, avoiding stale memo issues with table.getAllColumns().
-  // When Category=Electronics is active, Brand facets only include electronics brands,
-  // so Nike/Adidas won't appear. Each column's own facets exclude its own filter,
-  // so all categories still show even when one is selected.
+  // Create dynamic columns with cross-filter facets piped in from the server.
+  // Faceted columns receive `options` so unselected values stay visible after
+  // a filter narrows the row set. Slider columns receive `range={facets.range[col]}`
+  // so the slider can still be widened back. Each column's own filter is
+  // excluded from its facet computation server-side.
   const dynamicColumns = useMemo(() => {
-    const categoryOpts = facets?.category
-      ? categoryOptions.filter(opt => facets.category.includes(opt.value))
-      : categoryOptions
-    const brandOpts = facets?.brand
-      ? brandOptions.filter(opt => facets.brand.includes(opt.value))
-      : brandOptions
+    /**
+     * Cross-filter narrowing — see server-side-nuqs-state.tsx for full doc.
+     * The faceted filter hides options with `count === 0` by default, so we
+     * just merge counts; absent values get count 0 and disappear.
+     */
+    const mergeCounts = (
+      staticOpts: typeof categoryOptions,
+      facet: Array<{ value: string; count: number }> | undefined,
+    ) => {
+      if (!facet) return staticOpts
+      const m = new Map(facet.map(f => [f.value, f.count]))
+      return staticOpts.map(opt => ({ ...opt, count: m.get(opt.value) ?? 0 }))
+    }
+    const categoryOpts = mergeCounts(categoryOptions, facets?.select.category)
+    const brandOpts = mergeCounts(brandOptions, facets?.select.brand)
+    const priceRange = facets?.range.price
 
     return columns.map(col => {
       const key = (col as { accessorKey?: string }).accessorKey
@@ -1037,6 +1134,18 @@ function ServerSideStateTableContent() {
               <DataTableColumnTitle />
               <DataTableColumnSortMenu variant={FILTER_VARIANTS.TEXT} />
               <DataTableColumnFacetedFilterMenu options={brandOpts} />
+            </DataTableColumnHeader>
+          ),
+        } as DataTableColumnDef<Product>
+      }
+      if (key === "price" && priceRange) {
+        return {
+          ...col,
+          header: () => (
+            <DataTableColumnHeader>
+              <DataTableColumnTitle />
+              <DataTableColumnSortMenu variant={FILTER_VARIANTS.NUMBER} />
+              <DataTableColumnSliderFilterMenu range={priceRange} />
             </DataTableColumnHeader>
           ),
         } as DataTableColumnDef<Product>

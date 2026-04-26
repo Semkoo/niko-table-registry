@@ -35,6 +35,17 @@ function escapeCsvValue(value: unknown): string {
   if (typeof value === "boolean") return value ? "true" : "false"
   if (typeof value === "number") return String(value)
 
+  // Plain object — JSON-encode rather than letting `String(obj)` produce
+  // the useless "[object Object]". Falls through on cyclic refs.
+  if (typeof value === "object") {
+    try {
+      const json = JSON.stringify(value)
+      return `"${json.replace(/"/g, '""')}"`
+    } catch {
+      // Cyclic / non-serializable — drop through to the String() path.
+    }
+  }
+
   // Default: treat as string and escape quotes
   const str = String(value)
   // Wrap in quotes if the value contains commas, quotes, or newlines

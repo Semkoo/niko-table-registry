@@ -567,6 +567,65 @@ function ServerSideTable() {
 }
 ```
 
+## Cross-Filter Facets
+
+Server-side tables can't rely on TanStack's client-side faceted unique values — those only see the current page. Instead, the server returns per-column cross-filter facets and the client merges them into the static option list.
+
+### How it works
+
+For each select column, the server computes the option list **excluding that column's own filter** and applying every other active filter. This produces:
+
+- For the column being filtered: still includes every value → the user can pivot to any other option without losing their filter set.
+- For other columns: only includes values that would still produce non-empty results → impossible options (e.g. `Brand: Nike` while `Category: Electronics` is active) are pruned.
+
+### Server-side
+
+```ts showLineNumbers
+type ServerResponse<T> = {
+  data: T[]
+  total: number
+  facets: {
+    select: Record<string, Array<{ value: string; count: number }>>
+    range: Record<string, [number, number]>
+  }
+}
+
+// Per column, re-filter excluding its own filter
+const selectColumns = ["category", "brand"] as const
+for (const col of selectColumns) {
+  const facetFiltered = filterProductsByParams(allProducts, params, col)
+  const counts = new Map<string, number>()
+  for (const p of facetFiltered) {
+    const v = String(p[col])
+    counts.set(v, (counts.get(v) ?? 0) + 1)
+  }
+  facets.select[col] = [...counts.entries()].map(([value, count]) => ({
+    value,
+    count,
+  }))
+}
+```
+
+### Client-side
+
+Just merge counts onto your static label list — the faceted filter hides options with `count === 0` by default, so cross-filter narrowing happens automatically:
+
+```tsx showLineNumbers
+const mergeCounts = (
+  staticOpts: Option[],
+  facet: Array<{ value: string; count: number }> | undefined,
+) => {
+  if (!facet) return staticOpts
+  const m = new Map(facet.map(f => [f.value, f.count]))
+  return staticOpts.map(opt => ({ ...opt, count: m.get(opt.value) ?? 0 }))
+}
+
+const categoryOpts = mergeCounts(categoryOptions, facets?.select.category)
+// Pass as `options` to <DataTableColumnFacetedFilterMenu />
+```
+
+The `count: 0` rule is a default — pass `count: undefined` on options you want visible regardless. Pure label-only callers (no counts at all) are unaffected; the filter falls back to client-derived row counts.
+
 ## Manual Pagination, Sorting, and Filtering
 
 When using server-side operations, you need to enable manual modes:

@@ -13,25 +13,7 @@
 import { useEffect, useState } from "react"
 
 /**
- * PERFORMANCE: Debounces a value by delaying updates until after a specified delay period
- *
- * WHY: Without debouncing, rapidly changing values (like search input) trigger:
- * - Expensive operations on every keystroke (filtering, API calls, re-renders)
- * - 1,000 rows × 10 columns = 10,000 filter operations per keystroke
- * - Result: Noticeable lag and poor user experience
- *
- * WITH debouncing:
- * - Operations only run after user stops typing (e.g., 300ms)
- * - Reduces operations by 80-95% (e.g., 10 keystrokes → 1 operation)
- * - Result: Smooth, responsive UI
- *
- * IMPACT: Critical for search/filter performance - without this, typing feels laggy.
- * Especially important for large tables (1000+ rows).
- *
- * USE CASES:
- * - Search inputs (reduce filter operations)
- * - Filter fields (reduce API calls)
- * - Any rapidly changing values where you want to reduce updates
+ * Debounces a value by delaying updates until after a specified delay period.
  *
  * @template T - The type of the value to debounce
  * @param value - The value to debounce
@@ -104,13 +86,9 @@ export function useDebounce<T>(value: T, delay = 300): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value)
 
   useEffect(() => {
-    // Set up the timeout
     const handler = setTimeout(() => {
       setDebouncedValue(value)
     }, delay)
-
-    // Clean up the timeout if value changes before delay expires
-    // or component unmounts
     return () => {
       clearTimeout(handler)
     }
