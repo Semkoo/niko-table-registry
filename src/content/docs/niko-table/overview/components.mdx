@@ -1280,3 +1280,169 @@ Context-aware wrapper for `TableDragAlongCell`. Cell follows column drag positio
 | `cell`      | `Cell<TData, TValue>` | -       | TanStack Table cell instance (required). |
 | `children`  | `React.ReactNode`     | -       | Cell content.                            |
 | `className` | `string`              | -       | Additional CSS classes.                  |
+
+## Column Header Internal Helpers
+
+The column header system is split into a composable set of files. `DataTableColumnHeader` (documented above) is the user-facing entry point that consumers render in their column `header` callbacks. The pieces below are the building blocks it uses internally — they are exported so consumers building a fully custom header can drop in just the parts they need (e.g. only the sort menu, or only the pin/hide actions), but most consumers won't import them directly.
+
+Each module is a thin wrapper around the corresponding `filters/table-column-*` filter (which holds the TanStack-Table-aware logic) and adds context wiring + UI chrome via `useColumnHeaderContext`.
+
+### data-table-column-actions
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-column-actions.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+</div>
+
+Renders the trailing dropdown-menu trigger on a column header (the `⋮` button). Composed from the column-sort, column-hide, column-pin, and column-faceted-filter primitives — pulls in only the items relevant to the column's `meta` configuration. Used inside `DataTableColumnHeader`.
+
+### data-table-column-title
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-column-title.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+</div>
+
+Renders the column's title text (resolved from `column.columnDef.meta?.label` or the accessor key via `useDerivedColumnTitle`). Wraps the corresponding `TableColumnTitle` from `filters/`.
+
+### data-table-column-sort
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-column-sort.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+</div>
+
+Renders the per-column sort menu items (Asc / Desc / Clear) with the variant-aware icons from `SORT_ICONS` / `SORT_LABELS`. Honors `column.getCanSort()` — renders nothing when sorting is disabled. Wraps `TableColumnSort` from `filters/`.
+
+### data-table-column-hide
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-column-hide.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+</div>
+
+Renders the "Hide column" menu item. Honors `column.getCanHide()`. Wraps `TableColumnHide` from `filters/`.
+
+### data-table-column-pin
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-column-pin.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+</div>
+
+Renders the "Pin to left" / "Pin to right" / "Unpin" menu items. Honors `column.getCanPin()`. Wraps `TableColumnPin` from `filters/`.
+
+### data-table-column-filter
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-column-filter.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+</div>
+
+Routes a column to the right per-column filter UI based on `column.columnDef.meta?.variant` (text / number / range / date / select / multi_select / boolean). Lazy-mounts the variant-specific filter component (`data-table-column-faceted-filter`, `data-table-column-slider-filter-options`, `data-table-column-date-filter-options`) only when the user opens the filter panel.
+
+### data-table-column-filter-trigger
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-column-filter-trigger.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+</div>
+
+The `<button>` shown in the column header that opens the per-column filter popover. Switches its label / active state based on whether the column currently has a filter value.
+
+### data-table-column-faceted-filter
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-column-faceted-filter.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+</div>
+
+The per-column variant of the faceted multi-select filter (used for `select` / `multi_select` column variants). Generates options via `useGeneratedOptions` and forwards `dynamicCounts` / `limitToFilteredRows` props through to the option builder. Wraps `TableColumnFacetedFilter` from `filters/`.
+
+### data-table-column-date-filter-options
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-column-date-filter-options.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+</div>
+
+The per-column date / date-range filter UI (date picker + operator selector). Backed by `TableColumnDateFilter` from `filters/`. Lazily mounted by `data-table-column-filter` when the column variant is `date` / `date_range`.
+
+### data-table-column-slider-filter-options
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-column-slider-filter-options.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+</div>
+
+The per-column numeric range slider UI. Resolves `min` / `max` from the column's faceted min/max values when not explicitly set. Backed by `TableColumnSliderFilter` from `filters/`. Lazily mounted by `data-table-column-filter` when the column variant is `range`.
