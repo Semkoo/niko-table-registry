@@ -18,6 +18,27 @@ import { DataTableColumnHeaderRoot } from "../components/data-table-column-heade
 import { getCommonPinningStyles } from "../lib/styles"
 
 // ============================================================================
+// Stable measureElement — computed once at module level
+// ============================================================================
+
+/**
+ * Custom element measurer for the row virtualizer. Uses
+ * `getBoundingClientRect().height` for accurate dynamic-height measurement.
+ *
+ * Disabled in Firefox where `getBoundingClientRect` returns stale values
+ * during virtual-scroll reflows, causing measurement loops. In Firefox the
+ * virtualizer falls back to its built-in `estimateSize` heuristic instead.
+ *
+ * Defined at module scope so every virtualizer instance shares the same
+ * stable function reference — no `useCallback` / `useMemo` overhead, and
+ * React never detaches/reattaches the ref due to a changed identity.
+ */
+export const measureElement: ((element: Element) => number) | undefined =
+  typeof window !== "undefined" && navigator.userAgent.indexOf("Firefox") === -1
+    ? (element: Element) => element.getBoundingClientRect().height
+    : undefined
+
+// ============================================================================
 // ScrollEvent Type
 // ============================================================================
 
@@ -275,6 +296,7 @@ export function DataTableVirtualizedBody<TData>({
     estimateSize: () => estimateSize,
     overscan,
     enabled: !!scrollElement,
+    measureElement,
   })
 
   /**
@@ -465,6 +487,7 @@ export function DataTableVirtualizedBody<TData>({
           <React.Fragment key={row.id}>
             {/* Main data row */}
             <TableRow
+              ref={rowVirtualizer.measureElement}
               data-index={virtualRow.index}
               data-row-index={row?.index}
               data-row-id={row?.id}

@@ -25,6 +25,7 @@ import {
 import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 import type { ScrollEvent } from "./data-table-virtualized-structure"
+import { measureElement } from "./data-table-virtualized-structure"
 
 // ============================================================================
 // VirtualizedDraggableRow — internal row component for virtualized DnD
@@ -36,6 +37,7 @@ interface VirtualizedDraggableRowProps {
   /** Used for event delegation (row click); forwarded as data-row-index. */
   rowIndex?: number
   className?: string
+  measureRef?: (node: HTMLTableRowElement | null) => void
 }
 
 function VirtualizedDraggableRow({
@@ -43,10 +45,19 @@ function VirtualizedDraggableRow({
   rowId,
   rowIndex,
   className,
+  measureRef,
 }: VirtualizedDraggableRowProps) {
   const { transform, transition, setNodeRef, isDragging } = useSortable({
     id: rowId,
   })
+
+  const setRefs = React.useCallback(
+    (node: HTMLTableRowElement | null) => {
+      setNodeRef(node)
+      if (measureRef) measureRef(node)
+    },
+    [setNodeRef, measureRef],
+  )
 
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
@@ -58,7 +69,7 @@ function VirtualizedDraggableRow({
 
   return (
     <TableRow
-      ref={setNodeRef}
+      ref={setRefs}
       style={style}
       className={cn("flex w-full", isDragging && "bg-muted/50", className)}
       data-row-index={rowIndex}
@@ -136,11 +147,7 @@ export function DataTableVirtualizedDndBody<TData>({
     estimateSize: () => estimateSize,
     overscan,
     enabled: !!scrollElement,
-    measureElement:
-      typeof window !== "undefined" &&
-      navigator.userAgent.indexOf("Firefox") === -1
-        ? element => element?.getBoundingClientRect().height
-        : undefined,
+    measureElement,
   })
 
   const handleScrollTop = React.useCallback(() => {
@@ -273,7 +280,11 @@ export function DataTableVirtualizedDndBody<TData>({
 
           return (
             <React.Fragment key={`${row.id}-${isExpanded}`}>
-              <VirtualizedDraggableRow rowId={row.id} rowIndex={row?.index}>
+              <VirtualizedDraggableRow
+                rowId={row.id}
+                rowIndex={row?.index}
+                measureRef={rowVirtualizer.measureElement}
+              >
                 {row.getVisibleCells().map(cell => {
                   const size = cell.column.columnDef.size
                   const cellStyle = {
@@ -490,11 +501,7 @@ export function DataTableVirtualizedDndColumnBody<TData>({
     estimateSize: () => estimateSize,
     overscan,
     enabled: !!scrollElement,
-    measureElement:
-      typeof window !== "undefined" &&
-      navigator.userAgent.indexOf("Firefox") === -1
-        ? element => element?.getBoundingClientRect().height
-        : undefined,
+    measureElement,
   })
 
   const handleScrollTop = React.useCallback(() => {
@@ -617,11 +624,7 @@ export function DataTableVirtualizedDndColumnBody<TData>({
         return (
           <TableRow
             key={row.id}
-            ref={node => {
-              if (node) {
-                rowVirtualizer.measureElement(node)
-              }
-            }}
+            ref={rowVirtualizer.measureElement}
             data-index={virtualRow.index}
             data-row-index={row?.index}
             data-row-id={row?.id}
