@@ -116,6 +116,8 @@ export const SYSTEM_COLUMN_IDS = {
   SELECT: "select",
   /** Row expand/collapse column */
   EXPAND: "expand",
+  /** Row actions column (edit, delete, etc.) */
+  ACTIONS: "actions",
 } as const
 
 /** Array of all system column IDs for filtering */

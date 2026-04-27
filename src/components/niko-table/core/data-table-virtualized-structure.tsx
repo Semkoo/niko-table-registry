@@ -13,7 +13,7 @@
  */
 import React from "react"
 import { useVirtualizer } from "@tanstack/react-virtual"
-import { flexRender } from "@tanstack/react-table"
+import { flexRender, type Row } from "@tanstack/react-table"
 import { cn } from "@/lib/utils"
 import { useDataTable } from "./data-table-context"
 import {
@@ -36,10 +36,20 @@ import { getCommonPinningStyles } from "../lib/styles"
 
 // Sums base + expanded sibling height (ResizeObserver only sees the base row).
 // Disabled in Firefox where stale `getBoundingClientRect` causes measure loops.
-const measureElement: ((element: Element) => number) | undefined =
+//
+// Prefers `ResizeObserverEntry.borderBoxSize` for the base row when TanStack
+// Virtual passes the entry through — that height is computed off the same
+// observation that fired the callback, so we skip a forced layout read.
+// Falls back to `getBoundingClientRect` for the initial measure (no entry)
+// and for the expanded sibling (not observed by the virtualizer).
+const measureElement:
+  | ((element: Element, entry?: ResizeObserverEntry | undefined) => number)
+  | undefined =
   typeof window !== "undefined" && navigator.userAgent.indexOf("Firefox") === -1
-    ? (element: Element) => {
-        const baseHeight = element.getBoundingClientRect().height
+    ? (element, entry) => {
+        const baseHeight =
+          entry?.borderBoxSize?.[0]?.blockSize ??
+          element.getBoundingClientRect().height
         const next = element.nextElementSibling
         if (
           next &&
@@ -208,6 +218,127 @@ export const DataTableVirtualizedFlexHeader = React.memo(
 DataTableVirtualizedFlexHeader.displayName = "DataTableVirtualizedFlexHeader"
 
 // ============================================================================
+// VirtualizedBodyRow — memoized to keep selection / expansion / column-vis
+// changes from cascading into all visible rows
+// ============================================================================
+
+/**
+ * Per-row component for `DataTableVirtualizedBody`. Wrapped with
+ * `React.memo` so single-row state changes (selection, expansion) don't
+ * reconcile every other visible row.
+ *
+ * The measure ref is wrapped in a stable callback by the parent so it
+ * doesn't invalidate the memo on every parent render. Composite key
+ * (`${row.id}-${isExpanded}`) stays on the parent so the row remounts
+ * on expansion toggle and `ResizeObserver` re-attaches.
+ */
+interface VirtualizedBodyRowProps<TData> {
+  row: Row<TData>
+  virtualIndex: number
+  expandColumnId: string | undefined
+  isExpanded: boolean
+  isSelected: boolean
+  isClickable: boolean
+  measureRef: ((node: HTMLTableRowElement | null) => void) | undefined
+  onClick: (event: React.MouseEvent<HTMLElement>) => void
+  /** Column layout signature — invalidates React.memo on visibility/order/pinning change. */
+  columnLayoutSignature: string
+  /**
+   * Per-row memo key. Change this string to force React.memo to re-render a
+   * specific row when row-level state changes outside of TanStack Table's
+   * tracked props (e.g. inline edit mode, optimistic state).
+   */
+  rowMemoKey: string
+}
+
+const VirtualizedBodyRowInner = function VirtualizedBodyRow<TData>({
+  row,
+  virtualIndex,
+  expandColumnId,
+  isExpanded,
+  isSelected,
+  isClickable,
+  measureRef,
+  onClick,
+  columnLayoutSignature,
+  rowMemoKey,
+}: VirtualizedBodyRowProps<TData>) {
+  const expandCell =
+    isExpanded && expandColumnId
+      ? row.getAllCells().find(c => c.column.id === expandColumnId)
+      : undefined
+
+  const visibleCells = row.getVisibleCells()
+
+  // Cache the base-row DOM node so we can re-trigger measureRef when column
+  // layout changes while the row is expanded (no remount = no automatic re-measure).
+  const elementRef = React.useRef<HTMLTableRowElement | null>(null)
+  const setRef = React.useCallback(
+    (node: HTMLTableRowElement | null) => {
+      elementRef.current = node
+      if (measureRef) measureRef(node)
+    },
+    [measureRef],
+  )
+
+  // Re-measure when column layout changes while expanded so the virtualizer
+  // picks up the updated combined base + expanded-pane height.
+  React.useEffect(() => {
+    if (isExpanded && measureRef && elementRef.current) {
+      measureRef(elementRef.current)
+    }
+  }, [isExpanded, rowMemoKey, columnLayoutSignature, measureRef])
+
+  return (
+    <>
+      <TableRow
+        ref={setRef}
+        data-index={virtualIndex}
+        data-row-id={row.id}
+        data-state={isSelected ? "selected" : undefined}
+        onClick={onClick}
+        className={cn("group", isClickable && "cursor-pointer")}
+      >
+        {visibleCells.map(cell => {
+          const size = cell.column.columnDef.size
+          const cellStyle = {
+            width: size ? `${size}px` : undefined,
+            ...getCommonPinningStyles(cell.column, false),
+          }
+
+          return (
+            <TableCell
+              key={cell.id}
+              className={cn(
+                "overflow-hidden",
+                cell.column.getIsPinned() &&
+                  "bg-background group-hover:bg-muted/50 group-data-[state=selected]:bg-muted",
+              )}
+              style={cellStyle}
+            >
+              {flexRender(cell.column.columnDef.cell, cell.getContext())}
+            </TableCell>
+          )
+        })}
+      </TableRow>
+
+      {isExpanded && expandCell && (
+        <TableRow data-slot="datatable-expanded-row">
+          <TableCell colSpan={visibleCells.length} className="p-0">
+            {expandCell.column.columnDef.meta?.expandedContent?.(row.original)}
+          </TableCell>
+        </TableRow>
+      )}
+    </>
+  )
+}
+
+// React.memo strips generics; cast back so call sites stay typed.
+const VirtualizedBodyRow = React.memo(
+  VirtualizedBodyRowInner,
+) as typeof VirtualizedBodyRowInner
+
+// ============================================================================
 // DataTableVirtualizedBody
 // ============================================================================
 
@@ -252,6 +383,19 @@ export interface DataTableVirtualizedBodyProps<TData> {
    * needing the row element can `event.target.closest("tr[data-row-id]")`.
    */
   onRowClick?: (row: TData, event: React.MouseEvent<HTMLElement>) => void
+  /**
+   * Return a per-row memo invalidation key. When the returned string changes
+   * for a specific row, React.memo re-renders that row even if TanStack Table
+   * props (selection, expansion, column layout) are unchanged. Use this for
+   * row-level external state that cell renderers depend on — e.g. inline edit
+   * mode, optimistic overlays, or any closure-captured state in column
+   * definitions that changes independently of the table's own state.
+   *
+   * @example
+   * // Trigger re-render on inline edit toggle (only the edited row re-renders)
+   * getRowMemoKey={(row) => (isEditing(row.id) ? "editing" : "")}
+   */
+  getRowMemoKey?: (row: TData) => string
 }
 
 export function DataTableVirtualizedBody<TData>({
@@ -266,6 +410,7 @@ export function DataTableVirtualizedBody<TData>({
   scrollThreshold = 50,
   onNearEnd,
   prefetchThreshold = 10,
+  getRowMemoKey,
 }: DataTableVirtualizedBodyProps<TData>) {
   const { table, columns } = useDataTable()
   const { rows } = table.getRowModel()
@@ -277,6 +422,21 @@ export function DataTableVirtualizedBody<TData>({
         ?.id,
     [table, columns],
   )
+
+  const { columnVisibility, columnOrder, columnPinning } = table.getState()
+  // Encodes visible column ids + pinning so memoized rows re-render on layout changes.
+  const columnLayoutSignature = React.useMemo(
+    () =>
+      table
+        .getVisibleLeafColumns()
+        .map(c => {
+          const pinned = c.getIsPinned()
+          return pinned ? `${c.id}:${pinned}` : c.id
+        })
+        .join(","),
+    [table, columnVisibility, columnOrder, columnPinning],
+  )
+
   const [scrollElement, setScrollElement] =
     React.useState<HTMLDivElement | null>(null)
   const tbodyRef = React.useRef<HTMLTableSectionElement | null>(null)
@@ -474,6 +634,21 @@ export function DataTableVirtualizedBody<TData>({
     [onRowClick, table],
   )
 
+  // Stable wrapper around the virtualizer's measure callback. The
+  // virtualizer recreates its `measureElement` on every render, which
+  // would invalidate `React.memo` on the row component if passed
+  // directly. The latest-ref pattern keeps the prop reference stable
+  // while still calling through to the current measurer.
+  const measureElementRef = React.useRef(rowVirtualizer.measureElement)
+  measureElementRef.current = rowVirtualizer.measureElement
+  const stableMeasureElement = React.useCallback(
+    (node: HTMLTableRowElement | null) => {
+      measureElementRef.current(node)
+    },
+    [],
+  )
+
+  const isClickable = !!onRowClick
   const visibleColumnCount = table.getVisibleLeafColumns().length
 
   return (
@@ -498,65 +673,26 @@ export function DataTableVirtualizedBody<TData>({
         if (!row) return null
         const isExpanded = row.getIsExpanded()
 
-        // Resolve the expand cell only when expanded, using the
-        // memoized `expandColumnId`.
-        const expandCell =
-          isExpanded && expandColumnId
-            ? row.getAllCells().find(c => c.column.id === expandColumnId)
-            : undefined
-
+        // Composite key forces a remount on expansion toggle so
+        // `ResizeObserver` re-attaches and re-reads the combined height.
+        // DnD bodies use a stable key (preserving `useSortable`) and
+        // re-measure imperatively instead.
         return (
-          // Composite key forces a remount on expansion toggle so
-          // `ResizeObserver` re-attaches and re-reads the combined height.
-          // DnD bodies use a stable key (preserving `useSortable`) and
-          // re-measure imperatively instead.
-          <React.Fragment key={`${row.id}-${isExpanded}`}>
-            {/* Main data row */}
-            <TableRow
-              ref={columnsLocked ? rowVirtualizer.measureElement : undefined}
-              data-index={virtualRow.index}
-              data-row-id={row?.id}
-              data-state={row.getIsSelected() ? "selected" : undefined}
-              onClick={handleRowClick}
-              className={cn("group", onRowClick && "cursor-pointer")}
-            >
-              {row.getVisibleCells().map(cell => {
-                const size = cell.column.columnDef.size
-                const cellStyle = {
-                  width: size ? `${size}px` : undefined,
-                  ...getCommonPinningStyles(cell.column, false),
-                }
-
-                return (
-                  <TableCell
-                    key={cell.id}
-                    className={cn(
-                      "overflow-hidden",
-                      cell.column.getIsPinned() &&
-                        "bg-background group-hover:bg-muted/50 group-data-[state=selected]:bg-muted",
-                    )}
-                    style={cellStyle}
-                  >
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                )
-              })}
-            </TableRow>
-
-            {/* Expanded content row */}
-            {isExpanded && expandCell && (
-              <TableRow data-slot="datatable-expanded-row">
-                <TableCell
-                  colSpan={row.getVisibleCells().length}
-                  className="p-0"
-                >
-                  {expandCell.column.columnDef.meta?.expandedContent?.(
-                    row.original,
-                  )}
-                </TableCell>
-              </TableRow>
-            )}
-          </React.Fragment>
+          <VirtualizedBodyRow
+            key={`${row.id}-${isExpanded}`}
+            row={row as Row<TData>}
+            virtualIndex={virtualRow.index}
+            expandColumnId={expandColumnId}
+            isExpanded={isExpanded}
+            isSelected={row.getIsSelected()}
+            isClickable={isClickable}
+            measureRef={columnsLocked ? stableMeasureElement : undefined}
+            onClick={handleRowClick}
+            columnLayoutSignature={columnLayoutSignature}
+            rowMemoKey={
+              getRowMemoKey ? getRowMemoKey(row.original as TData) : ""
+            }
+          />
         )
       })}
 

@@ -180,6 +180,10 @@ export default defineConfig({
               slug: "examples/row-expansion-table",
             },
             {
+              label: "Inline Edit Table",
+              slug: "examples/inline-edit-table",
+            },
+            {
               label: "Column Pinning Table",
               slug: "examples/column-pinning-table",
             },

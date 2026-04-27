@@ -1,0 +1,273 @@
+---
+title: Inline Edit Table
+description: Edit rows in-place with React.memo-safe cell re-rendering via getRowMemoKey.
+---
+
+import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
+import CollapsiblePreview from "@/components/markdown/collapsible-preview.astro"
+import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
+
+<CodePreview demo="niko-table/inline-edit" />
+
+<CollapsiblePreview>
+  <CodePreview demo="niko-table/inline-edit-state" />
+</CollapsiblePreview>
+
+## Introduction
+
+The Inline Edit Table lets users edit row fields directly in the table without opening a dialog or navigating away.
+
+Niko Table wraps each body row in `React.memo` for performance — rows only re-render when their props change. This is great for large tables, but it creates a problem for inline editing: the edit draft and validation errors live outside the row's props, so memo'd rows won't pick up changes by default. The `getRowMemoKey` prop solves this — it lets you return a row-specific string that encodes whatever external state that row depends on. When the string changes, React.memo allows the re-render; when it doesn't, the row stays frozen.
+
+## Design decisions
+
+A common approach to inline editing is to embed edit state directly in the data array — each row object carries an `isEditing: boolean` flag. Triggering an edit means calling `setData` to flip that flag, which replaces the entire array and causes every memoized row to re-render.
+
+We approach it differently: edit state lives *outside* the data. `editingId`, `draft`, and `errors` are separate `useState` variables. The data array is only updated once on `save()` — not on every keystroke. Callbacks are threaded into column `cell` closures (or optionally via `table.options.meta`) rather than through the data shape.
+
+The result is that typing in an input field touches exactly one memoized row, and only because `getRowMemoKey` returns a new string for it. All other rows are completely skipped by React reconciliation.
+
+| Concern | Embedded state | Our approach |
+|---|---|---|
+| Edit state location | Inside the data array (`isEditing` on each row) | Outside data (`editingId` + `draft` state) |
+| Update on keystroke | `setData` replaces the whole array → all rows re-render | Only `draft` changes → one row re-renders via `getRowMemoKey` |
+| Draft & validation | No concept — changes write directly to data | Staged draft with error validation before committing |
+| Data mutation | On every interaction | Once, on explicit `save()` |
+
+## Installation
+
+Install the DataTable core and add-ons for this example:
+
+<CliCommandCode action="run" command="shadcn@latest add @niko-table/data-table @niko-table/data-table-pagination @niko-table/data-table-search-filter @niko-table/data-table-view-menu @niko-table/data-table-column-sort" />
+
+This example also uses `input` and `badge` from Shadcn UI:
+
+<CliCommandCode action="run" command="shadcn@latest add input badge" />
+
+> First time using `@niko-table`? See the [Installation Guide](/getting-started/installation#configure-the-niko-table-registry) to set up the registry.
+
+For other add-ons or manual copy-paste, see the [Installation Guide](/getting-started/installation/).
+
+## Prerequisites
+
+We are going to build a table to show products with inline editing. Here's what our data looks like:
+
+```tsx showLineNumbers
+type Product = {
+  id: string
+  name: string
+  category: string
+  price: number
+  stock: number
+}
+```
+
+## Building `useInlineEdit`
+
+Extract all edit logic into a reusable hook. The critical export is `getRowMemoKey`:
+
+```tsx showLineNumbers title="use-inline-edit.ts"
+type EditDraft = { name: string; price: string }
+type EditErrors = { name?: string; price?: string }
+
+function useInlineEdit(
+  setData: React.Dispatch<React.SetStateAction<Product[]>>,
+) {
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [draft, setDraft] = useState<EditDraft>({ name: "", price: "" })
+  const [errors, setErrors] = useState<EditErrors>({})
+
+  const startEditing = useCallback((product: Product) => {
+    setEditingId(product.id)
+    setDraft({ name: product.name, price: String(product.price) })
+    setErrors({})
+  }, [])
+
+  const cancel = useCallback(() => {
+    setEditingId(null)
+    setDraft({ name: "", price: "" })
+    setErrors({})
+  }, [])
+
+  const setField = useCallback((field: keyof EditDraft, value: string) => {
+    setDraft((prev) => ({ ...prev, [field]: value }))
+    setErrors((prev) => ({ ...prev, [field]: undefined }))
+  }, [])
+
+  const save = useCallback(() => {
+    const next: EditErrors = {}
+    if (!draft.name.trim()) next.name = "Name is required"
+    const parsed = parseFloat(draft.price)
+    if (isNaN(parsed) || parsed <= 0) next.price = "Enter a positive price"
+    if (Object.keys(next).length > 0) {
+      setErrors(next)
+      return
+    }
+    setData((prev) =>
+      prev.map((p) =>
+        p.id === editingId ? { ...p, name: draft.name.trim(), price: parsed } : p,
+      ),
+    )
+    cancel()
+  }, [draft, editingId, cancel, setData])
+
+  /**
+   * getRowMemoKey — the bridge between external state and React.memo.
+   *
+   * Returns "" for every non-editing row (no change → no re-render).
+   * Returns a unique string for the editing row that encodes all mutable
+   * state — draft values and validation errors.
+   *
+   * Each keystroke changes `draft.name` → new string → React.memo
+   * re-renders only this row. All 7 other rows are untouched.
+   */
+  const getRowMemoKey = useCallback(
+    (row: Product): string => {
+      if (row.id !== editingId) return ""
+      return `${draft.name}|${draft.price}|${errors.name ?? ""}|${errors.price ?? ""}`
+    },
+    [editingId, draft, errors],
+  )
+
+  return { editingId, draft, errors, startEditing, cancel, setField, save, getRowMemoKey }
+}
+```
+
+## Column definitions
+
+Column cells close over `inlineEdit` state. They conditionally render the input or the read-only value:
+
+```tsx showLineNumbers title="columns.tsx"
+const columns = useMemo<DataTableColumnDef<Product>[]>(
+  () => [
+    {
+      id: "name",
+      accessorKey: "name",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column}>
+          <DataTableColumnTitle>Name</DataTableColumnTitle>
+          <DataTableColumnSortMenu />
+        </DataTableColumnHeader>
+      ),
+      cell: ({ row }) => {
+        const isEditing = row.original.id === inlineEdit.editingId
+        if (!isEditing) return <span className="font-medium">{row.original.name}</span>
+        return (
+          <Input
+            value={inlineEdit.draft.name}
+            onChange={(e) => inlineEdit.setField("name", e.target.value)}
+            className="h-7 w-48 text-sm"
+            autoFocus
+            onKeyDown={(e) => {
+              if (e.key === "Enter") inlineEdit.save()
+              if (e.key === "Escape") inlineEdit.cancel()
+            }}
+          />
+        )
+      },
+    },
+    // ... price, category, stock columns
+    {
+      id: SYSTEM_COLUMN_IDS.ACTIONS,
+      cell: ({ row }) => {
+        const isEditing = row.original.id === inlineEdit.editingId
+        if (isEditing) {
+          return (
+            <div className="flex gap-1">
+              <Button size="icon" variant="ghost" onClick={inlineEdit.save}>
+                <Check className="h-3.5 w-3.5 text-green-600" />
+              </Button>
+              <Button size="icon" variant="ghost" onClick={inlineEdit.cancel}>
+                <X className="h-3.5 w-3.5 text-red-600" />
+              </Button>
+            </div>
+          )
+        }
+        return (
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={() => inlineEdit.startEditing(row.original)}
+          >
+            <Pencil className="h-3.5 w-3.5" />
+          </Button>
+        )
+      },
+    },
+  ],
+  // Rebuild columns when edit state changes so cells see fresh closures.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  [inlineEdit.editingId, inlineEdit.draft, inlineEdit.errors],
+)
+```
+
+## Wiring it together
+
+Pass `getRowMemoKey` directly to `DataTableBody`:
+
+```tsx showLineNumbers title="products-table.tsx"
+export function ProductsTable() {
+  const [data, setData] = useState<Product[]>(initialData)
+  const inlineEdit = useInlineEdit(setData)
+
+  const columns = useMemo(..., [inlineEdit.editingId, inlineEdit.draft, inlineEdit.errors])
+
+  return (
+    <DataTableRoot data={data} columns={columns}>
+      <DataTable>
+        <DataTableToolbarSection>
+          <DataTableSearchFilter placeholder="Search products…" />
+        </DataTableToolbarSection>
+        <DataTableHeader />
+        <DataTableBody getRowMemoKey={inlineEdit.getRowMemoKey} />
+        <DataTableEmptyBody>...</DataTableEmptyBody>
+        <DataTablePagination />
+      </DataTable>
+    </DataTableRoot>
+  )
+}
+```
+
+## Composing multiple state sources
+
+`getRowMemoKey` is generic — you can encode any per-row external state into the returned string. Combine sources by joining with a separator:
+
+```tsx showLineNumbers title="composing-multiple-sources.tsx"
+const [savingIds, setSavingIds] = useState<Set<string>>(new Set())
+
+// useInlineEdit already returns its own getRowMemoKey
+const inlineEdit = useInlineEdit(setData)
+
+// Compose: inline edit state + saving state + any other per-row state
+const getRowMemoKey = useCallback(
+  (row: Product): string =>
+    [
+      inlineEdit.getRowMemoKey(row),              // edit draft + errors
+      savingIds.has(row.id) ? "saving" : "idle",  // in-flight mutation
+    ].join("||"),
+  [inlineEdit.getRowMemoKey, savingIds],
+)
+
+// Works with any body variant — virtualized, DnD, virtualized DnD
+return (
+  <>
+    {/* Non-virtualized */}
+    <DataTableBody getRowMemoKey={getRowMemoKey} />
+
+    {/* Or virtualized */}
+    <DataTableVirtualizedBody getRowMemoKey={getRowMemoKey} estimateSize={52} />
+
+    {/* Or row-DnD */}
+    <DataTableDndBody getRowMemoKey={getRowMemoKey} />
+  </>
+)
+```
+
+## Keyboard shortcuts
+
+The example wires up standard keyboard shortcuts inside the input's `onKeyDown`:
+
+| Key      | Action            |
+| -------- | ----------------- |
+| `Enter`  | Save the edit     |
+| `Escape` | Cancel and revert |

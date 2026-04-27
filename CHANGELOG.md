@@ -9,7 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **`getRowMemoKey` prop** — all six body components (`DataTableBody`, `DataTableVirtualizedBody`, `DataTableDndBody`, `DataTableDndColumnBody`, `DataTableVirtualizedDndBody`, `DataTableVirtualizedDndColumnBody`) now accept `getRowMemoKey?: (row: TData) => string`. Return a string per row that encodes external row-level state (inline edit draft values, optimistic overlays, saving spinners). When the string changes for a row, React.memo re-renders only that row — without this, closures captured in column `cell` definitions update silently while the memoized row holds stale output until an unrelated prop (selection, expansion) triggers a re-render. See the [Inline Edit Table example](/examples/inline-edit-table/).
+- **Expanded-row re-measure effect** — `rowMemoKey` is now included in the `useEffect` dependency array of virtualized body rows so height is re-measured whenever inline edit state changes while a row is expanded.
 - `DataTableVirtualizedFlexHeader` — flex-layout header for `DataTableVirtualizedDndBody`. Pick by body: plain → `DataTableVirtualizedHeader`, row-DnD → `DataTableVirtualizedFlexHeader`, column-DnD → `DataTableVirtualizedDndHeader`.
+- `TableSearchFilter` — `debounceMs` prop (default `0`). Keystrokes update the input immediately; `table.setGlobalFilter` is delayed by the configured amount. Recommended at `200`+ for large client-side datasets; leave at `0` for server-driven tables where the network is already the rate limiter. In controlled mode, debounce in the consumer's `onChange` instead.
 
 ### Changed
 
@@ -38,6 +41,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `VirtualizedDraggableRow` — added `data-index` alongside `data-row-index`.
 - `FILTER_OPERATORS.RELATIVE` hidden from the date-filter dropdown (kept in catalogue for server-side consumers); per-row `console.error` throttled.
 - `getObjectHash` — full sorted-keys join (was first-3 keys, false-negatived row selection with sequential IDs).
+- `DndBodyRow` — `isSelected` was missing from props, so `React.memo` never re-rendered on selection changes; `TableDraggableRow`'s `data-state` stayed stale.
+- `VirtualizedDndColumnBodyRow` — expansion toggle no longer silently skips the virtualizer re-measure. Added `elementRef` + `useEffect` matching the pattern in `VirtualizedDraggableRow`, so the combined base + expanded-pane height is measured without remounting the row.
+- `TableSearchFilter` `debounceMs` — out-of-band table state resets (URL nav, programmatic clear) now cancel any pending debounce flush before syncing `pendingValue`, preventing a stale keystroke timer from overwriting the reset.
+
+### Fixed
+
+- **`columnLayoutSignature` memo deps** — all six body components now depend on `columnVisibility`, `columnOrder`, and `columnPinning` from `table.getState()` instead of the stable `columns` array. The memo previously never recomputed on toggle/reorder/pin changes because `table` and `columns` are both stable references; visible column IDs and pinning are now correctly reactive.
+- **`VirtualizedBodyRowInner` expanded-row re-measure** — base row now uses `setRef`/`elementRef` and a `useEffect([isExpanded, columnLayoutSignature, measureRef])` so the virtualizer re-measures when column layout changes while a row is expanded (no remount, so the earlier `ref={measureRef}` was never re-called).
+- **`VirtualizedDndColumnBodyRowInner` re-measure effect** — `columnLayoutSignature` added to `useEffect` deps so the virtualizer picks up the updated combined height when column layout changes while a row is expanded.
+- **`TableSearchFilter` debounce timer cancel order** — pending timer is now cancelled before the `!debounceEnabled` early return. Previously, switching `debounceEnabled` from `true` to `false` left a stale timer running that could overwrite the cleared state.
 
 ### Performance
 
@@ -48,6 +61,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `DataTableBody` — row clicks delegated to `<tbody>`, removing one listener per row.
 - `tableOptions` — 6 inline fallback setters extracted to stable `useCallback`s; deps trimmed to destructured `state` / `initialState` / `globalFilterFn`.
 - `expandColumnId` memoized in all six bodies (was O(rows × cols) per render).
+- All six body row components wrapped with `React.memo` (`BodyRow`, `DndBodyRow`, `DndColumnBodyRow`, `VirtualizedBodyRow`, `VirtualizedDndBodyRow`, `VirtualizedDndColumnBodyRow`). A single-row state change (selection, expansion) now reconciles only that row rather than every visible row. Each component receives a `columnLayoutSignature` prop (visible col ids + pinning encoded as a string) so memo correctly invalidates on column visibility / order / pinning changes.
+- `measureRowWithExpansion` — base-row height now reads from `ResizeObserverEntry.borderBoxSize[0].blockSize` when TanStack Virtual passes the entry, skipping a `getBoundingClientRect` forced layout read on the hot measure path. Falls back to `getBoundingClientRect` for initial measure and expanded sibling.
+- Stable `measureElement` wrapper added to all virtualized bodies — the virtualizer recreates its callback on every render; wrapping it in a `useRef` + `useCallback([])` keeps the prop reference stable so `React.memo` on the row component isn't defeated on every parent render.
 - `DataTableColumnHeaderRoot` context value memoized.
 - `useKeyboardShortcuts` listener no longer re-attaches every render.
 - `onRowSelection` no longer fires on initial mount — user-driven changes only.
