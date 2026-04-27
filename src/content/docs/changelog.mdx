@@ -7,6 +7,7 @@ description: Latest updates and release notes for Niko Table.
 
 ### Added
 
+- **`getRowMemoKey` prop** — all six body components (`DataTableBody`, `DataTableVirtualizedBody`, `DataTableDndBody`, `DataTableDndColumnBody`, `DataTableVirtualizedDndBody`, `DataTableVirtualizedDndColumnBody`) now accept `getRowMemoKey?: (row: TData) => string`. Return a string per row that encodes external row-level state (inline edit draft values, optimistic overlays, saving spinners). When the string changes for a row, React.memo re-renders only that row — without this, closures captured in column `cell` definitions become stale. See the [Inline Edit Table example](/examples/inline-edit-table/).
 - **`DataTableVirtualizedFlexHeader`** — flex-layout header for `DataTableVirtualizedDndBody`. Pick by body: plain → `DataTableVirtualizedHeader`, row-DnD → `DataTableVirtualizedFlexHeader`, column-DnD → `DataTableVirtualizedDndHeader`.
 
 ### Changed
@@ -19,6 +20,7 @@ description: Latest updates and release notes for Niko Table.
 - **`TableRangeFilter`** — `[min, max]` memo depends on faceted scalars, so the range refreshes on data change. `formatValue` no longer locale-formats numbers (`type="number"` inputs reject localized output).
 - **`TableSliderFilter` clear button** — always `stopPropagation()` (was DIV-only, so SVG/icon clicks bubbled and re-opened the popover).
 - **Sort / filter / inline-filter column memos** — now key on `table.options.columns` (table ref alone is too stable).
+- **Expanded-row re-measure effect** — `rowMemoKey` is now in the `useEffect` dependency array of virtualized body rows so height is re-measured when inline edit state changes while a row is expanded.
 - **`TableSortMenu`** — derives the next sorting from `table.getState().sorting` instead of the closure-captured `sorting`.
 - **CSV export** — plain objects are now JSON-encoded instead of serializing as `[object Object]`.
 - **Filter menu / inline filter — stale counts on filter changes.** `<DataTableFilterMenu />` and `<DataTableInlineFilter />` mutate `meta.options` to inject counts; once pinned, those counts survived later filter changes so the count-0 hide rule never fired (e.g. selecting Category=Clothing left every Brand option visible). Pristine options are now captured in a ref and `meta.options` is rebuilt from that source each render — cross-filter narrowing now works in both filter UIs.

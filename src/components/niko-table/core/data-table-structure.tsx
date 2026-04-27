@@ -21,7 +21,7 @@ import {
   TableBody,
   TableCell,
 } from "@/components/ui/table"
-import { flexRender } from "@tanstack/react-table"
+import { flexRender, type Row } from "@tanstack/react-table"
 import { Skeleton } from "@/components/ui/skeleton"
 import { DataTableEmptyState } from "../components/data-table-empty-state"
 import { DataTableColumnHeaderRoot } from "../components/data-table-column-header"
@@ -112,6 +112,93 @@ export const DataTableHeader = React.memo(function DataTableHeader({
 DataTableHeader.displayName = "DataTableHeader"
 
 // ============================================================================
+// BodyRow — memoized to avoid cascading re-renders across visible rows
+// ============================================================================
+
+/**
+ * Per-row component for `DataTableBody`. Wrapped with `React.memo` so a
+ * single-row state change (selection toggle, expansion) doesn't cascade
+ * into a re-render across every visible row.
+ *
+ * Default shallow equality is sufficient: all props are either primitive
+ * (`isExpanded`, `isSelected`, `isClickable`, `expandColumnId`) or stable
+ * by contract (`row` is a TanStack row instance, kept stable across
+ * renders unless the source data array reference changes).
+ */
+interface BodyRowProps {
+  row: Row<unknown>
+  expandColumnId: string | undefined
+  isClickable: boolean
+  isExpanded: boolean
+  isSelected: boolean
+  /** Column layout signature — invalidates React.memo on visibility/order/pinning change. */
+  columnLayoutSignature: string
+  /**
+   * Per-row memo key. Change this string to force React.memo to re-render a
+   * specific row when row-level state changes outside of TanStack Table's
+   * tracked props (e.g. inline edit mode, optimistic state).
+   */
+  rowMemoKey: string
+}
+
+const BodyRow = React.memo(function BodyRow({
+  row,
+  expandColumnId,
+  isClickable,
+  isExpanded,
+  isSelected,
+}: BodyRowProps) {
+  const expandCell =
+    isExpanded && expandColumnId
+      ? row.getAllCells().find(c => c.column.id === expandColumnId)
+      : undefined
+
+  const visibleCells = row.getVisibleCells()
+
+  return (
+    <>
+      <TableRow
+        data-row-index={row.index}
+        data-row-id={row.id}
+        data-state={isSelected ? "selected" : undefined}
+        className={cn(isClickable && "cursor-pointer", "group")}
+      >
+        {visibleCells.map(cell => {
+          const size = cell.column.columnDef.size
+          const cellStyle = {
+            width: size ? `${size}px` : undefined,
+            ...getCommonPinningStyles(cell.column, false),
+          }
+
+          return (
+            <TableCell
+              key={cell.id}
+              style={cellStyle}
+              className={cn(
+                cell.column.getIsPinned() &&
+                  "bg-background group-hover:bg-muted/50 group-data-[state=selected]:bg-muted",
+              )}
+            >
+              {flexRender(cell.column.columnDef.cell, cell.getContext())}
+            </TableCell>
+          )
+        })}
+      </TableRow>
+
+      {expandCell && (
+        <TableRow>
+          <TableCell colSpan={visibleCells.length} className="p-0">
+            {expandCell.column.columnDef.meta?.expandedContent?.(row.original)}
+          </TableCell>
+        </TableRow>
+      )}
+    </>
+  )
+})
+
+BodyRow.displayName = "BodyRow"
+
+// ============================================================================
 // DataTableBody
 // ============================================================================
 
@@ -130,6 +217,11 @@ export interface DataTableBodyProps<TData> {
    * element can `event.target.closest("tr[data-row-id]")`.
    */
   onRowClick?: (row: TData, event: React.MouseEvent<HTMLElement>) => void
+  /**
+   * Return a per-row memo invalidation key. When this key changes for a
+   * specific row, only that row re-renders.
+   */
+  getRowMemoKey?: (row: TData) => string
 }
 
 export function DataTableBody<TData>({
@@ -140,6 +232,7 @@ export function DataTableBody<TData>({
   onScrolledBottom,
   scrollThreshold = 50,
   onRowClick,
+  getRowMemoKey,
 }: DataTableBodyProps<TData>) {
   const { table, columns, isLoading } = useDataTable<TData>()
   const { rows } = table.getRowModel()
@@ -184,6 +277,20 @@ export function DataTableBody<TData>({
     [table, columns],
   )
 
+  const { columnVisibility, columnOrder, columnPinning } = table.getState()
+  // Encodes visible column ids + pinning so memoized rows re-render on layout changes.
+  const columnLayoutSignature = React.useMemo(
+    () =>
+      table
+        .getVisibleLeafColumns()
+        .map(c => {
+          const pinned = c.getIsPinned()
+          return pinned ? `${c.id}:${pinned}` : c.id
+        })
+        .join(","),
+    [table, columnVisibility, columnOrder, columnPinning],
+  )
+
   const isClickable = !!onRowClick
 
   return (
@@ -194,65 +301,20 @@ export function DataTableBody<TData>({
     >
       {/* Only show rows when not loading */}
       {!isLoading && rows?.length
-        ? rows.map(row => {
-            const isExpanded = row.getIsExpanded()
-
-            // Resolve the expand cell only when expanded, using the
-            // memoized `expandColumnId`.
-            const expandCell =
-              isExpanded && expandColumnId
-                ? row.getAllCells().find(c => c.column.id === expandColumnId)
-                : undefined
-
-            return (
-              <React.Fragment key={row.id}>
-                <TableRow
-                  data-row-index={row?.index}
-                  data-row-id={row?.id}
-                  data-state={row.getIsSelected() && "selected"}
-                  className={cn(isClickable && "cursor-pointer", "group")}
-                >
-                  {row.getVisibleCells().map(cell => {
-                    const size = cell.column.columnDef.size
-                    const cellStyle = {
-                      width: size ? `${size}px` : undefined,
-                      ...getCommonPinningStyles(cell.column, false),
-                    }
-
-                    return (
-                      <TableCell
-                        key={cell.id}
-                        style={cellStyle}
-                        className={cn(
-                          cell.column.getIsPinned() &&
-                            "bg-background group-hover:bg-muted/50 group-data-[state=selected]:bg-muted",
-                        )}
-                      >
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext(),
-                        )}
-                      </TableCell>
-                    )
-                  })}
-                </TableRow>
-
-                {/* Expanded content row */}
-                {expandCell && (
-                  <TableRow>
-                    <TableCell
-                      colSpan={row.getVisibleCells().length}
-                      className="p-0"
-                    >
-                      {expandCell.column.columnDef.meta?.expandedContent?.(
-                        row.original,
-                      )}
-                    </TableCell>
-                  </TableRow>
-                )}
-              </React.Fragment>
-            )
-          })
+        ? rows.map(row => (
+            <BodyRow
+              key={row.id}
+              row={row as Row<unknown>}
+              expandColumnId={expandColumnId}
+              isClickable={isClickable}
+              isExpanded={row.getIsExpanded()}
+              isSelected={row.getIsSelected()}
+              columnLayoutSignature={columnLayoutSignature}
+              rowMemoKey={
+                getRowMemoKey ? getRowMemoKey(row.original as TData) : ""
+              }
+            />
+          ))
         : null}
 
       {children}
