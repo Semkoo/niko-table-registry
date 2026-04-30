@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Filter variant naming normalized to camelCase** — canonical variant values now use `dateRange` and `multiSelect` (instead of `date_range` and `multi_select`) across constants, types, examples, and docs.
 - **Options with `count: 0` are hidden across every filter UI** (faceted filter, filter menu, inline filter). Server-side tables that pass cross-filter counts get automatic narrowing without writing helpers. Pure label-only callers (no counts) unaffected. Opt-out per option by passing `count: undefined`.
 - **`autoResetPageIndex` defaults to `false`** (was `true`). Sort/filter changes now preserve the pagination cursor. Opt back in via `config={{ autoResetPageIndex: true }}`.
 

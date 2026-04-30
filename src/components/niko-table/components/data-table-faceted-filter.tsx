@@ -104,7 +104,7 @@ interface UseFacetedOptionsArgs<TData> {
 }
 
 // Resolves option list in priority order: 1) caller `options`, 2) meta-aware
-// generator (select/multi_select), 3) data-derived fallback. Memo gates it so
+// generator (select/multiSelect), 3) data-derived fallback. Memo gates it so
 // we don't walk rows twice.
 function useFacetedOptions<TData>({
   table,

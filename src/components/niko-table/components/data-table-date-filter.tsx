@@ -77,11 +77,14 @@ export function DataTableDateFilter<TData>({
   React.useMemo(() => {
     if (!column) return
     const meta = (column.columnDef.meta ||= {})
+    type ColumnVariant = NonNullable<(typeof meta)["variant"]>
     // Only set variant if not already set (respects manual configuration)
     if (!meta.variant) {
-      meta.variant = multiple
+      const inferredVariant = multiple
         ? FILTER_VARIANTS.DATE_RANGE
         : FILTER_VARIANTS.DATE
+      // Keep assignment compatible across installations with different variant literal typings.
+      meta.variant = inferredVariant as ColumnVariant
     }
   }, [column, multiple])
 

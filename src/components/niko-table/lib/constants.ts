@@ -75,11 +75,11 @@ export const FILTER_VARIANTS = {
   /** Single date picker */
   DATE: "date",
   /** Date range picker */
-  DATE_RANGE: "date_range",
+  DATE_RANGE: "dateRange",
   /** Single select dropdown */
   SELECT: "select",
   /** Multi-select dropdown */
-  MULTI_SELECT: "multi_select",
+  MULTI_SELECT: "multiSelect",
   /** Checkbox or toggle */
   BOOLEAN: "boolean",
 } as const

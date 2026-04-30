@@ -25,7 +25,7 @@ type BaseTableFilterMenuProps<TData> = Omit<
 
 interface AutoOptionProps {
   /**
-   * Automatically generate select/multi_select options for columns lacking static options
+   * Automatically generate select/multiSelect options for columns lacking static options
    * @default true
    */
   autoOptions?: boolean
@@ -84,7 +84,7 @@ export function DataTableFilterMenu<TData>({
 }: DataTableFilterMenuProps<TData>) {
   const { table } = useDataTable<TData>()
 
-  // Generate options map (only includes select/multi_select columns)
+  // Generate options map (only includes select/multiSelect columns)
   const generatedOptions = useGeneratedOptions(table, {
     showCounts,
     dynamicCounts,
@@ -116,12 +116,11 @@ export function DataTableFilterMenu<TData>({
     if (!autoOptions) return
     table.getAllColumns().forEach(column => {
       const meta = (column.columnDef.meta ||= {})
-      const variant = meta.variant ?? FILTER_VARIANTS.TEXT
-      if (
-        variant !== FILTER_VARIANTS.SELECT &&
-        variant !== FILTER_VARIANTS.MULTI_SELECT
-      )
-        return
+      const variant = String(meta.variant ?? FILTER_VARIANTS.TEXT)
+      const isSelectVariant = variant === FILTER_VARIANTS.SELECT
+      const isMultiSelectVariant = variant === FILTER_VARIANTS.MULTI_SELECT
+
+      if (!isSelectVariant && !isMultiSelectVariant) return
       const gen = generatedOptions[column.id]
       if (!gen || gen.length === 0) return
 

@@ -186,7 +186,7 @@ export function TableColumnFacetedFilterMenu<TData, TValue>({
 
   const derivedTitle = useDerivedColumnTitle(column, column.id, title)
 
-  // Auto-generate options from column meta (works for select/multi_select variants)
+  // Auto-generate options from column meta (works for select/multiSelect variants)
   const generatedOptions = useGeneratedOptionsForColumn(
     table as Table<TData>,
     column.id,
