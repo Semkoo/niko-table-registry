@@ -61,7 +61,7 @@ export function DataTableColumnFacetedFilterMenu<TData, TValue>(
 ) {
   const context = useColumnHeaderContext<TData, TValue>(false)
   const column = props.column || context?.column
-  const { table } = useDataTable<TData>()
+  const { table, generatedOptionsMap } = useDataTable<TData>()
 
   if (!column) {
     console.warn(
@@ -71,7 +71,18 @@ export function DataTableColumnFacetedFilterMenu<TData, TValue>(
   }
 
   return (
-    <TableColumnFacetedFilterMenu column={column} table={table} {...props} />
+    <TableColumnFacetedFilterMenu
+      column={column}
+      table={table}
+      precomputedOptions={
+        // Skip batch cache when caller supplies custom per-column config
+        // (dynamicCounts / limitToFilteredRows) so those props are honoured.
+        "dynamicCounts" in props || "limitToFilteredRows" in props
+          ? undefined
+          : generatedOptionsMap
+      }
+      {...props}
+    />
   )
 }
 

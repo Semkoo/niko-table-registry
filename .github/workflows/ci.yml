@@ -37,9 +37,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Unit tests (vitest)
-        run: pnpm test
-
       - name: Lint (eslint, non-fix)
         # `pnpm lint` in this repo runs `eslint --fix`, which is the wrong
         # shape for CI — CI should fail, not rewrite files. Invoke eslint

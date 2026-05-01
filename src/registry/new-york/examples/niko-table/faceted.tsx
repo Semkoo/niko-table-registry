@@ -215,14 +215,14 @@ const columns: DataTableColumnDef<Product>[] = [
     ),
     meta: {
       label: "Release Date",
-      variant: "date_range", // Auto-applies dateRangeFilter
+      variant: "dateRange", // Auto-applies dateRangeFilter
     },
     cell: ({ row }) => {
       const date = row.getValue("releaseDate") as Date
       return <span>{date.toLocaleDateString()}</span>
     },
     enableColumnFilter: true,
-    // filterFn auto-applied based on variant: "date_range" -> dateRangeFilter
+    // filterFn auto-applied based on variant: "dateRange" -> dateRangeFilter
   },
 ]
 

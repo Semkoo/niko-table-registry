@@ -307,7 +307,7 @@ The filter menu component allows users to create rule-based filters with multipl
 
 | Name                  | Type                                                | Default      | Description                                            |
 | --------------------- | --------------------------------------------------- | ------------ | ------------------------------------------------------ |
-| `autoOptions`         | `boolean`                                           | `true`       | Auto-generate options for select/multi_select columns  |
+| `autoOptions`         | `boolean`                                           | `true`       | Auto-generate options for select/multiSelect columns   |
 | `showCounts`          | `boolean`                                           | `true`       | Show counts beside each option                         |
 | `dynamicCounts`       | `boolean`                                           | `true`       | Recompute counts based on currently filtered rows      |
 | `limitToFilteredRows` | `boolean`                                           | `true`       | Generate options from filtered rows only (vs all rows) |
@@ -372,19 +372,19 @@ Define filter metadata in your column definitions:
 
 - **`"text"`** - Text input filter
 - **`"select"`** - Dropdown select filter (requires `options`)
-- **`"multi_select"`** - Multiple selection dropdown
+- **`"multiSelect"`** - Multiple selection dropdown
 - **`"number"`** - Number input filter (optional `unit` for display)
 - **`"range"`** - Numeric range slider (auto-applied for `number` variant with `meta.range`)
 - **`"boolean"`** - Boolean checkbox filter
 - **`"date"`** - Single date picker filter
-- **`"date_range"`** - Date range picker (auto-applied when `DataTableDateFilter` has `multiple={true}`)
+- **`"dateRange"`** - Date range picker (auto-applied when `DataTableDateFilter` has `multiple={true}`)
 
 **Auto-applied filter functions:**
 
 When you specify `meta.variant` in your column definition, the appropriate `filterFn` is automatically applied:
 
 - **`variant: "range"`** → `numberRangeFilter` (for numeric ranges like price)
-- **`variant: "date"`** or **`variant: "date_range"`** → `dateRangeFilter` (for date filtering)
+- **`variant: "date"`** or **`variant: "dateRange"`** → `dateRangeFilter` (for date filtering)
 
 You can still provide a custom `filterFn` if needed - it will override the auto-applied function.
 

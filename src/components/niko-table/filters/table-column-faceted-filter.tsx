@@ -160,6 +160,7 @@ export function TableColumnFacetedFilterMenu<TData, TValue>({
   multiple,
   limitToFilteredRows,
   dynamicCounts = true,
+  precomputedOptions,
   ...props
 }: Omit<
   React.ComponentProps<typeof TableFacetedFilter>,
@@ -180,18 +181,26 @@ export function TableColumnFacetedFilterMenu<TData, TValue>({
    * @default true
    */
   dynamicCounts?: boolean
+  /**
+   * Precomputed options map from DataTableProvider context. When provided,
+   * skips per-column option generation.
+   */
+  precomputedOptions?: Record<string, Option[]>
 }) {
   // Default: multi-select shows all options, single-select filters to visible rows
   limitToFilteredRows ??= !multiple
 
   const derivedTitle = useDerivedColumnTitle(column, column.id, title)
 
-  // Auto-generate options from column meta (works for select/multi_select variants)
-  const generatedOptions = useGeneratedOptionsForColumn(
+  // Auto-generate options from column meta (works for select/multiSelect variants).
+  // Use precomputed batch when available to avoid per-column row scans.
+  const needsPerColumnGeneration = !precomputedOptions
+  const perColumnOptions = useGeneratedOptionsForColumn(
     table as Table<TData>,
-    column.id,
+    needsPerColumnGeneration ? column.id : "__noop__",
     { limitToFilteredRows, dynamicCounts },
   )
+  const generatedOptions = precomputedOptions?.[column.id] ?? perColumnOptions
 
   /**
    * REACTIVITY FIX: Extract row model references outside memos so that when
