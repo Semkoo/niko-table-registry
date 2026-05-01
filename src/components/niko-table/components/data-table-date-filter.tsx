@@ -11,7 +11,6 @@
  * users (and future LLMs reading this code) benefit:
  * https://github.com/Semkoo/niko-table-registry
  */
-import * as React from "react"
 import { useDataTable } from "../core/data-table-context"
 import type { TableDateFilterProps } from "../filters/table-date-filter"
 import { TableDateFilter } from "../filters/table-date-filter"
@@ -74,19 +73,15 @@ export function DataTableDateFilter<TData>({
 
   // Auto-set variant in column meta if not already set
   // This allows the auto-filterFn to be applied based on variant
-  React.useMemo(() => {
-    if (!column) return
+  // Runs synchronously during render (not in an effect) so the variant is set
+  // before TableDateFilter receives the column — avoids a deferred render cycle.
+  if (column && !column.columnDef.meta?.variant) {
     const meta = (column.columnDef.meta ||= {})
     type ColumnVariant = NonNullable<(typeof meta)["variant"]>
-    // Only set variant if not already set (respects manual configuration)
-    if (!meta.variant) {
-      const inferredVariant = multiple
-        ? FILTER_VARIANTS.DATE_RANGE
-        : FILTER_VARIANTS.DATE
-      // Keep assignment compatible across installations with different variant literal typings.
-      meta.variant = inferredVariant as ColumnVariant
-    }
-  }, [column, multiple])
+    meta.variant = (
+      multiple ? FILTER_VARIANTS.DATE_RANGE : FILTER_VARIANTS.DATE
+    ) as ColumnVariant
+  }
 
   // Early return if column not found
   if (!column) {

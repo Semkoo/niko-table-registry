@@ -1306,7 +1306,7 @@ function FilterFacetedSelect<TData>({
   // and only then fall back to per-column generation.
   const precomputedOptions = React.useContext(PrecomputedOptionsContext)
   const needsPerColumnGeneration =
-    !precomputedOptions && !columnMeta?.options?.length
+    !precomputedOptions?.[column.id] && !columnMeta?.options?.length
   const perColumnGenerated = useGeneratedOptionsForColumn(
     table,
     needsPerColumnGeneration ? column.id : "__noop__",

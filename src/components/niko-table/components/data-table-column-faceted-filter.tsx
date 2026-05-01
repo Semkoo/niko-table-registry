@@ -74,7 +74,13 @@ export function DataTableColumnFacetedFilterMenu<TData, TValue>(
     <TableColumnFacetedFilterMenu
       column={column}
       table={table}
-      precomputedOptions={generatedOptionsMap}
+      precomputedOptions={
+        // Skip batch cache when caller supplies custom per-column config
+        // (dynamicCounts / limitToFilteredRows) so those props are honoured.
+        "dynamicCounts" in props || "limitToFilteredRows" in props
+          ? undefined
+          : generatedOptionsMap
+      }
       {...props}
     />
   )
