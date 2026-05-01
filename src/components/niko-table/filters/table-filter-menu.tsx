@@ -74,12 +74,18 @@ import {
   ERROR_MESSAGES,
   KEYBOARD_SHORTCUTS,
 } from "../lib/constants"
+import { useGeneratedOptionsForColumn } from "../hooks/use-generated-options"
 import type {
   ExtendedColumnFilter,
   FilterOperator,
   JoinOperator,
   Option,
 } from "../types"
+
+/* ---------- Precomputed options context (avoids per-column row walks) ---------- */
+const PrecomputedOptionsContext = React.createContext<
+  Record<string, Option[]> | undefined
+>(undefined)
 
 /* --------------------------------- Utilities -------------------------------- */
 
@@ -757,12 +763,18 @@ interface TableFilterMenuProps<TData> extends React.ComponentProps<
   onFiltersChange?: (filters: ExtendedColumnFilter<TData>[] | null) => void
   joinOperator?: JoinOperator
   onJoinOperatorChange?: (operator: JoinOperator) => void
+  /**
+   * Precomputed options map from batch generation. When provided,
+   * faceted selects skip per-column row scans.
+   */
+  precomputedOptions?: Record<string, Option[]>
 }
 
 export function TableFilterMenu<TData>({
   table,
   filters: controlledFilters,
   onFiltersChange: controlledOnFiltersChange,
+  precomputedOptions,
   // Legacy properties ignored: joinOperator, onJoinOperatorChange - now uses individual joinOperators
   ...props
 }: Omit<
@@ -908,100 +920,103 @@ export function TableFilterMenu<TData>({
   )
 
   return (
-    <Sortable
-      value={filters}
-      onValueChange={handleFiltersReorder}
-      getItemValue={item => item.filterId}
-    >
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <Button variant="outline" size="sm" title="Open filter menu (F)">
-            <ListFilter />
-            Filter
-            {filters.length > 0 && (
-              <Badge
-                variant="secondary"
-                className="h-[18.24px] rounded-[3.2px] px-[5.12px] font-mono text-[10.4px] font-normal"
-              >
-                {filters.length}
-              </Badge>
-            )}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent
-          aria-describedby={descriptionId}
-          aria-labelledby={labelId}
-          className="flex w-full max-w-(--radix-popover-content-available-width) origin-(--radix-popover-content-transform-origin) flex-col gap-3.5 p-4 sm:min-w-[380px]"
-          {...props}
-        >
-          <div className="flex flex-col gap-1">
-            <h4 id={labelId} className="leading-none font-medium">
-              {filters.length > 0 ? "Filters" : "No filters applied"}
-            </h4>
-            <p
-              id={descriptionId}
-              className={cn(
-                "text-sm text-muted-foreground",
-                filters.length > 0 && "sr-only",
+    <PrecomputedOptionsContext.Provider value={precomputedOptions}>
+      <Sortable
+        value={filters}
+        onValueChange={handleFiltersReorder}
+        getItemValue={item => item.filterId}
+      >
+        <Popover open={open} onOpenChange={setOpen}>
+          <PopoverTrigger asChild>
+            <Button variant="outline" size="sm" title="Open filter menu (F)">
+              <ListFilter />
+              Filter
+              {filters.length > 0 && (
+                <Badge
+                  variant="secondary"
+                  className="h-[18.24px] rounded-[3.2px] px-[5.12px] font-mono text-[10.4px] font-normal"
+                >
+                  {filters.length}
+                </Badge>
               )}
-            >
-              {filters.length > 0
-                ? "Modify filters to refine your rows."
-                : "Add filters to refine your rows."}
-            </p>
-          </div>
-          {filters.length > 0 ? (
-            <SortableContent asChild>
-              <ul className="flex max-h-[300px] flex-col gap-2 overflow-y-auto p-1">
-                {filters.map((filter, index) => (
-                  <TableFilterItem<TData>
-                    key={filter.filterId}
-                    filter={filter}
-                    index={index}
-                    filterItemId={`${id}-filter-${filter.filterId}`}
-                    columns={columns}
-                    onFilterUpdate={onFilterUpdate}
-                    onFilterRemove={onFilterRemove}
-                  />
-                ))}
-              </ul>
-            </SortableContent>
-          ) : null}
-          <div className="flex w-full items-center gap-2">
-            <Button
-              size="sm"
-              className="rounded"
-              ref={addButtonRef}
-              onClick={onFilterAdd}
-              title="Add a new filter"
-            >
-              Add filter
             </Button>
+          </PopoverTrigger>
+          <PopoverContent
+            aria-describedby={descriptionId}
+            aria-labelledby={labelId}
+            className="flex w-full max-w-(--radix-popover-content-available-width) origin-(--radix-popover-content-transform-origin) flex-col gap-3.5 p-4 sm:min-w-[380px]"
+            {...props}
+          >
+            <div className="flex flex-col gap-1">
+              <h4 id={labelId} className="leading-none font-medium">
+                {filters.length > 0 ? "Filters" : "No filters applied"}
+              </h4>
+              <p
+                id={descriptionId}
+                className={cn(
+                  "text-sm text-muted-foreground",
+                  filters.length > 0 && "sr-only",
+                )}
+              >
+                {filters.length > 0
+                  ? "Modify filters to refine your rows."
+                  : "Add filters to refine your rows."}
+              </p>
+            </div>
             {filters.length > 0 ? (
+              <SortableContent asChild>
+                <ul className="flex max-h-[300px] flex-col gap-2 overflow-y-auto p-1">
+                  {filters.map((filter, index) => (
+                    <TableFilterItem<TData>
+                      key={filter.filterId}
+                      filter={filter}
+                      index={index}
+                      filterItemId={`${id}-filter-${filter.filterId}`}
+                      table={table}
+                      columns={columns}
+                      onFilterUpdate={onFilterUpdate}
+                      onFilterRemove={onFilterRemove}
+                    />
+                  ))}
+                </ul>
+              </SortableContent>
+            ) : null}
+            <div className="flex w-full items-center gap-2">
               <Button
-                variant="outline"
                 size="sm"
                 className="rounded"
-                onClick={onFiltersReset}
-                title="Clear all filters"
+                ref={addButtonRef}
+                onClick={onFilterAdd}
+                title="Add a new filter"
               >
-                Reset filters
+                Add filter
               </Button>
-            ) : null}
+              {filters.length > 0 ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="rounded"
+                  onClick={onFiltersReset}
+                  title="Clear all filters"
+                >
+                  Reset filters
+                </Button>
+              ) : null}
+            </div>
+          </PopoverContent>
+        </Popover>
+        <SortableOverlay>
+          <div className="flex items-center gap-2">
+            <div className="h-8 min-w-[72px] rounded-sm bg-primary/10" />
+            <div className="h-8 w-32 rounded-sm bg-primary/10" />
+            <div className="h-8 w-32 rounded-sm bg-primary/10" />
+            <div className="h-8 min-w-36 flex-1 rounded-sm bg-primary/10" />
+            <div className="size-8 shrink-0 rounded-sm bg-primary/10" />
+            <div className="size-8 shrink-0 rounded-sm bg-primary/10" />
           </div>
-        </PopoverContent>
-      </Popover>
-      <SortableOverlay>
-        <div className="flex items-center gap-2">
-          <div className="h-8 min-w-[72px] rounded-sm bg-primary/10" />
-          <div className="h-8 w-32 rounded-sm bg-primary/10" />
-          <div className="h-8 w-32 rounded-sm bg-primary/10" />
-          <div className="h-8 min-w-36 flex-1 rounded-sm bg-primary/10" />
-          <div className="size-8 shrink-0 rounded-sm bg-primary/10" />
-          <div className="size-8 shrink-0 rounded-sm bg-primary/10" />
-        </div>
-      </SortableOverlay>
-    </Sortable>
+        </SortableOverlay>
+      </Sortable>
+    </PrecomputedOptionsContext.Provider>
   )
 }
 
@@ -1009,6 +1024,7 @@ interface TableFilterItemProps<TData> {
   filter: ExtendedColumnFilter<TData>
   index: number
   filterItemId: string
+  table: Table<TData>
   columns: Column<TData>[]
   onFilterUpdate: (
     filterId: string,
@@ -1021,6 +1037,7 @@ function TableFilterItem<TData>({
   filter,
   index,
   filterItemId,
+  table,
   columns,
   onFilterUpdate,
   onFilterRemove,
@@ -1107,6 +1124,7 @@ function TableFilterItem<TData>({
           <FilterValueInput
             filter={filter}
             inputId={inputId}
+            table={table}
             column={column}
             columnMeta={columnMeta}
             onFilterUpdate={onFilterUpdate}
@@ -1148,6 +1166,7 @@ function TableFilterItem<TData>({
 interface FilterInputProps<TData> {
   filter: ExtendedColumnFilter<TData>
   inputId: string
+  table: Table<TData>
   column: Column<TData>
   columnMeta?: Column<TData>["columnDef"]["meta"]
   onFilterUpdate: (
@@ -1266,6 +1285,8 @@ FilterBooleanSelect.displayName = "FilterBooleanSelect"
 function FilterFacetedSelect<TData>({
   filter,
   inputId,
+  table,
+  column,
   columnMeta,
   onFilterUpdate,
   showValueSelector,
@@ -1280,6 +1301,20 @@ function FilterFacetedSelect<TData>({
     : typeof filter.value === "string"
       ? filter.value
       : undefined
+
+  // Resolve options: prefer static meta.options, then precomputed batch,
+  // and only then fall back to per-column generation.
+  const precomputedOptions = React.useContext(PrecomputedOptionsContext)
+  const needsPerColumnGeneration =
+    !precomputedOptions && !columnMeta?.options?.length
+  const perColumnGenerated = useGeneratedOptionsForColumn(
+    table,
+    needsPerColumnGeneration ? column.id : "__noop__",
+  )
+  const generatedOptions = precomputedOptions?.[column.id] ?? perColumnGenerated
+  const options = columnMeta?.options?.length
+    ? columnMeta.options
+    : generatedOptions
 
   return (
     <Faceted
@@ -1304,7 +1339,7 @@ function FilterFacetedSelect<TData>({
           title={`Select ${columnMeta?.label?.toLowerCase() ?? "option"}${multiple ? "s" : ""}`}
         >
           <FacetedBadgeList
-            options={columnMeta?.options}
+            options={options}
             placeholder={
               columnMeta?.placeholder ??
               `Select option${multiple ? "s" : ""}...`
@@ -1326,7 +1361,7 @@ function FilterFacetedSelect<TData>({
             {/* Cross-filter narrowing: hide options at count 0 (matches the
                 rule used by `TableColumnFacetedFilterMenu`). Pure label-only
                 option lists (no counts) render unchanged. */}
-            {columnMeta?.options
+            {options
               ?.filter((option: Option) => option.count !== 0)
               .map((option: Option) => (
                 <FacetedItem key={option.value} value={option.value}>
