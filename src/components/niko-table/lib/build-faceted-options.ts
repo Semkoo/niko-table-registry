@@ -23,7 +23,7 @@ export interface BuildFacetedOptionsConfig {
    * enriched with live counts).
    *
    * If omitted, options are derived from the rows themselves — useful for
-   * columns that are not declared as `select`/`multi_select` variants but are
+   * columns that are not declared as `select`/`multiSelect` variants but are
    * still being used with a faceted filter (boolean, text, etc.).
    */
   staticOptions?: Option[]

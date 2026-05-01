@@ -14,7 +14,6 @@
 import React from "react"
 import { useDataTable } from "../core/data-table-context"
 import { TableFilterMenu } from "../filters/table-filter-menu"
-import { useGeneratedOptions } from "../hooks/use-generated-options"
 import { FILTER_VARIANTS } from "../lib/constants"
 import type { Option } from "../types"
 
@@ -25,7 +24,7 @@ type BaseTableFilterMenuProps<TData> = Omit<
 
 interface AutoOptionProps {
   /**
-   * Automatically generate select/multi_select options for columns lacking static options
+   * Automatically generate select/multiSelect options for columns lacking static options
    * @default true
    */
   autoOptions?: boolean
@@ -82,17 +81,44 @@ export function DataTableFilterMenu<TData>({
   mergeStrategy = "preserve",
   ...props
 }: DataTableFilterMenuProps<TData>) {
-  const { table } = useDataTable<TData>()
+  const { table, generatedOptionsMap } = useDataTable<TData>()
 
-  // Generate options map (only includes select/multi_select columns)
-  const generatedOptions = useGeneratedOptions(table, {
-    showCounts,
-    dynamicCounts,
-    limitToFilteredRows,
+  // Batch options are computed upstream in DataTableProvider.
+  // Keep local shaping props (include/exclude/limit/showCounts) for API parity.
+  const generatedOptions = React.useMemo(() => {
+    const includeSet = includeColumns ? new Set(includeColumns) : null
+    const excludeSet = excludeColumns ? new Set(excludeColumns) : null
+
+    const entries = Object.entries(generatedOptionsMap)
+      .filter(([columnId]) => {
+        if (includeSet && !includeSet.has(columnId)) return false
+        if (excludeSet && excludeSet.has(columnId)) return false
+        return true
+      })
+      .map(([columnId, options]) => {
+        const limited =
+          typeof limitPerColumn === "number" && limitPerColumn > 0
+            ? options.slice(0, limitPerColumn)
+            : options
+        const normalized = showCounts
+          ? limited
+          : limited.map(opt => ({ ...opt, count: undefined }))
+        return [columnId, normalized]
+      })
+
+    return Object.fromEntries(entries) as Record<string, Option[]>
+  }, [
+    generatedOptionsMap,
     includeColumns,
     excludeColumns,
     limitPerColumn,
-  })
+    showCounts,
+  ])
+
+  // Data source selection (dynamicCounts/limitToFilteredRows) now lives in the
+  // provider-level batch computation, so these props are intentionally read-only.
+  void dynamicCounts
+  void limitToFilteredRows
 
   /**
    * BUG: stale counts on filter changes
@@ -116,12 +142,11 @@ export function DataTableFilterMenu<TData>({
     if (!autoOptions) return
     table.getAllColumns().forEach(column => {
       const meta = (column.columnDef.meta ||= {})
-      const variant = meta.variant ?? FILTER_VARIANTS.TEXT
-      if (
-        variant !== FILTER_VARIANTS.SELECT &&
-        variant !== FILTER_VARIANTS.MULTI_SELECT
-      )
-        return
+      const variant = String(meta.variant ?? FILTER_VARIANTS.TEXT)
+      const isSelectVariant = variant === FILTER_VARIANTS.SELECT
+      const isMultiSelectVariant = variant === FILTER_VARIANTS.MULTI_SELECT
+
+      if (!isSelectVariant && !isMultiSelectVariant) return
       const gen = generatedOptions[column.id]
       if (!gen || gen.length === 0) return
 
@@ -157,7 +182,13 @@ export function DataTableFilterMenu<TData>({
     })
   }, [autoOptions, generatedOptions, mergeStrategy, showCounts, table])
 
-  return <TableFilterMenu<TData> table={table} {...props} />
+  return (
+    <TableFilterMenu<TData>
+      table={table}
+      precomputedOptions={generatedOptions}
+      {...props}
+    />
+  )
 }
 
 /**

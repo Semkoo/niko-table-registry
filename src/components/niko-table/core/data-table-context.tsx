@@ -18,7 +18,8 @@ import React, {
   useEffect,
   useReducer,
 } from "react"
-import type { DataTableInstance, DataTableColumnDef } from "../types"
+import { useGeneratedOptions } from "../hooks/use-generated-options"
+import type { DataTableInstance, DataTableColumnDef, Option } from "../types"
 
 export type DataTableContextState = {
   isLoading: boolean
@@ -27,6 +28,7 @@ export type DataTableContextState = {
 type DataTableContextProps<TData> = DataTableContextState & {
   table: DataTableInstance<TData>
   columns: DataTableColumnDef<TData>[]
+  generatedOptionsMap: Record<string, Option[]>
   setIsLoading: (isLoading: boolean) => void
 }
 
@@ -172,6 +174,10 @@ export function DataTableProvider<TData>({
     columnOrder,
   ])
 
+  // Generate options for all select/multiSelect columns in a single pass.
+  // This replaces N separate per-column scans in faceted filter consumers.
+  const generatedOptionsMap = useGeneratedOptions(table)
+
   // Memoize so context consumers (10+ filter/action components) only re-render
   // when table, columns, loading, or actual table state changes.
   const value = React.useMemo(
@@ -181,9 +187,17 @@ export function DataTableProvider<TData>({
         columns:
           columns || (table.options.columns as DataTableColumnDef<TData>[]),
         isLoading: state.isLoading,
+        generatedOptionsMap,
         setIsLoading,
       }) as DataTableContextProps<TData>,
-    [table, columns, state.isLoading, setIsLoading, tableStateKey],
+    [
+      table,
+      columns,
+      state.isLoading,
+      generatedOptionsMap,
+      setIsLoading,
+      tableStateKey,
+    ],
   )
 
   return (

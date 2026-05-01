@@ -101,10 +101,11 @@ interface UseFacetedOptionsArgs<TData> {
   showCounts: boolean
   dynamicCounts: boolean
   limitToFilteredRows: boolean
+  precomputedOptions?: Record<string, Option[]>
 }
 
 // Resolves option list in priority order: 1) caller `options`, 2) meta-aware
-// generator (select/multi_select), 3) data-derived fallback. Memo gates it so
+// generator (select/multiSelect), 3) data-derived fallback. Memo gates it so
 // we don't walk rows twice.
 function useFacetedOptions<TData>({
   table,
@@ -113,6 +114,7 @@ function useFacetedOptions<TData>({
   showCounts,
   dynamicCounts,
   limitToFilteredRows,
+  precomputedOptions,
 }: UseFacetedOptionsArgs<TData>): Option[] {
   const column = table.getColumn(accessorKey)
 
@@ -120,11 +122,20 @@ function useFacetedOptions<TData>({
   // it handles augment/preserve strategies and per-column meta overrides.
   // It returns `[]` for columns that don't match a select variant, which is
   // how we detect "fall back to data-derived options."
-  const metaGenerated = useGeneratedOptionsForColumn(table, accessorKey, {
-    showCounts,
-    dynamicCounts,
-    limitToFilteredRows,
-  })
+  const metaGenerated = precomputedOptions?.[accessorKey] ?? []
+  const needsFallbackGeneration = !precomputedOptions
+  const perColumnGenerated = useGeneratedOptionsForColumn(
+    table,
+    needsFallbackGeneration ? accessorKey : "__noop__",
+    {
+      showCounts,
+      dynamicCounts,
+      limitToFilteredRows,
+    },
+  )
+  const resolvedMetaGenerated = needsFallbackGeneration
+    ? perColumnGenerated
+    : metaGenerated
 
   // Pull state slices for memo reactivity.
   const state = table.getState()
@@ -162,7 +173,7 @@ function useFacetedOptions<TData>({
     // Priority 2: trust the meta-aware generator when it produced anything.
     // (Preserved original "non-empty result wins" behavior so auto-generated
     // columns with valid data don't get clobbered by the fallback.)
-    if (metaGenerated.length > 0) return metaGenerated
+    if (resolvedMetaGenerated.length > 0) return resolvedMetaGenerated
 
     // Priority 3: data-derived fallback for non-select variants (or select
     // variants that had no rows to work with — empty output either way).
@@ -182,7 +193,7 @@ function useFacetedOptions<TData>({
   }, [
     column,
     options,
-    metaGenerated,
+    resolvedMetaGenerated,
     table,
     coreRows,
     accessorKey,
@@ -214,7 +225,7 @@ function useFacetedFilterSetup<TData>({
   limitToFilteredRows: boolean
   title?: string
 }) {
-  const { table } = useDataTable<TData>()
+  const { table, generatedOptionsMap } = useDataTable<TData>()
   const column = table.getColumn(accessorKey)
 
   const derivedTitle = useDerivedColumnTitle(column, accessorKey, title)
@@ -226,6 +237,7 @@ function useFacetedFilterSetup<TData>({
     showCounts,
     dynamicCounts,
     limitToFilteredRows,
+    precomputedOptions: generatedOptionsMap,
   })
 
   return { table, column, derivedTitle, dynamicOptions }

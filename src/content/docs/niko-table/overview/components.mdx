@@ -194,17 +194,17 @@ import { DataTableFilterMenu } from "@/components/niko-table/components/data-tab
 
 #### Props
 
-| Name                  | Type                                   | Default      | Description                                            |
-| --------------------- | -------------------------------------- | ------------ | ------------------------------------------------------ |
-| `autoOptions`         | `boolean`                              | `true`       | Auto-generate options for select/multi_select columns. |
-| `showCounts`          | `boolean`                              | `true`       | Show counts beside each option.                        |
-| `dynamicCounts`       | `boolean`                              | `true`       | Recompute counts based on filtered rows.               |
-| `limitToFilteredRows` | `boolean`                              | `true`       | Generate options from filtered rows only.              |
-| `includeColumns`      | `string[]`                             | -            | Only generate options for these column ids.            |
-| `excludeColumns`      | `string[]`                             | -            | Exclude these column ids from generation.              |
-| `limitPerColumn`      | `number`                               | -            | Limit number of generated options per column.          |
-| `mergeStrategy`       | `"preserve" \| "augment" \| "replace"` | `"preserve"` | How to handle existing static options.                 |
-| `className`           | `string`                               | -            | Additional CSS classes.                                |
+| Name                  | Type                                   | Default      | Description                                           |
+| --------------------- | -------------------------------------- | ------------ | ----------------------------------------------------- |
+| `autoOptions`         | `boolean`                              | `true`       | Auto-generate options for select/multiSelect columns. |
+| `showCounts`          | `boolean`                              | `true`       | Show counts beside each option.                       |
+| `dynamicCounts`       | `boolean`                              | `true`       | Recompute counts based on filtered rows.              |
+| `limitToFilteredRows` | `boolean`                              | `true`       | Generate options from filtered rows only.             |
+| `includeColumns`      | `string[]`                             | -            | Only generate options for these column ids.           |
+| `excludeColumns`      | `string[]`                             | -            | Exclude these column ids from generation.             |
+| `limitPerColumn`      | `number`                               | -            | Limit number of generated options per column.         |
+| `mergeStrategy`       | `"preserve" \| "augment" \| "replace"` | `"preserve"` | How to handle existing static options.                |
+| `className`           | `string`                               | -            | Additional CSS classes.                               |
 
 #### Merge Strategy
 
@@ -739,7 +739,7 @@ const columns: DataTableColumnDef<Product>[] = [
         <DataTableColumnDateFilterMenu />
       </DataTableColumnHeader>
     ),
-    meta: { label: "Release Date", variant: "date_range" },
+    meta: { label: "Release Date", variant: "dateRange" },
     enableColumnFilter: true,
   },
 ]
@@ -1381,7 +1381,7 @@ Renders the "Pin to left" / "Pin to right" / "Unpin" menu items. Honors `column.
   </Button>
 </div>
 
-Routes a column to the right per-column filter UI based on `column.columnDef.meta?.variant` (text / number / range / date / select / multi_select / boolean). Lazy-mounts the variant-specific filter component (`data-table-column-faceted-filter`, `data-table-column-slider-filter-options`, `data-table-column-date-filter-options`) only when the user opens the filter panel.
+Routes a column to the right per-column filter UI based on `column.columnDef.meta?.variant` (text / number / range / date / select / multiSelect / boolean). Lazy-mounts the variant-specific filter component (`data-table-column-faceted-filter`, `data-table-column-slider-filter-options`, `data-table-column-date-filter-options`) only when the user opens the filter panel.
 
 ### data-table-column-filter-trigger
 
@@ -1413,7 +1413,7 @@ The `<button>` shown in the column header that opens the per-column filter popov
   </Button>
 </div>
 
-The per-column variant of the faceted multi-select filter (used for `select` / `multi_select` column variants). Generates options via `useGeneratedOptions` and forwards `dynamicCounts` / `limitToFilteredRows` props through to the option builder. Wraps `TableColumnFacetedFilter` from `filters/`.
+The per-column variant of the faceted multi-select filter (used for `select` / `multiSelect` column variants). Generates options via `useGeneratedOptions` and forwards `dynamicCounts` / `limitToFilteredRows` props through to the option builder. Wraps `TableColumnFacetedFilter` from `filters/`.
 
 ### data-table-column-date-filter-options
 
@@ -1429,7 +1429,7 @@ The per-column variant of the faceted multi-select filter (used for `select` / `
   </Button>
 </div>
 
-The per-column date / date-range filter UI (date picker + operator selector). Backed by `TableColumnDateFilter` from `filters/`. Lazily mounted by `data-table-column-filter` when the column variant is `date` / `date_range`.
+The per-column date / date-range filter UI (date picker + operator selector). Backed by `TableColumnDateFilter` from `filters/`. Lazily mounted by `data-table-column-filter` when the column variant is `date` / `dateRange`.
 
 ### data-table-column-slider-filter-options
 

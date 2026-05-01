@@ -161,7 +161,7 @@ export const columns: DataTableColumnDef<Product>[] = [
     ),
     meta: {
       label: "Release Date",
-      variant: "date_range", // Auto-applies dateRangeFilter
+      variant: "dateRange", // Auto-applies dateRangeFilter
     },
     enableColumnFilter: true,
   },
@@ -295,7 +295,7 @@ const columns: DataTableColumnDef<Product>[] = [
     ),
     meta: {
       label: "Release Date",
-      variant: "date_range",
+      variant: "dateRange",
     },
     enableColumnFilter: true,
   },
@@ -427,7 +427,7 @@ If you do define a custom `filterFn`, it will work as you define it:
 When you specify `meta.variant` in your column definition, the appropriate `filterFn` is automatically applied:
 
 - **`variant: "range"`** → `numberRangeFilter` (for numeric ranges like price)
-- **`variant: "date"`** or **`variant: "date_range"`** → `dateRangeFilter` (for date filtering)
+- **`variant: "date"`** or **`variant: "dateRange"`** → `dateRangeFilter` (for date filtering)
 
 ```tsx showLineNumbers
 {

@@ -52,7 +52,7 @@ export interface GenerateOptionsConfig {
 }
 
 /**
- * Generate a map of options for select/multi_select columns based on table data.
+ * Generate a map of options for select/multiSelect columns based on table data.
  * Uses either filtered rows (dynamicCounts) or all core rows.
  */
 export function useGeneratedOptions<TData>(
