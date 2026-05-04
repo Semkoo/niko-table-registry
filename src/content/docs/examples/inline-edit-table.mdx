@@ -23,16 +23,16 @@ Niko Table wraps each body row in `React.memo` for performance — rows only re-
 
 A common approach to inline editing is to embed edit state directly in the data array — each row object carries an `isEditing: boolean` flag. Triggering an edit means calling `setData` to flip that flag, which replaces the entire array and causes every memoized row to re-render.
 
-We approach it differently: edit state lives *outside* the data. `editingId`, `draft`, and `errors` are separate `useState` variables. The data array is only updated once on `save()` — not on every keystroke. Callbacks are threaded into column `cell` closures (or optionally via `table.options.meta`) rather than through the data shape.
+We approach it differently: edit state lives _outside_ the data. `editingId`, `draft`, and `errors` are separate `useState` variables. The data array is only updated once on `save()` — not on every keystroke. Callbacks are threaded into column `cell` closures (or optionally via `table.options.meta`) rather than through the data shape.
 
 The result is that typing in an input field touches exactly one memoized row, and only because `getRowMemoKey` returns a new string for it. All other rows are completely skipped by React reconciliation.
 
-| Concern | Embedded state | Our approach |
-|---|---|---|
-| Edit state location | Inside the data array (`isEditing` on each row) | Outside data (`editingId` + `draft` state) |
+| Concern             | Embedded state                                          | Our approach                                                  |
+| ------------------- | ------------------------------------------------------- | ------------------------------------------------------------- |
+| Edit state location | Inside the data array (`isEditing` on each row)         | Outside data (`editingId` + `draft` state)                    |
 | Update on keystroke | `setData` replaces the whole array → all rows re-render | Only `draft` changes → one row re-renders via `getRowMemoKey` |
-| Draft & validation | No concept — changes write directly to data | Staged draft with error validation before committing |
-| Data mutation | On every interaction | Once, on explicit `save()` |
+| Draft & validation  | No concept — changes write directly to data             | Staged draft with error validation before committing          |
+| Data mutation       | On every interaction                                    | Once, on explicit `save()`                                    |
 
 ## Installation
 
