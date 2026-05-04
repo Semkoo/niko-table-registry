@@ -80,7 +80,11 @@ export function CodePreviewInternal({
               <Component />
             </Suspense>
           </TabsContent>
-          <TabsContent value="code" className="h-full">
+          <TabsContent
+            value="code"
+            forceMount
+            className="h-full data-[state=inactive]:hidden"
+          >
             {children}
           </TabsContent>
         </CardContent>
