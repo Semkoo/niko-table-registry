@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Expanded-row re-measure effect** — `rowMemoKey` is now included in the `useEffect` dependency array of virtualized body rows so height is re-measured whenever inline edit state changes while a row is expanded.
 - `DataTableVirtualizedFlexHeader` — flex-layout header for `DataTableVirtualizedDndBody`. Pick by body: plain → `DataTableVirtualizedHeader`, row-DnD → `DataTableVirtualizedFlexHeader`, column-DnD → `DataTableVirtualizedDndHeader`.
 - `TableSearchFilter` — `debounceMs` prop (default `0`). Keystrokes update the input immediately; `table.setGlobalFilter` is delayed by the configured amount. Recommended at `200`+ for large client-side datasets; leave at `0` for server-driven tables where the network is already the rate limiter. In controlled mode, debounce in the consumer's `onChange` instead.
+- **`TableViewMenu` — three opt-in extensions for column management UX.** All additive; existing callers unaffected.
+  - **`lockedColumnIds: string[]`** — include columns marked `enableHiding: false` in the menu list, but render them disabled (always-on, can't toggle). Lets consumers surface required columns in the column dropdown without making them togglable. Pairs naturally with a Reset action below.
+  - **`enableReorder` + `columnOrder` + `onColumnOrderChange`** — each row gets a `GripVertical` drag handle and the list becomes vertically sortable via `@dnd-kit`. Restricted to vertical axis with an 8px activation threshold so click-to-toggle still works. The same `columnOrder` state the table consumes drives the menu's display order, so dropping a row updates both the menu and the table in lockstep. Combines cleanly with the existing `TableColumnDndProvider` (header drag) — two reorder surfaces, one state.
+  - **`onReset` + `resetLabel`** — render a Reset button (default label "Reset to defaults") below a separator at the bottom of the menu. Useful when paired with DB-backed column preferences so users can revert visibility + order + sort in one click.
 
 ### Changed
 
@@ -24,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **`TableRangeFilter`** — `[min, max]` memo now depends on faceted scalars, so the range refreshes when row data changes. `formatValue` no longer locale-formats numbers (`type="number"` inputs reject localized output).
 - **`TableSliderFilter` clear button** — always `stopPropagation()` (was DIV-only, so SVG/icon clicks bubbled and re-opened the popover).
+- **`TableColumnDndProvider`** — added an 8px drag activation threshold on `MouseSensor` + `TouchSensor` so clicks on inline header chrome (sort menus, help-tooltip triggers) land as clicks. Without the threshold, every mousedown on a draggable header started a drag candidate and stole click events from anything rendered inside the header.
 - **Sort / filter / inline-filter column memos** — now key on `table.options.columns` (table ref alone is too stable across column rebuilds).
 - **`TableSortMenu`** — derives the next sorting from `table.getState().sorting` instead of the closure-captured `sorting`, eliminating drift if the callback fires across renders.
 - **CSV export** — plain objects are now JSON-encoded instead of serializing as `[object Object]`.
