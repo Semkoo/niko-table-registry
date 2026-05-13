@@ -16,10 +16,41 @@
  * A dropdown menu component that allows users to toggle the visibility of table columns.
  * It uses a popover to display a list of columns with checkboxes.
  * Users can search for columns and toggle their visibility.
+ *
+ * Three opt-in extensions:
+ *   - `lockedColumnIds`: include columns marked `enableHiding: false` in the
+ *     list, but render them disabled (always-on, can't toggle).
+ *   - `enableReorder` + `columnOrder` + `onColumnOrderChange`: each row gets a
+ *     drag handle and the list becomes vertically sortable via dnd-kit.
+ *   - `onReset` + `resetLabel`: render a Reset button below a separator.
  */
 
+import {
+  closestCenter,
+  DndContext,
+  KeyboardSensor,
+  MouseSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core"
+import { restrictToVerticalAxis } from "@dnd-kit/modifiers"
+import {
+  arrayMove,
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable"
+import { CSS } from "@dnd-kit/utilities"
 import type { Column, Table } from "@tanstack/react-table"
-import { Check, ChevronsUpDown, Settings2 } from "lucide-react"
+import {
+  Check,
+  ChevronsUpDown,
+  GripVertical,
+  RotateCcw,
+  Settings2,
+} from "lucide-react"
 import * as React from "react"
 import { Button } from "@/components/ui/button"
 import {
@@ -50,11 +81,85 @@ export interface TableViewMenuProps<TData> {
   table: Table<TData>
   className?: string
   onColumnVisibilityChange?: (columnId: string, isVisible: boolean) => void
+  /**
+   * Column ids that should appear in the menu but cannot be toggled off.
+   * Useful for columns the table marks `enableHiding: false` but the
+   * consumer still wants visible in the column list (typically with a
+   * Reset to Defaults affordance below).
+   */
+  lockedColumnIds?: string[]
+  /**
+   * When true, each row gets a drag handle and the list becomes sortable
+   * via dnd-kit. Requires `columnOrder` and `onColumnOrderChange` to
+   * control the underlying table state.
+   */
+  enableReorder?: boolean
+  /** Controlled column order. The menu displays rows in this order. */
+  columnOrder?: string[]
+  /** Called when the user drops a row in a new position. */
+  onColumnOrderChange?: (next: string[]) => void
+  /**
+   * When provided, renders a Reset button at the bottom of the menu.
+   * Useful when paired with persisted column preferences so users can
+   * revert to defaults.
+   */
+  onReset?: () => void
+  /** Label for the reset button. Defaults to "Reset to defaults". */
+  resetLabel?: string
+}
+
+function SortableMenuRow({
+  id,
+  children,
+}: {
+  id: string
+  children: React.ReactNode
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id })
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    position: "relative",
+    zIndex: isDragging ? 1 : 0,
+  }
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      className="flex items-center"
+    >
+      <span
+        {...listeners}
+        role="button"
+        tabIndex={-1}
+        aria-label="Reorder column"
+        className="flex cursor-grab items-center px-2 text-muted-foreground hover:text-foreground"
+      >
+        <GripVertical className="size-4" />
+      </span>
+      <div className="flex-1">{children}</div>
+    </div>
+  )
 }
 
 export function TableViewMenu<TData>({
   table,
   onColumnVisibilityChange,
+  lockedColumnIds,
+  enableReorder = false,
+  columnOrder,
+  onColumnOrderChange,
+  onReset,
+  resetLabel,
 }: TableViewMenuProps<TData>) {
   /**
    * PERFORMANCE: Memoize filtered columns to avoid recalculating on every render
@@ -62,13 +167,10 @@ export function TableViewMenu<TData>({
    * WHY: `getAllColumns().filter()` iterates through all columns and checks properties.
    * Without memoization, this runs on every render, even when columns haven't changed.
    *
-   * IMPACT: Prevents unnecessary column filtering operations.
-   * With 20 columns: saves ~0.2-0.5ms per render.
-   *
-   * NOTE: Column visibility changes are tracked via table state in context,
-   * so this memoization correctly updates when visibility changes.
-   *
-   * WHAT: Only recalculates when table instance changes (rare).
+   * Locked columns (passed via `lockedColumnIds`) are included even when
+   * `column.getCanHide()` is false — they appear with a disabled toggle so
+   * the consumer can surface required columns in the list without making
+   * them togglable.
    */
   const columns = React.useMemo(
     () =>
@@ -76,12 +178,85 @@ export function TableViewMenu<TData>({
         .getAllColumns()
         .filter(
           column =>
-            typeof column.accessorFn !== "undefined" && column.getCanHide(),
+            typeof column.accessorFn !== "undefined" &&
+            (column.getCanHide() ||
+              lockedColumnIds?.includes(column.id) === true),
         ),
     // Depend on the column set, not just the (stable) table ref.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [table, table.options.columns],
+    [table, table.options.columns, lockedColumnIds],
   )
+
+  /**
+   * When `enableReorder` is active with a controlled `columnOrder`, sort
+   * the menu rows by that order so drag end yields visually-consistent
+   * positions. Fall back to the table's natural column order otherwise.
+   */
+  const orderedColumns = React.useMemo(() => {
+    if (!enableReorder || !columnOrder) return columns
+    const orderIndex = new Map(columnOrder.map((id, i) => [id, i]))
+    return [...columns].sort(
+      (a, b) =>
+        (orderIndex.get(a.id) ?? Infinity) - (orderIndex.get(b.id) ?? Infinity),
+    )
+  }, [columns, columnOrder, enableReorder])
+
+  // 8px drag threshold so clicks on the row chrome land as clicks, not
+  // drag starts. Matches the column-header DnD primitive convention.
+  const sensors = useSensors(
+    useSensor(MouseSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(TouchSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(KeyboardSensor),
+  )
+
+  const handleDragEnd = React.useCallback(
+    (event: DragEndEvent) => {
+      const { active, over } = event
+      if (
+        !over ||
+        active.id === over.id ||
+        !columnOrder ||
+        !onColumnOrderChange
+      ) {
+        return
+      }
+      const oldIndex = columnOrder.indexOf(String(active.id))
+      const newIndex = columnOrder.indexOf(String(over.id))
+      if (oldIndex === -1 || newIndex === -1) return
+      onColumnOrderChange(arrayMove(columnOrder, oldIndex, newIndex))
+    },
+    [columnOrder, onColumnOrderChange],
+  )
+
+  const renderItem = (column: Column<TData, unknown>) => {
+    const isLocked = lockedColumnIds?.includes(column.id) === true
+    return (
+      <CommandItem
+        key={column.id}
+        data-disabled={isLocked ? "" : undefined}
+        onSelect={() => {
+          if (isLocked) return
+          const newVisibility = !column.getIsVisible()
+          column.toggleVisibility(newVisibility)
+          onColumnVisibilityChange?.(column.id, newVisibility)
+        }}
+      >
+        <span className={cn("truncate", isLocked && "text-muted-foreground")}>
+          {getColumnTitle(column)}
+        </span>
+        <Check
+          className={cn(
+            "ml-auto size-4 shrink-0",
+            isLocked
+              ? "opacity-50"
+              : column.getIsVisible()
+                ? "opacity-100"
+                : "opacity-0",
+          )}
+        />
+      </CommandItem>
+    )
+  }
 
   return (
     <Popover>
@@ -104,26 +279,43 @@ export function TableViewMenu<TData>({
           <CommandList>
             <CommandEmpty>No columns found.</CommandEmpty>
             <CommandGroup>
-              {columns.map(column => (
-                <CommandItem
-                  key={column.id}
-                  onSelect={() => {
-                    const newVisibility = !column.getIsVisible()
-                    column.toggleVisibility(newVisibility)
-                    onColumnVisibilityChange?.(column.id, newVisibility)
-                  }}
+              {enableReorder && columnOrder && onColumnOrderChange ? (
+                <DndContext
+                  collisionDetection={closestCenter}
+                  modifiers={[restrictToVerticalAxis]}
+                  sensors={sensors}
+                  onDragEnd={handleDragEnd}
                 >
-                  <span className="truncate">{getColumnTitle(column)}</span>
-                  <Check
-                    className={cn(
-                      "ml-auto size-4 shrink-0",
-                      column.getIsVisible() ? "opacity-100" : "opacity-0",
-                    )}
-                  />
-                </CommandItem>
-              ))}
+                  <SortableContext
+                    items={orderedColumns.map(c => c.id)}
+                    strategy={verticalListSortingStrategy}
+                  >
+                    {orderedColumns.map(column => (
+                      <SortableMenuRow key={column.id} id={column.id}>
+                        {renderItem(column)}
+                      </SortableMenuRow>
+                    ))}
+                  </SortableContext>
+                </DndContext>
+              ) : (
+                orderedColumns.map(renderItem)
+              )}
             </CommandGroup>
           </CommandList>
+          {onReset ? (
+            <>
+              <div className="border-t" />
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full justify-start gap-2 rounded-none text-muted-foreground"
+                onClick={onReset}
+              >
+                <RotateCcw className="size-4" />
+                {resetLabel ?? "Reset to defaults"}
+              </Button>
+            </>
+          ) : null}
         </Command>
       </PopoverContent>
     </Popover>
