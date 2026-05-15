@@ -138,6 +138,40 @@ function SortableMenuRow({
   )
 }
 
+interface MenuItemProps<TData> {
+  column: Column<TData, unknown>
+  isLocked: boolean
+  isVisible: boolean
+  onToggle: (columnId: string) => void
+}
+
+const MenuItem = React.memo(function MenuItem<TData>({
+  column,
+  isLocked,
+  isVisible,
+  onToggle,
+}: MenuItemProps<TData>) {
+  return (
+    <CommandItem
+      data-disabled={isLocked ? "" : undefined}
+      onSelect={() => {
+        if (isLocked) return
+        onToggle(column.id)
+      }}
+    >
+      <span className={cn("truncate", isLocked && "text-muted-foreground")}>
+        {getColumnTitle(column)}
+      </span>
+      <Check
+        className={cn(
+          "ml-auto size-4 shrink-0",
+          isLocked ? "opacity-50" : isVisible ? "opacity-100" : "opacity-0",
+        )}
+      />
+    </CommandItem>
+  )
+}) as <TData>(props: MenuItemProps<TData>) => React.ReactElement
+
 export function TableViewDndMenu<TData>({
   table,
   onColumnVisibilityChange,
@@ -152,6 +186,13 @@ export function TableViewDndMenu<TData>({
   // as an orphan. Filtering at this layer means non-matching rows don't
   // render at all, wrapper and all.
   const [search, setSearch] = React.useState("")
+
+  // O(1) lookups instead of O(m) `.includes()` per row — matters at 200+ columns.
+  const lockedSet = React.useMemo(
+    () => new Set(lockedColumnIds ?? []),
+    [lockedColumnIds],
+  )
+
   const columns = React.useMemo(
     () =>
       table
@@ -159,12 +200,11 @@ export function TableViewDndMenu<TData>({
         .filter(
           column =>
             typeof column.accessorFn !== "undefined" &&
-            (column.getCanHide() ||
-              lockedColumnIds?.includes(column.id) === true),
+            (column.getCanHide() || lockedSet.has(column.id)),
         ),
     // Depend on the column set, not just the (stable) table ref.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [table, table.options.columns, lockedColumnIds],
+    [table, table.options.columns, lockedSet],
   )
 
   /**
@@ -194,11 +234,18 @@ export function TableViewDndMenu<TData>({
    * for only a subset of columns. Restrict drag affordances to ids that
    * actually appear in `columnOrder`; rows omitted from it stay visible
    * but render without a handle so users aren't offered a no-op drag.
+   * Returned as a Set so the per-row check in the render loop is O(1).
    */
-  const draggableIds = React.useMemo(() => {
+  const draggableIdSet = React.useMemo(() => {
     const visibleIds = new Set(columns.map(c => c.id))
-    return columnOrder.filter(id => visibleIds.has(id))
+    return new Set(columnOrder.filter(id => visibleIds.has(id)))
   }, [columns, columnOrder])
+
+  // `SortableContext` needs the ordered id list; derive once from the Set.
+  const draggableIds = React.useMemo(
+    () => Array.from(draggableIdSet),
+    [draggableIdSet],
+  )
 
   // 8px drag threshold so clicks on the row chrome land as clicks, not
   // drag starts. Matches the column-header DnD primitive convention.
@@ -222,35 +269,17 @@ export function TableViewDndMenu<TData>({
     [columnOrder, onColumnOrderChange],
   )
 
-  const renderItem = (column: Column<TData, unknown>) => {
-    const isLocked = lockedColumnIds?.includes(column.id) === true
-    return (
-      <CommandItem
-        key={column.id}
-        data-disabled={isLocked ? "" : undefined}
-        onSelect={() => {
-          if (isLocked) return
-          const newVisibility = !column.getIsVisible()
-          column.toggleVisibility(newVisibility)
-          onColumnVisibilityChange?.(column.id, newVisibility)
-        }}
-      >
-        <span className={cn("truncate", isLocked && "text-muted-foreground")}>
-          {getColumnTitle(column)}
-        </span>
-        <Check
-          className={cn(
-            "ml-auto size-4 shrink-0",
-            isLocked
-              ? "opacity-50"
-              : column.getIsVisible()
-                ? "opacity-100"
-                : "opacity-0",
-          )}
-        />
-      </CommandItem>
-    )
-  }
+  // Stable callback so memoized rows skip re-render on keystrokes.
+  const onToggle = React.useCallback(
+    (columnId: string) => {
+      const column = table.getColumn(columnId)
+      if (!column) return
+      const newVisibility = !column.getIsVisible()
+      column.toggleVisibility(newVisibility)
+      onColumnVisibilityChange?.(columnId, newVisibility)
+    },
+    [table, onColumnVisibilityChange],
+  )
 
   return (
     <Popover>
@@ -289,17 +318,23 @@ export function TableViewDndMenu<TData>({
                     items={draggableIds}
                     strategy={verticalListSortingStrategy}
                   >
-                    {visibleColumns.map(column =>
-                      draggableIds.includes(column.id) ? (
+                    {visibleColumns.map(column => {
+                      const item = (
+                        <MenuItem
+                          column={column}
+                          isLocked={lockedSet.has(column.id)}
+                          isVisible={column.getIsVisible()}
+                          onToggle={onToggle}
+                        />
+                      )
+                      return draggableIdSet.has(column.id) ? (
                         <SortableMenuRow key={column.id} id={column.id}>
-                          {renderItem(column)}
+                          {item}
                         </SortableMenuRow>
                       ) : (
-                        <React.Fragment key={column.id}>
-                          {renderItem(column)}
-                        </React.Fragment>
-                      ),
-                    )}
+                        <React.Fragment key={column.id}>{item}</React.Fragment>
+                      )
+                    })}
                   </SortableContext>
                 </DndContext>
               </CommandGroup>

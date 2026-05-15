@@ -21,6 +21,10 @@
  *     list, but render them disabled (always-on, can't toggle).
  *   - `onReset` + `resetLabel`: render a Reset button below a separator.
  *
+ * Tuned for large column counts (200+): rows are a memoized component, the
+ * search filter runs at this layer (so non-matching rows skip rendering
+ * entirely), and `lockedColumnIds` is consulted via a `Set` for O(1) lookups.
+ *
  * For drag-to-reorder, see `TableViewDndMenu` — it lives in a separate file
  * so consumers who don't need DnD don't pay the `@dnd-kit/*` bundle cost.
  */
@@ -70,6 +74,40 @@ export interface TableViewMenuProps<TData> {
   resetLabel?: string
 }
 
+interface MenuRowProps<TData> {
+  column: Column<TData, unknown>
+  isLocked: boolean
+  isVisible: boolean
+  onToggle: (columnId: string) => void
+}
+
+const MenuRow = React.memo(function MenuRow<TData>({
+  column,
+  isLocked,
+  isVisible,
+  onToggle,
+}: MenuRowProps<TData>) {
+  return (
+    <CommandItem
+      data-disabled={isLocked ? "" : undefined}
+      onSelect={() => {
+        if (isLocked) return
+        onToggle(column.id)
+      }}
+    >
+      <span className={cn("truncate", isLocked && "text-muted-foreground")}>
+        {getColumnTitle(column)}
+      </span>
+      <Check
+        className={cn(
+          "ml-auto size-4 shrink-0",
+          isLocked ? "opacity-50" : isVisible ? "opacity-100" : "opacity-0",
+        )}
+      />
+    </CommandItem>
+  )
+}) as <TData>(props: MenuRowProps<TData>) => React.ReactElement
+
 export function TableViewMenu<TData>({
   table,
   onColumnVisibilityChange,
@@ -77,6 +115,17 @@ export function TableViewMenu<TData>({
   onReset,
   resetLabel,
 }: TableViewMenuProps<TData>) {
+  // Controlled search. cmdk's built-in filter hides non-matching `CommandItem`s
+  // but still renders all of them — at 200+ columns that's the bottleneck.
+  // Filtering at this layer means non-matching rows skip rendering entirely.
+  const [search, setSearch] = React.useState("")
+
+  // O(1) lookups instead of O(m) `.includes()` per row.
+  const lockedSet = React.useMemo(
+    () => new Set(lockedColumnIds ?? []),
+    [lockedColumnIds],
+  )
+
   const columns = React.useMemo(
     () =>
       table
@@ -84,43 +133,30 @@ export function TableViewMenu<TData>({
         .filter(
           column =>
             typeof column.accessorFn !== "undefined" &&
-            (column.getCanHide() ||
-              lockedColumnIds?.includes(column.id) === true),
+            (column.getCanHide() || lockedSet.has(column.id)),
         ),
     // Depend on the column set, not just the (stable) table ref.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [table, table.options.columns, lockedColumnIds],
+    [table, table.options.columns, lockedSet],
   )
 
-  const renderItem = (column: Column<TData, unknown>) => {
-    const isLocked = lockedColumnIds?.includes(column.id) === true
-    return (
-      <CommandItem
-        key={column.id}
-        data-disabled={isLocked ? "" : undefined}
-        onSelect={() => {
-          if (isLocked) return
-          const newVisibility = !column.getIsVisible()
-          column.toggleVisibility(newVisibility)
-          onColumnVisibilityChange?.(column.id, newVisibility)
-        }}
-      >
-        <span className={cn("truncate", isLocked && "text-muted-foreground")}>
-          {getColumnTitle(column)}
-        </span>
-        <Check
-          className={cn(
-            "ml-auto size-4 shrink-0",
-            isLocked
-              ? "opacity-50"
-              : column.getIsVisible()
-                ? "opacity-100"
-                : "opacity-0",
-          )}
-        />
-      </CommandItem>
-    )
-  }
+  const visibleColumns = React.useMemo(() => {
+    const q = search.trim().toLowerCase()
+    if (!q) return columns
+    return columns.filter(c => getColumnTitle(c).toLowerCase().includes(q))
+  }, [columns, search])
+
+  // Stable callback so memoized rows skip re-render on keystrokes.
+  const onToggle = React.useCallback(
+    (columnId: string) => {
+      const column = table.getColumn(columnId)
+      if (!column) return
+      const newVisibility = !column.getIsVisible()
+      column.toggleVisibility(newVisibility)
+      onColumnVisibilityChange?.(columnId, newVisibility)
+    },
+    [table, onColumnVisibilityChange],
+  )
 
   return (
     <Popover>
@@ -138,11 +174,25 @@ export function TableViewMenu<TData>({
         </Button>
       </PopoverTrigger>
       <PopoverContent align="end" className="w-fit p-0">
-        <Command>
-          <CommandInput placeholder="Search columns..." />
+        <Command shouldFilter={false}>
+          <CommandInput
+            placeholder="Search columns..."
+            value={search}
+            onValueChange={setSearch}
+          />
           <CommandList>
             <CommandEmpty>No columns found.</CommandEmpty>
-            <CommandGroup>{columns.map(renderItem)}</CommandGroup>
+            <CommandGroup>
+              {visibleColumns.map(column => (
+                <MenuRow
+                  key={column.id}
+                  column={column}
+                  isLocked={lockedSet.has(column.id)}
+                  isVisible={column.getIsVisible()}
+                  onToggle={onToggle}
+                />
+              ))}
+            </CommandGroup>
           </CommandList>
           {onReset ? (
             <>

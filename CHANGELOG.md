@@ -24,6 +24,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`autoResetPageIndex` defaults to `false`** (was `true`). Sort/filter changes preserve the pagination cursor. Opt back in via `config={{ autoResetPageIndex: true }}`.
 - **Minimum Node** bumped to 24 (was 22.13) via `.nvmrc` + `engines.node`.
 
+### Performance
+
+- **`TableViewMenu` + `TableViewDndMenu` tuned for 200+ columns** — `lockedColumnIds` consulted via a `Set` (O(1) per row instead of O(m)), rows extracted to a `React.memo`'d `MenuRow`/`MenuItem` with a stable `onToggle` callback, and plain `TableViewMenu` filters search at the parent (`shouldFilter={false}`) so non-matching rows skip rendering entirely instead of being rendered + hidden by cmdk. Search keystrokes at 200–500 columns now only reconcile the rows whose props actually changed.
+
 ### Fixed
 
 - **View menu split bundle cost** — moved DnD reorder out of `TableViewMenu` into the new `TableViewDndMenu`. Plain-menu consumers no longer pull `@dnd-kit/*`.
