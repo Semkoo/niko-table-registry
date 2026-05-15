@@ -1,0 +1,107 @@
+---
+title: Components
+description: Every Niko Table registry item at a glance — name, what it does, install command. Pick what you need; the registry handles core dependencies automatically.
+---
+
+import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
+
+A cheat sheet of every component you can install from the Niko Table registry. Browse by category to find what you need — or just grep this page.
+
+Each addon transitively pulls in `data-table` (the core), so installing any single addon also installs everything required to render a basic table. You never need to install `data-table` explicitly unless you only want the bare core.
+
+> First time using `@niko-table`? Set up the registry once: see the [Installation Guide](/getting-started/installation#configure-the-niko-table-registry).
+
+## Core
+
+The foundation. Every other component depends on it.
+
+| Name         | What it does                                                                                                                             |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `data-table` | Core DataTable with `DataTableRoot`, context, structure, column header, toolbar section, empty state. Includes the `Table` UI primitive. |
+
+<CliCommandCode action="run" command="shadcn@latest add @niko-table/data-table" />
+
+## Virtualization
+
+For large datasets (1k+ rows).
+
+| Name                     | What it does                                                                           |
+| ------------------------ | -------------------------------------------------------------------------------------- |
+| `data-table-virtualized` | Virtualized body/header for rendering large datasets efficiently via TanStack Virtual. |
+
+<CliCommandCode action="run" command="shadcn@latest add @niko-table/data-table-virtualized" />
+
+## Toolbar Filters
+
+Top-of-table filter controls. Each component is independent — install only what you need.
+
+| Name                        | What it does                                                                                                                                                         |
+| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `data-table-search-filter`  | Global search input with debouncing.                                                                                                                                 |
+| `data-table-pagination`     | Page-size selector, page navigation, row-count display.                                                                                                              |
+| `data-table-sort-menu`      | Sort management with multi-column sorting and drag-to-reorder of sort entries.                                                                                       |
+| `data-table-view-menu`      | Column visibility toggle menu. Optional `lockedColumnIds`, `onReset`.                                                                                                |
+| `data-table-view-dnd-menu`  | Column visibility menu **with drag-to-reorder**. Use instead of `data-table-view-menu` when you want users to reorder columns from the menu (pulls in `@dnd-kit/*`). |
+| `data-table-filter-menu`    | Command-palette-style filter interface for adding/managing column filters.                                                                                           |
+| `data-table-inline-filter`  | Inline filter toolbar showing active filters as editable chips.                                                                                                      |
+| `data-table-faceted-filter` | Faceted filter (single/multi select) with option counts and search.                                                                                                  |
+| `data-table-slider-filter`  | Slider-based numeric range filter.                                                                                                                                   |
+| `data-table-date-filter`    | Date picker filter supporting single date and date range.                                                                                                            |
+| `data-table-clear-filter`   | Button to clear all active filters at once.                                                                                                                          |
+
+<CliCommandCode action="run" command="shadcn@latest add @niko-table/data-table-search-filter @niko-table/data-table-pagination @niko-table/data-table-view-menu" />
+
+## Column-Header Controls
+
+Per-column controls embedded in the column header dropdown.
+
+| Name                               | What it does                                     |
+| ---------------------------------- | ------------------------------------------------ |
+| `data-table-column-sort`           | Header sort option with asc/desc/clear.          |
+| `data-table-column-hide`           | Header option to hide/show the column.           |
+| `data-table-column-pin`            | Header option to pin column left/right.          |
+| `data-table-column-faceted-filter` | Header faceted filter with multi-select options. |
+| `data-table-column-slider-filter`  | Header slider filter for numeric range.          |
+| `data-table-column-date-filter`    | Header date filter with calendar picker.         |
+
+<CliCommandCode action="run" command="shadcn@latest add @niko-table/data-table-column-sort @niko-table/data-table-column-hide @niko-table/data-table-column-pin" />
+
+## Drag and Drop
+
+Row and column reordering. Pulls in `@dnd-kit/*`.
+
+| Name                    | What it does                                                                                       |
+| ----------------------- | -------------------------------------------------------------------------------------------------- |
+| `data-table-row-dnd`    | Row drag-and-drop. Includes provider, draggable row, drag handle, DnD-aware body.                  |
+| `data-table-column-dnd` | Column drag-and-drop. Includes provider, draggable header, drag-along cell, DnD-aware header/body. |
+
+<CliCommandCode action="run" command="shadcn@latest add @niko-table/data-table-row-dnd @niko-table/data-table-column-dnd" />
+
+> Row DnD should not be combined with sorting or filtering — data order conflicts. Column DnD is safe to combine with any feature.
+
+## Auxiliary
+
+Surrounding UI that pairs with the table.
+
+| Name                       | What it does                                                             |
+| -------------------------- | ------------------------------------------------------------------------ |
+| `data-table-export-button` | Export current rows to CSV with configurable column selection.           |
+| `data-table-aside`         | Sidebar panel for row details or additional content alongside the table. |
+| `data-table-selection-bar` | Bulk-actions bar that appears when rows are selected.                    |
+
+<CliCommandCode action="run" command="shadcn@latest add @niko-table/data-table-export-button @niko-table/data-table-aside @niko-table/data-table-selection-bar" />
+
+## Picking a starting point
+
+Not sure where to start? Find the example that looks closest to what you're building and copy its install line:
+
+- [Basic Table](/examples/basic-table/) — search + pagination + view menu
+- [Faceted Filter Table](/examples/faceted-filter-table/) — faceted + slider + date filters
+- [Advanced Table](/examples/advanced-table/) — filter menu, sort menu, export
+- [Virtualization Table](/examples/virtualization-table/) — 10k+ rows
+- [Column DnD Table](/examples/column-dnd-table/) — column reorder + DnD view menu
+- [Row DnD Table](/examples/row-dnd-table/) — row reorder
+- [Tree Table](/examples/tree-table/) — expandable rows
+- [Inline Edit Table](/examples/inline-edit-table/) — `getRowMemoKey` pattern
+
+Each example page lists exactly the registry items it uses.

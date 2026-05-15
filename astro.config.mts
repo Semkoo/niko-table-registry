@@ -140,6 +140,7 @@ export default defineConfig({
               label: "Manual Installation",
               slug: "getting-started/manual-installation",
             },
+            { label: "Components", slug: "getting-started/components" },
             { label: "Skills", slug: "getting-started/skills" },
           ],
         },
