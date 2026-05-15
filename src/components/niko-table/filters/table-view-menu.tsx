@@ -39,6 +39,7 @@ import { restrictToVerticalAxis } from "@dnd-kit/modifiers"
 import {
   arrayMove,
   SortableContext,
+  sortableKeyboardCoordinates,
   useSortable,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable"
@@ -110,9 +111,11 @@ export interface TableViewMenuProps<TData> {
 
 function SortableMenuRow({
   id,
+  disabled = false,
   children,
 }: {
   id: string
+  disabled?: boolean
   children: React.ReactNode
 }) {
   const {
@@ -131,21 +134,17 @@ function SortableMenuRow({
     zIndex: isDragging ? 1 : 0,
   }
   return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      {...attributes}
-      className="flex items-center"
-    >
-      <span
-        {...listeners}
-        role="button"
-        tabIndex={-1}
+    <div ref={setNodeRef} style={style} className="flex items-center">
+      <button
+        type="button"
+        disabled={disabled}
         aria-label="Reorder column"
-        className="flex cursor-grab items-center px-2 text-muted-foreground hover:text-foreground"
+        {...attributes}
+        {...listeners}
+        className="flex cursor-grab items-center rounded-sm px-2 text-muted-foreground hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none"
       >
         <GripVertical className="size-4" />
-      </span>
+      </button>
       <div className="flex-1">{children}</div>
     </div>
   )
@@ -201,12 +200,26 @@ export function TableViewMenu<TData>({
     )
   }, [columns, columnOrder, enableReorder])
 
+  /**
+   * Partial `columnOrder` lists are common — consumers may control sort
+   * for only a subset of columns. Restrict drag affordances to ids that
+   * actually appear in `columnOrder`; rows omitted from it stay visible
+   * but render without a handle so users aren't offered a no-op drag.
+   */
+  const draggableIds = React.useMemo(() => {
+    if (!enableReorder || !columnOrder) return undefined
+    const visibleIds = new Set(columns.map(c => c.id))
+    return columnOrder.filter(id => visibleIds.has(id))
+  }, [columns, columnOrder, enableReorder])
+
   // 8px drag threshold so clicks on the row chrome land as clicks, not
   // drag starts. Matches the column-header DnD primitive convention.
   const sensors = useSensors(
     useSensor(MouseSensor, { activationConstraint: { distance: 8 } }),
     useSensor(TouchSensor, { activationConstraint: { distance: 8 } }),
-    useSensor(KeyboardSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
   )
 
   const handleDragEnd = React.useCallback(
@@ -279,7 +292,7 @@ export function TableViewMenu<TData>({
           <CommandList>
             <CommandEmpty>No columns found.</CommandEmpty>
             <CommandGroup>
-              {enableReorder && columnOrder && onColumnOrderChange ? (
+              {enableReorder && draggableIds && onColumnOrderChange ? (
                 <DndContext
                   collisionDetection={closestCenter}
                   modifiers={[restrictToVerticalAxis]}
@@ -287,14 +300,20 @@ export function TableViewMenu<TData>({
                   onDragEnd={handleDragEnd}
                 >
                   <SortableContext
-                    items={orderedColumns.map(c => c.id)}
+                    items={draggableIds}
                     strategy={verticalListSortingStrategy}
                   >
-                    {orderedColumns.map(column => (
-                      <SortableMenuRow key={column.id} id={column.id}>
-                        {renderItem(column)}
-                      </SortableMenuRow>
-                    ))}
+                    {orderedColumns.map(column =>
+                      draggableIds.includes(column.id) ? (
+                        <SortableMenuRow key={column.id} id={column.id}>
+                          {renderItem(column)}
+                        </SortableMenuRow>
+                      ) : (
+                        <React.Fragment key={column.id}>
+                          {renderItem(column)}
+                        </React.Fragment>
+                      ),
+                    )}
                   </SortableContext>
                 </DndContext>
               ) : (
