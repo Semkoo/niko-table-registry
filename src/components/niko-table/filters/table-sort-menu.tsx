@@ -130,7 +130,6 @@ function TableSortItem({
               id={fieldTriggerId}
               aria-controls={fieldListboxId}
               variant="outline"
-              size="sm"
               className="w-44 justify-between rounded font-normal"
             >
               <span className="truncate">{columnLabels.get(sort.id)}</span>
@@ -241,6 +240,7 @@ export function TableSortMenu<TData>({
   const addButtonRef = React.useRef<HTMLButtonElement>(null)
 
   const sorting = table.getState().sorting
+  const canMultiSort = table.options.enableMultiSort !== false
 
   // ============================================================================
   // Sorting State Management
@@ -440,15 +440,17 @@ export function TableSortMenu<TData>({
             </SortableContent>
           )}
           <div className="flex w-full items-center gap-2">
-            <Button
-              size="sm"
-              className="rounded"
-              ref={addButtonRef}
-              onClick={onSortAdd}
-              disabled={columns.length === 0}
-            >
-              Add sort
-            </Button>
+            {canMultiSort && (
+              <Button
+                size="sm"
+                className="rounded"
+                ref={addButtonRef}
+                onClick={onSortAdd}
+                disabled={columns.length === 0}
+              >
+                Add sort
+              </Button>
+            )}
             {sorting.length > 0 && (
               <Button
                 variant="outline"
