@@ -28,6 +28,7 @@ import { DataTableColumnHeaderRoot } from "../components/data-table-column-heade
 import { createScrollHandler } from "../lib/create-scroll-handler"
 import { resolveRowFromClick } from "../lib/row-click"
 import { getCommonPinningStyles } from "../lib/styles"
+import { useColumnDefsVersion } from "../lib/use-column-defs-version"
 
 // ============================================================================
 // ScrollEvent Type
@@ -278,17 +279,22 @@ export function DataTableBody<TData>({
   )
 
   const { columnVisibility, columnOrder, columnPinning } = table.getState()
-  // Encodes visible column ids + pinning so memoized rows re-render on layout changes.
+  // Bumps whenever any column def reference changes — invalidates memoized
+  // rows when consumers rebuild `columns` via `useMemo([externalState, ...])`,
+  // so cells reading external state stay fresh without `getRowMemoKey`.
+  const columnDefsVersion = useColumnDefsVersion(table)
+  // Encodes visible column ids + pinning + content version so memoized rows
+  // re-render on layout AND content changes.
   const columnLayoutSignature = React.useMemo(
     () =>
-      table
+      `${columnDefsVersion}|${table
         .getVisibleLeafColumns()
         .map(c => {
           const pinned = c.getIsPinned()
           return pinned ? `${c.id}:${pinned}` : c.id
         })
-        .join(","),
-    [table, columnVisibility, columnOrder, columnPinning],
+        .join(",")}`,
+    [table, columnVisibility, columnOrder, columnPinning, columnDefsVersion],
   )
 
   const isClickable = !!onRowClick
