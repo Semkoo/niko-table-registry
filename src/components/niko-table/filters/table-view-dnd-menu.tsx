@@ -147,6 +147,11 @@ export function TableViewDndMenu<TData>({
   onReset,
   resetLabel,
 }: TableViewDndMenuProps<TData>) {
+  // Controlled search. cmdk's built-in filter only hides the inner
+  // CommandItem, which would leave SortableMenuRow's grip handle visible
+  // as an orphan. Filtering at this layer means non-matching rows don't
+  // render at all, wrapper and all.
+  const [search, setSearch] = React.useState("")
   const columns = React.useMemo(
     () =>
       table
@@ -173,6 +178,16 @@ export function TableViewDndMenu<TData>({
         (orderIndex.get(a.id) ?? Infinity) - (orderIndex.get(b.id) ?? Infinity),
     )
   }, [columns, columnOrder])
+
+  // Apply the controlled search filter here so SortableMenuRow wrappers
+  // skip entirely for non-matching rows (no orphan handles).
+  const visibleColumns = React.useMemo(() => {
+    const q = search.trim().toLowerCase()
+    if (!q) return orderedColumns
+    return orderedColumns.filter(c =>
+      getColumnTitle(c).toLowerCase().includes(q),
+    )
+  }, [orderedColumns, search])
 
   /**
    * Partial `columnOrder` lists are common — consumers may control sort
@@ -253,35 +268,42 @@ export function TableViewDndMenu<TData>({
         </Button>
       </PopoverTrigger>
       <PopoverContent align="end" className="w-fit p-0">
-        <Command>
-          <CommandInput placeholder="Search columns..." />
+        <Command shouldFilter={false}>
+          <CommandInput
+            placeholder="Search columns..."
+            value={search}
+            onValueChange={setSearch}
+          />
           <CommandList>
-            <CommandEmpty>No columns found.</CommandEmpty>
-            <CommandGroup>
-              <DndContext
-                collisionDetection={closestCenter}
-                modifiers={[restrictToVerticalAxis]}
-                sensors={sensors}
-                onDragEnd={handleDragEnd}
-              >
-                <SortableContext
-                  items={draggableIds}
-                  strategy={verticalListSortingStrategy}
+            {visibleColumns.length === 0 ? (
+              <CommandEmpty>No columns found.</CommandEmpty>
+            ) : (
+              <CommandGroup>
+                <DndContext
+                  collisionDetection={closestCenter}
+                  modifiers={[restrictToVerticalAxis]}
+                  sensors={sensors}
+                  onDragEnd={handleDragEnd}
                 >
-                  {orderedColumns.map(column =>
-                    draggableIds.includes(column.id) ? (
-                      <SortableMenuRow key={column.id} id={column.id}>
-                        {renderItem(column)}
-                      </SortableMenuRow>
-                    ) : (
-                      <React.Fragment key={column.id}>
-                        {renderItem(column)}
-                      </React.Fragment>
-                    ),
-                  )}
-                </SortableContext>
-              </DndContext>
-            </CommandGroup>
+                  <SortableContext
+                    items={draggableIds}
+                    strategy={verticalListSortingStrategy}
+                  >
+                    {visibleColumns.map(column =>
+                      draggableIds.includes(column.id) ? (
+                        <SortableMenuRow key={column.id} id={column.id}>
+                          {renderItem(column)}
+                        </SortableMenuRow>
+                      ) : (
+                        <React.Fragment key={column.id}>
+                          {renderItem(column)}
+                        </React.Fragment>
+                      ),
+                    )}
+                  </SortableContext>
+                </DndContext>
+              </CommandGroup>
+            )}
           </CommandList>
           {onReset ? (
             <>
