@@ -151,6 +151,7 @@ function useFacetedOptions<TData>({
 
     const meta = column.columnDef.meta
     const autoOptionsFormat = meta?.autoOptionsFormat ?? true
+    const formatOptionLabel = meta?.formatOptionLabel
 
     // Priority 1: caller-supplied options — always wins over meta/data.
     if (options && options.length > 0) {
@@ -166,6 +167,7 @@ function useFacetedOptions<TData>({
           dynamicCounts,
           showCounts,
           autoOptionsFormat,
+          formatOptionLabel,
         },
       )
     }
@@ -188,6 +190,7 @@ function useFacetedOptions<TData>({
         dynamicCounts,
         showCounts,
         autoOptionsFormat,
+        formatOptionLabel,
       },
     )
   }, [
