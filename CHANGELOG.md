@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **`TableViewDndMenu` orphan grip handles when search filters rows** — cmdk's built-in filter only hides the inner `CommandItem`, leaving `SortableMenuRow`'s wrapper + grip handle visible as an empty row for non-matching columns. The menu now uses `shouldFilter={false}` and filters `orderedColumns` itself, so non-matching rows skip rendering entirely — wrapper, handle, and item all disappear together.
 - **`TableRangeFilter`** — `[min, max]` memo now depends on faceted scalars, so the range refreshes when row data changes. `formatValue` no longer locale-formats numbers (`type="number"` inputs reject localized output).
 - **`TableSliderFilter` clear button** — always `stopPropagation()` (was DIV-only, so SVG/icon clicks bubbled and re-opened the popover).
 - **`TableColumnDndProvider`** — added an 8px drag activation threshold on `MouseSensor` + `TouchSensor` so clicks on inline header chrome (sort menus, help-tooltip triggers) land as clicks. Without the threshold, every mousedown on a draggable header started a drag candidate and stole click events from anything rendered inside the header.

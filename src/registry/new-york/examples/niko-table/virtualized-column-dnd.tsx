@@ -15,6 +15,9 @@ import {
   DataTableEmptyTitle,
   DataTableEmptyDescription,
 } from "@/components/niko-table/components/data-table-empty-state"
+import { DataTableSearchFilter } from "@/components/niko-table/components/data-table-search-filter"
+import { DataTableToolbarSection } from "@/components/niko-table/components/data-table-toolbar-section"
+import { DataTableViewDndMenu } from "@/components/niko-table/components/data-table-view-dnd-menu"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 import { Badge } from "@/components/ui/badge"
 import { Inbox } from "lucide-react"
@@ -206,10 +209,11 @@ const columns: DataTableColumnDef<Employee>[] = [
   },
 ]
 
+const initialColumnOrder = columns.map(c => c.id as string)
+
 export default function VirtualizedColumnDndExample() {
-  const [columnOrder, setColumnOrder] = React.useState(() =>
-    columns.map(c => c.id as string),
-  )
+  const [columnOrder, setColumnOrder] =
+    React.useState<string[]>(initialColumnOrder)
 
   return (
     <DataTableRoot
@@ -222,6 +226,19 @@ export default function VirtualizedColumnDndExample() {
         columnOrder={columnOrder}
         onColumnOrderChange={setColumnOrder}
       >
+        {/*
+         * Two reorder surfaces, one state — header drag and view-menu drag
+         * both update the same `columnOrder`. Search filters the 500-row
+         * virtualized dataset on the fly.
+         */}
+        <DataTableToolbarSection className="justify-between">
+          <DataTableSearchFilter placeholder="Search employees..." />
+          <DataTableViewDndMenu
+            columnOrder={columnOrder}
+            onColumnOrderChange={setColumnOrder}
+            onReset={() => setColumnOrder(initialColumnOrder)}
+          />
+        </DataTableToolbarSection>
         <DataTable height={500}>
           <DataTableVirtualizedDndHeader />
           <DataTableVirtualizedDndColumnBody estimateSize={40} overscan={10}>
@@ -232,7 +249,7 @@ export default function VirtualizedColumnDndExample() {
                 </DataTableEmptyIcon>
                 <DataTableEmptyTitle>No employees found</DataTableEmptyTitle>
                 <DataTableEmptyDescription>
-                  There are no employees to display at this time.
+                  Try a different search.
                 </DataTableEmptyDescription>
               </DataTableEmptyMessage>
             </DataTableVirtualizedEmptyBody>
