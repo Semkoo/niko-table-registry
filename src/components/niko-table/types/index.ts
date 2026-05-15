@@ -44,6 +44,13 @@ declare module "@tanstack/react-table" {
     autoOptions?: boolean
     /** Whether to automatically rename option labels using formatLabel. When false, uses raw value as label. */
     autoOptionsFormat?: boolean
+    /**
+     * Per-column label formatter applied when options are auto-derived from
+     * row data. Receives the stringified row value and returns the display
+     * label. Wins over `autoOptionsFormat` when present. Ignored when the
+     * caller passes explicit `options`.
+     */
+    formatOptionLabel?: (value: string) => string
     /** Per-column override for showing counts (falls back to wrapper prop). */
     showCounts?: boolean
     /** Per-column override for using filtered rows for counts (falls back to wrapper prop). */

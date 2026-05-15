@@ -117,6 +117,7 @@ export function useGeneratedOptions<TData>(
       const colDynamicCounts = meta.dynamicCounts ?? dynamicCounts
       const colMerge = meta.mergeStrategy
       const colAutoOptionsFormat = meta.autoOptionsFormat ?? true
+      const colFormatOptionLabel = meta.formatOptionLabel
 
       if (!colAutoOptions) {
         result[column.id] = meta.options ?? []
@@ -226,7 +227,11 @@ export function useGeneratedOptions<TData>(
       const options: Option[] = Array.from(optionValues)
         .map(value => ({
           value,
-          label: colAutoOptionsFormat ? formatLabel(value) : value,
+          label: colFormatOptionLabel
+            ? colFormatOptionLabel(value)
+            : colAutoOptionsFormat
+              ? formatLabel(value)
+              : value,
           count: colShowCounts ? (counts.get(value) ?? 0) : undefined,
         }))
         .sort((a, b) => a.label.localeCompare(b.label))

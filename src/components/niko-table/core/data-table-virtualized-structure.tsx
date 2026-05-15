@@ -423,8 +423,10 @@ export function DataTableVirtualizedBody<TData>({
     [table, columns],
   )
 
+  // String signature of the visible column layout. Memoized rows compare it
+  // to invalidate on column toggle / reorder / pin. For external row state
+  // (inline edits, optimistic overlays), pass `getRowMemoKey`.
   const { columnVisibility, columnOrder, columnPinning } = table.getState()
-  // Encodes visible column ids + pinning so memoized rows re-render on layout changes.
   const columnLayoutSignature = React.useMemo(
     () =>
       table
@@ -434,6 +436,7 @@ export function DataTableVirtualizedBody<TData>({
           return pinned ? `${c.id}:${pinned}` : c.id
         })
         .join(","),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [table, columnVisibility, columnOrder, columnPinning],
   )
 

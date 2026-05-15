@@ -38,6 +38,24 @@ src
 | `src/registry/new-york/examples` | Example files used for rendering in the documentation pages for each component.  |
 | `src/registry/new-york/items`    | The implementation of the component that will be installed in the users project. |
 
+## Conventions
+
+### No barrel imports inside `niko-table/`
+
+Use **direct file imports** for everything under `src/components/niko-table/`. Do not add or import from `index.ts` re-export files in `core/`, `components/`, `filters/`, `hooks/`, `lib/`, or `config/`.
+
+```ts
+// ✅ Correct — direct file path
+import { DataTableRoot } from "@/components/niko-table/core/data-table-root"
+
+// ❌ Wrong — barrel import
+import { DataTableRoot } from "@/components/niko-table/core"
+```
+
+The only allowed barrel is `src/components/niko-table/types/index.ts`, which collects type-only declarations (zero runtime cost).
+
+**Why:** the registry is copy-paste. Barrels defeat tree-shaking, hide circular imports, and make installed code look unlike every other shadcn component. ESLint enforces this via `no-restricted-imports` (configured in `eslint.config.ts`) — violations fail `pnpm lint` and CI.
+
 ## Development
 
 ### Fork this repo

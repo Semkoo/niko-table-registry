@@ -58,6 +58,39 @@ export default defineConfig([
     },
   },
   {
+    // No barrel imports inside `niko-table/`. The registry is copy-paste —
+    // barrels defeat tree-shaking, hide circular imports, and make installed
+    // code diverge from shadcn conventions. `types/` is the single allowed
+    // barrel (type-only, zero runtime cost). See CONTRIBUTING.md.
+    files: ["**/*.{ts,mts,cts,tsx,jsx}"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            "@/components/niko-table/core",
+            "@/components/niko-table/components",
+            "@/components/niko-table/filters",
+            "@/components/niko-table/hooks",
+            "@/components/niko-table/lib",
+            "@/components/niko-table/config",
+          ].flatMap(p => [
+            {
+              name: p,
+              message:
+                "No barrel imports inside niko-table/. Import directly from the file (e.g. `@/components/niko-table/core/data-table-root`). Only `niko-table/types` is allowed as a barrel. See CONTRIBUTING.md.",
+            },
+            {
+              name: `${p}/index`,
+              message:
+                "No barrel imports inside niko-table/. Import directly from the file (e.g. `@/components/niko-table/core/data-table-root`). Only `niko-table/types` is allowed as a barrel. See CONTRIBUTING.md.",
+            },
+          ]),
+        },
+      ],
+    },
+  },
+  {
     settings: {
       react: {
         version: "detect",
