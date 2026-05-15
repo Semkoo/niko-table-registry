@@ -228,15 +228,18 @@ import {
 
 #### Props
 
-| Name               | Type                           | Default | Description                             |
-| ------------------ | ------------------------------ | ------- | --------------------------------------- |
-| `className`        | `string`                       | -       | Additional CSS classes.                 |
-| `children`         | `React.ReactNode`              | -       | Child components (Skeleton, EmptyBody). |
-| `onScroll`         | `(event: ScrollEvent) => void` | -       | Scroll event handler.                   |
-| `onScrolledTop`    | `() => void`                   | -       | Called when scrolled to top.            |
-| `onScrolledBottom` | `() => void`                   | -       | Called when scrolled to bottom.         |
-| `scrollThreshold`  | `number`                       | `50`    | Threshold for scroll events.            |
-| `onRowClick`       | `(row: TData) => void`         | -       | Called when a row is clicked.           |
+| Name               | Type                           | Default | Description                                                                                                                                                                              |
+| ------------------ | ------------------------------ | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `className`        | `string`                       | -       | Additional CSS classes.                                                                                                                                                                  |
+| `children`         | `React.ReactNode`              | -       | Child components (Skeleton, EmptyBody).                                                                                                                                                  |
+| `onScroll`         | `(event: ScrollEvent) => void` | -       | Scroll event handler.                                                                                                                                                                    |
+| `onScrolledTop`    | `() => void`                   | -       | Called when scrolled to top.                                                                                                                                                             |
+| `onScrolledBottom` | `() => void`                   | -       | Called when scrolled to bottom.                                                                                                                                                          |
+| `scrollThreshold`  | `number`                       | `50`    | Threshold for scroll events.                                                                                                                                                             |
+| `onRowClick`       | `(row: TData) => void`         | -       | Called when a row is clicked.                                                                                                                                                            |
+| `getRowMemoKey`    | `(row: TData) => string`       | -       | Per-row key encoding external row state (inline edits, optimistic overlays). When it changes for a row, only that row re-renders. See [Inline Edit Table](/examples/inline-edit-table/). |
+
+> **Row memo invalidation:** all six body components are wrapped in `React.memo` for performance. When you rebuild the `columns` array via `useMemo([externalState, ...])`, every row invalidates automatically (via the internal `useColumnDefsVersion` hook keyed on `columnDef` references). Use `getRowMemoKey` only when you want **per-row** invalidation (e.g. only the row being edited re-renders).
 
 #### ScrollEvent Type
 
@@ -504,6 +507,7 @@ Virtualized table body for rendering thousands of rows efficiently.
 | `onNearEnd`         | `() => void`                                    | -       | Fires when the last rendered virtual row is within `prefetchThreshold` rows of the end. Virtualizer-index-driven — strictly better than `onScrolledBottom` for infinite scroll. |
 | `prefetchThreshold` | `number`                                        | `10`    | How many rows from the end to trigger `onNearEnd`.                                                                                                                              |
 | `onRowClick`        | `(row: TData, event: React.MouseEvent) => void` | -       | Called when a row is clicked.                                                                                                                                                   |
+| `getRowMemoKey`     | `(row: TData) => string`                        | -       | Per-row key encoding external row state. When it changes for a row, only that row (and its size measurement) re-renders.                                                        |
 
 #### DataTableVirtualizedEmptyBody
 
@@ -680,11 +684,12 @@ import { DataTableRowDndProvider } from "@/components/niko-table/components/data
 
 #### Props
 
-| Name         | Type                   | Default | Description                   |
-| ------------ | ---------------------- | ------- | ----------------------------- |
-| `children`   | `React.ReactNode`      | -       | Child components.             |
-| `className`  | `string`               | -       | Additional CSS classes.       |
-| `onRowClick` | `(row: TData) => void` | -       | Called when a row is clicked. |
+| Name            | Type                     | Default | Description                                                                                   |
+| --------------- | ------------------------ | ------- | --------------------------------------------------------------------------------------------- |
+| `children`      | `React.ReactNode`        | -       | Child components.                                                                             |
+| `className`     | `string`                 | -       | Additional CSS classes.                                                                       |
+| `onRowClick`    | `(row: TData) => void`   | -       | Called when a row is clicked.                                                                 |
+| `getRowMemoKey` | `(row: TData) => string` | -       | Per-row key encoding external row state. When it changes for a row, only that row re-renders. |
 
 #### DataTableDndHeader
 
@@ -715,11 +720,12 @@ DnD-aware table body for column drag-and-drop. Each cell follows its column's dr
 
 #### Props
 
-| Name         | Type                   | Default | Description                   |
-| ------------ | ---------------------- | ------- | ----------------------------- |
-| `children`   | `React.ReactNode`      | -       | Child components.             |
-| `className`  | `string`               | -       | Additional CSS classes.       |
-| `onRowClick` | `(row: TData) => void` | -       | Called when a row is clicked. |
+| Name            | Type                     | Default | Description                                                                                   |
+| --------------- | ------------------------ | ------- | --------------------------------------------------------------------------------------------- |
+| `children`      | `React.ReactNode`        | -       | Child components.                                                                             |
+| `className`     | `string`                 | -       | Additional CSS classes.                                                                       |
+| `onRowClick`    | `(row: TData) => void`   | -       | Called when a row is clicked.                                                                 |
+| `getRowMemoKey` | `(row: TData) => string` | -       | Per-row key encoding external row state. When it changes for a row, only that row re-renders. |
 
 ### Virtualized DnD Components
 
@@ -761,17 +767,18 @@ import { DataTableRowDndProvider } from "@/components/niko-table/components/data
 
 #### Props
 
-| Name               | Type                                            | Default | Description                                              |
-| ------------------ | ----------------------------------------------- | ------- | -------------------------------------------------------- |
-| `children`         | `React.ReactNode`                               | -       | Child components (e.g. `DataTableVirtualizedEmptyBody`). |
-| `estimateSize`     | `number`                                        | `34`    | Estimated row height in pixels.                          |
-| `overscan`         | `number`                                        | `20`    | Number of items to render outside visible area.          |
-| `className`        | `string`                                        | -       | Additional CSS classes.                                  |
-| `onScroll`         | `(event: ScrollEvent) => void`                  | -       | Scroll event handler.                                    |
-| `onScrolledTop`    | `() => void`                                    | -       | Called when scrolled to top.                             |
-| `onScrolledBottom` | `() => void`                                    | -       | Called when scrolled to bottom.                          |
-| `scrollThreshold`  | `number`                                        | `50`    | Pixel threshold for top/bottom scroll events.            |
-| `onRowClick`       | `(row: TData, event: React.MouseEvent) => void` | -       | Called when a row is clicked.                            |
+| Name               | Type                                            | Default | Description                                                                                   |
+| ------------------ | ----------------------------------------------- | ------- | --------------------------------------------------------------------------------------------- |
+| `children`         | `React.ReactNode`                               | -       | Child components (e.g. `DataTableVirtualizedEmptyBody`).                                      |
+| `estimateSize`     | `number`                                        | `34`    | Estimated row height in pixels.                                                               |
+| `overscan`         | `number`                                        | `20`    | Number of items to render outside visible area.                                               |
+| `className`        | `string`                                        | -       | Additional CSS classes.                                                                       |
+| `onScroll`         | `(event: ScrollEvent) => void`                  | -       | Scroll event handler.                                                                         |
+| `onScrolledTop`    | `() => void`                                    | -       | Called when scrolled to top.                                                                  |
+| `onScrolledBottom` | `() => void`                                    | -       | Called when scrolled to bottom.                                                               |
+| `scrollThreshold`  | `number`                                        | `50`    | Pixel threshold for top/bottom scroll events.                                                 |
+| `onRowClick`       | `(row: TData, event: React.MouseEvent) => void` | -       | Called when a row is clicked.                                                                 |
+| `getRowMemoKey`    | `(row: TData) => string`                        | -       | Per-row key encoding external row state. When it changes for a row, only that row re-renders. |
 
 #### DataTableVirtualizedDndHeader
 
