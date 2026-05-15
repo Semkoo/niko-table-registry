@@ -55,6 +55,38 @@ async function testUrl(filename) {
   }
 }
 
+/**
+ * Fetches the live registry index and returns the set of item names
+ * currently published. Used to skip local-only entries (newly added in
+ * a PR but not yet deployed) so PRs aren't blocked by a chicken-and-egg
+ * dependency on production.
+ */
+async function getPublishedNames() {
+  const url = `${baseUrl}/r/registry.json`
+  try {
+    const res = await fetch(url)
+    if (!res.ok) {
+      console.warn(
+        `Warning: could not fetch live registry index (${res.status}); treating all entries as published.`,
+      )
+      return null
+    }
+    const data = await res.json()
+    if (!Array.isArray(data?.items)) {
+      console.warn(
+        "Warning: live registry index has unexpected shape; treating all entries as published.",
+      )
+      return null
+    }
+    return new Set(data.items.map(it => it?.name).filter(Boolean))
+  } catch (e) {
+    console.warn(
+      `Warning: could not fetch live registry index (${e.message}); treating all entries as published.`,
+    )
+    return null
+  }
+}
+
 async function main() {
   const files = getItemFiles()
   if (files.length === 0) {
@@ -62,10 +94,19 @@ async function main() {
     process.exit(1)
   }
 
+  const publishedNames = await getPublishedNames()
+
   console.log(`Testing ${files.length} registry URLs (base: ${baseUrl})\n`)
 
   let failed = 0
+  let skipped = 0
   for (const file of files) {
+    const name = file.replace(/\.json$/, "")
+    if (publishedNames && !publishedNames.has(name)) {
+      console.log(`SKIP  /r/${file} — not yet in live registry index`)
+      skipped++
+      continue
+    }
     const result = await testUrl(file)
     const status = result.ok ? "PASS" : "FAIL"
     const detail = result.ok ? "" : ` — ${result.error}`
@@ -78,7 +119,11 @@ async function main() {
     console.error(`${failed} URL(s) failed.`)
     process.exit(1)
   }
-  console.log("All registry URLs passed.")
+  if (skipped > 0) {
+    console.log(`All registry URLs passed (${skipped} skipped, pre-deploy).`)
+  } else {
+    console.log("All registry URLs passed.")
+  }
   process.exit(0)
 }
 
