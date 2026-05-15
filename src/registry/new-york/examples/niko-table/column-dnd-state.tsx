@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import type { VisibilityState } from "@tanstack/react-table"
 import { DataTableRoot } from "@/components/niko-table/core/data-table-root"
 import { DataTable } from "@/components/niko-table/core/data-table"
 import { DataTableEmptyBody } from "@/components/niko-table/core/data-table-structure"
@@ -15,6 +16,9 @@ import {
   DataTableEmptyTitle,
   DataTableEmptyDescription,
 } from "@/components/niko-table/components/data-table-empty-state"
+import { DataTableSearchFilter } from "@/components/niko-table/components/data-table-search-filter"
+import { DataTableToolbarSection } from "@/components/niko-table/components/data-table-toolbar-section"
+import { DataTableViewDndMenu } from "@/components/niko-table/components/data-table-view-dnd-menu"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -172,21 +176,45 @@ const initialColumnOrder = columns.map(c => c.id as string)
 export default function ColumnDndStateExample() {
   const [columnOrder, setColumnOrder] =
     React.useState<string[]>(initialColumnOrder)
+  const [columnVisibility, setColumnVisibility] =
+    React.useState<VisibilityState>({})
+  const [globalFilter, setGlobalFilter] = React.useState<string | object>("")
 
-  const resetColumnOrder = () => setColumnOrder(initialColumnOrder)
+  const resetAll = () => {
+    setColumnOrder(initialColumnOrder)
+    setColumnVisibility({})
+    setGlobalFilter("")
+  }
 
   return (
     <div className="w-full space-y-4">
       <DataTableRoot
         data={data}
         columns={columns}
-        state={{ columnOrder }}
+        state={{ columnOrder, columnVisibility, globalFilter }}
         onColumnOrderChange={setColumnOrder}
+        onColumnVisibilityChange={setColumnVisibility}
+        onGlobalFilterChange={setGlobalFilter}
       >
         <DataTableColumnDndProvider
           columnOrder={columnOrder}
           onColumnOrderChange={setColumnOrder}
         >
+          {/*
+           * Two reorder surfaces share one `columnOrder`:
+           *   1. Drag column headers (DataTableColumnDndProvider)
+           *   2. Drag rows in the View menu (DataTableViewDndMenu)
+           * Either updates the same state, so both stay in sync.
+           * The View menu also toggles visibility and exposes a Reset.
+           */}
+          <DataTableToolbarSection className="justify-between">
+            <DataTableSearchFilter placeholder="Search employees..." />
+            <DataTableViewDndMenu
+              columnOrder={columnOrder}
+              onColumnOrderChange={setColumnOrder}
+              onReset={resetAll}
+            />
+          </DataTableToolbarSection>
           <DataTable>
             <DataTableDndHeader />
             <DataTableDndColumnBody>
@@ -197,7 +225,7 @@ export default function ColumnDndStateExample() {
                   </DataTableEmptyIcon>
                   <DataTableEmptyTitle>No employees found</DataTableEmptyTitle>
                   <DataTableEmptyDescription>
-                    There are no employees to display at this time.
+                    Try a different search.
                   </DataTableEmptyDescription>
                 </DataTableEmptyMessage>
               </DataTableEmptyBody>
@@ -209,13 +237,14 @@ export default function ColumnDndStateExample() {
       {/* State Display */}
       <Card>
         <CardHeader>
-          <CardTitle>Current Column Order</CardTitle>
+          <CardTitle>Column DnD State</CardTitle>
           <CardDescription>
-            Drag column headers to reorder. The order is tracked in state.
+            Header drag, view-menu drag, visibility toggles, and search — all
+            live state.
           </CardDescription>
           <CardAction>
-            <Button variant="outline" size="sm" onClick={resetColumnOrder}>
-              Reset Order
+            <Button variant="outline" size="sm" onClick={resetAll}>
+              Reset
             </Button>
           </CardAction>
         </CardHeader>
@@ -229,6 +258,23 @@ export default function ColumnDndStateExample() {
               <span className="font-medium">Current Order:</span>
               <span className="text-foreground">{columnOrder.join(" → ")}</span>
             </div>
+            <div className="flex justify-between">
+              <span className="font-medium">Hidden:</span>
+              <span className="text-foreground">
+                {Object.entries(columnVisibility)
+                  .filter(([, v]) => !v)
+                  .map(([k]) => k)
+                  .join(", ") || "none"}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="font-medium">Search:</span>
+              <span className="text-foreground">
+                {typeof globalFilter === "string" && globalFilter
+                  ? globalFilter
+                  : "—"}
+              </span>
+            </div>
           </div>
 
           <details className="mt-4 border-t pt-4">
@@ -236,7 +282,11 @@ export default function ColumnDndStateExample() {
               View Full State
             </summary>
             <pre className="mt-2 overflow-auto rounded bg-muted p-2 text-xs">
-              {JSON.stringify(columnOrder, null, 2)}
+              {JSON.stringify(
+                { columnOrder, columnVisibility, globalFilter },
+                null,
+                2,
+              )}
             </pre>
           </details>
         </CardContent>
