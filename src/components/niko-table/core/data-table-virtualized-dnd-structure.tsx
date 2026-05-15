@@ -483,8 +483,9 @@ export function DataTableVirtualizedDndBody<TData>({
   // rows when consumers rebuild `columns` via `useMemo([externalState, ...])`,
   // so cells reading external state stay fresh without `getRowMemoKey`.
   const columnDefsVersion = useColumnDefsVersion(table)
-  // Encodes visible column ids + pinning + content version so memoized rows
-  // re-render on layout AND content changes.
+  // State deps drive `table.getVisibleLeafColumns()` internally; lint can't
+  // see through the method call, so list them explicitly.
+   
   const columnLayoutSignature = React.useMemo(
     () =>
       `${columnDefsVersion}|${table
@@ -822,8 +823,9 @@ export function DataTableVirtualizedDndColumnBody<TData>({
   // rows when consumers rebuild `columns` via `useMemo([externalState, ...])`,
   // so cells reading external state stay fresh without `getRowMemoKey`.
   const columnDefsVersion = useColumnDefsVersion(table)
-  // Encodes visible column ids + pinning + content version so memoized rows
-  // re-render on layout AND content changes.
+  // State deps drive `table.getVisibleLeafColumns()` internally; lint can't
+  // see through the method call, so list them explicitly.
+   
   const columnLayoutSignature = React.useMemo(
     () =>
       `${columnDefsVersion}|${table
