@@ -55,6 +55,8 @@ const COMPONENT_FEATURES: Record<string, FeatureRequirements> = {
   // Filtering components
   DataTableViewMenu: { enableFilters: true },
   TableViewMenu: { enableFilters: true },
+  DataTableViewDndMenu: { enableFilters: true },
+  TableViewDndMenu: { enableFilters: true },
   DataTableSearchFilter: { enableFilters: true },
   TableSearchFilter: { enableFilters: true },
   DataTableFacetedFilter: { enableFilters: true },
