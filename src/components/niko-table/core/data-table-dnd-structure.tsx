@@ -24,7 +24,6 @@ import { flexRender, type Row } from "@tanstack/react-table"
 import { DataTableColumnHeaderRoot } from "../components/data-table-column-header"
 import { resolveRowFromClick } from "../lib/row-click"
 import { getCommonPinningStyles } from "../lib/styles"
-import { useColumnDefsVersion } from "../lib/use-column-defs-version"
 import {
   TableDraggableRow,
   SortableContext,
@@ -251,24 +250,21 @@ export function DataTableDndBody<TData>({
     [table, columns],
   )
 
+  // String signature of the visible column layout. Memoized rows compare it
+  // to invalidate on column toggle / reorder / pin. For external row state
+  // (inline edits, optimistic overlays), pass `getRowMemoKey`.
   const { columnVisibility, columnOrder, columnPinning } = table.getState()
-  // Bumps whenever any column def reference changes — invalidates memoized
-  // rows when consumers rebuild `columns` via `useMemo([externalState, ...])`,
-  // so cells reading external state stay fresh without `getRowMemoKey`.
-  const columnDefsVersion = useColumnDefsVersion(table)
-  // State deps drive `table.getVisibleLeafColumns()` internally; lint can't
-  // see through the method call, so list them explicitly.
-   
   const columnLayoutSignature = React.useMemo(
     () =>
-      `${columnDefsVersion}|${table
+      table
         .getVisibleLeafColumns()
         .map(c => {
           const pinned = c.getIsPinned()
           return pinned ? `${c.id}:${pinned}` : c.id
         })
-        .join(",")}`,
-    [table, columnVisibility, columnOrder, columnPinning, columnDefsVersion],
+        .join(","),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [table, columnVisibility, columnOrder, columnPinning],
   )
 
   const isClickable = !!onRowClick
@@ -440,24 +436,21 @@ export function DataTableDndColumnBody<TData>({
     [table, columns],
   )
 
+  // String signature of the visible column layout. Memoized rows compare it
+  // to invalidate on column toggle / reorder / pin. For external row state
+  // (inline edits, optimistic overlays), pass `getRowMemoKey`.
   const { columnVisibility, columnOrder, columnPinning } = table.getState()
-  // Bumps whenever any column def reference changes — invalidates memoized
-  // rows when consumers rebuild `columns` via `useMemo([externalState, ...])`,
-  // so cells reading external state stay fresh without `getRowMemoKey`.
-  const columnDefsVersion = useColumnDefsVersion(table)
-  // State deps drive `table.getVisibleLeafColumns()` internally; lint can't
-  // see through the method call, so list them explicitly.
-   
   const columnLayoutSignature = React.useMemo(
     () =>
-      `${columnDefsVersion}|${table
+      table
         .getVisibleLeafColumns()
         .map(c => {
           const pinned = c.getIsPinned()
           return pinned ? `${c.id}:${pinned}` : c.id
         })
-        .join(",")}`,
-    [table, columnVisibility, columnOrder, columnPinning, columnDefsVersion],
+        .join(","),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [table, columnVisibility, columnOrder, columnPinning],
   )
 
   const isClickable = !!onRowClick

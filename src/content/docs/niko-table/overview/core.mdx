@@ -239,7 +239,7 @@ import {
 | `onRowClick`       | `(row: TData) => void`         | -       | Called when a row is clicked.                                                                                                                                                            |
 | `getRowMemoKey`    | `(row: TData) => string`       | -       | Per-row key encoding external row state (inline edits, optimistic overlays). When it changes for a row, only that row re-renders. See [Inline Edit Table](/examples/inline-edit-table/). |
 
-> **Row memo invalidation:** all six body components are wrapped in `React.memo` for performance. When you rebuild the `columns` array via `useMemo([externalState, ...])`, every row invalidates automatically (via the internal `useColumnDefsVersion` hook keyed on `columnDef` references). Use `getRowMemoKey` only when you want **per-row** invalidation (e.g. only the row being edited re-renders).
+> **Row memo invalidation:** all six body components are wrapped in `React.memo` for performance. Column toggle / reorder / pin already invalidate rows (the `columnLayoutSignature` prop encodes them). If your column `cell` functions read **external state** (inline edit drafts, optimistic overlays) wire `getRowMemoKey` so that state change forces only the affected row to re-render.
 
 #### ScrollEvent Type
 
