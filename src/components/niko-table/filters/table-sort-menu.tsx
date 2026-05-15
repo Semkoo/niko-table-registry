@@ -240,7 +240,11 @@ export function TableSortMenu<TData>({
   const addButtonRef = React.useRef<HTMLButtonElement>(null)
 
   const sorting = table.getState().sorting
-  const canMultiSort = table.options.enableMultiSort !== false
+  // Hide "Add sort" when adding a second entry would silently replace the
+  // first (`enableMultiSort: false`). The first sort can still be added
+  // from the menu when no sort exists yet.
+  const canShowAddSort =
+    table.options.enableMultiSort !== false || sorting.length === 0
 
   // ============================================================================
   // Sorting State Management
@@ -440,7 +444,7 @@ export function TableSortMenu<TData>({
             </SortableContent>
           )}
           <div className="flex w-full items-center gap-2">
-            {canMultiSort && (
+            {canShowAddSort && (
               <Button
                 size="sm"
                 className="rounded"
