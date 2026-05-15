@@ -47,6 +47,12 @@ export interface BuildFacetedOptionsConfig {
    * are always preserved as-is.
    */
   autoOptionsFormat: boolean
+  /**
+   * Optional per-column label formatter. Wins over `autoOptionsFormat` when
+   * present. Receives the stringified row value, returns the display label.
+   * Ignored when `staticOptions` is provided.
+   */
+  formatOptionLabel?: (value: string) => string
 }
 
 /**
@@ -69,6 +75,7 @@ export function buildFacetedOptions<TData>(
     dynamicCounts,
     showCounts,
     autoOptionsFormat,
+    formatOptionLabel,
   } = config
 
   // Fast path: explicit options, no narrowing, no counts — just normalize the
@@ -108,7 +115,11 @@ export function buildFacetedOptions<TData>(
     baseOptions = Array.from(availableValues)
       .map(value => ({
         value,
-        label: autoOptionsFormat ? formatLabel(value) : value,
+        label: formatOptionLabel
+          ? formatOptionLabel(value)
+          : autoOptionsFormat
+            ? formatLabel(value)
+            : value,
       }))
       .sort((a, b) => a.label.localeCompare(b.label))
   }
