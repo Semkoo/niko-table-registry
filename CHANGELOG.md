@@ -33,7 +33,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`TableSortMenu` / `DataTableSortMenu`** — "Add sort" is hidden when `enableMultiSort: false` AND a sort already exists. The first sort can still be added from the menu.
 - **`TableSortMenu`** — next sorting derived from `table.getState().sorting` instead of closure-captured state.
 - **Sort / filter / inline-filter column memos** — key on `table.options.columns` instead of the stable table ref.
-- **Memoized rows invalidate when consumers rebuild `columns`** — new `useColumnDefsVersion(table)` hook bumps when any `columnDef` reference changes, threaded into `columnLayoutSignature` across all six bodies. Cells reading external state stay fresh without forcing every caller to wire `getRowMemoKey`.
 - **`columnLayoutSignature` memo deps** — all six bodies now depend on `columnVisibility` / `columnOrder` / `columnPinning` from `table.getState()` instead of the stable `columns` array.
 - **Filter menu / inline filter — stale counts on filter changes**. Pristine options captured in a ref and `meta.options` rebuilt each render, so cross-filter narrowing works.
 - **Faceted filter** — caller-supplied options no longer narrowed to current row set; caller is the source of truth. `TableColumnFacetedFilterMenu` decouples `limitToFilteredRows` from the `multiple` default for caller options.
