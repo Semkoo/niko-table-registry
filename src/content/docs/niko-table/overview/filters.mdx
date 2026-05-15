@@ -318,7 +318,7 @@ import { TableSortMenu } from "@/components/niko-table/filters/table-sort-menu"
 
 ### TableViewMenu
 
-Core view menu implementation for column visibility.
+Core view menu implementation for column visibility. For drag-to-reorder, use [`TableViewDndMenu`](#tableviewdndmenu) — it lives in a separate file so consumers who don't need DnD don't pay the `@dnd-kit/*` bundle cost.
 
 <div className="mb-4 flex gap-2">
   <Button variant="outline" size="sm" asChild>
@@ -345,15 +345,74 @@ import { TableViewMenu } from "@/components/niko-table/filters/table-view-menu"
     console.log(`Column ${columnId} is now ${isVisible ? "visible" : "hidden"}`)
   }}
 />
+
+// Surface required columns + a Reset action
+<TableViewMenu
+  table={table}
+  lockedColumnIds={["id", "name"]}
+  onReset={() => {
+    table.resetColumnVisibility()
+    table.resetColumnOrder()
+  }}
+/>
 ```
 
 #### Props
 
-| Name                       | Type                                             | Description                         |
-| -------------------------- | ------------------------------------------------ | ----------------------------------- |
-| `table`                    | `Table<TData>`                                   | TanStack Table instance (required). |
-| `className`                | `string`                                         | Additional CSS classes.             |
-| `onColumnVisibilityChange` | `(columnId: string, isVisible: boolean) => void` | Callback when visibility changes.   |
+| Name                       | Type                                             | Description                                                                                                |
+| -------------------------- | ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------- |
+| `table`                    | `Table<TData>`                                   | TanStack Table instance (required).                                                                        |
+| `className`                | `string`                                         | Additional CSS classes.                                                                                    |
+| `onColumnVisibilityChange` | `(columnId: string, isVisible: boolean) => void` | Callback when visibility changes.                                                                          |
+| `lockedColumnIds`          | `string[]`                                       | Columns shown in the menu but rendered disabled. Useful for required columns marked `enableHiding: false`. |
+| `onReset`                  | `() => void`                                     | When provided, renders a Reset button below a separator at the bottom of the menu.                         |
+| `resetLabel`               | `string`                                         | Label for the reset button. Defaults to `"Reset to defaults"`.                                             |
+
+### TableViewDndMenu
+
+Drag-to-reorder variant of `TableViewMenu`. Each row gets a `GripVertical` handle and the list becomes vertically sortable via `@dnd-kit`. The same `columnOrder` state the table consumes drives the menu's display order, so dropping a row updates both surfaces in lockstep. Combines cleanly with [`TableColumnDndProvider`](#tablecolumndndprovider) (header drag) — two reorder surfaces, one state.
+
+<div className="mb-4 flex gap-2">
+  <Button variant="outline" size="sm" asChild>
+    <a
+      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-view-dnd-menu.tsx`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Source Code ↗
+    </a>
+  </Button>
+</div>
+
+```tsx showLineNumbers
+import { TableViewDndMenu } from "@/components/niko-table/filters/table-view-dnd-menu"
+
+const [columnOrder, setColumnOrder] = React.useState<string[]>([])
+
+<TableViewDndMenu
+  table={table}
+  columnOrder={columnOrder}
+  onColumnOrderChange={setColumnOrder}
+  lockedColumnIds={["id"]}
+  onReset={() => {
+    setColumnOrder([])
+    table.resetColumnVisibility()
+  }}
+/>
+```
+
+#### Props
+
+| Name                       | Type                                             | Description                                                    |
+| -------------------------- | ------------------------------------------------ | -------------------------------------------------------------- |
+| `table`                    | `Table<TData>`                                   | TanStack Table instance (required).                            |
+| `columnOrder`              | `string[]`                                       | Current column order array (required).                         |
+| `onColumnOrderChange`      | `(next: string[]) => void`                       | Callback when a row is dropped in a new position (required).   |
+| `className`                | `string`                                         | Additional CSS classes.                                        |
+| `onColumnVisibilityChange` | `(columnId: string, isVisible: boolean) => void` | Callback when visibility changes.                              |
+| `lockedColumnIds`          | `string[]`                                       | Columns shown in the menu but rendered disabled.               |
+| `onReset`                  | `() => void`                                     | When provided, renders a Reset button below a separator.       |
+| `resetLabel`               | `string`                                         | Label for the reset button. Defaults to `"Reset to defaults"`. |
 
 ### TableInlineFilter
 
