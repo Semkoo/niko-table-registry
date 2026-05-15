@@ -27,9 +27,9 @@ Column DnD lets users reorder table columns by dragging headers. Built with `@dn
 
 ## Installation
 
-Install the DataTable core and column DnD add-on:
+Install the DataTable core and column DnD add-ons. Add `data-table-view-dnd-menu` and `data-table-search-filter` for the toolbar shown in the example:
 
-<CliCommandCode action="run" command="shadcn@latest add @niko-table/data-table @niko-table/data-table-column-dnd" />
+<CliCommandCode action="run" command="shadcn@latest add @niko-table/data-table @niko-table/data-table-column-dnd @niko-table/data-table-view-dnd-menu @niko-table/data-table-search-filter" />
 
 > First time using `@niko-table`? See the [Installation Guide](/getting-started/installation#configure-the-niko-table-registry) to set up the registry.
 
@@ -68,12 +68,30 @@ return (
 )
 ```
 
+## Two Reorder Surfaces, One State
+
+`DataTableViewDndMenu` is a drag-to-reorder variant of the View menu that shares the same `columnOrder` state as the column-header drag. Users get two ways to reorder, and visibility toggles + a Reset live in the same dropdown:
+
+```tsx showLineNumbers title="column-dnd.tsx"
+<DataTableToolbarSection className="justify-between">
+  <DataTableSearchFilter placeholder="Search employees..." />
+  <DataTableViewDndMenu
+    columnOrder={columnOrder}
+    onColumnOrderChange={setColumnOrder}
+    onReset={() => setColumnOrder(initialColumnOrder)}
+  />
+</DataTableToolbarSection>
+```
+
+Use [`DataTableViewMenu`](/niko-table/overview/components#datatableviewmenu) (no DnD) instead if you don't need drag-to-reorder — it skips the `@dnd-kit/*` bundle.
+
 ## Key Points
 
 - Every column needs an explicit **`id`** field for column order tracking
-- **`columnOrder`** state must be passed to both `DataTableRoot` and `DataTableColumnDndProvider`
+- **`columnOrder`** state must be passed to both `DataTableRoot` and `DataTableColumnDndProvider` — and `DataTableViewDndMenu` if you use it
 - Headers are draggable by default — grab any header to reorder
 - **Safe to combine with sorting and filtering** — column order is independent of data order, unlike [Row DnD](/examples/row-dnd-table/)
+- `DataTableViewDndMenu` and the column-header drag share state, so both surfaces stay in lockstep
 
 ## When to Use
 

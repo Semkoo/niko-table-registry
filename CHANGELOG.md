@@ -9,49 +9,56 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **`getRowMemoKey` prop** — all six body components (`DataTableBody`, `DataTableVirtualizedBody`, `DataTableDndBody`, `DataTableDndColumnBody`, `DataTableVirtualizedDndBody`, `DataTableVirtualizedDndColumnBody`) now accept `getRowMemoKey?: (row: TData) => string`. Return a string per row that encodes external row-level state (inline edit draft values, optimistic overlays, saving spinners). When the string changes for a row, React.memo re-renders only that row — without this, closures captured in column `cell` definitions update silently while the memoized row holds stale output until an unrelated prop (selection, expansion) triggers a re-render. See the [Inline Edit Table example](/examples/inline-edit-table/).
-- **Expanded-row re-measure effect** — `rowMemoKey` is now included in the `useEffect` dependency array of virtualized body rows so height is re-measured whenever inline edit state changes while a row is expanded.
-- `DataTableVirtualizedFlexHeader` — flex-layout header for `DataTableVirtualizedDndBody`. Pick by body: plain → `DataTableVirtualizedHeader`, row-DnD → `DataTableVirtualizedFlexHeader`, column-DnD → `DataTableVirtualizedDndHeader`.
-- `TableSearchFilter` — `debounceMs` prop (default `0`). Keystrokes update the input immediately; `table.setGlobalFilter` is delayed by the configured amount. Recommended at `200`+ for large client-side datasets; leave at `0` for server-driven tables where the network is already the rate limiter. In controlled mode, debounce in the consumer's `onChange` instead.
+- **`TableViewDndMenu` / `DataTableViewDndMenu`** — new drag-to-reorder variant of the view menu (separate registry entry `data-table-view-dnd-menu`). Required `columnOrder` + `onColumnOrderChange` drive the same state the table consumes; combines with `TableColumnDndProvider` so header drag and menu drag stay in lockstep. Lives in its own file so consumers of the plain `TableViewMenu` skip the `@dnd-kit/*` bundle.
+- **`TableViewMenu` / `TableViewDndMenu` — `lockedColumnIds` + `onReset` / `resetLabel`** (both menus). `lockedColumnIds` surfaces columns marked `enableHiding: false` in the list as disabled (always-on); `onReset` renders a Reset button at the bottom.
+- **`ColumnMeta.formatOptionLabel`** — per-column label formatter for auto-derived faceted-filter options. Wins over `autoOptionsFormat`; ignored when the caller passes explicit `options`. Lets columns whose cell prefixes the raw value (e.g. `L${level}`, `$${amount}`) keep filter dropdown labels in sync.
+- **`getRowMemoKey` prop** on all six body components — return a per-row string encoding external row state (inline edits, optimistic overlays). React.memo re-renders only the affected row. See the [Inline Edit Table example](/examples/inline-edit-table/).
+- **`rowMemoKey` in expanded-row re-measure deps** — virtualized rows re-measure when inline edit state changes while expanded.
+- **`DataTableVirtualizedFlexHeader`** — flex-layout header for `DataTableVirtualizedDndBody`.
+- **`TableSearchFilter` — `debounceMs` prop** (default `0`). Input updates immediately; `table.setGlobalFilter` is delayed. Use `200`+ for large client-side datasets.
 
 ### Changed
 
-- **Filter variant naming normalized to camelCase** — canonical variant values now use `dateRange` and `multiSelect` (instead of `date_range` and `multi_select`) across constants, types, examples, and docs.
-- **Options with `count: 0` are hidden across every filter UI** (faceted filter, filter menu, inline filter). Server-side tables that pass cross-filter counts get automatic narrowing without writing helpers. Pure label-only callers (no counts) unaffected. Opt-out per option by passing `count: undefined`.
-- **`autoResetPageIndex` defaults to `false`** (was `true`). Sort/filter changes now preserve the pagination cursor. Opt back in via `config={{ autoResetPageIndex: true }}`.
+- **Filter variant naming normalized to camelCase** — canonical variant values use `dateRange` and `multiSelect` (was `date_range` / `multi_select`).
+- **Options with `count: 0` hidden across every filter UI** (faceted, filter-menu, inline). Server-side tables get automatic narrowing for free; opt-out per option by passing `count: undefined`.
+- **`autoResetPageIndex` defaults to `false`** (was `true`). Sort/filter changes preserve the pagination cursor. Opt back in via `config={{ autoResetPageIndex: true }}`.
+- **Minimum Node** bumped to 24 (was 22.13) via `.nvmrc` + `engines.node`.
+
+### Performance
+
+- **`TableViewMenu` + `TableViewDndMenu` tuned for 200+ columns** — `lockedColumnIds` consulted via a `Set` (O(1) per row instead of O(m)), rows extracted to a `React.memo`'d `MenuRow`/`MenuItem` with a stable `onToggle` callback, and plain `TableViewMenu` filters search at the parent (`shouldFilter={false}`) so non-matching rows skip rendering entirely instead of being rendered + hidden by cmdk. Search keystrokes at 200–500 columns now only reconcile the rows whose props actually changed.
 
 ### Fixed
 
-- **`TableRangeFilter`** — `[min, max]` memo now depends on faceted scalars, so the range refreshes when row data changes. `formatValue` no longer locale-formats numbers (`type="number"` inputs reject localized output).
-- **`TableSliderFilter` clear button** — always `stopPropagation()` (was DIV-only, so SVG/icon clicks bubbled and re-opened the popover).
-- **Sort / filter / inline-filter column memos** — now key on `table.options.columns` (table ref alone is too stable across column rebuilds).
-- **`TableSortMenu`** — derives the next sorting from `table.getState().sorting` instead of the closure-captured `sorting`, eliminating drift if the callback fires across renders.
-- **CSV export** — plain objects are now JSON-encoded instead of serializing as `[object Object]`.
-- **Filter menu / inline filter — stale counts on filter changes.** `<DataTableFilterMenu />` and `<DataTableInlineFilter />` mutate `meta.options` to inject counts; once a count was pinned on first render it survived later filter changes, so the count-0 hide rule never fired (e.g. selecting Category=Clothing left every Brand option visible). Pristine options are now captured in a ref and `meta.options` is rebuilt from that source each render, so cross-filter narrowing works in both filter UIs (matching the column-header faceted filter).
-- Faceted filter — caller-supplied options no longer narrowed to current row set; caller is the source of truth.
-- `TableColumnFacetedFilterMenu` — `limitToFilteredRows` decoupled from `multiple` default for caller options (still applies to auto-generated/fallback).
-- Cross-table "state update on unmounted component" warning silenced via mount-ref guards on every default state setter.
-- `onRowClick` event type unified to `React.MouseEvent<HTMLElement>` across all bodies.
-- Virtualized DnD body — expanded-row height re-measured on toggle without losing `useSortable` registration.
-- Virtualized non-DnD body — `setColumnsLocked` race fixed; `columnsLocked` gates `measureElement`.
-- Virtualized bodies — `data-index` uses `virtualRow.index`; click delegation via stable `data-row-id` + `table.getRow(rowId)`.
-- Virtualized bodies — expanded-row height included in virtualizer measurement.
-- Virtualized Row-DnD body — selected row styling applies (`data-state="selected"`).
-- Virtualized DnD bodies — `onRowClick` widened to `React.MouseEvent<HTMLElement>`.
-- Column-DnD bodies (virtualized + non-virtualized) — expanded-row rendering matched to other bodies.
-- `VirtualizedDraggableRow` — added `data-index` alongside `data-row-index`.
-- `FILTER_OPERATORS.RELATIVE` hidden from the date-filter dropdown (kept in catalogue for server-side consumers); per-row `console.error` throttled.
-- `getObjectHash` — full sorted-keys join (was first-3 keys, false-negatived row selection with sequential IDs).
-- `DndBodyRow` — `isSelected` was missing from props, so `React.memo` never re-rendered on selection changes; `TableDraggableRow`'s `data-state` stayed stale.
-- `VirtualizedDndColumnBodyRow` — expansion toggle no longer silently skips the virtualizer re-measure. Added `elementRef` + `useEffect` matching the pattern in `VirtualizedDraggableRow`, so the combined base + expanded-pane height is measured without remounting the row.
-- `TableSearchFilter` `debounceMs` — out-of-band table state resets (URL nav, programmatic clear) now cancel any pending debounce flush before syncing `pendingValue`, preventing a stale keystroke timer from overwriting the reset.
+- **View menu split bundle cost** — moved DnD reorder out of `TableViewMenu` into the new `TableViewDndMenu`. Plain-menu consumers no longer pull `@dnd-kit/*`.
+- **`TableViewDndMenu` orphan grip handles when search filters rows** — cmdk's built-in filter only hides the inner `CommandItem`. The menu now uses `shouldFilter={false}` and filters rows itself, so wrapper + handle + item disappear together for non-matching rows.
+- **`TableViewDndMenu` drag handle a11y + partial `columnOrder` support** — handle is a real `<button>` (focus ring, `sortableKeyboardCoordinates`) instead of `<span role="button">`. Rows omitted from a partial `columnOrder` render without a handle rather than producing no-op drags.
+- **`TableColumnDndProvider`** — 8px drag activation threshold on `MouseSensor` + `TouchSensor` so clicks on inline header chrome (sort menus, tooltips) land as clicks.
+- **`TableSortMenu` / `DataTableSortMenu`** — "Add sort" is hidden when `enableMultiSort: false` AND a sort already exists. The first sort can still be added from the menu.
+- **`TableSortMenu`** — next sorting derived from `table.getState().sorting` instead of closure-captured state.
+- **Sort / filter / inline-filter column memos** — key on `table.options.columns` instead of the stable table ref.
+- **`columnLayoutSignature` memo deps** — all six bodies now depend on `columnVisibility` / `columnOrder` / `columnPinning` from `table.getState()` instead of the stable `columns` array.
+- **Filter menu / inline filter — stale counts on filter changes**. Pristine options captured in a ref and `meta.options` rebuilt each render, so cross-filter narrowing works.
+- **Faceted filter** — caller-supplied options no longer narrowed to current row set; caller is the source of truth. `TableColumnFacetedFilterMenu` decouples `limitToFilteredRows` from the `multiple` default for caller options.
+- **`TableRangeFilter`** — `[min, max]` memo depends on faceted scalars; `formatValue` no longer locale-formats numbers.
+- **`TableSliderFilter` clear button** — always `stopPropagation()` (SVG/icon clicks no longer reopen the popover).
+- **`TableSearchFilter` `debounceMs`** — pending timer cancelled on `!debounceEnabled` early return and before out-of-band state resets, preventing stale flushes.
+- **CSV export** — plain objects JSON-encoded instead of serializing as `[object Object]`.
+- **Virtualized bodies** — expanded-row height re-measured on toggle/column-layout change without losing `useSortable` registration; `data-index` uses `virtualRow.index`; click delegation via stable `data-row-id`.
+- **`VirtualizedBodyRowInner` / `VirtualizedDndColumnBodyRowInner`** — re-measure effect includes `columnLayoutSignature` so virtualizer picks up height changes while a row is expanded.
+- **Virtualized non-DnD body** — `setColumnsLocked` race fixed; `columnsLocked` gates `measureElement`.
+- **Column-DnD bodies** (virtualized + non-virtualized) — expanded-row rendering matched to other bodies.
+- **Virtualized Row-DnD body** — selected row styling applies (`data-state="selected"`).
+- **`onRowClick`** event type unified to `React.MouseEvent<HTMLElement>` across all bodies.
+- **`DndBodyRow`** — `isSelected` added to props so `React.memo` re-renders on selection change.
+- **`VirtualizedDraggableRow`** — `data-index` added alongside `data-row-index`.
+- **Cross-table "state update on unmounted component"** warning silenced via mount-ref guards on every default state setter.
+- **`FILTER_OPERATORS.RELATIVE`** hidden from the date-filter dropdown (kept for server-side consumers); per-row `console.error` throttled.
+- **`getObjectHash`** — full sorted-keys join (was first-3 keys, false-negatived row selection with sequential IDs).
 
-### Fixed
+### Internal
 
-- **`columnLayoutSignature` memo deps** — all six body components now depend on `columnVisibility`, `columnOrder`, and `columnPinning` from `table.getState()` instead of the stable `columns` array. The memo previously never recomputed on toggle/reorder/pin changes because `table` and `columns` are both stable references; visible column IDs and pinning are now correctly reactive.
-- **`VirtualizedBodyRowInner` expanded-row re-measure** — base row now uses `setRef`/`elementRef` and a `useEffect([isExpanded, columnLayoutSignature, measureRef])` so the virtualizer re-measures when column layout changes while a row is expanded (no remount, so the earlier `ref={measureRef}` was never re-called).
-- **`VirtualizedDndColumnBodyRowInner` re-measure effect** — `columnLayoutSignature` added to `useEffect` deps so the virtualizer picks up the updated combined height when column layout changes while a row is expanded.
-- **`TableSearchFilter` debounce timer cancel order** — pending timer is now cancelled before the `!debounceEnabled` early return. Previously, switching `debounceEnabled` from `true` to `false` left a stale timer running that could overwrite the cleared state.
+- **Registry URL smoke test** skips pre-deploy entries by checking against the live `/r/registry.json` index. Fixes false-positive PR failures for newly-added registry items.
 
 ### Performance
 

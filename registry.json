@@ -272,6 +272,37 @@
       ]
     },
     {
+      "name": "data-table-view-dnd-menu",
+      "type": "registry:component",
+      "title": "DataTable View DnD Menu",
+      "description": "Column visibility toggle menu with drag-to-reorder support. Use instead of data-table-view-menu when you need users to reorder columns from the menu.",
+      "dependencies": [
+        "@dnd-kit/core",
+        "@dnd-kit/modifiers",
+        "@dnd-kit/sortable",
+        "@dnd-kit/utilities",
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "https://niko-table.com/r/data-table.json",
+        "button",
+        "command",
+        "popover"
+      ],
+      "files": [
+        {
+          "path": "src/components/niko-table/components/data-table-view-dnd-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-view-dnd-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/filters/table-view-dnd-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/table-view-dnd-menu.tsx"
+        }
+      ]
+    },
+    {
       "name": "data-table-clear-filter",
       "type": "registry:component",
       "title": "DataTable Clear Filter",

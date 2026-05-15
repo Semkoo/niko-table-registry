@@ -143,6 +143,9 @@ interface ColumnMeta<TData extends RowData, TValue> {
   range?: [number, number]
   autoOptions?: boolean
   autoOptionsFormat?: boolean
+  /** Per-column label formatter for auto-derived faceted-filter options.
+   *  Wins over `autoOptionsFormat`; ignored when caller passes explicit `options`. */
+  formatOptionLabel?: (value: string) => string
   showCounts?: boolean
   dynamicCounts?: boolean
   mergeStrategy?: "preserve" | "augment" | "replace"

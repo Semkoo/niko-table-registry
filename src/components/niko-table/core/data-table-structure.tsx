@@ -218,8 +218,16 @@ export interface DataTableBodyProps<TData> {
    */
   onRowClick?: (row: TData, event: React.MouseEvent<HTMLElement>) => void
   /**
-   * Return a per-row memo invalidation key. When this key changes for a
-   * specific row, only that row re-renders.
+   * Return a per-row memo invalidation key. When the returned string changes
+   * for a specific row, React.memo re-renders that row even if TanStack Table
+   * props (selection, expansion, column layout) are unchanged. Use this for
+   * row-level external state that cell renderers depend on — e.g. inline edit
+   * mode, optimistic overlays, or any closure-captured state in column
+   * definitions that changes independently of the table's own state.
+   *
+   * @example
+   * // Trigger re-render on inline edit toggle (only the edited row re-renders)
+   * getRowMemoKey={(row) => (isEditing(row.id) ? "editing" : "")}
    */
   getRowMemoKey?: (row: TData) => string
 }
@@ -277,8 +285,10 @@ export function DataTableBody<TData>({
     [table, columns],
   )
 
+  // String signature of the visible column layout. Memoized rows compare it
+  // to invalidate on column toggle / reorder / pin. For external row state
+  // (inline edits, optimistic overlays), pass `getRowMemoKey`.
   const { columnVisibility, columnOrder, columnPinning } = table.getState()
-  // Encodes visible column ids + pinning so memoized rows re-render on layout changes.
   const columnLayoutSignature = React.useMemo(
     () =>
       table
@@ -288,6 +298,7 @@ export function DataTableBody<TData>({
           return pinned ? `${c.id}:${pinned}` : c.id
         })
         .join(","),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [table, columnVisibility, columnOrder, columnPinning],
   )
 

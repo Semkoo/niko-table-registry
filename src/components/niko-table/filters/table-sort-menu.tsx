@@ -130,7 +130,6 @@ function TableSortItem({
               id={fieldTriggerId}
               aria-controls={fieldListboxId}
               variant="outline"
-              size="sm"
               className="w-44 justify-between rounded font-normal"
             >
               <span className="truncate">{columnLabels.get(sort.id)}</span>
@@ -241,6 +240,11 @@ export function TableSortMenu<TData>({
   const addButtonRef = React.useRef<HTMLButtonElement>(null)
 
   const sorting = table.getState().sorting
+  // Hide "Add sort" when adding a second entry would silently replace the
+  // first (`enableMultiSort: false`). The first sort can still be added
+  // from the menu when no sort exists yet.
+  const canShowAddSort =
+    table.options.enableMultiSort !== false || sorting.length === 0
 
   // ============================================================================
   // Sorting State Management
@@ -440,15 +444,17 @@ export function TableSortMenu<TData>({
             </SortableContent>
           )}
           <div className="flex w-full items-center gap-2">
-            <Button
-              size="sm"
-              className="rounded"
-              ref={addButtonRef}
-              onClick={onSortAdd}
-              disabled={columns.length === 0}
-            >
-              Add sort
-            </Button>
+            {canShowAddSort && (
+              <Button
+                size="sm"
+                className="rounded"
+                ref={addButtonRef}
+                onClick={onSortAdd}
+                disabled={columns.length === 0}
+              >
+                Add sort
+              </Button>
+            )}
             {sorting.length > 0 && (
               <Button
                 variant="outline"
