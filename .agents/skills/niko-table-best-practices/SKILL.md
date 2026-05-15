@@ -187,7 +187,7 @@ Sync table state (pagination, sorting, filters, search) with the URL for shareab
    }
    ```
 4. **Core**: `shadcn@latest add @niko-table/data-table` (also installs/updates `components/ui/table.tsx` with `TableComponent`; backward compatible with existing Shadcn table).
-5. **Add-ons** (examples): `@niko-table/data-table-pagination`, `@niko-table/data-table-search-filter`, `@niko-table/data-table-view-menu`, `@niko-table/data-table-sort-menu`, `@niko-table/data-table-filter-menu`, plus column-level filter/sort components as needed. Match names from the registry at niko-table.com.
+5. **Add-ons** (examples): `@niko-table/data-table-pagination`, `@niko-table/data-table-search-filter`, `@niko-table/data-table-view-menu` (or `@niko-table/data-table-view-dnd-menu` if you need drag-to-reorder in the column visibility list — pulls in `@dnd-kit/*`), `@niko-table/data-table-sort-menu`, `@niko-table/data-table-filter-menu`, plus column-level filter/sort components as needed. Match names from the registry at niko-table.com.
 6. **Server-side**: For `manualPagination`/`manualSorting`/`manualFiltering`, set `config.pageCount` (e.g. `Math.ceil(totalCount / pageSize)`) and pass `totalCount` to `DataTablePagination` when using server-driven data.
 
 ## Drag and Drop
