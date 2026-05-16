@@ -7,6 +7,8 @@ import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
 import CollapsiblePreview from "@/components/markdown/collapsible-preview.astro"
 import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
 
+Pairs `@tanstack/react-virtual` with an `IntersectionObserver` sentinel: only on-screen rows render to the DOM, and a new page is fetched as you approach the end. Memory and frame time stay constant regardless of how many pages you've loaded — the right pick for any paginated API that can grow past a few hundred rows.
+
 <CodePreview demo="niko-table/infinite-scroll-virtualized-table" />
 
 <CollapsiblePreview>

@@ -7,6 +7,8 @@ import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
 import CollapsiblePreview from "@/components/markdown/collapsible-preview.astro"
 import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
 
+Renders nested row models (`subRows`) with collapsible parents and optional cascading selection — checking a parent flips every descendant, and partial child selection bubbles up as indeterminate. Backed by TanStack Table's expanded-row model, so there's no recursive code in your column defs.
+
 <CodePreview demo="niko-table/tree-table" />
 
 <CollapsiblePreview>

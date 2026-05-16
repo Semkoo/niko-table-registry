@@ -7,6 +7,8 @@ import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
 import CollapsiblePreview from "@/components/markdown/collapsible-preview.astro"
 import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
 
+Loads more rows as the user reaches the bottom of the scroll container, calling your `loadMore` handler whenever an `IntersectionObserver` sentinel becomes visible. **Heads up**: every loaded row stays in the DOM — see the caution below for when to reach for the virtualized variant instead.
+
 <CodePreview demo="niko-table/infinite-scroll-table" />
 
 <CollapsiblePreview>
