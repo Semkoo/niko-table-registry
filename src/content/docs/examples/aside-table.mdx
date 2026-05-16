@@ -7,6 +7,8 @@ import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
 import CollapsiblePreview from "@/components/markdown/collapsible-preview.astro"
 import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
 
+Mounts left and/or right panels that share the layout with the table so contextual chrome — filter trees, row detail, summary stats — doesn't compete with the data view for horizontal space. The panels are regular slots: put whatever React you want inside.
+
 <CodePreview demo="niko-table/aside" />
 
 <CollapsiblePreview>

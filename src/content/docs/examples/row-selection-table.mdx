@@ -7,6 +7,8 @@ import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
 import CollapsiblePreview from "@/components/markdown/collapsible-preview.astro"
 import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
 
+Adds a checkbox column wired to the table's `rowSelection` state, with header-row "select all" plus the indeterminate state for partial selection. Pair it with `DataTableSelectionBar` to surface bulk actions — export, delete, update — only when at least one row is checked.
+
 <CodePreview demo="niko-table/row-selection" />
 
 <CollapsiblePreview>

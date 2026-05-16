@@ -7,6 +7,8 @@ import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
 import CollapsiblePreview from "@/components/markdown/collapsible-preview.astro"
 import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
 
+Reorder rows via drag-and-drop using `DataTableRowDndProvider` and a dedicated drag-handle column. **Important constraint**: do not combine row DnD with sorting or filtering — the user's manual order will fight whatever the table is computing, so disable those add-ons on a DnD table.
+
 ## Overview
 
 <CodePreview demo="niko-table/row-dnd" />
