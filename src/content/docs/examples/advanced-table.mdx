@@ -7,6 +7,8 @@ import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
 import CollapsiblePreview from "@/components/markdown/collapsible-preview.astro"
 import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
 
+Composes `DataTableFilterMenu` and `DataTableSortMenu` into a query-builder UX: users stack multiple typed filter rules (text, number, date, faceted) and combine them with AND/OR. State stays local — pair it with the Advanced Nuqs Table if you also need URL persistence.
+
 <CodePreview demo="niko-table/advanced" />
 
 <CollapsiblePreview>

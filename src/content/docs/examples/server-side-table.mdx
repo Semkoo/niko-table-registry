@@ -6,6 +6,8 @@ description: Server-side pagination, sorting, and filtering with TanStack Query 
 import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
 import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
 
+Hands pagination, sorting, and filtering off to your API and uses TanStack Query for caching, background revalidation, and request dedup. Table state lives in `useState` only — a refresh resets filters; use the Nuqs variant if you also need URL persistence.
+
 <CodePreview demo="niko-table/server-side-state" />
 
 ## Introduction

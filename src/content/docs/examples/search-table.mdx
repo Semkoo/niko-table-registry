@@ -7,6 +7,8 @@ import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
 import CollapsiblePreview from "@/components/markdown/collapsible-preview.astro"
 import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
 
+Wires `DataTableSearchFilter` to a single input that fuzzy-matches across every visible column at once, using TanStack Table's built-in `globalFilter`. A drop-in for any table where users mostly want a "just find this thing" affordance and don't need per-column filter controls.
+
 <CodePreview demo="niko-table/search" />
 
 <CollapsiblePreview>
