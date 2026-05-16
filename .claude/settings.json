@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -s http://localhost:4322/ -o /tmp/home.html -w \"HTTP %{http_code}\\\\n\")",
+      "Read(//tmp/**)",
+      "Read(//private/tmp/**)",
+      "Bash(curl -s http://localhost:4322/examples/basic-table/ -o /dev/null -w \"basic: %{http_code}\\\\n\")",
+      "Bash(awk 'NR<=200 && /from \"@/' src/registry/new-york/examples/niko-table/all-features-table.tsx)",
+      "Bash(grep -c '^```' src/content/docs/index.mdx src/content/docs/examples/basic-table.mdx)",
+      "Bash(git commit -m ' *)",
+      "Bash(pnpm i *)",
+      "Bash(pnpm build *)"
+    ],
+    "additionalDirectories": ["/tmp"]
+  }
+}
