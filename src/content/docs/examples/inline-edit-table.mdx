@@ -7,6 +7,8 @@ import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
 import CollapsiblePreview from "@/components/markdown/collapsible-preview.astro"
 import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
 
+Demonstrates the `getRowMemoKey` escape hatch — Niko Table wraps every body row in `React.memo` for perf, but inline-edit drafts and validation errors live outside row props, so memo'd rows wouldn't otherwise re-render. Returning a string that encodes each row's draft + error state tells `React.memo` exactly when to allow the re-render, and exactly when to stay frozen.
+
 <CodePreview demo="niko-table/inline-edit" />
 
 <CollapsiblePreview>

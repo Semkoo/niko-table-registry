@@ -6,6 +6,8 @@ description: Server-side pagination, sorting, and filtering with TanStack Query 
 import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
 import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
 
+Combines TanStack Query (data fetching, caching, request dedup) with [nuqs](https://nuqs.dev/) URL state, so the URL itself becomes the cache key — share a link, and the recipient hits the same cached response without a refetch. The right pick for paginated APIs where you also want bookmarkable filtered views.
+
 <CodePreview demo="niko-table/server-side-nuqs-state" />
 
 ## Introduction
