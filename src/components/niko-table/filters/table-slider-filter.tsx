@@ -170,6 +170,24 @@ export function TableSliderFilter<TData>({
     return value.toLocaleString(undefined, { maximumFractionDigits: 0 })
   }, [])
 
+  // Match count: rows that fall inside the currently-selected range,
+  // sourced from the faceted row model so the number reflects "matches
+  // before this filter is applied" within the current cross-filter
+  // context. Renders inside the popover next to the label so the user
+  // sees the hit count for the active range as they drag the slider.
+  const facetedRows = column.getFacetedRowModel().rows
+  const matchCount = React.useMemo(() => {
+    const [filterMin, filterMax] = range
+    let count = 0
+    for (const row of facetedRows) {
+      const raw = row.getValue(column.id)
+      const value = typeof raw === "number" ? raw : Number(raw)
+      if (!Number.isFinite(value)) continue
+      if (value >= filterMin && value <= filterMax) count += 1
+    }
+    return count
+  }, [range, facetedRows, column.id])
+
   const applyFilterValue = React.useCallback(
     (value: [number, number] | undefined) => {
       column.setFilterValue(value)
@@ -254,14 +272,19 @@ export function TableSliderFilter<TData>({
       </PopoverTrigger>
       <PopoverContent align="start" className="flex w-auto flex-col gap-4">
         <div className="flex flex-col gap-3">
-          <p className="leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-            {label}
-          </p>
-          <div className="flex items-center gap-4">
+          <div className="flex h-5 items-center justify-between gap-2">
+            <p className="font-medium leading-5 peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+              {label}
+            </p>
+            <span className="bg-secondary text-secondary-foreground inline-flex h-5 items-center justify-center rounded-sm px-1.5 text-xs leading-none font-normal tabular-nums">
+              {matchCount}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
             <Label htmlFor={`${id}-from`} className="sr-only">
               From
             </Label>
-            <div className="relative">
+            <div className="relative flex-1">
               <Input
                 key={`${id}-from-${range[0]}`}
                 id={`${id}-from`}
@@ -278,7 +301,7 @@ export function TableSliderFilter<TData>({
                 onChange={event =>
                   onRangeValueChange(String(event.target.value), true)
                 }
-                className={cn("h-8 w-24", unit && "pr-8")}
+                className={cn("h-8 w-full", unit && "pr-8")}
               />
               {unit && (
                 <span className="absolute top-0 right-0 bottom-0 mt-0.5 mr-0.5 flex h-7 items-center rounded-r-md bg-accent px-2 text-sm text-muted-foreground">
@@ -289,7 +312,7 @@ export function TableSliderFilter<TData>({
             <Label htmlFor={`${id}-to`} className="sr-only">
               to
             </Label>
-            <div className="relative">
+            <div className="relative flex-1">
               <Input
                 key={`${id}-to-${range[1]}`}
                 id={`${id}-to`}
@@ -306,7 +329,7 @@ export function TableSliderFilter<TData>({
                 onChange={event =>
                   onRangeValueChange(String(event.target.value))
                 }
-                className={cn("h-8 w-24", unit && "pr-8")}
+                className={cn("h-8 w-full", unit && "pr-8")}
               />
               {unit && (
                 <span className="absolute top-0 right-0 bottom-0 mt-0.5 mr-0.5 flex h-7 items-center rounded-r-md bg-accent px-2 text-sm text-muted-foreground">
