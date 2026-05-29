@@ -21,7 +21,7 @@
     "prepare": "husky",
     "lint": "eslint --fix .",
     "format": "prettier --write .",
-    "test": "vitest run",
+    "test": "vitest run --passWithNoTests",
     "test:watch": "vitest",
     "test:registry": "node scripts/test-registry-urls.mjs",
     "test:install": "node scripts/test-install-e2e.mjs"
