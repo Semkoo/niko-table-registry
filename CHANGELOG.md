@@ -43,6 +43,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Faceted filter** — caller-supplied options no longer narrowed to current row set; caller is the source of truth. `TableColumnFacetedFilterMenu` decouples `limitToFilteredRows` from the `multiple` default for caller options.
 - **`TableRangeFilter`** — `[min, max]` memo depends on faceted scalars; `formatValue` no longer locale-formats numbers.
 - **`TableSliderFilter` clear button** — always `stopPropagation()` (SVG/icon clicks no longer reopen the popover).
+- **`TableSliderFilter` popover range feedback** — shows a live match-count badge for the active range (computed from faceted rows in current cross-filter context) and uses fluid min/max inputs for better narrow-layout usability.
 - **`TableSearchFilter` `debounceMs`** — pending timer cancelled on `!debounceEnabled` early return and before out-of-band state resets, preventing stale flushes.
 - **CSV export** — plain objects JSON-encoded instead of serializing as `[object Object]`.
 - **Virtualized bodies** — expanded-row height re-measured on toggle/column-layout change without losing `useSortable` registration; `data-index` uses `virtualRow.index`; click delegation via stable `data-row-id`.
