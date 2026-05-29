@@ -63,6 +63,7 @@ export function DataTableInlineFilter<TData>({
     includeColumns,
     excludeColumns,
     limitPerColumn,
+    mergeStrategy,
   })
 
   /**
