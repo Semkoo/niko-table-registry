@@ -134,7 +134,7 @@ export function DataTable({
         "hover:[&::-webkit-scrollbar-thumb]:bg-border",
         "[&::-webkit-scrollbar-thumb:hover]:bg-border/80!",
         // Firefox scrollbar styling
-        "scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border/40",
+        "scrollbar-thin scrollbar-thumb-border/40 scrollbar-track-transparent",
         "hover:scrollbar-thumb-border",
         parsed.safeClassName,
       )}
