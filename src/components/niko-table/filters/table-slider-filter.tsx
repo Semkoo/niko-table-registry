@@ -273,10 +273,10 @@ export function TableSliderFilter<TData>({
       <PopoverContent align="start" className="flex w-auto flex-col gap-4">
         <div className="flex flex-col gap-3">
           <div className="flex h-5 items-center justify-between gap-2">
-            <p className="font-medium leading-5 peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+            <p className="leading-5 font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
               {label}
             </p>
-            <span className="bg-secondary text-secondary-foreground inline-flex h-5 items-center justify-center rounded-sm px-1.5 text-xs leading-none font-normal tabular-nums">
+            <span className="inline-flex h-5 items-center justify-center rounded-sm bg-secondary px-1.5 text-xs leading-none font-normal text-secondary-foreground tabular-nums">
               {matchCount}
             </span>
           </div>
