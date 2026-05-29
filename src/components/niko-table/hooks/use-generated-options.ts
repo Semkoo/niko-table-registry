@@ -49,6 +49,11 @@ export interface GenerateOptionsConfig {
    * Optional cap on number of options per column (after sorting)
    */
   limitPerColumn?: number
+  /**
+   * Default merge strategy when a column does not provide meta.mergeStrategy.
+   * Column-level mergeStrategy still takes precedence.
+   */
+  mergeStrategy?: "preserve" | "augment" | "replace"
 }
 
 /**
@@ -66,6 +71,7 @@ export function useGeneratedOptions<TData>(
     includeColumns,
     excludeColumns,
     limitPerColumn,
+    mergeStrategy,
   } = config
 
   // Pull state slices to use as memo deps (stable values)
@@ -115,7 +121,7 @@ export function useGeneratedOptions<TData>(
       const colAutoOptions = meta.autoOptions ?? true
       const colShowCounts = meta.showCounts ?? showCounts
       const colDynamicCounts = meta.dynamicCounts ?? dynamicCounts
-      const colMerge = meta.mergeStrategy
+      const colMerge = meta.mergeStrategy ?? mergeStrategy
       const colAutoOptionsFormat = meta.autoOptionsFormat ?? true
       const colFormatOptionLabel = meta.formatOptionLabel
 
@@ -283,6 +289,7 @@ export function useGeneratedOptions<TData>(
     includeKey,
     excludeKey,
     limitPerColumn,
+    mergeStrategy,
     limitToFilteredRows,
     // Recompute when filters/global filter change to keep counts in sync
     columnFilters,

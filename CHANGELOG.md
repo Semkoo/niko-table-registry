@@ -39,6 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Sort / filter / inline-filter column memos** — key on `table.options.columns` instead of the stable table ref.
 - **`columnLayoutSignature` memo deps** — all six bodies now depend on `columnVisibility` / `columnOrder` / `columnPinning` from `table.getState()` instead of the stable `columns` array.
 - **Filter menu / inline filter — stale counts on filter changes**. Pristine options captured in a ref and `meta.options` rebuilt each render, so cross-filter narrowing works.
+- **`DataTableInlineFilter` + `useGeneratedOptions` mergeStrategy fallback** — component-level `mergeStrategy` now propagates into option generation as the fallback when column `meta.mergeStrategy` is unset. Fixes `limitToFilteredRows` + `mergeStrategy="replace"` inline-select options getting stuck narrowed after removing other filters.
 - **Faceted filter** — caller-supplied options no longer narrowed to current row set; caller is the source of truth. `TableColumnFacetedFilterMenu` decouples `limitToFilteredRows` from the `multiple` default for caller options.
 - **`TableRangeFilter`** — `[min, max]` memo depends on faceted scalars; `formatValue` no longer locale-formats numbers.
 - **`TableSliderFilter` clear button** — always `stopPropagation()` (SVG/icon clicks no longer reopen the popover).
