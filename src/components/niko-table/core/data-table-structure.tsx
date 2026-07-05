@@ -24,6 +24,8 @@ import {
 import { flexRender, type Row } from "@tanstack/react-table"
 import { Skeleton } from "@/components/ui/skeleton"
 import { DataTableEmptyState } from "../components/data-table-empty-state"
+import { DataTableRowContextMenu } from "../components/data-table-row-context-menu"
+import { resolveRowContextMenuRenderer } from "../components/data-table-row-context-menu-slot"
 import { DataTableColumnHeaderRoot } from "../components/data-table-column-header"
 import { createScrollHandler } from "../lib/create-scroll-handler"
 import { resolveRowFromClick } from "../lib/row-click"
@@ -139,6 +141,12 @@ interface BodyRowProps {
    * tracked props (e.g. inline edit mode, optimistic state).
    */
   rowMemoKey: string
+  /**
+   * Right-click menu items for this row. Must be a stable callback (wrap in
+   * `useCallback`) so `React.memo` keeps holding. Return `null` to opt a
+   * specific row out of having a menu.
+   */
+  renderRowContextMenu?: (row: unknown) => React.ReactNode
 }
 
 const BodyRow = React.memo(function BodyRow({
@@ -147,6 +155,7 @@ const BodyRow = React.memo(function BodyRow({
   isClickable,
   isExpanded,
   isSelected,
+  renderRowContextMenu,
 }: BodyRowProps) {
   const expandCell =
     isExpanded && expandColumnId
@@ -155,35 +164,52 @@ const BodyRow = React.memo(function BodyRow({
 
   const visibleCells = row.getVisibleCells()
 
+  const rowElement = (
+    <TableRow
+      data-row-index={row.index}
+      data-row-id={row.id}
+      data-state={isSelected ? "selected" : undefined}
+      className={cn(
+        isClickable && "cursor-pointer",
+        "group data-[context-menu-open]:bg-muted/50",
+      )}
+    >
+      {visibleCells.map(cell => {
+        const size = cell.column.columnDef.size
+        const cellStyle = {
+          width: size ? `${size}px` : undefined,
+          ...getCommonPinningStyles(cell.column, false),
+        }
+
+        return (
+          <TableCell
+            key={cell.id}
+            style={cellStyle}
+            className={cn(
+              cell.column.getIsPinned() &&
+                "bg-background group-hover:bg-muted/50 group-data-[context-menu-open]:bg-muted/50 group-data-[state=selected]:bg-muted",
+            )}
+          >
+            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+          </TableCell>
+        )
+      })}
+    </TableRow>
+  )
+
+  // Only stand up the context-menu shell when the consumer supplies items
+  // for this row — a `null` return keeps the plain row (and zero portal cost).
+  const menuItems = renderRowContextMenu?.(row.original)
+
   return (
     <>
-      <TableRow
-        data-row-index={row.index}
-        data-row-id={row.id}
-        data-state={isSelected ? "selected" : undefined}
-        className={cn(isClickable && "cursor-pointer", "group")}
-      >
-        {visibleCells.map(cell => {
-          const size = cell.column.columnDef.size
-          const cellStyle = {
-            width: size ? `${size}px` : undefined,
-            ...getCommonPinningStyles(cell.column, false),
-          }
-
-          return (
-            <TableCell
-              key={cell.id}
-              style={cellStyle}
-              className={cn(
-                cell.column.getIsPinned() &&
-                  "bg-background group-hover:bg-muted/50 group-data-[state=selected]:bg-muted",
-              )}
-            >
-              {flexRender(cell.column.columnDef.cell, cell.getContext())}
-            </TableCell>
-          )
-        })}
-      </TableRow>
+      {menuItems ? (
+        <DataTableRowContextMenu row={row.original} trigger={rowElement}>
+          {menuItems}
+        </DataTableRowContextMenu>
+      ) : (
+        rowElement
+      )}
 
       {expandCell && (
         <TableRow>
@@ -230,6 +256,18 @@ export interface DataTableBodyProps<TData> {
    * getRowMemoKey={(row) => (isEditing(row.id) ? "editing" : "")}
    */
   getRowMemoKey?: (row: TData) => string
+  /**
+   * Attach a native right-click context menu to each row. Return the menu
+   * items (`ContextMenuItem`, `ContextMenuSeparator`, `ContextMenuSub`, …)
+   * for the given row, or `null` to give that row no menu. The popup shell
+   * and portalling are handled internally.
+   *
+   * Opt-in: tables without this prop render plain rows. Pair it with a "…"
+   * row-actions column so right-click surfaces the same actions.
+   *
+   * Wrap the callback in `useCallback` so memoized rows don't re-render.
+   */
+  renderRowContextMenu?: (row: TData) => React.ReactNode
 }
 
 export function DataTableBody<TData>({
@@ -241,6 +279,7 @@ export function DataTableBody<TData>({
   scrollThreshold = 50,
   onRowClick,
   getRowMemoKey,
+  renderRowContextMenu,
 }: DataTableBodyProps<TData>) {
   const { table, columns, isLoading } = useDataTable<TData>()
   const { rows } = table.getRowModel()
@@ -304,6 +343,13 @@ export function DataTableBody<TData>({
 
   const isClickable = !!onRowClick
 
+  // Composable path: the per-row menu may come from the `renderRowContextMenu`
+  // prop OR a nested `<DataTableRowContextMenuSlot>` child (prop wins).
+  const resolvedRenderRowContextMenu = resolveRowContextMenuRenderer(
+    renderRowContextMenu,
+    children,
+  )
+
   return (
     <TableBody
       ref={containerRef}
@@ -323,6 +369,11 @@ export function DataTableBody<TData>({
               columnLayoutSignature={columnLayoutSignature}
               rowMemoKey={
                 getRowMemoKey ? getRowMemoKey(row.original as TData) : ""
+              }
+              renderRowContextMenu={
+                resolvedRenderRowContextMenu as
+                  | ((row: unknown) => React.ReactNode)
+                  | undefined
               }
             />
           ))

@@ -9,7 +9,13 @@
       "title": "Data Table",
       "description": "Core DataTable component built with TanStack Table and Shadcn UI. Includes table structure, context, types, hooks, utilities, and base components (column header, toolbar section, empty state).",
       "dependencies": ["@tanstack/react-table", "lucide-react"],
-      "registryDependencies": ["skeleton", "alert", "button", "dropdown-menu"],
+      "registryDependencies": [
+        "skeleton",
+        "alert",
+        "button",
+        "dropdown-menu",
+        "context-menu"
+      ],
       "files": [
         {
           "path": "src/components/ui/table.tsx",
@@ -34,6 +40,21 @@
           "path": "src/components/niko-table/core/data-table-structure.tsx",
           "type": "registry:component",
           "target": "components/niko-table/core/data-table-structure.tsx"
+        },
+        {
+          "path": "src/components/niko-table/components/data-table-row-context-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-row-context-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/components/data-table-row-context-menu-slot.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-row-context-menu-slot.tsx"
+        },
+        {
+          "path": "src/components/niko-table/components/data-table-row-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-row-menu.tsx"
         },
         {
           "path": "src/components/niko-table/core/data-table-error-boundary.tsx",

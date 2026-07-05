@@ -25,6 +25,8 @@ import {
 } from "@/components/ui/table"
 import { Skeleton } from "@/components/ui/skeleton"
 import { DataTableEmptyState } from "../components/data-table-empty-state"
+import { DataTableRowContextMenu } from "../components/data-table-row-context-menu"
+import { resolveRowContextMenuRenderer } from "../components/data-table-row-context-menu-slot"
 import { DataTableColumnHeaderRoot } from "../components/data-table-column-header"
 import { createScrollHandler } from "../lib/create-scroll-handler"
 import { isInteractiveClickTarget } from "../lib/row-click"
@@ -249,6 +251,11 @@ interface VirtualizedBodyRowProps<TData> {
    * tracked props (e.g. inline edit mode, optimistic state).
    */
   rowMemoKey: string
+  /**
+   * Right-click menu items for this row. Must be a stable callback so
+   * `React.memo` keeps holding. Return `null` to opt a specific row out.
+   */
+  renderRowContextMenu?: (row: TData) => React.ReactNode
 }
 
 const VirtualizedBodyRowInner = function VirtualizedBodyRow<TData>({
@@ -262,6 +269,7 @@ const VirtualizedBodyRowInner = function VirtualizedBodyRow<TData>({
   onClick,
   columnLayoutSignature,
   rowMemoKey,
+  renderRowContextMenu,
 }: VirtualizedBodyRowProps<TData>) {
   const expandCell =
     isExpanded && expandColumnId
@@ -289,38 +297,59 @@ const VirtualizedBodyRowInner = function VirtualizedBodyRow<TData>({
     }
   }, [isExpanded, rowMemoKey, columnLayoutSignature, measureRef])
 
+  const rowElement = (
+    <TableRow
+      ref={setRef}
+      data-index={virtualIndex}
+      data-row-id={row.id}
+      data-state={isSelected ? "selected" : undefined}
+      onClick={onClick}
+      className={cn(
+        "group data-[context-menu-open]:bg-muted/50",
+        isClickable && "cursor-pointer",
+      )}
+    >
+      {visibleCells.map(cell => {
+        const size = cell.column.columnDef.size
+        const cellStyle = {
+          width: size ? `${size}px` : undefined,
+          ...getCommonPinningStyles(cell.column, false),
+        }
+
+        return (
+          <TableCell
+            key={cell.id}
+            className={cn(
+              "overflow-hidden",
+              cell.column.getIsPinned() &&
+                "bg-background group-hover:bg-muted/50 group-data-[context-menu-open]:bg-muted/50 group-data-[state=selected]:bg-muted",
+            )}
+            style={cellStyle}
+          >
+            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+          </TableCell>
+        )
+      })}
+    </TableRow>
+  )
+
+  // Stand up the context-menu shell only when the consumer returns items
+  // for this row. Base UI merges its anchor ref with the virtualizer's
+  // `measureRef` via the `render` prop, so row measurement is unaffected.
+  const menuItems = renderRowContextMenu?.(row.original as TData)
+
   return (
     <>
-      <TableRow
-        ref={setRef}
-        data-index={virtualIndex}
-        data-row-id={row.id}
-        data-state={isSelected ? "selected" : undefined}
-        onClick={onClick}
-        className={cn("group", isClickable && "cursor-pointer")}
-      >
-        {visibleCells.map(cell => {
-          const size = cell.column.columnDef.size
-          const cellStyle = {
-            width: size ? `${size}px` : undefined,
-            ...getCommonPinningStyles(cell.column, false),
-          }
-
-          return (
-            <TableCell
-              key={cell.id}
-              className={cn(
-                "overflow-hidden",
-                cell.column.getIsPinned() &&
-                  "bg-background group-hover:bg-muted/50 group-data-[state=selected]:bg-muted",
-              )}
-              style={cellStyle}
-            >
-              {flexRender(cell.column.columnDef.cell, cell.getContext())}
-            </TableCell>
-          )
-        })}
-      </TableRow>
+      {menuItems ? (
+        <DataTableRowContextMenu
+          row={row.original as TData}
+          trigger={rowElement}
+        >
+          {menuItems}
+        </DataTableRowContextMenu>
+      ) : (
+        rowElement
+      )}
 
       {isExpanded && expandCell && (
         <TableRow data-slot="datatable-expanded-row">
@@ -396,6 +425,14 @@ export interface DataTableVirtualizedBodyProps<TData> {
    * getRowMemoKey={(row) => (isEditing(row.id) ? "editing" : "")}
    */
   getRowMemoKey?: (row: TData) => string
+  /**
+   * Attach a native right-click context menu to each row. Return the menu
+   * items for the given row, or `null` to give that row no menu. The popup
+   * shell and portalling are handled internally. Opt-in per table; pair it
+   * with a "…" row-actions column so right-click surfaces the same actions.
+   * Wrap the callback in `useCallback` so memoized rows don't re-render.
+   */
+  renderRowContextMenu?: (row: TData) => React.ReactNode
 }
 
 export function DataTableVirtualizedBody<TData>({
@@ -411,6 +448,7 @@ export function DataTableVirtualizedBody<TData>({
   onNearEnd,
   prefetchThreshold = 10,
   getRowMemoKey,
+  renderRowContextMenu,
 }: DataTableVirtualizedBodyProps<TData>) {
   const { table, columns } = useDataTable()
   const { rows } = table.getRowModel()
@@ -654,6 +692,13 @@ export function DataTableVirtualizedBody<TData>({
   const isClickable = !!onRowClick
   const visibleColumnCount = table.getVisibleLeafColumns().length
 
+  // Composable path: the per-row menu may come from the `renderRowContextMenu`
+  // prop OR a nested `<DataTableRowContextMenuSlot>` child (prop wins).
+  const resolvedRenderRowContextMenu = resolveRowContextMenuRenderer(
+    renderRowContextMenu,
+    children,
+  )
+
   return (
     <TableBody ref={parentRef} className={cn(className)}>
       {/* Top spacer — colSpan keeps it within native table layout */}
@@ -695,6 +740,7 @@ export function DataTableVirtualizedBody<TData>({
             rowMemoKey={
               getRowMemoKey ? getRowMemoKey(row.original as TData) : ""
             }
+            renderRowContextMenu={resolvedRenderRowContextMenu}
           />
         )
       })}
