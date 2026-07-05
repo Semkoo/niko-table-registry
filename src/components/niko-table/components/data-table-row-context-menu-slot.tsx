@@ -80,3 +80,26 @@ export function resolveRowContextMenuRenderer<TData>(
       : menu
   }
 }
+
+/**
+ * Body-side hook: resolve the per-row menu renderer and return a **stable**
+ * callback identity, so memoized rows (`BodyRow`) don't re-render just because
+ * the body re-rendered. `resolveRowContextMenuRenderer` returns a fresh
+ * function each render (it closes over `children`); we keep the latest in a ref
+ * and hand out a stable wrapper that reads it. The wrapper identity only
+ * changes when the presence of a menu changes.
+ */
+export function useResolvedRowContextMenuRenderer<TData>(
+  prop: ((row: TData) => React.ReactNode) | undefined,
+  children: React.ReactNode,
+): ((row: TData) => React.ReactNode) | undefined {
+  const resolved = resolveRowContextMenuRenderer(prop, children)
+  const latestRef = React.useRef(resolved)
+  // eslint-disable-next-line react-hooks/refs -- latest-ref: keep a stable callback so memoized rows hold, while still reading the current menu when a row renders
+  latestRef.current = resolved
+  const hasMenu = !!resolved
+  return React.useMemo(
+    () => (hasMenu ? (row: TData) => latestRef.current?.(row) : undefined),
+    [hasMenu],
+  )
+}

@@ -51,7 +51,10 @@ import {
 type RowMenuSurface = "dropdown" | "context"
 
 const RowMenuSurfaceContext = React.createContext<RowMenuSurface | null>(null)
-const DataTableRowValueContext = React.createContext<unknown>(undefined)
+
+/** Sentinel so `useDataTableRow` can tell "no provider" from a row of `undefined`. */
+const NO_ROW = Symbol("niko-table.no-row")
+const DataTableRowValueContext = React.createContext<unknown>(NO_ROW)
 
 /**
  * Provides the current row and the menu surface to the row-menu pieces nested
@@ -76,9 +79,15 @@ export function DataTableRowMenuScope({
   )
 }
 
-/** Read the row a row-menu is rendering for. */
+/** Read the row a row-menu is rendering for. Throws outside a scope. */
 export function useDataTableRow<TData>(): TData {
-  return React.useContext(DataTableRowValueContext) as TData
+  const row = React.useContext(DataTableRowValueContext)
+  if (row === NO_ROW) {
+    throw new Error(
+      'useDataTableRow must be used inside a DataTableRowMenuScope — i.e. a table row context menu, or a kebab DropdownMenuContent wrapped with surface="dropdown".',
+    )
+  }
+  return row as TData
 }
 
 function useRowMenuSurface(): RowMenuSurface {

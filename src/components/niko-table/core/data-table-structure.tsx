@@ -25,7 +25,7 @@ import { flexRender, type Row } from "@tanstack/react-table"
 import { Skeleton } from "@/components/ui/skeleton"
 import { DataTableEmptyState } from "../components/data-table-empty-state"
 import { DataTableRowContextMenu } from "../components/data-table-row-context-menu"
-import { resolveRowContextMenuRenderer } from "../components/data-table-row-context-menu-slot"
+import { useResolvedRowContextMenuRenderer } from "../components/data-table-row-context-menu-slot"
 import { DataTableColumnHeaderRoot } from "../components/data-table-column-header"
 import { createScrollHandler } from "../lib/create-scroll-handler"
 import { resolveRowFromClick } from "../lib/row-click"
@@ -345,7 +345,7 @@ export function DataTableBody<TData>({
 
   // Composable path: the per-row menu may come from the `renderRowContextMenu`
   // prop OR a nested `<DataTableRowContextMenuSlot>` child (prop wins).
-  const resolvedRenderRowContextMenu = resolveRowContextMenuRenderer(
+  const resolvedRenderRowContextMenu = useResolvedRowContextMenuRenderer(
     renderRowContextMenu,
     children,
   )
