@@ -181,6 +181,10 @@ export default defineConfig({
               slug: "examples/row-expansion-table",
             },
             {
+              label: "Row Context Menu Table",
+              slug: "examples/row-context-menu-table",
+            },
+            {
               label: "Inline Edit Table",
               slug: "examples/inline-edit-table",
             },
