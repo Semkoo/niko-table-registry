@@ -1,0 +1,77 @@
+---
+title: Row Context Menu Table
+description: One declarative row menu that powers both the "…" dropdown and the right-click context menu.
+---
+
+import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
+import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
+
+Give every row a native right-click context menu that mirrors its "…" (kebab) actions — defined **once** and rendered into both surfaces. Right-click a row, or open the ⋯ menu; both run the same actions.
+
+## Overview
+
+<CodePreview demo="niko-table/row-context-menu" />
+
+## Introduction
+
+The composable, shadcn-style way to do row actions: write them once as a small component, then drop that same component into the kebab cell and the body's context-menu slot. No duplicated item lists, and no `(row) => …` render function at the call site.
+
+Three pieces make it work:
+
+- **`DataTableRowContextMenuSlot`** — nest it inside a `DataTableBody` / `DataTableVirtualizedBody`. It renders nothing itself; the body detects it and attaches a right-click menu to every row, wrapped in a scope that carries the row.
+- **`DataTableRowMenuScope`** — provides the current `row` and the `surface` (`"dropdown"` or `"context"`) to the pieces nested inside. The context-menu body sets this up automatically; you wrap it around your `DropdownMenuContent` children for the kebab.
+- **Polymorphic `RowMenuItem` / `RowMenuSeparator` / `RowMenuSub` / …** — each renders as the dropdown primitive or the context-menu primitive depending on the surface it reads from context. Compose them like `DropdownMenuItem`s.
+
+Read the row inside your menu component with **`useDataTableRow<T>()`**, so the same element works for every row.
+
+## Anatomy
+
+```tsx
+// 1. Define the actions ONCE — reads its row from context.
+function PlayerRowMenu({ onView, onRemove }: PlayerRowMenuProps) {
+  const player = useDataTableRow<Player>()
+  return (
+    <>
+      <RowMenuItem onClick={() => onView(player)}>View profile</RowMenuItem>
+      <RowMenuSeparator />
+      <RowMenuItem variant="destructive" onClick={() => onRemove(player)}>
+        Remove player
+      </RowMenuItem>
+    </>
+  )
+}
+
+const rowMenu = <PlayerRowMenu onView={onView} onRemove={onRemove} />
+
+// 2. Kebab cell — same element, rendered as a dropdown.
+<DropdownMenuContent align="end">
+  <DataTableRowMenuScope row={row.original} surface="dropdown">
+    {rowMenu}
+  </DataTableRowMenuScope>
+</DropdownMenuContent>
+
+// 3. Right-click — same element, rendered as a context menu.
+<DataTableBody>
+  <DataTableRowContextMenuSlot>{rowMenu}</DataTableRowContextMenuSlot>
+</DataTableBody>
+```
+
+## Per-row opt-out
+
+To hide the menu for specific rows (locked, read-only, etc.), pass an `enabledFor` predicate to the slot — return `false` and that row gets no menu:
+
+```tsx
+<DataTableRowContextMenuSlot enabledFor={(row) => !row.isLocked}>
+  {rowMenu}
+</DataTableRowContextMenuSlot>
+```
+
+For table-level gating (e.g. no manage permission), simply don't render the slot.
+
+## Installation
+
+The row menu ships with the DataTable core:
+
+<CliCommandCode action="run" command="shadcn@latest add @niko-table/data-table" />
+
+> First time using `@niko-table`? See the [Installation Guide](/getting-started/installation#configure-the-niko-table-registry) to set up the registry.

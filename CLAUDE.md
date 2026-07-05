@@ -39,6 +39,12 @@ src/
 - Registry examples must be self-contained (import only from `@/components/niko-table/*` direct paths and `@/components/ui`)
 - Use semantic color tokens (`bg-success`, `text-destructive`) not hardcoded Tailwind colors
 
+## Row Menu & Hook Conventions
+
+- **Composable-first row actions**: define row actions ONCE as a declarative component — `function XRowMenu(props){ const row = useDataTableRow<T>(); return <><RowMenuItem …/>…</> }` using the polymorphic `RowMenuItem` / `RowMenuSub` / … from `data-table-row-menu` — and drop the SAME `<XRowMenu/>` into the kebab cell (inside `<DataTableRowMenuScope surface="dropdown">`) and the body's `<DataTableRowContextMenuSlot>`. It renders as a dropdown or context menu by the surface it reads from context. No `(row) =>` render function and no injected component maps at the call site; no duplicated item lists. Per-row opt-out uses the slot's `enabledFor` predicate.
+- **Context-scope hooks must throw outside their provider**: a hook that reads a required context (e.g. `useDataTableRow`, `useRowMenuSurface`) must detect the missing provider (use a sentinel default, not `undefined`, since a legitimate value may be `undefined`/`null`) and throw an actionable error — never silently return `undefined` for callers to trip over later.
+- **Body-side per-row render resolvers must return a STABLE callback identity** so memoized rows (`React.memo` `BodyRow`) don't re-render when the body re-renders for unrelated reasons. A resolver that closes over `children` produces a fresh function each render; wrap it in the latest-ref pattern (`useResolvedRowContextMenuRenderer`): keep the freshly-resolved fn in a ref and hand out a memoized wrapper whose identity only changes when the menu's presence changes. Bodies must consume the hook, not the raw resolver.
+
 ## DnD Architecture
 
 Built on `@dnd-kit`. Three tiers of components:
