@@ -134,8 +134,8 @@ const generateMockOrders = (count: number): Order[] => {
     id: `${i + 1}`,
     orderNumber: `ORD-${1000 + i}`,
     customer: customers[i % customers.length],
-    amount: Math.random() * 1000 + 50,
-    status: statuses[Math.floor(Math.random() * statuses.length)],
+    amount: ((i * 17) % 950) + 50,
+    status: statuses[i % statuses.length],
     date: new Date(2024, 0, i + 1).toLocaleDateString(),
   }))
 }
