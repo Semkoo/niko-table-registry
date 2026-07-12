@@ -1,21 +1,23 @@
 {
-  "name": "MyWebSite",
-  "short_name": "MySite",
-  "icons": [
-    {
-      "src": "/web-app-manifest-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "maskable"
-    },
-    {
-      "src": "/web-app-manifest-512x512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
-    }
-  ],
+  "name": "Niko Table",
+  "short_name": "Niko Table",
+  "description": "Shadcn-compatible React data table registry built with TanStack Table.",
+  "start_url": "/",
+  "display": "browser",
   "theme_color": "#000000",
   "background_color": "#000000",
-  "display": "standalone"
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon",
+      "purpose": "any"
+    }
+  ]
 }
