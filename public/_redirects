@@ -36,3 +36,11 @@
 /niko-table/server-side-table/ /examples/server-side-table/ 301
 /niko-table/server-side-nuqs-table /examples/server-side-nuqs-table/ 301
 /niko-table/server-side-nuqs-table/ /examples/server-side-nuqs-table/ 301
+/niko-table/row-context-menu-table /examples/row-context-menu-table/ 301
+/niko-table/row-context-menu-table/ /examples/row-context-menu-table/ 301
+/niko-table/infinite-scroll-table /examples/infinite-scroll-table/ 301
+/niko-table/infinite-scroll-table/ /examples/infinite-scroll-table/ 301
+/niko-table/infinite-scroll-virtualized-table /examples/infinite-scroll-virtualized-table/ 301
+/niko-table/infinite-scroll-virtualized-table/ /examples/infinite-scroll-virtualized-table/ 301
+/niko-table/inline-edit-table /examples/inline-edit-table/ 301
+/niko-table/inline-edit-table/ /examples/inline-edit-table/ 301

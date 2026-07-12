@@ -2,35 +2,54 @@
 const { head } = Astro.locals.starlightRoute
 const { title, description } = Astro.locals.starlightRoute.entry.data
 const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href
+const pathname = Astro.url.pathname
+const isHomePage = pathname === "/" || pathname === ""
+const isExamplePage = pathname.startsWith("/examples/")
+const isInstallationPage =
+  pathname.includes("/getting-started/installation") ||
+  pathname.includes("/getting-started/manual-installation")
 
 // By default, Astro renders the default favicon before the media specific favicons which results in the media specific favicons not being used.
 // This code forces the default favicon to only be used when the user has no preference for light or dark mode instead of always being used.
-const sortedHead = head.map(h => {
-  if (h.tag !== "link") return h
-  if (
-    typeof h.attrs !== "object" ||
-    typeof h.attrs.rel !== "string" ||
-    !h.attrs.rel.includes("icon") ||
-    h.attrs.media
-  ) {
+const processedHead = head
+  .map(h => {
+    if (h.tag !== "link") return h
+    if (
+      typeof h.attrs !== "object" ||
+      typeof h.attrs.rel !== "string" ||
+      !h.attrs.rel.includes("icon") ||
+      h.attrs.media
+    ) {
+      return h
+    }
+
+    return {
+      ...h,
+      attrs: { ...h.attrs, media: "(prefers-color-scheme: no-preference)" },
+    }
+  })
+  .filter(h => {
+    if (h.tag !== "link" || typeof h.attrs !== "object") return true
+    const rel = h.attrs.rel
+    return rel !== "canonical"
+  })
+  .map(h => {
+    if (h.tag !== "meta" || typeof h.attrs !== "object") return h
+    if (h.attrs.property === "og:type" && isHomePage) {
+      return { ...h, attrs: { ...h.attrs, content: "website" } }
+    }
     return h
-  }
+  })
 
-  return {
-    ...h,
-    attrs: { ...h.attrs, media: "(prefers-color-scheme: no-preference)" },
-  }
-})
-
-const isHomePage = Astro.url.pathname === "/" || Astro.url.pathname === ""
+const siteUrl = Astro.site?.href ?? "https://niko-table.com/"
 
 const websiteSchema = {
   "@context": "https://schema.org",
   "@type": "WebSite",
   name: "Niko Table",
   description:
-    "A composable, shadcn-compatible data table component registry built with TanStack Table and React.",
-  url: Astro.site?.href ?? "https://niko-table.com",
+    "Composable, shadcn-compatible React data table components built with TanStack Table. Copy source via the registry CLI.",
+  url: siteUrl,
 }
 
 const softwareSchema = {
@@ -45,7 +64,28 @@ const softwareSchema = {
   license: "https://opensource.org/licenses/MIT",
 }
 
-const breadcrumbItems = Astro.url.pathname
+const techArticleSchema = {
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  headline: title ?? "Niko Table",
+  description: description ?? "Niko Table documentation",
+  url: canonicalUrl,
+  author: {
+    "@type": "Organization",
+    name: "Niko Table",
+    url: siteUrl,
+  },
+}
+
+const webPageSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  name: title ?? "Niko Table",
+  description: description ?? "Niko Table documentation",
+  url: canonicalUrl,
+}
+
+const breadcrumbItems = pathname
   .split("/")
   .filter(Boolean)
   .map((segment, index, arr) => ({
@@ -61,16 +101,25 @@ const breadcrumbSchema = {
   itemListElement: breadcrumbItems,
 }
 
-const jsonLd = isHomePage
-  ? JSON.stringify(websiteSchema)
-  : JSON.stringify([softwareSchema, breadcrumbSchema])
+function primarySchema() {
+  if (isHomePage) return websiteSchema
+  if (isInstallationPage) return softwareSchema
+  if (isExamplePage) return techArticleSchema
+  return webPageSchema
+}
+
+const jsonLd =
+  isHomePage || breadcrumbItems.length === 0
+    ? JSON.stringify(primarySchema())
+    : JSON.stringify([primarySchema(), breadcrumbSchema])
 ---
 
 {
-  sortedHead.map(({ tag: Tag, attrs, content }) => (
+  processedHead.map(({ tag: Tag, attrs, content }) => (
     <Tag {...attrs} set:html={content} />
   ))
 }
 
 <link rel="canonical" href={canonicalUrl} />
+<link rel="manifest" href="/site.webmanifest" />
 <script is:inline type="application/ld+json" set:html={jsonLd} />

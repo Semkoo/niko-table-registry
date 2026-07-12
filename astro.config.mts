@@ -113,7 +113,7 @@ export default defineConfig({
           },
         },
       ],
-      title: "Niko Table - Nobody's table, everyone's solution",
+      title: "Niko Table",
       editLink: {
         baseUrl: `${GITHUB_REPO_URL}/tree/main`,
       },

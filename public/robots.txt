@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
+Disallow: /r/
 
 Sitemap: https://niko-table.com/sitemap-index.xml
