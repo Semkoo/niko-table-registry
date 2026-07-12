@@ -47,18 +47,21 @@ Since you own the code, you can:
 
 ### ♿ Accessible by Default
 
-- WCAG 2.1 compliant
-- Full keyboard navigation
-- Screen reader support
-- Semantic HTML
-- ARIA labels and roles
+Built on **Radix UI** primitives with semantic table markup where possible:
 
-### 📱 Mobile-Friendly
+- Keyboard support in sort/filter menus and toolbar controls
+- ARIA labels on filter triggers, sliders, and clear actions
+- Screen-reader-friendly patterns via Shadcn/Radix components
+- **jsx-a11y** lint rules on docs and source
 
-- Responsive design
-- Touch-friendly controls
-- Mobile-optimized filters
-- Collapsible sidebars
+We do not claim third-party WCAG certification; treat complex tables (virtualization, DnD, pinning) like any custom UI and verify with your own accessibility checklist.
+
+### 📱 Responsive layout
+
+- `DataTable` uses a full-width **`overflow-auto`** scroll region for wide column sets on small screens
+- Popovers and filter panels respect available viewport width
+- Optional **`DataTableAside`** for a collapsible detail panel (see [Aside Table](/examples/aside-table/))
+- Toolbars are plain flex layouts — wrap or hide filters on mobile in your app as needed
 
 ## How It Works
 
@@ -112,6 +115,26 @@ Build tables by composing components - start simple and add features as needed:
 </DataTableRoot>
 ```
 
+## Composability map
+
+Niko Table is **mix-and-match**: install only the registry items you need, render only the children you want, and swap body strategies without rewriting column defs.
+
+| Layer               | What you choose                                                                             | Notes                                                                                             |
+| ------------------- | ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- | ------------------------ |
+| **Root**            | `DataTableRoot`                                                                             | Required. Optional controlled `state`, `config` overrides, `getRowId` for selection/DnD/expansion |
+| **Toolbar**         | `DataTableToolbarSection` + any of search, faceted, filter menu, view menu, clear           | Omitted entirely for minimal tables                                                               |
+| **Table shell**     | `DataTable` with `height` / `max-h-*` when virtualizing                                     | Virtualizer needs a bounded scroll container                                                      |
+| **Header / body**   | Regular: `DataTableHeader` + `DataTableBody`                                                | Default path                                                                                      |
+|                     | Virtualized: `DataTableVirtualizedHeader` + `DataTableVirtualizedBody`                      | [10k+ rows](/examples/virtualization-table/)                                                      |
+|                     | Row DnD: `DataTableRowDndProvider` (outside table) + `DataTableDndBody`                     | Do **not** combine with sort/filter                                                               |
+|                     | Column DnD                                                                                  | `DataTableColumnDndProvider` + draggable headers/cells                                            | Safe with other features |
+| **Loading / empty** | `DataTableSkeleton`, `DataTableEmptyBody` or composable empty pieces                        | Siblings inside the body                                                                          |
+| **Footer**          | `DataTablePagination`, `DataTableSelectionBar`                                              | Optional                                                                                          |
+| **Row actions**     | One `RowMenu*` component + `useDataTableRow` in kebab **and** `DataTableRowContextMenuSlot` | [Row context menu](/examples/row-context-menu-table/)                                             |
+| **Escape hatch**    | `Table*` filters with your own `table` instance                                             | Custom layouts without context                                                                    |
+
+`DataTableRoot` runs **feature detection** on children (`detectFeaturesFromChildren`) so pagination, filtering, and sorting turn on when you add the matching components — you rarely hand-roll a giant config object.
+
 ## What's Included
 
 This DataTable provides you with:
@@ -120,7 +143,7 @@ This DataTable provides you with:
 - **Composable components** - Build complex UIs from simple, reusable pieces
 - **State management** - Context-based state sharing with hook-based flexibility
 - **Performance optimization** - Virtual scrolling, memoization, and efficient rendering
-- **Accessibility** - WCAG 2.1 compliant with full keyboard navigation and screen reader support
+- **Accessibility** - Radix primitives, keyboard-friendly filters/menus, jsx-a11y linting (verify end-to-end in your app)
 - **TypeScript** - Fully typed with comprehensive type definitions
 
 ## Philosophy

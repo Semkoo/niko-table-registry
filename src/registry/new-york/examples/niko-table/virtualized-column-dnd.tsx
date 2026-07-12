@@ -112,17 +112,17 @@ const generateEmployees = (count: number): Employee[] => {
   const statuses: Employee["status"][] = ["active", "on-leave", "remote"]
 
   return Array.from({ length: count }, (_, i) => {
-    const firstName = firstNames[Math.floor(Math.random() * firstNames.length)]
-    const lastName = lastNames[Math.floor(Math.random() * lastNames.length)]
+    const firstName = firstNames[i % firstNames.length]
+    const lastName = lastNames[(i * 3) % lastNames.length]
     return {
       id: `EMP-${String(i + 1).padStart(4, "0")}`,
       name: `${firstName} ${lastName}`,
       email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}${i}@company.com`,
-      department: departments[Math.floor(Math.random() * departments.length)],
-      role: roles[Math.floor(Math.random() * roles.length)],
-      location: locations[Math.floor(Math.random() * locations.length)],
-      status: statuses[Math.floor(Math.random() * statuses.length)],
-      salary: Math.floor(Math.random() * 100000) + 50000,
+      department: departments[i % departments.length],
+      role: roles[(i * 5) % roles.length],
+      location: locations[(i * 7) % locations.length],
+      status: statuses[i % statuses.length],
+      salary: 50000 + ((i * 1337) % 100000),
     }
   })
 }

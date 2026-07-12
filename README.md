@@ -38,7 +38,7 @@ Niko Table is built around the following principles:
 - **Composable Column Headers** — Build custom column headers with sort, filter, pin, and hide controls
 - **Empty States** — Composable empty state with filtered/unfiltered messaging
 - **Type-Safe** — Full TypeScript support with comprehensive type definitions
-- **Accessible** — WCAG 2.1 compliant with keyboard navigation and screen reader support
+- **Accessible** — Radix UI primitives, ARIA in filters/menus, keyboard shortcuts; jsx-a11y in this repo (verify in your app for full conformance)
 - **Responsive** — Mobile-friendly design with touch-friendly controls
 
 ## Quick Start

@@ -66,48 +66,45 @@ interface Product {
   releaseDate: Date
 }
 
-// Generate large dataset for virtualization demo
-const generateLargeData = (count: number): Product[] => {
-  const categories = [
-    "Electronics",
-    "Clothing",
-    "Food",
-    "Books",
-    "Sports",
-    "Home",
-    "Toys",
-    "Beauty",
-  ]
-  const brands = [
-    "Apple",
-    "Samsung",
-    "Nike",
-    "Adidas",
-    "Sony",
-    "LG",
-    "Dell",
-    "HP",
-  ]
+// Deterministic mock data — safe for SSR/Strict Mode (see infinite-scroll-virtualized-table.tsx).
+const CATEGORIES = [
+  "Electronics",
+  "Clothing",
+  "Food",
+  "Books",
+  "Sports",
+  "Home",
+  "Toys",
+  "Beauty",
+] as const
 
+const BRANDS = [
+  "Apple",
+  "Samsung",
+  "Nike",
+  "Adidas",
+  "Sony",
+  "LG",
+  "Dell",
+  "HP",
+] as const
+
+const generateLargeData = (count: number): Product[] => {
   return Array.from({ length: count }, (_, i) => {
-    const stock = Math.floor(Math.random() * 150)
-    const price = Math.floor(Math.random() * 500) + 10
+    const stock = (i * 37) % 150
+    const price = ((i * 13) % 490) + 10
     return {
       id: `product-${i + 1}`,
       name: `Product ${i + 1}`,
-      category: categories[Math.floor(Math.random() * categories.length)],
-      brand: brands[Math.floor(Math.random() * brands.length)],
+      category: CATEGORIES[i % CATEGORIES.length],
+      brand: BRANDS[i % BRANDS.length],
       price,
       stock,
-      rating: Math.floor(Math.random() * 5) + 1,
+      rating: ((i * 7) % 5) + 1,
       revenue: price * stock,
       status:
         stock === 0 ? "out-of-stock" : stock < 20 ? "low-stock" : "in-stock",
-      releaseDate: new Date(
-        2024,
-        Math.floor(Math.random() * 12),
-        Math.floor(Math.random() * 28) + 1,
-      ),
+      releaseDate: new Date(2024, (i * 3) % 12, ((i * 7) % 28) + 1),
     }
   })
 }
