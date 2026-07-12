@@ -80,9 +80,9 @@ const generateTasks = (count: number): Task[] => {
   return Array.from({ length: count }, (_, i) => ({
     id: `TASK-${String(i + 1).padStart(4, "0")}`,
     title: titles[i % titles.length],
-    status: statuses[Math.floor(Math.random() * statuses.length)],
-    priority: priorities[Math.floor(Math.random() * priorities.length)],
-    assignee: assignees[Math.floor(Math.random() * assignees.length)],
+    status: statuses[i % statuses.length],
+    priority: priorities[i % priorities.length],
+    assignee: assignees[i % assignees.length],
   }))
 }
 

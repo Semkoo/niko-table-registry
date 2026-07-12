@@ -690,8 +690,8 @@ function fetchProducts(
   return new Promise((resolve, reject) => {
     setTimeout(() => {
       try {
-        // Simulate occasional errors (5% chance)
-        if (Math.random() < 0.05) {
+        // Simulate occasional errors (~5% of page indices, deterministic for demos)
+        if (params.page > 0 && params.page % 20 === 0) {
           reject(new Error("Server error: Failed to fetch products"))
           return
         }
@@ -1038,8 +1038,7 @@ function InlineFilterToolbar({
  */
 function normalizeFiltersWithUniqueIds<TData>(
   filters: (
-    | Omit<ExtendedColumnFilter<TData>, "filterId">
-    | ExtendedColumnFilter<TData>
+    Omit<ExtendedColumnFilter<TData>, "filterId"> | ExtendedColumnFilter<TData>
   )[],
 ): ExtendedColumnFilter<TData>[] {
   // Quick check: if all filters already have unique filterIds, return as-is
@@ -1177,8 +1176,7 @@ function ServerSideStateTableContent() {
 
   // Get filter mode from URL
   const filterMode = (urlParams.filterMode || "standard") as
-    | "standard"
-    | "inline"
+    "standard" | "inline"
 
   // Global filter from URL - handle both search string and OR filters
   const globalFilter = useMemo(() => {
