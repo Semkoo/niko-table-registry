@@ -1,6 +1,6 @@
 packages: []
 overrides:
-  vite: ^7.3.3
+  vite: ^8.1.4
 allowBuilds:
   esbuild: true
   msw: true
