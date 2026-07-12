@@ -1,12 +1,14 @@
 # Niko Table
 
-> Niko Table is a composable, shadcn-compatible data table component registry built with TanStack Table, React, and Tailwind CSS. It follows an open-code philosophy — install components into your project and own the code. Features include sorting, filtering, pagination, row selection, row expansion, column pinning, drag-and-drop (row and column), virtualization, server-side data, and URL state management. AI-Ready by design.
+> Niko Table is a composable, shadcn-compatible data table component registry built with TanStack Table, React, and Tailwind CSS. It follows an open-code philosophy — install components into your project and own the code. Features include sorting, filtering, pagination, row selection, row expansion, row context menus, column pinning, drag-and-drop (row and column), virtualization, infinite scroll, server-side data, and URL state management (nuqs).
 
 ## Getting Started
 
-- [Introduction](https://niko-table.com/getting-started/introduction): Overview, quick start, and installation instructions.
+- [Introduction](https://niko-table.com/getting-started/introduction): Architecture, composability, and progressive complexity.
 - [Installation](https://niko-table.com/getting-started/installation): CLI-based installation using the shadcn registry.
 - [Manual Installation](https://niko-table.com/getting-started/manual-installation): Step-by-step manual setup without the CLI.
+- [Components catalog](https://niko-table.com/getting-started/components): Registry item list and install commands.
+- [Skills (AI)](https://niko-table.com/getting-started/skills): Agent skill for Niko Table patterns.
 
 ## API Reference
 
@@ -30,6 +32,8 @@
 
 - [Row Selection Table](https://niko-table.com/examples/row-selection-table): Checkbox-based row selection with bulk actions.
 - [Row Expansion Table](https://niko-table.com/examples/row-expansion-table): Expandable rows with custom content.
+- [Row Context Menu Table](https://niko-table.com/examples/row-context-menu-table): Shared kebab and right-click row actions (composable RowMenu* API).
+- [Inline Edit Table](https://niko-table.com/examples/inline-edit-table): Editable cells in the table body.
 - [Column Pinning Table](https://niko-table.com/examples/column-pinning-table): Pin columns to left or right edges.
 - [Tree Table](https://niko-table.com/examples/tree-table): Hierarchical tree data with expand/collapse.
 
@@ -41,7 +45,9 @@
 ### Layout & Presentation
 
 - [Aside Table](https://niko-table.com/examples/aside-table): Table with a collapsible sidebar panel.
-- [Virtualization Table](https://niko-table.com/examples/virtualization-table): Virtual scrolling for large datasets using @tanstack/react-virtual.
+- [Virtualization Table](https://niko-table.com/examples/virtualization-table): Virtual scrolling for 10,000+ rows using @tanstack/react-virtual.
+- [Infinite Scroll Table](https://niko-table.com/examples/infinite-scroll-table): Load more rows as the user scrolls.
+- [Infinite Scroll Virtualized Table](https://niko-table.com/examples/infinite-scroll-virtualized-table): Virtual scrolling plus paginated infinite loading.
 
 ### Filtering
 
@@ -66,3 +72,4 @@
 
 - [Component Overview](https://niko-table.com/niko-table/components): High-level directory of all components organized by category.
 - [DataTable Introduction](https://niko-table.com/niko-table/introduction): Deep dive into the DataTable component system and composition patterns.
+- [Changelog](https://niko-table.com/changelog): Release notes and registry updates.
