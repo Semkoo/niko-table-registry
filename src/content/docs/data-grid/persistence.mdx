@@ -1,0 +1,97 @@
+---
+title: Persistence
+description: Turn Data Grid edits into a create / update / delete change-set with useGridChanges — for staging saves, autosave, and full CRUD against your backend.
+---
+
+import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
+
+The grid engine is **uncontrolled** — it owns the rows and knows nothing about your server. `useGridChanges` is a small, opt-in hook that _watches_ the engine and turns every edit into a precise CRUD delta: which rows were **created**, **updated**, and **deleted**. You get a dirty indicator for free, and one `getChangeSet()` call gives you exactly what to send. It's plain React (no store, no dependency), and a grid that doesn't persist never imports it.
+
+<CodePreview demo="niko-table/grid-save" />
+
+## The whole idea in one hook
+
+```tsx showLineNumbers
+const grid = useDataGrid<Row>({ columnIds, createEmptyRow, initialRows })
+
+const changes = useGridChanges(grid, {
+  initialRows, // the server baseline: these ids are "existing" rows
+})
+
+changes.isDirty // boolean — anything unsaved?
+changes.getChangeSet() // { created, updated, deleted }
+changes.reconcile(result) // settle dirty state after a save
+```
+
+Pass the **same** `initialRows` you seeded the grid with as the baseline. Their ids become the "already on the server" set, so editing one is an **update** and removing one is a **delete**. For a blank import where everything is new, pass `[]` (or omit it) — every row the user enters is a **create**.
+
+## The API
+
+| Member              | Type                            | What it gives you                                                              |
+| ------------------- | ------------------------------- | ------------------------------------------------------------------------------ |
+| `dirtyRowIds`       | `ReadonlySet<string>`           | Ids with unsaved changes. Reactive — new identity only when the set changes.   |
+| `isDirty`           | `boolean`                       | `dirtyRowIds.size > 0`. Wire it to a Save button or an unsaved-changes prompt. |
+| `getChangeSet()`    | `{ created, updated, deleted }` | The exact delta to persist. Call it on Save (or after a debounce).             |
+| `reconcile(result)` | `(result) => void`              | After a save, clear the rows that succeeded and keep the ones that failed.     |
+| `failedRowIds`      | `ReadonlySet<string>`           | Rows the last `reconcile` rejected — highlight them for the user.              |
+| `reset(rows?)`      | `(rows?) => void`               | Re-baseline (a fresh load, or starting a new import). Everything goes clean.   |
+
+## Pattern 1 — staging save
+
+The common case: the user edits, then clicks **Save**. Read the change-set, send it, and reconcile the result.
+
+```tsx showLineNumbers
+async function onSave() {
+  const { created, updated, deleted } = changes.getChangeSet()
+
+  const result = await api.bulkSave({ created, updated, deleted })
+  // result.succeededIds / result.failedIds come from your endpoint
+
+  changes.reconcile({
+    succeededIds: result.succeededIds,
+    failedIds: result.failedIds,
+  })
+}
+```
+
+Succeeded rows fold into the baseline and go clean. Failed rows **stay dirty** and land in `failedRowIds`, so the grid still shows there's unsaved work and you can flag exactly which rows need another look.
+
+## Pattern 2 — autosave
+
+Because `dirtyRowIds` only changes identity when dirtiness actually changes, you can drive a debounced autosave straight off it:
+
+```tsx showLineNumbers
+React.useEffect(() => {
+  if (!changes.isDirty) return
+  const t = setTimeout(async () => {
+    const delta = changes.getChangeSet()
+    const result = await api.bulkSave(delta)
+    changes.reconcile(result)
+  }, 800)
+  return () => clearTimeout(t)
+}, [changes.dirtyRowIds]) // fires when the dirty set changes, not per keystroke
+```
+
+## Dirty is safe; the change-set is precise
+
+Marking a row dirty on the hot path is **O(1)** — the hook never scans your rows on a keystroke. The trade-off is deliberate: if a user edits a cell and then edits it **back** to its original value, `isDirty` conservatively still reports "unsaved" (it never loses an edit). `getChangeSet()` is the precise one — it filters those reverts out of `updated` using the `isEqual` you provide:
+
+```tsx showLineNumbers
+useGridChanges(grid, {
+  initialRows,
+  // return true when a row equals its baseline — reverts drop from `updated`
+  isEqual: (a, b) => columnIds.every(id => rawOf(a, id) === rawOf(b, id)),
+})
+```
+
+Without `isEqual`, comparison is by reference (pair it with the engine's structural sharing — untouched rows keep their reference). Provide one when you want a revert-to-original to disappear from the save.
+
+## How it works
+
+The engine exposes one general signal — `grid.lastCommit` — describing what changed on the last commit (`set` / `add` / `remove` with the touched ids, or `bulk` / `reset`). `useGridChanges` reads it and reclassifies only the affected ids, so a single-cell edit is constant work no matter how large the grid. A bulk operation (paste, fill, reorder, undo/redo) triggers one full recompute against the baseline. The signal is domain-free — a dirty badge, an analytics hook, or your own logic can read `lastCommit` directly.
+
+## Next Steps
+
+- [Cell Types](/data-grid/cell-types/) — the built-in editors and how validity works.
+- [Dynamic Columns](/data-grid/dynamic-columns/) — runtime add / rename / move / delete.
+- [API Reference](/data-grid/api/) — the full engine and `useGridChanges` contracts.

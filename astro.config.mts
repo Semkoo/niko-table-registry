@@ -252,6 +252,17 @@ export default defineConfig({
           ],
         },
         {
+          label: "Data Grid",
+          items: [
+            { label: "Introduction", slug: "data-grid/introduction" },
+            { label: "Cell Types", slug: "data-grid/cell-types" },
+            { label: "Validation", slug: "data-grid/validation" },
+            { label: "Dynamic Columns", slug: "data-grid/dynamic-columns" },
+            { label: "Persistence", slug: "data-grid/persistence" },
+            { label: "API Reference", slug: "data-grid/api" },
+          ],
+        },
+        {
           label: "Changelog",
           slug: "changelog",
         },

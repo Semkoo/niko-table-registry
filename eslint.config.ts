@@ -123,4 +123,31 @@ export default defineConfig([
     files: ["**/*.astro"],
   },
   prettier,
+  {
+    // niko-table is battle-tested engine code mirrored verbatim from its
+    // upstream source (the edge2 monorepo, where it's developed and tested).
+    // It follows upstream's lint stance for a few rules so the mirror stays
+    // turnkey — no per-sync rewrites — and so the React Compiler's most
+    // aggressive rules don't flag intentional, correct patterns. Consistent
+    // with this project already disabling `react-hooks/set-state-in-effect`.
+    files: [
+      "src/components/niko-table/**/*.{ts,tsx}",
+      "src/registry/new-york/examples/niko-table/**/*.{ts,tsx}",
+    ],
+    rules: {
+      // The engine uses `!` on invariant array/map access (matching upstream);
+      // rewriting every site on each mirror risks regressions for no real gain
+      // (correctness is enforced by upstream's tests).
+      "@typescript-eslint/no-non-null-assertion": "off",
+      // The latest-ref pattern (writing `ref.current` during render) is a
+      // deliberate, correct idiom for stale-closure-free handlers/effects.
+      "react-hooks/refs": "off",
+      // Mutual rAF-loop callbacks reference each other before declaration by
+      // design (a self-scheduling animation loop).
+      "react-hooks/immutability": "off",
+      // TanStack Virtual's `useVirtualizer()` returns non-memoizable functions —
+      // a third-party limitation the React Compiler flags, not our bug.
+      "react-hooks/incompatible-library": "off",
+    },
+  },
 ])

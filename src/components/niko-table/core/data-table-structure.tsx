@@ -11,25 +11,25 @@
  * users (and future LLMs reading this code) benefit:
  * https://github.com/Semkoo/niko-table-registry
  */
-import React from "react"
-import { cn } from "@/lib/utils"
-import { useDataTable } from "./data-table-context"
-import {
-  TableHeader,
-  TableRow,
-  TableHead,
-  TableBody,
-  TableCell,
-} from "@/components/ui/table"
 import { flexRender, type Row } from "@tanstack/react-table"
 import { Skeleton } from "@/components/ui/skeleton"
+import {
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import { cn } from "@/lib/utils"
+import React from "react"
+import { DataTableColumnHeaderRoot } from "../components/data-table-column-header"
 import { DataTableEmptyState } from "../components/data-table-empty-state"
 import { DataTableRowContextMenu } from "../components/data-table-row-context-menu"
 import { useResolvedRowContextMenuRenderer } from "../components/data-table-row-context-menu-slot"
-import { DataTableColumnHeaderRoot } from "../components/data-table-column-header"
 import { createScrollHandler } from "../lib/create-scroll-handler"
 import { resolveRowFromClick } from "../lib/row-click"
 import { getCommonPinningStyles } from "../lib/styles"
+import { flashCellKey, useDataTable } from "./data-table-context"
 
 // ============================================================================
 // ScrollEvent Type
@@ -141,6 +141,10 @@ interface BodyRowProps {
    * tracked props (e.g. inline edit mode, optimistic state).
    */
   rowMemoKey: string
+  /** Whole row is flashing (highlight-what-changed). */
+  isRowFlashing: boolean
+  /** Keys of individual flashing cells (`flashCellKey`). */
+  flashingCellKeys: ReadonlySet<string>
   /**
    * Right-click menu items for this row. Must be a stable callback (wrap in
    * `useCallback`) so `React.memo` keeps holding. Return `null` to opt a
@@ -149,12 +153,17 @@ interface BodyRowProps {
   renderRowContextMenu?: (row: unknown) => React.ReactNode
 }
 
+/** Fade-pulse animation applied to a flashing cell (keyframe in the provider). */
+const FLASH_ANIMATION = "niko-row-flash 1.2s ease-out"
+
 const BodyRow = React.memo(function BodyRow({
   row,
   expandColumnId,
   isClickable,
   isExpanded,
   isSelected,
+  isRowFlashing,
+  flashingCellKeys,
   renderRowContextMenu,
 }: BodyRowProps) {
   const expandCell =
@@ -168,6 +177,11 @@ const BodyRow = React.memo(function BodyRow({
     <TableRow
       data-row-index={row.index}
       data-row-id={row.id}
+      data-row-type={
+        (row.original as { rowType?: string } | undefined)?.rowType
+      }
+      data-parity={row.index % 2 === 0 ? "even" : "odd"}
+      data-expanded={isExpanded ? "true" : undefined}
       data-state={isSelected ? "selected" : undefined}
       className={cn(
         isClickable && "cursor-pointer",
@@ -176,14 +190,19 @@ const BodyRow = React.memo(function BodyRow({
     >
       {visibleCells.map(cell => {
         const size = cell.column.columnDef.size
+        const flashing =
+          isRowFlashing ||
+          flashingCellKeys.has(flashCellKey(row.id, cell.column.id))
         const cellStyle = {
           width: size ? `${size}px` : undefined,
           ...getCommonPinningStyles(cell.column, false),
+          ...(flashing ? { animation: FLASH_ANIMATION } : {}),
         }
 
         return (
           <TableCell
             key={cell.id}
+            data-flash={flashing ? "true" : undefined}
             style={cellStyle}
             className={cn(
               cell.column.getIsPinned() &&
@@ -236,24 +255,16 @@ export interface DataTableBodyProps<TData> {
   onScrolledBottom?: () => void
   scrollThreshold?: number
   /**
-   * Click is dispatched per-row from each cell's onClick. The
-   * event's `currentTarget` is the `<td>` cell — typed as
-   * `HTMLElement` to stay consistent with the virtualized variants
-   * (which delegate on `<tbody>`). Consumers needing the row
-   * element can `event.target.closest("tr[data-row-id]")`.
+   * Click is dispatched per-row from each cell's onClick. The event's
+   * `currentTarget` is the `<td>` cell — typed as `HTMLElement` to
+   * stay consistent with the virtualized variants (which delegate on
+   * `<tbody>`). Consumers needing the row element can
+   * `event.target.closest("tr[data-row-id]")`.
    */
   onRowClick?: (row: TData, event: React.MouseEvent<HTMLElement>) => void
   /**
-   * Return a per-row memo invalidation key. When the returned string changes
-   * for a specific row, React.memo re-renders that row even if TanStack Table
-   * props (selection, expansion, column layout) are unchanged. Use this for
-   * row-level external state that cell renderers depend on — e.g. inline edit
-   * mode, optimistic overlays, or any closure-captured state in column
-   * definitions that changes independently of the table's own state.
-   *
-   * @example
-   * // Trigger re-render on inline edit toggle (only the edited row re-renders)
-   * getRowMemoKey={(row) => (isEditing(row.id) ? "editing" : "")}
+   * Return a per-row memo invalidation key. When this key changes for a
+   * specific row, only that row re-renders.
    */
   getRowMemoKey?: (row: TData) => string
   /**
@@ -261,9 +272,6 @@ export interface DataTableBodyProps<TData> {
    * items (`ContextMenuItem`, `ContextMenuSeparator`, `ContextMenuSub`, …)
    * for the given row, or `null` to give that row no menu. The popup shell
    * and portalling are handled internally.
-   *
-   * Opt-in: tables without this prop render plain rows. Pair it with a "…"
-   * row-actions column so right-click surfaces the same actions.
    *
    * Wrap the callback in `useCallback` so memoized rows don't re-render.
    */
@@ -281,20 +289,35 @@ export function DataTableBody<TData>({
   getRowMemoKey,
   renderRowContextMenu,
 }: DataTableBodyProps<TData>) {
-  const { table, columns, isLoading } = useDataTable<TData>()
+  const {
+    table,
+    columns,
+    isLoading,
+    flashingRowIds,
+    flashingCellKeys,
+    registerRowScroller,
+  } = useDataTable<TData>()
   const { rows } = table.getRowModel()
   const containerRef = React.useRef<HTMLTableSectionElement>(null)
 
-  // Single delegated click handler — avoids one inline fn per row.
-  const handleRowClick = React.useCallback(
-    (event: React.MouseEvent<HTMLTableSectionElement>) => {
-      if (!onRowClick) return
-      const row = resolveRowFromClick(event.target as HTMLElement, table)
-      if (!row) return
-      onRowClick(row.original, event)
-    },
-    [onRowClick, table],
-  )
+  // Register a scroll handle SCOPED to this table's own container, so
+  // `scrollRowIntoView` resolves the row within this table (a plain body has no
+  // virtualizer to register otherwise, and the context's document-wide fallback
+  // could match a same-index row in a different table on the page).
+  React.useEffect(() => {
+    registerRowScroller((index, opts) => {
+      const container = containerRef.current?.closest(
+        '[data-slot="table-container"]',
+      )
+      const row = container?.querySelector(`[data-row-index="${index}"]`)
+      const block: ScrollLogicalPosition =
+        opts?.align === undefined || opts.align === "auto"
+          ? "nearest"
+          : opts.align
+      row?.scrollIntoView({ block })
+    })
+    return () => registerRowScroller(null)
+  }, [registerRowScroller])
 
   // Passive scroll listener — shared `createScrollHandler` keeps all four body
   // variants in sync; passive flag unlocks the browser's scroll-thread path.
@@ -315,19 +338,35 @@ export function DataTableBody<TData>({
     return () => container.removeEventListener("scroll", handleScroll)
   }, [onScroll, onScrolledTop, onScrolledBottom, scrollThreshold])
 
+  // Single delegated click handler on <tbody> — matches the DnD bodies and
+  // removes one listener per row.
+  const handleBodyClick = React.useCallback(
+    (event: React.MouseEvent<HTMLTableSectionElement>) => {
+      if (!onRowClick) return
+      const row = resolveRowFromClick(event.target as HTMLElement, table)
+      if (!row) return
+      onRowClick(
+        row.original,
+        event as unknown as React.MouseEvent<HTMLElement>,
+      )
+    },
+    [onRowClick, table],
+  )
+
   // Hoist expand-column lookup above the row map (was O(rows × cols) per render).
   // `columns` is in deps because the table reference is too stable on its own.
   const expandColumnId = React.useMemo(
     () =>
       table.getAllColumns().find(col => col.columnDef.meta?.expandedContent)
         ?.id,
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- `columns` is an intentional invalidation key; the TanStack table instance is stable across column swaps
     [table, columns],
   )
 
+  const { columnVisibility, columnOrder, columnPinning } = table.getState()
   // String signature of the visible column layout. Memoized rows compare it
   // to invalidate on column toggle / reorder / pin. For external row state
   // (inline edits, optimistic overlays), pass `getRowMemoKey`.
-  const { columnVisibility, columnOrder, columnPinning } = table.getState()
   const columnLayoutSignature = React.useMemo(
     () =>
       table
@@ -354,7 +393,7 @@ export function DataTableBody<TData>({
     <TableBody
       ref={containerRef}
       className={className}
-      onClick={onRowClick ? handleRowClick : undefined}
+      onClick={onRowClick ? handleBodyClick : undefined}
     >
       {/* Only show rows when not loading */}
       {!isLoading && rows?.length
@@ -370,10 +409,11 @@ export function DataTableBody<TData>({
               rowMemoKey={
                 getRowMemoKey ? getRowMemoKey(row.original as TData) : ""
               }
+              isRowFlashing={flashingRowIds.has(row.id)}
+              flashingCellKeys={flashingCellKeys}
               renderRowContextMenu={
                 resolvedRenderRowContextMenu as
-                  | ((row: unknown) => React.ReactNode)
-                  | undefined
+                  ((row: unknown) => React.ReactNode) | undefined
               }
             />
           ))
@@ -575,16 +615,15 @@ DataTableLoading.displayName = "DataTableLoading"
 
 export interface DataTableLoadingMoreProps {
   /**
-   * Whether a next-page fetch is currently in flight. Typically wired
-   * to a library state like TanStack Query's `isFetchingNextPage`,
-   * SWR's `isValidating`, or a plain `useState` flag. When false, this
-   * component renders nothing.
+   * Whether a next-page fetch is currently in flight. Typically
+   * wired to tRPC's `useInfiniteQuery.isFetchingNextPage`. When
+   * false, this component renders nothing.
    */
   isFetching: boolean
   /**
-   * Optional custom content. Defaults to a spinner + "Loading more..."
-   * label. Pass children to customize per-table (e.g. "Loading more
-   * products...").
+   * Optional custom content inside the loading-more row. Defaults
+   * to a spinner + "Loading more…" label. Pass children to
+   * customize the label per-table (e.g. "Loading more venues…").
    */
   children?: React.ReactNode
   colSpan?: number
@@ -592,24 +631,28 @@ export interface DataTableLoadingMoreProps {
 }
 
 /**
- * Composable "loading more" row for infinite-scroll tables. Renders at
- * the end of the body when `isFetching` is true, and nothing when
- * false — designed to be dropped as a child of `DataTableBody`
- * alongside `DataTableSkeleton` and `DataTableEmptyBody`.
+ * Composable "loading more" row for infinite-scroll tables. Renders
+ * a spinner + label row at the end of the body when `isFetching` is
+ * true, and nothing when false — designed to be dropped as a child
+ * of `DataTableBody` alongside `DataTableSkeleton` and
+ * `DataTableEmptyBody`.
  *
- * Self-gates on its own `isFetching` prop. Combine with
- * `onScrolledBottom` on `DataTableBody` to trigger next-page fetches.
+ * Mirror of `DataTableVirtualizedLoadingMore` for non-virtualized
+ * tables — same API, same styling, same self-gating behavior.
  *
  * @example
+ * const query = api.thing.list.useInfiniteQuery(...);
  * <DataTableBody
  *   onScrolledBottom={() => {
- *     if (hasMore && !isFetching) void loadMore()
+ *     if (query.hasNextPage && !query.isFetchingNextPage) {
+ *       void query.fetchNextPage();
+ *     }
  *   }}
  * >
  *   <DataTableSkeleton rows={5} />
  *   <DataTableEmptyBody>No results</DataTableEmptyBody>
- *   <DataTableLoadingMore isFetching={isFetching}>
- *     Loading more products...
+ *   <DataTableLoadingMore isFetching={query.isFetchingNextPage}>
+ *     Loading more things…
  *   </DataTableLoadingMore>
  * </DataTableBody>
  */
@@ -628,17 +671,11 @@ export function DataTableLoadingMore({
     <TableRow data-slot="datatable-loading-more-row">
       <TableCell
         colSpan={colSpan ?? columns.length}
-        className={cn(
-          "py-3 text-center text-xs text-muted-foreground",
-          className,
-        )}
+        className={cn("text-center text-xs text-muted-foreground", className)}
       >
-        <span className="inline-flex items-center justify-center gap-2">
-          <span
-            className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-primary border-t-transparent"
-            aria-hidden="true"
-          />
-          <span>{children ?? "Loading more..."}</span>
+        <span className="inline-flex items-center justify-center gap-2 py-3">
+          <span className="inline-block size-3.5 animate-spin rounded-full border-2 border-muted-foreground/60 border-t-transparent" />
+          {children ?? "Loading more…"}
         </span>
       </TableCell>
     </TableRow>

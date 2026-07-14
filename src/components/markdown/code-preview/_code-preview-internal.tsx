@@ -40,6 +40,12 @@ export type Demo =
   | "niko-table/row-context-menu"
   | "niko-table/inline-edit"
   | "niko-table/inline-edit-state"
+  | "niko-table/grid-all-features"
+  | "niko-table/grid-basic"
+  | "niko-table/grid-cell-types"
+  | "niko-table/grid-dynamic-columns"
+  | "niko-table/grid-save"
+  | "niko-table/grid-validation"
 
 export function CodePreviewInternal({
   demo,

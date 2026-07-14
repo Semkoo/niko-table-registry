@@ -1,0 +1,76 @@
+---
+title: Dynamic Columns
+description: Make Data Grid columns runtime state — add, rename, move, delete, reorder, and retype columns from the header menu.
+---
+
+import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
+
+By default a grid's columns are fixed. Opt into **dynamic columns** and they become runtime state: `useGridColumns` owns the column list, `<DataGridColumns>` wires the header menu (Rename / Insert left|right / Move / Delete) and the add-column button, and `<DataTableViewDndMenu>` drives show/hide + drag-to-reorder from the same order.
+
+<CodePreview demo="niko-table/grid-dynamic-columns" />
+
+## Why it needs no engine changes
+
+Adding, deleting, or reordering a column needs **zero** engine or row changes. The engine's `columnIds` is reactive, and a row with no cell entry for a column just renders empty — so a new column shows blank cells, a deleted column simply orphans its data (re-adding restores it), and reordering is a pure display concern.
+
+## Wiring
+
+```tsx showLineNumbers
+import { useGridColumns } from "@/components/niko-table/grid/hooks/use-grid-columns"
+import { DataGridColumns } from "@/components/niko-table/grid/core/data-grid-columns-context"
+import { DataGridAddColumnButton } from "@/components/niko-table/grid/components/grid-add-column"
+import { GridColumnMenuOptions } from "@/components/niko-table/grid/components/grid-column-menu"
+import { DataTableViewDndMenu } from "@/components/niko-table/components/data-table-view-dnd-menu"
+
+const cols = useGridColumns({ initialColumns })
+const grid = useDataGrid({ columnIds: cols.columnIds, createEmptyRow })
+
+// Header menu — drop GridColumnMenuOptions into DataTableColumnActions:
+header: () => (
+  <DataTableColumnHeader>
+    <DataTableColumnTitle />
+    <DataTableColumnActions>
+      <DataTableColumnHideOptions />
+      <GridColumnMenuOptions /> {/* Rename / Insert / Move / Delete */}
+    </DataTableColumnActions>
+  </DataTableColumnHeader>
+)
+
+// Provider + toolbar:
+<DataGrid grid={grid}>
+  <DataGridColumns value={cols}>
+    <DataGridToolbar>
+      <DataGridAddColumnButton />
+      <DataTableViewDndMenu
+        columnOrder={cols.columnIds}
+        onColumnOrderChange={cols.reorderColumns}
+      />
+    </DataGridToolbar>
+    {/* <DataTable> … */}
+  </DataGridColumns>
+</DataGrid>
+```
+
+`useGridColumns` returns `columns`, `columnIds`, `addColumn`, `renameColumn`, `moveColumn`, `removeColumn`, `reorderColumns`, and `setColumnType`. One column order feeds both the header "Move" items and the view menu, so they always agree.
+
+## Runtime retype
+
+Pass `columnTypes` + `resolveCell` to `<DataGridColumns>` to let users change a column's type from the header ("Column type" submenu). The grid re-resolves that column's existing cells against the new type — e.g. switching text → select re-validates every value (unmatched ones turn red) in a layout effect, before paint.
+
+```tsx showLineNumbers
+<DataGridColumns
+  value={cols}
+  columnTypes={[
+    { value: "text", label: "Text" },
+    { value: "select", label: "Select", options: STATUSES },
+  ]}
+  resolveCell={resolveCell}
+>
+  {/* … */}
+</DataGridColumns>
+```
+
+## Next Steps
+
+- [Cell Types](/data-grid/cell-types/) — the editors each column can use.
+- [API Reference](/data-grid/api/) — `useGridColumns` and `<DataGridColumns>`.

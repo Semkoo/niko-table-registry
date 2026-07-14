@@ -11,29 +11,34 @@
  * users (and future LLMs reading this code) benefit:
  * https://github.com/Semkoo/niko-table-registry
  */
-import React from "react"
+import { flexRender, type Header, type Row } from "@tanstack/react-table"
 import { useVirtualizer } from "@tanstack/react-virtual"
-import { flexRender, type Row } from "@tanstack/react-table"
-import { cn } from "@/lib/utils"
-import { useDataTable } from "./data-table-context"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
-  TableHeader,
-  TableRow,
-  TableHead,
   TableBody,
   TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from "@/components/ui/table"
-import { Skeleton } from "@/components/ui/skeleton"
+import { cn } from "@/lib/utils"
+import { Loader2 } from "lucide-react"
+import React from "react"
+import { DataTableColumnHeaderRoot } from "../components/data-table-column-header"
 import { DataTableEmptyState } from "../components/data-table-empty-state"
 import { DataTableRowContextMenu } from "../components/data-table-row-context-menu"
 import { useResolvedRowContextMenuRenderer } from "../components/data-table-row-context-menu-slot"
-import { DataTableColumnHeaderRoot } from "../components/data-table-column-header"
 import { createScrollHandler } from "../lib/create-scroll-handler"
 import { isInteractiveClickTarget } from "../lib/row-click"
 import { getCommonPinningStyles } from "../lib/styles"
+import {
+  flashCellKey,
+  useDataTable,
+  useDataTableActiveCell,
+} from "./data-table-context"
 
 // ============================================================================
-// Stable measureElement — computed once at module level
+// Row measurement helper
 // ============================================================================
 
 // Sums base + expanded sibling height (ResizeObserver only sees the base row).
@@ -44,7 +49,7 @@ import { getCommonPinningStyles } from "../lib/styles"
 // observation that fired the callback, so we skip a forced layout read.
 // Falls back to `getBoundingClientRect` for the initial measure (no entry)
 // and for the expanded sibling (not observed by the virtualizer).
-const measureElement:
+const measureRowWithExpansion:
   | ((element: Element, entry?: ResizeObserverEntry | undefined) => number)
   | undefined =
   typeof window !== "undefined" && navigator.userAgent.indexOf("Firefox") === -1
@@ -77,6 +82,130 @@ export interface ScrollEvent {
 }
 
 // ============================================================================
+// Column resize handle (opt-in via `enableColumnResizing`)
+// ============================================================================
+
+// Room for cell chrome the text measurement doesn't cover.
+const AUTOSIZE_CELL_PADDING = 24 // a cell's horizontal padding + a small buffer
+const AUTOSIZE_HEADER_CHROME = 52 // header's sort/menu trigger + resize grip
+
+/**
+ * The tightest width that fits every TEXT node in an element. Uses a DOM Range
+ * (which reports the real text extent) so `w-full` + `truncate` cell wrappers
+ * — whose `scrollWidth` just echoes the current cell width — don't hide the
+ * natural content width. Lets autosize both grow AND shrink to fit.
+ */
+function widestTextWidth(el: Element): number {
+  const range = document.createRange()
+  const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT)
+  let max = 0
+  for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+    if (!n.textContent || n.textContent.trim() === "") continue
+    range.selectNodeContents(n)
+    max = Math.max(max, range.getBoundingClientRect().width)
+  }
+  return max
+}
+
+/**
+ * Autosize a column to fit its content — measures the widest rendered
+ * cell/header text (only MOUNTED cells, virtualized: fit what's on screen, the
+ * standard approach on large data) and sets that column's size.
+ */
+function autosizeColumn<TData>(
+  header: Header<TData, unknown>,
+  handle: Element,
+) {
+  const root = handle.closest('[data-slot="table"]')
+  if (!root) return
+  const cells = root.querySelectorAll<HTMLElement>(
+    `[data-col-id="${CSS.escape(header.column.id)}"]`,
+  )
+  let content = 0
+  cells.forEach(c => {
+    const isHeader = c.getAttribute("data-slot") === "table-head"
+    const chrome = isHeader ? AUTOSIZE_HEADER_CHROME : AUTOSIZE_CELL_PADDING
+    content = Math.max(content, widestTextWidth(c) + chrome)
+  })
+  if (content <= 0) return
+  const def = header.column.columnDef
+  const width = Math.min(
+    Math.max(Math.ceil(content), def.minSize ?? 40),
+    def.maxSize ?? 1000,
+  )
+  header
+    .getContext()
+    .table.setColumnSizing(prev => ({ ...prev, [header.column.id]: width }))
+}
+
+/**
+ * Drag-to-resize / double-click-to-autosize grip on a header's right edge.
+ * Keyboard-operable (WAI-ARIA window-splitter): focusable, Arrow Left/Right
+ * nudge the width (Shift = larger step), Enter autosizes; exposes
+ * `aria-value*`.
+ */
+function ColumnResizeHandle<TData>({
+  header,
+}: {
+  header: Header<TData, unknown>
+}) {
+  const isResizing = header.column.getIsResizing()
+  const resize = header.getResizeHandler()
+  const def = header.column.columnDef
+  const min = def.minSize ?? 40
+  const max = def.maxSize ?? 1000
+
+  const nudge = (delta: number) => {
+    header.getContext().table.setColumnSizing(prev => {
+      const current = prev[header.column.id] ?? header.column.getSize()
+      const next = Math.min(Math.max(current + delta, min), max)
+      return { ...prev, [header.column.id]: next }
+    })
+  }
+
+  return (
+    <div
+      role="separator"
+      aria-orientation="vertical"
+      aria-label="Resize column (arrow keys, or double-click to fit)"
+      aria-valuenow={header.column.getSize()}
+      aria-valuemin={min}
+      aria-valuemax={max}
+      tabIndex={0}
+      onMouseDown={resize}
+      onTouchStart={resize}
+      onDoubleClick={e => autosizeColumn(header, e.currentTarget)}
+      onClick={e => e.stopPropagation()}
+      onKeyDown={e => {
+        const step = e.shiftKey ? 40 : 8
+        if (e.key === "ArrowLeft") {
+          e.preventDefault()
+          nudge(-step)
+        } else if (e.key === "ArrowRight") {
+          e.preventDefault()
+          nudge(step)
+        } else if (e.key === "Enter") {
+          e.preventDefault()
+          autosizeColumn(header, e.currentTarget)
+        }
+      }}
+      className="group/resize absolute top-0 right-0 z-10 flex h-full w-2 cursor-col-resize touch-none justify-end outline-none select-none"
+    >
+      {/* Faint grip always visible (discoverable); a full primary bar on
+          hover, keyboard focus, or active drag. */}
+      <div
+        className={cn(
+          "my-1.5 w-px rounded bg-border transition-all",
+          "group-hover/resize:my-0 group-hover/resize:w-0.5 group-hover/resize:bg-primary",
+          "group-focus-visible/resize:my-0 group-focus-visible/resize:w-0.5 group-focus-visible/resize:bg-primary",
+          isResizing && "my-0 w-0.5 bg-primary",
+        )}
+      />
+    </div>
+  )
+}
+
+// ============================================================================
 // DataTableVirtualizedHeader
 // ============================================================================
 
@@ -95,6 +224,10 @@ export const DataTableVirtualizedHeader = React.memo(
     sticky = true,
   }: DataTableVirtualizedHeaderProps) {
     const { table } = useDataTable()
+    // Dedicated context — only this header (and the body) re-render when the
+    // grid's focused cell moves; other table consumers are untouched.
+    const activeCell = useDataTableActiveCell()
+    const resizing = table?.options.enableColumnResizing ?? false
 
     const headerGroups = table?.getHeaderGroups() ?? []
 
@@ -104,26 +237,67 @@ export const DataTableVirtualizedHeader = React.memo(
 
     return (
       <TableHeader
-        className={cn(sticky && "sticky top-0 z-30 bg-background", className)}
+        className={cn(
+          sticky && "sticky top-0 z-30 bg-background",
+          // Sticky elements don't paint the row's own border-b reliably — draw
+          // the bottom rule as a pseudo-element so it stays crisp while scrolling.
+          sticky &&
+            "after:absolute after:right-0 after:bottom-0 after:left-0 after:h-px after:bg-border",
+          className,
+        )}
       >
         {headerGroups.map(headerGroup => (
           <TableRow key={headerGroup.id}>
-            {headerGroup.headers.map(header => (
-              <TableHead
-                key={header.id}
-                className={cn(header.column.getIsPinned() && "bg-background")}
-                style={getCommonPinningStyles(header.column, true)}
-              >
-                {header.isPlaceholder ? null : (
-                  <DataTableColumnHeaderRoot column={header.column}>
-                    {flexRender(
-                      header.column.columnDef.header,
-                      header.getContext(),
-                    )}
-                  </DataTableColumnHeaderRoot>
-                )}
-              </TableHead>
-            ))}
+            {headerGroup.headers.map(header => {
+              const size = header.column.columnDef.size
+              const isActiveColumn =
+                activeCell?.columnIds.has(header.column.id) ?? false
+              return (
+                <TableHead
+                  key={header.id}
+                  data-active-column={isActiveColumn ? "true" : undefined}
+                  data-col-id={header.column.id}
+                  // Pinned header cells stick with the body (same
+                  // `getCommonPinningStyles`) and paint an opaque bg + right rule
+                  // so scrolled columns pass cleanly underneath. Set an explicit
+                  // width (mirroring the non-virtualized header) so the sticky
+                  // offset math lines up with the body's pinned columns. The
+                  // active column (focused cell) lights up grid-style.
+                  className={cn(
+                    header.column.getIsPinned() && "bg-background",
+                    // Trailing `!` so the active tint wins over the base
+                    // `bg-accent/30` / `text-accent-foreground` (equal-specificity
+                    // utilities are otherwise source-order dependent in Tailwind).
+                    isActiveColumn &&
+                      "bg-primary/15! font-semibold! text-foreground!",
+                    // Anchor the absolute resize handle to the cell's right edge.
+                    resizing && "relative",
+                  )}
+                  style={{
+                    // Resizing: width tracks `getSize()` (columnSizing-aware).
+                    // Off: unchanged (columnDef.size, or auto when unset).
+                    width: resizing
+                      ? header.getSize()
+                      : size
+                        ? `${size}px`
+                        : undefined,
+                    ...getCommonPinningStyles(header.column, true),
+                  }}
+                >
+                  {header.isPlaceholder ? null : (
+                    <DataTableColumnHeaderRoot column={header.column}>
+                      {flexRender(
+                        header.column.columnDef.header,
+                        header.getContext(),
+                      )}
+                    </DataTableColumnHeaderRoot>
+                  )}
+                  {resizing && header.column.getCanResize() && (
+                    <ColumnResizeHandle header={header} />
+                  )}
+                </TableHead>
+              )
+            })}
           </TableRow>
         ))}
       </TableHeader>
@@ -179,6 +353,10 @@ export const DataTableVirtualizedFlexHeader = React.memo(
         className={cn(
           "block",
           sticky && "sticky top-0 z-30 bg-background",
+          // Sticky elements don't paint the row's own border-b reliably — draw
+          // the bottom rule as a pseudo-element so it stays crisp while scrolling.
+          sticky &&
+            "after:absolute after:right-0 after:bottom-0 after:left-0 after:h-px after:bg-border",
           className,
         )}
       >
@@ -230,9 +408,13 @@ DataTableVirtualizedFlexHeader.displayName = "DataTableVirtualizedFlexHeader"
  * reconcile every other visible row.
  *
  * The measure ref is wrapped in a stable callback by the parent so it
- * doesn't invalidate the memo on every parent render. Composite key
- * (`${row.id}-${isExpanded}`) stays on the parent so the row remounts
- * on expansion toggle and `ResizeObserver` re-attaches.
+ * doesn't invalidate the memo on every parent render. `getRowClassName`
+ * and `getCellClassName` are expected to be stable refs from the
+ * consumer — pass them through `useCallback` to preserve memoization
+ * across parent renders.
+ *
+ * Composite key (`${row.id}-${isExpanded}`) stays on the parent so the
+ * row remounts on expansion toggle and `ResizeObserver` re-attaches.
  */
 interface VirtualizedBodyRowProps<TData> {
   row: Row<TData>
@@ -240,9 +422,15 @@ interface VirtualizedBodyRowProps<TData> {
   expandColumnId: string | undefined
   isExpanded: boolean
   isSelected: boolean
+  /** This row holds the active cell — exposed as `data-active-row` for the gutter cross-highlight. */
+  isActiveRow: boolean
+  /** Column resizing is on — cells size from `column.getSize()` instead of `columnDef.size`. */
+  columnSizingEnabled: boolean
   isClickable: boolean
   measureRef: ((node: HTMLTableRowElement | null) => void) | undefined
   onClick: (event: React.MouseEvent<HTMLElement>) => void
+  getRowClassName?: (row: TData) => string | undefined
+  getCellClassName?: (row: TData, columnId: string) => string | undefined
   /** Column layout signature — invalidates React.memo on visibility/order/pinning change. */
   columnLayoutSignature: string
   /**
@@ -251,6 +439,10 @@ interface VirtualizedBodyRowProps<TData> {
    * tracked props (e.g. inline edit mode, optimistic state).
    */
   rowMemoKey: string
+  /** Whole row is flashing (highlight-what-changed). */
+  isRowFlashing: boolean
+  /** Keys of individual flashing cells (`flashCellKey`). */
+  flashingCellKeys: ReadonlySet<string>
   /**
    * Right-click menu items for this row. Must be a stable callback so
    * `React.memo` keeps holding. Return `null` to opt a specific row out.
@@ -258,17 +450,26 @@ interface VirtualizedBodyRowProps<TData> {
   renderRowContextMenu?: (row: TData) => React.ReactNode
 }
 
+/** Fade-pulse animation applied to a flashing cell (keyframe in the provider). */
+const FLASH_ANIMATION = "niko-row-flash 1.2s ease-out"
+
 const VirtualizedBodyRowInner = function VirtualizedBodyRow<TData>({
   row,
   virtualIndex,
   expandColumnId,
   isExpanded,
   isSelected,
+  isActiveRow,
+  columnSizingEnabled,
   isClickable,
   measureRef,
   onClick,
+  getRowClassName,
+  getCellClassName,
   columnLayoutSignature,
   rowMemoKey,
+  isRowFlashing,
+  flashingCellKeys,
   renderRowContextMenu,
 }: VirtualizedBodyRowProps<TData>) {
   const expandCell =
@@ -303,26 +504,40 @@ const VirtualizedBodyRowInner = function VirtualizedBodyRow<TData>({
       data-index={virtualIndex}
       data-row-id={row.id}
       data-state={isSelected ? "selected" : undefined}
+      data-active-row={isActiveRow ? "true" : undefined}
       onClick={onClick}
       className={cn(
         "group data-[context-menu-open]:bg-muted/50",
         isClickable && "cursor-pointer",
+        getRowClassName?.(row.original as TData),
       )}
     >
       {visibleCells.map(cell => {
         const size = cell.column.columnDef.size
+        const flashing =
+          isRowFlashing ||
+          flashingCellKeys.has(flashCellKey(row.id, cell.column.id))
         const cellStyle = {
-          width: size ? `${size}px` : undefined,
+          // Resizing: width tracks `getSize()`; off: unchanged.
+          width: columnSizingEnabled
+            ? cell.column.getSize()
+            : size
+              ? `${size}px`
+              : undefined,
           ...getCommonPinningStyles(cell.column, false),
+          ...(flashing ? { animation: FLASH_ANIMATION } : {}),
         }
 
         return (
           <TableCell
             key={cell.id}
+            data-flash={flashing ? "true" : undefined}
+            data-col-id={cell.column.id}
             className={cn(
               "overflow-hidden",
               cell.column.getIsPinned() &&
                 "bg-background group-hover:bg-muted/50 group-data-[context-menu-open]:bg-muted/50 group-data-[state=selected]:bg-muted",
+              getCellClassName?.(row.original as TData, cell.column.id),
             )}
             style={cellStyle}
           >
@@ -375,19 +590,38 @@ export interface DataTableVirtualizedBodyProps<TData> {
   children?: React.ReactNode
   estimateSize?: number
   overscan?: number
+  /**
+   * All rows are EXACTLY `estimateSize` tall — skip per-row `ResizeObserver`
+   * measurement entirely. Every row is positioned at `index * estimateSize` with
+   * zero measure/correct cycles, so scrolling is perfectly smooth (no vertical
+   * jitter, and no re-layout that would jitter column widths). Use for uniform
+   * fixed-height grids (single-line clamped cells). Incompatible with row
+   * expansion / variable-height rows — leave `false` (default) for those.
+   */
+  fixedRowHeight?: boolean
   className?: string
   onScroll?: (event: ScrollEvent) => void
   onScrolledTop?: () => void
   onScrolledBottom?: () => void
   scrollThreshold?: number
   /**
+   * Click is dispatched per-row from each row's `onClick`. Typed as
+   * `React.MouseEvent<HTMLElement>` to match the other body
+   * variants (`DataTableBody`, `DataTableDndBody`,
+   * `DataTableVirtualizedDndBody`, etc.) so a single handler can be
+   * passed through wrappers that switch between bodies. Consumers
+   * needing the row element can `event.target.closest("tr[data-row-id]")`.
+   */
+  onRowClick?: (row: TData, event: React.MouseEvent<HTMLElement>) => void
+  /**
    * Fires when the last rendered virtual row is within
    * `prefetchThreshold` rows of the end of the dataset. Intended
-   * as a prefetch trigger for infinite-scroll — pair it with
-   * `fetchNextPage()` so the next page starts loading *before* the
-   * user reaches the bottom. Called at most once per transition into
-   * the near-end zone (not every frame) so consumers can wire it
-   * directly without worrying about double-fires.
+   * as a prefetch trigger for infinite-scroll — pair it with tRPC's
+   * `useInfiniteQuery.fetchNextPage()` so the next page is loaded
+   * *before* the user reaches the bottom. Called at most once per
+   * transition into the near-end zone (not every frame) so
+   * consumers can wire it directly without worrying about
+   * double-fires.
    *
    * Strictly better than `onScrolledBottom` for virtualized infinite
    * scroll because it's virtualizer-index-driven (not scroll-event-
@@ -403,15 +637,10 @@ export interface DataTableVirtualizedBodyProps<TData> {
    * prefetching (pre-fetch earlier), lower for more conservative.
    */
   prefetchThreshold?: number
-  /**
-   * Click is dispatched per-row from each row's `onClick`. Typed as
-   * `React.MouseEvent<HTMLElement>` to match the other body
-   * variants (`DataTableBody`, `DataTableDndBody`,
-   * `DataTableVirtualizedDndBody`, etc.) so a single handler can be
-   * passed through wrappers that switch between bodies. Consumers
-   * needing the row element can `event.target.closest("tr[data-row-id]")`.
-   */
-  onRowClick?: (row: TData, event: React.MouseEvent<HTMLElement>) => void
+  /** Return extra className(s) for a specific row. Called per-row during render. */
+  getRowClassName?: (row: TData) => string | undefined
+  /** Return extra className(s) for a specific cell. Called per-cell during render. */
+  getCellClassName?: (row: TData, columnId: string) => string | undefined
   /**
    * Return a per-row memo invalidation key. When the returned string changes
    * for a specific row, React.memo re-renders that row even if TanStack Table
@@ -428,9 +657,8 @@ export interface DataTableVirtualizedBodyProps<TData> {
   /**
    * Attach a native right-click context menu to each row. Return the menu
    * items for the given row, or `null` to give that row no menu. The popup
-   * shell and portalling are handled internally. Opt-in per table; pair it
-   * with a "…" row-actions column so right-click surfaces the same actions.
-   * Wrap the callback in `useCallback` so memoized rows don't re-render.
+   * shell and portalling are handled internally. Wrap the callback in
+   * `useCallback` so memoized rows don't re-render.
    */
   renderRowContextMenu?: (row: TData) => React.ReactNode
 }
@@ -439,6 +667,7 @@ export function DataTableVirtualizedBody<TData>({
   children,
   estimateSize = 34,
   overscan = 20,
+  fixedRowHeight = false,
   className,
   onScroll,
   onRowClick,
@@ -447,24 +676,38 @@ export function DataTableVirtualizedBody<TData>({
   scrollThreshold = 50,
   onNearEnd,
   prefetchThreshold = 10,
-  getRowMemoKey,
   renderRowContextMenu,
+  getRowClassName,
+  getCellClassName,
+  getRowMemoKey,
 }: DataTableVirtualizedBodyProps<TData>) {
-  const { table, columns } = useDataTable()
+  const {
+    table,
+    columns,
+    registerRowScroller,
+    flashingRowIds,
+    flashingCellKeys,
+  } = useDataTable()
+  // Dedicated context — see the header note; memoized rows keep the actual
+  // re-render cost to just the rows whose active state changed.
+  const activeCell = useDataTableActiveCell()
   const { rows } = table.getRowModel()
+  const activeRowRange = activeCell?.rowRange ?? null
+  const resizing = table.options.enableColumnResizing ?? false
 
   // Hoist expand-column lookup above the virtualizer loop (was O(virtual_rows × cols) per frame).
   const expandColumnId = React.useMemo(
     () =>
       table.getAllColumns().find(col => col.columnDef.meta?.expandedContent)
         ?.id,
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- `columns` is an intentional invalidation key; the TanStack table instance is stable across column swaps
     [table, columns],
   )
 
+  const { columnVisibility, columnOrder, columnPinning } = table.getState()
   // String signature of the visible column layout. Memoized rows compare it
   // to invalidate on column toggle / reorder / pin. For external row state
   // (inline edits, optimistic overlays), pass `getRowMemoKey`.
-  const { columnVisibility, columnOrder, columnPinning } = table.getState()
   const columnLayoutSignature = React.useMemo(
     () =>
       table
@@ -477,7 +720,6 @@ export function DataTableVirtualizedBody<TData>({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [table, columnVisibility, columnOrder, columnPinning],
   )
-
   const [scrollElement, setScrollElement] =
     React.useState<HTMLDivElement | null>(null)
   const tbodyRef = React.useRef<HTMLTableSectionElement | null>(null)
@@ -506,9 +748,33 @@ export function DataTableVirtualizedBody<TData>({
   // and bake huge spacer gaps into the virtualizer.
   const [columnsLocked, setColumnsLocked] = React.useState(false)
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally runs every render; guarded by refs
   React.useLayoutEffect(() => {
     const leafColumns = table.getVisibleLeafColumns()
     const currentColCount = leafColumns.length
+
+    // Column resizing on: widths come from `column.getSize()` (React-controlled)
+    // + `table-layout: fixed`, so the content-measure lock is neither needed nor
+    // wanted (it would fight user resizes). Just fix the layout once and flag
+    // locked so the row measurer attaches; column add/remove needs no re-lock.
+    if (resizing) {
+      if (!columnLockRef.current) {
+        const tableEl = tbodyRef.current?.closest<HTMLTableElement>(
+          '[data-slot="table"]',
+        )
+        if (tableEl) {
+          tableEl.style.tableLayout = "fixed"
+          // `max-content` so columns render at exactly `getSize()` — narrower
+          // than the container leaves space at the right (no stretch), wider
+          // scrolls. `w-full` would otherwise distribute slack onto columns.
+          tableEl.style.width = "max-content"
+        }
+        columnLockRef.current = true
+        lockedColumnCountRef.current = currentColCount
+        setColumnsLocked(true)
+      }
+      return
+    }
 
     // Reset lock when column visibility changes (toggle columns on/off)
     if (
@@ -567,9 +833,11 @@ export function DataTableVirtualizedBody<TData>({
     tableEl.style.minWidth = `${totalDesiredWidth}px`
 
     // Measure auto-computed widths. Auto-layout naturally gives content-heavy
-    // columns more space than narrow columns — keep that behavior but enforce
-    // each column's explicit `size` as a minimum so a column with `size: 180`
-    // is never locked narrower than 180px even when its visible content is short.
+    // columns (e.g. Name with chevron + icon + badge) more space than narrow
+    // columns (e.g. Games showing "0"). We keep that behavior but enforce
+    // each column's explicit `size` as a minimum — so a column with
+    // `size: 180` is never locked narrower than 180px even if its visible
+    // content happens to be short.
     const rawWidths: number[] = []
     ths.forEach(th => rawWidths.push(th.getBoundingClientRect().width))
 
@@ -596,14 +864,27 @@ export function DataTableVirtualizedBody<TData>({
     setColumnsLocked(true)
   })
 
+   
   const rowVirtualizer = useVirtualizer({
     count: rows.length,
     getScrollElement: () => scrollElement,
     estimateSize: () => estimateSize,
     overscan,
     enabled: !!scrollElement,
-    measureElement,
+    // Fixed-height mode: no measurement — every row is exactly `estimateSize`,
+    // so the virtualizer never measures/corrects and scroll stays jitter-free.
+    measureElement: fixedRowHeight ? undefined : measureRowWithExpansion,
   })
+
+  // Register this body's scroll capability with the table context so consumers
+  // (e.g. an editable grid's keyboard engine) can scroll a row into view via the
+  // stable `scrollRowIntoView` handle without touching the virtualizer directly.
+  React.useEffect(() => {
+    registerRowScroller((index, opts) =>
+      rowVirtualizer.scrollToIndex(index, { align: opts?.align ?? "auto" }),
+    )
+    return () => registerRowScroller(null)
+  }, [registerRowScroller, rowVirtualizer])
 
   // Passive scroll listener — shared `createScrollHandler` across all body variants.
   React.useEffect(() => {
@@ -630,9 +911,9 @@ export function DataTableVirtualizedBody<TData>({
   const hasVirtualItems = virtualItems.length > 0
 
   // Calculate spacer heights for virtual scrolling
-  const topSpacerHeight = hasVirtualItems ? virtualItems[0].start : 0
+  const topSpacerHeight = hasVirtualItems ? virtualItems[0]!.start : 0
   const lastItem = hasVirtualItems
-    ? virtualItems[virtualItems.length - 1]
+    ? virtualItems[virtualItems.length - 1]!
     : null
   const bottomSpacerHeight = lastItem
     ? rowVirtualizer.getTotalSize() - lastItem.end
@@ -733,13 +1014,29 @@ export function DataTableVirtualizedBody<TData>({
             expandColumnId={expandColumnId}
             isExpanded={isExpanded}
             isSelected={row.getIsSelected()}
+            isActiveRow={
+              activeRowRange !== null &&
+              row.index >= activeRowRange.min &&
+              row.index <= activeRowRange.max
+            }
+            columnSizingEnabled={resizing}
             isClickable={isClickable}
-            measureRef={columnsLocked ? stableMeasureElement : undefined}
+            measureRef={
+              fixedRowHeight
+                ? undefined
+                : columnsLocked
+                  ? stableMeasureElement
+                  : undefined
+            }
             onClick={handleRowClick}
+            getRowClassName={getRowClassName}
+            getCellClassName={getCellClassName}
             columnLayoutSignature={columnLayoutSignature}
             rowMemoKey={
               getRowMemoKey ? getRowMemoKey(row.original as TData) : ""
             }
+            isRowFlashing={flashingRowIds.has(row.id)}
+            flashingCellKeys={flashingCellKeys}
             renderRowContextMenu={resolvedRenderRowContextMenu}
           />
         )
@@ -784,6 +1081,7 @@ export interface DataTableVirtualizedEmptyBodyProps {
 
 /**
  * Empty state component specifically for virtualized tables.
+ * Uses flex layout to properly center content in virtualized table bodies.
  * Use composition pattern with DataTableEmpty* components for full customization.
  *
  * @example
@@ -855,9 +1153,7 @@ export interface DataTableVirtualizedSkeletonProps {
    */
   rows?: number
   /**
-   * Estimated row height in pixels. Should match the `estimateSize` prop on
-   * `DataTableVirtualizedBody` so skeleton rows are the same height as real
-   * rows and the layout doesn't shift when data arrives.
+   * Estimated row height (should match estimateSize prop of DataTableVirtualizedBody).
    * @default 34
    */
   estimateSize?: number
@@ -935,6 +1231,7 @@ export interface DataTableVirtualizedLoadingProps {
 
 /**
  * Loading state component specifically for virtualized tables.
+ * Uses flex layout to properly center content in virtualized table bodies.
  */
 export function DataTableVirtualizedLoading({
   children,
@@ -971,16 +1268,15 @@ DataTableVirtualizedLoading.displayName = "DataTableVirtualizedLoading"
 
 export interface DataTableVirtualizedLoadingMoreProps {
   /**
-   * Whether a next-page fetch is currently in flight. Typically wired
-   * to a library state like TanStack Query's `isFetchingNextPage`,
-   * SWR's `isValidating`, or a plain `useState` flag. When false, this
-   * component renders nothing.
+   * Whether a next-page fetch is currently in flight. Typically
+   * wired to tRPC's `useInfiniteQuery.isFetchingNextPage`. When
+   * false, this component renders nothing.
    */
   isFetching: boolean
   /**
-   * Optional custom content. Defaults to a spinner + "Loading more..."
-   * label. Pass children to customize per-table (e.g. "Loading more
-   * products...").
+   * Optional custom content inside the loading-more row. Defaults
+   * to a spinner + "Loading more…" label. Pass children to
+   * customize the label per-table (e.g. "Loading more venues…").
    */
   children?: React.ReactNode
   colSpan?: number
@@ -988,26 +1284,28 @@ export interface DataTableVirtualizedLoadingMoreProps {
 }
 
 /**
- * Virtualized variant of `DataTableLoadingMore`. Composable "loading
- * more" row for infinite-scroll virtualized tables. Renders at the end
- * of the body when `isFetching` is true, and nothing when false.
- *
- * Sits OUTSIDE the virtualizer's row count (it's a plain child of
- * `TableBody`, not a virtual row), so it does not affect `estimateSize`
- * math. Designed to be dropped as a child of
+ * Composable "loading more" row for infinite-scroll virtualized
+ * tables. Renders at the end of the body when `isFetching` is true,
+ * and nothing when false — designed to be dropped as a child of
  * `DataTableVirtualizedBody` alongside `DataTableVirtualizedSkeleton`
  * and `DataTableVirtualizedEmptyBody`.
  *
+ * Sits outside the virtualizer row count (it's just appended to the
+ * `TableBody` children), so it doesn't affect `estimateSize` math.
+ *
  * @example
+ * const query = api.thing.list.useInfiniteQuery(...);
  * <DataTableVirtualizedBody
  *   onScrolledBottom={() => {
- *     if (hasMore && !isFetching) void loadMore()
+ *     if (query.hasNextPage && !query.isFetchingNextPage) {
+ *       void query.fetchNextPage();
+ *     }
  *   }}
  * >
  *   <DataTableVirtualizedSkeleton rows={5} />
  *   <DataTableVirtualizedEmptyBody>No results</DataTableVirtualizedEmptyBody>
- *   <DataTableVirtualizedLoadingMore isFetching={isFetching}>
- *     Loading more products...
+ *   <DataTableVirtualizedLoadingMore isFetching={query.isFetchingNextPage}>
+ *     Loading more things…
  *   </DataTableVirtualizedLoadingMore>
  * </DataTableVirtualizedBody>
  */
@@ -1032,11 +1330,8 @@ export function DataTableVirtualizedLoadingMore({
         )}
       >
         <span className="inline-flex items-center justify-center gap-2">
-          <span
-            className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-primary border-t-transparent"
-            aria-hidden="true"
-          />
-          <span>{children ?? "Loading more..."}</span>
+          <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
+          <span>{children ?? "Loading more…"}</span>
         </span>
       </TableCell>
     </TableRow>

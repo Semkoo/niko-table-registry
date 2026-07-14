@@ -11,46 +11,56 @@
  * users (and future LLMs reading this code) benefit:
  * https://github.com/Semkoo/niko-table-registry
  */
-import React from "react"
 import {
-  useReactTable,
   getCoreRowModel,
   getExpandedRowModel,
+  getFacetedMinMaxValues,
   getFacetedRowModel,
   getFacetedUniqueValues,
-  getFacetedMinMaxValues,
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
-  type Table,
-  type TableOptions,
-  type PaginationState,
-  type SortingState,
+  useReactTable,
   type ColumnFiltersState,
-  type RowSelectionState,
-  type VisibilityState,
-  type ExpandedState,
   type ColumnOrderState,
-  type ColumnPinningState,
-  type Updater,
+  type ColumnSizingState,
+  type ExpandedState,
   type FilterFn,
   type FilterFnOption,
+  type PaginationState,
+  type RowSelectionState,
+  type SortingState,
+  type Table,
+  type TableOptions,
+  type Updater,
+  type VisibilityState,
 } from "@tanstack/react-table"
-import { DataTableProvider } from "./data-table-context"
+import { TooltipProvider } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
-import { type DataTableColumnDef, type GlobalFilter } from "../types"
+import React from "react"
 import { detectFeaturesFromChildren } from "../config/feature-detection"
-import {
-  extendedFilter,
-  globalFilter as globalFilterFn,
-  numberRangeFilter,
-  dateRangeFilter,
-} from "../lib/filter-functions"
 import {
   FILTER_VARIANTS,
   SYSTEM_COLUMN_IDS,
   SYSTEM_COLUMN_ID_LIST,
 } from "../lib/constants"
+import {
+  dateRangeFilter,
+  extendedFilter,
+  globalFilter as globalFilterFn,
+  numberRangeFilter,
+} from "../lib/filter-functions"
+import { type DataTableColumnDef, type GlobalFilter } from "../types"
+import { DataTableProvider } from "./data-table-context"
+
+/**
+ * Delay (ms) before a tooltip inside a data table opens. Deliberately long so
+ * header help/sort tooltips don't pop while the assigner is scanning or
+ * clicking through sorts — they only appear on a considered hover. Scopes to
+ * the table via a nested `TooltipProvider`, so action-button tooltips outside
+ * the table keep their own (faster) provider delay.
+ */
+const TABLE_TOOLTIP_DELAY_MS = 1000
 
 export interface DataTableConfig {
   // Feature toggles
@@ -61,6 +71,14 @@ export interface DataTableConfig {
   enableMultiSort?: boolean
   enableGrouping?: boolean
   enableExpanding?: boolean
+  /**
+   * Enable drag-to-resize column widths (opt-in; off by default so existing
+   * tables are unaffected). When on, columns render at `column.getSize()` and a
+   * resize handle appears on each resizable header's right edge. Pair with a
+   * `<DataTableColumnResizeHandle>` in your header and, optionally, double-click
+   * it to autosize to content.
+   */
+  enableColumnResizing?: boolean
 
   // Manual modes (for server-side)
   manualSorting?: boolean
@@ -169,6 +187,7 @@ function DataTableRootInternal<TData, TValue>({
       enableMultiSort: config?.enableMultiSort,
       enableGrouping: config?.enableGrouping,
       enableExpanding: config?.enableExpanding ?? hasExpandColumn,
+      enableColumnResizing: config?.enableColumnResizing,
       manualSorting: config?.manualSorting,
       manualPagination: config?.manualPagination,
       manualFiltering: config?.manualFiltering,
@@ -191,6 +210,7 @@ function DataTableRootInternal<TData, TValue>({
       config?.enableMultiSort,
       config?.enableGrouping,
       config?.enableExpanding,
+      config?.enableColumnResizing,
       hasExpandColumn,
       config?.manualSorting,
       config?.manualPagination,
@@ -240,6 +260,10 @@ function DataTableRootInternal<TData, TValue>({
         finalConfig.enableExpanding ??
         detectedFeatures.enableExpanding ??
         false,
+      enableColumnResizing:
+        finalConfig.enableColumnResizing ??
+        detectedFeatures.enableColumnResizing ??
+        false,
       manualSorting:
         finalConfig.manualSorting ?? detectedFeatures.manualSorting ?? false,
       manualPagination:
@@ -283,6 +307,9 @@ function DataTableRootInternal<TData, TValue>({
   })
   const [columnOrder, setColumnOrder] = React.useState<ColumnOrderState>(
     restInitialState?.columnOrder ?? [],
+  )
+  const [columnSizing, setColumnSizing] = React.useState<ColumnSizingState>(
+    restInitialState?.columnSizing ?? {},
   )
   const [pagination, setPagination] = React.useState<PaginationState>({
     pageIndex:
@@ -346,22 +373,6 @@ function DataTableRootInternal<TData, TValue>({
     [],
   )
 
-  // Fire `onRowSelection` only on user-driven changes — skip the initial mount.
-  const skipInitialRowSelectionRef = React.useRef(true)
-  React.useEffect(() => {
-    if (!isMountedRef.current) return
-    if (skipInitialRowSelectionRef.current) {
-      skipInitialRowSelectionRef.current = false
-      return
-    }
-    if (!onRowSelection) return
-    const selectedRows = Object.keys(rowSelection)
-      .filter(key => rowSelection[key])
-      .map(key => rowIdMap.get(key))
-      .filter((row): row is TData => row !== undefined)
-    onRowSelection(selectedRows)
-  }, [rowSelection, rowIdMap, onRowSelection])
-
   /**
    * PERFORMANCE: Stable mount-guarded fallback setters
    *
@@ -394,7 +405,7 @@ function DataTableRootInternal<TData, TValue>({
   )
 
   const handleColumnPinningChange = React.useCallback(
-    (updater: Updater<ColumnPinningState>) => {
+    (updater: Updater<{ left?: string[]; right?: string[] }>) => {
       if (!isMountedRef.current) return
       setColumnPinning(prev => {
         const next = typeof updater === "function" ? updater(prev) : updater
@@ -414,6 +425,13 @@ function DataTableRootInternal<TData, TValue>({
     [],
   )
 
+  const handleColumnSizingChange = React.useCallback(
+    (u: Updater<ColumnSizingState>) => {
+      if (isMountedRef.current) setColumnSizing(u)
+    },
+    [],
+  )
+
   const handleExpandedChange = React.useCallback(
     (u: Updater<ExpandedState>) => {
       if (isMountedRef.current) setExpanded(u)
@@ -427,6 +445,22 @@ function DataTableRootInternal<TData, TValue>({
     },
     [],
   )
+
+  // Fire `onRowSelection` only on user-driven changes — skip the initial mount.
+  const skipInitialRowSelectionRef = React.useRef(true)
+  React.useEffect(() => {
+    if (!isMountedRef.current) return
+    if (skipInitialRowSelectionRef.current) {
+      skipInitialRowSelectionRef.current = false
+      return
+    }
+    if (!onRowSelection) return
+    const selectedRows = Object.keys(rowSelection)
+      .filter(key => rowSelection[key])
+      .map(key => rowIdMap.get(key))
+      .filter((row): row is TData => row !== undefined)
+    onRowSelection(selectedRows)
+  }, [rowSelection, rowIdMap, onRowSelection])
 
   /**
    * Auto-apply filterFn based on meta.variant if not explicitly provided
@@ -494,6 +528,7 @@ function DataTableRootInternal<TData, TValue>({
       : globalFilter
   const controlledColumnPinning = restState?.columnPinning ?? columnPinning
   const controlledColumnOrder = restState?.columnOrder ?? columnOrder
+  const controlledColumnSizing = restState?.columnSizing ?? columnSizing
   const controlledExpanded = restState?.expanded ?? expanded
   const controlledPagination = restState?.pagination ?? pagination
 
@@ -585,12 +620,16 @@ function DataTableRootInternal<TData, TValue>({
         columnVisibility: controlledColumnVisibility,
         columnPinning: finalColumnPinning,
         columnOrder: controlledColumnOrder,
+        columnSizing: controlledColumnSizing,
         rowSelection: controlledRowSelection,
         columnFilters: controlledColumnFilters,
         globalFilter: controlledGlobalFilter,
         expanded: controlledExpanded,
         pagination: controlledPagination,
       },
+      enableColumnResizing: detectFeatures.enableColumnResizing,
+      columnResizeMode: "onChange",
+      onColumnSizingChange: handleColumnSizingChange,
       enableRowSelection: detectFeatures.enableRowSelection,
       enableFilters: detectFeatures.enableFilters,
       enableSorting: detectFeatures.enableSorting,
@@ -694,6 +733,7 @@ function DataTableRootInternal<TData, TValue>({
       handleColumnPinningChange,
       onColumnOrderChange,
       handleColumnOrderChange,
+      handleColumnSizingChange,
       onExpandedChange,
       handleExpandedChange,
       onPaginationChange,
@@ -706,6 +746,7 @@ function DataTableRootInternal<TData, TValue>({
       controlledColumnFilters,
       controlledGlobalFilter,
       controlledColumnOrder,
+      controlledColumnSizing,
       controlledExpanded,
       controlledPagination,
       // Add column pinning state to dependencies so the table updates when it changes
@@ -715,6 +756,7 @@ function DataTableRootInternal<TData, TValue>({
 
   // Instance ref is stable across state changes; React Compiler warns about
   // incompatible-library here — TanStack manages its own memoization (expected).
+   
   const table = useReactTable<TData>(tableOptions)
 
   return (
@@ -723,7 +765,11 @@ function DataTableRootInternal<TData, TValue>({
       columns={processedColumns as DataTableColumnDef<TData>[]}
       isLoading={isLoading}
     >
-      <div className={cn("w-full space-y-4", className)}>{children}</div>
+      <TooltipProvider delayDuration={TABLE_TOOLTIP_DELAY_MS}>
+        <div className={cn("w-full min-w-0 space-y-4", className)}>
+          {children}
+        </div>
+      </TooltipProvider>
     </DataTableProvider>
   )
 }
@@ -746,7 +792,11 @@ export function DataTableRoot<TData, TValue>({
         columns={columns as DataTableColumnDef<TData>[]}
         isLoading={isLoading}
       >
-        <div className={cn("w-full space-y-4", className)}>{children}</div>
+        <TooltipProvider delayDuration={TABLE_TOOLTIP_DELAY_MS}>
+          <div className={cn("w-full min-w-0 space-y-4", className)}>
+            {children}
+          </div>
+        </TooltipProvider>
       </DataTableProvider>
     )
   }
