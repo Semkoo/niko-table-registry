@@ -46,6 +46,7 @@ export type Demo =
   | "niko-table/grid-dynamic-columns"
   | "niko-table/grid-save"
   | "niko-table/grid-validation"
+  | "niko-table/grid-portaled-cell"
 
 export function CodePreviewInternal({
   demo,

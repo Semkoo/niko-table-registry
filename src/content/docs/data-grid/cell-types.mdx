@@ -126,6 +126,12 @@ If your editor renders its interactive surface in a **portal** — a `Popover`, 
 
 React events still bubble through the React tree from a portaled child back to the grid, and the grid also watches document-level `mousedown` to clear the selection on click-away. Both paths treat any element inside `[data-grid-cell-editor]` as "still inside the editor": a mousedown there will **not** reselect the cell or `deselect()` — either of which clears `editingCell` and unmounts your editor _before_ its own `onSelect` / click fires, so the pick would silently no-op. The built-in `GridDateCell` and `GridComboboxCell` tag their popovers this way; do the same for any custom portaled editor. Segmented / inline editors that stay inside the cell don't need it.
 
+Here's a complete, runnable custom portaled cell — a **color-swatch picker** whose palette lives in a `PopoverContent` tagged `data-grid-cell-editor`. It shows the whole contract end to end: the display/editor split, the portaled surface, and committing on pick. Double-click a **Color** cell to open the palette:
+
+<CodePreview demo="niko-table/grid-portaled-cell" />
+
+Try removing the `data-grid-cell-editor` attribute from `PopoverContent` in the source above — clicking a swatch stops committing, because the grid reselects the cell and unmounts the editor before the click lands. That one attribute is the whole trick.
+
 ## Next Steps
 
 - [Validation](/data-grid/validation/) — validate cells with Zod; inline per-cell error tooltips.
