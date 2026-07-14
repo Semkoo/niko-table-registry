@@ -34,6 +34,8 @@ The returned object exposes the row data and the id-keyed mutators:
 | `undo` / `redo` / `canUndo` / `canRedo`                                           | The bounded row history.                                                                |
 | `selectRow` / `selectColumn` / `fillSelectionWith`                                | Whole-row / whole-column select + fill.                                                 |
 
+`updateRows(updater, opts?)` is undoable by default. Pass `{ history: false }` to apply a **non-undoable settle** — re-deriving cell state _from_ committed data (e.g. cross-field validation status) without pushing an undo entry or clearing the redo stack. See [Validation → cross-field rules](/data-grid/validation/#layer-2--cross-field-row-rules).
+
 ## Container — `<DataGrid>` and `<DataGridCell>`
 
 `<DataGrid grid={grid}>` is the irreducible core: it reads the table's display order and owns keyboard navigation, the selection rectangle, drag range-select with edge auto-scroll, and the scroll-into-view seam. Place it **inside** `DataTableRoot`, wrapping `DataTable`. Pass `onRequestShortcuts` to open a help dialog on `?`.

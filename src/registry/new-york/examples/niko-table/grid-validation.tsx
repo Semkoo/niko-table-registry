@@ -163,23 +163,32 @@ export function GridValidation() {
 
   // Re-run the cross-field rule after every commit and fold its result onto the
   // `end` cell. Field-level resolution wins (a malformed time stays malformed);
-  // otherwise the cross-field message is overlaid. Comparing before writing
-  // keeps this from looping — an unchanged cell is never re-set.
+  // otherwise the cross-field message is overlaid.
+  //
+  // Two things keep this correct:
+  //   - Return the SAME row when nothing changed. The engine skips no-op
+  //     updates, so the settle converges in one extra commit and never loops.
+  //   - `{ history: false }` — re-settling derived state must NOT push an undo
+  //     entry, or Ctrl+Z would step through the settle instead of the user's
+  //     actual edit (and a settle right after an undo could drop the redo stack).
   React.useEffect(() => {
     if (!grid.lastCommit) return
-    for (const row of grid.rows) {
-      const end = row.end
-      if (typeof end !== "object" || end == null) continue
-      const base = resolveCell("end", end.raw)
-      const crossErr = crossFieldEndError(row)
-      const next =
-        crossErr && base.status !== "invalid"
-          ? { ...base, status: "invalid" as const, error: crossErr }
-          : base
-      if (next.status !== end.status || next.error !== end.error) {
-        grid.setCell(row.id, "end", next)
-      }
-    }
+    grid.updateRows(
+      rows =>
+        rows.map(row => {
+          const end = row.end
+          if (typeof end !== "object" || end == null) return row
+          const base = resolveCell("end", end.raw)
+          const crossErr = crossFieldEndError(row)
+          const next =
+            crossErr && base.status !== "invalid"
+              ? { ...base, status: "invalid" as const, error: crossErr }
+              : base
+          if (next.status === end.status && next.error === end.error) return row
+          return { ...row, end: next }
+        }),
+      { history: false },
+    )
   }, [grid.lastCommit, grid])
 
   const invalidCount = React.useMemo(
