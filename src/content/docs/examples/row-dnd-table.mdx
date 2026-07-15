@@ -7,7 +7,7 @@ import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
 import CollapsiblePreview from "@/components/markdown/collapsible-preview.astro"
 import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
 
-Reorder rows via drag-and-drop using `DataTableRowDndProvider` and a dedicated drag-handle column. **Important constraint**: do not combine row DnD with sorting or filtering — the user's manual order will fight whatever the table is computing, so disable those add-ons on a DnD table.
+Reorder rows via drag-and-drop using `DataTableRowDndProvider` and a dedicated drag-handle column. **Important constraint**: do not combine row DnD with sorting or filtering — the user's manual order will fight whatever the table is computing, so disable those add-ons on a DnD table. Column resize is fine — drop in `<DataTableColumnResize />` (same as other tables); keep `enableResizing: false` on the drag-handle / `#` columns.
 
 ## Overview
 
@@ -31,7 +31,7 @@ Row DnD lets users reorder table rows by dragging. Built with `@dnd-kit` and com
 
 Install the DataTable core and row DnD add-on:
 
-<CliCommandCode action="run" command="shadcn@latest add @niko-table/data-table @niko-table/data-table-row-dnd" />
+<CliCommandCode action="run" command="shadcn@latest add @niko-table/data-table @niko-table/data-table-row-dnd @niko-table/data-table-column-resize" />
 
 > First time using `@niko-table`? See the [Installation Guide](/getting-started/installation#configure-the-niko-table-registry) to set up the registry.
 
@@ -69,12 +69,14 @@ const columns: DataTableColumnDef<Task>[] = [
     cell: ({ row }) => <DataTableRowDragHandle rowId={row.id} />,
     enableSorting: false,
     enableHiding: false,
+    enableResizing: false,
   },
   // ... other columns
 ]
 
 return (
   <DataTableRoot data={data} columns={columns} getRowId={(row) => row.id}>
+    <DataTableColumnResize />
     <DataTableRowDndProvider data={data} onReorder={setData}>
       <DataTable>
         <DataTableHeader />

@@ -10,6 +10,8 @@ All notable changes to the data-table component.
 
 #### Core
 
+- **Column resize overflow** — regular + virtualized body cells use `truncate` so shrink-via-resize ellipsizes instead of spilling into neighbors; when resize is enabled, default `minSize` is 40px (aligned with the grip clamp; TanStack’s built-in floor was 20).
+- **`DataTableDndBody` — column resize** — honors `getSize()`, layout lock, and truncate so Row DnD tables can mount `<DataTableColumnResize />` (opt out on drag-handle columns with `enableResizing: false`).
 - **Memoized body rows — invalidate on column add/remove** (`columnLayoutSignature` now depends on `columns`)
   - Dynamic columns (Data Grid “Add column”) left the header updated while body cells stayed stale — missing cells, borders, and row rules under the new column.
   - Fixed in all six body variants (regular + virtualized + DnD).

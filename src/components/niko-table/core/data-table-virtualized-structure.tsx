@@ -411,7 +411,8 @@ const VirtualizedBodyRowInner = function VirtualizedBodyRow<TData>({
             data-flash={flashing ? "true" : undefined}
             data-col-id={cell.column.id}
             className={cn(
-              "overflow-hidden",
+              // Ellipsis on shrink (same as regular body / grid display cells).
+              "truncate",
               cell.column.getIsPinned() &&
                 "bg-background group-hover:bg-muted/50 group-data-[context-menu-open]:bg-muted/50 group-data-[state=selected]:bg-muted",
               getCellClassName?.(row.original as TData, cell.column.id),

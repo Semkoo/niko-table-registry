@@ -44,6 +44,7 @@ import {
   SYSTEM_COLUMN_IDS,
   SYSTEM_COLUMN_ID_LIST,
 } from "../lib/constants"
+import { DEFAULT_MIN_COLUMN_SIZE } from "../lib/column-resize-handle"
 import {
   dateRangeFilter,
   extendedFilter,
@@ -513,8 +514,13 @@ function DataTableRootInternal<TData, TValue>({
       // — virtualized flex layout uses this to distinguish fixed vs flexible cols.
       // `column.getSize()` still falls back to 150 internally.
       size: undefined,
+      // Align mouse-drag floor with the resize handle's keyboard/autosize
+      // clamp (TanStack's built-in default is 20 — too tight for padded cells).
+      ...(detectFeatures.enableColumnResizing
+        ? { minSize: DEFAULT_MIN_COLUMN_SIZE }
+        : {}),
     }),
-    [],
+    [detectFeatures.enableColumnResizing],
   )
 
   // Extract controlled-state slices for the tableOptions dep array.

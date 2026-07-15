@@ -25,8 +25,8 @@ const AUTOSIZE_CELL_PADDING = 24 // horizontal padding + buffer
 const AUTOSIZE_HEADER_CHROME = 52 // sort/menu trigger + resize grip
 
 /** Column-width bounds used when a column omits `minSize` / `maxSize`. */
-const DEFAULT_MIN_COLUMN_SIZE = 40
-const DEFAULT_MAX_COLUMN_SIZE = 1000
+export const DEFAULT_MIN_COLUMN_SIZE = 40
+export const DEFAULT_MAX_COLUMN_SIZE = 1000
 /** Keyboard resize step (px); the larger step applies while Shift is held. */
 const KEYBOARD_RESIZE_STEP = 8
 const KEYBOARD_RESIZE_STEP_LARGE = 40

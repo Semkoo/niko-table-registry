@@ -233,6 +233,10 @@ const BodyRow = React.memo(function BodyRow({
             data-col-id={cell.column.id}
             style={cellStyle}
             className={cn(
+              // Match virtualized/grid: clip overflow. `truncate` adds ellipsis
+              // on top of shadcn TableCell's `whitespace-nowrap` so shrink-via-
+              // resize doesn't paint into neighboring columns.
+              "truncate",
               cell.column.getIsPinned() &&
                 "bg-background group-hover:bg-muted/50 group-data-[context-menu-open]:bg-muted/50 group-data-[state=selected]:bg-muted",
             )}

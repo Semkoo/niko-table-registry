@@ -57,6 +57,8 @@ interface DndBodyRowProps {
   isExpanded: boolean
   /** Selection state — read by `TableDraggableRow` internally; prop exists to invalidate React.memo. */
   isSelected: boolean
+  /** Column resizing is on — cells size from `column.getSize()` instead of `columnDef.size`. */
+  columnSizingEnabled: boolean
   /** Column layout signature — invalidates React.memo on visibility/order/pinning change. */
   columnLayoutSignature: string
   /**
@@ -73,6 +75,7 @@ const DndBodyRow = React.memo(function DndBodyRow({
   expandColumnId,
   isClickable,
   isExpanded,
+  columnSizingEnabled,
 }: DndBodyRowProps) {
   const expandCell =
     isExpanded && expandColumnId
@@ -87,15 +90,22 @@ const DndBodyRow = React.memo(function DndBodyRow({
         {visibleCells.map(cell => {
           const size = cell.column.columnDef.size
           const cellStyle = {
-            width: size ? `${size}px` : undefined,
+            // Resizing: width tracks `getSize()`; off: unchanged.
+            width: columnSizingEnabled
+              ? cell.column.getSize()
+              : size
+                ? `${size}px`
+                : undefined,
             ...getCommonPinningStyles(cell.column, false),
           }
 
           return (
             <TableCell
               key={cell.id}
+              data-col-id={cell.column.id}
               style={cellStyle}
               className={cn(
+                "truncate",
                 isClickable && "cursor-pointer",
                 cell.column.getIsPinned() &&
                   "bg-background group-hover:bg-muted/50 group-data-[state=selected]:bg-muted",
@@ -234,6 +244,7 @@ export function DataTableDndBody<TData>({
 }: DataTableDndBodyProps<TData>) {
   const { table, columns, isLoading } = useDataTable<TData>()
   const { rows } = table.getRowModel()
+  const containerRef = React.useRef<HTMLTableSectionElement>(null)
 
   const dataIds = React.useMemo<UniqueIdentifier[]>(
     () => rows.map(row => row.id),
@@ -262,26 +273,89 @@ export function DataTableDndBody<TData>({
   )
 
   // String signature of the visible column layout. Memoized rows compare it
-  // to invalidate on column toggle / reorder / pin. For external row state
-  // (inline edits, optimistic overlays), pass `getRowMemoKey`.
-  const { columnVisibility, columnOrder, columnPinning } = table.getState()
+  // to invalidate on column toggle / reorder / pin / resize. For external row
+  // state (inline edits, optimistic overlays), pass `getRowMemoKey`.
+  const { columnVisibility, columnOrder, columnPinning, columnSizing } =
+    table.getState()
+  const resizing = table.options.enableColumnResizing ?? false
   const columnLayoutSignature = React.useMemo(
     () =>
       table
         .getVisibleLeafColumns()
         .map(c => {
           const pinned = c.getIsPinned()
-          return pinned ? `${c.id}:${pinned}` : c.id
+          const base = pinned ? `${c.id}:${pinned}` : c.id
+          return resizing ? `${base}:${c.getSize()}` : base
         })
         .join(","),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [table, columns, columnVisibility, columnOrder, columnPinning],
+    [
+      table,
+      columns,
+      columnVisibility,
+      columnOrder,
+      columnPinning,
+      columnSizing,
+      resizing,
+    ],
   )
 
   const isClickable = !!onRowClick
 
+  // Capture / restore table inline sizing when resize turns on (same as
+  // `DataTableBody`) so `w-full` cannot compress columns while dragging.
+  const tableStyleSnapshotRef = React.useRef<{
+    tableLayout: string
+    width: string
+    minWidth: string
+  } | null>(null)
+
+  React.useLayoutEffect(() => {
+    const tableEl = containerRef.current?.closest<HTMLTableElement>(
+      '[data-slot="table"]',
+    )
+    if (!tableEl) return
+
+    const restore = () => {
+      const snap = tableStyleSnapshotRef.current
+      if (!snap) return
+      tableEl.style.tableLayout = snap.tableLayout
+      tableEl.style.width = snap.width
+      tableEl.style.minWidth = snap.minWidth
+      tableStyleSnapshotRef.current = null
+    }
+
+    if (!resizing) {
+      restore()
+      return
+    }
+
+    if (!tableStyleSnapshotRef.current) {
+      tableStyleSnapshotRef.current = {
+        tableLayout: tableEl.style.tableLayout,
+        width: tableEl.style.width,
+        minWidth: tableEl.style.minWidth,
+      }
+    }
+    const totalDesiredWidth = table
+      .getVisibleLeafColumns()
+      .reduce((sum, col) => sum + col.getSize(), 0)
+    tableEl.style.tableLayout = "fixed"
+    tableEl.style.width = `${totalDesiredWidth}px`
+    tableEl.style.minWidth = `${totalDesiredWidth}px`
+    return restore
+  }, [
+    resizing,
+    table,
+    columnSizing,
+    columnVisibility,
+    columnOrder,
+    columnPinning,
+  ])
+
   return (
     <TableBody
+      ref={containerRef}
       className={className}
       onClick={onRowClick ? handleRowClick : undefined}
     >
@@ -296,6 +370,7 @@ export function DataTableDndBody<TData>({
               isClickable={isClickable}
               isExpanded={row.getIsExpanded()}
               isSelected={row.getIsSelected()}
+              columnSizingEnabled={resizing}
               columnLayoutSignature={columnLayoutSignature}
               rowMemoKey={
                 getRowMemoKey ? getRowMemoKey(row.original as TData) : ""

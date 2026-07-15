@@ -10,6 +10,7 @@ import {
 import { DataTableDndBody } from "@/components/niko-table/core/data-table-dnd-structure"
 import { DataTableColumnHeader } from "@/components/niko-table/components/data-table-column-header"
 import { DataTableColumnTitle } from "@/components/niko-table/components/data-table-column-title"
+import { DataTableColumnResize } from "@/components/niko-table/components/data-table-column-resize"
 import {
   DataTableEmptyIcon,
   DataTableEmptyMessage,
@@ -126,6 +127,7 @@ export default function RowDndExample() {
         cell: ({ row }) => <DataTableRowDragHandle rowId={row.id} />,
         enableSorting: false,
         enableHiding: false,
+        enableResizing: false,
       },
       {
         id: "order",
@@ -140,6 +142,7 @@ export default function RowDndExample() {
         ),
         enableSorting: false,
         enableHiding: false,
+        enableResizing: false,
       },
       {
         accessorKey: "id",
@@ -159,6 +162,7 @@ export default function RowDndExample() {
           </DataTableColumnHeader>
         ),
         meta: { label: "Title" },
+        size: 240,
       },
       {
         accessorKey: "status",
@@ -196,6 +200,7 @@ export default function RowDndExample() {
 
   return (
     <DataTableRoot data={data} columns={columns} getRowId={row => row.id}>
+      <DataTableColumnResize />
       <DataTableRowDndProvider data={data} onReorder={setData}>
         <DataTable>
           <DataTableHeader />

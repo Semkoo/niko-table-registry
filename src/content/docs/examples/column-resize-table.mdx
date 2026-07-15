@@ -9,6 +9,8 @@ import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-c
 
 Drag any header's right edge to resize that column, or double-click the grip to autosize to the widest visible content. Drop `<DataTableColumnResize />` inside `DataTableRoot` to enable it — columns keep working with regular `DataTableHeader` / `DataTableBody` (no virtualization required). Opt out per column with `enableResizing: false`.
 
+Columns default to a **40px** drag floor (`minSize`) when resize is enabled — override per column with `minSize` / `maxSize`. Body cells use `truncate` so long text ellipsizes instead of spilling into the next column (same as the Data Grid / virtualized bodies).
+
 <CodePreview demo="niko-table/column-resize" />
 
 <CollapsiblePreview>
@@ -159,12 +161,21 @@ export function ControlledResizeTable({ data }: { data: Order[] }) {
 - You want drag-to-resize and double-click autosize without a custom header
 - Some columns (row number, actions) should stay fixed-width via `enableResizing: false`
 
+**Works with:**
+
+- [Row DnD](/examples/row-dnd-table/) — same `<DataTableColumnResize />` on `DataTableHeader` + `DataTableDndBody` (opt out on drag-handle columns)
+
 **❌ Consider other options when:**
 
 - All columns fit comfortably and widths never need tuning
 - You only need sticky identifier/action columns — see [Column Pinning](/examples/column-pinning-table/)
 
+## Virtualization
+
+You do **not** need a separate “virtualized column resize” example. Swap in `DataTableVirtualizedHeader` + `DataTableVirtualizedBody` (and give `DataTable` a fixed height) — the same `<DataTableColumnResize />` marker applies. See [Virtualization Table](/examples/virtualization-table/) and [All Features Grid](/examples/all-features-grid/).
+
 ## Next Steps
 
 - [Column Pinning Table](/examples/column-pinning-table/) - Keep key columns visible while scrolling
-- [Virtualization Table](/examples/virtualization-table/) - Resize works with virtualized headers/bodies too
+- [Virtualization Table](/examples/virtualization-table/) - Same resize marker with virtualized headers/bodies
+- [All Features Grid](/examples/all-features-grid/) - Resize + editable grid cells
