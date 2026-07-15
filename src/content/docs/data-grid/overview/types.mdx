@@ -6,7 +6,7 @@ description: CellState, CellPosition, GridRow, and related TypeScript types.
 import { GITHUB_REPO_URL } from "@/data/env"
 import DocsLink from "@/components/markdown/docs-link.astro"
 
-Types under `grid/types/`. Domain-free — safe to copy with the registry item.
+Types under `grid/types/`. Domain-free: safe to copy with the registry item.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/grid/types/grid-cell.ts`} external>Source Code ↗</DocsLink>
@@ -34,7 +34,7 @@ interface CellState<T> {
 
 ## CellPosition
 
-Address by **row id** and **column id** — not display index — so focus/selection survive filter/sort/reorder.
+Address by **row id** and **column id**: not display index: so focus/selection survive filter/sort/reorder.
 
 ```ts
 interface CellPosition {

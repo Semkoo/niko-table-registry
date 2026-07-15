@@ -20,7 +20,7 @@ Split **API / overview** from **runnable examples**. Do not put the same topic i
 
 **Data Grid** overview pages mirror the source tree (`grid/components`, `grid/core`, `grid/hooks`, …). Feature walkthroughs with a live demo belong under **Data Grid Examples**, not under overview.
 
-Reference: [Basic Grid](/examples/basic-grid/) — minimal grid example that follows this guide.
+Reference: [Basic Grid](/examples/basic-grid/): minimal grid example that follows this guide.
 
 ## File layout
 
@@ -48,11 +48,11 @@ src/registry/new-york/examples/niko-table/
 
 <Steps>
 
-1. **Registry demo** — add a self-contained example under `src/registry/new-york/examples/niko-table/` (e.g. `grid-foo.tsx`). Import only from `@/components/niko-table/...` direct paths and `@/components/ui`. Use deterministic mock data (no `Math.random()` / `Date.now()`).
+1. **Registry demo**: add a self-contained example under `src/registry/new-york/examples/niko-table/` (e.g. `grid-foo.tsx`). Import only from `@/components/niko-table/...` direct paths and `@/components/ui`. Use deterministic mock data (no `Math.random()` / `Date.now()`).
 
-2. **Register the demo name** — add the string to `CodePreviewInternal`’s `Demo` union in `src/components/markdown/code-preview/_code-preview-internal.tsx`, and wire the lazy import map there.
+2. **Register the demo name**: add the string to `CodePreviewInternal`’s `Demo` union in `src/components/markdown/code-preview/_code-preview-internal.tsx`, and wire the lazy import map there.
 
-3. **Example MDX** — create `src/content/docs/examples/<name>-grid.mdx` with:
+3. **Example MDX**: create `src/content/docs/examples/<name>-grid.mdx` with:
 
    - Short pitch (1–2 sentences)
    - `<CodePreview demo="niko-table/…" />`
@@ -61,9 +61,9 @@ src/registry/new-york/examples/niko-table/
    - Optional short “What’s included” / usage notes
    - Next links to related overview or examples
 
-4. **Sidebar** — add an entry under **Data Grid Examples** in `astro.config.mts` (`slug: "examples/<name>-grid"`).
+4. **Sidebar**: add an entry under **Data Grid Examples** in `astro.config.mts` (`slug: "examples/<name>-grid"`).
 
-5. **Cross-links** — from Introduction / overview pages, link to the example; don’t paste a second live demo of the same feature into overview.
+5. **Cross-links**: from Introduction / overview pages, link to the example; don’t paste a second live demo of the same feature into overview.
 
 </Steps>
 
@@ -85,9 +85,13 @@ src/registry/new-york/examples/niko-table/
 
 Prefer trailing slashes in hardcoded `href`s and markdown links, e.g. `/examples/basic-grid/`. Dev can accept both with `trailingSlash: "ignore"`, but slashed links stay consistent with production directory URLs.
 
+### Punctuation
+
+Avoid em dashes (`—`). Prefer a colon after bold labels (`**Composable**: …`), or a period / comma in prose.
+
 ## Sidebar scroll
 
-Theme-black does not use Starlight’s `#starlight__sidebar` / `SidebarPersister`. **Do not** add that id — it freezes the main thread with this theme.
+Theme-black does not use Starlight’s `#starlight__sidebar` / `SidebarPersister`. **Do not** add that id: it freezes the main thread with this theme.
 
 Scroll restore for the theme sidebar lives in `src/components/overrides/head.astro` (`aside.aside .sidebar` + `sessionStorage`). Prefer extending that script over a custom Sidebar override.
 
@@ -102,6 +106,6 @@ Scroll restore for the theme sidebar lives in `src/components/overrides/head.ast
 
 ## Related
 
-- [Contributing Code](/contributing/contributing-code/) — fork, branch, registry build
+- [Contributing Code](/contributing/contributing-code/): fork, branch, registry build
 - [Component Request](/contributing/component-request/) / [Feature Request](/contributing/feature-request/)
-- [CLAUDE.md](https://github.com/Semkoo/niko-table-registry/blob/main/CLAUDE.md) — component layering and registry rules
+- [CLAUDE.md](https://github.com/Semkoo/niko-table-registry/blob/main/CLAUDE.md): component layering and registry rules
