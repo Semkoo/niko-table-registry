@@ -32,6 +32,7 @@ import { createScrollHandler } from "../lib/create-scroll-handler"
 import { DataTableColumnResizeHandle } from "../lib/column-resize-handle"
 import { isInteractiveClickTarget } from "../lib/row-click"
 import { getCommonPinningStyles } from "../lib/styles"
+import { useColumnAutoFit } from "../lib/use-column-auto-fit"
 import {
   flashCellKey,
   useDataTable,
@@ -627,6 +628,11 @@ export function DataTableVirtualizedBody<TData>({
   const [scrollElement, setScrollElement] =
     React.useState<HTMLDivElement | null>(null)
   const tbodyRef = React.useRef<HTMLTableSectionElement | null>(null)
+
+  // When resizing is on, columns render at fixed `getSize()` widths instead of
+  // flex-filling. Scale the resizable columns up to fill the container on load
+  // so the table doesn't leave dead space on the right (until the user resizes).
+  useColumnAutoFit(table, scrollElement, resizing)
 
   const parentRef = React.useCallback(
     (node: HTMLTableSectionElement | null) => {

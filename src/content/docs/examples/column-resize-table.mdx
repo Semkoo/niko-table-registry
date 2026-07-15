@@ -11,6 +11,8 @@ Drag any header's right edge to resize that column, or double-click the grip to 
 
 Columns default to a **40px** drag floor (`minSize`) when resize is enabled: override per column with `minSize` / `maxSize`. Body cells use `truncate` so long text ellipsizes instead of spilling into the next column (same as the Data Grid / virtualized bodies).
 
+Columns **fill the container on load**: `useColumnAutoFit` scales resizable columns up to the available width, then backs off once you drag a column or restore a saved layout. See [Auto-fit](#auto-fit) and [Persist Widths](#persist-widths).
+
 <CodePreview demo="niko-table/column-resize" />
 
 <CollapsiblePreview>
@@ -128,9 +130,17 @@ const columns: DataTableColumnDef<Order>[] = [
 ]
 ```
 
+## Auto-fit
+
+With resize on, cells render at fixed `getSize()` widths instead of flex-filling, so columns that don't add up to the container width leave dead space. `useColumnAutoFit` (built into `DataTableHeader` / `DataTableBody` and their virtualized twins) scales the **resizable** columns up to fill it. Fixed columns (`enableResizing: false`) keep their size. It re-fits when the container grows and stops once the user drags a column or a saved `columnSizing` is restored, so manual and persisted widths win. Columns wider than the container scroll horizontally.
+
+These columns declare small `size` values yet fill the width:
+
+<CodePreview demo="niko-table/column-resize-autofit" />
+
 ## Controlled Sizing
 
-Manage `columnSizing` externally for persistence or live inspection:
+Manage `columnSizing` externally for persistence or live inspection. Provide `state={{ columnSizing }}` + `onColumnSizingChange`. Restored widths take precedence over auto-fit, so a saved layout is never overwritten on reload:
 
 ```tsx showLineNumbers title="column-resize-state.tsx"
 import { useState } from "react"
@@ -152,6 +162,54 @@ export function ControlledResizeTable({ data }: { data: Order[] }) {
   )
 }
 ```
+
+## Persist Widths
+
+Save `columnSizing` anywhere so widths survive a reload, usually `localStorage`. Read it once on mount (restored widths win over auto-fit) and write on every change. Resize a column below, then reload:
+
+<CodePreview demo="niko-table/column-resize-persisted" />
+
+A minimal `localStorage`-backed hook. Pass its `columnSizing` / `setColumnSizing` straight to `DataTableRoot`. Swap the store for your own settings API to sync per-user:
+
+```tsx showLineNumbers title="use-persisted-column-sizing.ts"
+import { useCallback, useState } from "react"
+import type { ColumnSizingState } from "@tanstack/react-table"
+
+export function usePersistedColumnSizing(storageKey: string) {
+  const [columnSizing, setState] = useState<ColumnSizingState>(() => {
+    if (typeof window === "undefined") return {}
+    try {
+      const raw = window.localStorage.getItem(storageKey)
+      return raw ? (JSON.parse(raw) as ColumnSizingState) : {}
+    } catch {
+      return {}
+    }
+  })
+
+  const setColumnSizing = useCallback(
+    (
+      updater:
+        | ColumnSizingState
+        | ((prev: ColumnSizingState) => ColumnSizingState),
+    ) => {
+      setState((prev) => {
+        const next = typeof updater === "function" ? updater(prev) : updater
+        try {
+          window.localStorage.setItem(storageKey, JSON.stringify(next))
+        } catch {
+          // Quota / private mode: drop persistence.
+        }
+        return next
+      })
+    },
+    [storageKey],
+  )
+
+  return { columnSizing, setColumnSizing }
+}
+```
+
+> Persist column **width** like visibility and order: a per-user preference, not URL state. Restored widths take precedence over auto-fit, so a saved layout is never overwritten.
 
 ## When to Use
 
