@@ -149,7 +149,7 @@ export const DataTableVirtualizedHeader = React.memo(
                     isActiveColumn &&
                       "bg-primary/15! font-semibold! text-foreground!",
                     // Anchor the absolute resize handle to the cell's right edge.
-                    resizing && "relative",
+                    resizing && "relative overflow-hidden",
                   )}
                   style={{
                     // Resizing: width tracks `getSize()` (columnSizing-aware).
@@ -164,10 +164,12 @@ export const DataTableVirtualizedHeader = React.memo(
                 >
                   {header.isPlaceholder ? null : (
                     <DataTableColumnHeaderRoot column={header.column}>
-                      {flexRender(
-                        header.column.columnDef.header,
-                        header.getContext(),
-                      )}
+                      <div className={cn("min-w-0", resizing && "truncate")}>
+                        {flexRender(
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
+                      </div>
                     </DataTableColumnHeaderRoot>
                   )}
                   {resizing && header.column.getCanResize() && (
@@ -257,7 +259,7 @@ export const DataTableVirtualizedFlexHeader = React.memo(
                     "flex items-center",
                     header.column.getIsPinned() && "bg-background",
                     // Anchor the absolute resize handle to the cell's right edge.
-                    resizing && "relative",
+                    resizing && "relative overflow-hidden",
                   )}
                   style={{
                     width: fixedWidth,
@@ -266,10 +268,12 @@ export const DataTableVirtualizedFlexHeader = React.memo(
                 >
                   {header.isPlaceholder ? null : (
                     <DataTableColumnHeaderRoot column={header.column}>
-                      {flexRender(
-                        header.column.columnDef.header,
-                        header.getContext(),
-                      )}
+                      <div className={cn("min-w-0", resizing && "truncate")}>
+                        {flexRender(
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
+                      </div>
                     </DataTableColumnHeaderRoot>
                   )}
                   {resizing && header.column.getCanResize() && (

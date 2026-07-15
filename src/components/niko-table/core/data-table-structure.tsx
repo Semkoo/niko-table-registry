@@ -105,15 +105,17 @@ export const DataTableHeader = React.memo(function DataTableHeader({
                 className={cn(
                   header.column.getIsPinned() && "bg-background",
                   // Anchor the absolute resize handle to the cell's right edge.
-                  resizing && "relative",
+                  resizing && "relative overflow-hidden",
                 )}
               >
                 {header.isPlaceholder ? null : (
                   <DataTableColumnHeaderRoot column={header.column}>
-                    {flexRender(
-                      header.column.columnDef.header,
-                      header.getContext(),
-                    )}
+                    <div className={cn("min-w-0", resizing && "truncate")}>
+                      {flexRender(
+                        header.column.columnDef.header,
+                        header.getContext(),
+                      )}
+                    </div>
                   </DataTableColumnHeaderRoot>
                 )}
                 {resizing && header.column.getCanResize() && (
