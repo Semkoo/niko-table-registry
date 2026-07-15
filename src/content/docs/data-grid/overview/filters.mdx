@@ -1,6 +1,6 @@
 ---
 title: Filters
-description: Data Grid reuses Niko Table filters — no separate grid/filters layer.
+description: "Data Grid reuses Niko Table filters. There is no separate grid/filters layer."
 ---
 
 import { GITHUB_REPO_URL } from "@/data/env"
@@ -17,7 +17,7 @@ The Data Grid does **not** ship its own `grid/filters/` directory. Sort, filter,
 
 1. Build columns and toolbar filters as you would for any Niko Table.
 2. Pass `grid.rows` into `DataTableRoot` as `data`.
-3. Wrap the table in `<DataGrid>` — keyboard nav and selection read **display order** after filter/sort.
+3. Wrap the table in `<DataGrid>`: keyboard nav and selection read **display order** after filter/sort.
 4. Cell editors keep using `{ rowId, columnId }`, so filtered-out rows retain state.
 
 ```tsx showLineNumbers

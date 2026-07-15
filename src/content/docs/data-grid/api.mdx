@@ -32,28 +32,28 @@ const grid = useDataGrid<TRow extends GridRow>({
 
 Blank seeds from `initialRowCount` use deterministic `row-0`… ids (SSR-safe). Runtime `addRows` / `insertRows` / `clearAll` use `makeId`.
 
-| Field                                                                             | Purpose                                                                |
-| --------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| `rows`                                                                            | Pass to `DataTableRoot data`                                           |
-| `lastCommit`                                                                      | Last mutation signal — see [Persistence](#persistence--usegridchanges) |
-| `focusedCell` / `editingCell` / `selectionAnchor`                                 | Cursor + range by `{ rowId, columnId }`                                |
-| `selectCell` / `deselect` / `extendSelectionTo`                                   | Move / clear / extend selection (all leave edit mode)                  |
-| `startEditing` / `stopEditing`                                                    | Open / close the editor                                                |
-| `setCell(rowId, colId, next)`                                                     | O(1) commit — one row identity changes                                 |
-| `updateRows` / `addRows` / `insertRows` / `removeRow` / `removeRows` / `clearAll` | Row mutations (undoable)                                               |
-| `undo` / `redo` / `canUndo` / `canRedo`                                           | History                                                                |
+| Field                                                                             | Purpose                                                               |
+| --------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| `rows`                                                                            | Pass to `DataTableRoot data`                                          |
+| `lastCommit`                                                                      | Last mutation signal: see [Persistence](#persistence--usegridchanges) |
+| `focusedCell` / `editingCell` / `selectionAnchor`                                 | Cursor + range by `{ rowId, columnId }`                               |
+| `selectCell` / `deselect` / `extendSelectionTo`                                   | Move / clear / extend selection (all leave edit mode)                 |
+| `startEditing` / `stopEditing`                                                    | Open / close the editor                                               |
+| `setCell(rowId, colId, next)`                                                     | O(1) commit: one row identity changes                                 |
+| `updateRows` / `addRows` / `insertRows` / `removeRow` / `removeRows` / `clearAll` | Row mutations (undoable)                                              |
+| `undo` / `redo` / `canUndo` / `canRedo`                                           | History                                                               |
 
 `updateRows(fn, { history: false })` settles derived state (e.g. cross-field validation) without pushing undo. See [Validation](/examples/validation-grid/).
 
-`clearAll` replaces every row with blanks — count matches `initialRows.length` or `initialRowCount`.
+`clearAll` replaces every row with blanks: count matches `initialRows.length` or `initialRowCount`.
 
 Whole-row / whole-column select and `fillSelectionWith` live on **`<DataGrid>` context**, not on this hook.
 
 ## `<DataGrid>` / `<DataGridCell>`
 
-`<DataGrid grid={grid}>` — place inside `DataTableRoot`, wrapping `DataTable`. Owns keyboard nav, selection rectangle, drag-select, and scroll-into-view. Pass `onRequestShortcuts` to open the `?` dialog.
+`<DataGrid grid={grid}>`: place inside `DataTableRoot`, wrapping `DataTable`. Owns keyboard nav, selection rectangle, drag-select, and scroll-into-view. Pass `onRequestShortcuts` to open the `?` dialog.
 
-`<DataGridCell row columnId>` — wrap each column `cell`. Display index is resolved from row id (post sort/filter). Do **not** pass TanStack `row.index`.
+`<DataGridCell row columnId>`: wrap each column `cell`. Display index is resolved from row id (post sort/filter). Do **not** pass TanStack `row.index`.
 
 ```tsx
 cell: (ctx) => (
@@ -88,7 +88,7 @@ Children of `<DataGrid>`. Unmounted = tree-shaken.
 | `DataGridClipboard`      | Copy / cut / paste (`resolveCell` required) |
 | `DataGridFillHandle`     | Corner fill; double-click auto-fill         |
 | `DataGridMove`           | Drag block to move (Ctrl/Cmd = copy)        |
-| `DataGridRowReorder`     | Row drag — prefer without active sort       |
+| `DataGridRowReorder`     | Row drag: prefer without active sort        |
 | `DataGridCrossHighlight` | Selection chrome on header / gutter         |
 | `DataGridStatusBar`      | Aggregate the selection                     |
 
@@ -107,9 +107,9 @@ From `grid-toolbar`: `DataGridToolbar`, `DataGridUndo`, `DataGridRedo`, `DataGri
 
 ## Row menu
 
-`<GridRowMenu />` inside `<DataTableRowContextMenuSlot>` — Copy / Cut / Clear / Delete / Insert. Clipboard items appear only when `DataGridClipboard` is mounted.
+`<GridRowMenu />` inside `<DataTableRowContextMenuSlot>`. Copy / Cut / Clear / Delete / Insert. Clipboard items appear only when `DataGridClipboard` is mounted.
 
-## Persistence — `useGridChanges`
+## Persistence: `useGridChanges`
 
 Separate install: `@niko-table/data-table-grid-changes`.
 

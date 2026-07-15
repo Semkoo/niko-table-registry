@@ -1,13 +1,13 @@
 ---
 title: Validation
-description: Per-field and cross-field validation — Zod or any resolve. Errors inline on the cell.
+description: Per-field and cross-field validation. Zod or any resolve. Errors inline on the cell.
 ---
 
 import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
 import CollapsiblePreview from "@/components/markdown/collapsible-preview.astro"
 import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
 
-The grid is validation-agnostic. Your `resolve` returns `status` + optional `error`. Invalid cells show a tooltip — no summary block.
+The grid is validation-agnostic. Your `resolve` returns `status` + optional `error`. Invalid cells show a tooltip. No summary block.
 
 <CodePreview demo="niko-table/grid-validation" />
 
@@ -76,7 +76,7 @@ Reuse the same `resolve` for cells and clipboard.
 
 ## Cross-field
 
-`resolve` sees one cell. Re-settle after commits with `updateRows(..., { history: false })` so undo stays clean. Return the **same row ref** when nothing changes — the engine treats that as a no-op and will not loop.
+`resolve` sees one cell. Re-settle after commits with `updateRows(..., { history: false })` so undo stays clean. Return the **same row ref** when nothing changes: the engine treats that as a no-op and will not loop.
 
 ```tsx showLineNumbers
 React.useEffect(() => {

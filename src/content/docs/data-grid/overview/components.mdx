@@ -6,7 +6,7 @@ description: Opt-in Data Grid feature components, toolbar, menus, and cell edito
 import { GITHUB_REPO_URL } from "@/data/env"
 import DocsLink from "@/components/markdown/docs-link.astro"
 
-Context-aware pieces under `grid/components/` and typed editors under `grid/cells/`. Mount only what you need as children of `<DataGrid>` — unmounted features attach no listeners and tree-shake out.
+Context-aware pieces under `grid/components/` and typed editors under `grid/cells/`. Mount only what you need as children of `<DataGrid>`: unmounted features attach no listeners and tree-shake out.
 
 <div className="not-content mb-6 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/tree/main/src/components/niko-table/grid/components`} external>Source Code ↗</DocsLink>
@@ -15,12 +15,12 @@ Context-aware pieces under `grid/components/` and typed editors under `grid/cell
 
 ## Directory structure
 
-- **`grid/components/`** — clipboard, fill, move, toolbar, status bar, menus
-- **`grid/cells/`** — display shell + typed editors (`GridTextCell`, …)
-- **`grid/core/`** — [Core](/data-grid/overview/core/) (`DataGrid`, context, features)
-- **`grid/hooks/`** — [Hooks](/data-grid/overview/hooks/)
-- **`grid/types/`** — [Types](/data-grid/overview/types/)
-- **`grid/config/`** — [Config](/data-grid/overview/config/)
+- **`grid/components/`**: clipboard, fill, move, toolbar, status bar, menus
+- **`grid/cells/`**: display shell + typed editors (`GridTextCell`, …)
+- **`grid/core/`**: [Core](/data-grid/overview/core/) (`DataGrid`, context, features)
+- **`grid/hooks/`**: [Hooks](/data-grid/overview/hooks/)
+- **`grid/types/`**: [Types](/data-grid/overview/types/)
+- **`grid/config/`**: [Config](/data-grid/overview/config/)
 
 ## Feature children
 
@@ -31,7 +31,7 @@ Children of `<DataGrid>`. Unmounted = tree-shaken.
 | `DataGridClipboard`      | Copy / cut / paste (`resolveCell` required) |
 | `DataGridFillHandle`     | Corner fill; double-click auto-fill         |
 | `DataGridMove`           | Drag block to move (Ctrl/Cmd = copy)        |
-| `DataGridRowReorder`     | Row drag — prefer without active sort       |
+| `DataGridRowReorder`     | Row drag: prefer without active sort        |
 | `DataGridCrossHighlight` | Selection chrome on header / gutter         |
 | `DataGridStatusBar`      | Aggregate the selection                     |
 
@@ -106,7 +106,7 @@ See [Dynamic Columns](/examples/dynamic-columns-grid/).
 
 ## Row menu
 
-`<GridRowMenu />` inside `<DataTableRowContextMenuSlot>` — Copy / Cut / Clear / Delete / Insert. Clipboard items appear only when `DataGridClipboard` is mounted.
+`<GridRowMenu />` inside `<DataTableRowContextMenuSlot>`. Copy / Cut / Clear / Delete / Insert. Clipboard items appear only when `DataGridClipboard` is mounted.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/grid/components/grid-row-menu.tsx`} external>Source Code ↗</DocsLink>
@@ -137,7 +137,7 @@ cell: (ctx) => (
 
 ## Related guides
 
-- [Cell Types](/examples/cell-types-grid/) — editors in depth
-- [Validation](/examples/validation-grid/) — `status` / `error` and settle
-- [Persistence](/examples/persistence-grid/) — `useGridChanges`
-- [API Reference](/data-grid/api/) — consolidated dump
+- [Cell Types](/examples/cell-types-grid/): editors in depth
+- [Validation](/examples/validation-grid/): `status` / `error` and settle
+- [Persistence](/examples/persistence-grid/): `useGridChanges`
+- [API Reference](/data-grid/api/): consolidated dump
