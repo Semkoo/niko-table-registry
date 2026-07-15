@@ -1,0 +1,67 @@
+---
+title: Basic Grid
+description: Minimal editable Data Grid — text cells, virtualization, undo/redo.
+---
+
+import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
+import CollapsiblePreview from "@/components/markdown/collapsible-preview.astro"
+import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
+import { Aside } from "@astrojs/starlight/components"
+
+The smallest useful Data Grid: `useDataGrid` + `<DataGrid>` + `GridTextCell`. You get keyboard navigation, undo/redo, and a virtualized body. Clipboard, fill, and other features stay opt-in children you add later.
+
+This page is the reference shape for new grid examples — see [Documentation Guidelines](/contributing/documentation-guidelines/).
+
+<CodePreview demo="niko-table/grid-basic" />
+
+<CollapsiblePreview>
+  <CodePreview demo="niko-table/grid-basic-state" />
+</CollapsiblePreview>
+
+## Installation
+
+<CliCommandCode action="run" command="shadcn@latest add @niko-table/data-table-grid" />
+
+> First time using `@niko-table`? See the [Installation Guide](/getting-started/installation/#configure-the-niko-table-registry).
+
+## What’s included
+
+| Piece            | Role                                                 |
+| ---------------- | ---------------------------------------------------- |
+| `useDataGrid`    | Headless rows, focus, edit lifecycle, undo/redo      |
+| `<DataGrid>`     | Keyboard nav + selection around `DataTable`          |
+| `<DataGridCell>` | Id-addressed cell wrapper (not TanStack `row.index`) |
+| `GridTextCell`   | Text editor (display shell; editor mounts on edit)   |
+| Virtualized body | Fixed-height scroll container required               |
+
+## Composition
+
+```tsx showLineNumbers
+const grid = useDataGrid({
+  columnIds: ["task", "assignee", "status"],
+  createEmptyRow,
+  initialRows,
+})
+
+<DataTableRoot data={grid.rows} columns={columns} getRowId={(r) => r.id}>
+  <DataGrid grid={grid}>
+    <DataTable>
+      <DataTableVirtualizedHeader />
+      <DataTableVirtualizedBody height={360} />
+    </DataTable>
+  </DataGrid>
+</DataTableRoot>
+```
+
+Column `cell` renderers wrap editors in `<DataGridCell row={…} columnId={…}>`. Focus and edits stay correct after sort/filter because addressing is by row id.
+
+<Aside type="tip">
+  Mount only what you need. Clipboard / fill / move are children of `<DataGrid>`; see [All Features Grid](/examples/all-features-grid/).
+</Aside>
+
+## Next
+
+- [All Features Grid](/examples/all-features-grid/) — clipboard, fill, filters, dynamic columns
+- [Cell Types](/examples/cell-types-grid/) · [Validation](/examples/validation-grid/)
+- [Dynamic Columns](/examples/dynamic-columns-grid/) · [Persistence](/examples/persistence-grid/)
+- [Hooks](/data-grid/overview/hooks/) · [Components](/data-grid/overview/components/) — API by layer

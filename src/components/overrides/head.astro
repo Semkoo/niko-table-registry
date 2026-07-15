@@ -123,3 +123,60 @@ const jsonLd =
 <link rel="canonical" href={canonicalUrl} />
 <link rel="manifest" href="/site.webmanifest" />
 <script is:inline type="application/ld+json" set:html={jsonLd} />
+
+{
+  /*
+    Persist theme-black sidebar scroll across MPA navigations.
+    Must NOT use `#starlight__sidebar` / SidebarPersister — those freeze this theme.
+  */
+}
+<script is:inline>
+  ;(() => {
+    const KEY = "niko-sidebar-scroll"
+    const run = () => {
+      try {
+        if (!matchMedia("(min-width: 48rem)").matches) return
+        const el = document.querySelector("aside.aside .sidebar")
+        if (!(el instanceof HTMLElement)) return
+
+        const persist = () => {
+          try {
+            sessionStorage.setItem(KEY, String(el.scrollTop))
+          } catch {}
+        }
+
+        const raw = sessionStorage.getItem(KEY)
+        if (raw != null) {
+          const y = Number(raw)
+          if (Number.isFinite(y)) el.scrollTop = y
+        }
+
+        const current = el.querySelector("[aria-current='page']")
+        if (current instanceof HTMLElement) {
+          const c = current.getBoundingClientRect()
+          const s = el.getBoundingClientRect()
+          if (c.top < s.top || c.bottom > s.bottom) {
+            current.scrollIntoView({ block: "nearest" })
+            persist()
+          }
+        }
+
+        el.addEventListener("scroll", persist, { passive: true })
+        addEventListener("pagehide", persist)
+        el.addEventListener(
+          "click",
+          e => {
+            if (e.target instanceof Element && e.target.closest("a")) persist()
+          },
+          true,
+        )
+      } catch {}
+    }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", run, { once: true })
+    } else {
+      run()
+    }
+  })()
+</script>

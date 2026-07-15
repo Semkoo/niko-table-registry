@@ -37,9 +37,24 @@ export const getCommonPinningStyles = <TData>(
     // Body: z-10 to stay above other body cells.
     zIndex: isHeader ? 20 : 10,
     backgroundColor: "var(--background)", // Ensure opaque background
-    // Create a visual separation for pinned columns
-    boxShadow: isLeft
-      ? "1px 0 0 var(--border)" // Right border for left pinned
-      : "-1px 0 0 var(--border)", // Left border for right pinned
+    // Directional separator on the pinned side — a real inner border (right for
+    // left-pinned, left for right-pinned) plus a soft shadow so the frozen
+    // column reads as distinct from scrolling content, even in a grid where
+    // every cell already has borders. `border-box` keeps it from shifting width.
+    // Pinned-column separator. Drawn as an INSET box-shadow (part of the sticky
+    // cell's own paint) rather than a plain border: a border on a sticky cell
+    // gets covered by scrolled-under content in some browsers, so it vanishes
+    // once you scroll horizontally. An inset shadow stays put. A soft OUTER
+    // shadow adds depth. `--border` alone is intentionally very faint (10% white
+    // in dark mode), so the line is a stronger foreground mix to read clearly.
+    ...(isLeft
+      ? {
+          boxShadow:
+            "inset -2px 0 0 0 color-mix(in oklab, var(--foreground) 40%, transparent), 4px 0 8px -2px color-mix(in oklab, var(--foreground) 14%, transparent)",
+        }
+      : {
+          boxShadow:
+            "inset 2px 0 0 0 color-mix(in oklab, var(--foreground) 40%, transparent), -4px 0 8px -2px color-mix(in oklab, var(--foreground) 14%, transparent)",
+        }),
   }
 }

@@ -1,0 +1,69 @@
+---
+title: Library
+description: Cell props, shared styles, clipboard helpers, and other grid utilities.
+---
+
+import { GITHUB_REPO_URL } from "@/data/env"
+import DocsLink from "@/components/markdown/docs-link.astro"
+
+The Data Grid has no `grid/lib/` folder. Shared utilities live next to cells and clipboard features. This page mirrors the Niko Table [Library](/niko-table/overview/lib/) slot for those helpers.
+
+<div className="not-content mb-6 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/tree/main/src/components/niko-table/grid/cells`} external>Cells ↗</DocsLink>
+  <DocsLink href="/data-grid/overview/components/">Components ↗</DocsLink>
+</div>
+
+## Cell props
+
+Shared editor contract for every typed cell.
+
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/grid/cells/cell-props.ts`} external>Source Code ↗</DocsLink>
+</div>
+
+`CellEditorProps` is what `DataGridCell` passes into the render prop: focus/edit flags, commit helpers, and the current `CellState`.
+
+`GridComboboxOption` shapes searchable dropdown options (`label` / `value`).
+
+## Cell styles
+
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/grid/cells/cell-styles.ts`} external>Source Code ↗</DocsLink>
+</div>
+
+| Export             | Role                                               |
+| ------------------ | -------------------------------------------------- |
+| `CELL_HEIGHT`      | Default row/cell height (`36`)                     |
+| `cellTriggerClass` | Classnames for the display trigger (status chrome) |
+
+Use these when building a custom editor so alignment matches stock cells.
+
+## Clipboard helpers
+
+Exported from the clipboard module / hook (used by `DataGridClipboard`):
+
+| Helper               | Role                                  |
+| -------------------- | ------------------------------------- |
+| `parseTsv`           | Parse clipboard text into a 2D matrix |
+| `serializeSelection` | Selection → TSV for copy              |
+
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/grid/hooks/use-grid-clipboard.ts`} external>Source Code ↗</DocsLink>
+</div>
+
+## Feature constants
+
+From `data-grid-features.tsx` — edge auto-scroll while dragging fill/move:
+
+| Constant          | Default | Role                         |
+| ----------------- | ------- | ---------------------------- |
+| `GRID_EDGE_ZONE`  | `36`    | Px near edge to start scroll |
+| `GRID_EDGE_SPEED` | `14`    | Scroll step                  |
+| `clampGridIndex`  | —       | Clamp display indices        |
+
+## Related table lib
+
+Shared table utilities (filter operators, formatting, etc.) remain under Niko Table:
+
+- [Library overview](/niko-table/overview/lib/)
+- Install deps from `data-table-grid` also pull scroll/flash helpers used by the grid body

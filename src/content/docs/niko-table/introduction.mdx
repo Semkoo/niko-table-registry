@@ -6,27 +6,11 @@ description: A composable, themeable and customizable data table component.
 import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
 import { Steps } from "@astrojs/starlight/components"
 import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
-import { Button } from "@/components/ui/button"
+import DocsLink from "@/components/markdown/docs-link.astro"
 
-<div className="mb-6 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href="https://tanstack.com/table/latest/docs/introduction"
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Docs ↗
-    </a>
-  </Button>
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href="https://tanstack.com/table/latest/docs/api/core/table"
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      API Reference ↗
-    </a>
-  </Button>
+<div className="not-content mb-6 flex items-center gap-2">
+  <DocsLink href="https://tanstack.com/table/latest/docs/introduction" external>Docs ↗</DocsLink>
+  <DocsLink href="https://tanstack.com/table/latest/docs/api/core/table" external>API Reference ↗</DocsLink>
 </div>
 
 <figure className="flex flex-col gap-4">
@@ -66,17 +50,17 @@ We now have a solid foundation to build on top of. Composable. Themeable. Custom
    }
    ```
 
-2. **Install the DataTable core and all add-ons**
+2. **Install a recommended starter set**
 
    <CliCommandCode action="run" command="shadcn@latest add @niko-table/data-table @niko-table/data-table-pagination @niko-table/data-table-search-filter @niko-table/data-table-view-menu @niko-table/data-table-sort-menu @niko-table/data-table-filter-menu @niko-table/data-table-column-sort @niko-table/data-table-column-faceted-filter @niko-table/data-table-column-slider-filter @niko-table/data-table-column-date-filter" />
 
-   For optional add-ons (pagination, filters, virtualization, etc.) and manual copy-paste, see the [Installation Guide](/getting-started/installation/).
+   Need more (virtualization, DnD, Data Grid)? See the [Installation Guide](/getting-started/installation/) or [Components](/getting-started/components/).
 
 </Steps>
 
-## Structure
+## Anatomy
 
-A `DataTable` component is composed of the following parts:
+A `DataTable` is composed of the following parts:
 
 - `DataTableRoot` - The root provider that manages table state and context.
 - `DataTableToolbarSection` - Container for filters, search, and actions.

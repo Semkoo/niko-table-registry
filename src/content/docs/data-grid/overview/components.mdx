@@ -1,0 +1,143 @@
+---
+title: Components
+description: Opt-in Data Grid feature components, toolbar, menus, and cell editors.
+---
+
+import { GITHUB_REPO_URL } from "@/data/env"
+import DocsLink from "@/components/markdown/docs-link.astro"
+
+Context-aware pieces under `grid/components/` and typed editors under `grid/cells/`. Mount only what you need as children of `<DataGrid>` — unmounted features attach no listeners and tree-shake out.
+
+<div className="not-content mb-6 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/tree/main/src/components/niko-table/grid/components`} external>Source Code ↗</DocsLink>
+  <DocsLink href="/data-grid/overview/core/">Core ↗</DocsLink>
+</div>
+
+## Directory structure
+
+- **`grid/components/`** — clipboard, fill, move, toolbar, status bar, menus
+- **`grid/cells/`** — display shell + typed editors (`GridTextCell`, …)
+- **`grid/core/`** — [Core](/data-grid/overview/core/) (`DataGrid`, context, features)
+- **`grid/hooks/`** — [Hooks](/data-grid/overview/hooks/)
+- **`grid/types/`** — [Types](/data-grid/overview/types/)
+- **`grid/config/`** — [Config](/data-grid/overview/config/)
+
+## Feature children
+
+Children of `<DataGrid>`. Unmounted = tree-shaken.
+
+| Component                | Capability                                  |
+| ------------------------ | ------------------------------------------- |
+| `DataGridClipboard`      | Copy / cut / paste (`resolveCell` required) |
+| `DataGridFillHandle`     | Corner fill; double-click auto-fill         |
+| `DataGridMove`           | Drag block to move (Ctrl/Cmd = copy)        |
+| `DataGridRowReorder`     | Row drag — prefer without active sort       |
+| `DataGridCrossHighlight` | Selection chrome on header / gutter         |
+| `DataGridStatusBar`      | Aggregate the selection                     |
+
+### DataGridClipboard
+
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/grid/components/grid-clipboard.tsx`} external>Source Code ↗</DocsLink>
+</div>
+
+```tsx showLineNumbers
+<DataGrid grid={grid}>
+  <DataGridClipboard resolveCell={resolveCell} />
+  <DataTable>…</DataTable>
+</DataGrid>
+```
+
+| Prop          | Type                                                   | Description                           |
+| ------------- | ------------------------------------------------------ | ------------------------------------- |
+| `resolveCell` | `(columnId: string, raw: string) => CellState<string>` | Map pasted / cut text into cell state |
+
+### DataGridFillHandle / DataGridMove / DataGridRowReorder
+
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/grid/components/grid-fill-handle.tsx`} external>Fill ↗</DocsLink>
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/grid/components/grid-move.tsx`} external>Move ↗</DocsLink>
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/grid/components/grid-row-reorder.tsx`} external>Reorder ↗</DocsLink>
+</div>
+
+No required props. Mount inside `<DataGrid>` next to the table.
+
+### DataGridCrossHighlight / DataGridStatusBar
+
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/grid/components/grid-cross-highlight.tsx`} external>Cross highlight ↗</DocsLink>
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/grid/components/grid-status-bar.tsx`} external>Status bar ↗</DocsLink>
+</div>
+
+Cross-highlight paints header/gutter for the selection. Status bar aggregates the current range.
+
+## Toolbar
+
+From `grid-toolbar`:
+
+| Component                 | Role                                   |
+| ------------------------- | -------------------------------------- |
+| `DataGridToolbar`         | Flex row for undo / redo / add / clear |
+| `DataGridUndo`            | Undo last mutation                     |
+| `DataGridRedo`            | Redo                                   |
+| `DataGridAddRows`         | Append `count` blank rows              |
+| `DataGridClearAll`        | Replace all rows with blanks           |
+| `DataGridPasteHint`       | Clipboard paste affordance             |
+| `DataGridShortcutsButton` | Opens `?` shortcuts dialog             |
+
+```tsx showLineNumbers
+<DataGridToolbar>
+  <DataGridUndo />
+  <DataGridRedo />
+  <DataGridAddRows count={5} />
+  <DataGridClearAll />
+  <DataGridShortcutsButton />
+</DataGridToolbar>
+```
+
+## Dynamic columns UI
+
+See [Dynamic Columns](/examples/dynamic-columns-grid/).
+
+| Component                 | Role                                 |
+| ------------------------- | ------------------------------------ |
+| `DataGridAddColumnButton` | Add a column at runtime              |
+| `GridColumnMenuOptions`   | Column type / remove options in menu |
+
+## Row menu
+
+`<GridRowMenu />` inside `<DataTableRowContextMenuSlot>` — Copy / Cut / Clear / Delete / Insert. Clipboard items appear only when `DataGridClipboard` is mounted.
+
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/grid/components/grid-row-menu.tsx`} external>Source Code ↗</DocsLink>
+</div>
+
+## Cell editors
+
+Display shell for every visible cell; heavy editor mounts only while editing. Walkthrough: [Cell Types](/examples/cell-types-grid/).
+
+| Component          | Use                                             |
+| ------------------ | ----------------------------------------------- |
+| `GridTextCell`     | Free text                                       |
+| `GridNumberCell`   | Numeric; optional `format` for currency display |
+| `GridCheckboxCell` | Boolean; always interactive                     |
+| `GridDateCell`     | Calendar; stores `YYYY-MM-DD`                   |
+| `GridSelectCell`   | Dropdown (no search)                            |
+| `GridComboboxCell` | Searchable dropdown                             |
+| `GridCellDisplay`  | Shared read-only shell for custom cells         |
+| `GridMarchingAnts` | Copy outline                                    |
+
+```tsx showLineNumbers
+cell: (ctx) => (
+  <DataGridCell row={ctx.row.original} columnId={col.id}>
+    {(p) => <GridTextCell {...p} resolve={(raw) => resolveCell(col.id, raw)} />}
+  </DataGridCell>
+)
+```
+
+## Related guides
+
+- [Cell Types](/examples/cell-types-grid/) — editors in depth
+- [Validation](/examples/validation-grid/) — `status` / `error` and settle
+- [Persistence](/examples/persistence-grid/) — `useGridChanges`
+- [API Reference](/data-grid/api/) — consolidated dump

@@ -26,13 +26,15 @@ export interface DataTableRowContextMenuSlotProps<TData> {
 /**
  * Declarative, composable row context menu for niko-table bodies.
  *
- * Nest it inside a `DataTableBody` / `DataTableVirtualizedBody` so the per-row
- * menu reads as part of the table's JSX tree. It renders nothing itself — the
- * body detects it among its children and renders its menu for every (enabled)
- * row inside a `DataTableRowMenuScope`, so a declarative `<XRowMenu>` composed
- * from `RowMenuItem` / `RowMenuSub` / … resolves the row and surface from
- * context. The body's `renderRowContextMenu` prop still works and wins when
- * both are present.
+ * Nest it inside a `DataTableBody` / `DataTableVirtualizedBody` — or any of
+ * the four DnD bodies (`DataTableDndBody`, `DataTableDndColumnBody`,
+ * `DataTableVirtualizedDndBody`, `DataTableVirtualizedDndColumnBody`) — so
+ * the per-row menu reads as part of the table's JSX tree. It renders nothing
+ * itself — the body detects it among its children and renders its menu for
+ * every (enabled) row inside a `DataTableRowMenuScope`, so a declarative
+ * `<XRowMenu>` composed from `RowMenuItem` / `RowMenuSub` / … resolves the
+ * row and surface from context. The body's `renderRowContextMenu` prop still
+ * works and wins when both are present.
  *
  * @example
  * <DataTableVirtualizedBody estimateSize={44}>
@@ -63,9 +65,12 @@ export function resolveRowContextMenuRenderer<TData>(
 
   let slotProps: DataTableRowContextMenuSlotProps<TData> | undefined
   React.Children.forEach(children, child => {
+    if (!React.isValidElement(child)) return
+    // Match by displayName — reference equality breaks across re-exports / HMR.
+    const type = child.type as { displayName?: string }
     if (
-      React.isValidElement(child) &&
-      child.type === DataTableRowContextMenuSlot
+      child.type === DataTableRowContextMenuSlot ||
+      type.displayName === "DataTableRowContextMenuSlot"
     ) {
       slotProps = child.props as DataTableRowContextMenuSlotProps<TData>
     }
@@ -95,7 +100,7 @@ export function useResolvedRowContextMenuRenderer<TData>(
 ): ((row: TData) => React.ReactNode) | undefined {
   const resolved = resolveRowContextMenuRenderer(prop, children)
   const latestRef = React.useRef(resolved)
-  // eslint-disable-next-line react-hooks/refs -- latest-ref: keep a stable callback so memoized rows hold, while still reading the current menu when a row renders
+
   latestRef.current = resolved
   const hasMenu = !!resolved
   return React.useMemo(

@@ -152,6 +152,14 @@ export const KEYBOARD_SHORTCUTS = {
   DELETE: "delete",
 } as const
 
+/**
+ * Default column width bounds when a column omits `minSize` / `maxSize`.
+ * Shared by `DataTableRoot` (defaultColumn) and the resize handle clamp —
+ * keep these in constants so root does not import the resize-handle module.
+ */
+export const DEFAULT_MIN_COLUMN_SIZE = 40
+export const DEFAULT_MAX_COLUMN_SIZE = 1000
+
 /** Standard internalized error messages */
 export const ERROR_MESSAGES = {
   /** Thrown when using the old global operator pattern */

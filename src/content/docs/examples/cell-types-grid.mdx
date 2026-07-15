@@ -1,0 +1,139 @@
+---
+title: Cell Types
+description: Built-in editors — text, number, currency, checkbox, date, select — and how to write your own.
+---
+
+import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
+import CollapsiblePreview from "@/components/markdown/collapsible-preview.astro"
+import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
+
+Cheap **display** shell for every visible cell. Heavy **editor** mounts only while editing. Validity comes from your `resolve` — the grid stays type-agnostic.
+
+<CodePreview demo="niko-table/grid-cell-types" />
+
+<CollapsiblePreview>
+  <CodePreview demo="niko-table/grid-cell-types-state" />
+</CollapsiblePreview>
+
+## Installation
+
+<CliCommandCode action="run" command="shadcn@latest add @niko-table/data-table-grid" />
+
+Date / select also need:
+
+<CliCommandCode action="run" command="shadcn@latest add calendar popover command button" />
+
+## Editors
+
+| Cell     | Component                             | Notes                                           |
+| -------- | ------------------------------------- | ----------------------------------------------- |
+| Text     | `GridTextCell`                        | Commits on blur / Enter / Tab                   |
+| Number   | `GridNumberCell`                      | Right-aligned; `resolve` owns validity          |
+| Currency | `GridNumberCell` + `format`           | Display via `Intl.NumberFormat`; edit shows raw |
+| Checkbox | `GridCheckboxCell`                    | Always interactive                              |
+| Date     | `GridDateCell`                        | Stores `YYYY-MM-DD`                             |
+| Select   | `GridSelectCell` / `GridComboboxCell` | Combobox adds search                            |
+
+## Dispatch by column
+
+```tsx showLineNumbers
+function CellByType({
+  spec,
+  ...p
+}: CellEditorProps & { spec: ColumnSpec }) {
+  switch (spec.type) {
+    case "number":
+      return <GridNumberCell {...p} resolve={(raw) => resolveCell(spec.id, raw)} />
+    case "currency":
+      return (
+        <GridNumberCell
+          {...p}
+          resolve={(raw) => resolveCell(spec.id, raw)}
+          format={(raw) => usd.format(Number(raw))}
+        />
+      )
+    case "checkbox":
+      return <GridCheckboxCell {...p} aria-label={spec.label} />
+    case "date":
+      return <GridDateCell {...p} placeholder={spec.label} />
+    case "select":
+      return (
+        <GridSelectCell
+          {...p}
+          options={spec.options.map((o) => ({ label: o, value: o }))}
+          placeholder="Select…"
+          displayLabel={p.cell.value ?? undefined}
+        />
+      )
+    default:
+      return <GridTextCell {...p} resolve={(raw) => resolveCell(spec.id, raw)} />
+  }
+}
+```
+
+## Validity via `resolve`
+
+```tsx showLineNumbers
+function resolveCell(columnId: string, raw: string): CellState<string> {
+  const spec = SPEC_BY_ID[columnId]
+  const trimmed = raw.trim()
+  switch (spec?.type) {
+    case "number":
+    case "currency": {
+      if (trimmed === "") return { raw, value: null, status: "empty" }
+      const ok = Number.isFinite(Number(trimmed))
+      return { raw, value: ok ? trimmed : null, status: ok ? "valid" : "invalid" }
+    }
+    case "select": {
+      const match = spec.options.includes(raw)
+      return {
+        raw,
+        value: match ? raw : null,
+        status: raw === "" ? "empty" : match ? "valid" : "invalid",
+      }
+    }
+    default:
+      return { raw, value: raw || null, status: raw === "" ? "empty" : "valid" }
+  }
+}
+```
+
+Pass the same `resolve` to `<DataGridClipboard resolveCell={…} />` so bad pastes stay visible (red) instead of dropping.
+
+## Custom cells
+
+Satisfy `CellEditorProps`. Render `GridCellDisplay` when idle; mount your editor only when `isEditing`.
+
+```tsx showLineNumbers
+export function MyCell(props: CellEditorProps) {
+  const { cell, isFocused, isSelected, isEditing } = props
+  if (!isEditing) {
+    return (
+      <GridCellDisplay status={cell.status} isFocused={isFocused} isSelected={isSelected}>
+        {cell.raw}
+      </GridCellDisplay>
+    )
+  }
+  return <MyEditor {...props} />
+}
+```
+
+### Portaled editors
+
+If the interactive surface lives in a portal (`Popover`, calendar, combobox list), tag it with `data-grid-cell-editor` so mousedown inside it does not clear `editingCell` before commit:
+
+```tsx
+<PopoverContent data-grid-cell-editor="">
+  <Calendar onSelect={…} />
+</PopoverContent>
+```
+
+Built-in date/combobox cells already do this. Full example:
+
+<CodePreview demo="niko-table/grid-portaled-cell" />
+
+## Next
+
+- [Validation](/examples/validation-grid/)
+- [Dynamic Columns](/examples/dynamic-columns-grid/)
+- [API Reference](/data-grid/api/)

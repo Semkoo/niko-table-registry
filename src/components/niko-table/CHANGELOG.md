@@ -6,10 +6,28 @@ All notable changes to the data-table component.
 
 ## Unreleased
 
+### ✨ Features / Composability
+
+#### Core
+
+- **Axis-split DnD structure** — import from `data-table-row-dnd-structure` / `data-table-column-dnd-structure` (+ virtualized twins). Registry packages no longer cross-ship the other axis. The old combined `data-table-dnd-structure` / `data-table-virtualized-dnd-structure` modules are removed (no re-export shims).
+- **`DEFAULT_MIN_COLUMN_SIZE`** — defined in `lib/constants`; `DataTableRoot` no longer imports `column-resize-handle` for that constant.
+- **`enableSorting` default `false`** — attaches `getSortedRowModel` only when config or feature detection enables sorting.
+- **DnD + context menu** — all four DnD bodies support `renderRowContextMenu` / `<DataTableRowContextMenuSlot>`.
+- **`DataTableDndColumnBody` resize** — honors `getSize()`, layout lock, truncate (parity with row DnD + virt column DnD).
+
 ### 🐛 Bug Fixes
 
 #### Core
 
+- **Column resize overflow** — regular + virtualized body cells use `truncate` so shrink-via-resize ellipsizes instead of spilling into neighbors; when resize is enabled, default `minSize` is 40px (aligned with the grip clamp; TanStack’s built-in floor was 20).
+- **`DataTableDndBody` — column resize** — honors `getSize()`, layout lock, and truncate so Row DnD tables can mount `<DataTableColumnResize />` (opt out on drag-handle columns with `enableResizing: false`).
+- **DnD SSR hydration** — `TableColumnDndProvider` / `TableRowDndProvider` / `TableViewDndMenu` pass `React.useId()` to `DndContext` so `aria-describedby` no longer mismatches (`DndDescribedBy-73` vs `DndDescribedBy-1`).
+- **Virtualized DnD + resize** — `DataTableVirtualizedFlexHeader` / `DataTableVirtualizedDndHeader` + virtualized DnD bodies honor `getSize()` and mount the resize grip; grip `stopPropagation` so it doesn’t start a column reorder.
+- **Memoized body rows — invalidate on column add/remove** (`columnLayoutSignature` now depends on `columns`)
+  - Dynamic columns (Data Grid “Add column”) left the header updated while body cells stayed stale — missing cells, borders, and row rules under the new column.
+  - Fixed in all six body variants (regular + virtualized + DnD).
+- **`DataTableBody` — resize cleanup restores prior table styles** instead of blanking `table-layout` / `width` / `min-width`.
 - **`DataTableVirtualizedBody` — column lock no longer compresses columns on wide datasets** (`core/data-table-virtualized-structure.tsx`)
   - The column-lock `useLayoutEffect` now sets `tableEl.style.minWidth` to the sum of all visible `column.getSize()` values before measuring `<th>` widths.
   - **Root cause**: `<TableComponent>` carries `w-full` (100% width), which forced the `<table>` element to fit inside its scroll container. The auto-layout algorithm then distributed compressed widths, and the lock mechanism permanently captured those compressed values.

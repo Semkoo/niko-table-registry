@@ -52,20 +52,21 @@ export function formatLabel(value: string): string {
 }
 
 /**
- * Create a date relative to the current date by subtracting days.
- * Useful for generating dynamic test data with relative dates.
+ * Create a date relative to a fixed epoch by subtracting days.
+ * Deterministic — safe for mock data / SSR hydration (no `Date.now()`).
  *
- * @param days - Number of days to subtract from current date
- * @returns Date object representing the date N days ago
+ * @param days - Number of days to subtract from the mock epoch
+ * @returns Date object representing the date N days before the epoch
  *
  * @example
- * daysAgo(7)   // 7 days ago
- * daysAgo(30)  // 30 days ago (1 month)
- * daysAgo(365) // 365 days ago (1 year)
+ * daysAgo(7)   // 7 days before 2026-07-15
+ * daysAgo(30)  // 30 days before 2026-07-15
  */
+const MOCK_EPOCH = new Date("2026-07-15T12:00:00.000Z")
+
 export function daysAgo(days: number): Date {
-  const date = new Date()
-  date.setDate(date.getDate() - days)
+  const date = new Date(MOCK_EPOCH)
+  date.setUTCDate(date.getUTCDate() - days)
   return date
 }
 

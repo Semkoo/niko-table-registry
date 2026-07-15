@@ -2,19 +2,22 @@
 name: niko-table-best-practices
 description: >-
   Integrate and use Niko Table (shadcn-compatible data tables with TanStack
-  Table). Use when the user mentions Niko Table, niko-table.com, data table with
-  shadcn, TanStack Table, building a sortable or filterable table, faceted
-  filters, advanced filter menu, row or column drag-and-drop, server-side
-  pagination, nuqs, URL state, shareable or bookmarkable table, row expansion,
-  tree table, row selection, or any shadcn-compatible data grid — even if they
-  don't name Niko Table explicitly.
-  Prefer this skill whenever the task involves a data table in a React/shadcn
-  project so the model follows Niko Table structure, imports, and patterns.
+  Table) and the editable Data Grid. Use when the user mentions Niko Table,
+  niko-table.com, data table with shadcn, TanStack Table, building a sortable or
+  filterable table, faceted filters, advanced filter menu, row or column
+  drag-and-drop, server-side pagination, nuqs, URL state, shareable or
+  bookmarkable table, row expansion, tree table, row selection, editable
+  spreadsheet grid, useDataGrid, DataGrid cell editors, clipboard/fill handle,
+  useGridChanges, or any shadcn-compatible data grid — even if they don't name
+  Niko Table explicitly.
+  Prefer this skill whenever the task involves a data table or editable grid in
+  a React/shadcn project so the model follows Niko Table structure, imports, and
+  patterns.
 ---
 
 # Niko Table Integration Guide
 
-A skill for building and configuring data tables with Niko Table: structure, filters (search, faceted, advanced), column menus, DnD, and server-side patterns.
+A skill for building and configuring data tables with Niko Table: structure, filters (search, faceted, advanced), column menus, DnD, server-side patterns, and the editable Data Grid.
 
 At a high level:
 
@@ -25,8 +28,9 @@ At a high level:
 - **URL state (nuqs):** Wrap app with `NuqsAdapter`; use `useQueryStates` with parsers for pagination, sort, filters, search; pass URL-derived state into `DataTableRoot` and wire `onPaginationChange` / `onSortingChange` / `onColumnFiltersChange` / `onGlobalFilterChange` to `setUrlParams`.
 - **Large lists:** Use `DataTableVirtualizedBody` (from core/structure) instead of `DataTableBody` for 10k+ rows; same children (Skeleton, EmptyBody). See Virtualization Table example.
 - **Sidebar:** Use `DataTableAside` (and trigger) for a detail panel next to the table. See Aside Table example.
+- **Data Grid:** `useDataGrid` + `<DataGrid grid={grid}>` wrapping `DataTable` inside `DataTableRoot`. Opt-in children for clipboard/fill/move. Cell editors via `<DataGridCell>` + `Grid*Cell`. Install `@niko-table/data-table-grid` (+ `data-table-grid-changes` for persistence). See Basic Grid / Data Grid docs on niko-table.com.
 
-Your job when using this skill is to figure out where the user is — new table, adding filters/DnD, fixing imports, wiring server-side, URL state (nuqs), row expansion, tree table, or row selection — and give them the right structure, imports, and patterns. If they’re vague (“I want a table”), suggest the minimal template and point to niko-table.com for examples. If they already have a table and want faceted filters or the advanced filter menu, jump to the Filtering section. Stay flexible: some users want copy-paste snippets; others want to understand the two-layer (DataTable* vs Table*) pattern.
+Your job when using this skill is to figure out where the user is — new table, adding filters/DnD, fixing imports, wiring server-side, URL state (nuqs), row expansion, tree table, row selection, or editable Data Grid — and give them the right structure, imports, and patterns. If they’re vague (“I want a table”), suggest the minimal template and point to niko-table.com for examples. If they already have a table and want faceted filters or the advanced filter menu, jump to the Filtering section. If they want spreadsheet editing, go to Data Grid. Stay flexible: some users want copy-paste snippets; others want to understand the two-layer (DataTable* vs Table*) pattern.
 
 Full docs and examples: **https://niko-table.com**. Registry: `https://niko-table.com/r/{name}.json` in `components.json` under `registries["@niko-table"]`.
 
@@ -250,8 +254,26 @@ export function UsersTable({ data, isLoading }: { data: User[]; isLoading?: bool
 }
 ```
 
+## Data Grid
+
+Editable spreadsheet-style grid built on the same `DataTableRoot` / virtualized body. Do **not** invent a separate widget API.
+
+```
+DataTableRoot data={grid.rows} getRowId={(r) => r.id}
+  → DataGrid grid={grid}
+      → opt-in: DataGridClipboard, DataGridFillHandle, DataGridMove, …
+      → DataTable → VirtualizedHeader + VirtualizedBody (fixed height)
+```
+
+- **Engine:** `useDataGrid({ columnIds, createEmptyRow, initialRows? })` — uncontrolled rows, focus/selection by `{ rowId, columnId }`, undo/redo.
+- **Cells:** Wrap editors in `<DataGridCell row={…} columnId={…}>`. Use `GridTextCell`, `GridNumberCell`, `GridCheckboxCell`, `GridDateCell`, `GridSelectCell` / `GridComboboxCell`. Validity comes from your `resolve` → `CellState`.
+- **Opt-in features:** Mount as children of `<DataGrid>` only — unmounted = tree-shaken.
+- **Persistence:** Separate install `@niko-table/data-table-grid-changes` → `useGridChanges(grid, { initialRows })`.
+- **Docs:** https://niko-table.com/data-grid/introduction/ · https://niko-table.com/examples/basic-grid/
+
 ## Where to Learn More
 
-- **Online**: https://niko-table.com — installation, examples, component overview, API. Example pages: Row Selection, Row Expansion, Tree Table; Faceted Filter, Advanced Filter; Advanced Nuqs, Server-Side Nuqs; Row DnD, Column DnD; Virtualization Table (DataTableVirtualizedBody), Aside Table (DataTableAside). For resilience: DataTableErrorBoundary (core/data-table-error-boundary).
+- **Online**: https://niko-table.com — installation, examples, component overview, API. Table examples: Simple / Basic / Faceted / Advanced / Nuqs / Server-Side / Row DnD / Column DnD / Virtualization / Aside. Data Grid examples: Basic Grid, Cell Types, Validation, Dynamic Columns, Persistence. For resilience: DataTableErrorBoundary (core/data-table-error-boundary).
 - **Skills (AI)**: https://niko-table.com/getting-started/skills/ — how to install and use this skill.
-- **In-repo** (when working in niko-table-registry): `src/content/docs/` — e.g. `niko-table/introduction.mdx`, `getting-started/installation.mdx`, `examples/row-selection-table.mdx`, `examples/row-expansion-table.mdx`, `examples/tree-table.mdx`, `examples/faceted-filter-table.mdx`, `examples/advanced-table.mdx`, `examples/advanced-nuqs-table.mdx`, `examples/server-side-nuqs-table.mdx`, `examples/row-dnd-table.mdx`, `examples/column-dnd-table.mdx`, `niko-table/overview/components.mdx`, `filters.mdx`.
+- **Docs guidelines**: https://niko-table.com/contributing/documentation-guidelines/
+- **In-repo** (when working in niko-table-registry): `src/content/docs/` — e.g. `getting-started/installation.mdx`, `niko-table/overview/`, `data-grid/overview/`, `examples/*-table.mdx`, `examples/*-grid.mdx`.

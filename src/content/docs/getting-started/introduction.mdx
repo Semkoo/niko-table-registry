@@ -120,14 +120,14 @@ Build tables by composing components - start simple and add features as needed:
 Niko Table is **mix-and-match**: install only the registry items you need, render only the children you want, and swap body strategies without rewriting column defs.
 
 | Layer               | What you choose                                                                             | Notes                                                                                             |
-| ------------------- | ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- | ------------------------ |
+| ------------------- | ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
 | **Root**            | `DataTableRoot`                                                                             | Required. Optional controlled `state`, `config` overrides, `getRowId` for selection/DnD/expansion |
 | **Toolbar**         | `DataTableToolbarSection` + any of search, faceted, filter menu, view menu, clear           | Omitted entirely for minimal tables                                                               |
 | **Table shell**     | `DataTable` with `height` / `max-h-*` when virtualizing                                     | Virtualizer needs a bounded scroll container                                                      |
 | **Header / body**   | Regular: `DataTableHeader` + `DataTableBody`                                                | Default path                                                                                      |
 |                     | Virtualized: `DataTableVirtualizedHeader` + `DataTableVirtualizedBody`                      | [10k+ rows](/examples/virtualization-table/)                                                      |
 |                     | Row DnD: `DataTableRowDndProvider` (outside table) + `DataTableDndBody`                     | Do **not** combine with sort/filter                                                               |
-|                     | Column DnD                                                                                  | `DataTableColumnDndProvider` + draggable headers/cells                                            | Safe with other features |
+|                     | Column DnD: `DataTableColumnDndProvider` + draggable headers/cells                          | Safe with other features                                                                          |
 | **Loading / empty** | `DataTableSkeleton`, `DataTableEmptyBody` or composable empty pieces                        | Siblings inside the body                                                                          |
 | **Footer**          | `DataTablePagination`, `DataTableSelectionBar`                                              | Optional                                                                                          |
 | **Row actions**     | One `RowMenu*` component + `useDataTableRow` in kebab **and** `DataTableRowContextMenuSlot` | [Row context menu](/examples/row-context-menu-table/)                                             |

@@ -16,6 +16,7 @@ type RegistryItem =
   | "data-table-search-filter"
   | "data-table-sort-menu"
   | "data-table-view-menu"
+  | "data-table-view-dnd-menu"
   | "data-table-clear-filter"
   | "data-table-filter-menu"
   | "data-table-faceted-filter"
@@ -28,9 +29,14 @@ type RegistryItem =
   | "data-table-column-sort"
   | "data-table-column-hide"
   | "data-table-column-pin"
+  | "data-table-column-resize"
   | "data-table-column-faceted-filter"
   | "data-table-column-slider-filter"
   | "data-table-column-date-filter"
+  | "data-table-row-dnd"
+  | "data-table-column-dnd"
+  | "data-table-grid"
+  | "data-table-grid-changes"
 
 type Props = { registryItem: RegistryItem }
 

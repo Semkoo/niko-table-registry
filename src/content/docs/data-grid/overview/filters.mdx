@@ -1,0 +1,43 @@
+---
+title: Filters
+description: Data Grid reuses Niko Table filters — no separate grid/filters layer.
+---
+
+import { GITHUB_REPO_URL } from "@/data/env"
+import DocsLink from "@/components/markdown/docs-link.astro"
+
+The Data Grid does **not** ship its own `grid/filters/` directory. Sort, filter, and faceted UIs come from Niko Table and stay correct because focus/edits are **id-addressed** (not display index).
+
+<div className="not-content mb-6 flex items-center gap-2">
+  <DocsLink href="/niko-table/overview/filters/">Table Filters ↗</DocsLink>
+  <DocsLink href="/niko-table/overview/components/">Table Components ↗</DocsLink>
+</div>
+
+## How filtering works with the grid
+
+1. Build columns and toolbar filters as you would for any Niko Table.
+2. Pass `grid.rows` into `DataTableRoot` as `data`.
+3. Wrap the table in `<DataGrid>` — keyboard nav and selection read **display order** after filter/sort.
+4. Cell editors keep using `{ rowId, columnId }`, so filtered-out rows retain state.
+
+```tsx showLineNumbers
+<DataTableRoot data={grid.rows} columns={columns} getRowId={(r) => r.id}>
+  <DataTableToolbarSection>
+    <DataTableSearchFilter />
+    <DataTableFacetedFilter columnId="status" title="Status" />
+  </DataTableToolbarSection>
+  <DataGrid grid={grid}>
+    <DataTable>…</DataTable>
+  </DataGrid>
+</DataTableRoot>
+```
+
+## Related docs
+
+| Topic                       | Link                                                    |
+| --------------------------- | ------------------------------------------------------- |
+| Filter primitives (Table\*) | [Filters overview](/niko-table/overview/filters/)       |
+| Context-aware filter UIs    | [Components overview](/niko-table/overview/components/) |
+| Faceted example             | [Faceted Filter Table](/examples/faceted-filter-table/) |
+| Advanced filter example     | [Advanced Table](/examples/advanced-table/)             |
+| Full grid demo with filters | [Introduction](/data-grid/introduction/)                |

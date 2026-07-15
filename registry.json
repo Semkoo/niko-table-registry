@@ -42,6 +42,11 @@
           "target": "components/niko-table/core/data-table-structure.tsx"
         },
         {
+          "path": "src/components/niko-table/lib/column-resize-handle.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/lib/column-resize-handle.tsx"
+        },
+        {
           "path": "src/components/niko-table/components/data-table-row-context-menu.tsx",
           "type": "registry:component",
           "target": "components/niko-table/components/data-table-row-context-menu.tsx"
@@ -165,6 +170,16 @@
           "path": "src/components/niko-table/types/index.ts",
           "type": "registry:lib",
           "target": "components/niko-table/types/index.ts"
+        },
+        {
+          "path": "src/components/niko-table/hooks/use-data-table-scroll.ts",
+          "type": "registry:component",
+          "target": "components/niko-table/hooks/use-data-table-scroll.ts"
+        },
+        {
+          "path": "src/components/niko-table/hooks/use-data-table-flash.ts",
+          "type": "registry:component",
+          "target": "components/niko-table/hooks/use-data-table-flash.ts"
         }
       ]
     },
@@ -724,7 +739,7 @@
       "name": "data-table-row-dnd",
       "type": "registry:component",
       "title": "DataTable Row DnD",
-      "description": "Drag-and-drop row reordering with composable primitives. Includes DnD provider, draggable row, drag handle, and DnD-aware table body.",
+      "description": "Drag-and-drop row reordering with composable primitives. Includes DnD provider, draggable row, drag handle, and row DnD table body. Does not ship column DnD.",
       "dependencies": [
         "@dnd-kit/core",
         "@dnd-kit/modifiers",
@@ -743,19 +758,14 @@
           "target": "components/niko-table/filters/table-row-dnd.tsx"
         },
         {
-          "path": "src/components/niko-table/filters/table-column-dnd.tsx",
-          "type": "registry:component",
-          "target": "components/niko-table/filters/table-column-dnd.tsx"
-        },
-        {
           "path": "src/components/niko-table/components/data-table-row-dnd.tsx",
           "type": "registry:component",
           "target": "components/niko-table/components/data-table-row-dnd.tsx"
         },
         {
-          "path": "src/components/niko-table/core/data-table-dnd-structure.tsx",
+          "path": "src/components/niko-table/core/data-table-row-dnd-structure.tsx",
           "type": "registry:component",
-          "target": "components/niko-table/core/data-table-dnd-structure.tsx"
+          "target": "components/niko-table/core/data-table-row-dnd-structure.tsx"
         }
       ]
     },
@@ -763,7 +773,7 @@
       "name": "data-table-column-dnd",
       "type": "registry:component",
       "title": "DataTable Column DnD",
-      "description": "Drag-and-drop column reordering with composable primitives. Includes DnD provider, draggable header, drag-along cell, and DnD-aware header/body.",
+      "description": "Drag-and-drop column reordering with composable primitives. Includes DnD provider, draggable header, drag-along cell, and column DnD header/body. Does not ship row DnD.",
       "dependencies": [
         "@dnd-kit/core",
         "@dnd-kit/modifiers",
@@ -778,19 +788,267 @@
           "target": "components/niko-table/filters/table-column-dnd.tsx"
         },
         {
-          "path": "src/components/niko-table/filters/table-row-dnd.tsx",
-          "type": "registry:component",
-          "target": "components/niko-table/filters/table-row-dnd.tsx"
-        },
-        {
           "path": "src/components/niko-table/components/data-table-column-dnd.tsx",
           "type": "registry:component",
           "target": "components/niko-table/components/data-table-column-dnd.tsx"
         },
         {
-          "path": "src/components/niko-table/core/data-table-dnd-structure.tsx",
+          "path": "src/components/niko-table/core/data-table-column-dnd-structure.tsx",
           "type": "registry:component",
-          "target": "components/niko-table/core/data-table-dnd-structure.tsx"
+          "target": "components/niko-table/core/data-table-column-dnd-structure.tsx"
+        }
+      ]
+    },
+    {
+      "name": "data-table-virtualized-row-dnd",
+      "type": "registry:component",
+      "title": "DataTable Virtualized Row DnD",
+      "description": "Virtualized row drag-and-drop body (`DataTableVirtualizedDndBody`). Requires data-table-virtualized + data-table-row-dnd. Does not ship column DnD.",
+      "dependencies": [
+        "@tanstack/react-virtual",
+        "@dnd-kit/sortable",
+        "@dnd-kit/utilities"
+      ],
+      "registryDependencies": [
+        "https://niko-table.com/r/data-table-virtualized.json",
+        "https://niko-table.com/r/data-table-row-dnd.json"
+      ],
+      "files": [
+        {
+          "path": "src/components/niko-table/core/data-table-virtualized-row-dnd-structure.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/core/data-table-virtualized-row-dnd-structure.tsx"
+        }
+      ]
+    },
+    {
+      "name": "data-table-virtualized-column-dnd",
+      "type": "registry:component",
+      "title": "DataTable Virtualized Column DnD",
+      "description": "Virtualized column drag-and-drop header/body (`DataTableVirtualizedDndHeader`, `DataTableVirtualizedDndColumnBody`). Requires data-table-virtualized + data-table-column-dnd. Does not ship row DnD.",
+      "dependencies": [
+        "@tanstack/react-virtual",
+        "@dnd-kit/sortable",
+        "@dnd-kit/utilities"
+      ],
+      "registryDependencies": [
+        "https://niko-table.com/r/data-table-virtualized.json",
+        "https://niko-table.com/r/data-table-column-dnd.json"
+      ],
+      "files": [
+        {
+          "path": "src/components/niko-table/core/data-table-virtualized-column-dnd-structure.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/core/data-table-virtualized-column-dnd-structure.tsx"
+        }
+      ]
+    },
+    {
+      "name": "data-table-column-resize",
+      "type": "registry:component",
+      "title": "DataTable Column Resize",
+      "description": "Opt-in column resizing with drag handles and double-click autosize (measures natural text width). Keyboard-operable handle. Drop <DataTableColumnResize/> into the table to enable — works with DataTableHeader/Body and the virtualized variants.",
+      "dependencies": [],
+      "registryDependencies": ["https://niko-table.com/r/data-table.json"],
+      "files": [
+        {
+          "path": "src/components/niko-table/components/data-table-column-resize.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-column-resize.tsx"
+        }
+      ]
+    },
+    {
+      "name": "data-table-grid",
+      "type": "registry:block",
+      "title": "Data Grid (editable)",
+      "description": "Composable editable spreadsheet grid: a headless engine (focus, selection, edit lifecycle, undo/redo, clipboard — all rowId-addressed so sort/filter work while editing) + a skin composed with DataTableRoot and the virtualized body. Keyboard cell nav, drag range-select with edge auto-scroll, quote-aware TSV copy/cut/paste with one-to-many tiling, fill handle, drag-move, dynamic columns, row drag-to-reorder, selection status bar, cross-highlight, and text/number/checkbox/date/select/combobox cells. Virtualized to 100k+ rows.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": [
+        "https://niko-table.com/r/data-table.json",
+        "https://niko-table.com/r/data-table-virtualized.json",
+        "https://niko-table.com/r/data-table-column-resize.json",
+        "button",
+        "input",
+        "checkbox",
+        "calendar",
+        "popover",
+        "command",
+        "dialog",
+        "dropdown-menu",
+        "separator",
+        "kbd",
+        "tooltip"
+      ],
+      "files": [
+        {
+          "path": "src/components/niko-table/grid/types/grid-cell.ts",
+          "type": "registry:component",
+          "target": "components/niko-table/grid/types/grid-cell.ts"
+        },
+        {
+          "path": "src/components/niko-table/grid/config/grid-shortcuts.ts",
+          "type": "registry:component",
+          "target": "components/niko-table/grid/config/grid-shortcuts.ts"
+        },
+        {
+          "path": "src/components/niko-table/grid/hooks/use-data-grid.ts",
+          "type": "registry:component",
+          "target": "components/niko-table/grid/hooks/use-data-grid.ts"
+        },
+        {
+          "path": "src/components/niko-table/grid/hooks/use-grid-clipboard.ts",
+          "type": "registry:component",
+          "target": "components/niko-table/grid/hooks/use-grid-clipboard.ts"
+        },
+        {
+          "path": "src/components/niko-table/grid/hooks/use-grid-columns.ts",
+          "type": "registry:component",
+          "target": "components/niko-table/grid/hooks/use-grid-columns.ts"
+        },
+        {
+          "path": "src/components/niko-table/grid/hooks/use-grid-navigation.ts",
+          "type": "registry:component",
+          "target": "components/niko-table/grid/hooks/use-grid-navigation.ts"
+        },
+        {
+          "path": "src/components/niko-table/grid/hooks/use-grid-keyboard.ts",
+          "type": "registry:component",
+          "target": "components/niko-table/grid/hooks/use-grid-keyboard.ts"
+        },
+        {
+          "path": "src/components/niko-table/grid/core/data-grid.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/grid/core/data-grid.tsx"
+        },
+        {
+          "path": "src/components/niko-table/grid/core/data-grid-context.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/grid/core/data-grid-context.tsx"
+        },
+        {
+          "path": "src/components/niko-table/grid/core/data-grid-features.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/grid/core/data-grid-features.tsx"
+        },
+        {
+          "path": "src/components/niko-table/grid/core/data-grid-columns-context.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/grid/core/data-grid-columns-context.tsx"
+        },
+        {
+          "path": "src/components/niko-table/grid/cells/cell-props.ts",
+          "type": "registry:component",
+          "target": "components/niko-table/grid/cells/cell-props.ts"
+        },
+        {
+          "path": "src/components/niko-table/grid/cells/cell-styles.ts",
+          "type": "registry:component",
+          "target": "components/niko-table/grid/cells/cell-styles.ts"
+        },
+        {
+          "path": "src/components/niko-table/grid/cells/grid-cell-display.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/grid/cells/grid-cell-display.tsx"
+        },
+        {
+          "path": "src/components/niko-table/grid/cells/grid-marching-ants.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/grid/cells/grid-marching-ants.tsx"
+        },
+        {
+          "path": "src/components/niko-table/grid/cells/grid-text-cell.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/grid/cells/grid-text-cell.tsx"
+        },
+        {
+          "path": "src/components/niko-table/grid/cells/grid-checkbox-cell.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/grid/cells/grid-checkbox-cell.tsx"
+        },
+        {
+          "path": "src/components/niko-table/grid/cells/grid-date-cell.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/grid/cells/grid-date-cell.tsx"
+        },
+        {
+          "path": "src/components/niko-table/grid/cells/grid-combobox-cell.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/grid/cells/grid-combobox-cell.tsx"
+        },
+        {
+          "path": "src/components/niko-table/grid/cells/grid-select-cell.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/grid/cells/grid-select-cell.tsx"
+        },
+        {
+          "path": "src/components/niko-table/grid/components/grid-clipboard.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/grid/components/grid-clipboard.tsx"
+        },
+        {
+          "path": "src/components/niko-table/grid/components/grid-fill-handle.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/grid/components/grid-fill-handle.tsx"
+        },
+        {
+          "path": "src/components/niko-table/grid/components/grid-move.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/grid/components/grid-move.tsx"
+        },
+        {
+          "path": "src/components/niko-table/grid/components/grid-row-reorder.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/grid/components/grid-row-reorder.tsx"
+        },
+        {
+          "path": "src/components/niko-table/grid/components/grid-cross-highlight.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/grid/components/grid-cross-highlight.tsx"
+        },
+        {
+          "path": "src/components/niko-table/grid/components/grid-status-bar.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/grid/components/grid-status-bar.tsx"
+        },
+        {
+          "path": "src/components/niko-table/grid/components/grid-column-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/grid/components/grid-column-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/grid/components/grid-add-column.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/grid/components/grid-add-column.tsx"
+        },
+        {
+          "path": "src/components/niko-table/grid/components/grid-row-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/grid/components/grid-row-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/grid/components/grid-toolbar.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/grid/components/grid-toolbar.tsx"
+        },
+        {
+          "path": "src/components/niko-table/grid/components/grid-shortcuts-dialog.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/grid/components/grid-shortcuts-dialog.tsx"
+        }
+      ]
+    },
+    {
+      "name": "data-table-grid-changes",
+      "type": "registry:component",
+      "title": "Data Grid — change tracking & persistence",
+      "description": "Opt-in useGridChanges hook that observes the uncontrolled grid engine and turns edits into a create/update/delete change-set — for staging saves, autosave, and full CRUD with per-row reconcile. Plain React, no dependency. Requires data-table-grid.",
+      "registryDependencies": ["https://niko-table.com/r/data-table-grid.json"],
+      "files": [
+        {
+          "path": "src/components/niko-table/grid/hooks/use-grid-changes.ts",
+          "type": "registry:component",
+          "target": "components/niko-table/grid/hooks/use-grid-changes.ts"
         }
       ]
     }

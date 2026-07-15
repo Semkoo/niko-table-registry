@@ -16,6 +16,189 @@ Before installing the DataTable component, make sure you have:
 3. **TailwindCSS** configured
 4. **TypeScript** (recommended)
 
+## Configure the Niko Table Registry
+
+To use the `@niko-table/` namespace with the shadcn CLI, you must first register it in your project's `components.json`. Add the `registries` field:
+
+```json title="components.json"
+{
+  "$schema": "https://ui.shadcn.com/schema.json",
+  // ... your existing config (style, tailwind, aliases, etc.)
+  "registries": {
+    "@niko-table": "https://niko-table.com/r/{name}.json"
+  }
+}
+```
+
+> **Tip:** If you prefer not to modify `components.json`, you can install any component directly via URL instead – see the URL-based commands in each section below.
+
+## Installation
+
+Install in two steps (or all at once):
+
+1. **Install the core once** — one command copies the base table (Root, DataTable, context, structure, column header, empty state, hooks, lib, types) into your project.
+2. **Add features one by one** — run the CLI for each feature you need (pagination, search filter, DnD, etc.). Each add-on depends on the core, so the CLI will install or reuse it.
+
+Now install the core:
+
+<Installation registryItem="data-table" />
+
+**This installs only the core.** For pagination, filters, DnD, virtualization, aside, and other features, add the optional blocks below (one by one) or use **Install Everything**.
+
+## Install Everything
+
+Want every registry item at once? List them explicitly — the shadcn CLI does **not** support wildcards like `@niko-table/**`. Prefer installing only what you need (see [Components](/getting-started/components/)); reach for this when you want the full set.
+
+<CliCommandCode
+  action="run"
+  command="shadcn@latest add @niko-table/data-table @niko-table/data-table-virtualized @niko-table/data-table-pagination @niko-table/data-table-search-filter @niko-table/data-table-sort-menu @niko-table/data-table-view-menu @niko-table/data-table-view-dnd-menu @niko-table/data-table-clear-filter @niko-table/data-table-filter-menu @niko-table/data-table-faceted-filter @niko-table/data-table-inline-filter @niko-table/data-table-slider-filter @niko-table/data-table-date-filter @niko-table/data-table-export-button @niko-table/data-table-aside @niko-table/data-table-selection-bar @niko-table/data-table-column-sort @niko-table/data-table-column-hide @niko-table/data-table-column-pin @niko-table/data-table-column-resize @niko-table/data-table-column-faceted-filter @niko-table/data-table-column-slider-filter @niko-table/data-table-column-date-filter @niko-table/data-table-row-dnd @niko-table/data-table-column-dnd @niko-table/data-table-virtualized-row-dnd @niko-table/data-table-virtualized-column-dnd @niko-table/data-table-grid @niko-table/data-table-grid-changes"
+/>
+
+You can also browse / filter the registry with:
+
+```bash
+npx shadcn@latest search @niko-table
+```
+
+### Install everything (via URLs)
+
+If you prefer not to configure the registry, pass full URLs instead:
+
+<CliCommandCode
+  action="run"
+  command={'shadcn@latest add "https://niko-table.com/r/data-table.json" "https://niko-table.com/r/data-table-virtualized.json" "https://niko-table.com/r/data-table-pagination.json" "https://niko-table.com/r/data-table-search-filter.json" "https://niko-table.com/r/data-table-sort-menu.json" "https://niko-table.com/r/data-table-view-menu.json" "https://niko-table.com/r/data-table-view-dnd-menu.json" "https://niko-table.com/r/data-table-clear-filter.json" "https://niko-table.com/r/data-table-filter-menu.json" "https://niko-table.com/r/data-table-faceted-filter.json" "https://niko-table.com/r/data-table-inline-filter.json" "https://niko-table.com/r/data-table-slider-filter.json" "https://niko-table.com/r/data-table-date-filter.json" "https://niko-table.com/r/data-table-export-button.json" "https://niko-table.com/r/data-table-aside.json" "https://niko-table.com/r/data-table-selection-bar.json" "https://niko-table.com/r/data-table-column-sort.json" "https://niko-table.com/r/data-table-column-hide.json" "https://niko-table.com/r/data-table-column-pin.json" "https://niko-table.com/r/data-table-column-resize.json" "https://niko-table.com/r/data-table-column-faceted-filter.json" "https://niko-table.com/r/data-table-column-slider-filter.json" "https://niko-table.com/r/data-table-column-date-filter.json" "https://niko-table.com/r/data-table-row-dnd.json" "https://niko-table.com/r/data-table-column-dnd.json" "https://niko-table.com/r/data-table-virtualized-row-dnd.json" "https://niko-table.com/r/data-table-virtualized-column-dnd.json" "https://niko-table.com/r/data-table-grid.json" "https://niko-table.com/r/data-table-grid-changes.json"'}
+/>
+
+## Optional Components
+
+Or install only the components you need. Each component can be added individually:
+
+### Table Controls
+
+**DataTablePagination:**
+
+<Installation registryItem="data-table-pagination" />
+
+**DataTableSearchFilter:**
+
+<Installation registryItem="data-table-search-filter" />
+
+**DataTableSortMenu:**
+
+<Installation registryItem="data-table-sort-menu" />
+
+**DataTableViewMenu:**
+
+<Installation registryItem="data-table-view-menu" />
+
+**DataTableViewDndMenu** (column visibility + drag-to-reorder):
+
+<Installation registryItem="data-table-view-dnd-menu" />
+
+**DataTableClearFilter:**
+
+<Installation registryItem="data-table-clear-filter" />
+
+**DataTableExportButton:**
+
+<Installation registryItem="data-table-export-button" />
+
+### Filter Components
+
+**DataTableFilterMenu:**
+
+<Installation registryItem="data-table-filter-menu" />
+
+**DataTableFacetedFilter:**
+
+<Installation registryItem="data-table-faceted-filter" />
+
+**DataTableInlineFilter:**
+
+<Installation registryItem="data-table-inline-filter" />
+
+**DataTableSliderFilter:**
+
+<Installation registryItem="data-table-slider-filter" />
+
+**DataTableDateFilter:**
+
+<Installation registryItem="data-table-date-filter" />
+
+### Column Header Components
+
+**DataTableColumnSort:**
+
+<Installation registryItem="data-table-column-sort" />
+
+**DataTableColumnHide:**
+
+<Installation registryItem="data-table-column-hide" />
+
+**DataTableColumnPin:**
+
+<Installation registryItem="data-table-column-pin" />
+
+**DataTableColumnResize:**
+
+<Installation registryItem="data-table-column-resize" />
+
+**DataTableColumnFacetedFilter:**
+
+<Installation registryItem="data-table-column-faceted-filter" />
+
+**DataTableColumnSliderFilter:**
+
+<Installation registryItem="data-table-column-slider-filter" />
+
+**DataTableColumnDateFilter:**
+
+<Installation registryItem="data-table-column-date-filter" />
+
+### Layout Components
+
+**DataTableVirtualized:**
+
+<Installation registryItem="data-table-virtualized" />
+
+**DataGrid (editable spreadsheet):**
+
+Turns the virtualized table into a keyboard-navigable, clipboard-aware editable grid. See the [Data Grid docs](/data-grid/introduction/).
+
+<Installation registryItem="data-table-grid" />
+
+Optional change-set tracking for saves (`useGridChanges`):
+
+<Installation registryItem="data-table-grid-changes" />
+
+**DataTableAside:**
+
+<Installation registryItem="data-table-aside" />
+
+**DataTableSelectionBar:**
+
+<Installation registryItem="data-table-selection-bar" />
+
+### Drag and Drop
+
+**DataTableRowDnd:**
+
+<Installation registryItem="data-table-row-dnd" />
+
+**DataTableColumnDnd:**
+
+<Installation registryItem="data-table-column-dnd" />
+
+**DataTableVirtualizedRowDnd** (needs virtualized + row-dnd):
+
+<Installation registryItem="data-table-virtualized-row-dnd" />
+
+**DataTableVirtualizedColumnDnd** (needs virtualized + column-dnd):
+
+<Installation registryItem="data-table-virtualized-column-dnd" />
+
+> Row DnD should not be combined with sorting or filtering. Column DnD is safe with any feature. Row and column packages are axis-isolated — installing one does not copy the other.
+
 ## Architecture Note
 
 The DataTable components use a two-layer architecture for maximum flexibility:
@@ -72,145 +255,6 @@ export {
   // ... your other exports
 }
 ```
-
-## Configure the Niko Table Registry
-
-To use the `@niko-table/` namespace with the shadcn CLI, you must first register it in your project's `components.json`. Add the `registries` field:
-
-```json title="components.json"
-{
-  "$schema": "https://ui.shadcn.com/schema.json",
-  // ... your existing config (style, tailwind, aliases, etc.)
-  "registries": {
-    "@niko-table": "https://niko-table.com/r/{name}.json"
-  }
-}
-```
-
-> **Tip:** If you prefer not to modify `components.json`, you can install any component directly via URL instead – see the URL-based commands in each section below.
-
-## Installation
-
-Install in two steps (or all at once):
-
-1. **Install the core once** — one command copies the base table (Root, DataTable, context, structure, column header, empty state, hooks, lib, types) into your project.
-2. **Add features one by one** — run the CLI for each feature you need (pagination, search filter, DnD, etc.). Each add-on depends on the core, so the CLI will install or reuse it.
-
-Now install the core:
-
-<Installation registryItem="data-table" />
-
-**This installs only the core.** For pagination, filters, DnD, virtualization, aside, and other features, add the optional blocks below (one by one) or use **Install Everything**.
-
-## Install Everything
-
-Want all components at once? The following command installs **core + all optional add-ons** in one go:
-
-<CliCommandCode
-  action="run"
-  command="shadcn@latest add @niko-table/data-table @niko-table/data-table-virtualized @niko-table/data-table-pagination @niko-table/data-table-search-filter @niko-table/data-table-sort-menu @niko-table/data-table-view-menu @niko-table/data-table-clear-filter @niko-table/data-table-filter-menu @niko-table/data-table-faceted-filter @niko-table/data-table-inline-filter @niko-table/data-table-slider-filter @niko-table/data-table-date-filter @niko-table/data-table-export-button @niko-table/data-table-aside @niko-table/data-table-selection-bar @niko-table/data-table-column-sort @niko-table/data-table-column-hide @niko-table/data-table-column-pin @niko-table/data-table-column-faceted-filter @niko-table/data-table-column-slider-filter @niko-table/data-table-column-date-filter @niko-table/data-table-row-dnd @niko-table/data-table-column-dnd"
-/>
-
-### Install everything (via URLs)
-
-If you prefer not to configure the registry, you can install core and every optional block in one command using URLs:
-
-<CliCommandCode
-  action="run"
-  command={'shadcn@latest add "https://niko-table.com/r/data-table.json" "https://niko-table.com/r/data-table-virtualized.json" "https://niko-table.com/r/data-table-pagination.json" "https://niko-table.com/r/data-table-search-filter.json" "https://niko-table.com/r/data-table-sort-menu.json" "https://niko-table.com/r/data-table-view-menu.json" "https://niko-table.com/r/data-table-clear-filter.json" "https://niko-table.com/r/data-table-filter-menu.json" "https://niko-table.com/r/data-table-faceted-filter.json" "https://niko-table.com/r/data-table-inline-filter.json" "https://niko-table.com/r/data-table-slider-filter.json" "https://niko-table.com/r/data-table-date-filter.json" "https://niko-table.com/r/data-table-export-button.json" "https://niko-table.com/r/data-table-aside.json" "https://niko-table.com/r/data-table-selection-bar.json" "https://niko-table.com/r/data-table-column-sort.json" "https://niko-table.com/r/data-table-column-hide.json" "https://niko-table.com/r/data-table-column-pin.json" "https://niko-table.com/r/data-table-column-faceted-filter.json" "https://niko-table.com/r/data-table-column-slider-filter.json" "https://niko-table.com/r/data-table-column-date-filter.json" "https://niko-table.com/r/data-table-row-dnd.json" "https://niko-table.com/r/data-table-column-dnd.json"'}
-/>
-
-## Optional Components
-
-Or install only the components you need. Each component can be added individually:
-
-### Table Controls
-
-**DataTablePagination:**
-
-<Installation registryItem="data-table-pagination" />
-
-**DataTableSearchFilter:**
-
-<Installation registryItem="data-table-search-filter" />
-
-**DataTableSortMenu:**
-
-<Installation registryItem="data-table-sort-menu" />
-
-**DataTableViewMenu:**
-
-<Installation registryItem="data-table-view-menu" />
-
-**DataTableClearFilter:**
-
-<Installation registryItem="data-table-clear-filter" />
-
-**DataTableExportButton:**
-
-<Installation registryItem="data-table-export-button" />
-
-### Filter Components
-
-**DataTableFilterMenu:**
-
-<Installation registryItem="data-table-filter-menu" />
-
-**DataTableFacetedFilter:**
-
-<Installation registryItem="data-table-faceted-filter" />
-
-**DataTableInlineFilter:**
-
-<Installation registryItem="data-table-inline-filter" />
-
-**DataTableSliderFilter:**
-
-<Installation registryItem="data-table-slider-filter" />
-
-**DataTableDateFilter:**
-
-<Installation registryItem="data-table-date-filter" />
-
-### Column Header Components
-
-**DataTableColumnSort:**
-
-<Installation registryItem="data-table-column-sort" />
-
-**DataTableColumnHide:**
-
-<Installation registryItem="data-table-column-hide" />
-
-**DataTableColumnPin:**
-
-<Installation registryItem="data-table-column-pin" />
-
-**DataTableColumnFacetedFilter:**
-
-<Installation registryItem="data-table-column-faceted-filter" />
-
-**DataTableColumnSliderFilter:**
-
-<Installation registryItem="data-table-column-slider-filter" />
-
-**DataTableColumnDateFilter:**
-
-<Installation registryItem="data-table-column-date-filter" />
-
-### Layout Components
-
-**DataTableVirtualized:**
-
-<Installation registryItem="data-table-virtualized" />
-
-**DataTableAside:**
-
-<Installation registryItem="data-table-aside" />
-
-**DataTableSelectionBar:**
-
-<Installation registryItem="data-table-selection-bar" />
 
 ## Manual Installation
 
@@ -377,27 +421,6 @@ nuqs provides type-safe search params state management, perfect for syncing tabl
 ### Sortable/Draggable Rows
 
 For drag-and-drop row reordering, follow the [DiceUI Sortable installation guide](https://www.diceui.com/docs/components/sortable).
-
-## Quick Install All Dependencies
-
-If you want to install everything upfront — core, all add-ons, and optional npm dependencies:
-
-<CliCommandCode
-  action="run"
-  command="shadcn@latest add @niko-table/data-table @niko-table/data-table-virtualized @niko-table/data-table-pagination @niko-table/data-table-search-filter @niko-table/data-table-sort-menu @niko-table/data-table-view-menu @niko-table/data-table-clear-filter @niko-table/data-table-filter-menu @niko-table/data-table-faceted-filter @niko-table/data-table-inline-filter @niko-table/data-table-slider-filter @niko-table/data-table-date-filter @niko-table/data-table-export-button @niko-table/data-table-aside @niko-table/data-table-selection-bar @niko-table/data-table-column-sort @niko-table/data-table-column-hide @niko-table/data-table-column-pin @niko-table/data-table-column-faceted-filter @niko-table/data-table-column-slider-filter @niko-table/data-table-column-date-filter @niko-table/data-table-row-dnd @niko-table/data-table-column-dnd"
-/>
-
-For optional dependencies used by specific examples (not required for all projects):
-
-<CliCommandCode
-  action="install"
-  command="nuqs @tanstack/react-query"
-/>
-
-<CliCommandCode
-  action="run"
-  command="shadcn@latest add checkbox card"
-/>
 
 ## Project Structure
 

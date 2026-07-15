@@ -1,0 +1,46 @@
+---
+title: All Features Grid
+description: Full composable Data Grid — clipboard, fill, move, filters, dynamic columns, and typed editors.
+---
+
+import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
+import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
+
+Kitchen-sink demo from the [Introduction](/data-grid/introduction/). Opt-in children only — unmounted features attach no listeners.
+
+<CodePreview
+  demo="niko-table/grid-all-features"
+  title="Data Grid"
+  type="block"
+  description="Composable, virtualized spreadsheet grid built on Niko Table."
+  className="w-full"
+/>
+
+## Installation
+
+<CliCommandCode action="run" command="shadcn@latest add @niko-table/data-table-grid @niko-table/data-table-grid-changes @niko-table/data-table-view-dnd-menu @niko-table/data-table-faceted-filter @niko-table/data-table-search-filter @niko-table/data-table-sort-menu" />
+
+Also needs shadcn primitives used by editors and menus:
+
+<CliCommandCode action="run" command="shadcn@latest add calendar popover command button checkbox dropdown-menu" />
+
+> First time using `@niko-table`? See the [Installation Guide](/getting-started/installation#configure-the-niko-table-registry).
+
+## What's included
+
+| Area            | Pieces                                                          |
+| --------------- | --------------------------------------------------------------- |
+| Core            | `useDataGrid`, `<DataGrid>`, `<DataGridCell>`                   |
+| Editors         | text, number, checkbox, date, select                            |
+| Features        | clipboard, fill, move, cross-highlight, status bar, row reorder |
+| Table overlays  | search, faceted filter, sort, view menu, column resize          |
+| Dynamic columns | `useGridColumns` + add/menu                                     |
+| Persistence     | `useGridChanges` + Current Table State panel                    |
+
+## Next
+
+- [Basic Grid](/examples/basic-grid/) — minimal starting point (reference example shape)
+- [Cell Types](/examples/cell-types-grid/) · [Validation](/examples/validation-grid/)
+- [Dynamic Columns](/examples/dynamic-columns-grid/) · [Persistence](/examples/persistence-grid/)
+- [Components](/data-grid/overview/components/) · [API Reference](/data-grid/api/)
+- [Documentation Guidelines](/contributing/documentation-guidelines/)

@@ -13,9 +13,9 @@
 import {
   Children,
   isValidElement,
-  type ReactNode,
   type ComponentType,
   type PropsWithChildren,
+  type ReactNode,
 } from "react"
 
 /**
@@ -29,6 +29,7 @@ export interface FeatureRequirements {
   enableMultiSort?: boolean
   enableGrouping?: boolean
   enableExpanding?: boolean
+  enableColumnResizing?: boolean
   manualSorting?: boolean
   manualPagination?: boolean
   manualFiltering?: boolean
@@ -57,6 +58,9 @@ const COMPONENT_FEATURES: Record<string, FeatureRequirements> = {
   TableViewMenu: { enableFilters: true },
   DataTableViewDndMenu: { enableFilters: true },
   TableViewDndMenu: { enableFilters: true },
+
+  // Column resize — a marker component; its presence turns on resizable columns.
+  DataTableColumnResize: { enableColumnResizing: true },
   DataTableSearchFilter: { enableFilters: true },
   TableSearchFilter: { enableFilters: true },
   DataTableFacetedFilter: { enableFilters: true },

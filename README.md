@@ -45,11 +45,29 @@ Niko Table is built around the following principles:
 
 ### Install via CLI (Recommended)
 
-```bash
-npx shadcn@latest add https://niko-table.com/r/data-table.json
+Add the registry to your project's `components.json`:
+
+```json
+{
+  "registries": {
+    "@niko-table": "https://niko-table.com/r/{name}.json"
+  }
+}
 ```
 
-This copies all DataTable components into your project. You own the code.
+Then install the core (or any add-on — see [Components](https://niko-table.com/getting-started/components/)):
+
+```bash
+pnpm dlx shadcn@latest add @niko-table/data-table
+```
+
+URL fallback (no `components.json` change):
+
+```bash
+pnpm dlx shadcn@latest add https://niko-table.com/r/data-table.json
+```
+
+This copies the DataTable source into your project. You own the code. The CLI does not support wildcards like `@niko-table/**` — list items explicitly or use [Install Everything](https://niko-table.com/getting-started/installation/#install-everything).
 
 ### Manual Installation
 

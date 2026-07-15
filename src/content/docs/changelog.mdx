@@ -3,6 +3,58 @@ title: Changelog
 description: Latest updates and release notes for Niko Table.
 ---
 
+## July 2026
+
+### Added
+
+- **Data Grid** (`data-table-grid`) — composable, virtualized spreadsheet grid: `useDataGrid` + `<DataGrid>` + opt-in children. [Introduction](/data-grid/introduction/)
+- **Persistence** (`data-table-grid-changes`) — `useGridChanges` → create / update / delete. [Persistence](/examples/persistence-grid/)
+- **Inline validation** — `CellState.error` tooltip on the cell. [Validation](/examples/validation-grid/)
+- **Column resize** — `<DataTableColumnResize />`; [example](/examples/column-resize-table/)
+- Docs — full registry catalog (resize + Data Grid + axis DnD packages), Install Everything lists all items, homepage/`CliCommandCode` namespace install
+- Docs — Data Grid intro live demo includes **Current Table State** panel
+- Docs — Manual Installation project tree includes `grid/`, column resize, flash/scroll hooks
+- Docs — Data Grid overview layers + Data Grid Examples (mirrors Table IA)
+- Docs — [Documentation Guidelines](/contributing/documentation-guidelines/)
+- Registry — `data-table-virtualized-row-dnd` / `data-table-virtualized-column-dnd`
+
+### Changed
+
+- Docs Source/API links use Astro `DocsLink` (aligned outline buttons; Starlight MDX stripped React `Button asChild`)
+- Install CLI yarn tab uses `yarn dlx`; Installation page is Prerequisites → Registry → Install first
+- [Skills](/getting-started/skills/) — Data Grid coverage + Cursor / Claude Code / Windsurf / agents install paths
+- `niko-table-best-practices` skill teaches Data Grid composition
+- Import DnD from `data-table-row-dnd-structure` / `data-table-column-dnd-structure` (and virtualized twins)
+- `DEFAULT_MIN_COLUMN_SIZE` moved to `lib/constants` (root no longer imports resize-handle for it)
+- `enableSorting` defaults off unless config or feature detection enables it
+- DnD bodies support row context menus; non-virt column-DnD body honors resize; column-DnD example mounts resize
+
+### Removed
+
+- `data-table-dnd-structure.tsx` / `data-table-virtualized-dnd-structure.tsx` (no re-export shims — use the axis files)
+
+### Fixed
+
+- Body cells truncate on column resize (no text spill into neighbors); default `minSize` 40px when resize is enabled
+- `DataTableDndBody` supports column resize (Row DnD + `<DataTableColumnResize />`)
+- DnD contexts use `React.useId()` to avoid SSR `aria-describedby` (`DndDescribedBy-N`) hydration mismatches
+- Virtualized row/column DnD supports `<DataTableColumnResize />` (flex header + body sizing; grip won’t start a reorder)
+- Introduction composability map table rendering
+- Sidebar scroll restore without Starlight `SidebarPersister` (freeze with theme-black)
+- **Core** — memoized body rows invalidate on column **add/remove** (`columns` in `columnLayoutSignature`) — dynamic columns no longer leave body cells / borders stale
+- **Core** — `data-row-index` is display order (`flashRows` / scroll after sort/filter)
+- **Core** — empty/loading `colSpan` uses visible columns; resize width cleanup restores prior table styles
+- **Core** — `daysAgo()` is deterministic (fixed epoch)
+- Validation settle no-ops on identical row refs (no infinite loop)
+- Display index under sort/filter (selection, gutter, cross-highlight)
+- Blank SSR seed (`row-0`…); `clearAll` keeps seed row count
+- Scroll-into-view with right-pinned columns
+- Undo/redo / filter / hide no longer leave ghost focus
+- `extendSelectionTo` ends editing; combobox no-op re-select skips undo
+- Pin + resize no longer clips the first data column
+- Portaled editors (`data-grid-cell-editor`) commit on mouse pick
+- Persistence demo rejects incomplete creates (Name + Email) with `failedRowIds` highlight
+
 ## May 2026
 
 ### Added
@@ -61,7 +113,6 @@ description: Latest updates and release notes for Niko Table.
 
 ### Internal
 
-- `data-table-virtualized-dnd-structure.tsx` marked `@internal`.
 - DnD virtualized bodies don't gate `measureElement` on `columnsLocked` — flex layout has no auto-layout pass.
 
 ## April 2026

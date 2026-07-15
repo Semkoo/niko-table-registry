@@ -1,0 +1,105 @@
+---
+title: Hooks
+description: useDataGrid, useGridColumns, useGridChanges, and internal grid hooks.
+---
+
+import { GITHUB_REPO_URL } from "@/data/env"
+import DocsLink from "@/components/markdown/docs-link.astro"
+
+Hooks under `grid/hooks/`. The public engine is `useDataGrid`; persistence is a separate install via `useGridChanges`.
+
+<div className="not-content mb-6 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/tree/main/src/components/niko-table/grid/hooks`} external>Source Code ↗</DocsLink>
+  <DocsLink href="/data-grid/overview/core/">Core ↗</DocsLink>
+</div>
+
+### useDataGrid
+
+Headless engine: rows, focus, selection, edit lifecycle, undo/redo. Domain-free.
+
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/grid/hooks/use-data-grid.ts`} external>Source Code ↗</DocsLink>
+  <DocsLink href="/data-grid/api/">API Reference ↗</DocsLink>
+</div>
+
+```tsx showLineNumbers
+import { useDataGrid } from "@/components/niko-table/grid/hooks/use-data-grid"
+
+const grid = useDataGrid<TRow extends GridRow>({
+  columnIds,         // editable column ids (visual order)
+  createEmptyRow,    // (id) => TRow
+  initialRows,       // seed data (optional)
+  initialRowCount,   // blank seed count when no initialRows (default 5)
+  maxRows,           // hard cap (default 200)
+  makeId,            // runtime inserts only (default crypto.randomUUID)
+})
+```
+
+Blank seeds from `initialRowCount` use deterministic `row-0`… ids (SSR-safe). Runtime `addRows` / `insertRows` / `clearAll` use `makeId`.
+
+#### Config
+
+| Name              | Type                   | Default | Description                            |
+| ----------------- | ---------------------- | ------- | -------------------------------------- |
+| `columnIds`       | `readonly string[]`    | —       | Editable column ids in visual order    |
+| `createEmptyRow`  | `(id: string) => TRow` | —       | Factory for blank rows                 |
+| `initialRows`     | `TRow[]`               | —       | Seed with exact rows                   |
+| `initialRowCount` | `number`               | `5`     | Blank seed count when no `initialRows` |
+| `maxRows`         | `number`               | `200`   | Hard cap                               |
+| `makeId`          | `() => string`         | UUID    | Runtime inserts only                   |
+
+#### Return values (high level)
+
+| Field                                                                             | Purpose                                                               |
+| --------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| `rows`                                                                            | Pass to `DataTableRoot data`                                          |
+| `lastCommit`                                                                      | Last mutation signal — see [Persistence](/examples/persistence-grid/) |
+| `focusedCell` / `editingCell` / `selectionAnchor`                                 | Cursor + range by `{ rowId, columnId }`                               |
+| `selectCell` / `deselect` / `extendSelectionTo`                                   | Move / clear / extend selection (all leave edit mode)                 |
+| `startEditing` / `stopEditing`                                                    | Open / close the editor                                               |
+| `setCell(rowId, colId, next)`                                                     | O(1) commit — one row identity changes                                |
+| `updateRows` / `addRows` / `insertRows` / `removeRow` / `removeRows` / `clearAll` | Row mutations (undoable)                                              |
+| `undo` / `redo` / `canUndo` / `canRedo`                                           | History                                                               |
+
+`updateRows(fn, { history: false })` settles derived state (e.g. cross-field validation) without pushing undo. See [Validation](/examples/validation-grid/).
+
+### useGridColumns
+
+Runtime column specs for [Dynamic Columns](/examples/dynamic-columns-grid/).
+
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/grid/hooks/use-grid-columns.ts`} external>Source Code ↗</DocsLink>
+</div>
+
+```tsx showLineNumbers
+import { useGridColumns } from "@/components/niko-table/grid/hooks/use-grid-columns"
+
+const cols = useGridColumns({ initialColumns })
+```
+
+### useGridChanges
+
+Separate install: `@niko-table/data-table-grid-changes`. Driven by `grid.lastCommit`.
+
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/grid/hooks/use-grid-changes.ts`} external>Source Code ↗</DocsLink>
+  <DocsLink href="/examples/persistence-grid/">Persistence ↗</DocsLink>
+</div>
+
+```tsx showLineNumbers
+const changes = useGridChanges(grid, { initialRows })
+changes.isDirty
+changes.getChangeSet() // { created, updated, deleted }
+changes.reconcile({ succeededIds, failedIds })
+```
+
+### Internal hooks
+
+Used by core / feature components — rarely imported from app code.
+
+| Hook                 | Role                                              |
+| -------------------- | ------------------------------------------------- |
+| `useGridKeyboard`    | Scoped keydown state machine                      |
+| `useGridNavigation`  | Arrow / Tab / Home / End movement                 |
+| `useGridClipboard`   | TSV serialize / parse helpers                     |
+| `useDataGridContext` | Context (lives in core) — throws outside provider |

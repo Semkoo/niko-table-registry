@@ -1,0 +1,19 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "data-table-column-resize",
+  "title": "DataTable Column Resize",
+  "description": "Opt-in column resizing with drag handles and double-click autosize (measures natural text width). Keyboard-operable handle. Drop <DataTableColumnResize/> into the table to enable — works with DataTableHeader/Body and the virtualized variants.",
+  "dependencies": [],
+  "registryDependencies": [
+    "https://niko-table.com/r/data-table.json"
+  ],
+  "files": [
+    {
+      "path": "src/components/niko-table/components/data-table-column-resize.tsx",
+      "content": "\"use client\"\n\n/**\n * niko-table — created by Semir N. (Semkoo, https://github.com/Semkoo) with AI assistance.\n *\n * Before reporting anything: please check the changelog first.\n *  - In-repo: ./CHANGELOG.md\n *  - Docs site: https://niko-table.com/changelog\n *\n * Found a bug or have a fix? Open an issue or PR on GitHub so other\n * users (and future LLMs reading this code) benefit:\n * https://github.com/Semkoo/niko-table-registry\n */\n\n/**\n * Opt-in column resizing — mix-and-match, like every other niko-table feature.\n * DROP THIS anywhere inside `<DataTableRoot>` and columns become drag-resizable\n * (grip on each header's right edge; double-click a grip to autosize to\n * content). Leave it out and nothing about the table changes.\n *\n * It renders nothing — its presence is detected from the children tree (by\n * `displayName`, same mechanism as the view/filter menus) and flips the table's\n * `enableColumnResizing`. Columns opt OUT individually with `enableResizing:\n * false` on their column def (e.g. a row-number gutter).\n *\n * Works with both `DataTableHeader` / `DataTableBody` and the virtualized\n * header/body variants. The grip UI ships with the data-table core; this\n * marker only flips the feature flag.\n *\n * @example\n * <DataTableRoot data={data} columns={columns}>\n *   <DataTableColumnResize />\n *   <DataTable>\n *     <DataTableHeader />\n *     <DataTableBody />\n *   </DataTable>\n * </DataTableRoot>\n */\nexport function DataTableColumnResize() {\n  return null\n}\n\nDataTableColumnResize.displayName = \"DataTableColumnResize\"\n",
+      "type": "registry:component",
+      "target": "components/niko-table/components/data-table-column-resize.tsx"
+    }
+  ],
+  "type": "registry:component"
+}

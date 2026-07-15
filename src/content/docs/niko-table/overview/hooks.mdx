@@ -3,8 +3,8 @@ title: Hooks
 description: Custom React hooks for table functionality including useDataTable, useDebounce, and more.
 ---
 
-import { Button } from "@/components/ui/button"
 import { GITHUB_REPO_URL } from "@/data/env"
+import DocsLink from "@/components/markdown/docs-link.astro"
 
 Custom React hooks for table functionality.
 
@@ -12,16 +12,8 @@ Custom React hooks for table functionality.
 
 Hook to access the table instance and context from any child component.
 
-<div className="mb-4 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/core/data-table-context.tsx`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Source Code ↗
-    </a>
-  </Button>
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/core/data-table-context.tsx`} external>Source Code ↗</DocsLink>
 </div>
 
 ```tsx showLineNumbers
@@ -57,16 +49,8 @@ export function CustomComponent() {
 
 Hook to debounce a value, useful for search inputs and filters.
 
-<div className="mb-4 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/hooks/use-debounce.ts`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Source Code ↗
-    </a>
-  </Button>
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/hooks/use-debounce.ts`} external>Source Code ↗</DocsLink>
 </div>
 
 ```tsx showLineNumbers
@@ -106,16 +90,8 @@ The debounced value of type `T`.
 
 Hook that derives the title for a column filter component.
 
-<div className="mb-4 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/hooks/use-derived-column-title.ts`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Source Code ↗
-    </a>
-  </Button>
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/hooks/use-derived-column-title.ts`} external>Source Code ↗</DocsLink>
 </div>
 
 ```tsx showLineNumbers
@@ -152,16 +128,8 @@ The derived title string (priority: title prop → column.meta.label → formatt
 
 Hook to generate options for select/multiSelect columns from table data.
 
-<div className="mb-4 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/hooks/use-generated-options.ts`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Source Code ↗
-    </a>
-  </Button>
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/hooks/use-generated-options.ts`} external>Source Code ↗</DocsLink>
 </div>
 
 ```tsx showLineNumbers
@@ -209,16 +177,8 @@ A record mapping column IDs to arrays of `Option` objects.
 
 Hook for managing keyboard shortcuts with fine-grained control.
 
-<div className="mb-4 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/hooks/use-keyboard-shortcut.ts`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Source Code ↗
-    </a>
-  </Button>
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/hooks/use-keyboard-shortcut.ts`} external>Source Code ↗</DocsLink>
 </div>
 
 ```tsx showLineNumbers

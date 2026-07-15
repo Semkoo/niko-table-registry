@@ -1,0 +1,80 @@
+---
+title: Dynamic Columns
+description: Add, rename, move, delete, reorder, and retype columns at runtime.
+---
+
+import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
+import CollapsiblePreview from "@/components/markdown/collapsible-preview.astro"
+import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
+
+Columns become runtime state. `useGridColumns` owns the list; `<DataGridColumns>` wires the header menu and add button. New columns render empty cells — no engine changes required.
+
+<CodePreview demo="niko-table/grid-dynamic-columns" />
+
+<CollapsiblePreview>
+  <CodePreview demo="niko-table/grid-dynamic-columns-state" />
+</CollapsiblePreview>
+
+## Installation
+
+<CliCommandCode action="run" command="shadcn@latest add @niko-table/data-table-grid @niko-table/data-table-view-dnd-menu" />
+
+## Usage
+
+```tsx showLineNumbers
+const cols = useGridColumns({
+  initialColumns: [
+    { id: "task", label: "Task", type: "text" },
+    { id: "status", label: "Status", type: "select", options: ["Todo", "Done"] },
+  ],
+})
+const grid = useDataGrid({ columnIds: cols.columnIds, createEmptyRow })
+```
+
+Header menu:
+
+```tsx
+<DataTableColumnActions>
+  <DataTableColumnHideOptions />
+  <GridColumnMenuOptions />
+</DataTableColumnActions>
+```
+
+Provider + toolbar:
+
+```tsx
+<DataGrid grid={grid}>
+  <DataGridColumns value={cols}>
+    <DataGridToolbar>
+      <DataGridAddColumnButton />
+      <DataTableViewDndMenu
+        columnOrder={cols.columnIds}
+        onColumnOrderChange={cols.reorderColumns}
+      />
+    </DataGridToolbar>
+    {/* table… */}
+  </DataGridColumns>
+</DataGrid>
+```
+
+API: `columns`, `columnIds`, `addColumn`, `renameColumn`, `moveColumn`, `removeColumn`, `reorderColumns`, `setColumnType`.
+
+## Retype
+
+```tsx
+<DataGridColumns
+  value={cols}
+  columnTypes={[
+    { value: "text", label: "Text" },
+    { value: "select", label: "Select", options: STATUSES },
+  ]}
+  resolveCell={resolveCell}
+>
+```
+
+Existing cells re-resolve against the new type (unmatched values turn invalid).
+
+## Next
+
+- [Cell Types](/examples/cell-types-grid/)
+- [API Reference](/data-grid/api/)

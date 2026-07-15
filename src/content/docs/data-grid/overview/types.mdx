@@ -1,0 +1,100 @@
+---
+title: Types
+description: CellState, CellPosition, GridRow, and related TypeScript types.
+---
+
+import { GITHUB_REPO_URL } from "@/data/env"
+import DocsLink from "@/components/markdown/docs-link.astro"
+
+Types under `grid/types/`. Domain-free — safe to copy with the registry item.
+
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/grid/types/grid-cell.ts`} external>Source Code ↗</DocsLink>
+</div>
+
+## CellStatus
+
+```ts
+type CellStatus = "valid" | "invalid" | "empty"
+```
+
+## CellState
+
+Each editable cell keeps `raw`, resolved `value`, and `status` separate so a pasted-but-unmatched value stays visible (and correctable).
+
+```ts
+interface CellState<T> {
+  raw: string
+  value: T | null
+  status: CellStatus
+  /** Tooltip when invalid. */
+  error?: string
+}
+```
+
+## CellPosition
+
+Address by **row id** and **column id** — not display index — so focus/selection survive filter/sort/reorder.
+
+```ts
+interface CellPosition {
+  rowId: string
+  columnId: string
+}
+```
+
+## CopiedRange
+
+Marching-ants copy outline, captured by identity (`Set` membership + edge ids).
+
+```ts
+interface CopiedRange {
+  rowIds: Set<string>
+  firstRowId: string
+  lastRowId: string
+  columnIds: Set<string>
+  firstColumnId: string
+  lastColumnId: string
+}
+```
+
+## SelectionBounds
+
+Inclusive selection rectangle in **display** space (post filter/sort indices).
+
+```ts
+interface SelectionBounds {
+  minRow: number
+  maxRow: number
+  minColIndex: number
+  maxColIndex: number
+}
+```
+
+## GridRow
+
+```ts
+interface GridRow {
+  id: string
+  [columnId: string]: CellState<string> | string
+}
+```
+
+## Helpers
+
+| Helper           | Role                                     |
+| ---------------- | ---------------------------------------- |
+| `emptyCell<T>()` | Blank cell with `status: "empty"`        |
+| `isCellInBounds` | Inclusive membership in selection bounds |
+
+## Related types elsewhere
+
+| Location                        | Types                                                 |
+| ------------------------------- | ----------------------------------------------------- |
+| `use-data-grid.ts`              | `UseDataGrid`, `UseDataGridConfig`, `GridCommit`      |
+| `use-grid-columns.ts`           | `GridColumnSpec`, `GridColumnsApi`                    |
+| `use-grid-changes.ts`           | `GridChangeSet`, `GridChanges`, `GridReconcileResult` |
+| `data-grid-columns-context.tsx` | `GridColumnTypeOption`                                |
+| `cell-props.ts`                 | `CellEditorProps`, `GridComboboxOption`               |
+
+See also [Niko Table Types](/niko-table/overview/types/) for table-level defs.
