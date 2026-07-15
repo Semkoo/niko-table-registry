@@ -35,6 +35,7 @@ description: Latest updates and release notes for Niko Table.
 
 ### Fixed
 
+- Column-resize grip is idle-invisible (shows on hover/focus/drag) so it doesn’t read as a header divider offset from body `border-r`
 - Body cells truncate on column resize (no text spill into neighbors); default `minSize` 40px when resize is enabled
 - `DataTableDndBody` supports column resize (Row DnD + `<DataTableColumnResize />`)
 - DnD contexts use `React.useId()` to avoid SSR `aria-describedby` (`DndDescribedBy-N`) hydration mismatches
