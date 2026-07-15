@@ -32,6 +32,14 @@ declare module "@tanstack/react-table" {
     // Display
     label?: string
     placeholder?: string
+    /**
+     * Fill the leftover row width with this column when column resizing is on
+     * (needs `<DataTableColumnResize />`). The table goes full-width and this
+     * column absorbs the surplus, so every other column keeps its `size` and a
+     * trailing actions/menu column pins to the right edge. Pure layout — never
+     * touches `columnSizing`, so no persistence side effects.
+     */
+    flex?: boolean
 
     // Filtering
     variant?: FilterVariant

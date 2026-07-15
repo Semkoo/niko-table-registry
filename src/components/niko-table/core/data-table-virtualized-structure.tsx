@@ -127,6 +127,9 @@ export const DataTableVirtualizedHeader = React.memo(
           <TableRow key={headerGroup.id}>
             {headerGroup.headers.map(header => {
               const size = header.column.columnDef.size
+              // A flex column has no explicit width — under `table-layout: fixed`
+              // it soaks up the leftover row width. Not drag-resizable.
+              const isFlex = header.column.columnDef.meta?.flex === true
               const isActiveColumn =
                 activeCell?.columnIds.has(header.column.id) ?? false
               return (
@@ -153,11 +156,14 @@ export const DataTableVirtualizedHeader = React.memo(
                   style={{
                     // Resizing: width tracks `getSize()` (columnSizing-aware).
                     // Off: unchanged (columnDef.size, or auto when unset).
-                    width: resizing
-                      ? header.getSize()
-                      : size
-                        ? `${size}px`
-                        : undefined,
+                    // Flex: no width — fills the leftover space.
+                    width: isFlex
+                      ? undefined
+                      : resizing
+                        ? header.getSize()
+                        : size
+                          ? `${size}px`
+                          : undefined,
                     ...getCommonPinningStyles(header.column, true),
                   }}
                 >
@@ -176,7 +182,7 @@ export const DataTableVirtualizedHeader = React.memo(
                       )}
                     </DataTableColumnHeaderRoot>
                   )}
-                  {resizing && header.column.getCanResize() && (
+                  {resizing && !isFlex && header.column.getCanResize() && (
                     <DataTableColumnResizeHandle header={header} />
                   )}
                 </TableHead>
@@ -417,16 +423,20 @@ const VirtualizedBodyRowInner = function VirtualizedBodyRow<TData>({
     >
       {visibleCells.map(cell => {
         const size = cell.column.columnDef.size
+        // Flex column: no width, so it fills the leftover row width.
+        const isFlex = cell.column.columnDef.meta?.flex === true
         const flashing =
           isRowFlashing ||
           flashingCellKeys.has(flashCellKey(row.id, cell.column.id))
         const cellStyle = {
-          // Resizing: width tracks `getSize()`; off: unchanged.
-          width: columnSizingEnabled
-            ? cell.column.getSize()
-            : size
-              ? `${size}px`
-              : undefined,
+          // Resizing: width tracks `getSize()`; off: unchanged; flex: fills.
+          width: isFlex
+            ? undefined
+            : columnSizingEnabled
+              ? cell.column.getSize()
+              : size
+                ? `${size}px`
+                : undefined,
           ...getCommonPinningStyles(cell.column, false),
           ...(flashing ? { animation: FLASH_ANIMATION } : {}),
         }
@@ -690,8 +700,13 @@ export function DataTableVirtualizedBody<TData>({
           (sum, col) => sum + col.getSize(),
           0,
         )
+        // A flex column (no explicit width) absorbs the leftover row width:
+        // let the table be full-width and only enforce `min-width` so columns
+        // don't shrink below their sizes. Without one, pin the table to the
+        // exact sum so sticky offsets and column flow stay in lockstep.
+        const hasFlex = leafColumns.some(c => c.columnDef.meta?.flex === true)
         tableEl.style.tableLayout = "fixed"
-        tableEl.style.width = `${totalDesiredWidth}px`
+        tableEl.style.width = hasFlex ? "100%" : `${totalDesiredWidth}px`
         tableEl.style.minWidth = `${totalDesiredWidth}px`
       }
       if (!columnLockRef.current) {

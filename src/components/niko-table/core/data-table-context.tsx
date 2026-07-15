@@ -172,6 +172,38 @@ export function useDataTableActiveCellSetter(): (cell: ActiveCell) => void {
   return setter
 }
 
+// ---------------------------------------------------------------------------
+// Column-resize preview context
+// ---------------------------------------------------------------------------
+// Resizing runs in `onEnd` mode: columns don't change width until the drag
+// ends, so the memoized header/body never re-render mid-drag — that's what
+// keeps resizing smooth on heavy (avatar/badge) tables. To still show a live
+// guide line that follows the cursor, the provider publishes the in-flight
+// resize offset here. Only `<ColumnResizePreviewLine>` subscribes, so nothing
+// else in the table re-renders per pointer move.
+// ---------------------------------------------------------------------------
+
+export interface ColumnResizeInfo {
+  /** Id of the column being dragged, or `null` when no resize is active. */
+  resizingColumnId: string | null
+  /** Pixel delta from the drag start (add to the column's right edge). */
+  deltaOffset: number
+}
+
+const ColumnResizeInfoContext = createContext<ColumnResizeInfo>({
+  resizingColumnId: null,
+  deltaOffset: 0,
+})
+
+/**
+ * Live column-resize offset for the preview guide line. Returns the idle value
+ * (`{ resizingColumnId: null, deltaOffset: 0 }`) when no drag is in flight (or
+ * outside a provider), so it's safe to call unconditionally.
+ */
+export function useColumnResizeInfo(): ColumnResizeInfo {
+  return useContext(ColumnResizeInfoContext)
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const DataTableContext = createContext<DataTableContextProps<any> | undefined>(
   undefined,
@@ -499,6 +531,19 @@ export function DataTableProvider<TData>({
   // This replaces N separate per-column scans in faceted filter consumers.
   const generatedOptionsMap = useGeneratedOptions(table)
 
+  // Publish the in-flight resize offset for the preview guide line (see
+  // ColumnResizeInfoContext). `columnSizingInfo` mutates every pointer move
+  // during a drag; this provider re-renders with it (it owns no memo boundary),
+  // but the memoized value below stays stable — only the preview line, which
+  // reads this dedicated context, re-renders per frame.
+  const columnSizingInfo = table.getState().columnSizingInfo
+  const resizingColumnId = columnSizingInfo.isResizingColumn || null
+  const resizeDeltaOffset = columnSizingInfo.deltaOffset ?? 0
+  const columnResizeInfo = React.useMemo<ColumnResizeInfo>(
+    () => ({ resizingColumnId, deltaOffset: resizeDeltaOffset }),
+    [resizingColumnId, resizeDeltaOffset],
+  )
+
   // Memoize so context consumers (10+ filter/action components) only re-render
   // when table, columns, loading, or actual table state changes.
   const value = React.useMemo(
@@ -544,10 +589,12 @@ export function DataTableProvider<TData>({
     <DataTableContext.Provider value={value}>
       <ActiveCellSetterContext.Provider value={setActiveCell}>
         <ActiveCellValueContext.Provider value={activeCell}>
-          <style href="niko-row-flash" precedence="default">
-            {ROW_FLASH_KEYFRAMES}
-          </style>
-          {children}
+          <ColumnResizeInfoContext.Provider value={columnResizeInfo}>
+            <style href="niko-row-flash" precedence="default">
+              {ROW_FLASH_KEYFRAMES}
+            </style>
+            {children}
+          </ColumnResizeInfoContext.Provider>
         </ActiveCellValueContext.Provider>
       </ActiveCellSetterContext.Provider>
     </DataTableContext.Provider>

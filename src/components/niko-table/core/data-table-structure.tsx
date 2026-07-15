@@ -85,14 +85,20 @@ export const DataTableHeader = React.memo(function DataTableHeader({
         <TableRow key={headerGroup.id}>
           {headerGroup.headers.map(header => {
             const size = header.column.columnDef.size
+            // A flex column has no explicit width — under `table-layout: fixed`
+            // it soaks up the leftover row width. Not drag-resizable.
+            const isFlex = header.column.columnDef.meta?.flex === true
             const headerStyle = {
               // Resizing: width tracks `getSize()` (columnSizing-aware).
               // Off: unchanged (columnDef.size, or auto when unset).
-              width: resizing
-                ? header.getSize()
-                : size
-                  ? `${size}px`
-                  : undefined,
+              // Flex: no width — fills the leftover space.
+              width: isFlex
+                ? undefined
+                : resizing
+                  ? header.getSize()
+                  : size
+                    ? `${size}px`
+                    : undefined,
               ...getCommonPinningStyles(header.column, true),
             }
 
@@ -122,7 +128,7 @@ export const DataTableHeader = React.memo(function DataTableHeader({
                     )}
                   </DataTableColumnHeaderRoot>
                 )}
-                {resizing && header.column.getCanResize() && (
+                {resizing && !isFlex && header.column.getCanResize() && (
                   <DataTableColumnResizeHandle header={header} />
                 )}
               </TableHead>
@@ -219,16 +225,21 @@ const BodyRow = React.memo(function BodyRow({
     >
       {visibleCells.map(cell => {
         const size = cell.column.columnDef.size
+        // Flex column: no explicit width so it fills the leftover row width.
+        const isFlex = cell.column.columnDef.meta?.flex === true
         const flashing =
           isRowFlashing ||
           flashingCellKeys.has(flashCellKey(row.id, cell.column.id))
         const cellStyle = {
           // Resizing: width tracks `getSize()`; off: unchanged.
-          width: columnSizingEnabled
-            ? cell.column.getSize()
-            : size
-              ? `${size}px`
-              : undefined,
+          // Flex: no width — fills the leftover space.
+          width: isFlex
+            ? undefined
+            : columnSizingEnabled
+              ? cell.column.getSize()
+              : size
+                ? `${size}px`
+                : undefined,
           ...getCommonPinningStyles(cell.column, false),
           ...(flashing ? { animation: FLASH_ANIMATION } : {}),
         }
@@ -484,11 +495,17 @@ export function DataTableBody<TData>({
         minWidth: tableEl.style.minWidth,
       }
     }
-    const totalDesiredWidth = table
-      .getVisibleLeafColumns()
-      .reduce((sum, col) => sum + col.getSize(), 0)
+    const leafColumns = table.getVisibleLeafColumns()
+    const totalDesiredWidth = leafColumns.reduce(
+      (sum, col) => sum + col.getSize(),
+      0,
+    )
+    // A flex column has no fixed width, so the table must stretch to the
+    // container (width 100%) and let that column soak up the surplus; the sized
+    // columns still can't compress below their sum (minWidth).
+    const hasFlex = leafColumns.some(c => c.columnDef.meta?.flex === true)
     tableEl.style.tableLayout = "fixed"
-    tableEl.style.width = `${totalDesiredWidth}px`
+    tableEl.style.width = hasFlex ? "100%" : `${totalDesiredWidth}px`
     tableEl.style.minWidth = `${totalDesiredWidth}px`
     return restore
   }, [

@@ -637,7 +637,12 @@ function DataTableRootInternal<TData, TValue>({
         pagination: controlledPagination,
       },
       enableColumnResizing: detectFeatures.enableColumnResizing,
-      columnResizeMode: "onChange",
+      // `onEnd`, not `onChange`: apply the new width once, on pointer release.
+      // In `onChange` every mousemove writes `columnSizing`, which invalidates
+      // the memoized header + every visible (avatar/badge-heavy) body row ~60x
+      // a second — the source of resize lag. `onEnd` keeps widths stable during
+      // the drag; `<ColumnResizePreviewLine>` shows a live guide line instead.
+      columnResizeMode: "onEnd",
       onColumnSizingChange: onColumnSizingChange ?? handleColumnSizingChange,
       enableRowSelection: detectFeatures.enableRowSelection,
       enableFilters: detectFeatures.enableFilters,
