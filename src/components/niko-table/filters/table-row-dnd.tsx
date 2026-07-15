@@ -62,6 +62,9 @@ export function TableRowDndProvider<TData>({
   onReorder,
   modifiers = [restrictToVerticalAxis],
 }: TableRowDndProviderProps<TData>) {
+  // Stable across SSR + hydration — see TableColumnDndProvider.
+  const dndContextId = React.useId()
+
   const rows = table.getRowModel().rows
   const dataIds = React.useMemo<UniqueIdentifier[]>(
     () => rows.map(row => row.id),
@@ -88,6 +91,7 @@ export function TableRowDndProvider<TData>({
 
   return (
     <DndContext
+      id={dndContextId}
       collisionDetection={closestCenter}
       modifiers={modifiers}
       onDragEnd={handleDragEnd}

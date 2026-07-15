@@ -28,6 +28,7 @@ description: Latest updates and release notes for Niko Table.
 
 - Body cells truncate on column resize (no text spill into neighbors); default `minSize` 40px when resize is enabled
 - `DataTableDndBody` supports column resize (Row DnD + `<DataTableColumnResize />`)
+- DnD contexts use `React.useId()` to avoid SSR `aria-describedby` (`DndDescribedBy-N`) hydration mismatches
 - Introduction composability map table rendering
 - Sidebar scroll restore without Starlight `SidebarPersister` (freeze with theme-black)
 - **Core** — memoized body rows invalidate on column **add/remove** (`columns` in `columnLayoutSignature`) — dynamic columns no longer leave body cells / borders stale
