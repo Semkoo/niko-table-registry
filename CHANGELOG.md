@@ -39,6 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Core** — regular (and virtualized) body cells use `truncate` so resize-shrunk text ellipsizes instead of overlapping neighbors; resize-on default `minSize` is 40px (matches the grip clamp)
 - **Core** — `DataTableDndBody` honors column resize (`getSize()`, layout lock, truncate) so Row DnD tables can mount `<DataTableColumnResize />`
 - **DnD** — pass stable `React.useId()` to every `DndContext` so SSR hydration no longer mismatches on `aria-describedby="DndDescribedBy-N"`
+- **DnD + resize** — virtualized flex/DnD headers and bodies honor column resize; resize grip `stopPropagation` so it doesn’t start a column reorder
 - **Docs** — Introduction composability map markdown table (stray column broke rendering)
 - **Docs** — sidebar scroll position preserved without Starlight’s `SidebarPersister` (avoids main-thread freeze with `starlight-theme-black`)
 - **Core** — memoized body `columnLayoutSignature` includes `columns` so dynamic add/remove refreshes body cells (borders / row rules)

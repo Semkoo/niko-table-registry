@@ -31,6 +31,7 @@ import {
   TableCell,
 } from "@/components/ui/table"
 import { DataTableColumnHeaderRoot } from "../components/data-table-column-header"
+import { DataTableColumnResizeHandle } from "../lib/column-resize-handle"
 import { createScrollHandler } from "../lib/create-scroll-handler"
 import { resolveRowFromClick } from "../lib/row-click"
 import { getCommonPinningStyles } from "../lib/styles"
@@ -204,6 +205,8 @@ interface VirtualizedDndBodyRowProps<TData> {
   isClickable: boolean
   estimateSize: number
   measureRef: ((node: HTMLTableRowElement | null) => void) | undefined
+  /** Column resizing is on — cells size from `column.getSize()` instead of `columnDef.size`. */
+  columnSizingEnabled: boolean
   /** Column layout signature — invalidates React.memo on visibility/order/pinning change. */
   columnLayoutSignature: string
   /**
@@ -223,6 +226,7 @@ const VirtualizedDndBodyRowInner = function VirtualizedDndBodyRow<TData>({
   isClickable,
   estimateSize,
   measureRef,
+  columnSizingEnabled,
   columnLayoutSignature,
   rowMemoKey,
 }: VirtualizedDndBodyRowProps<TData>) {
@@ -246,8 +250,13 @@ const VirtualizedDndBodyRowInner = function VirtualizedDndBodyRow<TData>({
       >
         {visibleCells.map(cell => {
           const size = cell.column.columnDef.size
+          const fixedWidth = columnSizingEnabled
+            ? cell.column.getSize()
+            : size
+              ? `${size}px`
+              : undefined
           const cellStyle = {
-            width: size ? `${size}px` : undefined,
+            width: fixedWidth,
             minHeight: `${estimateSize}px`,
             ...getCommonPinningStyles(cell.column, false),
           }
@@ -255,9 +264,10 @@ const VirtualizedDndBodyRowInner = function VirtualizedDndBodyRow<TData>({
           return (
             <TableCell
               key={cell.id}
+              data-col-id={cell.column.id}
               className={cn(
-                size ? "shrink-0" : "min-w-0 flex-1",
-                "flex items-center",
+                fixedWidth != null ? "shrink-0" : "min-w-0 flex-1",
+                "flex items-center truncate",
                 isClickable && "cursor-pointer",
                 cell.column.getIsPinned() &&
                   "bg-background group-hover:bg-muted/50 group-data-[state=selected]:bg-muted",
@@ -300,6 +310,8 @@ interface VirtualizedDndColumnBodyRowProps<TData> {
   isClickable: boolean
   estimateSize: number
   measureRef: ((node: HTMLTableRowElement | null) => void) | undefined
+  /** Column resizing is on — cells size from `column.getSize()` instead of `columnDef.size`. */
+  columnSizingEnabled: boolean
   /** Column layout signature — invalidates React.memo on visibility/order/pinning change. */
   columnLayoutSignature: string
   /**
@@ -321,6 +333,7 @@ const VirtualizedDndColumnBodyRowInner = function VirtualizedDndColumnBodyRow<
   isClickable,
   estimateSize,
   measureRef,
+  columnSizingEnabled,
   columnLayoutSignature,
   rowMemoKey,
 }: VirtualizedDndColumnBodyRowProps<TData>) {
@@ -361,18 +374,23 @@ const VirtualizedDndColumnBodyRowInner = function VirtualizedDndColumnBodyRow<
       >
         {visibleCells.map(cell => {
           const size = cell.column.columnDef.size
+          const fixedWidth = columnSizingEnabled
+            ? cell.column.getSize()
+            : size
+              ? `${size}px`
+              : undefined
           return (
             <TableDragAlongCell
               key={cell.id}
               cell={cell}
               className={cn(
-                size ? "shrink-0" : "min-w-0 flex-1",
-                "flex items-center",
+                fixedWidth != null ? "shrink-0" : "min-w-0 flex-1",
+                "flex items-center truncate",
                 cell.column.getIsPinned() &&
                   "bg-background group-hover:bg-muted/50 group-data-[state=selected]:bg-muted",
               )}
               style={{
-                width: size ? `${size}px` : undefined,
+                width: fixedWidth,
                 minHeight: `${estimateSize}px`,
               }}
             >
@@ -486,20 +504,31 @@ export function DataTableVirtualizedDndBody<TData>({
   )
 
   // String signature of the visible column layout. Memoized rows compare it
-  // to invalidate on column toggle / reorder / pin. For external row state
-  // (inline edits, optimistic overlays), pass `getRowMemoKey`.
-  const { columnVisibility, columnOrder, columnPinning } = table.getState()
+  // to invalidate on column toggle / reorder / pin / resize. For external row
+  // state (inline edits, optimistic overlays), pass `getRowMemoKey`.
+  const { columnVisibility, columnOrder, columnPinning, columnSizing } =
+    table.getState()
+  const resizing = table.options.enableColumnResizing ?? false
   const columnLayoutSignature = React.useMemo(
     () =>
       table
         .getVisibleLeafColumns()
         .map(c => {
           const pinned = c.getIsPinned()
-          return pinned ? `${c.id}:${pinned}` : c.id
+          const base = pinned ? `${c.id}:${pinned}` : c.id
+          return resizing ? `${base}:${c.getSize()}` : base
         })
         .join(","),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [table, columns, columnVisibility, columnOrder, columnPinning],
+    [
+      table,
+      columns,
+      columnVisibility,
+      columnOrder,
+      columnPinning,
+      columnSizing,
+      resizing,
+    ],
   )
 
   const [scrollElement, setScrollElement] =
@@ -634,6 +663,7 @@ export function DataTableVirtualizedDndBody<TData>({
               isClickable={isClickable}
               estimateSize={estimateSize}
               measureRef={stableMeasureElement}
+              columnSizingEnabled={resizing}
               columnLayoutSignature={columnLayoutSignature}
               rowMemoKey={
                 getRowMemoKey ? getRowMemoKey(row.original as TData) : ""
@@ -691,6 +721,7 @@ export const DataTableVirtualizedDndHeader = React.memo(
     sticky = true,
   }: DataTableVirtualizedDndHeaderProps) {
     const { table } = useDataTable()
+    const resizing = table?.options.enableColumnResizing ?? false
 
     const headerGroups = table?.getHeaderGroups() ?? []
 
@@ -710,18 +741,23 @@ export const DataTableVirtualizedDndHeader = React.memo(
           <TableRow key={headerGroup.id} className="flex w-full border-b">
             {headerGroup.headers.map(header => {
               const size = header.column.columnDef.size
+              const fixedWidth = resizing
+                ? header.getSize()
+                : size
+                  ? `${size}px`
+                  : undefined
 
               return (
                 <TableDraggableHeader
                   key={header.id}
                   header={header}
                   className={cn(
-                    size ? "shrink-0" : "min-w-0 flex-1",
+                    fixedWidth != null ? "shrink-0" : "min-w-0 flex-1",
                     "flex items-center",
                     header.column.getIsPinned() && "bg-background",
                   )}
                   style={{
-                    width: size ? `${size}px` : undefined,
+                    width: fixedWidth,
                     ...getCommonPinningStyles(header.column, true),
                   }}
                 >
@@ -732,6 +768,9 @@ export const DataTableVirtualizedDndHeader = React.memo(
                         header.getContext(),
                       )}
                     </DataTableColumnHeaderRoot>
+                  )}
+                  {resizing && header.column.getCanResize() && (
+                    <DataTableColumnResizeHandle header={header} />
                   )}
                 </TableDraggableHeader>
               )
@@ -831,20 +870,31 @@ export function DataTableVirtualizedDndColumnBody<TData>({
   )
 
   // String signature of the visible column layout. Memoized rows compare it
-  // to invalidate on column toggle / reorder / pin. For external row state
-  // (inline edits, optimistic overlays), pass `getRowMemoKey`.
-  const { columnVisibility, columnOrder, columnPinning } = table.getState()
+  // to invalidate on column toggle / reorder / pin / resize. For external row
+  // state (inline edits, optimistic overlays), pass `getRowMemoKey`.
+  const { columnVisibility, columnOrder, columnPinning, columnSizing } =
+    table.getState()
+  const resizing = table.options.enableColumnResizing ?? false
   const columnLayoutSignature = React.useMemo(
     () =>
       table
         .getVisibleLeafColumns()
         .map(c => {
           const pinned = c.getIsPinned()
-          return pinned ? `${c.id}:${pinned}` : c.id
+          const base = pinned ? `${c.id}:${pinned}` : c.id
+          return resizing ? `${base}:${c.getSize()}` : base
         })
         .join(","),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [table, columns, columnVisibility, columnOrder, columnPinning],
+    [
+      table,
+      columns,
+      columnVisibility,
+      columnOrder,
+      columnPinning,
+      columnSizing,
+      resizing,
+    ],
   )
 
   const [scrollElement, setScrollElement] =
@@ -972,6 +1022,7 @@ export function DataTableVirtualizedDndColumnBody<TData>({
             isClickable={isClickable}
             estimateSize={estimateSize}
             measureRef={stableMeasureElement}
+            columnSizingEnabled={resizing}
             columnLayoutSignature={columnLayoutSignature}
             rowMemoKey={
               getRowMemoKey ? getRowMemoKey(row.original as TData) : ""

@@ -20,6 +20,7 @@ import {
   DataTableRowDndProvider,
   DataTableRowDragHandle,
 } from "@/components/niko-table/components/data-table-row-dnd"
+import { DataTableColumnResize } from "@/components/niko-table/components/data-table-column-resize"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 import { Badge } from "@/components/ui/badge"
 import { Inbox } from "lucide-react"
@@ -130,6 +131,7 @@ export default function VirtualizedRowDndExample() {
         cell: ({ row }) => <DataTableRowDragHandle rowId={row.id} />,
         enableSorting: false,
         enableHiding: false,
+        enableResizing: false,
       },
       {
         id: "order",
@@ -144,6 +146,7 @@ export default function VirtualizedRowDndExample() {
         ),
         enableSorting: false,
         enableHiding: false,
+        enableResizing: false,
       },
       {
         accessorKey: "id",
@@ -163,6 +166,7 @@ export default function VirtualizedRowDndExample() {
           </DataTableColumnHeader>
         ),
         meta: { label: "Title" },
+        size: 240,
       },
       {
         accessorKey: "assignee",
@@ -210,6 +214,7 @@ export default function VirtualizedRowDndExample() {
 
   return (
     <DataTableRoot data={data} columns={columns} getRowId={row => row.id}>
+      <DataTableColumnResize />
       <DataTableRowDndProvider data={data} onReorder={setData}>
         <DataTable height={500}>
           <DataTableVirtualizedFlexHeader />

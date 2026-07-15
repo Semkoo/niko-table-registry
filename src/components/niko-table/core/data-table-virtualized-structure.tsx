@@ -218,6 +218,7 @@ export const DataTableVirtualizedFlexHeader = React.memo(
     sticky = true,
   }: DataTableVirtualizedFlexHeaderProps) {
     const { table } = useDataTable()
+    const resizing = table?.options.enableColumnResizing ?? false
 
     const headerGroups = table?.getHeaderGroups() ?? []
 
@@ -241,16 +242,24 @@ export const DataTableVirtualizedFlexHeader = React.memo(
           <TableRow key={headerGroup.id} className="flex w-full border-b">
             {headerGroup.headers.map(header => {
               const size = header.column.columnDef.size
+              const fixedWidth = resizing
+                ? header.getSize()
+                : size
+                  ? `${size}px`
+                  : undefined
               return (
                 <TableHead
                   key={header.id}
+                  data-col-id={header.column.id}
                   className={cn(
-                    size ? "shrink-0" : "min-w-0 flex-1",
+                    fixedWidth != null ? "shrink-0" : "min-w-0 flex-1",
                     "flex items-center",
                     header.column.getIsPinned() && "bg-background",
+                    // Anchor the absolute resize handle to the cell's right edge.
+                    resizing && "relative",
                   )}
                   style={{
-                    width: size ? `${size}px` : undefined,
+                    width: fixedWidth,
                     ...getCommonPinningStyles(header.column, true),
                   }}
                 >
@@ -261,6 +270,9 @@ export const DataTableVirtualizedFlexHeader = React.memo(
                         header.getContext(),
                       )}
                     </DataTableColumnHeaderRoot>
+                  )}
+                  {resizing && header.column.getCanResize() && (
+                    <DataTableColumnResizeHandle header={header} />
                   )}
                 </TableHead>
               )

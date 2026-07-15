@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/table"
 import { flexRender, type Row } from "@tanstack/react-table"
 import { DataTableColumnHeaderRoot } from "../components/data-table-column-header"
+import { DataTableColumnResizeHandle } from "../lib/column-resize-handle"
 import { resolveRowFromClick } from "../lib/row-click"
 import { getCommonPinningStyles } from "../lib/styles"
 import {
@@ -419,6 +420,7 @@ export const DataTableDndHeader = React.memo(function DataTableDndHeader({
   sticky = true,
 }: DataTableDndHeaderProps) {
   const { table } = useDataTable()
+  const resizing = table?.options.enableColumnResizing ?? false
 
   const headerGroups = table?.getHeaderGroups() ?? []
 
@@ -437,18 +439,34 @@ export const DataTableDndHeader = React.memo(function DataTableDndHeader({
     >
       {headerGroups.map(headerGroup => (
         <TableRow key={headerGroup.id}>
-          {headerGroup.headers.map(header => (
-            <TableDraggableHeader key={header.id} header={header}>
-              {header.isPlaceholder ? null : (
-                <DataTableColumnHeaderRoot column={header.column}>
-                  {flexRender(
-                    header.column.columnDef.header,
-                    header.getContext(),
-                  )}
-                </DataTableColumnHeaderRoot>
-              )}
-            </TableDraggableHeader>
-          ))}
+          {headerGroup.headers.map(header => {
+            const size = header.column.columnDef.size
+            return (
+              <TableDraggableHeader
+                key={header.id}
+                header={header}
+                style={{
+                  width: resizing
+                    ? header.getSize()
+                    : size
+                      ? `${size}px`
+                      : undefined,
+                }}
+              >
+                {header.isPlaceholder ? null : (
+                  <DataTableColumnHeaderRoot column={header.column}>
+                    {flexRender(
+                      header.column.columnDef.header,
+                      header.getContext(),
+                    )}
+                  </DataTableColumnHeaderRoot>
+                )}
+                {resizing && header.column.getCanResize() && (
+                  <DataTableColumnResizeHandle header={header} />
+                )}
+              </TableDraggableHeader>
+            )
+          })}
         </TableRow>
       ))}
     </TableHeader>

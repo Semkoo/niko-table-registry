@@ -9,6 +9,7 @@ import {
   DataTableVirtualizedDndColumnBody,
 } from "@/components/niko-table/core/data-table-virtualized-dnd-structure"
 import { DataTableColumnDndProvider } from "@/components/niko-table/components/data-table-column-dnd"
+import { DataTableColumnResize } from "@/components/niko-table/components/data-table-column-resize"
 import {
   DataTableEmptyIcon,
   DataTableEmptyMessage,
@@ -222,6 +223,7 @@ export default function VirtualizedColumnDndExample() {
       state={{ columnOrder }}
       onColumnOrderChange={setColumnOrder}
     >
+      <DataTableColumnResize />
       <DataTableColumnDndProvider
         columnOrder={columnOrder}
         onColumnOrderChange={setColumnOrder}

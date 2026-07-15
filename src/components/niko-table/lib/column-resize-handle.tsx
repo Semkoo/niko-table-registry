@@ -117,10 +117,19 @@ export function DataTableColumnResizeHandle<TData>({
       aria-valuemin={min}
       aria-valuemax={max}
       tabIndex={0}
-      onMouseDown={resize}
-      onTouchStart={resize}
+      onMouseDown={e => {
+        // Keep column-DnD header listeners from treating a resize drag as a
+        // reorder start (handle lives inside the sortable `<th>`).
+        e.stopPropagation()
+        resize(e)
+      }}
+      onTouchStart={e => {
+        e.stopPropagation()
+        resize(e)
+      }}
       onDoubleClick={e => autosizeColumn(header, e.currentTarget)}
       onClick={e => e.stopPropagation()}
+      onPointerDown={e => e.stopPropagation()}
       onKeyDown={e => {
         const step = e.shiftKey
           ? KEYBOARD_RESIZE_STEP_LARGE
