@@ -564,18 +564,18 @@ Choose the right DnD components based on your use case:
 | Row reorder (virtualized)    | `DataTableVirtualizedDndBody`                                         |
 | Column reorder (virtualized) | `DataTableVirtualizedDndHeader` + `DataTableVirtualizedDndColumnBody` |
 
-For standard (non-virtualized) tables with drag-and-drop, use these components from `data-table-dnd-structure.tsx`. They are drop-in replacements for `DataTableHeader` / `DataTableBody` when using row or column DnD.
-
-<div className="not-content mb-4 flex items-center gap-2">
-  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/core/data-table-dnd-structure.tsx`} external>Source Code ↗</DocsLink>
-</div>
+Row and column DnD ship as **separate modules** so installing one axis does not pull the other. Drop-in replacements for `DataTableHeader` / `DataTableBody`.
 
 #### DataTableDndBody
 
-DnD-aware table body that renders rows as draggable items. Drop-in replacement for `DataTableBody` when using row drag-and-drop. Must be wrapped in a `DataTableRowDndProvider`.
+DnD-aware table body that renders rows as draggable items. Drop-in replacement for `DataTableBody` when using row drag-and-drop. Must be wrapped in a `DataTableRowDndProvider`. Registry: `data-table-row-dnd`.
+
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/core/data-table-row-dnd-structure.tsx`} external>Source Code ↗</DocsLink>
+</div>
 
 ```tsx showLineNumbers
-import { DataTableDndBody } from "@/components/niko-table/core/data-table-dnd-structure"
+import { DataTableDndBody } from "@/components/niko-table/core/data-table-row-dnd-structure"
 import { DataTableRowDndProvider } from "@/components/niko-table/components/data-table-row-dnd"
 
 <DataTableRowDndProvider data={data} onReorder={setData}>
@@ -597,10 +597,14 @@ import { DataTableRowDndProvider } from "@/components/niko-table/components/data
 
 #### DataTableDndHeader
 
-DnD-aware table header that renders column headers as draggable items. Drop-in replacement for `DataTableHeader` when using column drag-and-drop. Must be wrapped in a `DataTableColumnDndProvider`.
+DnD-aware table header that renders column headers as draggable items. Drop-in replacement for `DataTableHeader` when using column drag-and-drop. Must be wrapped in a `DataTableColumnDndProvider`. Registry: `data-table-column-dnd`.
+
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/core/data-table-column-dnd-structure.tsx`} external>Source Code ↗</DocsLink>
+</div>
 
 ```tsx showLineNumbers
-import { DataTableDndHeader, DataTableDndColumnBody } from "@/components/niko-table/core/data-table-dnd-structure"
+import { DataTableDndHeader, DataTableDndColumnBody } from "@/components/niko-table/core/data-table-column-dnd-structure"
 import { DataTableColumnDndProvider } from "@/components/niko-table/components/data-table-column-dnd"
 
 <DataTableColumnDndProvider columnOrder={columnOrder} onColumnOrderChange={setColumnOrder}>
@@ -633,22 +637,19 @@ DnD-aware table body for column drag-and-drop. Each cell follows its column's dr
 
 ### Virtualized DnD Components
 
-For combining virtualization with drag-and-drop, use these specialized components from `data-table-virtualized-dnd-structure.tsx`.
-
-<div className="not-content mb-4 flex items-center gap-2">
-  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/core/data-table-virtualized-dnd-structure.tsx`} external>Source Code ↗</DocsLink>
-</div>
+Virtualized DnD is axis-split the same way. Registry: `data-table-virtualized-row-dnd` / `data-table-virtualized-column-dnd` (plus `data-table-virtualized` and the matching non-virt axis package).
 
 #### DataTableVirtualizedDndBody
 
 Virtualized DnD-aware table body for **row** drag-and-drop. Combines `@tanstack/react-virtual` for windowing with `@dnd-kit/sortable` for drag interactions. Must be wrapped in a `DataTableRowDndProvider`.
 
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/core/data-table-virtualized-row-dnd-structure.tsx`} external>Source Code ↗</DocsLink>
+</div>
+
 ```tsx showLineNumbers
-import {
-  DataTableVirtualizedHeader,
-  DataTableVirtualizedDndBody,
-  DataTableVirtualizedEmptyBody,
-} from "@/components/niko-table/core/data-table-virtualized-dnd-structure"
+import { DataTableVirtualizedFlexHeader, DataTableVirtualizedEmptyBody } from "@/components/niko-table/core/data-table-virtualized-structure"
+import { DataTableVirtualizedDndBody } from "@/components/niko-table/core/data-table-virtualized-row-dnd-structure"
 import { DataTableRowDndProvider } from "@/components/niko-table/components/data-table-row-dnd"
 
 <DataTableRowDndProvider data={data} onReorder={setData}>
@@ -684,7 +685,7 @@ Virtualized DnD-aware table header for **column** drag-and-drop. Must be wrapped
 import {
   DataTableVirtualizedDndHeader,
   DataTableVirtualizedDndColumnBody,
-} from "@/components/niko-table/core/data-table-virtualized-dnd-structure"
+} from "@/components/niko-table/core/data-table-virtualized-column-dnd-structure"
 import { DataTableColumnDndProvider } from "@/components/niko-table/components/data-table-column-dnd"
 
 <DataTableColumnDndProvider columnOrder={columnOrder} onColumnOrderChange={setColumnOrder}>

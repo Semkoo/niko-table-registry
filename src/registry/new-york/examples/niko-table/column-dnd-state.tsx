@@ -8,7 +8,7 @@ import { DataTableEmptyBody } from "@/components/niko-table/core/data-table-stru
 import {
   DataTableDndHeader,
   DataTableDndColumnBody,
-} from "@/components/niko-table/core/data-table-dnd-structure"
+} from "@/components/niko-table/core/data-table-column-dnd-structure"
 import { DataTableColumnDndProvider } from "@/components/niko-table/components/data-table-column-dnd"
 import {
   DataTableEmptyIcon,

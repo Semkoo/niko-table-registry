@@ -120,9 +120,11 @@ your-project/
 │   │       │   ├── data-table-context.tsx                          # useDataTable() context
 │   │       │   ├── data-table-error-boundary.tsx                   # Error boundary wrapper
 │   │       │   ├── data-table-structure.tsx                        # Header, Body, EmptyBody, Skeleton, Loading, LoadingMore
-│   │       │   ├── data-table-dnd-structure.tsx                    # Row-DnD + Column-DnD non-virtualized bodies
+│   │       │   ├── data-table-row-dnd-structure.tsx               # Row DnD body
+│   │       │   ├── data-table-column-dnd-structure.tsx            # Column DnD header/body
 │   │       │   ├── data-table-virtualized-structure.tsx            # VirtualizedHeader, VirtualizedBody, VirtualizedEmptyBody, VirtualizedSkeleton, VirtualizedLoading, VirtualizedLoadingMore
-│   │       │   └── data-table-virtualized-dnd-structure.tsx        # VirtualizedDndBody, VirtualizedDndHeader, VirtualizedDndColumnBody (deep-import only)
+│   │       │   ├── data-table-virtualized-row-dnd-structure.tsx   # Virtualized row DnD body
+│   │       │   └── data-table-virtualized-column-dnd-structure.tsx # Virtualized column DnD header/body
 │   │       │
 │   │       ├── components/                  # Context-aware user-facing components
 │   │       │   ├── data-table-search-filter.tsx

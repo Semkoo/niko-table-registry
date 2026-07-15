@@ -40,11 +40,11 @@ import { cn } from "@/lib/utils"
 import React from "react"
 import { detectFeaturesFromChildren } from "../config/feature-detection"
 import {
+  DEFAULT_MIN_COLUMN_SIZE,
   FILTER_VARIANTS,
   SYSTEM_COLUMN_IDS,
   SYSTEM_COLUMN_ID_LIST,
 } from "../lib/constants"
-import { DEFAULT_MIN_COLUMN_SIZE } from "../lib/column-resize-handle"
 import {
   dateRangeFilter,
   extendedFilter,
@@ -253,7 +253,7 @@ function DataTableRootInternal<TData, TValue>({
         detectedFeatures.enableRowSelection ??
         false,
       enableSorting:
-        finalConfig.enableSorting ?? detectedFeatures.enableSorting ?? true,
+        finalConfig.enableSorting ?? detectedFeatures.enableSorting ?? false,
       enableMultiSort:
         finalConfig.enableMultiSort ?? detectedFeatures.enableMultiSort ?? true,
       enableGrouping:
@@ -507,7 +507,9 @@ function DataTableRootInternal<TData, TValue>({
   // TanStack's `defaultColumn` is per-render-cheaper than mapping columns ourselves.
   const defaultColumn = React.useMemo<Partial<DataTableColumnDef<TData>>>(
     () => ({
-      enableSorting: true,
+      // Follow table-level sorting detection — don't opt every column into
+      // sortable chrome when sorting is off.
+      enableSorting: detectFeatures.enableSorting ?? false,
       enableHiding: true,
       filterFn: "extended" as FilterFnOption<TData>,
       // Override TanStack's internal default (150) so unset `size` stays undefined
@@ -520,7 +522,7 @@ function DataTableRootInternal<TData, TValue>({
         ? { minSize: DEFAULT_MIN_COLUMN_SIZE }
         : {}),
     }),
-    [detectFeatures.enableColumnResizing],
+    [detectFeatures.enableColumnResizing, detectFeatures.enableSorting],
   )
 
   // Extract controlled-state slices for the tableOptions dep array.

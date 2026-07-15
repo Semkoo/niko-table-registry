@@ -71,12 +71,14 @@ Per-column controls embedded in the column header dropdown.
 
 Row and column reordering. Pulls in `@dnd-kit/*`.
 
-| Name                    | What it does                                                                                       |
-| ----------------------- | -------------------------------------------------------------------------------------------------- |
-| `data-table-row-dnd`    | Row drag-and-drop. Includes provider, draggable row, drag handle, DnD-aware body.                  |
-| `data-table-column-dnd` | Column drag-and-drop. Includes provider, draggable header, drag-along cell, DnD-aware header/body. |
+| Name                                | What it does                                                                                       |
+| ----------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `data-table-row-dnd`                | Row drag-and-drop (provider, drag handle, `DataTableDndBody`). Does not ship column DnD.           |
+| `data-table-column-dnd`             | Column drag-and-drop (provider, header, `DataTableDndColumnBody`). Does not ship row DnD.          |
+| `data-table-virtualized-row-dnd`    | Virtualized row DnD body. Depends on `data-table-virtualized` + `data-table-row-dnd`.              |
+| `data-table-virtualized-column-dnd` | Virtualized column DnD header/body. Depends on `data-table-virtualized` + `data-table-column-dnd`. |
 
-<CliCommandCode action="run" command="shadcn@latest add @niko-table/data-table-row-dnd @niko-table/data-table-column-dnd" />
+<CliCommandCode action="run" command="shadcn@latest add @niko-table/data-table-row-dnd @niko-table/data-table-column-dnd @niko-table/data-table-virtualized-row-dnd @niko-table/data-table-virtualized-column-dnd" />
 
 > Row DnD should not be combined with sorting or filtering — data order conflicts. Column DnD is safe to combine with any feature.
 

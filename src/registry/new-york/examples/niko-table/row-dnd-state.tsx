@@ -7,7 +7,7 @@ import {
   DataTableHeader,
   DataTableEmptyBody,
 } from "@/components/niko-table/core/data-table-structure"
-import { DataTableDndBody } from "@/components/niko-table/core/data-table-dnd-structure"
+import { DataTableDndBody } from "@/components/niko-table/core/data-table-row-dnd-structure"
 import { DataTableColumnHeader } from "@/components/niko-table/components/data-table-column-header"
 import { DataTableColumnTitle } from "@/components/niko-table/components/data-table-column-title"
 import { DataTableColumnResize } from "@/components/niko-table/components/data-table-column-resize"

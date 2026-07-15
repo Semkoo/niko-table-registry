@@ -7,7 +7,7 @@ import {
   DataTableVirtualizedFlexHeader,
   DataTableVirtualizedEmptyBody,
 } from "@/components/niko-table/core/data-table-virtualized-structure"
-import { DataTableVirtualizedDndBody } from "@/components/niko-table/core/data-table-virtualized-dnd-structure"
+import { DataTableVirtualizedDndBody } from "@/components/niko-table/core/data-table-virtualized-row-dnd-structure"
 import { DataTableColumnHeader } from "@/components/niko-table/components/data-table-column-header"
 import { DataTableColumnTitle } from "@/components/niko-table/components/data-table-column-title"
 import {

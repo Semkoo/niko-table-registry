@@ -19,14 +19,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`getRowMemoKey`** on all bodies; **`TableSearchFilter debounceMs`**; **`DataTableVirtualizedFlexHeader`**
 - **Docs** — Data Grid overview layers (Components / Core / Filters / Hooks / Library / Types / Config) + Data Grid Examples sidebar (Basic, All Features, Cell Types, Validation, Dynamic Columns, Persistence)
 - **Docs** — [Documentation Guidelines](/contributing/documentation-guidelines/) for overview vs examples
-- **Docs** — [Composability & Performance Audit](/contributing/composability-audit/) (install vs runtime seams across table / virtualized / grid)
+- **Registry** — `data-table-virtualized-row-dnd` / `data-table-virtualized-column-dnd` ship virtualized DnD structure per axis
 
 ### Changed
+
+- **Composability** — row and column DnD structure split into `data-table-row-dnd-structure` / `data-table-column-dnd-structure` (registry packages no longer cross-ship the other axis); virtualized DnD likewise split
+- **Composability** — `DEFAULT_MIN_COLUMN_SIZE` lives in `lib/constants` so `DataTableRoot` no longer imports the resize-handle module for a constant
+- **Composability** — `enableSorting` defaults to `false` unless config or feature detection turns it on (sorted row model stays off without sort UI)
+- **DnD** — all four DnD bodies support `DataTableRowContextMenuSlot` / `renderRowContextMenu` like plain bodies
+- **DnD** — non-virtualized `DataTableDndColumnBody` honors column resize (`getSize()`, layout lock, truncate); column-DnD example mounts `<DataTableColumnResize />`
 
 - Data Grid docs rewritten — shorter, shadcn-style install → anatomy → usage
 - Intro demo includes search / faceted / advanced filters + **Current Table State** panel
 - Docs Source/API links use Astro `DocsLink`; install yarn tab is `yarn dlx`
-- Install Everything / Components catalog cover all 27 registry items (incl. resize + Data Grid)
+- Install Everything / Components catalog cover all registry items (incl. resize, axis DnD packages, Data Grid)
 - Manual Installation project tree documents `grid/`, column resize, and flash/scroll hooks
 - [Skills](/getting-started/skills/) — Data Grid prompts + install paths for Cursor, Claude Code, Windsurf, and `.agents` / `.agent`
 - `niko-table-best-practices` skill — Data Grid composition (`useDataGrid`, cells, opt-in children, `useGridChanges`)

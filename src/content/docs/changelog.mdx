@@ -11,12 +11,12 @@ description: Latest updates and release notes for Niko Table.
 - **Persistence** (`data-table-grid-changes`) — `useGridChanges` → create / update / delete. [Persistence](/examples/persistence-grid/)
 - **Inline validation** — `CellState.error` tooltip on the cell. [Validation](/examples/validation-grid/)
 - **Column resize** — `<DataTableColumnResize />`; [example](/examples/column-resize-table/)
-- Docs — full registry catalog (resize + Data Grid), Install Everything lists all 27 items, homepage/`CliCommandCode` namespace install
+- Docs — full registry catalog (resize + Data Grid + axis DnD packages), Install Everything lists all items, homepage/`CliCommandCode` namespace install
 - Docs — Data Grid intro live demo includes **Current Table State** panel
 - Docs — Manual Installation project tree includes `grid/`, column resize, flash/scroll hooks
 - Docs — Data Grid overview layers + Data Grid Examples (mirrors Table IA)
 - Docs — [Documentation Guidelines](/contributing/documentation-guidelines/)
-- Docs — [Composability & Performance Audit](/contributing/composability-audit/)
+- Registry — `data-table-virtualized-row-dnd` / `data-table-virtualized-column-dnd`
 
 ### Changed
 
@@ -24,6 +24,10 @@ description: Latest updates and release notes for Niko Table.
 - Install CLI yarn tab uses `yarn dlx`; Installation page is Prerequisites → Registry → Install first
 - [Skills](/getting-started/skills/) — Data Grid coverage + Cursor / Claude Code / Windsurf / agents install paths
 - `niko-table-best-practices` skill teaches Data Grid composition
+- Row/column DnD structures are separate modules + registry packages (no cross-axis install)
+- `DEFAULT_MIN_COLUMN_SIZE` moved to `lib/constants` (root no longer imports resize-handle for it)
+- `enableSorting` defaults off unless config or feature detection enables it
+- DnD bodies support row context menus; non-virt column-DnD body honors resize; column-DnD example mounts resize
 
 ### Fixed
 

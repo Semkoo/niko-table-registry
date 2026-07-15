@@ -6,6 +6,16 @@ All notable changes to the data-table component.
 
 ## Unreleased
 
+### ✨ Features / Composability
+
+#### Core
+
+- **Axis-split DnD structure** — `data-table-row-dnd-structure` / `data-table-column-dnd-structure` (+ virtualized twins). Registry packages no longer cross-ship the other axis. Compat re-exports remain in the old monolith paths.
+- **`DEFAULT_MIN_COLUMN_SIZE`** — defined in `lib/constants`; `DataTableRoot` no longer imports `column-resize-handle` for that constant.
+- **`enableSorting` default `false`** — attaches `getSortedRowModel` only when config or feature detection enables sorting.
+- **DnD + context menu** — all four DnD bodies support `renderRowContextMenu` / `<DataTableRowContextMenuSlot>`.
+- **`DataTableDndColumnBody` resize** — honors `getSize()`, layout lock, truncate (parity with row DnD + virt column DnD).
+
 ### 🐛 Bug Fixes
 
 #### Core

@@ -26,13 +26,15 @@ export interface DataTableRowContextMenuSlotProps<TData> {
 /**
  * Declarative, composable row context menu for niko-table bodies.
  *
- * Nest it inside a `DataTableBody` / `DataTableVirtualizedBody` so the per-row
- * menu reads as part of the table's JSX tree. It renders nothing itself — the
- * body detects it among its children and renders its menu for every (enabled)
- * row inside a `DataTableRowMenuScope`, so a declarative `<XRowMenu>` composed
- * from `RowMenuItem` / `RowMenuSub` / … resolves the row and surface from
- * context. The body's `renderRowContextMenu` prop still works and wins when
- * both are present.
+ * Nest it inside a `DataTableBody` / `DataTableVirtualizedBody` — or any of
+ * the four DnD bodies (`DataTableDndBody`, `DataTableDndColumnBody`,
+ * `DataTableVirtualizedDndBody`, `DataTableVirtualizedDndColumnBody`) — so
+ * the per-row menu reads as part of the table's JSX tree. It renders nothing
+ * itself — the body detects it among its children and renders its menu for
+ * every (enabled) row inside a `DataTableRowMenuScope`, so a declarative
+ * `<XRowMenu>` composed from `RowMenuItem` / `RowMenuSub` / … resolves the
+ * row and surface from context. The body's `renderRowContextMenu` prop still
+ * works and wins when both are present.
  *
  * @example
  * <DataTableVirtualizedBody estimateSize={44}>
