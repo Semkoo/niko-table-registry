@@ -17,6 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`DataTableViewDndMenu`** — drag-to-reorder view menu (separate package; plain view menu stays dnd-kit-free)
 - **Core bridges** — `scrollRowIntoView`, `flashRows` / `flashCells`, `toggleRowSelection`
 - **`getRowMemoKey`** on all bodies; **`TableSearchFilter debounceMs`**; **`DataTableVirtualizedFlexHeader`**
+- **Docs** — Data Grid overview layers (Components / Core / Filters / Hooks / Library / Types / Config) + Data Grid Examples sidebar (Basic, All Features, Cell Types, Validation, Dynamic Columns, Persistence)
+- **Docs** — [Documentation Guidelines](/contributing/documentation-guidelines/) for overview vs examples
 
 ### Changed
 
@@ -25,6 +27,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Docs Source/API links use Astro `DocsLink`; install yarn tab is `yarn dlx`
 - Install Everything / Components catalog cover all 27 registry items (incl. resize + Data Grid)
 - Manual Installation project tree documents `grid/`, column resize, and flash/scroll hooks
+- [Skills](/getting-started/skills/) — Data Grid prompts + install paths for Cursor, Claude Code, Windsurf, and `.agents` / `.agent`
+- `niko-table-best-practices` skill — Data Grid composition (`useDataGrid`, cells, opt-in children, `useGridChanges`)
 - Filter variants: `dateRange` / `multiSelect` (camelCase)
 - Options with `count: 0` hidden in filter UIs
 - `autoResetPageIndex` defaults to `false`
@@ -32,6 +36,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Docs** — Introduction composability map markdown table (stray column broke rendering)
+- **Docs** — sidebar scroll position preserved without Starlight’s `SidebarPersister` (avoids main-thread freeze with `starlight-theme-black`)
 - **Core** — memoized body `columnLayoutSignature` includes `columns` so dynamic add/remove refreshes body cells (borders / row rules)
 - **Core** — `data-row-index` uses display order (fixes `flashRows` / `scrollRowIntoView` after sort/filter)
 - **Core** — empty/loading `colSpan` follows visible columns

@@ -14,14 +14,20 @@ description: Latest updates and release notes for Niko Table.
 - Docs — full registry catalog (resize + Data Grid), Install Everything lists all 27 items, homepage/`CliCommandCode` namespace install
 - Docs — Data Grid intro live demo includes **Current Table State** panel
 - Docs — Manual Installation project tree includes `grid/`, column resize, flash/scroll hooks
+- Docs — Data Grid overview layers + Data Grid Examples (mirrors Table IA)
+- Docs — [Documentation Guidelines](/contributing/documentation-guidelines/)
 
 ### Changed
 
 - Docs Source/API links use Astro `DocsLink` (aligned outline buttons; Starlight MDX stripped React `Button asChild`)
 - Install CLI yarn tab uses `yarn dlx`; Installation page is Prerequisites → Registry → Install first
+- [Skills](/getting-started/skills/) — Data Grid coverage + Cursor / Claude Code / Windsurf / agents install paths
+- `niko-table-best-practices` skill teaches Data Grid composition
 
 ### Fixed
 
+- Introduction composability map table rendering
+- Sidebar scroll restore without Starlight `SidebarPersister` (freeze with theme-black)
 - **Core** — memoized body rows invalidate on column **add/remove** (`columns` in `columnLayoutSignature`) — dynamic columns no longer leave body cells / borders stale
 - **Core** — `data-row-index` is display order (`flashRows` / scroll after sort/filter)
 - **Core** — empty/loading `colSpan` uses visible columns; resize width cleanup restores prior table styles
