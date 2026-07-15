@@ -1,0 +1,115 @@
+---
+title: Composability & Performance Audit
+description: How Niko Table keeps unused features out of the install and runtime paths — and where the seams still leak.
+---
+
+import { Aside } from "@astrojs/starlight/components"
+
+Principle: **if the user doesn’t need a feature, they should not load it** — at install time (registry packages) and at runtime (no listeners / models until mounted).
+
+<Aside type="note">
+  Snapshot from the Data Grid + resize/DnD work (July 2026). Treat this as a living checklist when adding features across regular, virtualized, and grid surfaces.
+</Aside>
+
+## Verdict
+
+**Runtime opt-in is strong.** Marker children and `detectFeaturesFromChildren` / `useRegisterGridFeature` keep unused paths from attaching listeners and row models. **Heavy npm deps** (`@dnd-kit/*`, `@tanstack/react-virtual`) stay in separate registry packages. Grid never imports `@dnd-kit`.
+
+**Install / static-import opt-in is weaker inside shared structure files.** Resize handle and row-context-menu modules live in core and are imported by every header/body. Row and column DnD cross-include each other’s filter modules. Virtualized DnD structure exists in-repo but is not its own registry item.
+
+---
+
+## Surface matrix
+
+| Feature                                    | Regular | Virtualized                       | Data Grid                                          |
+| ------------------------------------------ | ------- | --------------------------------- | -------------------------------------------------- |
+| Column resize                              | yes     | yes                               | inherits (`DataTableColumnResize`)                 |
+| Row DnD (`@dnd-kit`)                       | yes     | code yes / **registry gap**       | N/A → `DataGridRowReorder`                         |
+| Column DnD (`@dnd-kit`)                    | yes     | code yes / **registry gap**       | partial (View DnD menu; no header-drag demo)       |
+| Search / faceted / filter menu             | yes     | yes                               | inherits                                           |
+| Sort / view / view-DnD                     | yes     | yes                               | inherits                                           |
+| Pagination                                 | yes     | optional (often infinite instead) | uncommon                                           |
+| Selection bar / pin / hide                 | yes     | yes                               | inherits                                           |
+| Row context menu                           | yes     | yes                               | partial (grid row menu; **missing on DnD bodies**) |
+| Empty / skeleton                           | yes     | yes                               | inherits virt empty                                |
+| Clipboard / fill / move / status / editors | N/A     | N/A                               | yes (mount-gated children)                         |
+| `useGridChanges`                           | N/A     | N/A                               | yes (separate package)                             |
+
+---
+
+## What works (keep doing this)
+
+1. **Separate registry packages** — `data-table-column-resize`, `data-table-row-dnd`, `data-table-view-dnd-menu`, `data-table-grid`, `data-table-grid-changes`, etc.
+2. **No barrel re-exports** for core/components/filters — direct file imports aid tree-shaking.
+3. **Markers / detection** — `<DataTableColumnResize />` flips `enableColumnResizing`; pagination/filters/sorting models attach only when detected (sorting still defaults on — see gaps).
+4. **Grid feature children** — unmounted clipboard/fill/move attach **zero** document listeners and register `undefined` on unmount (`data-grid-features.tsx`).
+5. **Plain structure ≠ DnD** — `data-table-structure.tsx` does not import `@dnd-kit`.
+
+---
+
+## Import seams
+
+### Good
+
+| Entry                      | Keeps out                                 |
+| -------------------------- | ----------------------------------------- |
+| `data-table-root`          | `@dnd-kit`, grid, virtualizer             |
+| `data-table-structure`     | `@dnd-kit`                                |
+| `data-table-column-resize` | Everything (renders `null`)               |
+| `data-grid.tsx` core       | Clipboard / fill / move / reorder modules |
+
+### Problem
+
+| Seam                                                                       | Why it matters                                                                    |
+| -------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| Header/body always import `column-resize-handle`                           | Unused resize still in the module graph once you import structure                 |
+| `data-table-root` imports `DEFAULT_MIN_COLUMN_SIZE` from resize-handle     | Couples root to resize module for a constant                                      |
+| `data-table-dnd-structure` imports **both** row + column DnD filters       | One axis can’t tree-shake the other after you import the structure file           |
+| Registry row-dnd / column-dnd packages each ship the **other** filter file | Install “row only” still copies column DnD source                                 |
+| `data-table-virtualized-dnd-structure` not in `registry.json`              | CLI install of row/column DnD + virtualized does not deliver the virt DnD surface |
+| Row context-menu always imported by regular/virtualized bodies             | Module cost even when no menu slot                                                |
+| `enableSorting` defaults `true`                                            | `getSortedRowModel` usually attached without sort UI                              |
+
+---
+
+## Gaps (priority)
+
+### P0 — bundler / install coupling
+
+1. Split row vs column DnD structure packages (or structure files) so each axis imports only its filter + `@dnd-kit` surface.
+2. Add a `data-table-virtualized-dnd` registry item that ships `data-table-virtualized-dnd-structure.tsx`.
+3. Move `DEFAULT_MIN_COLUMN_SIZE` (and ideally the handle) off the always-on root/structure import path — marker package or `lib/constants` + lazy handle.
+
+### P1 — surface parity
+
+4. Wire `DataTableRowContextMenuSlot` / resolver into DnD bodies (regular + virtualized), or document as unsupported there.
+5. Non-virtualized `DataTableDndColumnBody` should honor `getSize()` / truncate when resize is on (header already does; virt column DnD already does).
+6. Regular column-DnD example should mount `<DataTableColumnResize />` when we claim the combo works.
+7. Consider defaulting `enableSorting` from detection only (stricter model attachment).
+
+### P2 — footprint polish
+
+8. Optionally split grid registry into core vs editors/clipboard blocks (runtime is already mount-gated; install still copies everything).
+9. Document: **runtime opt-in strong; install/static opt-in strong between packages, weaker inside shared structure files.**
+
+---
+
+## Checklist for new features
+
+When adding a feature, verify all three surfaces that apply:
+
+- [ ] Own registry package (or explicit reason it lives in core)
+- [ ] Core / plain structure does **not** statically import the optional module or its heavy deps
+- [ ] Feature turns on only when a marker/child is mounted (detection or `useRegisterGridFeature`)
+- [ ] No window/document listeners while unmounted
+- [ ] Example for regular **and** virtualized if the structure API differs (DnD, resize)
+- [ ] Grid: table chrome under `DataTableRoot`, grid-only as `<DataGrid>` children
+- [ ] Changelog notes the seam (install vs runtime)
+
+---
+
+## Related
+
+- [Documentation Guidelines](/contributing/documentation-guidelines/) — overview vs examples
+- [Introduction — Composability map](/getting-started/introduction/#composability-map)
+- [Skills](/getting-started/skills/) — agent guidance follows the same install-only-what-you-need model
