@@ -123,6 +123,8 @@ export function DataGrid<TRow extends GridRow>({
     if (aRow === undefined || fRow === undefined) return null
     const aCol = columnIds.indexOf(anchor.columnId)
     const fCol = columnIds.indexOf(focusedCell.columnId)
+    // Hidden / reordered-away columns yield -1 — never treat that as a bound.
+    if (aCol < 0 || fCol < 0) return null
     return {
       minRow: Math.min(aRow, fRow),
       maxRow: Math.max(aRow, fRow),
@@ -130,6 +132,16 @@ export function DataGrid<TRow extends GridRow>({
       maxColIndex: Math.max(aCol, fCol),
     }
   }, [focusedCell, selectionAnchor, columnIds, displayIndexOf])
+
+  // Drop focus when the focused row/column leaves the display model (filter,
+  // hide column). Keeps Enter / type-to-edit from targeting a ghost cell.
+  const deselect = grid.deselect
+  React.useEffect(() => {
+    if (!focusedCell) return
+    const rowGone = displayIndexOf(focusedCell.rowId) === undefined
+    const colGone = columnIds.indexOf(focusedCell.columnId) < 0
+    if (rowGone || colGone) deselect()
+  }, [focusedCell, displayIndexOf, columnIds, deselect])
 
   // --- opt-in features (registered by mounted children) -------------------
   const [features, setFeatures] = React.useState<GridFeatures>({})
@@ -168,21 +180,27 @@ export function DataGrid<TRow extends GridRow>({
       const cont = scrollEl.getBoundingClientRect()
       const cell = cellEl.getBoundingClientRect()
 
-      // Horizontal: sticky pinned-left columns overlap the left edge — offset past them.
+      // Horizontal: sticky pins overlap the edges. Only LEFT-pinned cells have
+      // a non-auto `left` — right pins are also sticky but must inset the
+      // right edge (treating every sticky td as left used to yank scrollLeft).
       const rowEl = cellEl.closest("tr")
       let leftInset = 0
+      let rightInset = 0
       rowEl?.querySelectorAll<HTMLElement>("td").forEach(td => {
-        if (getComputedStyle(td).position === "sticky") {
-          leftInset = Math.max(
-            leftInset,
-            td.getBoundingClientRect().right - cont.left,
-          )
+        const style = getComputedStyle(td)
+        if (style.position !== "sticky") return
+        const rect = td.getBoundingClientRect()
+        if (style.left !== "auto") {
+          leftInset = Math.max(leftInset, rect.right - cont.left)
+        }
+        if (style.right !== "auto") {
+          rightInset = Math.max(rightInset, cont.right - rect.left)
         }
       })
       if (cell.left < cont.left + leftInset) {
         scrollEl.scrollLeft -= cont.left + leftInset - cell.left
-      } else if (cell.right > cont.right) {
-        scrollEl.scrollLeft += cell.right - cont.right
+      } else if (cell.right > cont.right - rightInset) {
+        scrollEl.scrollLeft += cell.right - (cont.right - rightInset)
       }
 
       // Vertical: the sticky header overlaps the top edge — offset past it
@@ -526,6 +544,7 @@ export function DataGrid<TRow extends GridRow>({
       grid,
       selectionBounds,
       columnIds,
+      displayIndexOf,
       onCellMouseDown,
       onCellMouseEnter,
       moveFocus,
@@ -543,6 +562,7 @@ export function DataGrid<TRow extends GridRow>({
       grid,
       selectionBounds,
       columnIds,
+      displayIndexOf,
       onCellMouseDown,
       onCellMouseEnter,
       moveFocus,

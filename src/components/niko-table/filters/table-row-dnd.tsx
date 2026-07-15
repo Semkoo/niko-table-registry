@@ -107,12 +107,19 @@ TableRowDndProvider.displayName = "TableRowDndProvider"
 export interface TableDraggableRowProps<TData> {
   /** The row instance from TanStack Table */
   row: Row<TData>
+  /**
+   * Position in the current display model (post sort/filter). Used for
+   * `scrollRowIntoView` / `flashRows`. Defaults to TanStack source `row.index`
+   * only when the caller omits it — prefer passing the map index.
+   */
+  displayIndex?: number
   children: React.ReactNode
   className?: string
 }
 
 export function TableDraggableRow<TData>({
   row,
+  displayIndex = row.index,
   children,
   className,
 }: TableDraggableRowProps<TData>) {
@@ -132,7 +139,7 @@ export function TableDraggableRow<TData>({
     <TableRow
       ref={setNodeRef}
       style={style}
-      data-row-index={row.index}
+      data-row-index={displayIndex}
       data-row-id={row.id}
       data-state={row.getIsSelected() && "selected"}
       className={cn(isDragging && "bg-muted/50", className)}

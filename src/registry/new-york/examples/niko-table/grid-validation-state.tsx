@@ -1,23 +1,23 @@
 "use client"
 
 /**
- * niko-table/grid — validation with Zod.
- *
- * The grid is validation-agnostic: every cell carries a `status`
- * ("valid" | "invalid" | "empty") and an optional `error` string, and YOU decide
- * them in one `resolve(columnId, raw)` function. That's the seam where Zod runs.
- *
- * Two layers, both inline (no summary block):
- *   1. Per-cell (field) — a Zod schema per column inside `resolve`. A bad value
- *      goes red and shows its message in a tooltip on hover/focus.
- *   2. Cross-field (row) — a rule spanning cells (here: end time > start time),
- *      recomputed after every commit and folded onto the offending cell.
- *
- * On Save, the same schema that powers the cells validates the change-set — so
- * the grid can't submit anything your backend would reject (see the Persistence
- * example for the save half).
+ * niko-table/grid — Zod validation with a live state panel for docs.
  */
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible"
 import { DataTable } from "@/components/niko-table/core/data-table"
 import { DataTableRoot } from "@/components/niko-table/core/data-table-root"
 import {
@@ -41,6 +41,7 @@ import type {
   GridRow,
 } from "@/components/niko-table/grid/types/grid-cell"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
+import { ChevronRight } from "lucide-react"
 import * as React from "react"
 import { z } from "zod"
 
@@ -63,7 +64,6 @@ const COLUMN_BY_ID = Object.fromEntries(COLUMNS.map(c => [c.id, c])) as Record<
   (typeof COLUMNS)[number]
 >
 
-// --- Layer 1: a Zod field schema per column ----------------------------------
 const isRealDate = (s: string) => {
   const [y, m, d] = s.split("-").map(Number)
   const dt = new Date(Date.UTC(y!, m! - 1, d!))
@@ -87,8 +87,6 @@ const FIELD_SCHEMAS: Record<ColumnId, z.ZodType<string>> = {
   venue: z.string(),
 }
 
-// The one function the grid asks you for. Empty required cells read as "empty"
-// (neutral until you try to save); a filled-but-bad value is "invalid" + reason.
 function resolveCell(columnId: string, raw: string): CellState<string> {
   const trimmed = raw.trim()
   const col = COLUMN_BY_ID[columnId as ColumnId]
@@ -106,9 +104,6 @@ function resolveCell(columnId: string, raw: string): CellState<string> {
       }
 }
 
-// --- Layer 2: a cross-field rule (end must be after start) --------------------
-// Runs against a row's already-resolved start/end cells; returns the message to
-// pin on the `end` cell, or null when the pair is fine or not yet both valid.
 function crossFieldEndError(row: GridRow): string | null {
   const start = row.start
   const end = row.end
@@ -128,7 +123,6 @@ const INITIAL_ROWS: GridRow[] = [
     end: cell("end", "10:30"),
     venue: cell("venue", "Rink A"),
   },
-  // Seeds that arrive invalid, so the red state + tooltips show immediately:
   {
     id: "r2",
     date: cell("date", "2026-13-02"),
@@ -154,24 +148,30 @@ const rawOf = (row: GridRow, id: ColumnId) => {
   return typeof v === "object" && v != null ? v.raw : ""
 }
 
-export function GridValidation() {
+function formatPos(
+  pos: { rowId: string; columnId: string } | null | undefined,
+): string {
+  if (!pos) return "None"
+  return `${pos.rowId} / ${pos.columnId}`
+}
+
+export function GridValidationState() {
+  const [resetKey, setResetKey] = React.useState(0)
+  return (
+    <GridValidationStateInner
+      key={resetKey}
+      onReset={() => setResetKey(k => k + 1)}
+    />
+  )
+}
+
+function GridValidationStateInner({ onReset }: { onReset: () => void }) {
   const grid = useDataGrid<GridRow>({
     columnIds: COLUMN_IDS,
     createEmptyRow,
     initialRows: INITIAL_ROWS,
   })
 
-  // Re-run the cross-field rule after every commit and fold its result onto the
-  // `end` cell. Field-level resolution wins (a malformed time stays malformed);
-  // otherwise the cross-field message is overlaid.
-  //
-  // Two things keep this correct:
-  //   - Return the SAME row refs when nothing changed. The engine treats a
-  //     new array of identical element refs as a no-op (no `lastCommit` bump),
-  //     so the settle converges and never loops.
-  //   - `{ history: false }` — re-settling derived state must NOT push an undo
-  //     entry, or Ctrl+Z would step through the settle instead of the user's
-  //     actual edit (and a settle right after an undo could drop the redo stack).
   React.useEffect(() => {
     if (!grid.lastCommit) return
     grid.updateRows(
@@ -237,36 +237,122 @@ export function GridValidation() {
   )
 
   return (
-    <DataTableRoot data={grid.rows} columns={columns} getRowId={r => r.id}>
-      <DataGrid grid={grid}>
-        <DataGridClipboard resolveCell={resolveCell} />
-        <DataGridFillHandle />
-        <DataGridToolbar>
-          <DataGridAddRows count={1} />
-          <DataGridPasteHint />
-          <span className="ms-auto">
-            {invalidCount > 0 ? (
-              <Badge variant="destructive">
-                {invalidCount} row{invalidCount === 1 ? "" : "s"} need fixing
-              </Badge>
-            ) : (
-              <Badge variant="secondary">All rows valid</Badge>
-            )}
-          </span>
-        </DataGridToolbar>
-        <p className="px-1 text-sm text-muted-foreground">
-          Hover a red cell for the reason. Try a bad date (2026-13-02), a
-          12-hour time, or an end time before the start.
-        </p>
-        <DataTable maxHeight={320}>
-          <DataTableVirtualizedHeader />
-          <DataTableVirtualizedBody<GridRow>
-            estimateSize={37}
-            fixedRowHeight
-            getCellClassName={gridCellClassName}
-          />
-        </DataTable>
-      </DataGrid>
-    </DataTableRoot>
+    <div className="w-full space-y-4">
+      <DataTableRoot data={grid.rows} columns={columns} getRowId={r => r.id}>
+        <DataGrid grid={grid}>
+          <DataGridClipboard resolveCell={resolveCell} />
+          <DataGridFillHandle />
+          <DataGridToolbar>
+            <DataGridAddRows count={1} />
+            <DataGridPasteHint />
+            <span className="ms-auto">
+              {invalidCount > 0 ? (
+                <Badge variant="destructive">
+                  {invalidCount} row{invalidCount === 1 ? "" : "s"} need fixing
+                </Badge>
+              ) : (
+                <Badge variant="secondary">All rows valid</Badge>
+              )}
+            </span>
+          </DataGridToolbar>
+          <p className="px-1 text-sm text-muted-foreground">
+            Hover a red cell for the reason. Try a bad date (2026-13-02), a
+            12-hour time, or an end time before the start.
+          </p>
+          <DataTable maxHeight={320}>
+            <DataTableVirtualizedHeader />
+            <DataTableVirtualizedBody<GridRow>
+              estimateSize={37}
+              fixedRowHeight
+              getCellClassName={gridCellClassName}
+            />
+          </DataTable>
+        </DataGrid>
+      </DataTableRoot>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Current Grid State</CardTitle>
+          <CardDescription>
+            Live view of the grid engine state for demonstration
+          </CardDescription>
+          <CardAction>
+            <Button variant="outline" size="sm" onClick={onReset}>
+              Reset All State
+            </Button>
+          </CardAction>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-2 text-xs text-muted-foreground">
+            <div className="flex justify-between">
+              <span className="font-medium">Focused Cell:</span>
+              <span className="text-foreground">
+                {formatPos(grid.focusedCell)}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="font-medium">Editing Cell:</span>
+              <span className="text-foreground">
+                {formatPos(grid.editingCell)}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="font-medium">Selection Anchor:</span>
+              <span className="text-foreground">
+                {formatPos(grid.selectionAnchor)}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="font-medium">Total Rows:</span>
+              <span className="text-foreground">{grid.rows.length}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="font-medium">Invalid Rows:</span>
+              <span className="text-foreground">{invalidCount}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="font-medium">Can Undo / Redo:</span>
+              <span className="text-foreground">
+                {grid.canUndo ? "Yes" : "No"} / {grid.canRedo ? "Yes" : "No"}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="font-medium">Last Commit:</span>
+              <span className="text-foreground">
+                {grid.lastCommit
+                  ? `${grid.lastCommit.kind} (seq ${grid.lastCommit.seq})`
+                  : "None"}
+              </span>
+            </div>
+          </div>
+
+          <Collapsible>
+            <CollapsibleTrigger className="flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground [&[data-state=open]>svg]:rotate-90">
+              <ChevronRight className="size-3.5 transition-transform" />
+              View Full State Object
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <pre className="mt-2 max-h-64 overflow-auto rounded-md bg-muted p-3 text-[10px] leading-relaxed">
+                {JSON.stringify(
+                  {
+                    focusedCell: grid.focusedCell,
+                    editingCell: grid.editingCell,
+                    selectionAnchor: grid.selectionAnchor,
+                    canUndo: grid.canUndo,
+                    canRedo: grid.canRedo,
+                    lastCommit: grid.lastCommit,
+                    rowCount: grid.rows.length,
+                    invalidCount,
+                    rows: grid.rows,
+                  },
+                  null,
+                  2,
+                )}
+              </pre>
+            </CollapsibleContent>
+          </Collapsible>
+        </CardContent>
+      </Card>
+    </div>
   )
 }

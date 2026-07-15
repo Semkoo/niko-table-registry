@@ -7,9 +7,25 @@ description: Latest updates and release notes for Niko Table.
 
 ### Added
 
-- **Data Grid — a composable, editable spreadsheet grid (`data-table-grid`).** A headless engine (`useDataGrid` — focused cell, selection rectangle, edit lifecycle, undo/redo, all addressed by row id so sort and filter keep working while you edit) plus a composable skin you assemble from `<DataGrid>` + cell editors + opt-in feature children. Keyboard cell navigation, drag range-select, quote-aware TSV copy/cut/paste with one-to-many tiling, corner-drag fill, drag-to-move, row drag-to-reorder, dynamic columns, a selection status bar, and six cell editors (text, number, currency, checkbox, date, select/combobox). Virtualized to 100k+ rows. Start at the [Data Grid introduction](/data-grid/introduction/).
-- **Persistence for the grid (`data-table-grid-changes`).** The opt-in `useGridChanges` hook watches the engine and turns edits into a create / update / delete change-set — `getChangeSet()`, `dirtyRowIds` / `isDirty`, `reconcile()` for per-row save results, and `reset()` to re-baseline. Drives staging saves, debounced autosave, and full CRUD, in plain React with no dependency. See [Persistence](/data-grid/persistence/).
-- **Inline cell validation.** Cells now show their `error` message in a tooltip when invalid, so per-field and cross-field validation surfaces right on the offending cell (no summary block). Bring your own logic — the [Validation guide](/data-grid/validation/) shows the Zod pattern.
+- **Data Grid** (`data-table-grid`) — composable, virtualized spreadsheet grid: `useDataGrid` + `<DataGrid>` + opt-in children. [Introduction](/data-grid/introduction/)
+- **Persistence** (`data-table-grid-changes`) — `useGridChanges` → create / update / delete. [Persistence](/data-grid/persistence/)
+- **Inline validation** — `CellState.error` tooltip on the cell. [Validation](/data-grid/validation/)
+- **Column resize** — `<DataTableColumnResize />`; [example](/examples/column-resize-table/)
+- Docs pass — shorter, shadcn-style install → usage across the Data Grid guides
+
+### Fixed
+
+- **Core** — `data-row-index` is display order (`flashRows` / scroll after sort/filter)
+- **Core** — empty/loading `colSpan` uses visible columns; resize width cleanup
+- **Core** — `daysAgo()` is deterministic (fixed epoch)
+- Validation settle no-ops on identical row refs (no infinite loop)
+- Display index under sort/filter (selection, gutter, cross-highlight)
+- Blank SSR seed (`row-0`…); `clearAll` keeps seed row count
+- Scroll-into-view with right-pinned columns
+- Undo/redo / filter / hide no longer leave ghost focus
+- `extendSelectionTo` ends editing; combobox no-op re-select skips undo
+- Pin + resize no longer clips the first data column
+- Portaled editors (`data-grid-cell-editor`) commit on mouse pick
 
 ## May 2026
 

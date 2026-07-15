@@ -140,8 +140,9 @@ const ActiveCellSetterContext = createContext<
 /**
  * The active-selection span for the grid-style cross-highlight (`null` when
  * inactive). In a header, `activeCell.columnIds.has(column.id)` lights the
- * active columns; in a body/gutter, `row.index` within `activeCell.rowRange`
- * lights the active rows.
+ * active columns; in a body/gutter, the row's **display** index (position in
+ * `getRowModel().rows` / the virtualizer index) within `activeCell.rowRange`
+ * lights the active rows — not TanStack's source-data `row.index`.
  */
 export function useDataTableActiveCell(): ActiveCell {
   return useContext(ActiveCellValueContext)
@@ -322,10 +323,12 @@ export function DataTableProvider<TData>({
       if (!row) return
       const anchorId = rowSelectionAnchorRef.current
       if (shiftKey && anchorId != null && model.rowsById[anchorId]) {
-        // Select every row between the anchor and this one (display order),
-        // extending the current selection (standard bulk-selection behavior).
-        const a = model.rowsById[anchorId]!.index
-        const b = row.index
+        // Select every row between the anchor and this one in DISPLAY order.
+        // Use positions in `model.rows` — TanStack's `row.index` is the
+        // source-data index and diverges after sort/filter.
+        const a = model.rows.findIndex(r => r.id === anchorId)
+        const b = model.rows.findIndex(r => r.id === rowId)
+        if (a === -1 || b === -1) return
         const next = { ...table.getState().rowSelection }
         for (let i = Math.min(a, b); i <= Math.max(a, b); i++) {
           const r = model.rows[i]
@@ -344,8 +347,10 @@ export function DataTableProvider<TData>({
     (ids: string[]) => {
       const model = table.getRowModel()
       for (const id of ids) {
-        const idx = model.rowsById[id]?.index
-        if (idx !== undefined) {
+        // Display index — `scrollRowIntoView` / the virtualizer speak display
+        // space, not TanStack's source-data `row.index`.
+        const idx = model.rows.findIndex(r => r.id === id)
+        if (idx !== -1) {
           scrollRowIntoView(idx, { align: "center" })
           return
         }

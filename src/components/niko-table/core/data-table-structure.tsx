@@ -27,6 +27,7 @@ import { DataTableEmptyState } from "../components/data-table-empty-state"
 import { DataTableRowContextMenu } from "../components/data-table-row-context-menu"
 import { useResolvedRowContextMenuRenderer } from "../components/data-table-row-context-menu-slot"
 import { createScrollHandler } from "../lib/create-scroll-handler"
+import { DataTableColumnResizeHandle } from "../lib/column-resize-handle"
 import { resolveRowFromClick } from "../lib/row-click"
 import { getCommonPinningStyles } from "../lib/styles"
 import { flashCellKey, useDataTable } from "./data-table-context"
@@ -62,6 +63,7 @@ export const DataTableHeader = React.memo(function DataTableHeader({
   sticky = true,
 }: DataTableHeaderProps) {
   const { table } = useDataTable()
+  const resizing = table?.options.enableColumnResizing ?? false
 
   const headerGroups = table?.getHeaderGroups() ?? []
 
@@ -84,15 +86,26 @@ export const DataTableHeader = React.memo(function DataTableHeader({
           {headerGroup.headers.map(header => {
             const size = header.column.columnDef.size
             const headerStyle = {
-              width: size ? `${size}px` : undefined,
+              // Resizing: width tracks `getSize()` (columnSizing-aware).
+              // Off: unchanged (columnDef.size, or auto when unset).
+              width: resizing
+                ? header.getSize()
+                : size
+                  ? `${size}px`
+                  : undefined,
               ...getCommonPinningStyles(header.column, true),
             }
 
             return (
               <TableHead
                 key={header.id}
+                data-col-id={header.column.id}
                 style={headerStyle}
-                className={cn(header.column.getIsPinned() && "bg-background")}
+                className={cn(
+                  header.column.getIsPinned() && "bg-background",
+                  // Anchor the absolute resize handle to the cell's right edge.
+                  resizing && "relative",
+                )}
               >
                 {header.isPlaceholder ? null : (
                   <DataTableColumnHeaderRoot column={header.column}>
@@ -101,6 +114,9 @@ export const DataTableHeader = React.memo(function DataTableHeader({
                       header.getContext(),
                     )}
                   </DataTableColumnHeaderRoot>
+                )}
+                {resizing && header.column.getCanResize() && (
+                  <DataTableColumnResizeHandle header={header} />
                 )}
               </TableHead>
             )
@@ -129,11 +145,15 @@ DataTableHeader.displayName = "DataTableHeader"
  */
 interface BodyRowProps {
   row: Row<unknown>
+  /** Position in the current display model (post sort/filter) — for scroll/flash. */
+  displayIndex: number
   expandColumnId: string | undefined
   isClickable: boolean
   isExpanded: boolean
   isSelected: boolean
-  /** Column layout signature — invalidates React.memo on visibility/order/pinning change. */
+  /** Column resizing is on — cells size from `column.getSize()` instead of `columnDef.size`. */
+  columnSizingEnabled: boolean
+  /** Column layout signature — invalidates React.memo on visibility/order/pinning/resize change. */
   columnLayoutSignature: string
   /**
    * Per-row memo key. Change this string to force React.memo to re-render a
@@ -158,10 +178,12 @@ const FLASH_ANIMATION = "niko-row-flash 1.2s ease-out"
 
 const BodyRow = React.memo(function BodyRow({
   row,
+  displayIndex,
   expandColumnId,
   isClickable,
   isExpanded,
   isSelected,
+  columnSizingEnabled,
   isRowFlashing,
   flashingCellKeys,
   renderRowContextMenu,
@@ -175,12 +197,12 @@ const BodyRow = React.memo(function BodyRow({
 
   const rowElement = (
     <TableRow
-      data-row-index={row.index}
+      data-row-index={displayIndex}
       data-row-id={row.id}
       data-row-type={
         (row.original as { rowType?: string } | undefined)?.rowType
       }
-      data-parity={row.index % 2 === 0 ? "even" : "odd"}
+      data-parity={displayIndex % 2 === 0 ? "even" : "odd"}
       data-expanded={isExpanded ? "true" : undefined}
       data-state={isSelected ? "selected" : undefined}
       className={cn(
@@ -194,7 +216,12 @@ const BodyRow = React.memo(function BodyRow({
           isRowFlashing ||
           flashingCellKeys.has(flashCellKey(row.id, cell.column.id))
         const cellStyle = {
-          width: size ? `${size}px` : undefined,
+          // Resizing: width tracks `getSize()`; off: unchanged.
+          width: columnSizingEnabled
+            ? cell.column.getSize()
+            : size
+              ? `${size}px`
+              : undefined,
           ...getCommonPinningStyles(cell.column, false),
           ...(flashing ? { animation: FLASH_ANIMATION } : {}),
         }
@@ -203,6 +230,7 @@ const BodyRow = React.memo(function BodyRow({
           <TableCell
             key={cell.id}
             data-flash={flashing ? "true" : undefined}
+            data-col-id={cell.column.id}
             style={cellStyle}
             className={cn(
               cell.column.getIsPinned() &&
@@ -363,21 +391,32 @@ export function DataTableBody<TData>({
     [table, columns],
   )
 
-  const { columnVisibility, columnOrder, columnPinning } = table.getState()
+  const { columnVisibility, columnOrder, columnPinning, columnSizing } =
+    table.getState()
+  const resizing = table.options.enableColumnResizing ?? false
   // String signature of the visible column layout. Memoized rows compare it
-  // to invalidate on column toggle / reorder / pin. For external row state
-  // (inline edits, optimistic overlays), pass `getRowMemoKey`.
+  // to invalidate on column toggle / reorder / pin / (when enabled) resize.
+  // For external row state (inline edits, optimistic overlays), pass
+  // `getRowMemoKey`.
   const columnLayoutSignature = React.useMemo(
     () =>
       table
         .getVisibleLeafColumns()
         .map(c => {
           const pinned = c.getIsPinned()
-          return pinned ? `${c.id}:${pinned}` : c.id
+          const base = pinned ? `${c.id}:${pinned}` : c.id
+          return resizing ? `${base}:${c.getSize()}` : base
         })
         .join(","),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [table, columnVisibility, columnOrder, columnPinning],
+    [
+      table,
+      columnVisibility,
+      columnOrder,
+      columnPinning,
+      columnSizing,
+      resizing,
+    ],
   )
 
   const isClickable = !!onRowClick
@@ -389,6 +428,41 @@ export function DataTableBody<TData>({
     children,
   )
 
+  // When resizing is on, lock `table-layout: fixed` and an explicit pixel width
+  // (= sum of `getSize()`) so Tailwind `w-full` can't compress columns. Sticky
+  // pin offsets use the same sizes — a compressed table would leave the left
+  // pin overlaying the first data column.
+  React.useLayoutEffect(() => {
+    const tableEl = containerRef.current?.closest<HTMLTableElement>(
+      '[data-slot="table"]',
+    )
+    if (!tableEl) return
+    if (!resizing) {
+      tableEl.style.tableLayout = ""
+      tableEl.style.width = ""
+      tableEl.style.minWidth = ""
+      return
+    }
+    const totalDesiredWidth = table
+      .getVisibleLeafColumns()
+      .reduce((sum, col) => sum + col.getSize(), 0)
+    tableEl.style.tableLayout = "fixed"
+    tableEl.style.width = `${totalDesiredWidth}px`
+    tableEl.style.minWidth = `${totalDesiredWidth}px`
+    return () => {
+      tableEl.style.tableLayout = ""
+      tableEl.style.width = ""
+      tableEl.style.minWidth = ""
+    }
+  }, [
+    resizing,
+    table,
+    columnSizing,
+    columnVisibility,
+    columnOrder,
+    columnPinning,
+  ])
+
   return (
     <TableBody
       ref={containerRef}
@@ -397,14 +471,16 @@ export function DataTableBody<TData>({
     >
       {/* Only show rows when not loading */}
       {!isLoading && rows?.length
-        ? rows.map(row => (
+        ? rows.map((row, displayIndex) => (
             <BodyRow
               key={row.id}
               row={row as Row<unknown>}
+              displayIndex={displayIndex}
               expandColumnId={expandColumnId}
               isClickable={isClickable}
               isExpanded={row.getIsExpanded()}
               isSelected={row.getIsSelected()}
+              columnSizingEnabled={resizing}
               columnLayoutSignature={columnLayoutSignature}
               rowMemoKey={
                 getRowMemoKey ? getRowMemoKey(row.original as TData) : ""
@@ -480,9 +556,14 @@ export function DataTableEmptyBody({
   const rowCount = table.getRowModel().rows.length
   if (isLoading || rowCount > 0) return null
 
+  const visibleCount = table.getVisibleLeafColumns().length
+
   return (
     <TableRow>
-      <TableCell colSpan={colSpan ?? columns.length} className={className}>
+      <TableCell
+        colSpan={colSpan ?? (visibleCount || columns.length)}
+        className={className}
+      >
         <DataTableEmptyState isFiltered={isFiltered}>
           {children}
         </DataTableEmptyState>
@@ -526,7 +607,7 @@ export function DataTableSkeleton({
 
   // Get visible columns from table to match actual structure
   const visibleColumns = table.getVisibleLeafColumns()
-  const numColumns = colSpan ?? columns.length
+  const numColumns = colSpan ?? (visibleColumns.length || columns.length)
 
   // If custom children provided, show single row with custom content
   if (children) {
@@ -584,16 +665,18 @@ export function DataTableLoading({
   colSpan,
   className,
 }: DataTableLoadingProps) {
-  const { columns, isLoading } = useDataTable()
+  const { table, columns, isLoading } = useDataTable()
 
   // Self-gate on `isLoading` to match peer composables — otherwise the row
   // stays visible after data resolves.
   if (!isLoading) return null
 
+  const visibleCount = table.getVisibleLeafColumns().length
+
   return (
     <TableRow>
       <TableCell
-        colSpan={colSpan ?? columns.length}
+        colSpan={colSpan ?? (visibleCount || columns.length)}
         className={className ?? "h-24 text-center"}
       >
         {children ?? (
@@ -662,15 +745,17 @@ export function DataTableLoadingMore({
   colSpan,
   className,
 }: DataTableLoadingMoreProps) {
-  const { columns } = useDataTable()
+  const { table, columns } = useDataTable()
 
   // Self-gating — nothing to render when no fetch is in flight.
   if (!isFetching) return null
 
+  const visibleCount = table.getVisibleLeafColumns().length
+
   return (
     <TableRow data-slot="datatable-loading-more-row">
       <TableCell
-        colSpan={colSpan ?? columns.length}
+        colSpan={colSpan ?? (visibleCount || columns.length)}
         className={cn("text-center text-xs text-muted-foreground", className)}
       >
         <span className="inline-flex items-center justify-center gap-2 py-3">

@@ -11,7 +11,7 @@
  * users (and future LLMs reading this code) benefit:
  * https://github.com/Semkoo/niko-table-registry
  */
-import { flexRender, type Header, type Row } from "@tanstack/react-table"
+import { flexRender, type Row } from "@tanstack/react-table"
 import { useVirtualizer } from "@tanstack/react-virtual"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
@@ -29,6 +29,7 @@ import { DataTableEmptyState } from "../components/data-table-empty-state"
 import { DataTableRowContextMenu } from "../components/data-table-row-context-menu"
 import { useResolvedRowContextMenuRenderer } from "../components/data-table-row-context-menu-slot"
 import { createScrollHandler } from "../lib/create-scroll-handler"
+import { DataTableColumnResizeHandle } from "../lib/column-resize-handle"
 import { isInteractiveClickTarget } from "../lib/row-click"
 import { getCommonPinningStyles } from "../lib/styles"
 import {
@@ -79,130 +80,6 @@ export interface ScrollEvent {
   isTop: boolean
   isBottom: boolean
   percentage: number
-}
-
-// ============================================================================
-// Column resize handle (opt-in via `enableColumnResizing`)
-// ============================================================================
-
-// Room for cell chrome the text measurement doesn't cover.
-const AUTOSIZE_CELL_PADDING = 24 // a cell's horizontal padding + a small buffer
-const AUTOSIZE_HEADER_CHROME = 52 // header's sort/menu trigger + resize grip
-
-/**
- * The tightest width that fits every TEXT node in an element. Uses a DOM Range
- * (which reports the real text extent) so `w-full` + `truncate` cell wrappers
- * — whose `scrollWidth` just echoes the current cell width — don't hide the
- * natural content width. Lets autosize both grow AND shrink to fit.
- */
-function widestTextWidth(el: Element): number {
-  const range = document.createRange()
-  const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT)
-  let max = 0
-  for (let n = walker.nextNode(); n; n = walker.nextNode()) {
-    if (!n.textContent || n.textContent.trim() === "") continue
-    range.selectNodeContents(n)
-    max = Math.max(max, range.getBoundingClientRect().width)
-  }
-  return max
-}
-
-/**
- * Autosize a column to fit its content — measures the widest rendered
- * cell/header text (only MOUNTED cells, virtualized: fit what's on screen, the
- * standard approach on large data) and sets that column's size.
- */
-function autosizeColumn<TData>(
-  header: Header<TData, unknown>,
-  handle: Element,
-) {
-  const root = handle.closest('[data-slot="table"]')
-  if (!root) return
-  const cells = root.querySelectorAll<HTMLElement>(
-    `[data-col-id="${CSS.escape(header.column.id)}"]`,
-  )
-  let content = 0
-  cells.forEach(c => {
-    const isHeader = c.getAttribute("data-slot") === "table-head"
-    const chrome = isHeader ? AUTOSIZE_HEADER_CHROME : AUTOSIZE_CELL_PADDING
-    content = Math.max(content, widestTextWidth(c) + chrome)
-  })
-  if (content <= 0) return
-  const def = header.column.columnDef
-  const width = Math.min(
-    Math.max(Math.ceil(content), def.minSize ?? 40),
-    def.maxSize ?? 1000,
-  )
-  header
-    .getContext()
-    .table.setColumnSizing(prev => ({ ...prev, [header.column.id]: width }))
-}
-
-/**
- * Drag-to-resize / double-click-to-autosize grip on a header's right edge.
- * Keyboard-operable (WAI-ARIA window-splitter): focusable, Arrow Left/Right
- * nudge the width (Shift = larger step), Enter autosizes; exposes
- * `aria-value*`.
- */
-function ColumnResizeHandle<TData>({
-  header,
-}: {
-  header: Header<TData, unknown>
-}) {
-  const isResizing = header.column.getIsResizing()
-  const resize = header.getResizeHandler()
-  const def = header.column.columnDef
-  const min = def.minSize ?? 40
-  const max = def.maxSize ?? 1000
-
-  const nudge = (delta: number) => {
-    header.getContext().table.setColumnSizing(prev => {
-      const current = prev[header.column.id] ?? header.column.getSize()
-      const next = Math.min(Math.max(current + delta, min), max)
-      return { ...prev, [header.column.id]: next }
-    })
-  }
-
-  return (
-    <div
-      role="separator"
-      aria-orientation="vertical"
-      aria-label="Resize column (arrow keys, or double-click to fit)"
-      aria-valuenow={header.column.getSize()}
-      aria-valuemin={min}
-      aria-valuemax={max}
-      tabIndex={0}
-      onMouseDown={resize}
-      onTouchStart={resize}
-      onDoubleClick={e => autosizeColumn(header, e.currentTarget)}
-      onClick={e => e.stopPropagation()}
-      onKeyDown={e => {
-        const step = e.shiftKey ? 40 : 8
-        if (e.key === "ArrowLeft") {
-          e.preventDefault()
-          nudge(-step)
-        } else if (e.key === "ArrowRight") {
-          e.preventDefault()
-          nudge(step)
-        } else if (e.key === "Enter") {
-          e.preventDefault()
-          autosizeColumn(header, e.currentTarget)
-        }
-      }}
-      className="group/resize absolute top-0 right-0 z-10 flex h-full w-2 cursor-col-resize touch-none justify-end outline-none select-none"
-    >
-      {/* Faint grip always visible (discoverable); a full primary bar on
-          hover, keyboard focus, or active drag. */}
-      <div
-        className={cn(
-          "my-1.5 w-px rounded bg-border transition-all",
-          "group-hover/resize:my-0 group-hover/resize:w-0.5 group-hover/resize:bg-primary",
-          "group-focus-visible/resize:my-0 group-focus-visible/resize:w-0.5 group-focus-visible/resize:bg-primary",
-          isResizing && "my-0 w-0.5 bg-primary",
-        )}
-      />
-    </div>
-  )
 }
 
 // ============================================================================
@@ -293,7 +170,7 @@ export const DataTableVirtualizedHeader = React.memo(
                     </DataTableColumnHeaderRoot>
                   )}
                   {resizing && header.column.getCanResize() && (
-                    <ColumnResizeHandle header={header} />
+                    <DataTableColumnResizeHandle header={header} />
                   )}
                 </TableHead>
               )
@@ -704,21 +581,31 @@ export function DataTableVirtualizedBody<TData>({
     [table, columns],
   )
 
-  const { columnVisibility, columnOrder, columnPinning } = table.getState()
+  const { columnVisibility, columnOrder, columnPinning, columnSizing } =
+    table.getState()
   // String signature of the visible column layout. Memoized rows compare it
-  // to invalidate on column toggle / reorder / pin. For external row state
-  // (inline edits, optimistic overlays), pass `getRowMemoKey`.
+  // to invalidate on column toggle / reorder / pin / (when enabled) resize.
+  // For external row state (inline edits, optimistic overlays), pass
+  // `getRowMemoKey`.
   const columnLayoutSignature = React.useMemo(
     () =>
       table
         .getVisibleLeafColumns()
         .map(c => {
           const pinned = c.getIsPinned()
-          return pinned ? `${c.id}:${pinned}` : c.id
+          const base = pinned ? `${c.id}:${pinned}` : c.id
+          return resizing ? `${base}:${c.getSize()}` : base
         })
         .join(","),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [table, columnVisibility, columnOrder, columnPinning],
+    [
+      table,
+      columnVisibility,
+      columnOrder,
+      columnPinning,
+      columnSizing,
+      resizing,
+    ],
   )
   const [scrollElement, setScrollElement] =
     React.useState<HTMLDivElement | null>(null)
@@ -755,20 +642,25 @@ export function DataTableVirtualizedBody<TData>({
 
     // Column resizing on: widths come from `column.getSize()` (React-controlled)
     // + `table-layout: fixed`, so the content-measure lock is neither needed nor
-    // wanted (it would fight user resizes). Just fix the layout once and flag
-    // locked so the row measurer attaches; column add/remove needs no re-lock.
+    // wanted (it would fight user resizes). Pinning uses those same sizes for
+    // sticky `left`/`width` — if the table still collapses under Tailwind's
+    // `w-full`, layout columns shrink while sticky cells stay at `getSize()`,
+    // and the left pin overlays the first data column. Keep an explicit pixel
+    // width (= sum of sizes) in sync with columnSizing so sticky and flow match.
     if (resizing) {
-      if (!columnLockRef.current) {
-        const tableEl = tbodyRef.current?.closest<HTMLTableElement>(
-          '[data-slot="table"]',
+      const tableEl = tbodyRef.current?.closest<HTMLTableElement>(
+        '[data-slot="table"]',
+      )
+      if (tableEl) {
+        const totalDesiredWidth = leafColumns.reduce(
+          (sum, col) => sum + col.getSize(),
+          0,
         )
-        if (tableEl) {
-          tableEl.style.tableLayout = "fixed"
-          // `max-content` so columns render at exactly `getSize()` — narrower
-          // than the container leaves space at the right (no stretch), wider
-          // scrolls. `w-full` would otherwise distribute slack onto columns.
-          tableEl.style.width = "max-content"
-        }
+        tableEl.style.tableLayout = "fixed"
+        tableEl.style.width = `${totalDesiredWidth}px`
+        tableEl.style.minWidth = `${totalDesiredWidth}px`
+      }
+      if (!columnLockRef.current) {
         columnLockRef.current = true
         lockedColumnCountRef.current = currentColCount
         setColumnsLocked(true)
@@ -787,6 +679,7 @@ export function DataTableVirtualizedBody<TData>({
       const tableEl = tbody?.closest<HTMLTableElement>('[data-slot="table"]')
       if (tableEl) {
         tableEl.style.tableLayout = ""
+        tableEl.style.width = ""
         tableEl.style.minWidth = ""
         tableEl
           .querySelectorAll<HTMLTableCellElement>(
@@ -864,7 +757,6 @@ export function DataTableVirtualizedBody<TData>({
     setColumnsLocked(true)
   })
 
-   
   const rowVirtualizer = useVirtualizer({
     count: rows.length,
     getScrollElement: () => scrollElement,
@@ -1016,8 +908,8 @@ export function DataTableVirtualizedBody<TData>({
             isSelected={row.getIsSelected()}
             isActiveRow={
               activeRowRange !== null &&
-              row.index >= activeRowRange.min &&
-              row.index <= activeRowRange.max
+              virtualRow.index >= activeRowRange.min &&
+              virtualRow.index <= activeRowRange.max
             }
             columnSizingEnabled={resizing}
             isClickable={isClickable}
@@ -1124,10 +1016,12 @@ export function DataTableVirtualizedEmptyBody({
   const rowCount = table.getRowModel().rows.length
   if (isLoading || rowCount > 0) return null
 
+  const visibleCount = table.getVisibleLeafColumns().length
+
   return (
     <TableRow>
       <TableCell
-        colSpan={colSpan ?? columns.length}
+        colSpan={colSpan ?? (visibleCount || columns.length)}
         className={cn("text-center", className)}
       >
         <DataTableEmptyState isFiltered={isFiltered}>
@@ -1238,15 +1132,17 @@ export function DataTableVirtualizedLoading({
   colSpan,
   className,
 }: DataTableVirtualizedLoadingProps) {
-  const { columns, isLoading } = useDataTable()
+  const { table, columns, isLoading } = useDataTable()
 
   // Show loading only when loading
   if (!isLoading) return null
 
+  const visibleCount = table.getVisibleLeafColumns().length
+
   return (
     <TableRow>
       <TableCell
-        colSpan={colSpan ?? columns.length}
+        colSpan={colSpan ?? (visibleCount || columns.length)}
         className={className ?? "h-24 text-center"}
       >
         {children ?? (
@@ -1315,15 +1211,17 @@ export function DataTableVirtualizedLoadingMore({
   colSpan,
   className,
 }: DataTableVirtualizedLoadingMoreProps) {
-  const { columns } = useDataTable()
+  const { table, columns } = useDataTable()
 
   // Self-gating — nothing to render when no fetch is in flight.
   if (!isFetching) return null
 
+  const visibleCount = table.getVisibleLeafColumns().length
+
   return (
     <TableRow data-slot="datatable-loading-more-row">
       <TableCell
-        colSpan={colSpan ?? columns.length}
+        colSpan={colSpan ?? (visibleCount || columns.length)}
         className={cn(
           "py-3 text-center text-xs text-muted-foreground",
           className,

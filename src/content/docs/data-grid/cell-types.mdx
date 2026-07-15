@@ -1,28 +1,40 @@
 ---
 title: Cell Types
-description: The six built-in Data Grid cell editors — text, number, currency, checkbox, date, and select — plus how to write your own.
+description: Built-in editors — text, number, currency, checkbox, date, select — and how to write your own.
 ---
 
 import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
+import CollapsiblePreview from "@/components/markdown/collapsible-preview.astro"
+import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
 
-The grid ships six cell editors, each following the same **display / editor split**: a cheap read-only shell renders for every visible cell, and the heavy editor mounts only for the one cell being edited — so a 280-cell viewport never constructs 280 date pickers. The grid stays type-agnostic; a cell's validity comes from the `resolve` you inject.
+Cheap **display** shell for every visible cell. Heavy **editor** mounts only while editing. Validity comes from your `resolve` — the grid stays type-agnostic.
 
 <CodePreview demo="niko-table/grid-cell-types" />
 
-## The built-in editors
+<CollapsiblePreview>
+  <CodePreview demo="niko-table/grid-cell-types-state" />
+</CollapsiblePreview>
 
-| Cell     | Component                             | Source                          | Notes                                                                                  |
-| -------- | ------------------------------------- | ------------------------------- | -------------------------------------------------------------------------------------- |
-| Text     | `GridTextCell`                        | `grid/cells/grid-text-cell`     | Uncontrolled input; commits on blur / Enter / Tab.                                     |
-| Number   | `GridNumberCell`                      | `grid/cells/grid-text-cell`     | Right-aligned; `resolve` decides numeric validity.                                     |
-| Currency | `GridNumberCell` + `format`           | `grid/cells/grid-text-cell`     | Display formats via `Intl.NumberFormat`; the editor still shows raw for precise entry. |
-| Checkbox | `GridCheckboxCell`                    | `grid/cells/grid-checkbox-cell` | Always interactive; Space / type toggles it.                                           |
-| Date     | `GridDateCell`                        | `grid/cells/grid-date-cell`     | Popover calendar; stores `YYYY-MM-DD` (no timezone shift).                             |
-| Select   | `GridSelectCell` / `GridComboboxCell` | `grid/cells/grid-select-cell`   | Command + Popover dropdown; `GridComboboxCell` adds search.                            |
+## Installation
 
-## Dispatching per column
+<CliCommandCode action="run" command="shadcn@latest add @niko-table/data-table-grid" />
 
-A consumer picks the editor per column — this palette is yours, the grid never sees it. A tagged column spec + a small dispatcher is the common shape:
+Date / select also need:
+
+<CliCommandCode action="run" command="shadcn@latest add calendar popover command button" />
+
+## Editors
+
+| Cell     | Component                             | Notes                                           |
+| -------- | ------------------------------------- | ----------------------------------------------- |
+| Text     | `GridTextCell`                        | Commits on blur / Enter / Tab                   |
+| Number   | `GridNumberCell`                      | Right-aligned; `resolve` owns validity          |
+| Currency | `GridNumberCell` + `format`           | Display via `Intl.NumberFormat`; edit shows raw |
+| Checkbox | `GridCheckboxCell`                    | Always interactive                              |
+| Date     | `GridDateCell`                        | Stores `YYYY-MM-DD`                             |
+| Select   | `GridSelectCell` / `GridComboboxCell` | Combobox adds search                            |
+
+## Dispatch by column
 
 ```tsx showLineNumbers
 function CellByType({
@@ -61,8 +73,6 @@ function CellByType({
 
 ## Validity via `resolve`
 
-Number, date, and select cells stay valid/invalid based on the `resolve` you pass — the grid stores the `status` but never computes it. A pasted-but-unmatched value stays visible (in red) so the user can correct it:
-
 ```tsx showLineNumbers
 function resolveCell(columnId: string, raw: string): CellState<string> {
   const spec = SPEC_BY_ID[columnId]
@@ -88,14 +98,13 @@ function resolveCell(columnId: string, raw: string): CellState<string> {
 }
 ```
 
-## Writing your own cell
+Pass the same `resolve` to `<DataGridClipboard resolveCell={…} />` so bad pastes stay visible (red) instead of dropping.
 
-Any component satisfying the `CellEditorProps` contract is a cell — so a rating stepper, a color swatch, or a multi-select drops in the same way. Follow the split: render `GridCellDisplay` while not editing, and mount your editor only when `isEditing`.
+## Custom cells
+
+Satisfy `CellEditorProps`. Render `GridCellDisplay` when idle; mount your editor only when `isEditing`.
 
 ```tsx showLineNumbers
-import { GridCellDisplay } from "@/components/niko-table/grid/cells/grid-cell-display"
-import type { CellEditorProps } from "@/components/niko-table/grid/cells/cell-props"
-
 export function MyCell(props: CellEditorProps) {
   const { cell, isFocused, isSelected, isEditing } = props
   if (!isEditing) {
@@ -105,35 +114,26 @@ export function MyCell(props: CellEditorProps) {
       </GridCellDisplay>
     )
   }
-  return <MyEditor {...props} /> // mounts only for the edited cell
+  return <MyEditor {...props} />
 }
 ```
 
-### Portaled editors — tag the surface with `data-grid-cell-editor`
+### Portaled editors
 
-If your editor renders its interactive surface in a **portal** — a `Popover`, `Command` dropdown, calendar, time picker, or anything mounted outside the cell's DOM — mark that portaled element with the `data-grid-cell-editor` attribute:
+If the interactive surface lives in a portal (`Popover`, calendar, combobox list), tag it with `data-grid-cell-editor` so mousedown inside it does not clear `editingCell` before commit:
 
-```tsx {5}
-<Popover open onOpenChange={(open) => !open && onEditingChange(false)}>
-  <PopoverTrigger render={<button />}>{cell.raw || placeholder}</PopoverTrigger>
-  {/* The calendar portals out of the cell — tag it so the grid ignores
-      pointer events inside it. */}
-  <PopoverContent data-grid-cell-editor="">
-    <Calendar onSelect={/* onCommit(...) */} />
-  </PopoverContent>
-</Popover>
+```tsx
+<PopoverContent data-grid-cell-editor="">
+  <Calendar onSelect={…} />
+</PopoverContent>
 ```
 
-React events still bubble through the React tree from a portaled child back to the grid, and the grid also watches document-level `mousedown` to clear the selection on click-away. Both paths treat any element inside `[data-grid-cell-editor]` as "still inside the editor": a mousedown there will **not** reselect the cell or `deselect()` — either of which clears `editingCell` and unmounts your editor _before_ its own `onSelect` / click fires, so the pick would silently no-op. The built-in `GridDateCell` and `GridComboboxCell` tag their popovers this way; do the same for any custom portaled editor. Segmented / inline editors that stay inside the cell don't need it.
-
-Here's a complete, runnable custom portaled cell — a **color-swatch picker** whose palette lives in a `PopoverContent` tagged `data-grid-cell-editor`. It shows the whole contract end to end: the display/editor split, the portaled surface, and committing on pick. Double-click a **Color** cell to open the palette:
+Built-in date/combobox cells already do this. Full example:
 
 <CodePreview demo="niko-table/grid-portaled-cell" />
 
-Try removing the `data-grid-cell-editor` attribute from `PopoverContent` in the source above — clicking a swatch stops committing, because the grid reselects the cell and unmounts the editor before the click lands. That one attribute is the whole trick.
+## Next
 
-## Next Steps
-
-- [Validation](/data-grid/validation/) — validate cells with Zod; inline per-cell error tooltips.
-- [Dynamic Columns](/data-grid/dynamic-columns/) — runtime add / rename / move / delete.
-- [API Reference](/data-grid/api/) — the full `CellEditorProps` contract.
+- [Validation](/data-grid/validation/)
+- [Dynamic Columns](/data-grid/dynamic-columns/)
+- [API Reference](/data-grid/api/)

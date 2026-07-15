@@ -11,6 +11,7 @@
  */
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
+import { DataTableClearFilter } from "@/components/niko-table/components/data-table-clear-filter"
 import { DataTableColumnActions } from "@/components/niko-table/components/data-table-column-actions"
 import { DataTableColumnHeader } from "@/components/niko-table/components/data-table-column-header"
 import { DataTableColumnHideOptions } from "@/components/niko-table/components/data-table-column-hide"
@@ -18,8 +19,13 @@ import { DataTableColumnPinOptions } from "@/components/niko-table/components/da
 import { DataTableColumnSortOptions } from "@/components/niko-table/components/data-table-column-sort"
 import { DataTableColumnTitle } from "@/components/niko-table/components/data-table-column-title"
 import { DataTableExportButton } from "@/components/niko-table/components/data-table-export-button"
+import { DataTableFacetedFilter } from "@/components/niko-table/components/data-table-faceted-filter"
+import { DataTableFilterMenu } from "@/components/niko-table/components/data-table-filter-menu"
 import { DataTableRowContextMenuSlot } from "@/components/niko-table/components/data-table-row-context-menu-slot"
+import { DataTableSearchFilter } from "@/components/niko-table/components/data-table-search-filter"
 import { DataTableSelectionBar } from "@/components/niko-table/components/data-table-selection-bar"
+import { DataTableSortMenu } from "@/components/niko-table/components/data-table-sort-menu"
+import { DataTableToolbarSection } from "@/components/niko-table/components/data-table-toolbar-section"
 import { DataTableViewDndMenu } from "@/components/niko-table/components/data-table-view-dnd-menu"
 import { DataTable } from "@/components/niko-table/core/data-table"
 import { useDataTable } from "@/components/niko-table/core/data-table-context"
@@ -74,7 +80,10 @@ import type {
   CellState,
   GridRow,
 } from "@/components/niko-table/grid/types/grid-cell"
-import { SYSTEM_COLUMN_IDS } from "@/components/niko-table/lib/constants"
+import {
+  FILTER_VARIANTS,
+  SYSTEM_COLUMN_IDS,
+} from "@/components/niko-table/lib/constants"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 import { cn } from "@/lib/utils"
 import { GripVertical, Plus, Trash2 } from "lucide-react"
@@ -88,6 +97,9 @@ const LAST = ["Kohler", "Hansen", "Reilly", "Nolan", "Abbott", "Lynch"]
 const TEAMS = ["Falcons", "Titans", "Rovers", "Wolves", "Hawks", "Comets"]
 const VENUES = ["Central Arena", "Riverside Hall", "North Gym", "Summit Center"]
 const STATUSES = ["Draft", "Ready", "Needs review", "Conflict"]
+
+const TEAM_OPTIONS = TEAMS.map(t => ({ label: t, value: t }))
+const STATUS_OPTIONS = STATUSES.map(s => ({ label: s, value: s }))
 
 const pad = (n: number, w = 2) => String(n).padStart(w, "0")
 const pick = <T,>(arr: readonly T[], i: number) => arr[i % arr.length]!
@@ -244,18 +256,18 @@ const INITIAL_ROWS = makeRows(DEFAULT_ROW_COUNT)
  *  select checkbox and (when row-reorder is mounted) a drag grip. */
 function GutterCell({
   rowId,
-  index,
   isSelected,
 }: {
   rowId: string
-  index: number
   isSelected: boolean
 }) {
-  const { selectRow } = useDataGridContext<GridRow>()
+  const { selectRow, displayIndexOf } = useDataGridContext<GridRow>()
   const { toggleRowSelection } = useDataTable<GridRow>()
   const rowReorder = useDataGridRowReorder()
   const shiftRef = React.useRef(false)
   const isDragging = rowReorder?.draggingRowId === rowId
+  // Display order (post sort/filter) — never TanStack source `row.index`.
+  const displayIndex = displayIndexOf(rowId) ?? 0
   return (
     <div
       onClick={() => selectRow(rowId)}
@@ -268,7 +280,7 @@ function GutterCell({
       }}
       role="button"
       tabIndex={0}
-      aria-label={`Select row ${index + 1}`}
+      aria-label={`Select row ${displayIndex + 1}`}
       className={cn(
         "flex h-9 cursor-pointer items-center justify-start gap-0.5 pl-1 group-data-[active-row=true]:bg-primary/15",
         isDragging && "opacity-50",
@@ -278,7 +290,7 @@ function GutterCell({
         <button
           type="button"
           title="Drag to reorder"
-          aria-label={`Drag to reorder row ${index + 1}`}
+          aria-label={`Drag to reorder row ${displayIndex + 1}`}
           onClick={e => e.stopPropagation()}
           onMouseDown={e => rowReorder.onRowReorderMouseDown(e, rowId)}
           className="flex w-0 cursor-grab overflow-hidden text-muted-foreground opacity-0 group-hover:w-auto group-hover:opacity-100 hover:text-foreground focus-visible:w-auto focus-visible:opacity-100 active:cursor-grabbing"
@@ -287,7 +299,7 @@ function GutterCell({
         </button>
       )}
       <span className="text-xs text-muted-foreground tabular-nums group-hover:hidden group-data-[active-row=true]:font-semibold group-data-[active-row=true]:text-foreground group-data-[state=selected]:hidden">
-        {index + 1}
+        {displayIndex + 1}
       </span>
       <span
         // Capture the modifier on pointerdown — BEFORE the checkbox's click
@@ -302,10 +314,38 @@ function GutterCell({
         <Checkbox
           checked={isSelected}
           onCheckedChange={() => toggleRowSelection(rowId, shiftRef.current)}
-          aria-label={`Toggle row ${index + 1}`}
+          aria-label={`Toggle row ${displayIndex + 1}`}
         />
       </span>
     </div>
+  )
+}
+
+/** Search + faceted + advanced filters — same pattern as the homepage live demo. */
+function FilterToolbar() {
+  return (
+    <DataTableToolbarSection className="w-full flex-col justify-between gap-2 px-0">
+      <DataTableToolbarSection className="px-0">
+        <DataTableSearchFilter placeholder="Search rows..." />
+      </DataTableToolbarSection>
+      <DataTableToolbarSection className="flex-wrap px-0">
+        <DataTableFacetedFilter
+          accessorKey="homeTeam"
+          title="Home Team"
+          options={TEAM_OPTIONS}
+          multiple
+        />
+        <DataTableFacetedFilter
+          accessorKey="status"
+          title="Status"
+          options={STATUS_OPTIONS}
+          multiple
+        />
+        <DataTableSortMenu />
+        <DataTableFilterMenu />
+        <DataTableClearFilter />
+      </DataTableToolbarSection>
+    </DataTableToolbarSection>
   )
 }
 
@@ -318,7 +358,6 @@ function RowSelectionBar() {
     <DataTableSelectionBar
       selectedCount={selected.length}
       onClear={() => table.resetRowSelection()}
-      className="mt-2"
     >
       <Button
         variant="destructive"
@@ -456,11 +495,7 @@ export function GridAllFeatures() {
         </div>
       ),
       cell: ctx => (
-        <GutterCell
-          rowId={ctx.row.id}
-          index={ctx.row.index}
-          isSelected={ctx.row.getIsSelected()}
-        />
+        <GutterCell rowId={ctx.row.id} isSelected={ctx.row.getIsSelected()} />
       ),
     }
 
@@ -497,15 +532,31 @@ export function GridAllFeatures() {
         enableSorting: true,
         enableColumnFilter: true,
         meta: {
-          variant: col.type === "select" ? "select" : "text",
+          variant:
+            col.id === "homeTeam" || col.id === "status"
+              ? FILTER_VARIANTS.MULTI_SELECT
+              : col.type === "select"
+                ? FILTER_VARIANTS.SELECT
+                : col.type === "number"
+                  ? FILTER_VARIANTS.NUMBER
+                  : col.type === "date"
+                    ? FILTER_VARIANTS.DATE
+                    : col.type === "checkbox"
+                      ? FILTER_VARIANTS.BOOLEAN
+                      : FILTER_VARIANTS.TEXT,
           label: col.label,
+          ...(col.id === "homeTeam"
+            ? { options: TEAM_OPTIONS }
+            : col.id === "status"
+              ? { options: STATUS_OPTIONS }
+              : col.options
+                ? {
+                    options: col.options.map(o => ({ label: o, value: o })),
+                  }
+                : {}),
         },
         cell: ctx => (
-          <DataGridCell
-            row={ctx.row.original}
-            columnId={col.id}
-            displayIndex={ctx.row.index}
-          >
+          <DataGridCell row={ctx.row.original} columnId={col.id}>
             {(p: CellEditorProps) => (
               <GridCellByType col={col} resolveCell={resolveCell} {...p} />
             )}
@@ -518,7 +569,7 @@ export function GridAllFeatures() {
   }, [cols.columns, resolveCell])
 
   return (
-    <div className="w-full min-w-0 space-y-2">
+    <div className="w-full min-w-0 space-y-4">
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-sm text-muted-foreground">Stress test:</span>
         {ROW_COUNT_OPTIONS.map(count => (
@@ -527,7 +578,7 @@ export function GridAllFeatures() {
             type="button"
             onClick={() => regenerate(count)}
             className={cn(
-              "rounded-md border border-border px-3 py-1 text-sm tabular-nums transition-colors",
+              "rounded-md border border-border px-3 py-1.5 text-sm tabular-nums transition-colors",
               count === rowCount
                 ? "border-primary bg-primary text-primary-foreground"
                 : "bg-background hover:bg-muted",
@@ -557,61 +608,70 @@ export function GridAllFeatures() {
           <DataGridRowReorder />
           <DataTableColumnResize />
           <DataGridColumns value={cols}>
-            <DataGridToolbar>
-              <DataGridUndo />
-              <DataGridRedo />
-              <DataGridAddRows count={5} />
-              <DataGridAddColumnButton />
-              <DataTableViewDndMenu
-                columnOrder={cols.columnIds}
-                onColumnOrderChange={cols.reorderColumns}
-              />
-              <DataGridClearAll />
-              <DataTableExportButton
-                filename="grid-export"
-                useHeaderLabels
-                excludeColumns={[SYSTEM_COLUMN_IDS.SELECT]}
-              />
-              <DataGridShortcutsButton
-                open={shortcutsOpen}
-                onOpenChange={setShortcutsOpen}
-              />
-              <DataGridPasteHint />
-            </DataGridToolbar>
-            <DataTable maxHeight={520}>
-              <DataTableVirtualizedHeader />
-              <DataTableVirtualizedBody<GridRow>
-                estimateSize={ROW_HEIGHT}
-                fixedRowHeight
-                getCellClassName={gridCellClassName}
-              >
-                <DataTableRowContextMenuSlot>
-                  <GridRowMenu />
-                </DataTableRowContextMenuSlot>
-              </DataTableVirtualizedBody>
-            </DataTable>
-            <button
-              type="button"
-              onClick={() => {
-                const created = grid.addRows(1)
-                // Focus the new row so the grid scrolls to it (scroll follows
-                // focus) and it's ready for typing.
-                const first = created[0]
-                if (first && cols.columnIds[0]) {
-                  grid.selectCell({
-                    rowId: first.id,
-                    columnId: cols.columnIds[0],
-                  })
-                }
-              }}
-              disabled={grid.rows.length >= grid.maxRows}
-              className="flex w-full items-center gap-1.5 border border-t-0 border-border px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50"
-            >
-              <Plus className="size-4" />
-              Add row
-            </button>
-            <RowSelectionBar />
-            <DataGridStatusBar />
+            <div className="space-y-3">
+              <FilterToolbar />
+              <DataGridToolbar className="justify-between gap-x-2 gap-y-3">
+                <div className="flex flex-wrap items-center gap-2">
+                  <DataGridUndo />
+                  <DataGridRedo />
+                  <DataGridAddRows count={5} />
+                  <DataGridAddColumnButton />
+                  <DataTableViewDndMenu
+                    columnOrder={cols.columnIds}
+                    onColumnOrderChange={cols.reorderColumns}
+                  />
+                  <DataGridClearAll />
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <DataTableExportButton
+                    filename="grid-export"
+                    useHeaderLabels
+                    excludeColumns={[SYSTEM_COLUMN_IDS.SELECT]}
+                  />
+                  <DataGridShortcutsButton
+                    open={shortcutsOpen}
+                    onOpenChange={setShortcutsOpen}
+                  />
+                  <DataGridPasteHint />
+                </div>
+              </DataGridToolbar>
+              <div>
+                <DataTable maxHeight={520}>
+                  <DataTableVirtualizedHeader />
+                  <DataTableVirtualizedBody<GridRow>
+                    estimateSize={ROW_HEIGHT}
+                    fixedRowHeight
+                    getCellClassName={gridCellClassName}
+                  >
+                    <DataTableRowContextMenuSlot>
+                      <GridRowMenu />
+                    </DataTableRowContextMenuSlot>
+                  </DataTableVirtualizedBody>
+                </DataTable>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const created = grid.addRows(1)
+                    // Focus the new row so the grid scrolls to it (scroll follows
+                    // focus) and it's ready for typing.
+                    const first = created[0]
+                    if (first && cols.columnIds[0]) {
+                      grid.selectCell({
+                        rowId: first.id,
+                        columnId: cols.columnIds[0],
+                      })
+                    }
+                  }}
+                  disabled={grid.rows.length >= grid.maxRows}
+                  className="flex w-full items-center gap-1.5 border border-t-0 border-border px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50"
+                >
+                  <Plus className="size-4" />
+                  Add row
+                </button>
+              </div>
+              <RowSelectionBar />
+              <DataGridStatusBar />
+            </div>
           </DataGridColumns>
         </DataGrid>
       </DataTableRoot>

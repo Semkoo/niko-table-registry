@@ -42,6 +42,11 @@
           "target": "components/niko-table/core/data-table-structure.tsx"
         },
         {
+          "path": "src/components/niko-table/lib/column-resize-handle.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/lib/column-resize-handle.tsx"
+        },
+        {
           "path": "src/components/niko-table/components/data-table-row-context-menu.tsx",
           "type": "registry:component",
           "target": "components/niko-table/components/data-table-row-context-menu.tsx"
@@ -808,12 +813,9 @@
       "name": "data-table-column-resize",
       "type": "registry:component",
       "title": "DataTable Column Resize",
-      "description": "Opt-in column resizing with drag handles and double-click autosize (measures natural text width). Keyboard-operable handle. Drop <DataTableColumnResize/> into the table to enable.",
+      "description": "Opt-in column resizing with drag handles and double-click autosize (measures natural text width). Keyboard-operable handle. Drop <DataTableColumnResize/> into the table to enable — works with DataTableHeader/Body and the virtualized variants.",
       "dependencies": [],
-      "registryDependencies": [
-        "https://niko-table.com/r/data-table.json",
-        "https://niko-table.com/r/data-table-virtualized.json"
-      ],
+      "registryDependencies": ["https://niko-table.com/r/data-table.json"],
       "files": [
         {
           "path": "src/components/niko-table/components/data-table-column-resize.tsx",

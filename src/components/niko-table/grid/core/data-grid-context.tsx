@@ -42,6 +42,11 @@ export interface DataGridContextValue<TRow extends GridRow> {
    * by the table's visibility, pinning, and column order.
    */
   columnIds: readonly string[]
+  /**
+   * Map a row id → its index in the current display order (post filter/sort).
+   * Prefer this over TanStack's `row.index`, which is the source-data index.
+   */
+  displayIndexOf: (rowId: string) => number | undefined
   /** Mouse-down on a cell: focus (or shift-extend) + begin a drag-select. */
   onCellMouseDown: (pos: CellPosition, e: React.MouseEvent) => void
   /** Mouse-enter on a cell while dragging: extend the selection. */
@@ -148,7 +153,7 @@ export interface GridCellRender {
 export function useGridCell(
   row: GridRow,
   columnId: string,
-  displayIndex: number,
+  displayIndex?: number,
 ): GridCellRender {
   const {
     grid,
@@ -156,8 +161,10 @@ export function useGridCell(
     onCellMouseEnter,
     moveFocus,
     fillSelectionWith,
+    displayIndexOf,
   } = useDataGridContext()
-  const state = useGridCellState(row, columnId, displayIndex)
+  const resolvedDisplayIndex = displayIndexOf(row.id) ?? displayIndex ?? 0
+  const state = useGridCellState(row, columnId, resolvedDisplayIndex)
   const pos: CellPosition = { rowId: row.id, columnId }
 
   const editorProps: CellEditorProps = {
@@ -508,12 +515,18 @@ const DataGridCellInner = React.memo(function DataGridCellInner({
 export function DataGridCell({
   row,
   columnId,
-  displayIndex,
+  displayIndex: displayIndexProp,
   children,
 }: {
   row: GridRow
   columnId: string
-  displayIndex: number
+  /**
+   * Optional fallback. Prefer omitting — the cell resolves display index from
+   * row id via the grid's display order, so sort/filter stay correct. Passing
+   * TanStack's `row.index` (source-data index) will be ignored when the row is
+   * still in the current display model.
+   */
+  displayIndex?: number
   children: (props: CellEditorProps) => React.ReactNode
 }) {
   const {
@@ -522,8 +535,10 @@ export function DataGridCell({
     onCellMouseEnter,
     moveFocus,
     fillSelectionWith,
+    displayIndexOf,
   } = useDataGridContext()
   const features = useDataGridFeatures()
+  const displayIndex = displayIndexOf(row.id) ?? displayIndexProp ?? 0
   const state = useGridCellState(row, columnId, displayIndex)
 
   // Latest-ref + one stable handler set per cell instance. The handlers read

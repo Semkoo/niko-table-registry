@@ -260,11 +260,7 @@ export function GridPortaledCell() {
         size: 220,
         meta: { label: "Label" },
         cell: ctx => (
-          <DataGridCell
-            row={ctx.row.original}
-            columnId="label"
-            displayIndex={ctx.row.index}
-          >
+          <DataGridCell row={ctx.row.original} columnId="label">
             {(p: CellEditorProps) => (
               <GridTextCell
                 {...p}
@@ -283,11 +279,7 @@ export function GridPortaledCell() {
         meta: { label: "Color" },
         // The custom portaled cell — double-click or press Enter to open it.
         cell: ctx => (
-          <DataGridCell
-            row={ctx.row.original}
-            columnId="color"
-            displayIndex={ctx.row.index}
-          >
+          <DataGridCell row={ctx.row.original} columnId="color">
             {(p: CellEditorProps) => <SwatchCell {...p} />}
           </DataGridCell>
         ),

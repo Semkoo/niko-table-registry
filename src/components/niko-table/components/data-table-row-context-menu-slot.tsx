@@ -63,9 +63,12 @@ export function resolveRowContextMenuRenderer<TData>(
 
   let slotProps: DataTableRowContextMenuSlotProps<TData> | undefined
   React.Children.forEach(children, child => {
+    if (!React.isValidElement(child)) return
+    // Match by displayName — reference equality breaks across re-exports / HMR.
+    const type = child.type as { displayName?: string }
     if (
-      React.isValidElement(child) &&
-      child.type === DataTableRowContextMenuSlot
+      child.type === DataTableRowContextMenuSlot ||
+      type.displayName === "DataTableRowContextMenuSlot"
     ) {
       slotProps = child.props as DataTableRowContextMenuSlotProps<TData>
     }
@@ -95,7 +98,7 @@ export function useResolvedRowContextMenuRenderer<TData>(
 ): ((row: TData) => React.ReactNode) | undefined {
   const resolved = resolveRowContextMenuRenderer(prop, children)
   const latestRef = React.useRef(resolved)
-  // eslint-disable-next-line react-hooks/refs -- latest-ref: keep a stable callback so memoized rows hold, while still reading the current menu when a row renders
+
   latestRef.current = resolved
   const hasMenu = !!resolved
   return React.useMemo(

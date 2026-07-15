@@ -50,6 +50,8 @@ import {
  */
 interface DndBodyRowProps {
   row: Row<unknown>
+  /** Position in the current display model (post sort/filter). */
+  displayIndex: number
   expandColumnId: string | undefined
   isClickable: boolean
   isExpanded: boolean
@@ -67,6 +69,7 @@ interface DndBodyRowProps {
 
 const DndBodyRow = React.memo(function DndBodyRow({
   row,
+  displayIndex,
   expandColumnId,
   isClickable,
   isExpanded,
@@ -80,7 +83,7 @@ const DndBodyRow = React.memo(function DndBodyRow({
 
   return (
     <>
-      <TableDraggableRow row={row}>
+      <TableDraggableRow row={row} displayIndex={displayIndex}>
         {visibleCells.map(cell => {
           const size = cell.column.columnDef.size
           const cellStyle = {
@@ -284,10 +287,11 @@ export function DataTableDndBody<TData>({
     >
       {!isLoading && rows?.length ? (
         <SortableContext items={dataIds} strategy={verticalListSortingStrategy}>
-          {rows.map(row => (
+          {rows.map((row, displayIndex) => (
             <DndBodyRow
               key={row.id}
               row={row as Row<unknown>}
+              displayIndex={displayIndex}
               expandColumnId={expandColumnId}
               isClickable={isClickable}
               isExpanded={row.getIsExpanded()}

@@ -101,11 +101,20 @@ function GridComboboxEditor(props: GridComboboxCellProps) {
   const [search, setSearch] = React.useState(editSeed ?? "")
 
   const commit = (item: GridComboboxOption | null) => {
-    onCommit(
-      item
-        ? { raw: item.label, value: item.value, status: "valid" }
-        : { raw: "", value: null, status: "empty" },
-    )
+    const next = item
+      ? { raw: item.label, value: item.value, status: "valid" as const }
+      : { raw: "", value: null, status: "empty" as const }
+    // Skip no-op re-selects — otherwise every identical pick clones the row
+    // and pushes a phantom undo entry.
+    if (
+      next.value === cell.value &&
+      next.raw === cell.raw &&
+      next.status === cell.status
+    ) {
+      onEditingChange(false)
+      return
+    }
+    onCommit(next)
     onEditingChange(false)
   }
 

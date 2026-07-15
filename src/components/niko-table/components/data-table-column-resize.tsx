@@ -23,12 +23,16 @@
  * `enableColumnResizing`. Columns opt OUT individually with `enableResizing:
  * false` on their column def (e.g. a row-number gutter).
  *
+ * Works with both `DataTableHeader` / `DataTableBody` and the virtualized
+ * header/body variants. The grip UI ships with the data-table core; this
+ * marker only flips the feature flag.
+ *
  * @example
  * <DataTableRoot data={data} columns={columns}>
  *   <DataTableColumnResize />
  *   <DataTable>
- *     <DataTableVirtualizedHeader />
- *     <DataTableVirtualizedBody />
+ *     <DataTableHeader />
+ *     <DataTableBody />
  *   </DataTable>
  * </DataTableRoot>
  */

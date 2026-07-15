@@ -74,9 +74,9 @@ export interface DataTableConfig {
   /**
    * Enable drag-to-resize column widths (opt-in; off by default so existing
    * tables are unaffected). When on, columns render at `column.getSize()` and a
-   * resize handle appears on each resizable header's right edge. Pair with a
-   * `<DataTableColumnResizeHandle>` in your header and, optionally, double-click
-   * it to autosize to content.
+   * resize handle appears on each resizable header's right edge. Drop
+   * `<DataTableColumnResize />` inside the root to enable via feature detection.
+   * Double-click a grip to autosize; columns opt out with `enableResizing: false`.
    */
   enableColumnResizing?: boolean
 
@@ -143,6 +143,7 @@ function DataTableRootInternal<TData, TValue>({
   onExpandedChange,
   onColumnOrderChange,
   onColumnPinningChange,
+  onColumnSizingChange,
   onRowSelection,
   // Destructured by name so the `tableOptions` memo depends on stable values
   // — depending on the whole `rest` bag invalidated the memo every render
@@ -629,7 +630,7 @@ function DataTableRootInternal<TData, TValue>({
       },
       enableColumnResizing: detectFeatures.enableColumnResizing,
       columnResizeMode: "onChange",
-      onColumnSizingChange: handleColumnSizingChange,
+      onColumnSizingChange: onColumnSizingChange ?? handleColumnSizingChange,
       enableRowSelection: detectFeatures.enableRowSelection,
       enableFilters: detectFeatures.enableFilters,
       enableSorting: detectFeatures.enableSorting,
@@ -733,6 +734,7 @@ function DataTableRootInternal<TData, TValue>({
       handleColumnPinningChange,
       onColumnOrderChange,
       handleColumnOrderChange,
+      onColumnSizingChange,
       handleColumnSizingChange,
       onExpandedChange,
       handleExpandedChange,
@@ -756,7 +758,7 @@ function DataTableRootInternal<TData, TValue>({
 
   // Instance ref is stable across state changes; React Compiler warns about
   // incompatible-library here — TanStack manages its own memoization (expected).
-   
+
   const table = useReactTable<TData>(tableOptions)
 
   return (

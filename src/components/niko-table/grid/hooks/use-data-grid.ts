@@ -23,7 +23,7 @@
  * state + id-keyed setters.
  */
 
-import { useCallback, useMemo, useReducer, useState } from "react"
+import { useCallback, useEffect, useMemo, useReducer, useState } from "react"
 
 import {
   type CellPosition,
@@ -64,6 +64,24 @@ type HistoryAction<TRow> =
   | { type: "undo" }
   | { type: "redo" }
 
+/**
+ * True when `next` is the same row list as `prev` — either by array identity
+ * or by element identity (same length, every `next[i] === prev[i]`).
+ *
+ * Updaters often `rows.map(...)` and return the same row refs for unchanged
+ * rows. Without the element-wise check, a brand-new array of identical refs
+ * would still bump `seq` and re-fire `lastCommit` observers (e.g. validation
+ * settle loops forever after the first edit).
+ */
+function isSameRowList<TRow>(prev: TRow[], next: TRow[]): boolean {
+  if (next === prev) return true
+  if (next.length !== prev.length) return false
+  for (let i = 0; i < next.length; i++) {
+    if (next[i] !== prev[i]) return false
+  }
+  return true
+}
+
 function historyReducer<TRow>(
   state: HistoryState<TRow>,
   action: HistoryAction<TRow>,
@@ -72,7 +90,7 @@ function historyReducer<TRow>(
   switch (action.type) {
     case "commit": {
       const next = action.updater(state.rows)
-      if (next === state.rows) return state // no-op → no history entry, seq unchanged
+      if (isSameRowList(state.rows, next)) return state // no-op → no history entry, seq unchanged
       const past =
         state.past.length >= MAX_HISTORY
           ? [...state.past.slice(1), state.rows]
@@ -90,7 +108,7 @@ function historyReducer<TRow>(
       // or clear the redo stack, or undo/redo would step through the settle
       // instead of the user's actual edits. Past/future are left untouched.
       const next = action.updater(state.rows)
-      if (next === state.rows) return state // converged → no change, no seq bump
+      if (isSameRowList(state.rows, next)) return state // converged → no change, no seq bump
       return { ...state, rows: next, lastCommit: { kind: "bulk", seq } }
     }
     case "undo": {
@@ -129,7 +147,14 @@ export interface UseDataGridConfig<TRow extends GridRow> {
   initialRowCount?: number
   /** Seed with these exact rows (e.g. editing existing data) instead of blanks. */
   initialRows?: TRow[]
-  /** Client id generator. Default `crypto.randomUUID()`. Injectable for tests. */
+  /**
+   * Client id generator for runtime inserts (`addRows` / `insertRows`).
+   * Default `crypto.randomUUID()`. Injectable for tests.
+   *
+   * Blank grids seeded via `initialRowCount` (no `initialRows`) use
+   * deterministic `row-0`… ids so SSR and hydration agree — `makeId` is not
+   * used for that path.
+   */
   makeId?: () => string
 }
 
@@ -177,6 +202,7 @@ export interface UseDataGrid<TRow extends GridRow> {
   ) => TRow[]
   removeRow: (rowId: string) => void
   removeRows: (rowIds: Iterable<string>) => void
+  /** Replace every row with blanks (count = seed length or `initialRowCount`). */
   clearAll: () => void
   /** Undo the last data mutation (setCell / paste / insert / delete / clear). */
   undo: () => void
@@ -204,9 +230,13 @@ export function useDataGrid<TRow extends GridRow>(
     historyReducer<TRow>,
     null,
     (): HistoryState<TRow> => ({
+      // Deterministic ids for the blank seed — `crypto.randomUUID()` here would
+      // mismatch SSR vs client. Runtime inserts still go through `makeId`.
       rows:
         initialRows ??
-        Array.from({ length: initialRowCount }, () => createEmptyRow(makeId())),
+        Array.from({ length: initialRowCount }, (_, i) =>
+          createEmptyRow(`row-${i}`),
+        ),
       past: [],
       future: [],
       lastCommit: null,
@@ -243,6 +273,10 @@ export function useDataGrid<TRow extends GridRow>(
     (pos: CellPosition) => {
       setSelectionAnchor(anchor => anchor ?? focusedCell ?? pos)
       setFocusedCell(pos)
+      // Match `selectCell`: leave edit mode so a shift-drag can't leave an
+      // open editor committing against a selection the user has already moved.
+      setEditingCell(null)
+      setEditSeed(null)
     },
     [focusedCell],
   )
@@ -391,21 +425,31 @@ export function useDataGrid<TRow extends GridRow>(
     [rows, createEmptyRow, makeId, releaseRemovedRows],
   )
 
+  // Replace every row with blanks. Row count matches the seed (`initialRows`
+  // length, else `initialRowCount`) so a 500-row stress demo stays 500-tall.
   const clearAll = useCallback(() => {
+    const count = initialRows?.length ?? initialRowCount
     dispatch({
       type: "commit",
       updater: () =>
-        Array.from({ length: initialRowCount }, () => createEmptyRow(makeId())),
+        Array.from({ length: count }, () => createEmptyRow(makeId())),
       meta: { kind: "reset" },
     })
     setFocusedCell(null)
     setEditingCell(null)
     setSelectionAnchor(null)
     setEditSeed(null)
-  }, [createEmptyRow, initialRowCount, makeId])
+  }, [createEmptyRow, initialRowCount, initialRows, makeId])
 
   const undo = useCallback(() => dispatch({ type: "undo" }), [])
   const redo = useCallback(() => dispatch({ type: "redo" }), [])
+
+  // Undo/redo can restore or drop rows without going through removeRow —
+  // drop focus/anchor/edit that point at ids no longer in `rows`.
+  useEffect(() => {
+    const present = new Set(rows.map(r => r.id))
+    releaseRemovedRows(id => !present.has(id))
+  }, [rows, releaseRemovedRows])
 
   return useMemo(
     () => ({

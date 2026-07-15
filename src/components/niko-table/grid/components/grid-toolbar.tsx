@@ -123,7 +123,7 @@ export function DataGridAddRows({
   )
 }
 
-/** Reset the grid to its initial empty rows. */
+/** Replace every row with blanks (same count as the seed). */
 export function DataGridClearAll() {
   const { grid } = useDataGridContext<GridRow>()
   return (

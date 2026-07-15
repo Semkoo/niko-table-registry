@@ -96,11 +96,7 @@ export function GridBasic() {
         size: 200,
         meta: { label: LABELS[id] },
         cell: ctx => (
-          <DataGridCell
-            row={ctx.row.original}
-            columnId={id}
-            displayIndex={ctx.row.index}
-          >
+          <DataGridCell row={ctx.row.original} columnId={id}>
             {(p: CellEditorProps) => (
               <GridTextCell
                 {...p}

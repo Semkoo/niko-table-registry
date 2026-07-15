@@ -172,6 +172,8 @@ export function DataGridClipboard({ resolveCell }: DataGridClipboardProps) {
       // grows rather than dropping overflow; tiling is bounded by the existing
       // selection so it never needs new rows). `addRows` clamps at `maxRows`
       // and commits its own history entry, so a grown paste undoes in two steps.
+      // Note: `addRows` appends to STORAGE order — under an active column sort
+      // the new rows may not appear at the visual end (same caveat as reorder).
       const overflow = tile ? 0 : startRow + destRows - orderedRows.length
       const created = overflow > 0 ? grid.addRows(overflow) : []
 

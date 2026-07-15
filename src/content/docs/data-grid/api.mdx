@@ -1,118 +1,117 @@
 ---
 title: API Reference
-description: The niko-table/grid API — the headless engine, the DataGrid container, cell editors, and the opt-in feature components.
+description: useDataGrid, DataGrid, cell editors, opt-in features, and persistence.
 ---
 
-This page is the API reference for `niko-table/grid`. For a runnable walkthrough, start with the [Introduction](/data-grid/introduction/).
+For a walkthrough, start with the [Introduction](/data-grid/introduction/).
 
-## Engine — `useDataGrid`
+## `useDataGrid`
 
-The interaction engine. Owns the focused cell, selection anchor, edit lifecycle, and the undo/redo history. Pure state + id-keyed setters; domain-free.
+Headless engine: rows, focus, selection, edit lifecycle, undo/redo. Domain-free.
 
 ```tsx
 const grid = useDataGrid<TRow extends GridRow>({
-  columnIds,            // editable column ids, in visual order
-  createEmptyRow,       // (id) => TRow — factory for a blank row
-  initialRows,          // seed with existing data (else `initialRowCount` blanks)
-  maxRows,              // hard cap (default 200)
-  initialRowCount,      // blank rows to seed (default 5)
-  makeId,               // id generator (default crypto.randomUUID())
+  columnIds,         // editable column ids (visual order)
+  createEmptyRow,    // (id) => TRow
+  initialRows,       // seed data (optional)
+  initialRowCount,   // blank seed count when no initialRows (default 5)
+  maxRows,           // hard cap (default 200)
+  makeId,            // runtime inserts only (default crypto.randomUUID)
 })
 ```
 
-The returned object exposes the row data and the id-keyed mutators:
+Blank seeds from `initialRowCount` use deterministic `row-0`… ids (SSR-safe). Runtime `addRows` / `insertRows` / `clearAll` use `makeId`.
 
-| Field                                                                             | Purpose                                                                                 |
-| --------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| `rows`                                                                            | The current rows (pass to `DataTableRoot data`).                                        |
-| `lastCommit`                                                                      | What changed last commit (for [Persistence](#persistence--usegridchanges) / observers). |
-| `focusedCell` / `editingCell` / `selectionAnchor`                                 | Current cursor + selection, by `{ rowId, columnId }`.                                   |
-| `selectCell` / `deselect` / `extendSelectionTo`                                   | Move / clear / extend the selection.                                                    |
-| `startEditing` / `stopEditing`                                                    | Open / close a cell editor.                                                             |
-| `setCell(rowId, colId, next)`                                                     | O(1) commit — only that row's identity changes.                                         |
-| `updateRows` / `addRows` / `insertRows` / `removeRow` / `removeRows` / `clearAll` | Row mutations (each one undoable).                                                      |
-| `undo` / `redo` / `canUndo` / `canRedo`                                           | The bounded row history.                                                                |
-| `selectRow` / `selectColumn` / `fillSelectionWith`                                | Whole-row / whole-column select + fill.                                                 |
+| Field                                                                             | Purpose                                                                |
+| --------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| `rows`                                                                            | Pass to `DataTableRoot data`                                           |
+| `lastCommit`                                                                      | Last mutation signal — see [Persistence](#persistence--usegridchanges) |
+| `focusedCell` / `editingCell` / `selectionAnchor`                                 | Cursor + range by `{ rowId, columnId }`                                |
+| `selectCell` / `deselect` / `extendSelectionTo`                                   | Move / clear / extend selection (all leave edit mode)                  |
+| `startEditing` / `stopEditing`                                                    | Open / close the editor                                                |
+| `setCell(rowId, colId, next)`                                                     | O(1) commit — one row identity changes                                 |
+| `updateRows` / `addRows` / `insertRows` / `removeRow` / `removeRows` / `clearAll` | Row mutations (undoable)                                               |
+| `undo` / `redo` / `canUndo` / `canRedo`                                           | History                                                                |
 
-`updateRows(updater, opts?)` is undoable by default. Pass `{ history: false }` to apply a **non-undoable settle** — re-deriving cell state _from_ committed data (e.g. cross-field validation status) without pushing an undo entry or clearing the redo stack. See [Validation → cross-field rules](/data-grid/validation/#layer-2--cross-field-row-rules).
+`updateRows(fn, { history: false })` settles derived state (e.g. cross-field validation) without pushing undo. See [Validation](/data-grid/validation/).
 
-## Container — `<DataGrid>` and `<DataGridCell>`
+`clearAll` replaces every row with blanks — count matches `initialRows.length` or `initialRowCount`.
 
-`<DataGrid grid={grid}>` is the irreducible core: it reads the table's display order and owns keyboard navigation, the selection rectangle, drag range-select with edge auto-scroll, and the scroll-into-view seam. Place it **inside** `DataTableRoot`, wrapping `DataTable`. Pass `onRequestShortcuts` to open a help dialog on `?`.
+Whole-row / whole-column select and `fillSelectionWith` live on **`<DataGrid>` context**, not on this hook.
 
-`<DataGridCell row columnId displayIndex>` wraps each cell in a column's `cell` render. Its child is a render function receiving `CellEditorProps` — return the editor for that column:
+## `<DataGrid>` / `<DataGridCell>`
+
+`<DataGrid grid={grid}>` — place inside `DataTableRoot`, wrapping `DataTable`. Owns keyboard nav, selection rectangle, drag-select, and scroll-into-view. Pass `onRequestShortcuts` to open the `?` dialog.
+
+`<DataGridCell row columnId>` — wrap each column `cell`. Display index is resolved from row id (post sort/filter). Do **not** pass TanStack `row.index`.
 
 ```tsx
 cell: (ctx) => (
-  <DataGridCell row={ctx.row.original} columnId={col.id} displayIndex={ctx.row.index}>
+  <DataGridCell row={ctx.row.original} columnId={col.id}>
     {(p) => <GridTextCell {...p} resolve={(raw) => resolveCell(col.id, raw)} />}
   </DataGridCell>
 )
 ```
 
+Context helpers (via `useDataGridContext`): `selectRow`, `selectColumn`, `fillSelectionWith`, `displayIndexOf`, …
+
 ## Cell editors
 
-Every cell follows the **display / editor split** — a cheap read-only shell for all visible cells, a heavy editor mounted only for the cell being edited. All satisfy the `CellEditorProps` contract, so you can write your own.
+Display shell for every visible cell; heavy editor mounts only while editing.
 
-| Component          | Source                          | Use                                                                         |
-| ------------------ | ------------------------------- | --------------------------------------------------------------------------- |
-| `GridTextCell`     | `grid/cells/grid-text-cell`     | Free text; uncontrolled input.                                              |
-| `GridNumberCell`   | `grid/cells/grid-text-cell`     | Numeric; right-aligned; optional display `format` (e.g. currency).          |
-| `GridCheckboxCell` | `grid/cells/grid-checkbox-cell` | Boolean; always interactive.                                                |
-| `GridDateCell`     | `grid/cells/grid-date-cell`     | Popover calendar; stores `YYYY-MM-DD`.                                      |
-| `GridSelectCell`   | `grid/cells/grid-select-cell`   | Non-searchable dropdown (Command + Popover).                                |
-| `GridComboboxCell` | `grid/cells/grid-combobox-cell` | Searchable dropdown.                                                        |
-| `GridCellDisplay`  | `grid/cells/grid-cell-display`  | The shared read-only shell — render it in your own cells while not editing. |
+| Component          | Use                                             |
+| ------------------ | ----------------------------------------------- |
+| `GridTextCell`     | Free text                                       |
+| `GridNumberCell`   | Numeric; optional `format` for currency display |
+| `GridCheckboxCell` | Boolean; always interactive                     |
+| `GridDateCell`     | Calendar; stores `YYYY-MM-DD`                   |
+| `GridSelectCell`   | Dropdown (no search)                            |
+| `GridComboboxCell` | Searchable dropdown                             |
+| `GridCellDisplay`  | Shared read-only shell for custom cells         |
 
-## Opt-in feature components
+## Features
 
-Drop any of these inside `<DataGrid>`. Unmounted = zero listeners, zero overlays, tree-shaken out.
+Children of `<DataGrid>`. Unmounted = tree-shaken.
 
-| Component                | Source                                 | Capability                                                                                    |
-| ------------------------ | -------------------------------------- | --------------------------------------------------------------------------------------------- |
-| `DataGridClipboard`      | `grid/components/grid-clipboard`       | Native copy / cut / paste (quote-aware TSV, one-to-many tiling). Takes `resolveCell`.         |
-| `DataGridFillHandle`     | `grid/components/grid-fill-handle`     | Corner-drag fill; double-click auto-fill; Ctrl/Cmd+Enter fills the selection.                 |
-| `DataGridMove`           | `grid/components/grid-move`            | Border-drag to move a block; hold Ctrl/Cmd to copy.                                           |
-| `DataGridRowReorder`     | `grid/components/grid-row-reorder`     | Grid-native drag-to-reorder rows. Read `useDataGridRowReorder()` in your gutter for the grip. |
-| `DataGridCrossHighlight` | `grid/components/grid-cross-highlight` | Header + row-number highlight spanning the selection.                                         |
-| `DataGridStatusBar`      | `grid/components/grid-status-bar`      | Count / Sum / Avg / Min / Max of the selection.                                               |
+| Component                | Capability                                  |
+| ------------------------ | ------------------------------------------- |
+| `DataGridClipboard`      | Copy / cut / paste (`resolveCell` required) |
+| `DataGridFillHandle`     | Corner fill; double-click auto-fill         |
+| `DataGridMove`           | Drag block to move (Ctrl/Cmd = copy)        |
+| `DataGridRowReorder`     | Row drag — prefer without active sort       |
+| `DataGridCrossHighlight` | Selection chrome on header / gutter         |
+| `DataGridStatusBar`      | Aggregate the selection                     |
 
 ## Dynamic columns
 
-`useGridColumns({ initialColumns })` makes the columns runtime state (`columns`, `columnIds`, `addColumn`, `renameColumn`, `moveColumn`, `removeColumn`, `reorderColumns`, `setColumnType`). Wrap the toolbar + table in `<DataGridColumns value={cols}>` to wire the header menu and add-column button. Drop `<GridColumnMenuOptions />` into your `DataTableColumnActions` and `<DataGridAddColumnButton />` into the toolbar. Pass `columnTypes` + `resolveCell` to `<DataGridColumns>` to enable runtime retype. See [Dynamic Columns](/data-grid/dynamic-columns/).
+`useGridColumns({ initialColumns })` + `<DataGridColumns value={cols}>` + `<GridColumnMenuOptions />` + `<DataGridAddColumnButton />`. See [Dynamic Columns](/data-grid/dynamic-columns/).
 
 ## Toolbar
 
-`grid/components/grid-toolbar` exports `DataGridToolbar` (layout wrapper) plus `DataGridUndo`, `DataGridRedo`, `DataGridAddRows`, `DataGridClearAll`, and `DataGridPasteHint`. `grid/components/grid-shortcuts-dialog` exports `DataGridShortcutsButton` (a keyboard-shortcuts help dialog) and `GridShortcutsList`.
-
-`DataGridAddRows` appends `count` empty rows (default 5) and focuses the first one. `count={1}` reads **"Add row"** (the singular); any other count reads "Add N rows". Pass `className` to restyle — e.g. a full-width dashed bar under the grid body for a spreadsheet-style always-visible single-row append — or `label` to replace the text entirely:
+From `grid-toolbar`: `DataGridToolbar`, `DataGridUndo`, `DataGridRedo`, `DataGridAddRows`, `DataGridClearAll`, `DataGridPasteHint`. Shortcuts: `DataGridShortcutsButton`.
 
 ```tsx
-{/* in the toolbar: bulk */}
 <DataGridAddRows count={5} />
-
-{/* under the table: always-visible single-row append */}
 <DataGridAddRows count={1} className="w-full justify-center border-dashed" />
 ```
 
 ## Row menu
 
-`GridRowMenu` (`grid/components/grid-row-menu`) is the declarative Copy / Cut / Clear / Delete / Insert-rows menu. Drop it into a `<DataTableRowContextMenuSlot>` inside the body — it renders as the right-click context menu, and shows Copy/Cut/Paste only when `DataGridClipboard` is mounted.
+`<GridRowMenu />` inside `<DataTableRowContextMenuSlot>` — Copy / Cut / Clear / Delete / Insert. Clipboard items appear only when `DataGridClipboard` is mounted.
 
 ## Persistence — `useGridChanges`
 
-An opt-in hook (separate `data-table-grid-changes` install) that observes the engine's `grid.lastCommit` signal and turns edits into a CRUD change-set. `useGridChanges(grid, { initialRows, getRowId?, isEqual? })` returns `dirtyRowIds`, `isDirty`, `failedRowIds`, `getChangeSet()` (`{ created, updated, deleted }`), `reconcile(result)` (clear succeeded / keep failed after a save), and `reset(rows?)` (re-baseline). Classification is O(1) per keystroke; bulk ops recompute once against the baseline. See [Persistence](/data-grid/persistence/).
-
-The engine field it reads is general:
+Separate install: `@niko-table/data-table-grid-changes`.
 
 ```ts
-grid.lastCommit // GridCommit | null
-// { kind: "set" | "add" | "remove"; ids: readonly string[]; seq: number }
-// | { kind: "bulk" | "reset"; seq: number }
+const changes = useGridChanges(grid, { initialRows })
+changes.isDirty
+changes.getChangeSet() // { created, updated, deleted }
+changes.reconcile({ succeededIds, failedIds })
 ```
 
-`seq` advances on every real commit (never on a no-op), so any observer — a dirty badge, analytics, or `useGridChanges` — can `useEffect([grid.lastCommit?.seq])`.
+Driven by `grid.lastCommit` (`seq` advances on real commits only). See [Persistence](/data-grid/persistence/).
 
-## Core requirement
+## Core deps
 
-The grid depends on the additive core APIs shipped with `data-table` and `data-table-virtualized` — `scrollRowIntoView` / `useDataTableScroll`, `flashRows` / `flashCells` / `useDataTableFlash`, `toggleRowSelection`, and the column-resize wiring. Installing `data-table-grid` pulls them all in.
+Installing `data-table-grid` also brings `scrollRowIntoView`, flash helpers, `toggleRowSelection`, and column resize.

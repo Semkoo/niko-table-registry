@@ -109,11 +109,7 @@ export function GridDynamicColumns() {
         size: col.width,
         meta: { label: col.label },
         cell: ctx => (
-          <DataGridCell
-            row={ctx.row.original}
-            columnId={col.id}
-            displayIndex={ctx.row.index}
-          >
+          <DataGridCell row={ctx.row.original} columnId={col.id}>
             {(p: CellEditorProps) => (
               <GridTextCell
                 {...p}

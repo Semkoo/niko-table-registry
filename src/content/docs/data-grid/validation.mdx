@@ -1,34 +1,44 @@
 ---
 title: Validation
-description: Validate Data Grid cells with Zod (or any logic) — per-field and cross-field — surfaced inline, per cell, with tooltips. No summary block.
+description: Per-field and cross-field validation — Zod or any resolve. Errors inline on the cell.
 ---
 
 import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
+import CollapsiblePreview from "@/components/markdown/collapsible-preview.astro"
+import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
 
-The grid is **validation-agnostic**. Every cell carries a `status` and an optional `error`, and you decide both in one `resolve(columnId, raw)` function. That single seam is where your validation library runs — this page uses **Zod**, but any function that returns a `CellState` works. Errors surface **inline, on the cell**, in a tooltip: no summary block, no scrolling to find what's wrong.
+The grid is validation-agnostic. Your `resolve` returns `status` + optional `error`. Invalid cells show a tooltip — no summary block.
 
 <CodePreview demo="niko-table/grid-validation" />
 
-## The cell model
+<CollapsiblePreview>
+  <CodePreview demo="niko-table/grid-validation-state" />
+</CollapsiblePreview>
 
-```ts
+## Installation
+
+<CliCommandCode action="run" command="shadcn@latest add @niko-table/data-table-grid" />
+
+```bash
+npm install zod
+```
+
+## CellState
+
+```tsx
 interface CellState<T> {
-  raw: string // what the user typed: "2026-13-45"
-  value: T | null // the parsed value, or null when invalid
+  raw: string
+  value: T | null
   status: "valid" | "invalid" | "empty"
-  error?: string // human-readable reason — shown in the cell's tooltip
+  error?: string // tooltip when invalid
 }
 ```
 
-An `invalid` cell renders red (the shell sets `aria-invalid`); when it also has an `error`, hovering or focusing it shows that message in a tooltip. `empty` is the neutral "nothing entered yet" state — use it for untouched required cells so they don't scream red before the user has typed.
+Use `"empty"` for untouched required fields so they stay neutral until save.
 
-## Layer 1 — per-field validation with Zod
-
-Give each column a Zod schema and run it inside `resolve`. `safeParse` gives you the pass/fail and the message in one call:
+## Per-field (Zod)
 
 ```tsx showLineNumbers
-// One Zod schema per validated column. A column with no schema (free text, a
-// notes field) simply isn't in the map and passes its value through.
 const FIELD_SCHEMAS: Record<string, z.ZodType<string>> = {
   date: z
     .string()
@@ -39,13 +49,8 @@ const FIELD_SCHEMAS: Record<string, z.ZodType<string>> = {
     .regex(/^([01]\d|2[0-3]):[0-5]\d$/, "Use 24-hour time, e.g. 09:30"),
 }
 
-const REQUIRED = new Set(["date", "start", "end"])
-
 function resolveCell(columnId: string, raw: string): CellState<string> {
   const trimmed = raw.trim()
-
-  // Empty → neutral for a required column (don't redden an untouched cell),
-  // valid for an optional one. Required-ness is enforced later, at save time.
   if (trimmed === "") {
     return {
       raw,
@@ -53,11 +58,8 @@ function resolveCell(columnId: string, raw: string): CellState<string> {
       status: REQUIRED.has(columnId) ? "empty" : "valid",
     }
   }
-
-  // No schema for this column → accept the text as-is.
   const schema = FIELD_SCHEMAS[columnId]
   if (!schema) return { raw, value: trimmed, status: "valid" }
-
   const result = schema.safeParse(trimmed)
   return result.success
     ? { raw, value: result.data, status: "valid" }
@@ -65,28 +67,18 @@ function resolveCell(columnId: string, raw: string): CellState<string> {
         raw,
         value: null,
         status: "invalid",
-        // issues is never empty on a failure, but guard it for a clean type.
         error: result.error.issues[0]?.message ?? "Invalid value",
       }
 }
 ```
 
-Pass the same `resolve` to your cells and to `<DataGridClipboard resolveCell={…} />`, so a pasted-but-bad value stays visible (in red) for the user to fix instead of being silently dropped.
+Reuse the same `resolve` for cells and clipboard.
 
-## Layer 2 — cross-field (row) rules
+## Cross-field
 
-Some rules span cells — "end must be after start," "a court needs a venue," "the date sits inside the competition window." `resolve` only sees one cell, so recompute these after each commit and fold the result onto the offending cell. The engine's `lastCommit` signal is the trigger, and `updateRows(updater, { history: false })` applies the settle in one pass without touching undo/redo:
+`resolve` sees one cell. Re-settle after commits with `updateRows(..., { history: false })` so undo stays clean. Return the **same row ref** when nothing changes — the engine treats that as a no-op and will not loop.
 
 ```tsx showLineNumbers
-// The rule sees the whole row. Guard that both cells are resolved and valid
-// before comparing — a malformed time keeps its own field-level error.
-function endAfterStart(row: GridRow): boolean {
-  const { start, end } = row
-  if (typeof start !== "object" || typeof end !== "object") return true
-  if (start?.status !== "valid" || end?.status !== "valid") return true
-  return (end.value ?? "") > (start.value ?? "")
-}
-
 React.useEffect(() => {
   if (!grid.lastCommit) return
   grid.updateRows(
@@ -94,18 +86,14 @@ React.useEffect(() => {
       rows.map((row) => {
         const end = row.end
         if (typeof end !== "object" || end == null) return row
-        const base = resolveCell("end", end.raw) // field-level result first
+        const base = resolveCell("end", end.raw)
         const crossErr = endAfterStart(row)
           ? null
           : "End must be after the start time"
-        // Field errors win; overlay the cross-field message only when the
-        // value itself is well-formed.
         const next =
           crossErr && base.status !== "invalid"
             ? { ...base, status: "invalid" as const, error: crossErr }
             : base
-        // Return the SAME row when nothing changed → the engine skips the
-        // no-op, so the pass converges in one commit and never loops.
         if (next.status === end.status && next.error === end.error) return row
         return { ...row, end: next }
       }),
@@ -114,29 +102,12 @@ React.useEffect(() => {
 }, [grid.lastCommit, grid])
 ```
 
-Field-level errors win (a malformed time stays "use HH:MM"); the cross-field message is overlaid only when the value itself is well-formed. Returning the same row reference for unchanged rows lets the engine skip the no-op, so the pass converges in a single extra commit and never loops.
-
-**Why `{ history: false }`?** This effect runs after _every_ commit, re-deriving cell status. If that re-settle were undoable, one user edit would leave two entries on the stack — and pressing undo would revert the settle instead of the edit (a settle right after an undo could even drop the redo stack). `updateRows` is undoable by default; `{ history: false }` routes through a non-undoable path that leaves the undo/redo stacks untouched while still advancing `lastCommit` so observers converge. Derived state — anything you recompute _from_ committed data — should always settle this way.
-
 ## Required fields
 
-Mark the column header with an asterisk and keep the empty cell **neutral** (`status: "empty"`) until save. Enforce required-ness where it belongs — at the save boundary — rather than reddening every blank cell on mount:
+Asterisk in the header; keep blanks `"empty"` until save. Enforce at the save boundary.
 
-```tsx showLineNumbers
-header: () => (
-  <span>
-    {col.label}
-    {col.required && <span aria-hidden className="text-destructive font-semibold"> *</span>}
-  </span>
-)
-```
+## Next
 
-## One schema, client to server
-
-The Zod schemas that drive the cells are the same ones your backend should validate against. On save, run the change-set through the array schema and hand the identical schema to your tRPC/route input — the grid can't submit anything the server would reject. See [Persistence](/data-grid/persistence/) for the save half (`getChangeSet` → `reconcile`).
-
-## Next Steps
-
-- [Cell Types](/data-grid/cell-types/) — the built-in editors; `resolve` decides each one's validity.
-- [Persistence](/data-grid/persistence/) — turn validated edits into a create / update / delete change-set.
-- [API Reference](/data-grid/api/) — the full `CellEditorProps` and engine contracts.
+- [Cell Types](/data-grid/cell-types/)
+- [Persistence](/data-grid/persistence/)
+- [API Reference](/data-grid/api/)

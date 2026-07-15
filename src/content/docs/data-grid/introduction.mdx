@@ -1,9 +1,10 @@
 ---
 title: Data Grid
-description: A composable, virtualized, spreadsheet-style editable grid for React — keyboard cell navigation, clipboard, fill, dynamic columns, and typed cell editors, built on Niko Table.
+description: A composable, virtualized spreadsheet grid for React. Copy the source into your project — same model as shadcn/ui.
 ---
 
 import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
+import CollapsiblePreview from "@/components/markdown/collapsible-preview.astro"
 import { Steps } from "@astrojs/starlight/components"
 import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
 import { Button } from "@/components/ui/button"
@@ -29,43 +30,27 @@ import { GITHUB_REPO_URL } from "@/data/env"
     demo="niko-table/grid-all-features"
     title="Data Grid"
     type="block"
-    description="A composable, virtualized, spreadsheet-style editable grid built on Niko Table."
+    description="Composable, virtualized spreadsheet grid built on Niko Table."
     className="w-full"
   />
   <figcaption className="text-center text-sm text-gray-500">
-    An editable grid with cell navigation, clipboard, fill, drag-to-move, dynamic
-    columns, and typed cell editors.
+    Keyboard nav, clipboard, fill, filters, dynamic columns, and typed editors —
+    assembled from opt-in children.
   </figcaption>
 </figure>
 
-`niko-table/grid` turns the read-only DataTable into an **editable, spreadsheet-style grid**. It reuses the real Niko Table primitives — so it inherits virtualization, the column menu (sort / pin / hide / resize), and the row context menu — and adds a headless interaction engine on top: focused-cell navigation, a selection rectangle, an edit lifecycle, undo/redo, and clipboard.
+Turn a Niko Table into an editable spreadsheet. You get virtualization, sort, filter, pin, and resize from the table — plus a headless edit engine: focus, selection, undo/redo, and clipboard.
 
-Everything is addressed by **row id**, not position, so sorting and filtering keep working while you edit. And every capability is an **opt-in child** of `<DataGrid>`: an unmounted feature attaches no listeners, renders no overlays, and tree-shakes out of the bundle.
-
-## Live Demo
-
-The demo above shows every feature in action:
-
-- ✅ **Cell navigation** — arrows / Tab / Enter, type to edit, drag to select, Shift to extend
-- ✅ **Clipboard** — native copy / cut / paste, quote-aware TSV, one-to-many paste tiling
-- ✅ **Fill handle** — drag the corner to fill down / across; Ctrl/Cmd+Enter fills the selection
-- ✅ **Drag-to-move** — grab the selection border to move a block (hold Ctrl/Cmd to copy)
-- ✅ **Row reorder** — grid-native drag-to-reorder (no dnd-kit)
-- ✅ **Dynamic columns** — add / rename / move / delete / retype at runtime
-- ✅ **Column resize** — drag to resize, double-click a grip to autosize
-- ✅ **Undo / redo** — full row history (Cmd/Ctrl+Z, Shift+Z)
-- ✅ **Cell editors** — text, number, currency, checkbox, date, and select / combobox
-- ✅ **Selection status bar** — Count / Sum / Avg / Min / Max of the selection
-- ✅ **CSV export** — composes the core export button for free
-- ✅ **Virtualized** — smooth well past 100k rows
+- **Composable** — mount only the features you need as children of `<DataGrid>`
+- **Id-addressed** — focus and edits use row id, so sort/filter stay correct
+- **Performance-first** — O(1) cell commits, virtualized body, no listeners for unmounted features
+- **Own the code** — copy via the registry; nothing opaque to unwrap
 
 ## Installation
 
 <Steps>
 
-1. **Configure the `@niko-table` registry**
-
-   Add the registry to your `components.json`:
+1. **Add the registry** to `components.json`:
 
    ```json title="components.json"
    {
@@ -75,62 +60,48 @@ The demo above shows every feature in action:
    }
    ```
 
-2. **Install the Data Grid**
-
-   It pulls in the `data-table` core, the virtualized body, and the column-resize add-on automatically:
+2. **Install the grid** (pulls in `data-table`, virtualization, and column resize):
 
    <CliCommandCode action="run" command="shadcn@latest add @niko-table/data-table-grid" />
 
-   For manual copy-paste, see the [Installation Guide](/getting-started/installation/).
-
 </Steps>
 
-## Architecture
+Manual copy-paste: [Installation Guide](/getting-started/installation/).
 
-The grid is two layers with a tiny seam between them:
-
-- **A headless engine** — `useDataGrid()` owns the state a table model has no concept of: the focused cell, the selection anchor, the edit lifecycle, and the undo/redo history. It is pure state + id-keyed setters, domain-free, and knows nothing about your columns' meaning.
-- **A composable skin** — the `<DataGrid>` container (assembled inside `DataTableRoot` around the virtualized body) plus a set of cell editors and opt-in feature components. The container reads the table's **display order** (`table.getRowModel()`), so navigation and the selection rectangle stay correct after sort / filter.
-
-The layers meet at exactly two points: cell value commits flow out through the column `cell` render, and the focused cell scrolls into view through the core's `scrollRowIntoView`.
+## Anatomy
 
 ```
-┌──────────────────────────────────────────────────────────────┐
-│  DataTableRoot  (data = grid.rows)                            │
-│  ┌────────────────────────────────────────────────────────┐  │
-│  │  DataGrid  (grid = useDataGrid(...))                    │  │
-│  │   • keyboard navigation • selection rectangle           │  │
-│  │   • drag range-select   • scroll-into-view seam         │  │
-│  │  ┌──────────────────────────────────────────────────┐  │  │
-│  │  │  opt-in children (mix & match):                  │  │  │
-│  │  │  DataGridClipboard · DataGridFillHandle ·        │  │  │
-│  │  │  DataGridMove · DataGridRowReorder ·             │  │  │
-│  │  │  DataGridCrossHighlight · DataGridColumns · …     │  │  │
-│  │  └──────────────────────────────────────────────────┘  │  │
-│  │  ┌──────────────────────────────────────────────────┐  │  │
-│  │  │  DataTable → DataTableVirtualizedHeader / Body   │  │  │
-│  │  │  each cell:  <DataGridCell>{(p) => <GridXCell/>}  │  │  │
-│  │  └──────────────────────────────────────────────────┘  │  │
-│  └────────────────────────────────────────────────────────┘  │
-└──────────────────────────────────────────────────────────────┘
+DataTableRoot          ← data={grid.rows}
+└─ DataGrid            ← keyboard, selection, scroll-into-view
+   ├─ DataGridClipboard / Fill / Move / …   ← opt-in
+   └─ DataTable
+      ├─ VirtualizedHeader
+      └─ VirtualizedBody
+         └─ DataGridCell → GridTextCell / …
 ```
 
-## Your First Grid
+| Layer            | Role                                                     |
+| ---------------- | -------------------------------------------------------- |
+| `useDataGrid`    | Headless engine — rows, focus, edit lifecycle, undo/redo |
+| `<DataGrid>`     | Display-order navigation & selection rectangle           |
+| Feature children | Clipboard, fill, move, reorder, status bar, …            |
+| Cell editors     | Cheap display shell; heavy editor only while editing     |
 
-The smallest useful grid is text cells + clipboard + fill. You provide three things: the editable `columnIds`, a `createEmptyRow` factory, and a `cell` render that wraps each cell in `<DataGridCell>` and mounts an editor.
+## Usage
+
+The smallest useful grid: text cells + clipboard + fill.
 
 <CodePreview demo="niko-table/grid-basic" />
+
+<CollapsiblePreview>
+  <CodePreview demo="niko-table/grid-basic-state" />
+</CollapsiblePreview>
 
 <Steps>
 
 1. **Create the engine**
 
-   `useDataGrid` owns the rows. Give it the editable column ids and a factory for a blank row. Seed it with `initialRows`, or let it create blanks.
-
    ```tsx showLineNumbers
-   import { useDataGrid } from "@/components/niko-table/grid/hooks/use-data-grid"
-   import type { GridRow } from "@/components/niko-table/grid/types/grid-cell"
-
    const COLUMN_IDS = ["task", "assignee", "status"] as const
    const createEmptyRow = (id: string): GridRow => ({ id })
 
@@ -141,13 +112,9 @@ The smallest useful grid is text cells + clipboard + fill. You provide three thi
    })
    ```
 
-2. **Resolve raw text into cell state**
-
-   The grid is type-agnostic — a `resolve` turns a raw string into a `CellState` (`raw` + `value` + `status`). For text, everything is valid:
+2. **Resolve raw text → `CellState`**
 
    ```tsx showLineNumbers
-   import type { CellState } from "@/components/niko-table/grid/types/grid-cell"
-
    const resolveCell = (columnId: string, raw: string): CellState<string> => ({
      raw,
      value: raw || null,
@@ -155,16 +122,9 @@ The smallest useful grid is text cells + clipboard + fill. You provide three thi
    })
    ```
 
-3. **Define columns with a cell editor**
-
-   Each column's `accessorFn` returns the cell's raw text — that's what powers sorting, filtering, and CSV export for free. Wrap the cell in `<DataGridCell>` and mount a `GridTextCell`:
+3. **Wire columns** — `accessorFn` returns raw text (sort / filter / CSV for free). Wrap each cell in `<DataGridCell>`:
 
    ```tsx showLineNumbers
-   import type { DataTableColumnDef } from "@/components/niko-table/types"
-   import { DataGridCell } from "@/components/niko-table/grid/core/data-grid-context"
-   import { GridTextCell } from "@/components/niko-table/grid/cells/grid-text-cell"
-   import type { CellEditorProps } from "@/components/niko-table/grid/cells/cell-props"
-
    const columns: DataTableColumnDef<GridRow>[] = COLUMN_IDS.map((id) => ({
      id,
      accessorFn: (row) => {
@@ -173,12 +133,8 @@ The smallest useful grid is text cells + clipboard + fill. You provide three thi
      },
      header: id,
      cell: (ctx) => (
-       <DataGridCell
-         row={ctx.row.original}
-         columnId={id}
-         displayIndex={ctx.row.index}
-       >
-         {(p: CellEditorProps) => (
+       <DataGridCell row={ctx.row.original} columnId={id}>
+         {(p) => (
            <GridTextCell {...p} resolve={(raw) => resolveCell(id, raw)} />
          )}
        </DataGridCell>
@@ -186,94 +142,63 @@ The smallest useful grid is text cells + clipboard + fill. You provide three thi
    }))
    ```
 
-4. **Compose the grid**
-
-   Place `<DataGrid>` inside `DataTableRoot`, wrapping the virtualized table. Add opt-in features as children:
+4. **Compose**
 
    ```tsx showLineNumbers
-   import { DataTableRoot } from "@/components/niko-table/core/data-table-root"
-   import { DataTable } from "@/components/niko-table/core/data-table"
-   import {
-     DataTableVirtualizedBody,
-     DataTableVirtualizedHeader,
-   } from "@/components/niko-table/core/data-table-virtualized-structure"
-   import { DataTableRowContextMenuSlot } from "@/components/niko-table/components/data-table-row-context-menu-slot"
-   import { DataGrid } from "@/components/niko-table/grid/core/data-grid"
-   import { DataGridClipboard } from "@/components/niko-table/grid/components/grid-clipboard"
-   import { DataGridFillHandle } from "@/components/niko-table/grid/components/grid-fill-handle"
-   import { GridRowMenu } from "@/components/niko-table/grid/components/grid-row-menu"
-
-   export function TasksGrid() {
-     return (
-       <DataTableRoot data={grid.rows} columns={columns} getRowId={(r) => r.id}>
-         <DataGrid grid={grid}>
-           <DataGridClipboard resolveCell={resolveCell} />
-           <DataGridFillHandle />
-           <DataTable maxHeight={360}>
-             <DataTableVirtualizedHeader />
-             <DataTableVirtualizedBody estimateSize={36}>
-               <DataTableRowContextMenuSlot>
-                 <GridRowMenu />
-               </DataTableRowContextMenuSlot>
-             </DataTableVirtualizedBody>
-           </DataTable>
-         </DataGrid>
-       </DataTableRoot>
-     )
-   }
+   <DataTableRoot data={grid.rows} columns={columns} getRowId={(r) => r.id}>
+     <DataGrid grid={grid}>
+       <DataGridClipboard resolveCell={resolveCell} />
+       <DataGridFillHandle />
+       <DataTable maxHeight={360}>
+         <DataTableVirtualizedHeader />
+         <DataTableVirtualizedBody estimateSize={36}>
+           <DataTableRowContextMenuSlot>
+             <GridRowMenu />
+           </DataTableRowContextMenuSlot>
+         </DataTableVirtualizedBody>
+       </DataTable>
+     </DataGrid>
+   </DataTableRoot>
    ```
-
-5. **You've built an editable grid!**
-
-   Add more capability by mounting more children — see [Cell Types](/data-grid/cell-types/) and [Dynamic Columns](/data-grid/dynamic-columns/), or the [full-featured demo](#live-demo) above.
 
 </Steps>
 
-## Feature components
+## Features
 
-Drop any of these inside `<DataGrid>`. Unmounted = zero listeners, zero overlays, tree-shaken out.
+Drop any of these inside `<DataGrid>`. Unmounted = zero cost.
 
-| Component                       | Capability                                                                    |
-| ------------------------------- | ----------------------------------------------------------------------------- |
-| `DataGridClipboard`             | Native copy / cut / paste (quote-aware TSV, one-to-many tiling).              |
-| `DataGridFillHandle`            | Corner-drag fill; double-click auto-fill; Ctrl/Cmd+Enter fills the selection. |
-| `DataGridMove`                  | Border-drag to move a block; hold Ctrl/Cmd to copy.                           |
-| `DataGridRowReorder`            | Grid-native drag-to-reorder rows.                                             |
-| `DataGridCrossHighlight`        | Header + row-number highlight spanning the selection.                         |
-| `DataGridStatusBar`             | Count / Sum / Avg / Min / Max of the selection.                               |
-| `DataTableColumnResize`         | Drag to resize; double-click a grip to autosize.                              |
-| `DataGridUndo` / `DataGridRedo` | Undo / redo the row history.                                                  |
+| Component                       | Capability                                         |
+| ------------------------------- | -------------------------------------------------- |
+| `DataGridClipboard`             | Copy / cut / paste (quote-aware TSV)               |
+| `DataGridFillHandle`            | Corner-drag fill; `Ctrl/Cmd+Enter` fills selection |
+| `DataGridMove`                  | Drag selection border to move (Ctrl/Cmd to copy)   |
+| `DataGridRowReorder`            | Drag rows by grip (avoid combining with sort)      |
+| `DataGridCrossHighlight`        | Row / column chrome for the selection              |
+| `DataGridStatusBar`             | Count / Sum / Avg / Min / Max                      |
+| `DataTableColumnResize`         | Drag resize; double-click to autosize              |
+| `DataGridUndo` / `DataGridRedo` | History                                            |
 
-See the [API Reference](/data-grid/api/) for every export.
+Filters, sort, pin, and the view menu are regular Niko Table components — sit them beside `<DataGrid>` on the same `DataTableRoot`.
+
+Full lists and props: [API Reference](/data-grid/api/).
 
 ## Keyboard
 
-Arrows / Tab / Enter / Escape move and edit; type any character to start editing. `Mod+A` selects all; `Mod+Arrow` jumps to the data edge, `Mod+Shift+Arrow` extends to it; Home / End / PageUp / PageDown navigate; Delete / Backspace clears the selection; `Mod+C` / `X` / `V` copy / cut / paste; `Mod+Z` / `Mod+Shift+Z` undo / redo. `DataGridShortcutsButton` opens a help dialog listing them all.
+Arrows, Tab, Enter, Escape navigate and edit. Type to start editing. `Mod+A` select all; `Mod+Arrow` jump to edge; Delete clears; `Mod+C` / `X` / `V` clipboard; `Mod+Z` / `Mod+Shift+Z` undo/redo. `DataGridShortcutsButton` opens the cheat sheet.
 
-## State — keep it uncontrolled
+## State
 
-`useDataGrid` owns the row array internally (think `defaultValue`, not `value`). A controlled grid would allocate a new array every keystroke and re-derive the whole table model, defeating the O(1)-commit and virtualization story — and would break undo / redo. Two persistence patterns fit instead:
+`useDataGrid` owns the rows (**uncontrolled** — like `defaultValue`). Controlling every keystroke would re-derive the table model and break undo. Persist with:
 
-- **Staging buffer (default):** the grid is a fast local edit buffer; on an explicit Save, read `grid.rows` and send one bulk mutation.
-- **Autosave:** debounce the network (not the UI) — emit a change, batch changed rows into one request.
+- **Save button** — read `grid.rows` (or `useGridChanges().getChangeSet()`) on submit
+- **Autosave** — debounce the network, not the UI
 
-## When to Use
+See [Persistence](/data-grid/persistence/).
 
-**✅ Use the Data Grid when:**
+## Next
 
-- Users edit many cells at once — spreadsheet import, bulk data entry, quick inline correction.
-- You want keyboard nav, clipboard, and fill without hand-rolling them.
-- The data is large enough to need virtualization but still editable.
-
-**❌ Consider other options when:**
-
-- Users edit one row at a time in place → [Inline Edit Table](/examples/inline-edit-table/).
-- The table is read-only → the [Basic](/examples/basic-table/) or [Virtualization](/examples/virtualization-table/) tables.
-
-## Next Steps
-
-- [Cell Types](/data-grid/cell-types/) — the six built-in editors.
-- [Validation](/data-grid/validation/) — validate cells with Zod; inline per-cell error tooltips.
-- [Dynamic Columns](/data-grid/dynamic-columns/) — add / rename / move / delete at runtime.
-- [Persistence](/data-grid/persistence/) — turn edits into a create / update / delete change-set.
-- [API Reference](/data-grid/api/) — every hook, component, and type.
+- [Cell Types](/data-grid/cell-types/) — text, number, date, select, …
+- [Validation](/data-grid/validation/) — Zod (or any `resolve`) + inline errors
+- [Dynamic Columns](/data-grid/dynamic-columns/) — add / rename / retype at runtime
+- [Persistence](/data-grid/persistence/) — create / update / delete change-sets
+- [API Reference](/data-grid/api/)

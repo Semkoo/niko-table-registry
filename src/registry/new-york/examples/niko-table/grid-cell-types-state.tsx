@@ -1,13 +1,7 @@
 "use client"
 
 /**
- * niko-table/grid — the built-in cell editors.
- *
- * Six cell types, each following the display/editor split (the heavy editor
- * mounts only for the cell being edited): text, number, currency (a number cell
- * with a display `format`), checkbox, date (popover calendar), and select
- * (searchable dropdown). A consumer dispatches the editor per column — the grid
- * itself stays type-agnostic; validity comes from the injected `resolve`.
+ * niko-table/grid — cell types with a live state panel for docs.
  */
 import { DataTableRowContextMenuSlot } from "@/components/niko-table/components/data-table-row-context-menu-slot"
 import { DataTable } from "@/components/niko-table/core/data-table"
@@ -34,6 +28,21 @@ import type {
   GridRow,
 } from "@/components/niko-table/grid/types/grid-cell"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
+import { Button } from "@/components/ui/button"
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible"
+import { ChevronRight } from "lucide-react"
 import * as React from "react"
 
 type CellType = "text" | "number" | "currency" | "checkbox" | "date" | "select"
@@ -142,6 +151,13 @@ const createEmptyRow = (id: string): GridRow => ({ id })
 const gridCellClassName = () =>
   "border-border border-r p-0 align-middle last:border-r-0"
 
+function formatPos(
+  pos: { rowId: string; columnId: string } | null | undefined,
+): string {
+  if (!pos) return "None"
+  return `${pos.rowId} / ${pos.columnId}`
+}
+
 function CellByType({ spec, ...p }: CellEditorProps & { spec: ColumnSpec }) {
   switch (spec.type) {
     case "number":
@@ -188,7 +204,17 @@ function CellByType({ spec, ...p }: CellEditorProps & { spec: ColumnSpec }) {
   }
 }
 
-export function GridCellTypes() {
+export function GridCellTypesState() {
+  const [resetKey, setResetKey] = React.useState(0)
+  return (
+    <GridCellTypesStateInner
+      key={resetKey}
+      onReset={() => setResetKey(k => k + 1)}
+    />
+  )
+}
+
+function GridCellTypesStateInner({ onReset }: { onReset: () => void }) {
   const grid = useDataGrid<GridRow>({
     columnIds: SPECS.map(s => s.id),
     createEmptyRow,
@@ -216,22 +242,103 @@ export function GridCellTypes() {
   )
 
   return (
-    <DataTableRoot data={grid.rows} columns={columns} getRowId={r => r.id}>
-      <DataGrid grid={grid}>
-        <DataGridClipboard resolveCell={resolveCell} />
-        <DataTable maxHeight={360}>
-          <DataTableVirtualizedHeader />
-          <DataTableVirtualizedBody<GridRow>
-            estimateSize={37}
-            fixedRowHeight
-            getCellClassName={gridCellClassName}
-          >
-            <DataTableRowContextMenuSlot>
-              <GridRowMenu />
-            </DataTableRowContextMenuSlot>
-          </DataTableVirtualizedBody>
-        </DataTable>
-      </DataGrid>
-    </DataTableRoot>
+    <div className="w-full space-y-4">
+      <DataTableRoot data={grid.rows} columns={columns} getRowId={r => r.id}>
+        <DataGrid grid={grid}>
+          <DataGridClipboard resolveCell={resolveCell} />
+          <DataTable maxHeight={360}>
+            <DataTableVirtualizedHeader />
+            <DataTableVirtualizedBody<GridRow>
+              estimateSize={37}
+              fixedRowHeight
+              getCellClassName={gridCellClassName}
+            >
+              <DataTableRowContextMenuSlot>
+                <GridRowMenu />
+              </DataTableRowContextMenuSlot>
+            </DataTableVirtualizedBody>
+          </DataTable>
+        </DataGrid>
+      </DataTableRoot>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Current Grid State</CardTitle>
+          <CardDescription>
+            Live view of the grid engine state for demonstration
+          </CardDescription>
+          <CardAction>
+            <Button variant="outline" size="sm" onClick={onReset}>
+              Reset All State
+            </Button>
+          </CardAction>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-2 text-xs text-muted-foreground">
+            <div className="flex justify-between">
+              <span className="font-medium">Focused Cell:</span>
+              <span className="text-foreground">
+                {formatPos(grid.focusedCell)}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="font-medium">Editing Cell:</span>
+              <span className="text-foreground">
+                {formatPos(grid.editingCell)}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="font-medium">Selection Anchor:</span>
+              <span className="text-foreground">
+                {formatPos(grid.selectionAnchor)}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="font-medium">Total Rows:</span>
+              <span className="text-foreground">{grid.rows.length}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="font-medium">Can Undo / Redo:</span>
+              <span className="text-foreground">
+                {grid.canUndo ? "Yes" : "No"} / {grid.canRedo ? "Yes" : "No"}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="font-medium">Last Commit:</span>
+              <span className="text-foreground">
+                {grid.lastCommit
+                  ? `${grid.lastCommit.kind} (seq ${grid.lastCommit.seq})`
+                  : "None"}
+              </span>
+            </div>
+          </div>
+
+          <Collapsible>
+            <CollapsibleTrigger className="flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground [&[data-state=open]>svg]:rotate-90">
+              <ChevronRight className="size-3.5 transition-transform" />
+              View Full State Object
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <pre className="mt-2 max-h-64 overflow-auto rounded-md bg-muted p-3 text-[10px] leading-relaxed">
+                {JSON.stringify(
+                  {
+                    focusedCell: grid.focusedCell,
+                    editingCell: grid.editingCell,
+                    selectionAnchor: grid.selectionAnchor,
+                    canUndo: grid.canUndo,
+                    canRedo: grid.canRedo,
+                    lastCommit: grid.lastCommit,
+                    rowCount: grid.rows.length,
+                    rows: grid.rows,
+                  },
+                  null,
+                  2,
+                )}
+              </pre>
+            </CollapsibleContent>
+          </Collapsible>
+        </CardContent>
+      </Card>
+    </div>
   )
 }

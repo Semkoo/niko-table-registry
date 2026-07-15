@@ -1,0 +1,170 @@
+---
+title: Column Resize Table
+description: Drag column edges to resize widths, or double-click a grip to autosize to content.
+---
+
+import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
+import CollapsiblePreview from "@/components/markdown/collapsible-preview.astro"
+import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
+
+Drag any header's right edge to resize that column, or double-click the grip to autosize to the widest visible content. Drop `<DataTableColumnResize />` inside `DataTableRoot` to enable it — columns keep working with regular `DataTableHeader` / `DataTableBody` (no virtualization required). Opt out per column with `enableResizing: false`.
+
+<CodePreview demo="niko-table/column-resize" />
+
+<CollapsiblePreview>
+  <CodePreview demo="niko-table/column-resize-state" />
+</CollapsiblePreview>
+
+## Introduction
+
+Column resizing lets users tweak widths for dense, multi-column tables — especially when content length varies (emails, notes, product names). Explicit `size` values make the initial layout predictable; the resize addon handles drag and double-click autosize.
+
+## Installation
+
+Install the DataTable core and add-ons for this example:
+
+<CliCommandCode action="run" command="shadcn@latest add @niko-table/data-table @niko-table/data-table-column-resize @niko-table/data-table-column-sort @niko-table/data-table-column-hide @niko-table/data-table-pagination @niko-table/data-table-search-filter @niko-table/data-table-view-menu" />
+
+> First time using `@niko-table`? See the [Installation Guide](/getting-started/installation#configure-the-niko-table-registry) to set up the registry.
+
+For other add-ons or manual copy-paste, see the [Installation Guide](/getting-started/installation/).
+
+## Prerequisites
+
+We'll build a table showing orders. Here's our data:
+
+```tsx showLineNumbers
+type Order = {
+  id: string
+  customer: string
+  email: string
+  product: string
+  amount: number
+  status: "pending" | "shipped" | "delivered" | "cancelled"
+  date: string
+  region: string
+  city: string
+  payment: string
+  shipping: string
+  notes: string
+}
+
+const data: Order[] = [
+  {
+    id: "ORD-001",
+    customer: "John Doe",
+    email: "john.doe@example.com",
+    product: "Premium Widget",
+    amount: 299.99,
+    status: "delivered",
+    date: "2024-01-15",
+    region: "North America",
+    city: "New York",
+    payment: "Credit Card",
+    shipping: "Express",
+    notes: "Leave at front desk",
+  },
+  // ...
+]
+```
+
+## Enable Column Resize
+
+Drop `<DataTableColumnResize />` early inside `DataTableRoot`. Its presence flips `enableColumnResizing` via feature detection — no config flag required.
+
+```tsx showLineNumbers title="column-resize.tsx"
+<DataTableRoot data={data} columns={columns}>
+  <DataTableColumnResize />
+  <DataTable>
+    <DataTableHeader />
+    <DataTableBody />
+  </DataTable>
+</DataTableRoot>
+```
+
+## Column Definitions
+
+Set explicit `size` on columns so the initial layout is meaningful and horizontal scroll appears when needed. Opt out of resizing on fixed columns (e.g. actions):
+
+```tsx showLineNumbers title="columns.tsx"
+const columns: DataTableColumnDef<Order>[] = [
+  {
+    accessorKey: "id",
+    size: 110,
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle title="Order ID" />
+        <DataTableColumnActions>
+          <DataTableColumnSortOptions />
+        </DataTableColumnActions>
+      </DataTableColumnHeader>
+    ),
+    meta: { label: "Order ID" },
+  },
+  {
+    accessorKey: "customer",
+    size: 160,
+    header: () => (
+      <DataTableColumnHeader>
+        <DataTableColumnTitle title="Customer" />
+        <DataTableColumnActions>
+          <DataTableColumnSortOptions />
+        </DataTableColumnActions>
+      </DataTableColumnHeader>
+    ),
+    meta: { label: "Customer" },
+  },
+  // ... more columns with explicit sizes
+  {
+    id: "actions",
+    size: 70,
+    enableResizing: false, // no resize grip on this column
+    enableSorting: false,
+    enableHiding: false,
+    // ...
+  },
+]
+```
+
+## Controlled Sizing
+
+Manage `columnSizing` externally for persistence or live inspection:
+
+```tsx showLineNumbers title="column-resize-state.tsx"
+import { useState } from "react"
+import { type ColumnSizingState } from "@tanstack/react-table"
+
+export function ControlledResizeTable({ data }: { data: Order[] }) {
+  const [columnSizing, setColumnSizing] = useState<ColumnSizingState>({})
+
+  return (
+    <DataTableRoot
+      data={data}
+      columns={columns}
+      state={{ columnSizing }}
+      onColumnSizingChange={setColumnSizing}
+    >
+      <DataTableColumnResize />
+      {/* ... */}
+    </DataTableRoot>
+  )
+}
+```
+
+## When to Use
+
+**✅ Use Column Resize when:**
+
+- Tables have many columns and users need to adjust widths to content
+- You want drag-to-resize and double-click autosize without a custom header
+- Some columns (row number, actions) should stay fixed-width via `enableResizing: false`
+
+**❌ Consider other options when:**
+
+- All columns fit comfortably and widths never need tuning
+- You only need sticky identifier/action columns — see [Column Pinning](/examples/column-pinning-table/)
+
+## Next Steps
+
+- [Column Pinning Table](/examples/column-pinning-table/) - Keep key columns visible while scrolling
+- [Virtualization Table](/examples/virtualization-table/) - Resize works with virtualized headers/bodies too
