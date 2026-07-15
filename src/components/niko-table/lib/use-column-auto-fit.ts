@@ -1,0 +1,121 @@
+"use client"
+
+/**
+ * niko-table — created by Semir N. (Semkoo, https://github.com/Semkoo) with AI assistance.
+ *
+ * Before reporting anything: please check the changelog first.
+ *  - In-repo: ./CHANGELOG.md
+ *  - Docs site: https://niko-table.com/changelog
+ *
+ * Found a bug or have a fix? Open an issue or PR on GitHub so other
+ * users (and future LLMs reading this code) benefit:
+ * https://github.com/Semkoo/niko-table-registry
+ */
+
+/**
+ * Fill the container with resizable columns.
+ *
+ * When column resizing is enabled, cells render at `column.getSize()` (a fixed
+ * pixel width) instead of the flex-fill layout the non-resizable table uses.
+ * If the columns' natural sizes don't add up to the scroll container's width,
+ * that leaves dead space on the right. This hook removes it: on load (and when
+ * the container grows or columns are toggled) it scales the RESIZABLE columns'
+ * sizes up proportionally so they fill the available width, seeding
+ * `columnSizing` so `getSize()` — the source of truth for both rendering and
+ * drag math — stays consistent.
+ *
+ * Rules:
+ * - Only resizable columns are scaled; fixed utility columns (selection,
+ *   actions, gutters — `enableResizing: false`) keep their size, and their
+ *   width is subtracted from the space the resizable columns fill.
+ * - Once the user manually resizes any column, auto-fit stops for the life of
+ *   the mount, so their widths are never overwritten.
+ * - When the columns already meet or exceed the container width, it does
+ *   nothing and horizontal scrolling takes over.
+ *
+ * Idempotent: after a fit the columns sum to the container width, so the next
+ * run finds no surplus and makes no change.
+ */
+import type { Table } from "@tanstack/react-table"
+import * as React from "react"
+
+import { DEFAULT_MAX_COLUMN_SIZE, DEFAULT_MIN_COLUMN_SIZE } from "./constants"
+
+export function useColumnAutoFit<TData>(
+  table: Table<TData>,
+  scrollElement: HTMLElement | null,
+  enabled: boolean,
+): void {
+  // A manual drag/keyboard resize permanently exits auto-fit for this mount —
+  // otherwise a container resize would clobber the width the user just set.
+  const userResizedRef = React.useRef(false)
+  const isResizingColumn = table.getState().columnSizingInfo.isResizingColumn
+  React.useEffect(() => {
+    if (isResizingColumn) userResizedRef.current = true
+  }, [isResizingColumn])
+
+  // Sizes already present at mount (restored from persistence, or provided by
+  // the consumer) are respected as-is — auto-fit only fills the unsized
+  // first-load case, so it never overwrites a saved column layout.
+  const hadInitialSizingRef = React.useRef(
+    Object.keys(table.getState().columnSizing).length > 0,
+  )
+
+  // Reactively track the container's inner width so a fit re-runs when the
+  // available space changes (window resize, sidebar collapse, panel dock).
+  const [containerWidth, setContainerWidth] = React.useState(0)
+  React.useLayoutEffect(() => {
+    if (!scrollElement) return
+    const measure = () => setContainerWidth(scrollElement.clientWidth)
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(scrollElement)
+    return () => observer.disconnect()
+  }, [scrollElement])
+
+  // Re-derive on any layout-affecting state change. `columnSizing` is included
+  // so the effect converges (after a fit it re-runs, finds no surplus, stops).
+  const { columnSizing, columnVisibility, columnOrder } = table.getState()
+
+  React.useLayoutEffect(() => {
+    if (
+      !enabled ||
+      userResizedRef.current ||
+      hadInitialSizingRef.current ||
+      containerWidth <= 0
+    )
+      return
+
+    const leafColumns = table.getVisibleLeafColumns()
+    const resizable = leafColumns.filter(c => c.getCanResize())
+    if (resizable.length === 0) return
+
+    const fixedTotal = leafColumns
+      .filter(c => !c.getCanResize())
+      .reduce((sum, c) => sum + c.getSize(), 0)
+    const resizableTotal = resizable.reduce((sum, c) => sum + c.getSize(), 0)
+    const available = containerWidth - fixedTotal
+
+    // Already fills or overflows (allow 1px for subpixel rounding) — let the
+    // horizontal scrollbar handle it rather than shrinking columns to fit.
+    if (resizableTotal <= 0 || resizableTotal >= available - 1) return
+
+    const scale = available / resizableTotal
+    const next: Record<string, number> = {}
+    let changed = false
+    for (const column of resizable) {
+      const min = column.columnDef.minSize ?? DEFAULT_MIN_COLUMN_SIZE
+      const max = column.columnDef.maxSize ?? DEFAULT_MAX_COLUMN_SIZE
+      const size = Math.round(
+        Math.min(Math.max(column.getSize() * scale, min), max),
+      )
+      next[column.id] = size
+      if (size !== column.getSize()) changed = true
+    }
+    if (!changed) return
+
+    table.setColumnSizing(prev => ({ ...prev, ...next }))
+    // `table` identity is stable; state slices below drive re-fitting.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [enabled, containerWidth, columnSizing, columnVisibility, columnOrder])
+}

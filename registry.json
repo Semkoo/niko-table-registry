@@ -157,6 +157,11 @@
           "target": "components/niko-table/lib/styles.ts"
         },
         {
+          "path": "src/components/niko-table/lib/use-column-auto-fit.ts",
+          "type": "registry:lib",
+          "target": "components/niko-table/lib/use-column-auto-fit.ts"
+        },
+        {
           "path": "src/components/niko-table/config/data-table.ts",
           "type": "registry:lib",
           "target": "components/niko-table/config/data-table.ts"

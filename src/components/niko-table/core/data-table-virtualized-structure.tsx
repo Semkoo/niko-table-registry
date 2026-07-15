@@ -32,6 +32,7 @@ import { createScrollHandler } from "../lib/create-scroll-handler"
 import { DataTableColumnResizeHandle } from "../lib/column-resize-handle"
 import { isInteractiveClickTarget } from "../lib/row-click"
 import { getCommonPinningStyles } from "../lib/styles"
+import { useColumnAutoFit } from "../lib/use-column-auto-fit"
 import {
   flashCellKey,
   useDataTable,
@@ -148,7 +149,7 @@ export const DataTableVirtualizedHeader = React.memo(
                     isActiveColumn &&
                       "bg-primary/15! font-semibold! text-foreground!",
                     // Anchor the absolute resize handle to the cell's right edge.
-                    resizing && "relative",
+                    resizing && "relative overflow-hidden",
                   )}
                   style={{
                     // Resizing: width tracks `getSize()` (columnSizing-aware).
@@ -163,9 +164,16 @@ export const DataTableVirtualizedHeader = React.memo(
                 >
                   {header.isPlaceholder ? null : (
                     <DataTableColumnHeaderRoot column={header.column}>
-                      {flexRender(
-                        header.column.columnDef.header,
-                        header.getContext(),
+                      {resizing &&
+                      typeof header.column.columnDef.header === "string" ? (
+                        <span className="inline-block max-w-full truncate">
+                          {header.column.columnDef.header}
+                        </span>
+                      ) : (
+                        flexRender(
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )
                       )}
                     </DataTableColumnHeaderRoot>
                   )}
@@ -256,7 +264,7 @@ export const DataTableVirtualizedFlexHeader = React.memo(
                     "flex items-center",
                     header.column.getIsPinned() && "bg-background",
                     // Anchor the absolute resize handle to the cell's right edge.
-                    resizing && "relative",
+                    resizing && "relative overflow-hidden",
                   )}
                   style={{
                     width: fixedWidth,
@@ -265,9 +273,16 @@ export const DataTableVirtualizedFlexHeader = React.memo(
                 >
                   {header.isPlaceholder ? null : (
                     <DataTableColumnHeaderRoot column={header.column}>
-                      {flexRender(
-                        header.column.columnDef.header,
-                        header.getContext(),
+                      {resizing &&
+                      typeof header.column.columnDef.header === "string" ? (
+                        <span className="inline-block max-w-full truncate">
+                          {header.column.columnDef.header}
+                        </span>
+                      ) : (
+                        flexRender(
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )
                       )}
                     </DataTableColumnHeaderRoot>
                   )}
@@ -627,6 +642,11 @@ export function DataTableVirtualizedBody<TData>({
   const [scrollElement, setScrollElement] =
     React.useState<HTMLDivElement | null>(null)
   const tbodyRef = React.useRef<HTMLTableSectionElement | null>(null)
+
+  // When resizing is on, columns render at fixed `getSize()` widths instead of
+  // flex-filling. Scale the resizable columns up to fill the container on load
+  // so the table doesn't leave dead space on the right (until the user resizes).
+  useColumnAutoFit(table, scrollElement, resizing)
 
   const parentRef = React.useCallback(
     (node: HTMLTableSectionElement | null) => {

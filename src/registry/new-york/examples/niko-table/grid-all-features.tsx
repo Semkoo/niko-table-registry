@@ -450,7 +450,7 @@ function SelectableColumnTitle() {
       type="button"
       onClick={() => selectColumn(column.id)}
       title="Select column"
-      className="-mx-1 cursor-pointer rounded px-1 text-left transition-colors hover:bg-muted"
+      className="-mx-1 block min-w-0 max-w-full cursor-pointer rounded px-1 text-left transition-colors hover:bg-muted"
     >
       <DataTableColumnTitle />
     </button>

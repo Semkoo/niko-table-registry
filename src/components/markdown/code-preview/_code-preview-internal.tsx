@@ -39,6 +39,8 @@ export type Demo =
   | "niko-table/column-pinning-state"
   | "niko-table/column-resize"
   | "niko-table/column-resize-state"
+  | "niko-table/column-resize-autofit"
+  | "niko-table/column-resize-persisted"
   | "niko-table/virtualized-row-dnd"
   | "niko-table/virtualized-column-dnd"
   | "niko-table/row-context-menu"

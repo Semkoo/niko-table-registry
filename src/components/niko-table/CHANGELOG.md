@@ -10,6 +10,7 @@ All notable changes to the data-table component.
 
 #### Core
 
+- **Column auto-fit** (`lib/use-column-auto-fit.ts`) — when resizing is enabled, cells render at fixed `getSize()` widths instead of flex-filling, which left dead space when columns didn't reach the container width. The `useColumnAutoFit` hook (wired into `data-table-structure` and `data-table-virtualized-structure`) scales the **resizable** columns up proportionally to fill the container on load, seeding `columnSizing` so `getSize()` stays the single source of truth for rendering and drag math. Fixed columns (`enableResizing: false`) keep their size; auto-fit re-fits on container growth, and stops once the user manually resizes or when a saved `columnSizing` is restored (so persisted widths always win). Overflow still scrolls horizontally.
 - **Axis-split DnD structure** — import from `data-table-row-dnd-structure` / `data-table-column-dnd-structure` (+ virtualized twins). Registry packages no longer cross-ship the other axis. The old combined `data-table-dnd-structure` / `data-table-virtualized-dnd-structure` modules are removed (no re-export shims).
 - **`DEFAULT_MIN_COLUMN_SIZE`** — defined in `lib/constants`; `DataTableRoot` no longer imports `column-resize-handle` for that constant.
 - **`enableSorting` default `false`** — attaches `getSortedRowModel` only when config or feature detection enables sorting.

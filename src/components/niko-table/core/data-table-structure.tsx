@@ -30,6 +30,7 @@ import { createScrollHandler } from "../lib/create-scroll-handler"
 import { DataTableColumnResizeHandle } from "../lib/column-resize-handle"
 import { resolveRowFromClick } from "../lib/row-click"
 import { getCommonPinningStyles } from "../lib/styles"
+import { useColumnAutoFit } from "../lib/use-column-auto-fit"
 import { flashCellKey, useDataTable } from "./data-table-context"
 
 // ============================================================================
@@ -104,14 +105,21 @@ export const DataTableHeader = React.memo(function DataTableHeader({
                 className={cn(
                   header.column.getIsPinned() && "bg-background",
                   // Anchor the absolute resize handle to the cell's right edge.
-                  resizing && "relative",
+                  resizing && "relative overflow-hidden",
                 )}
               >
                 {header.isPlaceholder ? null : (
                   <DataTableColumnHeaderRoot column={header.column}>
-                    {flexRender(
-                      header.column.columnDef.header,
-                      header.getContext(),
+                    {resizing &&
+                    typeof header.column.columnDef.header === "string" ? (
+                      <span className="inline-block max-w-full truncate">
+                        {header.column.columnDef.header}
+                      </span>
+                    ) : (
+                      flexRender(
+                        header.column.columnDef.header,
+                        header.getContext(),
+                      )
                     )}
                   </DataTableColumnHeaderRoot>
                 )}
@@ -331,6 +339,24 @@ export function DataTableBody<TData>({
   } = useDataTable<TData>()
   const { rows } = table.getRowModel()
   const containerRef = React.useRef<HTMLTableSectionElement>(null)
+
+  // When resizing is on, columns render at fixed `getSize()` widths instead of
+  // flex-filling. Scale the resizable columns up to fill the container on load
+  // so the table doesn't leave dead space on the right (until the user resizes).
+  const [autoFitScrollEl, setAutoFitScrollEl] =
+    React.useState<HTMLElement | null>(null)
+  React.useLayoutEffect(() => {
+    setAutoFitScrollEl(
+      containerRef.current?.closest<HTMLElement>(
+        '[data-slot="table-container"]',
+      ) ?? null,
+    )
+  }, [])
+  useColumnAutoFit(
+    table,
+    autoFitScrollEl,
+    table.options.enableColumnResizing ?? false,
+  )
 
   // Register a scroll handle SCOPED to this table's own container, so
   // `scrollRowIntoView` resolves the row within this table (a plain body has no
