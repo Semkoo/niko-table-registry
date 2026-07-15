@@ -115,6 +115,15 @@ type DataTableContextProps<TData> = DataTableContextState & {
    */
   registerRowScroller: (fn: ScrollRowIntoView | null) => void
   /**
+   * The table's scroll container (`<DataTable>`'s `[data-slot="table-container"]`
+   * viewport). `<DataTable>` registers it on mount; opt-in features like
+   * `<DataTableColumnAutoFit />` read it to measure/observe available width.
+   * `null` until the container mounts (or when no `<DataTable>` is used).
+   */
+  scrollContainer: HTMLElement | null
+  /** Internal: `<DataTable>` registers its scroll container element here. */
+  registerScrollContainer: (el: HTMLElement | null) => void
+  /**
    * Toggle a row's selection with standard Shift-range support: a plain
    * click toggles one row and sets the anchor; a Shift+click selects every row
    * between the anchor and this one (in current display order). Wire a select
@@ -283,6 +292,16 @@ export function DataTableProvider<TData>({
   const registerRowScroller = useCallback((fn: ScrollRowIntoView | null) => {
     rowScrollerRef.current = fn
   }, [])
+
+  // The scroll container is state (not a ref) so opt-in consumers like
+  // `<DataTableColumnAutoFit />` re-run once it mounts. Set once on mount and
+  // cleared on unmount by `<DataTable>`'s ref callback.
+  const [scrollContainer, setScrollContainer] =
+    React.useState<HTMLElement | null>(null)
+  const registerScrollContainer = useCallback(
+    (el: HTMLElement | null) => setScrollContainer(el),
+    [],
+  )
   const scrollRowIntoView = useCallback<ScrollRowIntoView>((index, opts) => {
     if (rowScrollerRef.current) {
       rowScrollerRef.current(index, opts)
@@ -493,6 +512,8 @@ export function DataTableProvider<TData>({
         setIsLoading,
         scrollRowIntoView,
         registerRowScroller,
+        scrollContainer,
+        registerScrollContainer,
         flashingRowIds,
         flashingCellKeys,
         flashRows,
@@ -508,6 +529,8 @@ export function DataTableProvider<TData>({
       setIsLoading,
       scrollRowIntoView,
       registerRowScroller,
+      scrollContainer,
+      registerScrollContainer,
       flashingRowIds,
       flashingCellKeys,
       flashRows,

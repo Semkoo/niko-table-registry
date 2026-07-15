@@ -30,7 +30,6 @@ import { createScrollHandler } from "../lib/create-scroll-handler"
 import { DataTableColumnResizeHandle } from "../lib/column-resize-handle"
 import { resolveRowFromClick } from "../lib/row-click"
 import { getCommonPinningStyles } from "../lib/styles"
-import { useColumnAutoFit } from "../lib/use-column-auto-fit"
 import { flashCellKey, useDataTable } from "./data-table-context"
 
 // ============================================================================
@@ -339,24 +338,6 @@ export function DataTableBody<TData>({
   } = useDataTable<TData>()
   const { rows } = table.getRowModel()
   const containerRef = React.useRef<HTMLTableSectionElement>(null)
-
-  // When resizing is on, columns render at fixed `getSize()` widths instead of
-  // flex-filling. Scale the resizable columns up to fill the container on load
-  // so the table doesn't leave dead space on the right (until the user resizes).
-  const [autoFitScrollEl, setAutoFitScrollEl] =
-    React.useState<HTMLElement | null>(null)
-  React.useLayoutEffect(() => {
-    setAutoFitScrollEl(
-      containerRef.current?.closest<HTMLElement>(
-        '[data-slot="table-container"]',
-      ) ?? null,
-    )
-  }, [])
-  useColumnAutoFit(
-    table,
-    autoFitScrollEl,
-    table.options.enableColumnResizing ?? false,
-  )
 
   // Register a scroll handle SCOPED to this table's own container, so
   // `scrollRowIntoView` resolves the row within this table (a plain body has no

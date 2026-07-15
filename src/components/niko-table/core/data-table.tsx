@@ -15,6 +15,8 @@ import React from "react"
 import { cn } from "@/lib/utils"
 import { TableComponent } from "@/components/ui/table"
 
+import { useDataTable } from "./data-table-context"
+
 /**
  * Extracts height from Tailwind arbitrary values (e.g., h-[600px], max-h-[400px]).
  * Converts them to inline styles to ensure scroll events work reliably.
@@ -121,8 +123,13 @@ export function DataTable({
   const finalHeight = height ?? parsed.height
   const finalMaxHeight = maxHeight ?? parsed.maxHeight ?? finalHeight
 
+  // Register the scroll container so opt-in features (e.g.
+  // `<DataTableColumnAutoFit />`) can measure/observe the viewport width.
+  const { registerScrollContainer } = useDataTable()
+
   return (
     <div
+      ref={registerScrollContainer}
       data-slot="table-container"
       className={cn(
         "relative w-full overflow-auto rounded-lg border",
