@@ -24,10 +24,14 @@ description: Latest updates and release notes for Niko Table.
 - Install CLI yarn tab uses `yarn dlx`; Installation page is Prerequisites → Registry → Install first
 - [Skills](/getting-started/skills/) — Data Grid coverage + Cursor / Claude Code / Windsurf / agents install paths
 - `niko-table-best-practices` skill teaches Data Grid composition
-- Row/column DnD structures are separate modules + registry packages (no cross-axis install)
+- Import DnD from `data-table-row-dnd-structure` / `data-table-column-dnd-structure` (and virtualized twins)
 - `DEFAULT_MIN_COLUMN_SIZE` moved to `lib/constants` (root no longer imports resize-handle for it)
 - `enableSorting` defaults off unless config or feature detection enables it
 - DnD bodies support row context menus; non-virt column-DnD body honors resize; column-DnD example mounts resize
+
+### Removed
+
+- `data-table-dnd-structure.tsx` / `data-table-virtualized-dnd-structure.tsx` (no re-export shims — use the axis files)
 
 ### Fixed
 
@@ -109,7 +113,6 @@ description: Latest updates and release notes for Niko Table.
 
 ### Internal
 
-- `data-table-virtualized-dnd-structure.tsx` marked `@internal`.
 - DnD virtualized bodies don't gate `measureElement` on `columnsLocked` — flex layout has no auto-layout pass.
 
 ## April 2026

@@ -23,11 +23,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- **Composability** — row and column DnD structure split into `data-table-row-dnd-structure` / `data-table-column-dnd-structure` (registry packages no longer cross-ship the other axis); virtualized DnD likewise split
+- **Composability** — row/column DnD import from `data-table-row-dnd-structure` / `data-table-column-dnd-structure` (virtualized twins likewise); registry packages no longer cross-ship the other axis
 - **Composability** — `DEFAULT_MIN_COLUMN_SIZE` lives in `lib/constants` so `DataTableRoot` no longer imports the resize-handle module for a constant
 - **Composability** — `enableSorting` defaults to `false` unless config or feature detection turns it on (sorted row model stays off without sort UI)
 - **DnD** — all four DnD bodies support `DataTableRowContextMenuSlot` / `renderRowContextMenu` like plain bodies
 - **DnD** — non-virtualized `DataTableDndColumnBody` honors column resize (`getSize()`, layout lock, truncate); column-DnD example mounts `<DataTableColumnResize />`
+
+### Removed
+
+- **`data-table-dnd-structure.tsx` / `data-table-virtualized-dnd-structure.tsx`** — no re-export shims. Import the axis files above instead.
 
 - Data Grid docs rewritten — shorter, shadcn-style install → anatomy → usage
 - Intro demo includes search / faceted / advanced filters + **Current Table State** panel
