@@ -3,8 +3,8 @@ title: Filter Components
 description: Core filter implementation components that accept a table prop directly.
 ---
 
-import { Button } from "@/components/ui/button"
 import { GITHUB_REPO_URL } from "@/data/env"
+import DocsLink from "@/components/markdown/docs-link.astro"
 
 Filter components are the core implementation that accept a `table` prop directly. They are used internally by the context-aware components in `components/` but can also be used standalone when building custom components.
 
@@ -12,16 +12,8 @@ Filter components are the core implementation that accept a `table` prop directl
 
 Core search filter implementation.
 
-<div className="mb-4 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-search-filter.tsx`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Source Code ↗
-    </a>
-  </Button>
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-search-filter.tsx`} external>Source Code ↗</DocsLink>
 </div>
 
 ```tsx showLineNumbers
@@ -45,16 +37,8 @@ import { TableSearchFilter } from "@/components/niko-table/filters/table-search-
 
 Core pagination implementation.
 
-<div className="mb-4 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-pagination.tsx`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Source Code ↗
-    </a>
-  </Button>
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-pagination.tsx`} external>Source Code ↗</DocsLink>
 </div>
 
 ```tsx showLineNumbers
@@ -85,16 +69,8 @@ Same as `DataTablePagination` but requires `table` prop. See DataTablePagination
 
 Core filter menu implementation with command palette interface.
 
-<div className="mb-4 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-filter-menu.tsx`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Source Code ↗
-    </a>
-  </Button>
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-filter-menu.tsx`} external>Source Code ↗</DocsLink>
 </div>
 
 ```tsx showLineNumbers
@@ -125,16 +101,8 @@ const [filters, setFilters] = useState<ExtendedColumnFilter<Product>[]>([])
 
 Core faceted filter implementation.
 
-<div className="mb-4 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-faceted-filter.tsx`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Source Code ↗
-    </a>
-  </Button>
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-faceted-filter.tsx`} external>Source Code ↗</DocsLink>
 </div>
 
 ```tsx showLineNumbers
@@ -174,16 +142,8 @@ import { TableFacetedFilter } from "@/components/niko-table/filters/table-facete
 
 Core slider filter implementation for numeric ranges.
 
-<div className="mb-4 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-slider-filter.tsx`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Source Code ↗
-    </a>
-  </Button>
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-slider-filter.tsx`} external>Source Code ↗</DocsLink>
 </div>
 
 ```tsx showLineNumbers
@@ -231,16 +191,8 @@ import { TableSliderFilter } from "@/components/niko-table/filters/table-slider-
 
 Core date filter implementation.
 
-<div className="mb-4 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-date-filter.tsx`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Source Code ↗
-    </a>
-  </Button>
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-date-filter.tsx`} external>Source Code ↗</DocsLink>
 </div>
 
 ```tsx showLineNumbers
@@ -272,16 +224,8 @@ import { TableDateFilter } from "@/components/niko-table/filters/table-date-filt
 
 Core sort menu implementation.
 
-<div className="mb-4 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-sort-menu.tsx`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Source Code ↗
-    </a>
-  </Button>
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-sort-menu.tsx`} external>Source Code ↗</DocsLink>
 </div>
 
 ```tsx showLineNumbers
@@ -320,16 +264,8 @@ import { TableSortMenu } from "@/components/niko-table/filters/table-sort-menu"
 
 Core view menu implementation for column visibility. For drag-to-reorder, use [`TableViewDndMenu`](#tableviewdndmenu) — it lives in a separate file so consumers who don't need DnD don't pay the `@dnd-kit/*` bundle cost.
 
-<div className="mb-4 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-view-menu.tsx`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Source Code ↗
-    </a>
-  </Button>
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-view-menu.tsx`} external>Source Code ↗</DocsLink>
 </div>
 
 ```tsx showLineNumbers
@@ -372,16 +308,8 @@ import { TableViewMenu } from "@/components/niko-table/filters/table-view-menu"
 
 Drag-to-reorder variant of `TableViewMenu`. Each row gets a `GripVertical` handle and the list becomes vertically sortable via `@dnd-kit`. The same `columnOrder` state the table consumes drives the menu's display order, so dropping a row updates both surfaces in lockstep. Combines cleanly with [`TableColumnDndProvider`](#tablecolumndndprovider) (header drag) — two reorder surfaces, one state.
 
-<div className="mb-4 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-view-dnd-menu.tsx`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Source Code ↗
-    </a>
-  </Button>
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-view-dnd-menu.tsx`} external>Source Code ↗</DocsLink>
 </div>
 
 ```tsx showLineNumbers
@@ -418,16 +346,8 @@ const [columnOrder, setColumnOrder] = React.useState<string[]>([])
 
 Core inline filter implementation with advanced operators.
 
-<div className="mb-4 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-inline-filter.tsx`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Source Code ↗
-    </a>
-  </Button>
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-inline-filter.tsx`} external>Source Code ↗</DocsLink>
 </div>
 
 ```tsx showLineNumbers
@@ -458,16 +378,8 @@ const [filters, setFilters] = useState<ExtendedColumnFilter<Product>[]>([])
 
 Core clear filter button implementation.
 
-<div className="mb-4 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-clear-filter.tsx`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Source Code ↗
-    </a>
-  </Button>
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-clear-filter.tsx`} external>Source Code ↗</DocsLink>
 </div>
 
 ```tsx showLineNumbers
@@ -513,16 +425,8 @@ import { TableClearFilter } from "@/components/niko-table/filters/table-clear-fi
 
 Core export button implementation.
 
-<div className="mb-4 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-export-button.tsx`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Source Code ↗
-    </a>
-  </Button>
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-export-button.tsx`} external>Source Code ↗</DocsLink>
 </div>
 
 ```tsx showLineNumbers
@@ -608,16 +512,8 @@ exportTableToCSV(table, {
 
 Core range filter implementation for numeric inputs.
 
-<div className="mb-4 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-range-filter.tsx`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Source Code ↗
-    </a>
-  </Button>
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-range-filter.tsx`} external>Source Code ↗</DocsLink>
 </div>
 
 ```tsx showLineNumbers
@@ -662,16 +558,8 @@ These components are the core implementations used by the composable `DataTableC
 
 Core column title implementation. Renders a clickable title that toggles sorting.
 
-<div className="mb-4 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-column-title.tsx`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Source Code ↗
-    </a>
-  </Button>
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-column-title.tsx`} external>Source Code ↗</DocsLink>
 </div>
 
 ```tsx showLineNumbers
@@ -692,16 +580,8 @@ import { TableColumnTitle } from "@/components/niko-table/filters/table-column-t
 
 Core column actions container. Renders a dropdown menu trigger with active state indicator.
 
-<div className="mb-4 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-column-actions.tsx`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Source Code ↗
-    </a>
-  </Button>
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-column-actions.tsx`} external>Source Code ↗</DocsLink>
 </div>
 
 ```tsx showLineNumbers
@@ -724,16 +604,8 @@ import { TableColumnActions } from "@/components/niko-table/filters/table-column
 
 Core sorting implementations. `TableColumnSortOptions` renders sort items inside a dropdown menu. `TableColumnSortMenu` renders a standalone sort button.
 
-<div className="mb-4 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-column-sort.tsx`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Source Code ↗
-    </a>
-  </Button>
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-column-sort.tsx`} external>Source Code ↗</DocsLink>
 </div>
 
 ```tsx showLineNumbers
@@ -761,16 +633,8 @@ import {
 
 Core hide column implementations. `TableColumnHideOptions` renders a hide item inside a dropdown menu. `TableColumnHideMenu` renders a standalone button.
 
-<div className="mb-4 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-column-hide.tsx`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Source Code ↗
-    </a>
-  </Button>
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-column-hide.tsx`} external>Source Code ↗</DocsLink>
 </div>
 
 ```tsx showLineNumbers
@@ -797,16 +661,8 @@ import {
 
 Core column pinning implementations. `TableColumnPinOptions` renders pin left/right/unpin items inside a dropdown menu. `TableColumnPinMenu` renders a standalone button.
 
-<div className="mb-4 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-column-pin.tsx`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Source Code ↗
-    </a>
-  </Button>
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-column-pin.tsx`} external>Source Code ↗</DocsLink>
 </div>
 
 ```tsx showLineNumbers
@@ -833,16 +689,8 @@ import {
 
 Core faceted filter implementations for column headers. `TableColumnFacetedFilterOptions` renders inside a dropdown. `TableColumnFacetedFilterMenu` renders a standalone popover.
 
-<div className="mb-4 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-column-faceted-filter.tsx`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Source Code ↗
-    </a>
-  </Button>
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-column-faceted-filter.tsx`} external>Source Code ↗</DocsLink>
 </div>
 
 ```tsx showLineNumbers
@@ -891,16 +739,8 @@ All other props are passed through to the underlying `Button` component.
 
 Core slider filter implementation for column headers. Renders a range slider inside a dropdown menu.
 
-<div className="mb-4 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-column-slider-filter.tsx`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Source Code ↗
-    </a>
-  </Button>
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-column-slider-filter.tsx`} external>Source Code ↗</DocsLink>
 </div>
 
 ```tsx showLineNumbers
@@ -923,16 +763,8 @@ import { TableColumnSliderFilterOptions } from "@/components/niko-table/filters/
 
 Core date filter implementation for column headers. Renders a date picker inside a dropdown menu.
 
-<div className="mb-4 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-column-date-filter.tsx`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Source Code ↗
-    </a>
-  </Button>
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-column-date-filter.tsx`} external>Source Code ↗</DocsLink>
 </div>
 
 ```tsx showLineNumbers
@@ -957,16 +789,8 @@ import { TableColumnDateFilterOptions } from "@/components/niko-table/filters/ta
 
 Core row DnD provider that wraps the table with DnD context and sensors. Handles `arrayMove` internally and calls `onReorder` with the new data array.
 
-<div className="mb-4 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-row-dnd.tsx`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Source Code ↗
-    </a>
-  </Button>
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-row-dnd.tsx`} external>Source Code ↗</DocsLink>
 </div>
 
 ```tsx showLineNumbers
@@ -1013,16 +837,8 @@ A grip icon button cell for initiating row drags.
 
 Core column DnD provider that wraps the table with horizontal DnD context. Handles `arrayMove` on column order.
 
-<div className="mb-4 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-column-dnd.tsx`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Source Code ↗
-    </a>
-  </Button>
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-column-dnd.tsx`} external>Source Code ↗</DocsLink>
 </div>
 
 ```tsx showLineNumbers

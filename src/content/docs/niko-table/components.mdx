@@ -3,28 +3,12 @@ title: Components
 description: Overview of all DataTable components organized by directory structure.
 ---
 
-import { Button } from "@/components/ui/button"
 import { GITHUB_REPO_URL } from "@/data/env"
+import DocsLink from "@/components/markdown/docs-link.astro"
 
-<div className="mb-6 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href="https://tanstack.com/table/latest/docs/introduction"
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Docs ↗
-    </a>
-  </Button>
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href="https://tanstack.com/table/latest/docs/api/core/table"
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      API Reference ↗
-    </a>
-  </Button>
+<div className="not-content mb-6 flex items-center gap-2">
+  <DocsLink href="https://tanstack.com/table/latest/docs/introduction" external>Docs ↗</DocsLink>
+  <DocsLink href="https://tanstack.com/table/latest/docs/api/core/table" external>API Reference ↗</DocsLink>
 </div>
 
 The components in `data-table` are built to be composable. You build your table by putting the provided components together. They also compose well with other shadcn/ui components.

@@ -3,8 +3,8 @@ title: User-Facing Components
 description: Context-aware components that automatically connect to the table via the useDataTable hook.
 ---
 
-import { Button } from "@/components/ui/button"
 import { GITHUB_REPO_URL } from "@/data/env"
+import DocsLink from "@/components/markdown/docs-link.astro"
 
 User-facing components are context-aware and automatically connect to the table via the `useDataTable` hook. These are the recommended components for most use cases.
 
@@ -12,16 +12,8 @@ User-facing components are context-aware and automatically connect to the table 
 
 Container for organizing filters and actions in the toolbar.
 
-<div className="mb-4 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-toolbar-section.tsx`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Source Code ↗
-    </a>
-  </Button>
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-toolbar-section.tsx`} external>Source Code ↗</DocsLink>
 </div>
 
 ```tsx showLineNumbers
@@ -44,25 +36,9 @@ import { DataTableToolbarSection } from "@/components/niko-table/components/data
 
 Full-featured pagination controls with page size selection and navigation.
 
-<div className="mb-4 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-pagination.tsx`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Source Code ↗
-    </a>
-  </Button>
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-pagination.tsx`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Filter Implementation ↗
-    </a>
-  </Button>
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-pagination.tsx`} external>Source Code ↗</DocsLink>
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-pagination.tsx`} external>Filter Implementation ↗</DocsLink>
 </div>
 
 ```tsx showLineNumbers
@@ -103,25 +79,9 @@ import { DataTablePagination } from "@/components/niko-table/components/data-tab
 
 Global search input with debouncing. Supports both controlled and uncontrolled modes.
 
-<div className="mb-4 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-search-filter.tsx`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Source Code ↗
-    </a>
-  </Button>
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-search-filter.tsx`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Filter Implementation ↗
-    </a>
-  </Button>
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-search-filter.tsx`} external>Source Code ↗</DocsLink>
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-search-filter.tsx`} external>Filter Implementation ↗</DocsLink>
 </div>
 
 ```tsx showLineNumbers
@@ -160,25 +120,9 @@ const [search, setSearch] = useQueryState('search')
 
 Command palette-style interface for adding filters with advanced operators and AND/OR logic.
 
-<div className="mb-4 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-filter-menu.tsx`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Source Code ↗
-    </a>
-  </Button>
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-filter-menu.tsx`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Filter Implementation ↗
-    </a>
-  </Button>
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-filter-menu.tsx`} external>Source Code ↗</DocsLink>
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-filter-menu.tsx`} external>Filter Implementation ↗</DocsLink>
 </div>
 
 ```tsx showLineNumbers
@@ -218,25 +162,9 @@ import { DataTableFilterMenu } from "@/components/niko-table/components/data-tab
 
 Faceted filter component for single or multiple selection with dynamic option generation.
 
-<div className="mb-4 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-faceted-filter.tsx`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Source Code ↗
-    </a>
-  </Button>
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-faceted-filter.tsx`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Filter Implementation ↗
-    </a>
-  </Button>
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-faceted-filter.tsx`} external>Source Code ↗</DocsLink>
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-faceted-filter.tsx`} external>Filter Implementation ↗</DocsLink>
 </div>
 
 ```tsx showLineNumbers
@@ -283,25 +211,9 @@ Controls whether the filter shows options from all data or only from filtered ro
 
 Menu for managing column sorting with drag-and-drop reordering.
 
-<div className="mb-4 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-sort-menu.tsx`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Source Code ↗
-    </a>
-  </Button>
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-sort-menu.tsx`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Filter Implementation ↗
-    </a>
-  </Button>
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-sort-menu.tsx`} external>Source Code ↗</DocsLink>
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-sort-menu.tsx`} external>Filter Implementation ↗</DocsLink>
 </div>
 
 ```tsx showLineNumbers
@@ -324,25 +236,9 @@ import { DataTableSortMenu } from "@/components/niko-table/components/data-table
 
 Column visibility toggle menu with search functionality. For drag-to-reorder, use [`DataTableViewDndMenu`](#datatableviewdndmenu) — it lives in a separate file so consumers who don't need DnD don't pay the `@dnd-kit/*` bundle cost.
 
-<div className="mb-4 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-view-menu.tsx`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Source Code ↗
-    </a>
-  </Button>
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-view-menu.tsx`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Filter Implementation ↗
-    </a>
-  </Button>
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-view-menu.tsx`} external>Source Code ↗</DocsLink>
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-view-menu.tsx`} external>Filter Implementation ↗</DocsLink>
 </div>
 
 ```tsx showLineNumbers
@@ -375,25 +271,9 @@ import { DataTableViewMenu } from "@/components/niko-table/components/data-table
 
 Drag-to-reorder variant of `DataTableViewMenu`. Each row gets a `GripVertical` handle; the list becomes vertically sortable via `@dnd-kit`. The same `columnOrder` state the table consumes drives the menu's display order, so dropping a row updates both surfaces in lockstep.
 
-<div className="mb-4 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-view-dnd-menu.tsx`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Source Code ↗
-    </a>
-  </Button>
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-view-dnd-menu.tsx`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Filter Implementation ↗
-    </a>
-  </Button>
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-view-dnd-menu.tsx`} external>Source Code ↗</DocsLink>
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-view-dnd-menu.tsx`} external>Filter Implementation ↗</DocsLink>
 </div>
 
 ```tsx showLineNumbers
@@ -428,25 +308,9 @@ const [columnOrder, setColumnOrder] = React.useState<string[]>([])
 
 Inline filter toolbar for managing filters with advanced operators and AND/OR logic.
 
-<div className="mb-4 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-inline-filter.tsx`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Source Code ↗
-    </a>
-  </Button>
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-inline-filter.tsx`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Filter Implementation ↗
-    </a>
-  </Button>
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-inline-filter.tsx`} external>Source Code ↗</DocsLink>
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-inline-filter.tsx`} external>Filter Implementation ↗</DocsLink>
 </div>
 
 ```tsx showLineNumbers
@@ -468,25 +332,9 @@ Same as `DataTableFilterMenu`. See DataTableFilterMenu section above for details
 
 Slider filter for numeric ranges with min/max inputs.
 
-<div className="mb-4 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-slider-filter.tsx`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Source Code ↗
-    </a>
-  </Button>
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-slider-filter.tsx`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Filter Implementation ↗
-    </a>
-  </Button>
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-slider-filter.tsx`} external>Source Code ↗</DocsLink>
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-slider-filter.tsx`} external>Filter Implementation ↗</DocsLink>
 </div>
 
 ```tsx showLineNumbers
@@ -527,25 +375,9 @@ import { DataTableSliderFilter } from "@/components/niko-table/components/data-t
 
 Date filter component for single dates or date ranges.
 
-<div className="mb-4 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-date-filter.tsx`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Source Code ↗
-    </a>
-  </Button>
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-date-filter.tsx`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Filter Implementation ↗
-    </a>
-  </Button>
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-date-filter.tsx`} external>Source Code ↗</DocsLink>
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-date-filter.tsx`} external>Filter Implementation ↗</DocsLink>
 </div>
 
 ```tsx showLineNumbers
@@ -573,25 +405,9 @@ import { DataTableDateFilter } from "@/components/niko-table/components/data-tab
 
 Button to clear all active filters, sorting, and search.
 
-<div className="mb-4 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-clear-filter.tsx`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Source Code ↗
-    </a>
-  </Button>
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-clear-filter.tsx`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Filter Implementation ↗
-    </a>
-  </Button>
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-clear-filter.tsx`} external>Source Code ↗</DocsLink>
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-clear-filter.tsx`} external>Filter Implementation ↗</DocsLink>
 </div>
 
 ```tsx showLineNumbers
@@ -617,25 +433,9 @@ import { DataTableClearFilter } from "@/components/niko-table/components/data-ta
 
 Button to export table data to CSV.
 
-<div className="mb-4 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-export-button.tsx`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Source Code ↗
-    </a>
-  </Button>
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-export-button.tsx`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Filter Implementation ↗
-    </a>
-  </Button>
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-export-button.tsx`} external>Source Code ↗</DocsLink>
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-export-button.tsx`} external>Filter Implementation ↗</DocsLink>
 </div>
 
 ```tsx showLineNumbers
@@ -672,16 +472,8 @@ import { DataTableExportButton } from "@/components/niko-table/components/data-t
 
 Composable column header container. Provides layout for title, actions, and filters within each column header.
 
-<div className="mb-4 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-column-header.tsx`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Source Code ↗
-    </a>
-  </Button>
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-column-header.tsx`} external>Source Code ↗</DocsLink>
 </div>
 
 ```tsx showLineNumbers
@@ -1018,16 +810,8 @@ Standalone date filter popover for column header. Renders as a clickable button 
 
 Sidebar component for displaying additional content (filters, details, etc.) alongside the table.
 
-<div className="mb-4 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-aside.tsx`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Source Code ↗
-    </a>
-  </Button>
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-aside.tsx`} external>Source Code ↗</DocsLink>
 </div>
 
 ```tsx showLineNumbers
@@ -1085,16 +869,8 @@ import {
 
 Shows bulk actions when rows are selected.
 
-<div className="mb-4 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-selection-bar.tsx`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Source Code ↗
-    </a>
-  </Button>
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-selection-bar.tsx`} external>Source Code ↗</DocsLink>
 </div>
 
 ```tsx showLineNumbers
@@ -1122,16 +898,8 @@ import { DataTableSelectionBar } from "@/components/niko-table/components/data-t
 
 Composition components for building custom empty states.
 
-<div className="mb-4 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-empty-state.tsx`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Source Code ↗
-    </a>
-  </Button>
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-empty-state.tsx`} external>Source Code ↗</DocsLink>
 </div>
 
 ```tsx showLineNumbers
@@ -1144,7 +912,6 @@ import {
   DataTableEmptyActions,
 } from "@/components/niko-table/components/data-table-empty-state"
 import { PackageOpen } from "lucide-react"
-import { Button } from "@/components/ui/button"
 
 // Complete empty state composition
 
@@ -1226,22 +993,40 @@ Actions component for empty state (buttons, links, etc.).
 
 ---
 
+### DataTableColumnResize
+
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-column-resize.tsx`} external>Source Code ↗</DocsLink>
+</div>
+
+Opt-in column resizing. Drop `<DataTableColumnResize />` inside `DataTableRoot` to enable drag grips (and keyboard nudge / double-click autosize) on every header that allows resize. Works with both regular and virtualized headers. Opt out per column with `enableResizing: false`. See the [Column Resize Table](/examples/column-resize-table/) example.
+
+```tsx showLineNumbers
+import { DataTableColumnResize } from "@/components/niko-table/components/data-table-column-resize"
+
+<DataTableRoot data={data} columns={columns}>
+  <DataTableColumnResize />
+  <DataTable>
+    <DataTableHeader />
+    <DataTableBody />
+  </DataTable>
+</DataTableRoot>
+```
+
+| Name     | Type | Description                                       |
+| -------- | ---- | ------------------------------------------------- |
+| _(none)_ | —    | No props — presence enables resize for the table. |
+
+---
+
 ### Drag-and-Drop Components
 
 Context-aware DnD wrappers that pair with the core `Table*DndProvider` components in `filters/`. Use these for the recommended composition pattern.
 
 #### DataTableRowDndProvider
 
-<div className="mb-4 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-row-dnd.tsx`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Source Code ↗
-    </a>
-  </Button>
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-row-dnd.tsx`} external>Source Code ↗</DocsLink>
 </div>
 
 Wraps the table with row DnD context. Automatically connects to `DataTableRoot` via `useDataTable`.
@@ -1296,16 +1081,8 @@ Grip icon button for initiating row drags. Uses `useSortable` internally.
 
 #### DataTableColumnDndProvider
 
-<div className="mb-4 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-column-dnd.tsx`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Source Code ↗
-    </a>
-  </Button>
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-column-dnd.tsx`} external>Source Code ↗</DocsLink>
 </div>
 
 Wraps the table with column DnD context (horizontal axis).
@@ -1355,160 +1132,80 @@ Each module is a thin wrapper around the corresponding `filters/table-column-*` 
 
 ### data-table-column-actions
 
-<div className="mb-4 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-column-actions.tsx`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Source Code ↗
-    </a>
-  </Button>
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-column-actions.tsx`} external>Source Code ↗</DocsLink>
 </div>
 
 Renders the trailing dropdown-menu trigger on a column header (the `⋮` button). Composed from the column-sort, column-hide, column-pin, and column-faceted-filter primitives — pulls in only the items relevant to the column's `meta` configuration. Used inside `DataTableColumnHeader`.
 
 ### data-table-column-title
 
-<div className="mb-4 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-column-title.tsx`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Source Code ↗
-    </a>
-  </Button>
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-column-title.tsx`} external>Source Code ↗</DocsLink>
 </div>
 
 Renders the column's title text (resolved from `column.columnDef.meta?.label` or the accessor key via `useDerivedColumnTitle`). Wraps the corresponding `TableColumnTitle` from `filters/`.
 
 ### data-table-column-sort
 
-<div className="mb-4 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-column-sort.tsx`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Source Code ↗
-    </a>
-  </Button>
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-column-sort.tsx`} external>Source Code ↗</DocsLink>
 </div>
 
 Renders the per-column sort menu items (Asc / Desc / Clear) with the variant-aware icons from `SORT_ICONS` / `SORT_LABELS`. Honors `column.getCanSort()` — renders nothing when sorting is disabled. Wraps `TableColumnSort` from `filters/`.
 
 ### data-table-column-hide
 
-<div className="mb-4 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-column-hide.tsx`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Source Code ↗
-    </a>
-  </Button>
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-column-hide.tsx`} external>Source Code ↗</DocsLink>
 </div>
 
 Renders the "Hide column" menu item. Honors `column.getCanHide()`. Wraps `TableColumnHide` from `filters/`.
 
 ### data-table-column-pin
 
-<div className="mb-4 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-column-pin.tsx`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Source Code ↗
-    </a>
-  </Button>
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-column-pin.tsx`} external>Source Code ↗</DocsLink>
 </div>
 
 Renders the "Pin to left" / "Pin to right" / "Unpin" menu items. Honors `column.getCanPin()`. Wraps `TableColumnPin` from `filters/`.
 
 ### data-table-column-filter
 
-<div className="mb-4 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-column-filter.tsx`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Source Code ↗
-    </a>
-  </Button>
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-column-filter.tsx`} external>Source Code ↗</DocsLink>
 </div>
 
 Routes a column to the right per-column filter UI based on `column.columnDef.meta?.variant` (text / number / range / date / select / multiSelect / boolean). Lazy-mounts the variant-specific filter component (`data-table-column-faceted-filter`, `data-table-column-slider-filter-options`, `data-table-column-date-filter-options`) only when the user opens the filter panel.
 
 ### data-table-column-filter-trigger
 
-<div className="mb-4 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-column-filter-trigger.tsx`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Source Code ↗
-    </a>
-  </Button>
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-column-filter-trigger.tsx`} external>Source Code ↗</DocsLink>
 </div>
 
 The `<button>` shown in the column header that opens the per-column filter popover. Switches its label / active state based on whether the column currently has a filter value.
 
 ### data-table-column-faceted-filter
 
-<div className="mb-4 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-column-faceted-filter.tsx`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Source Code ↗
-    </a>
-  </Button>
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-column-faceted-filter.tsx`} external>Source Code ↗</DocsLink>
 </div>
 
 The per-column variant of the faceted multi-select filter (used for `select` / `multiSelect` column variants). Generates options via `useGeneratedOptions` and forwards `dynamicCounts` / `limitToFilteredRows` props through to the option builder. Wraps `TableColumnFacetedFilter` from `filters/`.
 
 ### data-table-column-date-filter-options
 
-<div className="mb-4 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-column-date-filter-options.tsx`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Source Code ↗
-    </a>
-  </Button>
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-column-date-filter-options.tsx`} external>Source Code ↗</DocsLink>
 </div>
 
 The per-column date / date-range filter UI (date picker + operator selector). Backed by `TableColumnDateFilter` from `filters/`. Lazily mounted by `data-table-column-filter` when the column variant is `date` / `dateRange`.
 
 ### data-table-column-slider-filter-options
 
-<div className="mb-4 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-column-slider-filter-options.tsx`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Source Code ↗
-    </a>
-  </Button>
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-column-slider-filter-options.tsx`} external>Source Code ↗</DocsLink>
 </div>
 
 The per-column numeric range slider UI. Resolves `min` / `max` from the column's faceted min/max values when not explicitly set. Backed by `TableColumnSliderFilter` from `filters/`. Lazily mounted by `data-table-column-filter` when the column variant is `range`.

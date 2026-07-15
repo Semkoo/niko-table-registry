@@ -1,0 +1,113 @@
+---
+title: Validation
+description: Per-field and cross-field validation — Zod or any resolve. Errors inline on the cell.
+---
+
+import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
+import CollapsiblePreview from "@/components/markdown/collapsible-preview.astro"
+import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
+
+The grid is validation-agnostic. Your `resolve` returns `status` + optional `error`. Invalid cells show a tooltip — no summary block.
+
+<CodePreview demo="niko-table/grid-validation" />
+
+<CollapsiblePreview>
+  <CodePreview demo="niko-table/grid-validation-state" />
+</CollapsiblePreview>
+
+## Installation
+
+<CliCommandCode action="run" command="shadcn@latest add @niko-table/data-table-grid" />
+
+```bash
+npm install zod
+```
+
+## CellState
+
+```tsx
+interface CellState<T> {
+  raw: string
+  value: T | null
+  status: "valid" | "invalid" | "empty"
+  error?: string // tooltip when invalid
+}
+```
+
+Use `"empty"` for untouched required fields so they stay neutral until save.
+
+## Per-field (Zod)
+
+```tsx showLineNumbers
+const FIELD_SCHEMAS: Record<string, z.ZodType<string>> = {
+  date: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Use the format YYYY-MM-DD")
+    .refine(isRealDate, "That date doesn't exist on the calendar"),
+  start: z
+    .string()
+    .regex(/^([01]\d|2[0-3]):[0-5]\d$/, "Use 24-hour time, e.g. 09:30"),
+}
+
+function resolveCell(columnId: string, raw: string): CellState<string> {
+  const trimmed = raw.trim()
+  if (trimmed === "") {
+    return {
+      raw,
+      value: null,
+      status: REQUIRED.has(columnId) ? "empty" : "valid",
+    }
+  }
+  const schema = FIELD_SCHEMAS[columnId]
+  if (!schema) return { raw, value: trimmed, status: "valid" }
+  const result = schema.safeParse(trimmed)
+  return result.success
+    ? { raw, value: result.data, status: "valid" }
+    : {
+        raw,
+        value: null,
+        status: "invalid",
+        error: result.error.issues[0]?.message ?? "Invalid value",
+      }
+}
+```
+
+Reuse the same `resolve` for cells and clipboard.
+
+## Cross-field
+
+`resolve` sees one cell. Re-settle after commits with `updateRows(..., { history: false })` so undo stays clean. Return the **same row ref** when nothing changes — the engine treats that as a no-op and will not loop.
+
+```tsx showLineNumbers
+React.useEffect(() => {
+  if (!grid.lastCommit) return
+  grid.updateRows(
+    (rows) =>
+      rows.map((row) => {
+        const end = row.end
+        if (typeof end !== "object" || end == null) return row
+        const base = resolveCell("end", end.raw)
+        const crossErr = endAfterStart(row)
+          ? null
+          : "End must be after the start time"
+        const next =
+          crossErr && base.status !== "invalid"
+            ? { ...base, status: "invalid" as const, error: crossErr }
+            : base
+        if (next.status === end.status && next.error === end.error) return row
+        return { ...row, end: next }
+      }),
+    { history: false },
+  )
+}, [grid.lastCommit, grid])
+```
+
+## Required fields
+
+Asterisk in the header; keep blanks `"empty"` until save. Enforce at the save boundary.
+
+## Next
+
+- [Cell Types](/examples/cell-types-grid/)
+- [Persistence](/examples/persistence-grid/)
+- [API Reference](/data-grid/api/)

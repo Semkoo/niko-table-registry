@@ -7,9 +7,10 @@ import {
   DataTableHeader,
   DataTableEmptyBody,
 } from "@/components/niko-table/core/data-table-structure"
-import { DataTableDndBody } from "@/components/niko-table/core/data-table-dnd-structure"
+import { DataTableDndBody } from "@/components/niko-table/core/data-table-row-dnd-structure"
 import { DataTableColumnHeader } from "@/components/niko-table/components/data-table-column-header"
 import { DataTableColumnTitle } from "@/components/niko-table/components/data-table-column-title"
+import { DataTableColumnResize } from "@/components/niko-table/components/data-table-column-resize"
 import {
   DataTableEmptyIcon,
   DataTableEmptyMessage,
@@ -135,6 +136,7 @@ export default function RowDndStateExample() {
         cell: ({ row }) => <DataTableRowDragHandle rowId={row.id} />,
         enableSorting: false,
         enableHiding: false,
+        enableResizing: false,
       },
       {
         id: "order",
@@ -149,6 +151,7 @@ export default function RowDndStateExample() {
         ),
         enableSorting: false,
         enableHiding: false,
+        enableResizing: false,
       },
       {
         accessorKey: "id",
@@ -168,6 +171,7 @@ export default function RowDndStateExample() {
           </DataTableColumnHeader>
         ),
         meta: { label: "Title" },
+        size: 240,
       },
       {
         accessorKey: "status",
@@ -208,6 +212,7 @@ export default function RowDndStateExample() {
   return (
     <div className="w-full space-y-4">
       <DataTableRoot data={data} columns={columns} getRowId={row => row.id}>
+        <DataTableColumnResize />
         <DataTableRowDndProvider data={data} onReorder={setData}>
           <DataTable>
             <DataTableHeader />

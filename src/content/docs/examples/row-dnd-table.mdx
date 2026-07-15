@@ -7,7 +7,7 @@ import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
 import CollapsiblePreview from "@/components/markdown/collapsible-preview.astro"
 import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
 
-Reorder rows via drag-and-drop using `DataTableRowDndProvider` and a dedicated drag-handle column. **Important constraint**: do not combine row DnD with sorting or filtering — the user's manual order will fight whatever the table is computing, so disable those add-ons on a DnD table.
+Reorder rows via drag-and-drop using `DataTableRowDndProvider` and a dedicated drag-handle column. **Important constraint**: do not combine row DnD with sorting or filtering — the user's manual order will fight whatever the table is computing, so disable those add-ons on a DnD table. Column resize is fine — drop in `<DataTableColumnResize />` (same as other tables); keep `enableResizing: false` on the drag-handle / `#` columns.
 
 ## Overview
 
@@ -19,7 +19,7 @@ Reorder rows via drag-and-drop using `DataTableRowDndProvider` and a dedicated d
 
 ## Virtualized Row DnD
 
-For large datasets, use `DataTableVirtualizedDndBody` which combines row virtualization with drag-and-drop. Only visible rows are rendered in the DOM for optimal performance.
+For large datasets, use `DataTableVirtualizedFlexHeader` + `DataTableVirtualizedDndBody` which combine row virtualization with drag-and-drop. Only visible rows are rendered in the DOM for optimal performance. The same `<DataTableColumnResize />` marker works here — grips appear on the flex header.
 
 <CodePreview demo="niko-table/virtualized-row-dnd" />
 
@@ -31,7 +31,7 @@ Row DnD lets users reorder table rows by dragging. Built with `@dnd-kit` and com
 
 Install the DataTable core and row DnD add-on:
 
-<CliCommandCode action="run" command="shadcn@latest add @niko-table/data-table @niko-table/data-table-row-dnd" />
+<CliCommandCode action="run" command="shadcn@latest add @niko-table/data-table @niko-table/data-table-row-dnd @niko-table/data-table-column-resize @niko-table/data-table-virtualized @niko-table/data-table-virtualized-row-dnd" />
 
 > First time using `@niko-table`? See the [Installation Guide](/getting-started/installation#configure-the-niko-table-registry) to set up the registry.
 
@@ -59,6 +59,8 @@ Three components work together:
 3. **`DataTableRowDragHandle`** — A grip icon button for dragging
 
 ```tsx showLineNumbers title="row-dnd.tsx"
+import { DataTableDndBody } from "@/components/niko-table/core/data-table-row-dnd-structure"
+
 const [data, setData] = React.useState(initialData)
 
 const columns: DataTableColumnDef<Task>[] = [
@@ -69,12 +71,14 @@ const columns: DataTableColumnDef<Task>[] = [
     cell: ({ row }) => <DataTableRowDragHandle rowId={row.id} />,
     enableSorting: false,
     enableHiding: false,
+    enableResizing: false,
   },
   // ... other columns
 ]
 
 return (
   <DataTableRoot data={data} columns={columns} getRowId={(row) => row.id}>
+    <DataTableColumnResize />
     <DataTableRowDndProvider data={data} onReorder={setData}>
       <DataTable>
         <DataTableHeader />
@@ -111,6 +115,8 @@ The drag handle is a dedicated column with `DataTableRowDragHandle`:
 Track the data order externally:
 
 ```tsx showLineNumbers title="row-dnd-state.tsx"
+import { DataTableDndBody } from "@/components/niko-table/core/data-table-row-dnd-structure"
+
 const [data, setData] = React.useState(initialData)
 
 // Reset to original order
@@ -118,6 +124,7 @@ const resetData = () => setData(initialData)
 
 return (
   <DataTableRoot data={data} columns={columns} getRowId={(row) => row.id}>
+    <DataTableColumnResize />
     <DataTableRowDndProvider data={data} onReorder={setData}>
       <DataTable>
         <DataTableHeader />

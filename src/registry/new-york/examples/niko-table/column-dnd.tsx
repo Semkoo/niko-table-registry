@@ -7,8 +7,9 @@ import { DataTableEmptyBody } from "@/components/niko-table/core/data-table-stru
 import {
   DataTableDndHeader,
   DataTableDndColumnBody,
-} from "@/components/niko-table/core/data-table-dnd-structure"
+} from "@/components/niko-table/core/data-table-column-dnd-structure"
 import { DataTableColumnDndProvider } from "@/components/niko-table/components/data-table-column-dnd"
+import { DataTableColumnResize } from "@/components/niko-table/components/data-table-column-resize"
 import {
   DataTableEmptyIcon,
   DataTableEmptyMessage,
@@ -174,6 +175,7 @@ export default function ColumnDndExample() {
       state={{ columnOrder }}
       onColumnOrderChange={setColumnOrder}
     >
+      <DataTableColumnResize />
       <DataTableColumnDndProvider
         columnOrder={columnOrder}
         onColumnOrderChange={setColumnOrder}

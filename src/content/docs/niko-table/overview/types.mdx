@@ -3,21 +3,13 @@ title: TypeScript Types
 description: TypeScript type definitions and interfaces for the data table.
 ---
 
-import { Button } from "@/components/ui/button"
 import { GITHUB_REPO_URL } from "@/data/env"
+import DocsLink from "@/components/markdown/docs-link.astro"
 
 The `types/` directory contains all TypeScript type definitions and interfaces used throughout the data table components.
 
-<div className="mb-4 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/types/index.ts`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Source Code ↗
-    </a>
-  </Button>
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/types/index.ts`} external>Source Code ↗</DocsLink>
 </div>
 
 ## Core Types

@@ -60,22 +60,25 @@ Per-column controls embedded in the column header dropdown.
 | `data-table-column-sort`           | Header sort option with asc/desc/clear.          |
 | `data-table-column-hide`           | Header option to hide/show the column.           |
 | `data-table-column-pin`            | Header option to pin column left/right.          |
+| `data-table-column-resize`         | Column resize handle + double-click to auto-fit. |
 | `data-table-column-faceted-filter` | Header faceted filter with multi-select options. |
 | `data-table-column-slider-filter`  | Header slider filter for numeric range.          |
 | `data-table-column-date-filter`    | Header date filter with calendar picker.         |
 
-<CliCommandCode action="run" command="shadcn@latest add @niko-table/data-table-column-sort @niko-table/data-table-column-hide @niko-table/data-table-column-pin" />
+<CliCommandCode action="run" command="shadcn@latest add @niko-table/data-table-column-sort @niko-table/data-table-column-hide @niko-table/data-table-column-pin @niko-table/data-table-column-resize" />
 
 ## Drag and Drop
 
 Row and column reordering. Pulls in `@dnd-kit/*`.
 
-| Name                    | What it does                                                                                       |
-| ----------------------- | -------------------------------------------------------------------------------------------------- |
-| `data-table-row-dnd`    | Row drag-and-drop. Includes provider, draggable row, drag handle, DnD-aware body.                  |
-| `data-table-column-dnd` | Column drag-and-drop. Includes provider, draggable header, drag-along cell, DnD-aware header/body. |
+| Name                                | What it does                                                                                       |
+| ----------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `data-table-row-dnd`                | Row drag-and-drop (provider, drag handle, `DataTableDndBody`). Does not ship column DnD.           |
+| `data-table-column-dnd`             | Column drag-and-drop (provider, header, `DataTableDndColumnBody`). Does not ship row DnD.          |
+| `data-table-virtualized-row-dnd`    | Virtualized row DnD body. Depends on `data-table-virtualized` + `data-table-row-dnd`.              |
+| `data-table-virtualized-column-dnd` | Virtualized column DnD header/body. Depends on `data-table-virtualized` + `data-table-column-dnd`. |
 
-<CliCommandCode action="run" command="shadcn@latest add @niko-table/data-table-row-dnd @niko-table/data-table-column-dnd" />
+<CliCommandCode action="run" command="shadcn@latest add @niko-table/data-table-row-dnd @niko-table/data-table-column-dnd @niko-table/data-table-virtualized-row-dnd @niko-table/data-table-virtualized-column-dnd" />
 
 > Row DnD should not be combined with sorting or filtering — data order conflicts. Column DnD is safe to combine with any feature.
 
@@ -91,6 +94,17 @@ Surrounding UI that pairs with the table.
 
 <CliCommandCode action="run" command="shadcn@latest add @niko-table/data-table-export-button @niko-table/data-table-aside @niko-table/data-table-selection-bar" />
 
+## Data Grid
+
+Editable spreadsheet layer on top of the virtualized table. See the [Data Grid docs](/data-grid/introduction/).
+
+| Name                      | What it does                                                                                        |
+| ------------------------- | --------------------------------------------------------------------------------------------------- |
+| `data-table-grid`         | Data Grid core: keyboard nav, clipboard, fill, typed cells. Pulls virtualization + column resize.   |
+| `data-table-grid-changes` | Optional change-set tracking (`useGridChanges`) for create / update / delete persistence workflows. |
+
+<CliCommandCode action="run" command="shadcn@latest add @niko-table/data-table-grid" />
+
 ## Picking a starting point
 
 Not sure where to start? Find the example that looks closest to what you're building and copy its install line:
@@ -101,7 +115,10 @@ Not sure where to start? Find the example that looks closest to what you're buil
 - [Virtualization Table](/examples/virtualization-table/) — 10k+ rows
 - [Column DnD Table](/examples/column-dnd-table/) — column reorder + DnD view menu
 - [Row DnD Table](/examples/row-dnd-table/) — row reorder
+- [Data Grid](/data-grid/introduction/) — editable spreadsheet
 - [Tree Table](/examples/tree-table/) — expandable rows
 - [Inline Edit Table](/examples/inline-edit-table/) — `getRowMemoKey` pattern
 
 Each example page lists exactly the registry items it uses.
+
+To install **every** item in one command, see [Install Everything](/getting-started/installation/#install-everything). The CLI does not support `@niko-table/**`.

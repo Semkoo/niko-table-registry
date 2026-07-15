@@ -1,0 +1,81 @@
+---
+title: Persistence
+description: Turn grid edits into create / update / delete change-sets with useGridChanges.
+---
+
+import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
+import CollapsiblePreview from "@/components/markdown/collapsible-preview.astro"
+import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
+
+The engine is uncontrolled. Opt into `useGridChanges` to watch edits and get a precise CRUD delta — plain React, separate install.
+
+<CodePreview demo="niko-table/grid-save" />
+
+<CollapsiblePreview>
+  <CodePreview demo="niko-table/grid-save-state" />
+</CollapsiblePreview>
+
+## Installation
+
+<CliCommandCode action="run" command="shadcn@latest add @niko-table/data-table-grid @niko-table/data-table-grid-changes" />
+
+Pass the **same** `initialRows` you seeded the grid with. Those ids are "existing"; everything else is a create. For a blank import, pass `[]`.
+
+## Usage
+
+```tsx showLineNumbers
+const grid = useDataGrid<Row>({ columnIds, createEmptyRow, initialRows })
+const changes = useGridChanges(grid, { initialRows })
+
+changes.isDirty
+changes.getChangeSet() // { created, updated, deleted }
+changes.reconcile(result)
+```
+
+| Member                                   | Purpose                         |
+| ---------------------------------------- | ------------------------------- |
+| `dirtyRowIds` / `isDirty`                | Reactive dirty set              |
+| `getChangeSet()`                         | Precise delta for save          |
+| `reconcile({ succeededIds, failedIds })` | Settle after save               |
+| `failedRowIds`                           | Rows that failed last reconcile |
+| `reset(rows?)`                           | Re-baseline                     |
+
+Dirtiness is O(1) per keystroke. `getChangeSet()` is the precise pass (optionally via `isEqual` so revert-to-original drops from `updated`).
+
+## Staging save
+
+```tsx showLineNumbers
+async function onSave() {
+  const { created, updated, deleted } = changes.getChangeSet()
+  const result = await api.bulkSave({ created, updated, deleted })
+  changes.reconcile({
+    succeededIds: result.succeededIds,
+    failedIds: result.failedIds,
+  })
+}
+```
+
+## Autosave
+
+Debounce the network off `dirtyRowIds` (identity changes only when dirtiness changes):
+
+```tsx showLineNumbers
+React.useEffect(() => {
+  if (!changes.isDirty) return
+  const t = setTimeout(async () => {
+    const delta = changes.getChangeSet()
+    const result = await api.bulkSave(delta)
+    changes.reconcile(result)
+  }, 800)
+  return () => clearTimeout(t)
+}, [changes.dirtyRowIds])
+```
+
+## Signal
+
+Driven by `grid.lastCommit` — `{ kind, ids?, seq }`. `seq` advances only on real commits. You can observe it directly for badges or analytics.
+
+## Next
+
+- [Validation](/examples/validation-grid/)
+- [API Reference](/data-grid/api/)

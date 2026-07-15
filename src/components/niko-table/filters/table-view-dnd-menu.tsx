@@ -181,6 +181,9 @@ export function TableViewDndMenu<TData>({
   onReset,
   resetLabel,
 }: TableViewDndMenuProps<TData>) {
+  // Stable across SSR + hydration — see TableColumnDndProvider.
+  const dndContextId = React.useId()
+
   // Controlled search. cmdk's built-in filter only hides the inner
   // CommandItem, which would leave SortableMenuRow's grip handle visible
   // as an orphan. Filtering at this layer means non-matching rows don't
@@ -309,6 +312,7 @@ export function TableViewDndMenu<TData>({
             ) : (
               <CommandGroup>
                 <DndContext
+                  id={dndContextId}
                   collisionDetection={closestCenter}
                   modifiers={[restrictToVerticalAxis]}
                   sensors={sensors}

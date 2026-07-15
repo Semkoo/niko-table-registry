@@ -1,0 +1,28 @@
+---
+/**
+ * Outline link styled like shadcn Button size="sm".
+ * Use in MDX instead of React `<Button asChild>` — Starlight MDX strips
+ * that component and multiline `<a>` text becomes a `<p>`, which breaks
+ * alignment.
+ */
+interface Props {
+  href: string
+  /** Opens in a new tab with rel="noopener noreferrer". */
+  external?: boolean
+}
+
+const { href, external = false } = Astro.props
+---
+
+<a
+  href={href}
+  class:list={[
+    "inline-flex h-8 items-center justify-center gap-1.5 rounded-md border bg-background px-3 text-sm font-medium whitespace-nowrap shadow-xs transition-colors",
+    "hover:bg-accent hover:text-accent-foreground",
+    "dark:border-input dark:bg-input/30 dark:hover:bg-input/50",
+    "no-underline!",
+  ]}
+  {...external ? { target: "_blank", rel: "noopener noreferrer" } : {}}
+>
+  <slot />
+</a>

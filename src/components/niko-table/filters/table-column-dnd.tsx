@@ -56,6 +56,11 @@ export function TableColumnDndProvider({
   onColumnOrderChange,
   modifiers = [restrictToHorizontalAxis],
 }: TableColumnDndProviderProps) {
+  // Stable across SSR + hydration. Without this, @dnd-kit's module-level
+  // `DndDescribedBy-N` counter can diverge (server N=73, client N=1) and
+  // React warns on `aria-describedby` mismatches.
+  const dndContextId = React.useId()
+
   // 8px drag threshold so a click on inline header chrome (sort menu,
   // help tooltip trigger) lands as a click, not as a drag start. dnd-kit
   // suppresses the click only after the pointer moves past the threshold.
@@ -79,6 +84,7 @@ export function TableColumnDndProvider({
 
   return (
     <DndContext
+      id={dndContextId}
       collisionDetection={closestCenter}
       modifiers={modifiers}
       onDragEnd={handleDragEnd}

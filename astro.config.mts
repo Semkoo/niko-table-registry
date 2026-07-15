@@ -21,7 +21,9 @@ if (SERVER_URL === undefined) throw new Error("SERVER_URL is not set.")
 // https://astro.build/config
 export default defineConfig({
   site: SERVER_URL,
-  trailingSlash: "always",
+  // Match `/path` and `/path/` (LinkCards / pasted URLs often omit the slash).
+  // `"always"` 404s bare paths in `astro dev` instead of redirecting.
+  trailingSlash: "ignore",
   env: {
     schema: {
       GITHUB_REPO_URL: envField.string({
@@ -193,6 +195,10 @@ export default defineConfig({
               slug: "examples/column-pinning-table",
             },
             {
+              label: "Column Resize Table",
+              slug: "examples/column-resize-table",
+            },
+            {
               label: "Tree Table",
               slug: "examples/tree-table",
             },
@@ -252,6 +258,40 @@ export default defineConfig({
           ],
         },
         {
+          label: "Data Grid",
+          items: [
+            { label: "Introduction", slug: "data-grid/introduction" },
+            {
+              label: "Components",
+              slug: "data-grid/overview/components",
+            },
+            { label: "Core", slug: "data-grid/overview/core" },
+            {
+              label: "Filters",
+              slug: "data-grid/overview/filters",
+            },
+            { label: "Hooks", slug: "data-grid/overview/hooks" },
+            { label: "Library", slug: "data-grid/overview/lib" },
+            { label: "Types", slug: "data-grid/overview/types" },
+            { label: "Config", slug: "data-grid/overview/config" },
+            { label: "API Reference", slug: "data-grid/api" },
+          ],
+        },
+        {
+          label: "Data Grid Examples",
+          items: [
+            { label: "Basic Grid", slug: "examples/basic-grid" },
+            { label: "All Features Grid", slug: "examples/all-features-grid" },
+            { label: "Cell Types", slug: "examples/cell-types-grid" },
+            { label: "Validation", slug: "examples/validation-grid" },
+            {
+              label: "Dynamic Columns",
+              slug: "examples/dynamic-columns-grid",
+            },
+            { label: "Persistence", slug: "examples/persistence-grid" },
+          ],
+        },
+        {
           label: "Changelog",
           slug: "changelog",
         },
@@ -271,6 +311,10 @@ export default defineConfig({
               label: "Contributing Code",
               slug: "contributing/contributing-code",
             },
+            {
+              label: "Documentation Guidelines",
+              slug: "contributing/documentation-guidelines",
+            },
           ],
         },
       ],
@@ -284,6 +328,10 @@ export default defineConfig({
             {
               label: "Table Examples",
               link: "/examples/simple-table/",
+            },
+            {
+              label: "Grid Examples",
+              link: "/examples/all-features-grid/",
             },
             {
               label: "Contributing",
