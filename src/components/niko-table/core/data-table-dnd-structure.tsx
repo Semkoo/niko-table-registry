@@ -275,7 +275,7 @@ export function DataTableDndBody<TData>({
         })
         .join(","),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [table, columnVisibility, columnOrder, columnPinning],
+    [table, columns, columnVisibility, columnOrder, columnPinning],
   )
 
   const isClickable = !!onRowClick
@@ -470,7 +470,7 @@ export function DataTableDndColumnBody<TData>({
         })
         .join(","),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [table, columnVisibility, columnOrder, columnPinning],
+    [table, columns, columnVisibility, columnOrder, columnPinning],
   )
 
   const isClickable = !!onRowClick

@@ -21,7 +21,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Data Grid docs rewritten — shorter, shadcn-style install → anatomy → usage
-- Intro demo includes search / faceted / advanced filters beside the grid
+- Intro demo includes search / faceted / advanced filters + **Current Table State** panel
+- Docs Source/API links use Astro `DocsLink`; install yarn tab is `yarn dlx`
+- Install Everything / Components catalog cover all 27 registry items (incl. resize + Data Grid)
 - Filter variants: `dateRange` / `multiSelect` (camelCase)
 - Options with `count: 0` hidden in filter UIs
 - `autoResetPageIndex` defaults to `false`
@@ -29,9 +31,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Core** — memoized body `columnLayoutSignature` includes `columns` so dynamic add/remove refreshes body cells (borders / row rules)
 - **Core** — `data-row-index` uses display order (fixes `flashRows` / `scrollRowIntoView` after sort/filter)
 - **Core** — empty/loading `colSpan` follows visible columns
-- **Core** — resize width styles cleaned up when resizing turns off
+- **Core** — resize width styles restored from snapshot when resizing turns off
 - **Core** — row-context-menu slot discovery by `displayName` (HMR / re-export safe)
 - **Core** — `daysAgo()` uses a fixed epoch (deterministic mock dates)
 - **Grid** — validation settle no-op on same row refs (no infinite loop)
@@ -44,6 +47,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Grid** — pinned + resize: table width = sum of `getSize()` (no pin overlay on first column)
 - **Grid** — portaled editors: `[data-grid-cell-editor]` mousedown guard
 - **Grid** — `updateRows(..., { history: false })` for non-undoable settle
+- **Grid** — persistence demo rejects incomplete creates (Name + Email) via `failedRowIds`
 - View menu / DnD / sort / filter / virtualization polish (see prior notes in git history)
 
 ### Performance

@@ -101,11 +101,23 @@ type SaveState =
   | { phase: "saving" }
   | {
       phase: "saved"
-      created: number
+      createdOk: number
       updated: number
       deleted: number
       failed: number
+      failReason?: string
     }
+
+/** Demo server rule: a create needs Name + Email. */
+function isCompleteCreate(row: GridRow): boolean {
+  const name = row.name
+  const email = row.email
+  const nameRaw =
+    typeof name === "object" && name != null ? name.raw.trim() : ""
+  const emailRaw =
+    typeof email === "object" && email != null ? email.raw.trim() : ""
+  return nameRaw.length > 0 && emailRaw.length > 0
+}
 
 export function GridSaveState() {
   const [resetKey, setResetKey] = React.useState(0)
@@ -135,21 +147,26 @@ function GridSaveStateInner({ onReset }: { onReset: () => void }) {
     setSave({ phase: "saving" })
 
     await new Promise(r => setTimeout(r, 700))
-    const rejected = created[0]
+    const rejected = created.filter(r => !isCompleteCreate(r))
+    const failedIds = rejected.map(r => r.id)
     const succeededIds = [
-      ...created.filter(r => r.id !== rejected?.id).map(r => r.id),
+      ...created.filter(r => !failedIds.includes(r.id)).map(r => r.id),
       ...updated.map(r => r.id),
       ...deleted,
     ]
-    const failedIds = rejected ? [rejected.id] : []
 
     changes.reconcile({ succeededIds, failedIds })
     setSave({
       phase: "saved",
-      created: created.length,
+      createdOk: succeededIds.filter(id => created.some(r => r.id === id))
+        .length,
       updated: updated.length,
       deleted: deleted.length,
       failed: failedIds.length,
+      failReason:
+        failedIds.length > 0
+          ? "New rows need a Name and Email before they can be saved."
+          : undefined,
     })
   }, [changes])
 
@@ -216,15 +233,21 @@ function GridSaveStateInner({ onReset }: { onReset: () => void }) {
           {save.phase === "saved" ? (
             <p
               role="status"
-              className="flex items-center gap-1.5 px-1 text-sm text-muted-foreground"
+              className={
+                save.failed > 0
+                  ? "flex items-start gap-1.5 px-1 text-sm text-destructive"
+                  : "flex items-center gap-1.5 px-1 text-sm text-muted-foreground"
+              }
             >
               {save.failed > 0 && (
-                <CircleAlert className="size-4 text-destructive" />
+                <CircleAlert className="mt-0.5 size-4 shrink-0" />
               )}
-              Saved {save.created - save.failed} new, {save.updated} updated,{" "}
-              {save.deleted} removed.
-              {save.failed > 0 &&
-                ` ${save.failed} row still needs attention. It stayed unsaved.`}
+              <span>
+                Saved {save.createdOk} new, {save.updated} updated,{" "}
+                {save.deleted} removed.
+                {save.failed > 0 &&
+                  ` ${save.failed} row${save.failed === 1 ? "" : "s"} stayed unsaved. ${save.failReason}`}
+              </span>
             </p>
           ) : null}
 
@@ -234,6 +257,11 @@ function GridSaveStateInner({ onReset }: { onReset: () => void }) {
               estimateSize={37}
               fixedRowHeight
               getCellClassName={gridCellClassName}
+              getRowClassName={row =>
+                changes.failedRowIds.has(row.id)
+                  ? "bg-destructive/10"
+                  : undefined
+              }
             >
               <DataTableRowContextMenuSlot>
                 <GridRowMenu />

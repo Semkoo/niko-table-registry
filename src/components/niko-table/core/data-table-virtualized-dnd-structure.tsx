@@ -499,7 +499,7 @@ export function DataTableVirtualizedDndBody<TData>({
         })
         .join(","),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [table, columnVisibility, columnOrder, columnPinning],
+    [table, columns, columnVisibility, columnOrder, columnPinning],
   )
 
   const [scrollElement, setScrollElement] =
@@ -844,7 +844,7 @@ export function DataTableVirtualizedDndColumnBody<TData>({
         })
         .join(","),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [table, columnVisibility, columnOrder, columnPinning],
+    [table, columns, columnVisibility, columnOrder, columnPinning],
   )
 
   const [scrollElement, setScrollElement] =

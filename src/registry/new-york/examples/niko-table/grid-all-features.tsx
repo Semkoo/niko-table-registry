@@ -10,7 +10,20 @@
  * any child and the grid drops that capability — and its listeners — entirely.
  */
 import { Button } from "@/components/ui/button"
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible"
 import { DataTableClearFilter } from "@/components/niko-table/components/data-table-clear-filter"
 import { DataTableColumnActions } from "@/components/niko-table/components/data-table-column-actions"
 import { DataTableColumnHeader } from "@/components/niko-table/components/data-table-column-header"
@@ -86,8 +99,31 @@ import {
 } from "@/components/niko-table/lib/constants"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 import { cn } from "@/lib/utils"
-import { GripVertical, Plus, Trash2 } from "lucide-react"
+import { ChevronRight, GripVertical, Plus, Trash2 } from "lucide-react"
 import * as React from "react"
+
+function formatPos(
+  pos: { rowId: string; columnId: string } | null | undefined,
+): string {
+  if (!pos) return "None"
+  return `${pos.rowId} / ${pos.columnId}`
+}
+
+function formatSearch(globalFilter: unknown): string {
+  if (typeof globalFilter === "string") return globalFilter || "None"
+  if (
+    typeof globalFilter === "object" &&
+    globalFilter &&
+    "filters" in globalFilter
+  ) {
+    const filterObj = globalFilter as {
+      filters: unknown[]
+      joinOperator: string
+    }
+    return `OR Filter (${filterObj.filters?.length || 0} conditions)`
+  }
+  return "None"
+}
 
 // ---------------------------------------------------------------------------
 // Deterministic sample data (no Math.random → no hydration mismatch).
@@ -180,9 +216,33 @@ const MAX_ROWS = 500_000
 const ROW_COUNT_OPTIONS = [500, 10_000, 100_000, 500_000] as const
 const ROW_HEIGHT = 37
 
-/** Zero the cell padding + draw borders so cells read as a tight matrix. */
-const gridCellClassName = () =>
-  "border-border border-r p-0 align-middle last:border-r-0"
+/**
+ * Tight cell matrix. Skip `border-r` on the pinned select gutter — the pin
+ * separator already draws the edge; a second rule misaligns vs the header.
+ */
+const gridCellClassName = (_row: GridRow, columnId: string) =>
+  cn(
+    "p-0 align-middle",
+    columnId !== SYSTEM_COLUMN_IDS.SELECT &&
+      "border-border border-r last:border-r-0",
+  )
+
+/** Gutter width — grip (14) + checkbox (16) + padding (8) + breathing room. */
+const GUTTER_SIZE = 52
+
+/**
+ * Exact same chrome for header + body: fill the sticky cell (ignores TableHead
+ * `px-2`), reserved grip column, then a fixed-size checkbox slot so select-all
+ * and per-row checkboxes share one x-coordinate. Pin separator alone draws the
+ * right edge (no `border-r` on this column).
+ */
+function GutterFrame({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="absolute inset-0 flex items-center gap-0.5 px-1">
+      {children}
+    </div>
+  )
+}
 
 const TRUTHY = ["true", "1", "yes"]
 
@@ -252,8 +312,7 @@ function makeRows(count: number): GridRow[] {
 
 const INITIAL_ROWS = makeRows(DEFAULT_ROW_COUNT)
 
-/** Gutter cell: click the row number to select the whole row; hover for the
- *  select checkbox and (when row-reorder is mounted) a drag grip. */
+/** Gutter cell: click row number to select; hover shows checkbox; grip for reorder. */
 function GutterCell({
   rowId,
   isSelected,
@@ -281,42 +340,50 @@ function GutterCell({
       role="button"
       tabIndex={0}
       aria-label={`Select row ${displayIndex + 1}`}
+      // No positioned wrapper — GutterFrame anchors to the sticky td padding
+      // box so header + body share the same 52px coordinate space.
       className={cn(
-        "flex h-9 cursor-pointer items-center justify-start gap-0.5 pl-1 group-data-[active-row=true]:bg-primary/15",
+        "block h-9 w-full cursor-pointer group-data-[active-row=true]:bg-primary/15",
         isDragging && "opacity-50",
       )}
     >
-      {rowReorder && (
-        <button
-          type="button"
-          title="Drag to reorder"
-          aria-label={`Drag to reorder row ${displayIndex + 1}`}
-          onClick={e => e.stopPropagation()}
-          onMouseDown={e => rowReorder.onRowReorderMouseDown(e, rowId)}
-          className="flex w-0 cursor-grab overflow-hidden text-muted-foreground opacity-0 group-hover:w-auto group-hover:opacity-100 hover:text-foreground focus-visible:w-auto focus-visible:opacity-100 active:cursor-grabbing"
-        >
-          <GripVertical className="size-3.5" />
-        </button>
-      )}
-      <span className="text-xs text-muted-foreground tabular-nums group-hover:hidden group-data-[active-row=true]:font-semibold group-data-[active-row=true]:text-foreground group-data-[state=selected]:hidden">
-        {displayIndex + 1}
-      </span>
-      <span
-        // Capture the modifier on pointerdown — BEFORE the checkbox's click
-        // fires onCheckedChange (which reads shiftRef). onClick bubbles up from
-        // the checkbox AFTER its own click, so it would set shiftRef too late.
-        onPointerDown={e => {
-          shiftRef.current = e.shiftKey
-        }}
-        onClick={e => e.stopPropagation()}
-        className="hidden group-hover:block group-data-[state=selected]:block"
-      >
-        <Checkbox
-          checked={isSelected}
-          onCheckedChange={() => toggleRowSelection(rowId, shiftRef.current)}
-          aria-label={`Toggle row ${displayIndex + 1}`}
-        />
-      </span>
+      <GutterFrame>
+        <div className="flex size-3.5 shrink-0 items-center justify-center">
+          {rowReorder ? (
+            <button
+              type="button"
+              title="Drag to reorder"
+              aria-label={`Drag to reorder row ${displayIndex + 1}`}
+              onClick={e => e.stopPropagation()}
+              onMouseDown={e => rowReorder.onRowReorderMouseDown(e, rowId)}
+              className="flex size-3.5 cursor-grab items-center justify-center text-muted-foreground opacity-0 group-hover:opacity-100 hover:text-foreground focus-visible:opacity-100 active:cursor-grabbing"
+            >
+              <GripVertical className="size-3.5" />
+            </button>
+          ) : null}
+        </div>
+        {/* Fixed w-4 — same slot as header select-all checkbox. */}
+        <div className="relative flex size-4 shrink-0 items-center justify-center">
+          <span className="text-xs text-muted-foreground tabular-nums group-hover:invisible group-data-[active-row=true]:font-semibold group-data-[active-row=true]:text-foreground group-data-[state=selected]:invisible">
+            {displayIndex + 1}
+          </span>
+          <span
+            onPointerDown={e => {
+              shiftRef.current = e.shiftKey
+            }}
+            onClick={e => e.stopPropagation()}
+            className="absolute inset-0 hidden items-center justify-center group-hover:flex group-data-[state=selected]:flex"
+          >
+            <Checkbox
+              checked={isSelected}
+              onCheckedChange={() =>
+                toggleRowSelection(rowId, shiftRef.current)
+              }
+              aria-label={`Toggle row ${displayIndex + 1}`}
+            />
+          </span>
+        </div>
+      </GutterFrame>
     </div>
   )
 }
@@ -435,6 +502,166 @@ function GridCellByType({
 }
 
 export function GridAllFeatures() {
+  const [resetKey, setResetKey] = React.useState(0)
+  return (
+    <GridAllFeaturesInner
+      key={resetKey}
+      onReset={() => setResetKey(k => k + 1)}
+    />
+  )
+}
+
+/** Live state card — table chrome + grid engine. Must render inside DataTableRoot. */
+function CurrentTableStatePanel({
+  grid,
+  columnCount,
+  onReset,
+}: {
+  grid: ReturnType<typeof useDataGrid<GridRow>>
+  columnCount: number
+  onReset: () => void
+}) {
+  const { table } = useDataTable<GridRow>()
+  const state = table.getState()
+  const sorting = state.sorting
+  const columnFilters = state.columnFilters
+  const columnVisibility = state.columnVisibility
+  const columnPinning = state.columnPinning
+  const rowSelection = state.rowSelection
+  const globalFilter = state.globalFilter
+  const selectedCount = Object.values(rowSelection).filter(Boolean).length
+  const hiddenCount = Object.values(columnVisibility).filter(
+    v => v === false,
+  ).length
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Current Table State</CardTitle>
+        <CardDescription>
+          Live view of table + grid state for demonstration
+        </CardDescription>
+        <CardAction>
+          <Button variant="outline" size="sm" onClick={onReset}>
+            Reset All State
+          </Button>
+        </CardAction>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="grid gap-2 text-xs text-muted-foreground">
+          <div className="flex justify-between">
+            <span className="font-medium">Search Query:</span>
+            <span className="text-foreground">
+              {formatSearch(globalFilter)}
+            </span>
+          </div>
+          <div className="flex justify-between">
+            <span className="font-medium">Total Rows:</span>
+            <span className="text-foreground">{grid.rows.length}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="font-medium">Selected Rows:</span>
+            <span className="text-foreground">{selectedCount}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="font-medium">Active Filters:</span>
+            <span className="text-foreground">{columnFilters.length}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="font-medium">Sorting:</span>
+            <span className="text-foreground">
+              {sorting.length > 0
+                ? sorting
+                    .map(s => `${s.id} ${s.desc ? "desc" : "asc"}`)
+                    .join(", ")
+                : "None"}
+            </span>
+          </div>
+          <div className="flex justify-between">
+            <span className="font-medium">Hidden Columns:</span>
+            <span className="text-foreground">{hiddenCount}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="font-medium">Pinned Columns:</span>
+            <span className="text-foreground">
+              {columnPinning.left?.length || 0} Left,{" "}
+              {columnPinning.right?.length || 0} Right
+            </span>
+          </div>
+          <div className="flex justify-between">
+            <span className="font-medium">Dynamic Columns:</span>
+            <span className="text-foreground">{columnCount}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="font-medium">Focused Cell:</span>
+            <span className="text-foreground">
+              {formatPos(grid.focusedCell)}
+            </span>
+          </div>
+          <div className="flex justify-between">
+            <span className="font-medium">Editing Cell:</span>
+            <span className="text-foreground">
+              {formatPos(grid.editingCell)}
+            </span>
+          </div>
+          <div className="flex justify-between">
+            <span className="font-medium">Selection Anchor:</span>
+            <span className="text-foreground">
+              {formatPos(grid.selectionAnchor)}
+            </span>
+          </div>
+          <div className="flex justify-between">
+            <span className="font-medium">Can Undo / Redo:</span>
+            <span className="text-foreground">
+              {grid.canUndo ? "Yes" : "No"} / {grid.canRedo ? "Yes" : "No"}
+            </span>
+          </div>
+          <div className="flex justify-between">
+            <span className="font-medium">Last Commit:</span>
+            <span className="text-foreground">
+              {grid.lastCommit
+                ? `${grid.lastCommit.kind} (seq ${grid.lastCommit.seq})`
+                : "None"}
+            </span>
+          </div>
+        </div>
+
+        <Collapsible>
+          <CollapsibleTrigger className="flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground [&[data-state=open]>svg]:rotate-90">
+            <ChevronRight className="size-3.5 transition-transform" />
+            View Full State Object
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <pre className="mt-2 max-h-64 overflow-auto rounded-md bg-muted p-3 text-[10px] leading-relaxed">
+              {JSON.stringify(
+                {
+                  focusedCell: grid.focusedCell,
+                  editingCell: grid.editingCell,
+                  selectionAnchor: grid.selectionAnchor,
+                  canUndo: grid.canUndo,
+                  canRedo: grid.canRedo,
+                  lastCommit: grid.lastCommit,
+                  rowCount: grid.rows.length,
+                  columnCount,
+                  globalFilter,
+                  sorting,
+                  columnFilters,
+                  columnVisibility,
+                  columnPinning,
+                  rowSelection,
+                },
+                null,
+                2,
+              )}
+            </pre>
+          </CollapsibleContent>
+        </Collapsible>
+      </CardContent>
+    </Card>
+  )
+}
+
+function GridAllFeaturesInner({ onReset }: { onReset: () => void }) {
   const cols = useGridColumns({ initialColumns: INITIAL_COLUMN_SPECS })
   const columnById = React.useMemo(
     () => Object.fromEntries(cols.columns.map(c => [c.id, c])),
@@ -475,24 +702,31 @@ export function GridAllFeatures() {
     // selection AND pins left (stays put on horizontal scroll).
     const gutter: DataTableColumnDef<GridRow> = {
       id: SYSTEM_COLUMN_IDS.SELECT,
-      size: 52,
+      size: GUTTER_SIZE,
+      minSize: GUTTER_SIZE,
+      maxSize: GUTTER_SIZE,
       enableSorting: false,
       enableHiding: false,
       enableResizing: false,
       header: ({ table }) => (
-        <div className="flex h-full items-center justify-start pl-1">
-          <Checkbox
-            checked={
-              table.getIsAllRowsSelected()
-                ? true
-                : table.getIsSomeRowsSelected()
-                  ? "indeterminate"
-                  : false
-            }
-            onCheckedChange={v => table.toggleAllRowsSelected(!!v)}
-            aria-label="Select all rows"
-          />
-        </div>
+        // Direct child of sticky th — `absolute inset-0` fills the padding box
+        // (full column width), not the inner content box after TableHead `pl-2`.
+        <GutterFrame>
+          <div className="size-3.5 shrink-0" aria-hidden />
+          <div className="flex size-4 shrink-0 items-center justify-center">
+            <Checkbox
+              checked={
+                table.getIsAllRowsSelected()
+                  ? true
+                  : table.getIsSomeRowsSelected()
+                    ? "indeterminate"
+                    : false
+              }
+              onCheckedChange={v => table.toggleAllRowsSelected(!!v)}
+              aria-label="Select all rows"
+            />
+          </div>
+        </GutterFrame>
       ),
       cell: ctx => (
         <GutterCell rowId={ctx.row.id} isSelected={ctx.row.getIsSelected()} />
@@ -674,6 +908,11 @@ export function GridAllFeatures() {
             </div>
           </DataGridColumns>
         </DataGrid>
+        <CurrentTableStatePanel
+          grid={grid}
+          columnCount={cols.columns.length}
+          onReset={onReset}
+        />
       </DataTableRoot>
     </div>
   )

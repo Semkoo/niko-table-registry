@@ -10,6 +10,10 @@ All notable changes to the data-table component.
 
 #### Core
 
+- **Memoized body rows — invalidate on column add/remove** (`columnLayoutSignature` now depends on `columns`)
+  - Dynamic columns (Data Grid “Add column”) left the header updated while body cells stayed stale — missing cells, borders, and row rules under the new column.
+  - Fixed in all six body variants (regular + virtualized + DnD).
+- **`DataTableBody` — resize cleanup restores prior table styles** instead of blanking `table-layout` / `width` / `min-width`.
 - **`DataTableVirtualizedBody` — column lock no longer compresses columns on wide datasets** (`core/data-table-virtualized-structure.tsx`)
   - The column-lock `useLayoutEffect` now sets `tableEl.style.minWidth` to the sum of all visible `column.getSize()` values before measuring `<th>` widths.
   - **Root cause**: `<TableComponent>` carries `w-full` (100% width), which forced the `<table>` element to fit inside its scroll container. The auto-layout algorithm then distributed compressed widths, and the lock mechanism permanently captured those compressed values.

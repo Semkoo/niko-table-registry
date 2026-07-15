@@ -16,63 +16,6 @@ Before installing the DataTable component, make sure you have:
 3. **TailwindCSS** configured
 4. **TypeScript** (recommended)
 
-## Architecture Note
-
-The DataTable components use a two-layer architecture for maximum flexibility:
-
-- **Components** (`data-table-*.tsx` in `/components` folder) - Context-aware wrapper components that use `useDataTable()` hook to automatically get the table from `DataTableRoot` context. These eliminate prop drilling and are the recommended way to use components:
-  - `DataTableSearchFilter`, `DataTableFilterMenu`, `DataTableSortMenu`, `DataTablePagination`, etc.
-- **Filters** (`table-*.tsx` in `/filters` folder) - Core implementation components that accept a `table` prop directly and use TanStack Table hooks (like `table.getState()`, `table.setGlobalFilter()`, etc.). These can be used standalone:
-  - `TableSearchFilter`, `TableFilterMenu`, `TableSortMenu`, etc.
-
-**Why this architecture?**
-
-- Use `DataTable*` components from their direct paths (e.g. `@/components/niko-table/components/data-table-pagination`) when you want context-based, zero-config usage
-- Use `Table*` components from filters (e.g. `@/components/niko-table/filters/table-pagination`) when you want to build custom components or manage the table instance yourself
-- All filter components use TanStack Table hooks directly, giving you full control
-
-Learn more in the [Introduction](/getting-started/introduction/#state-management-with-react-context).
-
-## Custom Table Component
-
-The DataTable registry automatically installs a custom `components/ui/table.tsx` that extends the default Shadcn table with:
-
-- A `TableComponent` export (used internally by DataTable)
-- `data-slot` attributes on all elements
-- A container div for overflow handling
-
-> **Note:** This is **100% backward compatible** — your existing Shadcn tables will continue to work exactly as before. If you already have a `table.tsx`, the CLI will prompt you before overwriting.
-
-### Monorepo / Non-Standard Layouts
-
-If your project uses a non-standard UI component path (e.g., `packages/ui/src/components/` instead of `src/components/ui/`), the shadcn CLI may place `table.tsx` in the wrong location. This is a [known upstream issue](https://github.com/shadcn-ui/ui/issues) with `registry:ui` path resolution.
-
-**Workaround:** After installing, check that `table.tsx` landed in the correct directory. If it was placed in a nested `ui/` folder, move it to your actual UI components path and ensure it exports `TableComponent`:
-
-```tsx
-// Your existing table.tsx — add this function and export
-function TableComponent({
-  className,
-  ...props
-}: React.ComponentProps<"table">) {
-  return (
-    <table
-      data-slot="table"
-      className={cn("w-full caption-bottom text-sm", className)}
-      {...props}
-    />
-  )
-}
-
-// Add TableComponent to your existing exports
-export {
-  TableComponent,
-  Table,
-  TableHeader,
-  // ... your other exports
-}
-```
-
 ## Configure the Niko Table Registry
 
 To use the `@niko-table/` namespace with the shadcn CLI, you must first register it in your project's `components.json`. Add the `registries` field:
@@ -104,20 +47,26 @@ Now install the core:
 
 ## Install Everything
 
-Want all components at once? The following command installs **core + all optional add-ons** in one go:
+Want every registry item at once? List them explicitly — the shadcn CLI does **not** support wildcards like `@niko-table/**`. Prefer installing only what you need (see [Components](/getting-started/components/)); reach for this when you want the full set.
 
 <CliCommandCode
   action="run"
-  command="shadcn@latest add @niko-table/data-table @niko-table/data-table-virtualized @niko-table/data-table-pagination @niko-table/data-table-search-filter @niko-table/data-table-sort-menu @niko-table/data-table-view-menu @niko-table/data-table-clear-filter @niko-table/data-table-filter-menu @niko-table/data-table-faceted-filter @niko-table/data-table-inline-filter @niko-table/data-table-slider-filter @niko-table/data-table-date-filter @niko-table/data-table-export-button @niko-table/data-table-aside @niko-table/data-table-selection-bar @niko-table/data-table-column-sort @niko-table/data-table-column-hide @niko-table/data-table-column-pin @niko-table/data-table-column-faceted-filter @niko-table/data-table-column-slider-filter @niko-table/data-table-column-date-filter @niko-table/data-table-row-dnd @niko-table/data-table-column-dnd"
+  command="shadcn@latest add @niko-table/data-table @niko-table/data-table-virtualized @niko-table/data-table-pagination @niko-table/data-table-search-filter @niko-table/data-table-sort-menu @niko-table/data-table-view-menu @niko-table/data-table-view-dnd-menu @niko-table/data-table-clear-filter @niko-table/data-table-filter-menu @niko-table/data-table-faceted-filter @niko-table/data-table-inline-filter @niko-table/data-table-slider-filter @niko-table/data-table-date-filter @niko-table/data-table-export-button @niko-table/data-table-aside @niko-table/data-table-selection-bar @niko-table/data-table-column-sort @niko-table/data-table-column-hide @niko-table/data-table-column-pin @niko-table/data-table-column-resize @niko-table/data-table-column-faceted-filter @niko-table/data-table-column-slider-filter @niko-table/data-table-column-date-filter @niko-table/data-table-row-dnd @niko-table/data-table-column-dnd @niko-table/data-table-grid @niko-table/data-table-grid-changes"
 />
+
+You can also browse / filter the registry with:
+
+```bash
+npx shadcn@latest search @niko-table
+```
 
 ### Install everything (via URLs)
 
-If you prefer not to configure the registry, you can install core and every optional block in one command using URLs:
+If you prefer not to configure the registry, pass full URLs instead:
 
 <CliCommandCode
   action="run"
-  command={'shadcn@latest add "https://niko-table.com/r/data-table.json" "https://niko-table.com/r/data-table-virtualized.json" "https://niko-table.com/r/data-table-pagination.json" "https://niko-table.com/r/data-table-search-filter.json" "https://niko-table.com/r/data-table-sort-menu.json" "https://niko-table.com/r/data-table-view-menu.json" "https://niko-table.com/r/data-table-clear-filter.json" "https://niko-table.com/r/data-table-filter-menu.json" "https://niko-table.com/r/data-table-faceted-filter.json" "https://niko-table.com/r/data-table-inline-filter.json" "https://niko-table.com/r/data-table-slider-filter.json" "https://niko-table.com/r/data-table-date-filter.json" "https://niko-table.com/r/data-table-export-button.json" "https://niko-table.com/r/data-table-aside.json" "https://niko-table.com/r/data-table-selection-bar.json" "https://niko-table.com/r/data-table-column-sort.json" "https://niko-table.com/r/data-table-column-hide.json" "https://niko-table.com/r/data-table-column-pin.json" "https://niko-table.com/r/data-table-column-faceted-filter.json" "https://niko-table.com/r/data-table-column-slider-filter.json" "https://niko-table.com/r/data-table-column-date-filter.json" "https://niko-table.com/r/data-table-row-dnd.json" "https://niko-table.com/r/data-table-column-dnd.json"'}
+  command={'shadcn@latest add "https://niko-table.com/r/data-table.json" "https://niko-table.com/r/data-table-virtualized.json" "https://niko-table.com/r/data-table-pagination.json" "https://niko-table.com/r/data-table-search-filter.json" "https://niko-table.com/r/data-table-sort-menu.json" "https://niko-table.com/r/data-table-view-menu.json" "https://niko-table.com/r/data-table-view-dnd-menu.json" "https://niko-table.com/r/data-table-clear-filter.json" "https://niko-table.com/r/data-table-filter-menu.json" "https://niko-table.com/r/data-table-faceted-filter.json" "https://niko-table.com/r/data-table-inline-filter.json" "https://niko-table.com/r/data-table-slider-filter.json" "https://niko-table.com/r/data-table-date-filter.json" "https://niko-table.com/r/data-table-export-button.json" "https://niko-table.com/r/data-table-aside.json" "https://niko-table.com/r/data-table-selection-bar.json" "https://niko-table.com/r/data-table-column-sort.json" "https://niko-table.com/r/data-table-column-hide.json" "https://niko-table.com/r/data-table-column-pin.json" "https://niko-table.com/r/data-table-column-resize.json" "https://niko-table.com/r/data-table-column-faceted-filter.json" "https://niko-table.com/r/data-table-column-slider-filter.json" "https://niko-table.com/r/data-table-column-date-filter.json" "https://niko-table.com/r/data-table-row-dnd.json" "https://niko-table.com/r/data-table-column-dnd.json" "https://niko-table.com/r/data-table-grid.json" "https://niko-table.com/r/data-table-grid-changes.json"'}
 />
 
 ## Optional Components
@@ -141,6 +90,10 @@ Or install only the components you need. Each component can be added individuall
 **DataTableViewMenu:**
 
 <Installation registryItem="data-table-view-menu" />
+
+**DataTableViewDndMenu** (column visibility + drag-to-reorder):
+
+<Installation registryItem="data-table-view-dnd-menu" />
 
 **DataTableClearFilter:**
 
@@ -225,6 +178,75 @@ Optional change-set tracking for saves (`useGridChanges`):
 **DataTableSelectionBar:**
 
 <Installation registryItem="data-table-selection-bar" />
+
+### Drag and Drop
+
+**DataTableRowDnd:**
+
+<Installation registryItem="data-table-row-dnd" />
+
+**DataTableColumnDnd:**
+
+<Installation registryItem="data-table-column-dnd" />
+
+> Row DnD should not be combined with sorting or filtering. Column DnD is safe with any feature.
+
+## Architecture Note
+
+The DataTable components use a two-layer architecture for maximum flexibility:
+
+- **Components** (`data-table-*.tsx` in `/components` folder) - Context-aware wrapper components that use `useDataTable()` hook to automatically get the table from `DataTableRoot` context. These eliminate prop drilling and are the recommended way to use components:
+  - `DataTableSearchFilter`, `DataTableFilterMenu`, `DataTableSortMenu`, `DataTablePagination`, etc.
+- **Filters** (`table-*.tsx` in `/filters` folder) - Core implementation components that accept a `table` prop directly and use TanStack Table hooks (like `table.getState()`, `table.setGlobalFilter()`, etc.). These can be used standalone:
+  - `TableSearchFilter`, `TableFilterMenu`, `TableSortMenu`, etc.
+
+**Why this architecture?**
+
+- Use `DataTable*` components from their direct paths (e.g. `@/components/niko-table/components/data-table-pagination`) when you want context-based, zero-config usage
+- Use `Table*` components from filters (e.g. `@/components/niko-table/filters/table-pagination`) when you want to build custom components or manage the table instance yourself
+- All filter components use TanStack Table hooks directly, giving you full control
+
+Learn more in the [Introduction](/getting-started/introduction/#state-management-with-react-context).
+
+## Custom Table Component
+
+The DataTable registry automatically installs a custom `components/ui/table.tsx` that extends the default Shadcn table with:
+
+- A `TableComponent` export (used internally by DataTable)
+- `data-slot` attributes on all elements
+- A container div for overflow handling
+
+> **Note:** This is **100% backward compatible** — your existing Shadcn tables will continue to work exactly as before. If you already have a `table.tsx`, the CLI will prompt you before overwriting.
+
+### Monorepo / Non-Standard Layouts
+
+If your project uses a non-standard UI component path (e.g., `packages/ui/src/components/` instead of `src/components/ui/`), the shadcn CLI may place `table.tsx` in the wrong location. This is a [known upstream issue](https://github.com/shadcn-ui/ui/issues) with `registry:ui` path resolution.
+
+**Workaround:** After installing, check that `table.tsx` landed in the correct directory. If it was placed in a nested `ui/` folder, move it to your actual UI components path and ensure it exports `TableComponent`:
+
+```tsx
+// Your existing table.tsx — add this function and export
+function TableComponent({
+  className,
+  ...props
+}: React.ComponentProps<"table">) {
+  return (
+    <table
+      data-slot="table"
+      className={cn("w-full caption-bottom text-sm", className)}
+      {...props}
+    />
+  )
+}
+
+// Add TableComponent to your existing exports
+export {
+  TableComponent,
+  Table,
+  TableHeader,
+  // ... your other exports
+}
+```
 
 ## Manual Installation
 
@@ -391,27 +413,6 @@ nuqs provides type-safe search params state management, perfect for syncing tabl
 ### Sortable/Draggable Rows
 
 For drag-and-drop row reordering, follow the [DiceUI Sortable installation guide](https://www.diceui.com/docs/components/sortable).
-
-## Quick Install All Dependencies
-
-If you want to install everything upfront — core, all add-ons, and optional npm dependencies:
-
-<CliCommandCode
-  action="run"
-  command="shadcn@latest add @niko-table/data-table @niko-table/data-table-virtualized @niko-table/data-table-pagination @niko-table/data-table-search-filter @niko-table/data-table-sort-menu @niko-table/data-table-view-menu @niko-table/data-table-clear-filter @niko-table/data-table-filter-menu @niko-table/data-table-faceted-filter @niko-table/data-table-inline-filter @niko-table/data-table-slider-filter @niko-table/data-table-date-filter @niko-table/data-table-export-button @niko-table/data-table-aside @niko-table/data-table-selection-bar @niko-table/data-table-column-sort @niko-table/data-table-column-hide @niko-table/data-table-column-pin @niko-table/data-table-column-faceted-filter @niko-table/data-table-column-slider-filter @niko-table/data-table-column-date-filter @niko-table/data-table-row-dnd @niko-table/data-table-column-dnd"
-/>
-
-For optional dependencies used by specific examples (not required for all projects):
-
-<CliCommandCode
-  action="install"
-  command="nuqs @tanstack/react-query"
-/>
-
-<CliCommandCode
-  action="run"
-  command="shadcn@latest add checkbox card"
-/>
 
 ## Project Structure
 

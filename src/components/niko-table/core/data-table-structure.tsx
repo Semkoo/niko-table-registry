@@ -395,7 +395,9 @@ export function DataTableBody<TData>({
     table.getState()
   const resizing = table.options.enableColumnResizing ?? false
   // String signature of the visible column layout. Memoized rows compare it
-  // to invalidate on column toggle / reorder / pin / (when enabled) resize.
+  // to invalidate on column add/remove / toggle / reorder / pin / resize.
+  // `columns` must be included — add/remove does not change visibility/order/
+  // pinning state, so omitting it left body rows stuck with a stale cell set.
   // For external row state (inline edits, optimistic overlays), pass
   // `getRowMemoKey`.
   const columnLayoutSignature = React.useMemo(
@@ -411,6 +413,7 @@ export function DataTableBody<TData>({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       table,
+      columns,
       columnVisibility,
       columnOrder,
       columnPinning,
@@ -428,6 +431,15 @@ export function DataTableBody<TData>({
     children,
   )
 
+  // The table's own inline sizing captured before resizing overrides it, so a
+  // consumer that sets inline `table-layout` / `width` / `min-width` gets those
+  // exact values back when resizing turns off — instead of them being blanked.
+  const tableStyleSnapshotRef = React.useRef<{
+    tableLayout: string
+    width: string
+    minWidth: string
+  } | null>(null)
+
   // When resizing is on, lock `table-layout: fixed` and an explicit pixel width
   // (= sum of `getSize()`) so Tailwind `w-full` can't compress columns. Sticky
   // pin offsets use the same sizes — a compressed table would leave the left
@@ -437,11 +449,29 @@ export function DataTableBody<TData>({
       '[data-slot="table"]',
     )
     if (!tableEl) return
+
+    const restore = () => {
+      const snap = tableStyleSnapshotRef.current
+      if (!snap) return
+      tableEl.style.tableLayout = snap.tableLayout
+      tableEl.style.width = snap.width
+      tableEl.style.minWidth = snap.minWidth
+      tableStyleSnapshotRef.current = null
+    }
+
     if (!resizing) {
-      tableEl.style.tableLayout = ""
-      tableEl.style.width = ""
-      tableEl.style.minWidth = ""
+      restore()
       return
+    }
+
+    // Capture the pre-override values once. Cleanup nulls the snapshot, so each
+    // resizing pass re-captures the restored (clean) values before overriding.
+    if (!tableStyleSnapshotRef.current) {
+      tableStyleSnapshotRef.current = {
+        tableLayout: tableEl.style.tableLayout,
+        width: tableEl.style.width,
+        minWidth: tableEl.style.minWidth,
+      }
     }
     const totalDesiredWidth = table
       .getVisibleLeafColumns()
@@ -449,11 +479,7 @@ export function DataTableBody<TData>({
     tableEl.style.tableLayout = "fixed"
     tableEl.style.width = `${totalDesiredWidth}px`
     tableEl.style.minWidth = `${totalDesiredWidth}px`
-    return () => {
-      tableEl.style.tableLayout = ""
-      tableEl.style.width = ""
-      tableEl.style.minWidth = ""
-    }
+    return restore
   }, [
     resizing,
     table,

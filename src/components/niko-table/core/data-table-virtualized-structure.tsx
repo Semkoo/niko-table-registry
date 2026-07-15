@@ -584,7 +584,10 @@ export function DataTableVirtualizedBody<TData>({
   const { columnVisibility, columnOrder, columnPinning, columnSizing } =
     table.getState()
   // String signature of the visible column layout. Memoized rows compare it
-  // to invalidate on column toggle / reorder / pin / (when enabled) resize.
+  // to invalidate on column add/remove / toggle / reorder / pin / resize.
+  // `columns` must be included — add/remove (e.g. dynamic grid columns) does
+  // not change visibility/order/pinning state, so omitting it left body rows
+  // stuck with a stale cell set while the header showed the new columns.
   // For external row state (inline edits, optimistic overlays), pass
   // `getRowMemoKey`.
   const columnLayoutSignature = React.useMemo(
@@ -600,6 +603,7 @@ export function DataTableVirtualizedBody<TData>({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       table,
+      columns,
       columnVisibility,
       columnOrder,
       columnPinning,

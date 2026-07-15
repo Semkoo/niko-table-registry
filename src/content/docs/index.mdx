@@ -11,36 +11,25 @@ hero:
       variant: minimal
 ---
 
-import { GITHUB_REPO_URL } from "@/data/env"
 import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
+import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
+import { GITHUB_REPO_URL } from "@/data/env"
 
 **Nobody's table, everyone's solution.**
 
-Just like Shadcn, Niko Table is **not a component library**. Instead, it's a comprehensive **DataTable component** that you copy into your project and customize to your needs. Built with **TanStack Table** and **Shadcn UI**, it provides enterprise-grade features while remaining fully under your control.
+Niko Table is not an opaque npm package — you copy the source into your project and own it. Built with TanStack Table and shadcn/ui.
 
-```bash
-npx shadcn@latest add https://niko-table.com/r/data-table.json
-```
+Add the registry once in `components.json` (`"@niko-table": "https://niko-table.com/r/{name}.json"`), then:
+
+<CliCommandCode action="run" command="shadcn@latest add @niko-table/data-table" />
+
+See [Installation](/getting-started/installation/) for registry setup and every available block.
 
 ## Live Demo
 
-See ALL features in action with this comprehensive example:
-
 <CodePreview demo="niko-table/all-features-table" />
 
-This demo showcases every feature:
-
-- ✅ **Row selection** - Select individual or all rows with checkboxes
-- ✅ **Bulk actions** - Export or delete selected rows
-- ✅ **Row expansion** - Click expand icon to see additional details
-- ✅ **Sidebar panels** - Left sidebar for quick filters, right sidebar for product details
-- ✅ **Multi-column sorting** - Click column headers to sort
-- ✅ **Advanced filtering** - Global search + column-specific filters with AND/OR logic
-- ✅ **Pagination** - Navigate through pages with customizable page sizes
-- ✅ **Column visibility** - Show/hide columns dynamically
-- ✅ **Data export** - Export all or selected rows to CSV
-- ✅ **Controlled state** - Full state management with React hooks
-- ✅ **Real-time updates** - See state changes reflected immediately
+Selection, expansion, filters, sort, pagination, column visibility, export, and asides — composed from registry pieces. Browse more in [Examples](/examples/simple-table/).
 
 ## Quick Links
 

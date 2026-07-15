@@ -7,22 +7,12 @@ import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
 import CollapsiblePreview from "@/components/markdown/collapsible-preview.astro"
 import { Steps } from "@astrojs/starlight/components"
 import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
-import { Button } from "@/components/ui/button"
 import { GITHUB_REPO_URL } from "@/data/env"
+import DocsLink from "@/components/markdown/docs-link.astro"
 
-<div className="mb-6 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/tree/main/src/components/niko-table/grid`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Source Code ↗
-    </a>
-  </Button>
-  <Button variant="outline" size="sm" asChild>
-    <a href="/data-grid/api/">API Reference ↗</a>
-  </Button>
+<div className="not-content mb-6 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/tree/main/src/components/niko-table/grid`} external>Source Code ↗</DocsLink>
+  <DocsLink href="/data-grid/api/">API Reference ↗</DocsLink>
 </div>
 
 <figure className="flex flex-col gap-4">
@@ -70,22 +60,30 @@ Manual copy-paste: [Installation Guide](/getting-started/installation/).
 
 ## Anatomy
 
+Two contexts, two slots:
+
+- **Table chrome** (`useDataTable`) — search, faceted filters, sort, view, export, pagination. Sit anywhere under `DataTableRoot` (sibling of `<DataGrid>` or nested inside it).
+- **Grid pieces** (`useDataGridContext`) — undo/redo, add rows, clipboard, fill, move, reorder. **Must** be children of `<DataGrid>`.
+
 ```
-DataTableRoot          ← data={grid.rows}
-└─ DataGrid            ← keyboard, selection, scroll-into-view
-   ├─ DataGridClipboard / Fill / Move / …   ← opt-in
+DataTableRoot                                    ← data={grid.rows}
+├─ Search / Faceted / Sort / Clear / View / …    ← table chrome (Root is enough)
+└─ DataGrid                                      ← keyboard, selection, scroll-into-view
+   ├─ DataGridToolbar (Undo, Add rows, …)        ← grid chrome (needs DataGrid)
+   ├─ DataGridClipboard / Fill / Move / Reorder  ← grid opt-ins
    └─ DataTable
       ├─ VirtualizedHeader
       └─ VirtualizedBody
          └─ DataGridCell → GridTextCell / …
 ```
 
-| Layer            | Role                                                     |
-| ---------------- | -------------------------------------------------------- |
-| `useDataGrid`    | Headless engine — rows, focus, edit lifecycle, undo/redo |
-| `<DataGrid>`     | Display-order navigation & selection rectangle           |
-| Feature children | Clipboard, fill, move, reorder, status bar, …            |
-| Cell editors     | Cheap display shell; heavy editor only while editing     |
+| Layer                 | Where                 | Role                                           |
+| --------------------- | --------------------- | ---------------------------------------------- |
+| `useDataGrid`         | Call site             | Headless engine — rows, focus, edit, undo/redo |
+| Table chrome          | Under `DataTableRoot` | Filters / sort / view / pagination             |
+| `<DataGrid>`          | Under `DataTableRoot` | Display-order nav + selection                  |
+| Grid chrome + opt-ins | Inside `<DataGrid>`   | Undo, add rows, clipboard, fill, move, …       |
+| Cell editors          | Column `cell` render  | Display shell; heavy editor only while editing |
 
 ## Usage
 
@@ -178,7 +176,7 @@ Drop any of these inside `<DataGrid>`. Unmounted = zero cost.
 | `DataTableColumnResize`         | Drag resize; double-click to autosize              |
 | `DataGridUndo` / `DataGridRedo` | History                                            |
 
-Filters, sort, pin, and the view menu are regular Niko Table components — sit them beside `<DataGrid>` on the same `DataTableRoot`.
+Filters, sort, pin, and the view menu are regular Niko Table components — nest them under `DataTableRoot` (beside or inside `<DataGrid>`). Do **not** put `DataGridUndo` / `DataGridAddRows` / clipboard outside `<DataGrid>`.
 
 Full lists and props: [API Reference](/data-grid/api/).
 

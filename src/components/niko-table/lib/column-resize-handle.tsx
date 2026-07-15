@@ -24,6 +24,13 @@ import { cn } from "@/lib/utils"
 const AUTOSIZE_CELL_PADDING = 24 // horizontal padding + buffer
 const AUTOSIZE_HEADER_CHROME = 52 // sort/menu trigger + resize grip
 
+/** Column-width bounds used when a column omits `minSize` / `maxSize`. */
+const DEFAULT_MIN_COLUMN_SIZE = 40
+const DEFAULT_MAX_COLUMN_SIZE = 1000
+/** Keyboard resize step (px); the larger step applies while Shift is held. */
+const KEYBOARD_RESIZE_STEP = 8
+const KEYBOARD_RESIZE_STEP_LARGE = 40
+
 /**
  * Tightest width that fits every TEXT node in an element. Uses a DOM Range
  * so `w-full` + `truncate` wrappers — whose `scrollWidth` echoes the current
@@ -65,8 +72,8 @@ function autosizeColumn<TData>(
   if (content <= 0) return
   const def = header.column.columnDef
   const width = Math.min(
-    Math.max(Math.ceil(content), def.minSize ?? 40),
-    def.maxSize ?? 1000,
+    Math.max(Math.ceil(content), def.minSize ?? DEFAULT_MIN_COLUMN_SIZE),
+    def.maxSize ?? DEFAULT_MAX_COLUMN_SIZE,
   )
   header
     .getContext()
@@ -79,16 +86,18 @@ function autosizeColumn<TData>(
  * nudge the width (Shift = larger step), Enter autosizes; exposes
  * `aria-value*`.
  */
+export interface DataTableColumnResizeHandleProps<TData> {
+  header: Header<TData, unknown>
+}
+
 export function DataTableColumnResizeHandle<TData>({
   header,
-}: {
-  header: Header<TData, unknown>
-}) {
+}: DataTableColumnResizeHandleProps<TData>) {
   const isResizing = header.column.getIsResizing()
   const resize = header.getResizeHandler()
   const def = header.column.columnDef
-  const min = def.minSize ?? 40
-  const max = def.maxSize ?? 1000
+  const min = def.minSize ?? DEFAULT_MIN_COLUMN_SIZE
+  const max = def.maxSize ?? DEFAULT_MAX_COLUMN_SIZE
 
   const nudge = (delta: number) => {
     header.getContext().table.setColumnSizing(prev => {
@@ -100,6 +109,7 @@ export function DataTableColumnResizeHandle<TData>({
 
   return (
     <div
+      data-slot="column-resize-handle"
       role="separator"
       aria-orientation="vertical"
       aria-label="Resize column (arrow keys, or double-click to fit)"
@@ -112,7 +122,9 @@ export function DataTableColumnResizeHandle<TData>({
       onDoubleClick={e => autosizeColumn(header, e.currentTarget)}
       onClick={e => e.stopPropagation()}
       onKeyDown={e => {
-        const step = e.shiftKey ? 40 : 8
+        const step = e.shiftKey
+          ? KEYBOARD_RESIZE_STEP_LARGE
+          : KEYBOARD_RESIZE_STEP
         if (e.key === "ArrowLeft") {
           e.preventDefault()
           nudge(-step)

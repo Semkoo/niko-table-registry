@@ -3,8 +3,8 @@ title: Library Utilities
 description: Utility functions, constants, and helper functions for the data table.
 ---
 
-import { Button } from "@/components/ui/button"
 import { GITHUB_REPO_URL } from "@/data/env"
+import DocsLink from "@/components/markdown/docs-link.astro"
 
 The `lib/` directory contains utility functions, constants, and helper functions used throughout the data table components.
 
@@ -12,16 +12,8 @@ The `lib/` directory contains utility functions, constants, and helper functions
 
 Centralized constants for join operators, filter operators, filter variants, and UI configuration.
 
-<div className="mb-4 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/lib/constants.ts`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Source Code ↗
-    </a>
-  </Button>
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/lib/constants.ts`} external>Source Code ↗</DocsLink>
 </div>
 
 ### JOIN_OPERATORS
@@ -107,16 +99,8 @@ Default keyboard shortcut key mappings.
 
 Helper functions for filter operations and validation.
 
-<div className="mb-4 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/lib/data-table.ts`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Source Code ↗
-    </a>
-  </Button>
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/lib/data-table.ts`} external>Source Code ↗</DocsLink>
 </div>
 
 ### getFilterOperators
@@ -190,16 +174,8 @@ const validFilters = getValidFilters(filters)
 
 Formatting functions for dates, labels, and query strings.
 
-<div className="mb-4 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/lib/format.ts`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Source Code ↗
-    </a>
-  </Button>
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/lib/format.ts`} external>Source Code ↗</DocsLink>
 </div>
 
 ### formatDate
@@ -301,16 +277,8 @@ formatQueryString(urlParams, urlKeys)
 
 Custom filter functions for TanStack Table with performance optimizations.
 
-<div className="mb-4 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/lib/filter-functions.ts`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Source Code ↗
-    </a>
-  </Button>
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/lib/filter-functions.ts`} external>Source Code ↗</DocsLink>
 </div>
 
 The filter functions module provides optimized filter implementations for TanStack Table. It includes:
@@ -409,16 +377,8 @@ const { processedFilters, joinOperators } = processFiltersForLogic(filters)
 
 Helper functions for styling table components, particularly for column pinning.
 
-<div className="mb-4 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/lib/styles.ts`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Source Code ↗
-    </a>
-  </Button>
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/lib/styles.ts`} external>Source Code ↗</DocsLink>
 </div>
 
 ### getCommonPinningStyles
@@ -459,16 +419,8 @@ const pinningStyles = getCommonPinningStyles(column, false)
 
 Shared scroll-listener body used by every data-table body component (`DataTableBody`, `DataTableVirtualizedBody`, `DataTableVirtualizedDndBody`, `DataTableVirtualizedDndColumnBody`). Extracted so scroll math changes propagate to all four bodies and so consumers writing custom bodies can reuse the canonical implementation.
 
-<div className="mb-4 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/lib/create-scroll-handler.ts`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Source Code ↗
-    </a>
-  </Button>
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/lib/create-scroll-handler.ts`} external>Source Code ↗</DocsLink>
 </div>
 
 ### createScrollHandler
@@ -524,16 +476,8 @@ Single options object:
 
 Shared row-click guard used by every body component (`DataTableBody`, `DataTableDndBody`, `DataTableDndColumnBody`, `DataTableVirtualizedBody`, `DataTableVirtualizedDndBody`, `DataTableVirtualizedDndColumnBody`). Centralized so the interactive-element list (action buttons, checkboxes, links, radix collection items, etc.) stays in sync — adding a new `data-slot` to ignore means editing one file instead of six.
 
-<div className="mb-4 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/lib/row-click.ts`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Source Code ↗
-    </a>
-  </Button>
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/lib/row-click.ts`} external>Source Code ↗</DocsLink>
 </div>
 
 ### isInteractiveClickTarget
@@ -612,16 +556,8 @@ ERROR_MESSAGES.DEPRECATED_GLOBAL_JOIN_OPERATOR
 
 Used internally by faceted-filter components to translate a raw column dataset into the `{ label, value, count }` shape the filter UI consumes. Documented for completeness — most consumers won't import it directly.
 
-<div className="mb-4 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/lib/build-faceted-options.ts`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Source Code ↗
-    </a>
-  </Button>
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/lib/build-faceted-options.ts`} external>Source Code ↗</DocsLink>
 </div>
 
 ### buildFacetedOptions
@@ -648,16 +584,8 @@ const options = buildFacetedOptions({
 
 Internal helpers that resolve `globalFilter` / column-filter combinations to a final visible row set. Used by `DataTableRoot` when wiring `tableOptions.getFilteredRowModel`.
 
-<div className="mb-4 flex gap-2">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/lib/filter-rows.ts`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Source Code ↗
-    </a>
-  </Button>
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/lib/filter-rows.ts`} external>Source Code ↗</DocsLink>
 </div>
 
 ### filter-rows.ts

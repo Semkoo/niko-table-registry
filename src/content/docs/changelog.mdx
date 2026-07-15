@@ -11,12 +11,19 @@ description: Latest updates and release notes for Niko Table.
 - **Persistence** (`data-table-grid-changes`) — `useGridChanges` → create / update / delete. [Persistence](/data-grid/persistence/)
 - **Inline validation** — `CellState.error` tooltip on the cell. [Validation](/data-grid/validation/)
 - **Column resize** — `<DataTableColumnResize />`; [example](/examples/column-resize-table/)
-- Docs pass — shorter, shadcn-style install → usage across the Data Grid guides
+- Docs — full registry catalog (resize + Data Grid), Install Everything lists all 27 items, homepage/`CliCommandCode` namespace install
+- Docs — Data Grid intro live demo includes **Current Table State** panel
+
+### Changed
+
+- Docs Source/API links use Astro `DocsLink` (aligned outline buttons; Starlight MDX stripped React `Button asChild`)
+- Install CLI yarn tab uses `yarn dlx`; Installation page is Prerequisites → Registry → Install first
 
 ### Fixed
 
+- **Core** — memoized body rows invalidate on column **add/remove** (`columns` in `columnLayoutSignature`) — dynamic columns no longer leave body cells / borders stale
 - **Core** — `data-row-index` is display order (`flashRows` / scroll after sort/filter)
-- **Core** — empty/loading `colSpan` uses visible columns; resize width cleanup
+- **Core** — empty/loading `colSpan` uses visible columns; resize width cleanup restores prior table styles
 - **Core** — `daysAgo()` is deterministic (fixed epoch)
 - Validation settle no-ops on identical row refs (no infinite loop)
 - Display index under sort/filter (selection, gutter, cross-highlight)
@@ -26,6 +33,7 @@ description: Latest updates and release notes for Niko Table.
 - `extendSelectionTo` ends editing; combobox no-op re-select skips undo
 - Pin + resize no longer clips the first data column
 - Portaled editors (`data-grid-cell-editor`) commit on mouse pick
+- Persistence demo rejects incomplete creates (Name + Email) with `failedRowIds` highlight
 
 ## May 2026
 
