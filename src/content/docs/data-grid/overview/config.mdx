@@ -1,0 +1,68 @@
+---
+title: Config
+description: Keyboard shortcut metadata and helpers for the Data Grid help UI.
+---
+
+import { GITHUB_REPO_URL } from "@/data/env"
+import DocsLink from "@/components/markdown/docs-link.astro"
+
+The `grid/config/` directory holds discoverable shortcut metadata — the human-readable mirror of `<DataGrid>`’s keydown handler. Wire it to `DataGridShortcutsButton` / `GridShortcutsList` via `onRequestShortcuts`.
+
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/grid/config/grid-shortcuts.ts`} external>Source Code ↗</DocsLink>
+</div>
+
+## Types
+
+```ts
+interface GridShortcut {
+  /** Key tokens. "Mod" renders as ⌘ on macOS, Ctrl elsewhere. */
+  keys: string[]
+  description: string
+}
+
+interface GridShortcutGroup {
+  category: string
+  shortcuts: GridShortcut[]
+}
+```
+
+## GRID_SHORTCUTS
+
+Grouped reference list (Navigation, Selection, Editing, Clipboard, …). Keep it in sync when the container’s handler changes.
+
+```tsx showLineNumbers
+import { GRID_SHORTCUTS } from "@/components/niko-table/grid/config/grid-shortcuts"
+import { GridShortcutsList } from "@/components/niko-table/grid/components/grid-shortcuts-dialog"
+
+<dialog>
+  <GridShortcutsList groups={GRID_SHORTCUTS} />
+</dialog>
+```
+
+## Helpers
+
+| Export              | Role                                      |
+| ------------------- | ----------------------------------------- |
+| `useIsMac()`        | Platform flag for Mod key labels          |
+| `formatShortcutKey` | Token → display string (`Mod` → ⌘ / Ctrl) |
+
+## Wiring shortcuts UI
+
+```tsx showLineNumbers
+const [open, setOpen] = React.useState(false)
+
+<DataGrid grid={grid} onRequestShortcuts={() => setOpen(true)}>
+  …
+</DataGrid>
+
+<DataGridShortcutsButton /> {/* or open your own dialog on `open` */}
+```
+
+When `onRequestShortcuts` is unset, `?` types normally into the cell.
+
+## Related table config
+
+Filter operators, sort icons, and feature detection live on the table side:
+
+- [Niko Table Config](/niko-table/overview/config/)

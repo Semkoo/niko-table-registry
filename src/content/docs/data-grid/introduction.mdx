@@ -12,6 +12,7 @@ import DocsLink from "@/components/markdown/docs-link.astro"
 
 <div className="not-content mb-6 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/tree/main/src/components/niko-table/grid`} external>Source Code ↗</DocsLink>
+  <DocsLink href="/data-grid/overview/components/">Components ↗</DocsLink>
   <DocsLink href="/data-grid/api/">API Reference ↗</DocsLink>
 </div>
 
@@ -178,7 +179,7 @@ Drop any of these inside `<DataGrid>`. Unmounted = zero cost.
 
 Filters, sort, pin, and the view menu are regular Niko Table components — nest them under `DataTableRoot` (beside or inside `<DataGrid>`). Do **not** put `DataGridUndo` / `DataGridAddRows` / clipboard outside `<DataGrid>`.
 
-Full lists and props: [API Reference](/data-grid/api/).
+Layered lists: [Components](/data-grid/overview/components/), [Core](/data-grid/overview/core/), [Hooks](/data-grid/overview/hooks/). Full dump: [API Reference](/data-grid/api/).
 
 ## Keyboard
 
@@ -191,12 +192,12 @@ Arrows, Tab, Enter, Escape navigate and edit. Type to start editing. `Mod+A` sel
 - **Save button** — read `grid.rows` (or `useGridChanges().getChangeSet()`) on submit
 - **Autosave** — debounce the network, not the UI
 
-See [Persistence](/data-grid/persistence/).
+See [Persistence](/examples/persistence-grid/).
 
 ## Next
 
-- [Cell Types](/data-grid/cell-types/) — text, number, date, select, …
-- [Validation](/data-grid/validation/) — Zod (or any `resolve`) + inline errors
-- [Dynamic Columns](/data-grid/dynamic-columns/) — add / rename / retype at runtime
-- [Persistence](/data-grid/persistence/) — create / update / delete change-sets
+- [Components](/data-grid/overview/components/) · [Core](/data-grid/overview/core/) · [Hooks](/data-grid/overview/hooks/) — API by layer
+- [Basic Grid](/examples/basic-grid/) · [All Features Grid](/examples/all-features-grid/) — examples
+- [Cell Types Grid](/examples/cell-types-grid/) · [Validation Grid](/examples/validation-grid/)
+- [Dynamic Columns Grid](/examples/dynamic-columns-grid/) · [Persistence Grid](/examples/persistence-grid/)
 - [API Reference](/data-grid/api/)

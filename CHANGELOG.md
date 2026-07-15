@@ -10,8 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - **Data Grid (`data-table-grid`)** — composable spreadsheet grid on Niko Table: `useDataGrid` + `<DataGrid>` + opt-in children (clipboard, fill, move, reorder, status bar, six cell editors). Id-addressed so sort/filter keep working. [Introduction](/data-grid/introduction/) · [API](/data-grid/api/)
-- **Persistence (`data-table-grid-changes`)** — `useGridChanges` → `{ created, updated, deleted }`, dirty set, `reconcile`. [Persistence](/data-grid/persistence/)
-- **Inline validation** — `CellState.error` tooltip on invalid cells. [Validation](/data-grid/validation/)
+- **Persistence (`data-table-grid-changes`)** — `useGridChanges` → `{ created, updated, deleted }`, dirty set, `reconcile`. [Persistence](/examples/persistence-grid/)
+- **Inline validation** — `CellState.error` tooltip on invalid cells. [Validation](/examples/validation-grid/)
 - **Column resize** — `<DataTableColumnResize />` (grip + double-click autosize). Regular example: [Column Resize Table](/examples/column-resize-table/)
 - **Row context menu** — write-once `RowMenu*` for kebab + right-click. [Row Context Menu](/examples/row-context-menu-table/)
 - **`DataTableViewDndMenu`** — drag-to-reorder view menu (separate package; plain view menu stays dnd-kit-free)

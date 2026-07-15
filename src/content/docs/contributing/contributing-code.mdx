@@ -24,8 +24,10 @@ This repository is structured as follows:
   - assets/
   - components/
   - content/docs
-    - components/
     - getting-started/
+    - niko-table/
+    - data-grid/
+    - examples/
     - contributing/
   - registry/new-york
     - examples/
@@ -33,13 +35,16 @@ This repository is structured as follows:
 
 </FileTree>
 
-- `src/assets`: Any logos/images for the documentation site.
-- `src/components`: Components used to create the documentation site.
-- `src/content/docs/components`: Individual documentation pages for each component.
-- `src/content/getting-started`: One-off guides for the getting started section of the documentation.
-- `src/content/docs/contributing`: Documentation for contributing to the registry.
-- `src/registry/new-york/examples`: Example files used for rendering in the documentation pages for each component.
-- `src/registry/new-york/items`: The implementation of the component that will be installed in the user's project.
+- `src/assets`: Logos/images for the documentation site.
+- `src/components`: Site UI (markdown helpers, overrides, etc.).
+- `src/content/docs/getting-started`: Install and intro guides.
+- `src/content/docs/niko-table` / `data-grid`: Product overview + API by layer.
+- `src/content/docs/examples`: Runnable table and grid example pages.
+- `src/content/docs/contributing`: How to contribute (code, requests, **docs**).
+- `src/registry/new-york/examples`: Demo components mounted by `CodePreview`.
+- `src/registry/new-york/items`: Installable registry implementations.
+
+For docs/example page shape, see [Documentation Guidelines](/contributing/documentation-guidelines/).
 
 ## Development
 

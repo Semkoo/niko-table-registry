@@ -3,7 +3,17 @@ title: API Reference
 description: useDataGrid, DataGrid, cell editors, opt-in features, and persistence.
 ---
 
-For a walkthrough, start with the [Introduction](/data-grid/introduction/).
+For a walkthrough, start with the [Introduction](/data-grid/introduction/). Layered docs mirror the source tree:
+
+| Layer      | Doc                                                       |
+| ---------- | --------------------------------------------------------- |
+| Components | [Overview](/data-grid/overview/components/)               |
+| Core       | [Overview](/data-grid/overview/core/)                     |
+| Filters    | [Overview](/data-grid/overview/filters/) (via Niko Table) |
+| Hooks      | [Overview](/data-grid/overview/hooks/)                    |
+| Library    | [Overview](/data-grid/overview/lib/)                      |
+| Types      | [Overview](/data-grid/overview/types/)                    |
+| Config     | [Overview](/data-grid/overview/config/)                   |
 
 ## `useDataGrid`
 
@@ -33,7 +43,7 @@ Blank seeds from `initialRowCount` use deterministic `row-0`… ids (SSR-safe). 
 | `updateRows` / `addRows` / `insertRows` / `removeRow` / `removeRows` / `clearAll` | Row mutations (undoable)                                               |
 | `undo` / `redo` / `canUndo` / `canRedo`                                           | History                                                                |
 
-`updateRows(fn, { history: false })` settles derived state (e.g. cross-field validation) without pushing undo. See [Validation](/data-grid/validation/).
+`updateRows(fn, { history: false })` settles derived state (e.g. cross-field validation) without pushing undo. See [Validation](/examples/validation-grid/).
 
 `clearAll` replaces every row with blanks — count matches `initialRows.length` or `initialRowCount`.
 
@@ -84,7 +94,7 @@ Children of `<DataGrid>`. Unmounted = tree-shaken.
 
 ## Dynamic columns
 
-`useGridColumns({ initialColumns })` + `<DataGridColumns value={cols}>` + `<GridColumnMenuOptions />` + `<DataGridAddColumnButton />`. See [Dynamic Columns](/data-grid/dynamic-columns/).
+`useGridColumns({ initialColumns })` + `<DataGridColumns value={cols}>` + `<GridColumnMenuOptions />` + `<DataGridAddColumnButton />`. See [Dynamic Columns](/examples/dynamic-columns-grid/).
 
 ## Toolbar
 
@@ -110,7 +120,7 @@ changes.getChangeSet() // { created, updated, deleted }
 changes.reconcile({ succeededIds, failedIds })
 ```
 
-Driven by `grid.lastCommit` (`seq` advances on real commits only). See [Persistence](/data-grid/persistence/).
+Driven by `grid.lastCommit` (`seq` advances on real commits only). See [Persistence](/examples/persistence-grid/).
 
 ## Core deps
 
