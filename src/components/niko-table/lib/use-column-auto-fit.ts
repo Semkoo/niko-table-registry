@@ -19,10 +19,10 @@
  * pixel width) instead of the flex-fill layout the non-resizable table uses.
  * If the columns' natural sizes don't add up to the scroll container's width,
  * that leaves dead space on the right. This hook removes it: on load (and when
- * the container grows or columns are toggled) it scales the RESIZABLE columns'
- * sizes up proportionally so they fill the available width, seeding
- * `columnSizing` so `getSize()` — the source of truth for both rendering and
- * drag math — stays consistent.
+ * the container grows or columns are toggled) it grows the RESIZABLE columns by
+ * an equal share of the leftover space so they fill the available width (wide
+ * and narrow columns end up closer), seeding `columnSizing` so `getSize()` —
+ * the source of truth for both rendering and drag math — stays consistent.
  *
  * Rules:
  * - Only resizable columns are scaled; fixed utility columns (selection,
@@ -100,14 +100,16 @@ export function useColumnAutoFit<TData>(
     // horizontal scrollbar handle it rather than shrinking columns to fit.
     if (resizableTotal <= 0 || resizableTotal >= available - 1) return
 
-    const scale = available / resizableTotal
+    // Split the leftover space evenly across the resizable columns (rather than
+    // scaling proportionally), so wide and narrow columns end up closer.
+    const perColumn = (available - resizableTotal) / resizable.length
     const next: Record<string, number> = {}
     let changed = false
     for (const column of resizable) {
       const min = column.columnDef.minSize ?? DEFAULT_MIN_COLUMN_SIZE
       const max = column.columnDef.maxSize ?? DEFAULT_MAX_COLUMN_SIZE
       const size = Math.round(
-        Math.min(Math.max(column.getSize() * scale, min), max),
+        Math.min(Math.max(column.getSize() + perColumn, min), max),
       )
       next[column.id] = size
       if (size !== column.getSize()) changed = true
