@@ -19,11 +19,19 @@ import { GITHUB_REPO_URL } from "@/data/env"
 
 Niko Table is not an opaque npm package — you copy the source into your project and own it. Built with TanStack Table and shadcn/ui.
 
-Add the registry once in `components.json` (`"@niko-table": "https://niko-table.com/r/{name}.json"`), then:
+Add the registry once under `registries` in `components.json`, then install:
+
+```json title="components.json"
+{
+  "registries": {
+    "@niko-table": "https://niko-table.com/r/{name}.json"
+  }
+}
+```
 
 <CliCommandCode action="run" command="shadcn@latest add @niko-table/data-table" />
 
-See [Installation](/getting-started/installation/) for registry setup and every available block.
+See [Installation](/getting-started/installation/) for merging into an existing `components.json` and every available block.
 
 ## Live Demo
 
