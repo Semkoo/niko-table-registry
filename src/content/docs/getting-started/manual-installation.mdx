@@ -139,6 +139,7 @@ your-project/
 │   │       │   ├── data-table-export-button.tsx
 │   │       │   ├── data-table-row-dnd.tsx
 │   │       │   ├── data-table-column-dnd.tsx
+│   │       │   ├── data-table-column-resize.tsx                   # Opt-in <DataTableColumnResize />
 │   │       │   ├── data-table-column-actions.tsx
 │   │       │   ├── data-table-column-header.tsx
 │   │       │   ├── data-table-column-title.tsx
@@ -157,6 +158,14 @@ your-project/
 │   │       │   ├── data-table-row-context-menu-slot.tsx            # Declarative <DataTableRowContextMenuSlot> for a body
 │   │       │   ├── data-table-row-menu.tsx                         # Polymorphic RowMenuItem/Sub/… + DataTableRowMenuScope + useDataTableRow
 │   │       │   └── data-table-empty-state.tsx
+│   │       │
+│   │       ├── grid/                        # Data Grid (optional — editable spreadsheet layer)
+│   │       │   ├── core/                      # DataGrid, context, features, columns context
+│   │       │   ├── cells/                     # Text / number / select / date / checkbox editors
+│   │       │   ├── components/                # Clipboard, fill, move, toolbar, status bar, …
+│   │       │   ├── hooks/                     # useDataGrid, useGridColumns, useGridChanges, …
+│   │       │   ├── config/                    # Keyboard shortcuts map
+│   │       │   └── types/                     # CellState, GridRow, …
 │   │       │
 │   │       ├── filters/                     # Core filter implementations (accept `table` prop directly)
 │   │       │   ├── table-search-filter.tsx
@@ -191,7 +200,9 @@ your-project/
 │   │       │   ├── use-debounce.ts
 │   │       │   ├── use-derived-column-title.ts
 │   │       │   ├── use-generated-options.ts
-│   │       │   └── use-keyboard-shortcut.ts
+│   │       │   ├── use-keyboard-shortcut.ts
+│   │       │   ├── use-data-table-flash.ts                      # flashRows / flashCells helpers
+│   │       │   └── use-data-table-scroll.ts                     # scrollRowIntoView helper
 │   │       │
 │   │       ├── lib/                         # Utility functions
 │   │       │   ├── constants.ts
@@ -201,7 +212,8 @@ your-project/
 │   │       │   ├── build-faceted-options.ts
 │   │       │   ├── format.ts
 │   │       │   ├── styles.ts
-│   │       │   ├── create-scroll-handler.ts                        # Shared scroll-listener factory used by every body
+│   │       │   ├── column-resize-handle.tsx                     # Shared resize grip (headers)
+│   │       │   ├── create-scroll-handler.ts                     # Shared scroll-listener factory used by every body
 │   │       │   └── row-click.ts                                    # Shared row-click guard used by every body
 │   │       │
 │   │       └── types/                       # TypeScript types
@@ -213,9 +225,11 @@ your-project/
 └── package.json
 ```
 
+Prefer the [CLI install](/getting-started/installation/) when you only need a subset — each registry item pulls its own dependencies. Manual copy is best when you want the full tree (including optional Data Grid under `grid/`).
+
 ## All Components
 
-Browse and copy individual files below:
+Browse and copy individual files below (includes `grid/` when present on disk):
 
 <ManualInstallationCode />
 
@@ -231,13 +245,13 @@ For URL state persistence in tables:
 
 ### Virtualization
 
-For virtualized tables:
+For virtualized tables (and Data Grid):
 
 <CliCommandCode action="install" command="@tanstack/react-virtual" />
 
-### Sortable Rows
+### Sortable Rows / Column DnD
 
-For drag-and-drop row reordering, follow the [DiceUI Sortable installation guide](https://www.diceui.com/docs/components/sortable).
+For drag-and-drop row or column reordering, install `@dnd-kit/*` as used by the row-dnd / column-dnd registry items, or follow the [DiceUI Sortable installation guide](https://www.diceui.com/docs/components/sortable).
 
 ## Next Steps
 
@@ -247,4 +261,7 @@ Now that you have all the components installed, check out the examples:
 - [Basic Table](/examples/basic-table/) - Add pagination and sorting
 - [Search Table](/examples/search-table/) - Add search functionality
 - [Faceted Filter Table](/examples/faceted-filter-table/) - Add advanced filtering
+- [Column Resize Table](/examples/column-resize-table/) - Drag / double-click column widths
+- [Data Grid](/data-grid/introduction/) - Editable spreadsheet on top of the virtualized table
 - [Advanced Table](/examples/advanced-table/) - All features combined
+- [Components catalog](/getting-started/components/) - Every `@niko-table/*` registry item

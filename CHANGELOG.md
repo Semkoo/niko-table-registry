@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Intro demo includes search / faceted / advanced filters + **Current Table State** panel
 - Docs Source/API links use Astro `DocsLink`; install yarn tab is `yarn dlx`
 - Install Everything / Components catalog cover all 27 registry items (incl. resize + Data Grid)
+- Manual Installation project tree documents `grid/`, column resize, and flash/scroll hooks
 - Filter variants: `dateRange` / `multiSelect` (camelCase)
 - Options with `count: 0` hidden in filter UIs
 - `autoResetPageIndex` defaults to `false`
