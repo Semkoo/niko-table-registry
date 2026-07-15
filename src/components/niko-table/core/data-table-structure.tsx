@@ -110,12 +110,17 @@ export const DataTableHeader = React.memo(function DataTableHeader({
               >
                 {header.isPlaceholder ? null : (
                   <DataTableColumnHeaderRoot column={header.column}>
-                    <div className={cn("min-w-0", resizing && "truncate")}>
-                      {flexRender(
+                    {resizing &&
+                    typeof header.column.columnDef.header === "string" ? (
+                      <span className="inline-block max-w-full truncate">
+                        {header.column.columnDef.header}
+                      </span>
+                    ) : (
+                      flexRender(
                         header.column.columnDef.header,
                         header.getContext(),
-                      )}
-                    </div>
+                      )
+                    )}
                   </DataTableColumnHeaderRoot>
                 )}
                 {resizing && header.column.getCanResize() && (
