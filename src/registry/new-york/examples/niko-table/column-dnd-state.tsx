@@ -10,6 +10,7 @@ import {
   DataTableDndColumnBody,
 } from "@/components/niko-table/core/data-table-column-dnd-structure"
 import { DataTableColumnDndProvider } from "@/components/niko-table/components/data-table-column-dnd"
+import { DataTableColumnResize } from "@/components/niko-table/components/data-table-column-resize"
 import {
   DataTableEmptyIcon,
   DataTableEmptyMessage,
@@ -196,6 +197,7 @@ export default function ColumnDndStateExample() {
         onColumnVisibilityChange={setColumnVisibility}
         onGlobalFilterChange={setGlobalFilter}
       >
+        <DataTableColumnResize />
         <DataTableColumnDndProvider
           columnOrder={columnOrder}
           onColumnOrderChange={setColumnOrder}

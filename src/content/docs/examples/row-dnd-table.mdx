@@ -59,6 +59,8 @@ Three components work together:
 3. **`DataTableRowDragHandle`** — A grip icon button for dragging
 
 ```tsx showLineNumbers title="row-dnd.tsx"
+import { DataTableDndBody } from "@/components/niko-table/core/data-table-row-dnd-structure"
+
 const [data, setData] = React.useState(initialData)
 
 const columns: DataTableColumnDef<Task>[] = [
@@ -113,6 +115,8 @@ The drag handle is a dedicated column with `DataTableRowDragHandle`:
 Track the data order externally:
 
 ```tsx showLineNumbers title="row-dnd-state.tsx"
+import { DataTableDndBody } from "@/components/niko-table/core/data-table-row-dnd-structure"
+
 const [data, setData] = React.useState(initialData)
 
 // Reset to original order
@@ -120,6 +124,7 @@ const resetData = () => setData(initialData)
 
 return (
   <DataTableRoot data={data} columns={columns} getRowId={(row) => row.id}>
+    <DataTableColumnResize />
     <DataTableRowDndProvider data={data} onReorder={setData}>
       <DataTable>
         <DataTableHeader />

@@ -31,7 +31,7 @@ Column DnD lets users reorder table columns by dragging headers. Built with `@dn
 
 Install the DataTable core and column DnD add-ons. Add `data-table-view-dnd-menu` and `data-table-search-filter` for the toolbar shown in the example:
 
-<CliCommandCode action="run" command="shadcn@latest add @niko-table/data-table @niko-table/data-table-column-dnd @niko-table/data-table-column-resize @niko-table/data-table-view-dnd-menu @niko-table/data-table-search-filter" />
+<CliCommandCode action="run" command="shadcn@latest add @niko-table/data-table @niko-table/data-table-column-dnd @niko-table/data-table-column-resize @niko-table/data-table-view-dnd-menu @niko-table/data-table-search-filter @niko-table/data-table-virtualized @niko-table/data-table-virtualized-column-dnd" />
 
 > First time using `@niko-table`? See the [Installation Guide](/getting-started/installation#configure-the-niko-table-registry) to set up the registry.
 
@@ -46,6 +46,11 @@ Three components work together:
 3. **`DataTableDndColumnBody`** — Cells follow column drag position
 
 ```tsx showLineNumbers title="column-dnd.tsx"
+import {
+  DataTableDndHeader,
+  DataTableDndColumnBody,
+} from "@/components/niko-table/core/data-table-column-dnd-structure"
+
 const [columnOrder, setColumnOrder] = React.useState<string[]>(() =>
   columns.map(c => c.id as string),
 )
@@ -57,6 +62,7 @@ return (
     state={{ columnOrder }}
     onColumnOrderChange={setColumnOrder}
   >
+    <DataTableColumnResize />
     <DataTableColumnDndProvider
       columnOrder={columnOrder}
       onColumnOrderChange={setColumnOrder}
