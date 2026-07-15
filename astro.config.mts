@@ -315,6 +315,10 @@ export default defineConfig({
               label: "Documentation Guidelines",
               slug: "contributing/documentation-guidelines",
             },
+            {
+              label: "Composability Audit",
+              slug: "contributing/composability-audit",
+            },
           ],
         },
       ],

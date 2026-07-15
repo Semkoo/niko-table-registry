@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`getRowMemoKey`** on all bodies; **`TableSearchFilter debounceMs`**; **`DataTableVirtualizedFlexHeader`**
 - **Docs** — Data Grid overview layers (Components / Core / Filters / Hooks / Library / Types / Config) + Data Grid Examples sidebar (Basic, All Features, Cell Types, Validation, Dynamic Columns, Persistence)
 - **Docs** — [Documentation Guidelines](/contributing/documentation-guidelines/) for overview vs examples
+- **Docs** — [Composability & Performance Audit](/contributing/composability-audit/) (install vs runtime seams across table / virtualized / grid)
 
 ### Changed
 
