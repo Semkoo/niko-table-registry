@@ -41,25 +41,25 @@ Blank seeds from `initialRowCount` use deterministic `row-0`… ids (SSR-safe). 
 
 | Name              | Type                   | Default | Description                            |
 | ----------------- | ---------------------- | ------- | -------------------------------------- |
-| `columnIds`       | `readonly string[]`    | —       | Editable column ids in visual order    |
-| `createEmptyRow`  | `(id: string) => TRow` | —       | Factory for blank rows                 |
-| `initialRows`     | `TRow[]`               | —       | Seed with exact rows                   |
+| `columnIds`       | `readonly string[]`    | -       | Editable column ids in visual order    |
+| `createEmptyRow`  | `(id: string) => TRow` | -       | Factory for blank rows                 |
+| `initialRows`     | `TRow[]`               | -       | Seed with exact rows                   |
 | `initialRowCount` | `number`               | `5`     | Blank seed count when no `initialRows` |
 | `maxRows`         | `number`               | `200`   | Hard cap                               |
 | `makeId`          | `() => string`         | UUID    | Runtime inserts only                   |
 
 #### Return values (high level)
 
-| Field                                                                             | Purpose                                                               |
-| --------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
-| `rows`                                                                            | Pass to `DataTableRoot data`                                          |
-| `lastCommit`                                                                      | Last mutation signal — see [Persistence](/examples/persistence-grid/) |
-| `focusedCell` / `editingCell` / `selectionAnchor`                                 | Cursor + range by `{ rowId, columnId }`                               |
-| `selectCell` / `deselect` / `extendSelectionTo`                                   | Move / clear / extend selection (all leave edit mode)                 |
-| `startEditing` / `stopEditing`                                                    | Open / close the editor                                               |
-| `setCell(rowId, colId, next)`                                                     | O(1) commit — one row identity changes                                |
-| `updateRows` / `addRows` / `insertRows` / `removeRow` / `removeRows` / `clearAll` | Row mutations (undoable)                                              |
-| `undo` / `redo` / `canUndo` / `canRedo`                                           | History                                                               |
+| Field                                                                             | Purpose                                                              |
+| --------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| `rows`                                                                            | Pass to `DataTableRoot data`                                         |
+| `lastCommit`                                                                      | Last mutation signal: see [Persistence](/examples/persistence-grid/) |
+| `focusedCell` / `editingCell` / `selectionAnchor`                                 | Cursor + range by `{ rowId, columnId }`                              |
+| `selectCell` / `deselect` / `extendSelectionTo`                                   | Move / clear / extend selection (all leave edit mode)                |
+| `startEditing` / `stopEditing`                                                    | Open / close the editor                                              |
+| `setCell(rowId, colId, next)`                                                     | O(1) commit: one row identity changes                                |
+| `updateRows` / `addRows` / `insertRows` / `removeRow` / `removeRows` / `clearAll` | Row mutations (undoable)                                             |
+| `undo` / `redo` / `canUndo` / `canRedo`                                           | History                                                              |
 
 `updateRows(fn, { history: false })` settles derived state (e.g. cross-field validation) without pushing undo. See [Validation](/examples/validation-grid/).
 
@@ -95,11 +95,11 @@ changes.reconcile({ succeededIds, failedIds })
 
 ### Internal hooks
 
-Used by core / feature components — rarely imported from app code.
+Used by core / feature components: rarely imported from app code.
 
-| Hook                 | Role                                              |
-| -------------------- | ------------------------------------------------- |
-| `useGridKeyboard`    | Scoped keydown state machine                      |
-| `useGridNavigation`  | Arrow / Tab / Home / End movement                 |
-| `useGridClipboard`   | TSV serialize / parse helpers                     |
-| `useDataGridContext` | Context (lives in core) — throws outside provider |
+| Hook                 | Role                                             |
+| -------------------- | ------------------------------------------------ |
+| `useGridKeyboard`    | Scoped keydown state machine                     |
+| `useGridNavigation`  | Arrow / Tab / Home / End movement                |
+| `useGridClipboard`   | TSV serialize / parse helpers                    |
+| `useDataGridContext` | Context (lives in core): throws outside provider |

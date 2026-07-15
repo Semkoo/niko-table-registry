@@ -7,9 +7,9 @@ import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
 import CollapsiblePreview from "@/components/markdown/collapsible-preview.astro"
 import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
 
-Drag any header's right edge to resize that column, or double-click the grip to autosize to the widest visible content. Drop `<DataTableColumnResize />` inside `DataTableRoot` to enable it — columns keep working with regular `DataTableHeader` / `DataTableBody` (no virtualization required). Opt out per column with `enableResizing: false`.
+Drag any header's right edge to resize that column, or double-click the grip to autosize to the widest visible content. Drop `<DataTableColumnResize />` inside `DataTableRoot` to enable it: columns keep working with regular `DataTableHeader` / `DataTableBody` (no virtualization required). Opt out per column with `enableResizing: false`.
 
-Columns default to a **40px** drag floor (`minSize`) when resize is enabled — override per column with `minSize` / `maxSize`. Body cells use `truncate` so long text ellipsizes instead of spilling into the next column (same as the Data Grid / virtualized bodies).
+Columns default to a **40px** drag floor (`minSize`) when resize is enabled: override per column with `minSize` / `maxSize`. Body cells use `truncate` so long text ellipsizes instead of spilling into the next column (same as the Data Grid / virtualized bodies).
 
 <CodePreview demo="niko-table/column-resize" />
 
@@ -19,7 +19,7 @@ Columns default to a **40px** drag floor (`minSize`) when resize is enabled — 
 
 ## Introduction
 
-Column resizing lets users tweak widths for dense, multi-column tables — especially when content length varies (emails, notes, product names). Explicit `size` values make the initial layout predictable; the resize addon handles drag and double-click autosize.
+Column resizing lets users tweak widths for dense, multi-column tables: especially when content length varies (emails, notes, product names). Explicit `size` values make the initial layout predictable; the resize addon handles drag and double-click autosize.
 
 ## Installation
 
@@ -72,7 +72,7 @@ const data: Order[] = [
 
 ## Enable Column Resize
 
-Drop `<DataTableColumnResize />` early inside `DataTableRoot`. Its presence flips `enableColumnResizing` via feature detection — no config flag required.
+Drop `<DataTableColumnResize />` early inside `DataTableRoot`. Its presence flips `enableColumnResizing` via feature detection: no config flag required.
 
 ```tsx showLineNumbers title="column-resize.tsx"
 <DataTableRoot data={data} columns={columns}>
@@ -163,19 +163,19 @@ export function ControlledResizeTable({ data }: { data: Order[] }) {
 
 **Works with:**
 
-- [Row DnD](/examples/row-dnd-table/) — same `<DataTableColumnResize />` on `DataTableHeader` + `DataTableDndBody` (opt out on drag-handle columns)
+- [Row DnD](/examples/row-dnd-table/): same `<DataTableColumnResize />` on `DataTableHeader` + `DataTableDndBody` (opt out on drag-handle columns)
 
 **❌ Consider other options when:**
 
 - All columns fit comfortably and widths never need tuning
-- You only need sticky identifier/action columns — see [Column Pinning](/examples/column-pinning-table/)
+- You only need sticky identifier/action columns: see [Column Pinning](/examples/column-pinning-table/)
 
 ## Virtualization
 
-You do **not** need a separate “virtualized column resize” example. Swap in `DataTableVirtualizedHeader` + `DataTableVirtualizedBody` (and give `DataTable` a fixed height) — the same `<DataTableColumnResize />` marker applies. See [Virtualization Table](/examples/virtualization-table/) and [All Features Grid](/examples/all-features-grid/).
+You do **not** need a separate “virtualized column resize” example. Swap in `DataTableVirtualizedHeader` + `DataTableVirtualizedBody` (and give `DataTable` a fixed height): the same `<DataTableColumnResize />` marker applies. See [Virtualization Table](/examples/virtualization-table/) and [Composed Grid](/examples/composed-grid/).
 
 ## Next Steps
 
 - [Column Pinning Table](/examples/column-pinning-table/) - Keep key columns visible while scrolling
 - [Virtualization Table](/examples/virtualization-table/) - Same resize marker with virtualized headers/bodies
-- [All Features Grid](/examples/all-features-grid/) - Resize + editable grid cells
+- [Composed Grid](/examples/composed-grid/) - Resize + editable grid cells

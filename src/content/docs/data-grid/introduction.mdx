@@ -1,6 +1,6 @@
 ---
 title: Data Grid
-description: A composable, virtualized spreadsheet grid for React. Copy the source into your project — same model as shadcn/ui.
+description: A composable, virtualized spreadsheet grid for React. Copy the source into your project. Same model as shadcn/ui.
 ---
 
 import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
@@ -25,17 +25,19 @@ import DocsLink from "@/components/markdown/docs-link.astro"
     className="w-full"
   />
   <figcaption className="text-center text-sm text-gray-500">
-    Keyboard nav, clipboard, fill, filters, dynamic columns, and typed editors —
+    Keyboard nav, clipboard, fill, filters, dynamic columns, and typed editors,
     assembled from opt-in children.
   </figcaption>
 </figure>
 
-Turn a Niko Table into an editable spreadsheet. You get virtualization, sort, filter, pin, and resize from the table — plus a headless edit engine: focus, selection, undo/redo, and clipboard.
+Turn a Niko Table into an editable spreadsheet. You get virtualization, sort,
+filter, pin, and resize from the table, plus a headless edit engine: focus,
+selection, undo/redo, and clipboard.
 
-- **Composable** — mount only the features you need as children of `<DataGrid>`
-- **Id-addressed** — focus and edits use row id, so sort/filter stay correct
-- **Performance-first** — O(1) cell commits, virtualized body, no listeners for unmounted features
-- **Own the code** — copy via the registry; nothing opaque to unwrap
+- **Composable**: mount only the features you need as children of `<DataGrid>`
+- **Id-addressed**: focus and edits use row id, so sort/filter stay correct
+- **Performance-first**: O(1) cell commits, virtualized body, no listeners for unmounted features
+- **Own the code**: copy via the registry; nothing opaque to unwrap
 
 ## Installation
 
@@ -63,8 +65,8 @@ Manual copy-paste: [Installation Guide](/getting-started/installation/).
 
 Two contexts, two slots:
 
-- **Table chrome** (`useDataTable`) — search, faceted filters, sort, view, export, pagination. Sit anywhere under `DataTableRoot` (sibling of `<DataGrid>` or nested inside it).
-- **Grid pieces** (`useDataGridContext`) — undo/redo, add rows, clipboard, fill, move, reorder. **Must** be children of `<DataGrid>`.
+- **Table chrome** (`useDataTable`): search, faceted filters, sort, view, export, pagination. Sit anywhere under `DataTableRoot` (sibling of `<DataGrid>` or nested inside it).
+- **Grid pieces** (`useDataGridContext`): undo/redo, add rows, clipboard, fill, move, reorder. **Must** be children of `<DataGrid>`.
 
 ```
 DataTableRoot                                    ← data={grid.rows}
@@ -80,7 +82,7 @@ DataTableRoot                                    ← data={grid.rows}
 
 | Layer                 | Where                 | Role                                           |
 | --------------------- | --------------------- | ---------------------------------------------- |
-| `useDataGrid`         | Call site             | Headless engine — rows, focus, edit, undo/redo |
+| `useDataGrid`         | Call site             | Headless engine: rows, focus, edit, undo/redo  |
 | Table chrome          | Under `DataTableRoot` | Filters / sort / view / pagination             |
 | `<DataGrid>`          | Under `DataTableRoot` | Display-order nav + selection                  |
 | Grid chrome + opt-ins | Inside `<DataGrid>`   | Undo, add rows, clipboard, fill, move, …       |
@@ -121,7 +123,7 @@ The smallest useful grid: text cells + clipboard + fill.
    })
    ```
 
-3. **Wire columns** — `accessorFn` returns raw text (sort / filter / CSV for free). Wrap each cell in `<DataGridCell>`:
+3. **Wire columns**. `accessorFn` returns raw text (sort / filter / CSV for free). Wrap each cell in `<DataGridCell>`:
 
    ```tsx showLineNumbers
    const columns: DataTableColumnDef<GridRow>[] = COLUMN_IDS.map((id) => ({
@@ -177,7 +179,7 @@ Drop any of these inside `<DataGrid>`. Unmounted = zero cost.
 | `DataTableColumnResize`         | Drag resize; double-click to autosize              |
 | `DataGridUndo` / `DataGridRedo` | History                                            |
 
-Filters, sort, pin, and the view menu are regular Niko Table components — nest them under `DataTableRoot` (beside or inside `<DataGrid>`). Do **not** put `DataGridUndo` / `DataGridAddRows` / clipboard outside `<DataGrid>`.
+Filters, sort, pin, and the view menu are regular Niko Table components. Nest them under `DataTableRoot` (beside or inside `<DataGrid>`). Do **not** put `DataGridUndo` / `DataGridAddRows` / clipboard outside `<DataGrid>`.
 
 Layered lists: [Components](/data-grid/overview/components/), [Core](/data-grid/overview/core/), [Hooks](/data-grid/overview/hooks/). Full dump: [API Reference](/data-grid/api/).
 
@@ -187,17 +189,17 @@ Arrows, Tab, Enter, Escape navigate and edit. Type to start editing. `Mod+A` sel
 
 ## State
 
-`useDataGrid` owns the rows (**uncontrolled** — like `defaultValue`). Controlling every keystroke would re-derive the table model and break undo. Persist with:
+`useDataGrid` owns the rows (**uncontrolled**, like `defaultValue`). Controlling every keystroke would re-derive the table model and break undo. Persist with:
 
-- **Save button** — read `grid.rows` (or `useGridChanges().getChangeSet()`) on submit
-- **Autosave** — debounce the network, not the UI
+- **Save button**: read `grid.rows` (or `useGridChanges().getChangeSet()`) on submit
+- **Autosave**: debounce the network, not the UI
 
 See [Persistence](/examples/persistence-grid/).
 
 ## Next
 
-- [Components](/data-grid/overview/components/) · [Core](/data-grid/overview/core/) · [Hooks](/data-grid/overview/hooks/) — API by layer
-- [Basic Grid](/examples/basic-grid/) · [All Features Grid](/examples/all-features-grid/) — examples
+- [Components](/data-grid/overview/components/) · [Core](/data-grid/overview/core/) · [Hooks](/data-grid/overview/hooks/): API by layer
+- [Basic Grid](/examples/basic-grid/) · [Composed Grid](/examples/composed-grid/): examples
 - [Cell Types Grid](/examples/cell-types-grid/) · [Validation Grid](/examples/validation-grid/)
 - [Dynamic Columns Grid](/examples/dynamic-columns-grid/) · [Persistence Grid](/examples/persistence-grid/)
 - [API Reference](/data-grid/api/)

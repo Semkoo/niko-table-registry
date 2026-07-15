@@ -24,6 +24,9 @@ export default defineConfig({
   // Match `/path` and `/path/` (LinkCards / pasted URLs often omit the slash).
   // `"always"` 404s bare paths in `astro dev` instead of redirecting.
   trailingSlash: "ignore",
+  redirects: {
+    "/examples/all-features-grid": "/examples/composed-grid/",
+  },
   env: {
     schema: {
       GITHUB_REPO_URL: envField.string({
@@ -281,7 +284,7 @@ export default defineConfig({
           label: "Data Grid Examples",
           items: [
             { label: "Basic Grid", slug: "examples/basic-grid" },
-            { label: "All Features Grid", slug: "examples/all-features-grid" },
+            { label: "Composed Grid", slug: "examples/composed-grid" },
             { label: "Cell Types", slug: "examples/cell-types-grid" },
             { label: "Validation", slug: "examples/validation-grid" },
             {
@@ -331,7 +334,7 @@ export default defineConfig({
             },
             {
               label: "Grid Examples",
-              link: "/examples/all-features-grid/",
+              link: "/examples/composed-grid/",
             },
             {
               label: "Contributing",
