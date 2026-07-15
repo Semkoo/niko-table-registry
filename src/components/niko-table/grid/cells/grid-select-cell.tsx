@@ -14,7 +14,7 @@
 import type { CellEditorProps, GridComboboxOption } from "./cell-props"
 import { GridComboboxCell } from "./grid-combobox-cell"
 
-interface GridSelectCellProps extends CellEditorProps {
+export interface GridSelectCellProps extends CellEditorProps {
   options: GridComboboxOption[]
   placeholder: string
 }

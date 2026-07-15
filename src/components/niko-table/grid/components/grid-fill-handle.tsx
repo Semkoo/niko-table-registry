@@ -21,6 +21,7 @@ import {
   useRegisterGridFeature,
   type FillFeature,
 } from "../core/data-grid-features"
+import { emptyCell } from "../types/grid-cell"
 import type { CellState, SelectionBounds } from "../types/grid-cell"
 
 /**
@@ -109,7 +110,10 @@ export function DataGridFillHandle() {
           const srcColId = env.columnIds[sc]
           if (!srcRow || !srcColId) continue
           const p = patch.get(targetRowId) ?? {}
-          p[targetCol] = { ...(srcRow[srcColId] as CellState<string>) }
+          // Blank source cells may be unmaterialized (absent) — fall back to a
+          // fresh empty cell so the destination always gets a valid CellState.
+          const src = srcRow[srcColId] as CellState<string> | undefined
+          p[targetCol] = src ? { ...src } : emptyCell<string>()
           patch.set(targetRowId, p)
           flashed.push({ rowId: targetRowId, columnId: targetCol })
         }

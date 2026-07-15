@@ -634,6 +634,9 @@ export function DataTableVirtualizedBody<TData>({
   // content changes. useLayoutEffect avoids the auto→fixed flash.
   const columnLockRef = React.useRef(false)
   const lockedColumnCountRef = React.useRef(0)
+  // Tracks the previous resize mode so a true→false transition can undo the
+  // fixed-width lock even when the column count is unchanged.
+  const prevResizingRef = React.useRef(false)
   // Mirrored as state so row-render can gate `measureElement` on it. Attaching
   // the ResizeObserver before the lock would read inflated wrapped-text heights
   // and bake huge spacer gaps into the virtualizer.
@@ -669,7 +672,29 @@ export function DataTableVirtualizedBody<TData>({
         lockedColumnCountRef.current = currentColCount
         setColumnsLocked(true)
       }
+      prevResizingRef.current = true
       return
+    }
+
+    // Resizing just turned off. The branches below only handle a column-count
+    // change and then the fast path returns early — neither clears the
+    // fixed-width lock applied while resizing was on. Undo it here (and unlock)
+    // so the table falls back to the normal content-measured layout.
+    if (prevResizingRef.current) {
+      prevResizingRef.current = false
+      const tableEl = tbodyRef.current?.closest<HTMLTableElement>(
+        '[data-slot="table"]',
+      )
+      if (tableEl) {
+        tableEl.style.tableLayout = ""
+        tableEl.style.width = ""
+        tableEl.style.minWidth = ""
+      }
+      if (columnLockRef.current) {
+        columnLockRef.current = false
+        setColumnsLocked(false)
+      }
+      // Fall through to re-measure + re-lock via the normal content path.
     }
 
     // Reset lock when column visibility changes (toggle columns on/off)

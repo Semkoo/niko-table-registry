@@ -133,6 +133,11 @@ export function useGridChanges<TRow extends GridRow>(
   React.useEffect(() => {
     const commit = grid.lastCommit
     if (!commit || commit.seq === seenSeqRef.current) return
+    // If commits were coalesced (React batched several dispatches into one
+    // observed `lastCommit`), `seq` jumps by more than 1 and the intermediate
+    // ids are gone — the granular path would miss those creates/updates/deletes.
+    // Fall back to a full recompute in that case; contiguous seq keeps O(1).
+    const skipped = commit.seq > seenSeqRef.current + 1
     seenSeqRef.current = commit.seq
 
     const existing = existingIdsRef.current
@@ -140,7 +145,7 @@ export function useGridChanges<TRow extends GridRow>(
     const deleted = deletedRef.current
     let changed = false
 
-    if (commit.kind === "bulk" || commit.kind === "reset") {
+    if (commit.kind === "bulk" || commit.kind === "reset" || skipped) {
       // Full recompute from the current rows vs the baseline.
       const nextDirty = new Set<string>()
       const nextDeleted = new Set<string>()
@@ -243,7 +248,6 @@ export function useGridChanges<TRow extends GridRow>(
 
       setFailedRowIds(new Set(result.failedIds ?? []))
       setDirtyRowIds(new Set(dirty))
-       
     },
     [grid],
   )
@@ -258,7 +262,6 @@ export function useGridChanges<TRow extends GridRow>(
       seenSeqRef.current = grid.lastCommit?.seq ?? 0
       setDirtyRowIds(EMPTY_SET)
       setFailedRowIds(EMPTY_SET)
-       
     },
     [grid],
   )

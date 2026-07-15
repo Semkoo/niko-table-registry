@@ -20,7 +20,7 @@ import type { CellEditorProps } from "./cell-props"
 import { cellTriggerClass } from "./cell-styles"
 import { GridCellDisplay } from "./grid-cell-display"
 
-interface GridTextCellProps extends CellEditorProps {
+export interface GridTextCellProps extends CellEditorProps {
   placeholder?: string
   /** Resolve raw text into a validated cell (date / time / number parsers). */
   resolve: (raw: string) => CellState<string>

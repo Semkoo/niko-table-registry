@@ -331,7 +331,7 @@ export default defineConfig({
             },
             {
               label: "Grid Examples",
-              link: "/examples/basic-grid/",
+              link: "/examples/all-features-grid/",
             },
             {
               label: "Contributing",

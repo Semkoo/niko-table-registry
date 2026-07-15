@@ -23,7 +23,7 @@ import type { CellEditorProps } from "./cell-props"
 import { cellTriggerClass } from "./cell-styles"
 import { GridCellDisplay } from "./grid-cell-display"
 
-interface GridDateCellProps extends CellEditorProps {
+export interface GridDateCellProps extends CellEditorProps {
   placeholder?: string
 }
 
@@ -31,8 +31,15 @@ interface GridDateCellProps extends CellEditorProps {
 function parseISODate(raw: string): Date | undefined {
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(raw.trim())
   if (!m) return undefined
-  const d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]))
-  return Number.isNaN(d.getTime()) ? undefined : d
+  const y = Number(m[1])
+  const mo = Number(m[2])
+  const day = Number(m[3])
+  const d = new Date(y, mo - 1, day)
+  // Reject calendar-invalid values JS silently rolls over (2026-02-31 → Mar 3).
+  if (d.getFullYear() !== y || d.getMonth() !== mo - 1 || d.getDate() !== day) {
+    return undefined
+  }
+  return d
 }
 
 function toISODate(d: Date): string {

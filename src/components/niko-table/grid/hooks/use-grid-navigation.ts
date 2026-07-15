@@ -62,7 +62,7 @@ export function useGridNavigation<TRow extends GridRow>({
 }: UseGridNavigationOptions<TRow>): GridNavigation {
   const moveFocus = React.useCallback(
     (dRow: number, dCol: number, extend = false) => {
-      if (orderedRows.length === 0) return
+      if (orderedRows.length === 0 || columnIds.length === 0) return
       const base = focusedCell ?? {
         rowId: orderedRows[0]!.id,
         columnId: columnIds[0]!,
@@ -83,7 +83,7 @@ export function useGridNavigation<TRow extends GridRow>({
 
   const tabNext = React.useCallback(
     (reverse: boolean) => {
-      if (orderedRows.length === 0) return
+      if (orderedRows.length === 0 || columnIds.length === 0) return
       const lastCol = columnIds.length - 1
       const base = focusedCell ?? {
         rowId: orderedRows[0]!.id,
@@ -127,7 +127,7 @@ export function useGridNavigation<TRow extends GridRow>({
 
   const moveTo = React.useCallback(
     (rowIdx: number, colIdx: number, extend: boolean) => {
-      if (orderedRows.length === 0) return
+      if (orderedRows.length === 0 || columnIds.length === 0) return
       const r = clamp(rowIdx, 0, orderedRows.length - 1)
       const c = clamp(colIdx, 0, columnIds.length - 1)
       const pos: CellPosition = {
@@ -141,7 +141,7 @@ export function useGridNavigation<TRow extends GridRow>({
   )
 
   const selectAll = React.useCallback(() => {
-    if (orderedRows.length === 0) return
+    if (orderedRows.length === 0 || columnIds.length === 0) return
     grid.selectCell({ rowId: orderedRows[0]!.id, columnId: columnIds[0]! })
     grid.extendSelectionTo({
       rowId: orderedRows[orderedRows.length - 1]!.id,
@@ -154,7 +154,8 @@ export function useGridNavigation<TRow extends GridRow>({
   // (or the far edge).
   const moveToEdge = React.useCallback(
     (dRow: number, dCol: number, extend: boolean) => {
-      if (!focusedCell || orderedRows.length === 0) return
+      if (!focusedCell || orderedRows.length === 0 || columnIds.length === 0)
+        return
       const rowMax = orderedRows.length - 1
       const colMax = columnIds.length - 1
       const startRow = displayIndexOf(focusedCell.rowId) ?? 0

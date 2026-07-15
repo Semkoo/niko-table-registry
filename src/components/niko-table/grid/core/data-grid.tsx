@@ -187,6 +187,9 @@ export function DataGrid<TRow extends GridRow>({
       let leftInset = 0
       let rightInset = 0
       rowEl?.querySelectorAll<HTMLElement>("td").forEach(td => {
+        // The focused cell itself must not inset the scroll: a pinned focused
+        // cell is already visible, and counting it would yank scrollLeft.
+        if (td === cellEl) return
         const style = getComputedStyle(td)
         if (style.position !== "sticky") return
         const rect = td.getBoundingClientRect()

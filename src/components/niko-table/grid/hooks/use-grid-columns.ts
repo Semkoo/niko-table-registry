@@ -80,15 +80,41 @@ export function useGridColumns({
   initialColumns,
   makeColumnId,
 }: UseGridColumnsOptions): GridColumnsApi {
-  // Drop any column that shadows the reserved `id` key (would corrupt row.id).
-  const [columns, setColumns] = React.useState<GridColumnSpec[]>(() =>
-    initialColumns.filter(c => c.id !== RESERVED_COLUMN_ID),
-  )
+  // Drop any column that shadows the reserved `id` key (would corrupt row.id),
+  // and any later duplicate id — every column id must be unique.
+  const [columns, setColumns] = React.useState<GridColumnSpec[]>(() => {
+    const seen = new Set<string>()
+    return initialColumns.filter(c => {
+      if (c.id === RESERVED_COLUMN_ID || seen.has(c.id)) return false
+      seen.add(c.id)
+      return true
+    })
+  })
 
   const idRef = React.useRef(0)
   const mintId = React.useCallback(
     () => makeColumnId?.() ?? `newcol_${idRef.current++}`,
     [makeColumnId],
+  )
+
+  // Live set of active column ids, kept in sync so `addColumn` can guarantee a
+  // unique id: a caller-supplied `spec.id` may collide with an existing column,
+  // and a minted id may too after removes/remounts. Reserving synchronously
+  // covers back-to-back adds in one tick (state updates are async).
+  const idSetRef = React.useRef<Set<string>>(new Set(columns.map(c => c.id)))
+  React.useEffect(() => {
+    idSetRef.current = new Set(columns.map(c => c.id))
+  }, [columns])
+  const mintUniqueId = React.useCallback(
+    (preferred?: string) => {
+      const active = idSetRef.current
+      let id =
+        preferred && preferred !== RESERVED_COLUMN_ID ? preferred : mintId()
+      while (id === RESERVED_COLUMN_ID || active.has(id)) id = mintId()
+      active.add(id)
+      return id
+    },
+    [mintId],
   )
   // Monotonic default-label counter. Reading `columns.length` would be stale
   // across a batch of synchronous addColumn calls (state updates are async), so
@@ -100,7 +126,7 @@ export function useGridColumns({
       // Resolve id + label UP FRONT so the returned column matches exactly what
       // gets inserted. A spec that shadows the reserved `id` key is remapped.
       const created: GridColumnSpec = {
-        id: spec?.id && spec.id !== RESERVED_COLUMN_ID ? spec.id : mintId(),
+        id: mintUniqueId(spec?.id),
         label: spec?.label || `Column ${(labelIndexRef.current += 1)}`,
         type: spec?.type ?? "text",
         ...(spec?.width !== undefined ? { width: spec.width } : {}),
@@ -117,7 +143,7 @@ export function useGridColumns({
       })
       return created
     },
-    [mintId],
+    [mintUniqueId],
   )
 
   const removeColumn = React.useCallback((id: string) => {

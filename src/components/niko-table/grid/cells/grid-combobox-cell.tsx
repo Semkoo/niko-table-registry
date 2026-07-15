@@ -31,7 +31,7 @@ import type { CellEditorProps, GridComboboxOption } from "./cell-props"
 import { cellTriggerClass } from "./cell-styles"
 import { GridCellDisplay } from "./grid-cell-display"
 
-interface GridComboboxCellProps extends CellEditorProps {
+export interface GridComboboxCellProps extends CellEditorProps {
   options: GridComboboxOption[]
   placeholder: string
   searchPlaceholder?: string

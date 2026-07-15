@@ -380,7 +380,9 @@ const DataGridCellInner = React.memo(function DataGridCellInner({
 
   React.useLayoutEffect(() => {
     if (!isFocused || isEditing) return
-    const el = ref.current?.querySelector<HTMLElement>("input, button")
+    const el = ref.current?.querySelector<HTMLElement>(
+      'input, textarea, select, button, [contenteditable]:not([contenteditable="false"]), [tabindex]:not([tabindex="-1"])',
+    )
     if (el && !el.contains(document.activeElement)) {
       el.focus({ preventScroll: true })
     }
