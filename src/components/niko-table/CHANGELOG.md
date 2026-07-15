@@ -20,6 +20,7 @@ All notable changes to the data-table component.
 
 #### Core
 
+- **Column-resize grip idle state** — grip bar is `opacity-0` until hover/focus/drag so it doesn’t act as a faux header divider (drifted 1–2px from real body `border-r` on bordered grids).
 - **Column resize overflow** — regular + virtualized body cells use `truncate` so shrink-via-resize ellipsizes instead of spilling into neighbors; when resize is enabled, default `minSize` is 40px (aligned with the grip clamp; TanStack’s built-in floor was 20).
 - **`DataTableDndBody` — column resize** — honors `getSize()`, layout lock, and truncate so Row DnD tables can mount `<DataTableColumnResize />` (opt out on drag-handle columns with `enableResizing: false`).
 - **DnD SSR hydration** — `TableColumnDndProvider` / `TableRowDndProvider` / `TableViewDndMenu` pass `React.useId()` to `DndContext` so `aria-describedby` no longer mismatches (`DndDescribedBy-73` vs `DndDescribedBy-1`).
