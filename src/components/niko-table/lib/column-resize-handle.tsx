@@ -148,14 +148,14 @@ export function DataTableColumnResizeHandle<TData>({
       }}
       className="group/resize absolute top-0 right-0 z-10 flex h-full w-2 cursor-col-resize touch-none justify-end outline-none select-none"
     >
-      {/* Faint grip always visible (discoverable); a full primary bar on
-          hover, keyboard focus, or active drag. */}
+      {/* Idle: invisible — an always-on grip bar reads as a header divider
+          and drifts 1–2px from real cell `border-r`. Show on hover/focus/drag. */}
       <div
         className={cn(
-          "my-1.5 w-px rounded bg-border transition-all",
-          "group-hover/resize:my-0 group-hover/resize:w-0.5 group-hover/resize:bg-primary",
-          "group-focus-visible/resize:my-0 group-focus-visible/resize:w-0.5 group-focus-visible/resize:bg-primary",
-          isResizing && "my-0 w-0.5 bg-primary",
+          "my-1.5 w-px rounded bg-border opacity-0 transition-all",
+          "group-hover/resize:my-0 group-hover/resize:w-0.5 group-hover/resize:bg-primary group-hover/resize:opacity-100",
+          "group-focus-visible/resize:my-0 group-focus-visible/resize:w-0.5 group-focus-visible/resize:bg-primary group-focus-visible/resize:opacity-100",
+          isResizing && "my-0 w-0.5 bg-primary opacity-100",
         )}
       />
     </div>
