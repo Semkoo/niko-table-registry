@@ -119,13 +119,6 @@ export default function ColumnResizeAutofitTable() {
 
   return (
     <div className="w-full space-y-4">
-      <p className="text-sm text-muted-foreground">
-        These columns declare small <code>size</code> values (summing to{" "}
-        {BASE_TOTAL}px), yet they fill the container: auto-fit scales the
-        resizable columns up on load. Drag any column to opt out; auto-fit stops
-        and your widths take over.
-      </p>
-
       <DataTableRoot
         data={data}
         columns={columns}
