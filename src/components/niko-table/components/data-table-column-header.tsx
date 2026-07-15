@@ -36,8 +36,7 @@ export function useColumnHeaderContext<TData, TValue>(
 ): TableColumnHeaderContextValue<TData, TValue> | undefined
 export function useColumnHeaderContext<TData, TValue>(required = true) {
   const context = React.useContext(TableColumnHeaderContext) as
-    | TableColumnHeaderContextValue<TData, TValue>
-    | undefined
+    TableColumnHeaderContextValue<TData, TValue> | undefined
 
   if (required && !context) {
     throw new Error(
@@ -91,7 +90,10 @@ export function DataTableColumnHeader({
   return (
     <div
       className={cn(
-        "group flex w-full items-center justify-between gap-1",
+        // `min-w-0` lets the header shrink below its content so the title's
+        // `truncate` engages. Without it, a narrow (resized/auto-fit) column's
+        // label overflows into the next header cell instead of ellipsizing.
+        "group flex w-full min-w-0 items-center justify-between gap-1",
         className,
       )}
       {...props}

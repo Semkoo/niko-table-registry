@@ -35,7 +35,10 @@ export function TableColumnTitle<TData, TValue>({
   return (
     <div
       className={cn(
-        "truncate py-0.5 text-sm font-semibold transition-colors",
+        // `min-w-0` so `truncate` can shrink this flex item below its text
+        // width (a nowrap flex child otherwise keeps full content width and
+        // spills into the neighbouring header cell on narrow columns).
+        "min-w-0 truncate py-0.5 text-sm font-semibold transition-colors",
         className,
       )}
     >

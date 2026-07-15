@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Persistence (`data-table-grid-changes`)** — `useGridChanges` → `{ created, updated, deleted }`, dirty set, `reconcile`. [Persistence](/examples/persistence-grid/)
 - **Inline validation** — `CellState.error` tooltip on invalid cells. [Validation](/examples/validation-grid/)
 - **Column resize** — `<DataTableColumnResize />` (grip + double-click autosize). Regular example: [Column Resize Table](/examples/column-resize-table/)
+- **Column auto-fit** — resizable columns fill the container width on load (`useColumnAutoFit`, wired into both table structures) instead of leaving dead space; fixed columns (`enableResizing: false`) keep their size; auto-fit re-fits on container growth and stops once the user resizes or `columnSizing` is restored. [Column Resize Table](/examples/column-resize-table/)
 - **Row context menu** — write-once `RowMenu*` for kebab + right-click. [Row Context Menu](/examples/row-context-menu-table/)
 - **`DataTableViewDndMenu`** — drag-to-reorder view menu (separate package; plain view menu stays dnd-kit-free)
 - **Core bridges** — `scrollRowIntoView`, `flashRows` / `flashCells`, `toggleRowSelection`
