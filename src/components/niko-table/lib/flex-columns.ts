@@ -51,10 +51,14 @@ export function resolveFlexColumnIds<TData>(
   const columnSizing = table.getState().columnSizing
 
   // Explicit opt-in wins: flex the marked column(s) unless the user resized it.
+  // A pinned column can't flex (sticky offsets need a real width), so skip it
+  // and fall through to the auto-pick — a marked-but-pinned column shouldn't
+  // strand the table without a fill column.
   let hasExplicit = false
   for (const column of leafColumns) {
     if (
       column.columnDef.meta?.flex === true &&
+      !column.getIsPinned() &&
       columnSizing[column.id] == null
     ) {
       ids.add(column.id)

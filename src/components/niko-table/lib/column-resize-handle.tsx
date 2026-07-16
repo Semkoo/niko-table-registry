@@ -117,9 +117,13 @@ export function DataTableColumnResizeHandle<TData>({
   const min = def.minSize ?? DEFAULT_MIN_COLUMN_SIZE
   const max = def.maxSize ?? DEFAULT_MAX_COLUMN_SIZE
 
-  const nudge = (delta: number) => {
+  // `fallbackWidth` seeds the first nudge for a flex column (no `columnSizing`
+  // entry yet) from its rendered width so the arrow key doesn't jump it to the
+  // declared `size`. Non-flex columns fall back to `getSize()` as before.
+  const nudge = (delta: number, fallbackWidth?: number) => {
     header.getContext().table.setColumnSizing(prev => {
-      const current = prev[header.column.id] ?? header.column.getSize()
+      const current =
+        prev[header.column.id] ?? fallbackWidth ?? header.column.getSize()
       const next = Math.min(Math.max(current + delta, min), max)
       return { ...prev, [header.column.id]: next }
     })
@@ -143,10 +147,15 @@ export function DataTableColumnResizeHandle<TData>({
         deltaOffset: ev.clientX - startClientX,
       })
     }
-    const onEnd = (ev: PointerEvent) => {
+    const teardown = () => {
       window.removeEventListener("pointermove", onMove)
-      window.removeEventListener("pointerup", onEnd)
-      window.removeEventListener("pointercancel", onEnd)
+      window.removeEventListener("pointerup", onUp)
+      window.removeEventListener("pointercancel", onCancel)
+      setResizePreview(null)
+    }
+    // Commit the new width only on a real release. A cancelled pointer (e.g. the
+    // browser stealing the gesture) just tears down and keeps the column flexing.
+    const onUp = (ev: PointerEvent) => {
       const next = Math.min(
         Math.max(startWidth + (ev.clientX - startClientX), min),
         max,
@@ -154,11 +163,12 @@ export function DataTableColumnResizeHandle<TData>({
       header
         .getContext()
         .table.setColumnSizing(prev => ({ ...prev, [id]: next }))
-      setResizePreview(null)
+      teardown()
     }
+    const onCancel = () => teardown()
     window.addEventListener("pointermove", onMove)
-    window.addEventListener("pointerup", onEnd)
-    window.addEventListener("pointercancel", onEnd)
+    window.addEventListener("pointerup", onUp)
+    window.addEventListener("pointercancel", onCancel)
   }
 
   return (
@@ -195,12 +205,18 @@ export function DataTableColumnResizeHandle<TData>({
         const step = e.shiftKey
           ? KEYBOARD_RESIZE_STEP_LARGE
           : KEYBOARD_RESIZE_STEP
+        // Flex columns have no `columnSizing` entry, so seed the first nudge
+        // from the rendered width to avoid jumping to the declared `size`.
+        const fallbackWidth = isFlex
+          ? e.currentTarget.closest("[data-col-id]")?.getBoundingClientRect()
+              .width
+          : undefined
         if (e.key === "ArrowLeft") {
           e.preventDefault()
-          nudge(-step)
+          nudge(-step, fallbackWidth)
         } else if (e.key === "ArrowRight") {
           e.preventDefault()
-          nudge(step)
+          nudge(step, fallbackWidth)
         } else if (e.key === "Enter") {
           e.preventDefault()
           autosizeColumn(header, e.currentTarget)

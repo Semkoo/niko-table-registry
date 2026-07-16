@@ -83,12 +83,18 @@ export function useHeaderMinWidths<TData>(
 
     const ctx = getMeasureContext()
     // Read the real header font (family/size/weight) so measurement matches the
-    // rendered label across themes and root font sizes.
-    const titleEl = scrollElement.querySelector<HTMLElement>(
-      'thead [data-slot="column-title"]',
-    )
-    if (!ctx || !titleEl) return
-    const cs = getComputedStyle(titleEl)
+    // rendered label. Prefer the composable title element (semibold); fall back
+    // to the header cell itself so raw string headers are still measurable.
+    const fontEl =
+      scrollElement.querySelector<HTMLElement>(
+        'thead [data-slot="column-title"]',
+      ) ?? scrollElement.querySelector<HTMLElement>("thead th[data-col-id]")
+    if (!ctx || !fontEl) {
+      // No header rendered yet / nothing to measure — drop any stale floors.
+      setMinWidths(EMPTY_MIN_WIDTHS)
+      return
+    }
+    const cs = getComputedStyle(fontEl)
     ctx.font = `${cs.fontStyle} ${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`
 
     const next = new Map<string, number>()

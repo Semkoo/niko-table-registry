@@ -10,17 +10,22 @@ All notable changes to the data-table component.
 
 #### Core
 
-- **Column auto-fit** (`lib/use-column-auto-fit.ts`) — when resizing is enabled, cells render at fixed `getSize()` widths instead of flex-filling, which left dead space when columns didn't reach the container width. The `useColumnAutoFit` hook (wired into `data-table-structure` and `data-table-virtualized-structure`) scales the **resizable** columns up proportionally to fill the container on load, seeding `columnSizing` so `getSize()` stays the single source of truth for rendering and drag math. Fixed columns (`enableResizing: false`) keep their size; auto-fit re-fits on container growth, and stops once the user manually resizes or when a saved `columnSizing` is restored (so persisted widths always win). Overflow still scrolls horizontally.
+- **Column fill on by default** (`lib/flex-columns.ts` → `resolveFlexColumnIds` / `resolveColumnWidth`) — a table fills its container automatically: the first non-pinned, resizable data column absorbs the leftover row width (renders width-less under `table-layout: fixed`), so a trailing actions column pins right with no per-table setup. `meta.flex` overrides which column fills; `meta.flex: false` opts a column out; `TableMeta.disableFlexFill` turns fill off for a whole table. Pure layout — never written to `columnSizing`, so nothing persists or goes stale.
+- **Header-fit** (`lib/use-header-min-widths.ts` → `useHeaderMinWidths`) — measures each header label with an off-DOM canvas (zero reflow, O(columns), re-measured only on column/label/font change) and floors every un-resized column at its header width (threaded through the DataTable context as `headerMinWidths`), so a compact column never truncates its label on load. A user-resized column keeps its width. Falls back to the header cell for the font so raw string headers are measured too.
+- **Resizable fill column** — the flex column has no width TanStack can drive, so it resizes through a custom pointer drag (`column-resize-handle`, `isFlex` + `setResizePreview`) that starts from its rendered width (no jump), follows the shared preview line via `setColumnResizePreview`, and on release writes an explicit width — pinning it and handing the fill to the next eligible column.
+- **Column auto-fit** (`lib/use-column-auto-fit.ts`) — opt-in `<DataTableColumnAutoFit />` marker: the even-split alternative to single-column flex fill. Scales the resizable columns up by an equal share of the leftover space on load, seeding `columnSizing`. Fixed columns (`enableResizing: false`) keep their size; re-fits on container growth, and stops once the user resizes or a saved `columnSizing` is restored. Overflow still scrolls horizontally.
 - **Axis-split DnD structure** — import from `data-table-row-dnd-structure` / `data-table-column-dnd-structure` (+ virtualized twins). Registry packages no longer cross-ship the other axis. The old combined `data-table-dnd-structure` / `data-table-virtualized-dnd-structure` modules are removed (no re-export shims).
 - **`DEFAULT_MIN_COLUMN_SIZE`** — defined in `lib/constants`; `DataTableRoot` no longer imports `column-resize-handle` for that constant.
 - **`enableSorting` default `false`** — attaches `getSortedRowModel` only when config or feature detection enables sorting.
 - **DnD + context menu** — all four DnD bodies support `renderRowContextMenu` / `<DataTableRowContextMenuSlot>`.
 - **`DataTableDndColumnBody` resize** — honors `getSize()`, layout lock, truncate (parity with row DnD + virt column DnD).
+- **Resize applies on drag-end** — `columnResizeMode: "onEnd"`, so a drag no longer rewrites `columnSizing` (and re-renders the memoized header + body rows) on every mousemove. A single container-level `ColumnResizePreviewLine`, fed by a dedicated `ColumnResizeInfo` context, follows the cursor instead.
 
 ### 🐛 Bug Fixes
 
 #### Core
 
+- **`resolveColumnWidth` — flex vs. resizing order** — checks `resizing` before `isFlex`, so a flex column keeps its declared `size` when resizing is off.
 - **Column-resize grip idle state** — grip bar is `opacity-0` until hover/focus/drag so it doesn’t act as a faux header divider (drifted 1–2px from real body `border-r` on bordered grids).
 - **Column resize overflow** — regular + virtualized body cells use `truncate` so shrink-via-resize ellipsizes instead of spilling into neighbors; when resize is enabled, default `minSize` is 40px (aligned with the grip clamp; TanStack’s built-in floor was 20).
 - **`DataTableDndBody` — column resize** — honors `getSize()`, layout lock, and truncate so Row DnD tables can mount `<DataTableColumnResize />` (opt out on drag-handle columns with `enableResizing: false`).
