@@ -11,7 +11,10 @@ description: Latest updates and release notes for Niko Table.
 - **Persistence** (`data-table-grid-changes`) — `useGridChanges` → create / update / delete. [Persistence](/examples/persistence-grid/)
 - **Inline validation** — `CellState.error` tooltip on the cell. [Validation](/examples/validation-grid/)
 - **Column resize** — `<DataTableColumnResize />`; [example](/examples/column-resize-table/)
-- **Column auto-fit** — resizable columns fill the container on load instead of leaving dead space (`useColumnAutoFit`); fixed columns keep their size, and restored/persisted widths win. [example](/examples/column-resize-table/)
+- **Column fill on by default** — the first non-pinned data column absorbs the leftover row width, so tables fill the container and a trailing actions column pins right, with no per-table setup. `meta.flex` overrides which column fills; `meta.flex: false` / `TableMeta.disableFlexFill` opt out. Pure layout, never persisted. [example](/examples/column-resize-table/)
+- **Header-fit** — un-resized columns are floored at their header width (measured off-DOM), so a compact column never truncates its label on load.
+- **Resizable fill column** — the fill column resizes via a drag that starts from its rendered width (no jump) and hands the fill to the next column on release.
+- **Column auto-fit** — opt-in `<DataTableColumnAutoFit />` marker that spreads leftover space evenly across resizable columns (the alternative to single-column fill); fixed columns keep their size, restored/persisted widths win. [example](/examples/column-resize-table/)
 - Docs — full registry catalog (resize + Data Grid + axis DnD packages), Install Everything lists all items, homepage/`CliCommandCode` namespace install
 - Docs — Data Grid intro live demo includes **Current Table State** panel
 - Docs — Manual Installation project tree includes `grid/`, column resize, flash/scroll hooks
@@ -29,6 +32,7 @@ description: Latest updates and release notes for Niko Table.
 - `DEFAULT_MIN_COLUMN_SIZE` moved to `lib/constants` (root no longer imports resize-handle for it)
 - `enableSorting` defaults off unless config or feature detection enables it
 - DnD bodies support row context menus; non-virt column-DnD body honors resize; column-DnD example mounts resize
+- Column resize applies on drag-end (`columnResizeMode: "onEnd"`) with a container-level preview line, so memoized rows don't re-render every mousemove
 
 ### Removed
 
@@ -36,6 +40,7 @@ description: Latest updates and release notes for Niko Table.
 
 ### Fixed
 
+- `resolveColumnWidth` keeps a flex column's declared size when resizing is off (checks `resizing` before `isFlex`)
 - Column-resize grip is idle-invisible (shows on hover/focus/drag) so it doesn’t read as a header divider offset from body `border-r`
 - Body cells truncate on column resize (no text spill into neighbors); default `minSize` 40px when resize is enabled
 - `DataTableDndBody` supports column resize (Row DnD + `<DataTableColumnResize />`)

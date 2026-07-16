@@ -13,7 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Persistence (`data-table-grid-changes`)** — `useGridChanges` → `{ created, updated, deleted }`, dirty set, `reconcile`. [Persistence](/examples/persistence-grid/)
 - **Inline validation** — `CellState.error` tooltip on invalid cells. [Validation](/examples/validation-grid/)
 - **Column resize** — `<DataTableColumnResize />` (grip + double-click autosize). Regular example: [Column Resize Table](/examples/column-resize-table/)
-- **Column auto-fit** — resizable columns fill the container width on load (`useColumnAutoFit`, wired into both table structures) instead of leaving dead space; fixed columns (`enableResizing: false`) keep their size; auto-fit re-fits on container growth and stops once the user resizes or `columnSizing` is restored. [Column Resize Table](/examples/column-resize-table/)
+- **Column fill on by default** — the first non-pinned data column absorbs the leftover row width (`resolveFlexColumnIds`), so tables fill the container and a trailing actions column pins right, with no per-table setup. `meta.flex` overrides which column fills; `meta.flex: false` / `TableMeta.disableFlexFill` opt out. Pure layout — never written to `columnSizing`. [Column Resize Table](/examples/column-resize-table/)
+- **Header-fit** — `useHeaderMinWidths` measures each header label off-DOM (canvas, zero reflow) and floors un-resized columns at their header width, so a compact column never truncates its label on load. A user-resized column keeps its width.
+- **Resizable fill column** — the flex column resizes via a custom pointer drag that starts from its rendered width (no jump) and hands the fill to the next column on release.
+- **Column auto-fit** — opt-in `<DataTableColumnAutoFit />` marker: spreads leftover space evenly across resizable columns to fill on load (the alternative to single-column flex fill). Fixed columns (`enableResizing: false`) keep their size; re-fits on container growth and stops once the user resizes or `columnSizing` is restored. [Column Resize Table](/examples/column-resize-table/)
 - **Row context menu** — write-once `RowMenu*` for kebab + right-click. [Row Context Menu](/examples/row-context-menu-table/)
 - **`DataTableViewDndMenu`** — drag-to-reorder view menu (separate package; plain view menu stays dnd-kit-free)
 - **Core bridges** — `scrollRowIntoView`, `flashRows` / `flashCells`, `toggleRowSelection`
@@ -24,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Column resize applies on drag-end** — `columnResizeMode: "onEnd"` with a container-level preview guide line, so memoized rows don't re-render on every mousemove during a drag.
 - **Composability** — row/column DnD import from `data-table-row-dnd-structure` / `data-table-column-dnd-structure` (virtualized twins likewise); registry packages no longer cross-ship the other axis
 - **Composability** — `DEFAULT_MIN_COLUMN_SIZE` lives in `lib/constants` so `DataTableRoot` no longer imports the resize-handle module for a constant
 - **Composability** — `enableSorting` defaults to `false` unless config or feature detection turns it on (sorted row model stays off without sort UI)
@@ -48,6 +52,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Core** — `resolveColumnWidth` checks `resizing` before `isFlex`, so a flex column keeps its declared `size` when resizing is off
 - **Core** — regular (and virtualized) body cells use `truncate` so resize-shrunk text ellipsizes instead of overlapping neighbors; resize-on default `minSize` is 40px (matches the grip clamp)
 - **Core** — `DataTableDndBody` honors column resize (`getSize()`, layout lock, truncate) so Row DnD tables can mount `<DataTableColumnResize />`
 - **DnD** — pass stable `React.useId()` to every `DndContext` so SSR hydration no longer mismatches on `aria-describedby="DndDescribedBy-N"`

@@ -10,6 +10,7 @@ import {
 } from "@/components/niko-table/core/data-table-structure"
 import { DataTableColumnHeader } from "@/components/niko-table/components/data-table-column-header"
 import { DataTableColumnTitle } from "@/components/niko-table/components/data-table-column-title"
+import { DataTableColumnAutoFit } from "@/components/niko-table/components/data-table-column-auto-fit"
 import { DataTableColumnResize } from "@/components/niko-table/components/data-table-column-resize"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 import { Badge } from "@/components/ui/badge"
@@ -126,6 +127,7 @@ export default function ColumnResizeAutofitTable() {
         onColumnSizingChange={setColumnSizing}
       >
         <DataTableColumnResize />
+        <DataTableColumnAutoFit />
         <DataTable>
           <DataTableHeader />
           <DataTableBody />

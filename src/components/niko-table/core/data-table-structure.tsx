@@ -26,11 +26,11 @@ import { DataTableColumnHeaderRoot } from "../components/data-table-column-heade
 import { DataTableEmptyState } from "../components/data-table-empty-state"
 import { DataTableRowContextMenu } from "../components/data-table-row-context-menu"
 import { useResolvedRowContextMenuRenderer } from "../components/data-table-row-context-menu-slot"
-import { createScrollHandler } from "../lib/create-scroll-handler"
 import { DataTableColumnResizeHandle } from "../lib/column-resize-handle"
+import { createScrollHandler } from "../lib/create-scroll-handler"
+import { resolveColumnWidth, resolveFlexColumnIds } from "../lib/flex-columns"
 import { resolveRowFromClick } from "../lib/row-click"
 import { getCommonPinningStyles } from "../lib/styles"
-import { useColumnAutoFit } from "../lib/use-column-auto-fit"
 import { flashCellKey, useDataTable } from "./data-table-context"
 
 // ============================================================================
@@ -63,7 +63,7 @@ export const DataTableHeader = React.memo(function DataTableHeader({
   className,
   sticky = true,
 }: DataTableHeaderProps) {
-  const { table } = useDataTable()
+  const { table, headerMinWidths, setColumnResizePreview } = useDataTable()
   const resizing = table?.options.enableColumnResizing ?? false
 
   const headerGroups = table?.getHeaderGroups() ?? []
@@ -71,6 +71,11 @@ export const DataTableHeader = React.memo(function DataTableHeader({
   if (headerGroups.length === 0) {
     return null
   }
+
+  // Flex fill is on by default: resolve which column soaks up the leftover
+  // width (explicit `meta.flex`, else the first non-pinned data column).
+  const flexColumnIds = resolveFlexColumnIds(table)
+  const columnSizing = table.getState().columnSizing
 
   return (
     <TableHeader
@@ -85,15 +90,16 @@ export const DataTableHeader = React.memo(function DataTableHeader({
       {headerGroups.map(headerGroup => (
         <TableRow key={headerGroup.id}>
           {headerGroup.headers.map(header => {
-            const size = header.column.columnDef.size
+            // A flex column has no explicit width — under `table-layout: fixed`
+            // it soaks up the leftover row width. Not drag-resizable.
+            const isFlex = flexColumnIds.has(header.column.id)
             const headerStyle = {
-              // Resizing: width tracks `getSize()` (columnSizing-aware).
-              // Off: unchanged (columnDef.size, or auto when unset).
-              width: resizing
-                ? header.getSize()
-                : size
-                  ? `${size}px`
-                  : undefined,
+              width: resolveColumnWidth(header.column, {
+                resizing,
+                isFlex,
+                columnSizing,
+                headerMinWidths,
+              }),
               ...getCommonPinningStyles(header.column, true),
             }
 
@@ -124,7 +130,11 @@ export const DataTableHeader = React.memo(function DataTableHeader({
                   </DataTableColumnHeaderRoot>
                 )}
                 {resizing && header.column.getCanResize() && (
-                  <DataTableColumnResizeHandle header={header} />
+                  <DataTableColumnResizeHandle
+                    header={header}
+                    isFlex={isFlex}
+                    setResizePreview={setColumnResizePreview}
+                  />
                 )}
               </TableHead>
             )
@@ -159,8 +169,13 @@ interface BodyRowProps {
   isClickable: boolean
   isExpanded: boolean
   isSelected: boolean
-  /** Column resizing is on — cells size from `column.getSize()` instead of `columnDef.size`. */
-  columnSizingEnabled: boolean
+  /**
+   * Precomputed `columnId -> width` for every visible column (flex → undefined,
+   * header-fit floor applied). Built once per body render so cells do an O(1)
+   * lookup instead of recomputing width each. Stable identity, so `React.memo`
+   * holds; the signature below invalidates it when a width changes.
+   */
+  columnWidths: ReadonlyMap<string, number | string | undefined>
   /** Column layout signature — invalidates React.memo on visibility/order/pinning/resize change. */
   columnLayoutSignature: string
   /**
@@ -191,7 +206,7 @@ const BodyRow = React.memo(function BodyRow({
   isClickable,
   isExpanded,
   isSelected,
-  columnSizingEnabled,
+  columnWidths,
   isRowFlashing,
   flashingCellKeys,
   renderRowContextMenu,
@@ -219,17 +234,13 @@ const BodyRow = React.memo(function BodyRow({
       )}
     >
       {visibleCells.map(cell => {
-        const size = cell.column.columnDef.size
         const flashing =
           isRowFlashing ||
           flashingCellKeys.has(flashCellKey(row.id, cell.column.id))
         const cellStyle = {
-          // Resizing: width tracks `getSize()`; off: unchanged.
-          width: columnSizingEnabled
-            ? cell.column.getSize()
-            : size
-              ? `${size}px`
-              : undefined,
+          // Precomputed by the body: flex → undefined (fills), otherwise the
+          // header-fit-floored width (or the declared size when resizing off).
+          width: columnWidths.get(cell.column.id),
           ...getCommonPinningStyles(cell.column, false),
           ...(flashing ? { animation: FLASH_ANIMATION } : {}),
         }
@@ -336,27 +347,10 @@ export function DataTableBody<TData>({
     flashingRowIds,
     flashingCellKeys,
     registerRowScroller,
+    headerMinWidths,
   } = useDataTable<TData>()
   const { rows } = table.getRowModel()
   const containerRef = React.useRef<HTMLTableSectionElement>(null)
-
-  // When resizing is on, columns render at fixed `getSize()` widths instead of
-  // flex-filling. Scale the resizable columns up to fill the container on load
-  // so the table doesn't leave dead space on the right (until the user resizes).
-  const [autoFitScrollEl, setAutoFitScrollEl] =
-    React.useState<HTMLElement | null>(null)
-  React.useLayoutEffect(() => {
-    setAutoFitScrollEl(
-      containerRef.current?.closest<HTMLElement>(
-        '[data-slot="table-container"]',
-      ) ?? null,
-    )
-  }, [])
-  useColumnAutoFit(
-    table,
-    autoFitScrollEl,
-    table.options.enableColumnResizing ?? false,
-  )
 
   // Register a scroll handle SCOPED to this table's own container, so
   // `scrollRowIntoView` resolves the row within this table (a plain body has no
@@ -424,12 +418,55 @@ export function DataTableBody<TData>({
   const { columnVisibility, columnOrder, columnPinning, columnSizing } =
     table.getState()
   const resizing = table.options.enableColumnResizing ?? false
+
+  // Flex fill is on by default: which column soaks up the leftover row width.
+  // `columnSizing` is a dep — resizing a flex column pins it and shifts the
+  // fill to the next column.
+  const flexColumnIds = React.useMemo(
+    () => resolveFlexColumnIds(table),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      table,
+      columnVisibility,
+      columnOrder,
+      columnPinning,
+      columnSizing,
+      resizing,
+    ],
+  )
+
+  // Precompute every column's rendered width once (flex + header-fit rules),
+  // so each cell is an O(1) lookup and header/body/lock all agree.
+  const columnWidths = React.useMemo(() => {
+    const widths = new Map<string, number | string | undefined>()
+    for (const col of table.getVisibleLeafColumns()) {
+      widths.set(
+        col.id,
+        resolveColumnWidth(col, {
+          resizing,
+          isFlex: flexColumnIds.has(col.id),
+          columnSizing,
+          headerMinWidths,
+        }),
+      )
+    }
+    return widths
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    table,
+    flexColumnIds,
+    columnSizing,
+    columnVisibility,
+    columnOrder,
+    headerMinWidths,
+    resizing,
+  ])
+
   // String signature of the visible column layout. Memoized rows compare it
-  // to invalidate on column add/remove / toggle / reorder / pin / resize.
-  // `columns` must be included — add/remove does not change visibility/order/
-  // pinning state, so omitting it left body rows stuck with a stale cell set.
-  // For external row state (inline edits, optimistic overlays), pass
-  // `getRowMemoKey`.
+  // to invalidate on column add/remove / toggle / reorder / pin / width change
+  // (resize OR header-fit/flex). `columns` must be included — add/remove does
+  // not change visibility/order/pinning. For external row state (inline edits,
+  // optimistic overlays), pass `getRowMemoKey`.
   const columnLayoutSignature = React.useMemo(
     () =>
       table
@@ -437,19 +474,11 @@ export function DataTableBody<TData>({
         .map(c => {
           const pinned = c.getIsPinned()
           const base = pinned ? `${c.id}:${pinned}` : c.id
-          return resizing ? `${base}:${c.getSize()}` : base
+          return resizing ? `${base}:${columnWidths.get(c.id) ?? "flex"}` : base
         })
         .join(","),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      table,
-      columns,
-      columnVisibility,
-      columnOrder,
-      columnPinning,
-      columnSizing,
-      resizing,
-    ],
+    [table, columns, columnWidths, resizing],
   )
 
   const isClickable = !!onRowClick
@@ -503,17 +532,26 @@ export function DataTableBody<TData>({
         minWidth: tableEl.style.minWidth,
       }
     }
-    const totalDesiredWidth = table
-      .getVisibleLeafColumns()
-      .reduce((sum, col) => sum + col.getSize(), 0)
+    const leafColumns = table.getVisibleLeafColumns()
+    // Min-width = sum of the rendered widths (header-fit floors included; a
+    // flex column contributes its natural `getSize()` as its floor).
+    const totalDesiredWidth = leafColumns.reduce((sum, col) => {
+      const width = columnWidths.get(col.id)
+      return sum + (typeof width === "number" ? width : col.getSize())
+    }, 0)
+    // A flex column has no fixed width, so the table must stretch to the
+    // container (width 100%) and let that column soak up the surplus; the sized
+    // columns still can't compress below their sum (minWidth).
+    const hasFlex = flexColumnIds.size > 0
     tableEl.style.tableLayout = "fixed"
-    tableEl.style.width = `${totalDesiredWidth}px`
+    tableEl.style.width = hasFlex ? "100%" : `${totalDesiredWidth}px`
     tableEl.style.minWidth = `${totalDesiredWidth}px`
     return restore
   }, [
     resizing,
     table,
-    columnSizing,
+    columnWidths,
+    flexColumnIds,
     columnVisibility,
     columnOrder,
     columnPinning,
@@ -536,7 +574,7 @@ export function DataTableBody<TData>({
               isClickable={isClickable}
               isExpanded={row.getIsExpanded()}
               isSelected={row.getIsSelected()}
-              columnSizingEnabled={resizing}
+              columnWidths={columnWidths}
               columnLayoutSignature={columnLayoutSignature}
               rowMemoKey={
                 getRowMemoKey ? getRowMemoKey(row.original as TData) : ""
