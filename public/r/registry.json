@@ -47,6 +47,16 @@
           "target": "components/niko-table/lib/column-resize-handle.tsx"
         },
         {
+          "path": "src/components/niko-table/lib/flex-columns.ts",
+          "type": "registry:lib",
+          "target": "components/niko-table/lib/flex-columns.ts"
+        },
+        {
+          "path": "src/components/niko-table/lib/use-header-min-widths.ts",
+          "type": "registry:lib",
+          "target": "components/niko-table/lib/use-header-min-widths.ts"
+        },
+        {
           "path": "src/components/niko-table/components/data-table-row-context-menu.tsx",
           "type": "registry:component",
           "target": "components/niko-table/components/data-table-row-context-menu.tsx"
@@ -155,11 +165,6 @@
           "path": "src/components/niko-table/lib/styles.ts",
           "type": "registry:lib",
           "target": "components/niko-table/lib/styles.ts"
-        },
-        {
-          "path": "src/components/niko-table/lib/use-column-auto-fit.ts",
-          "type": "registry:lib",
-          "target": "components/niko-table/lib/use-column-auto-fit.ts"
         },
         {
           "path": "src/components/niko-table/config/data-table.ts",
@@ -860,6 +865,29 @@
           "path": "src/components/niko-table/components/data-table-column-resize.tsx",
           "type": "registry:component",
           "target": "components/niko-table/components/data-table-column-resize.tsx"
+        }
+      ]
+    },
+    {
+      "name": "data-table-column-auto-fit",
+      "type": "registry:component",
+      "title": "DataTable Column Auto-fit",
+      "description": "Opt-in fill-to-container for resizable columns. Drop <DataTableColumnAutoFit/> next to <DataTableColumnResize/> and the resizable columns scale up to fill the viewport on load (they keep their declared size otherwise). Self-contained — the body ships no auto-fit code unless you install this.",
+      "dependencies": [],
+      "registryDependencies": [
+        "https://niko-table.com/r/data-table.json",
+        "https://niko-table.com/r/data-table-column-resize.json"
+      ],
+      "files": [
+        {
+          "path": "src/components/niko-table/components/data-table-column-auto-fit.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-column-auto-fit.tsx"
+        },
+        {
+          "path": "src/components/niko-table/lib/use-column-auto-fit.ts",
+          "type": "registry:lib",
+          "target": "components/niko-table/lib/use-column-auto-fit.ts"
         }
       ]
     },

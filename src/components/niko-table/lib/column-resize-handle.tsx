@@ -89,10 +89,27 @@ function autosizeColumn<TData>(
  */
 export interface DataTableColumnResizeHandleProps<TData> {
   header: Header<TData, unknown>
+  /**
+   * This column is currently the flex (fill) column. Flex columns have no width
+   * TanStack can drive, so they resize through a custom pointer drag that starts
+   * from the rendered width (no jump) and, on release, writes an explicit width
+   * — which pins the column and hands the fill to the next eligible column.
+   */
+  isFlex?: boolean
+  /**
+   * Drive the resize preview line during a flex drag (from the DataTable
+   * context). Passed `{ resizingColumnId, deltaOffset }` while dragging, `null`
+   * on release.
+   */
+  setResizePreview?: (
+    info: { resizingColumnId: string | null; deltaOffset: number } | null,
+  ) => void
 }
 
 export function DataTableColumnResizeHandle<TData>({
   header,
+  isFlex = false,
+  setResizePreview,
 }: DataTableColumnResizeHandleProps<TData>) {
   const isResizing = header.column.getIsResizing()
   const resize = header.getResizeHandler()
@@ -100,12 +117,58 @@ export function DataTableColumnResizeHandle<TData>({
   const min = def.minSize ?? DEFAULT_MIN_COLUMN_SIZE
   const max = def.maxSize ?? DEFAULT_MAX_COLUMN_SIZE
 
-  const nudge = (delta: number) => {
+  // `fallbackWidth` seeds the first nudge for a flex column (no `columnSizing`
+  // entry yet) from its rendered width so the arrow key doesn't jump it to the
+  // declared `size`. Non-flex columns fall back to `getSize()` as before.
+  const nudge = (delta: number, fallbackWidth?: number) => {
     header.getContext().table.setColumnSizing(prev => {
-      const current = prev[header.column.id] ?? header.column.getSize()
+      const current =
+        prev[header.column.id] ?? fallbackWidth ?? header.column.getSize()
       const next = Math.min(Math.max(current + delta, min), max)
       return { ...prev, [header.column.id]: next }
     })
+  }
+
+  // Custom drag for the flex column: measure its rendered (filled) width as the
+  // start so there's no jump, follow the cursor via the preview line, and write
+  // an explicit width on release (which releases it from flex).
+  const startFlexResize = (
+    startClientX: number,
+    handleEl: HTMLElement | null,
+  ) => {
+    const thEl = handleEl?.closest<HTMLElement>("[data-col-id]")
+    if (!thEl || !setResizePreview) return
+    const startWidth = thEl.getBoundingClientRect().width
+    const id = header.column.id
+    setResizePreview({ resizingColumnId: id, deltaOffset: 0 })
+    const onMove = (ev: PointerEvent) => {
+      setResizePreview({
+        resizingColumnId: id,
+        deltaOffset: ev.clientX - startClientX,
+      })
+    }
+    const teardown = () => {
+      window.removeEventListener("pointermove", onMove)
+      window.removeEventListener("pointerup", onUp)
+      window.removeEventListener("pointercancel", onCancel)
+      setResizePreview(null)
+    }
+    // Commit the new width only on a real release. A cancelled pointer (e.g. the
+    // browser stealing the gesture) just tears down and keeps the column flexing.
+    const onUp = (ev: PointerEvent) => {
+      const next = Math.min(
+        Math.max(startWidth + (ev.clientX - startClientX), min),
+        max,
+      )
+      header
+        .getContext()
+        .table.setColumnSizing(prev => ({ ...prev, [id]: next }))
+      teardown()
+    }
+    const onCancel = () => teardown()
+    window.addEventListener("pointermove", onMove)
+    window.addEventListener("pointerup", onUp)
+    window.addEventListener("pointercancel", onCancel)
   }
 
   return (
@@ -122,25 +185,38 @@ export function DataTableColumnResizeHandle<TData>({
         // Keep column-DnD header listeners from treating a resize drag as a
         // reorder start (handle lives inside the sortable `<th>`).
         e.stopPropagation()
-        resize(e)
+        // Flex columns resize via the pointer-based custom drag below.
+        if (!isFlex) resize(e)
       }}
       onTouchStart={e => {
         e.stopPropagation()
-        resize(e)
+        if (!isFlex) resize(e)
       }}
       onDoubleClick={e => autosizeColumn(header, e.currentTarget)}
       onClick={e => e.stopPropagation()}
-      onPointerDown={e => e.stopPropagation()}
+      onPointerDown={e => {
+        e.stopPropagation()
+        if (isFlex) {
+          e.preventDefault()
+          startFlexResize(e.clientX, e.currentTarget)
+        }
+      }}
       onKeyDown={e => {
         const step = e.shiftKey
           ? KEYBOARD_RESIZE_STEP_LARGE
           : KEYBOARD_RESIZE_STEP
+        // Flex columns have no `columnSizing` entry, so seed the first nudge
+        // from the rendered width to avoid jumping to the declared `size`.
+        const fallbackWidth = isFlex
+          ? e.currentTarget.closest("[data-col-id]")?.getBoundingClientRect()
+              .width
+          : undefined
         if (e.key === "ArrowLeft") {
           e.preventDefault()
-          nudge(-step)
+          nudge(-step, fallbackWidth)
         } else if (e.key === "ArrowRight") {
           e.preventDefault()
-          nudge(step)
+          nudge(step, fallbackWidth)
         } else if (e.key === "Enter") {
           e.preventDefault()
           autosizeColumn(header, e.currentTarget)

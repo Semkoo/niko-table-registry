@@ -34,6 +34,7 @@ export function TableColumnTitle<TData, TValue>({
 
   return (
     <div
+      data-slot="column-title"
       className={cn(
         // `min-w-0` so `truncate` can shrink this flex item below its text
         // width (a nowrap flex child otherwise keeps full content width and

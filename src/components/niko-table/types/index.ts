@@ -32,6 +32,22 @@ declare module "@tanstack/react-table" {
     // Display
     label?: string
     placeholder?: string
+    /**
+     * Which column absorbs the leftover row width when column resizing is on
+     * (needs `<DataTableColumnResize />`). Filling is ON BY DEFAULT — the first
+     * non-pinned data column flexes automatically — so you rarely set this.
+     *
+     * - `true` overrides the default to flex THIS column instead (use when the
+     *   first column isn't the one that should grow).
+     * - `false` opts this column out of being auto-picked.
+     *
+     * The flex column renders with no width and absorbs the surplus, so every
+     * other column keeps its `size` and a trailing actions/menu column pins to
+     * the right edge. Pure layout — never touches `columnSizing`, so no
+     * persistence side effects. Turn filling off for a whole table with
+     * `TableMeta.disableFlexFill`.
+     */
+    flex?: boolean
 
     // Filtering
     variant?: FilterVariant
@@ -70,6 +86,12 @@ declare module "@tanstack/react-table" {
   interface TableMeta<TData extends RowData> {
     joinOperator?: JoinOperator
     hasIndividualJoinOperators?: boolean
+    /**
+     * Turn off default flex fill for the whole table, so columns size to their
+     * own widths and the table scrolls horizontally instead of stretching to
+     * fill. Use for wide, many-column tables meant to scroll.
+     */
+    disableFlexFill?: boolean
   }
 }
 

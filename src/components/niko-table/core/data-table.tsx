@@ -15,6 +15,8 @@ import React from "react"
 import { cn } from "@/lib/utils"
 import { TableComponent } from "@/components/ui/table"
 
+import { useColumnResizeInfo, useDataTable } from "./data-table-context"
+
 /**
  * Extracts height from Tailwind arbitrary values (e.g., h-[600px], max-h-[400px]).
  * Converts them to inline styles to ensure scroll events work reliably.
@@ -106,6 +108,51 @@ export interface DataTableContainerProps {
  *   <DataTableBody onScroll={...} />
  * </DataTable>
  */
+/**
+ * A single vertical guide line that follows the cursor while a column is being
+ * resized. Resizing runs in `onEnd` mode, so the columns themselves don't move
+ * until the drag ends (that's what keeps heavy tables smooth); this line gives
+ * the live "where the edge will land" feedback in the meantime.
+ *
+ * It subscribes to the dedicated resize-info context, so it — and nothing else
+ * in the table — re-renders per pointer move. Positioned in the scroll
+ * container's content space so it tracks correctly through horizontal scroll.
+ */
+function ColumnResizePreviewLine() {
+  const { resizingColumnId, deltaOffset } = useColumnResizeInfo()
+  const { scrollContainer } = useDataTable()
+
+  if (!resizingColumnId || !scrollContainer) return null
+
+  const escapedId =
+    typeof CSS !== "undefined" && CSS.escape
+      ? CSS.escape(resizingColumnId)
+      : resizingColumnId
+  const cell = scrollContainer.querySelector<HTMLElement>(
+    `thead [data-col-id="${escapedId}"]`,
+  )
+  if (!cell) return null
+
+  const containerRect = scrollContainer.getBoundingClientRect()
+  const cellRect = cell.getBoundingClientRect()
+  // Right edge of the dragged column in the container's scrollable content
+  // space, shifted by the live drag delta.
+  const left =
+    cellRect.right -
+    containerRect.left +
+    scrollContainer.scrollLeft +
+    deltaOffset
+
+  return (
+    <div
+      aria-hidden
+      data-slot="column-resize-preview"
+      className="bg-primary pointer-events-none absolute top-0 z-40 w-px"
+      style={{ left, height: scrollContainer.scrollHeight }}
+    />
+  )
+}
+
 export function DataTable({
   children,
   className,
@@ -121,8 +168,13 @@ export function DataTable({
   const finalHeight = height ?? parsed.height
   const finalMaxHeight = maxHeight ?? parsed.maxHeight ?? finalHeight
 
+  // Register the scroll container so opt-in features (e.g.
+  // `<DataTableColumnAutoFit />`) can measure/observe the viewport width.
+  const { registerScrollContainer } = useDataTable()
+
   return (
     <div
+      ref={registerScrollContainer}
       data-slot="table-container"
       className={cn(
         "relative w-full overflow-auto rounded-lg border",
@@ -144,6 +196,7 @@ export function DataTable({
       }}
     >
       <TableComponent>{children}</TableComponent>
+      <ColumnResizePreviewLine />
     </div>
   )
 }
