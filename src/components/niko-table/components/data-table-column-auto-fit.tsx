@@ -18,10 +18,10 @@ import { useColumnAutoFit } from "../lib/use-column-auto-fit"
 /**
  * Opt-in column auto-fit — mix-and-match, like every other niko-table feature.
  * Pairs with column resizing (`<DataTableColumnResize />`). DROP THIS anywhere
- * inside `<DataTableRoot>` and, on load, the resizable columns scale up to fill
- * the container instead of leaving dead space to the right. Leave it out and
- * this whole feature (and its code) never ships — columns keep their declared
- * `size` and any surplus stays empty.
+ * inside `<DataTableRoot>` and, on load, the resizable columns scale up by an
+ * EQUAL SHARE of the leftover space. Leave it out and this whole feature (and
+ * its code) never ships — the default single-flex-column fill applies instead
+ * (the first non-pinned data column absorbs the surplus; see `meta.flex`).
  *
  * Self-contained: it runs the auto-fit logic itself off the table + scroll
  * container from context, so the body structures carry no auto-fit code. It

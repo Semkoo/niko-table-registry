@@ -41,8 +41,12 @@
  * - Writes immediately. Resizing runs in `onEnd` mode, so this fires once per
  *   drag (not per frame), and an immediate write can't be lost on a hard
  *   refresh the way a debounced one can.
- * - SSR-safe: reads `localStorage` only on the client (the server render starts
- *   from `{}`, then hydration fills in the stored widths).
+ * - SSR note: `localStorage` is only read on the client, so nothing crashes on
+ *   the server — but in an SSR framework the client's first (hydration) render
+ *   already has the stored widths while the server HTML was rendered with
+ *   `{}`, so React may log a hydration-mismatch warning for the width styles
+ *   and reconcile. Cosmetic, but if the warning matters to you, load the
+ *   widths in an effect instead (accepting a default-width first paint).
  * - Corrupt / hand-edited storage is ignored (non-object, or non-finite
  *   widths) so a bad value never reaches `column.getSize()`.
  * - Scope the `storageKey` per table (and per tenant/user if widths shouldn't
@@ -56,9 +60,18 @@ function sanitize(value: unknown): ColumnSizingState {
   if (!value || typeof value !== "object" || Array.isArray(value)) return {}
   const result: ColumnSizingState = {}
   for (const [id, width] of Object.entries(value)) {
-    if (typeof width === "number" && Number.isFinite(width)) result[id] = width
+    if (typeof width === "number" && Number.isFinite(width) && width > 0) {
+      result[id] = width
+    }
   }
   return result
+}
+
+/** Shallow content equality, so an identical re-read keeps state identity. */
+function sizingEqual(a: ColumnSizingState, b: ColumnSizingState): boolean {
+  const aKeys = Object.keys(a)
+  if (aKeys.length !== Object.keys(b).length) return false
+  return aKeys.every(id => a[id] === b[id])
 }
 
 function readStored(key: string): ColumnSizingState {
@@ -100,9 +113,13 @@ export function useColumnSizingPersistence(
   // render-time ref write and never re-create on unrelated renders.
   const columnSizingRef = React.useRef(columnSizing)
 
-  // Re-load when the key changes (e.g. switching tenant / scope).
+  // Re-load when the key changes (e.g. switching tenant / scope). Skips when
+  // the content already matches (the mount run after the initializer, or a
+  // key change landing on identical data), so no wasted re-render and no
+  // identity churn for consumers keyed on `columnSizing` (e.g. auto-fit).
   React.useEffect(() => {
     const next = readStored(storageKey)
+    if (sizingEqual(columnSizingRef.current, next)) return
     columnSizingRef.current = next
     setColumnSizing(next)
   }, [storageKey])

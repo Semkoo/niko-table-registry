@@ -161,7 +161,7 @@ export default function ColumnResizePersistedTable() {
       <p className="text-xs text-muted-foreground">
         {resizedCount > 0
           ? `${resizedCount} column widths saved.`
-          : "No widths saved yet. Showing the auto-fit layout."}
+          : "No widths saved yet. Showing the default fill layout."}
       </p>
     </div>
   )

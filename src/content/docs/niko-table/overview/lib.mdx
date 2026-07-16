@@ -686,7 +686,7 @@ const headerMinWidths = useHeaderMinWidths(table, scrollElement, resizingEnabled
 
 ### useColumnAutoFit
 
-The even-split alternative to single-column flex fill. On load (and when the container grows or columns toggle) it grows the resizable columns by an equal share of the leftover space so they fill the available width, seeding `columnSizing`. Backs off permanently once the user resizes a column or a saved `columnSizing` is restored. Consumed by the opt-in [`<DataTableColumnAutoFit />`](/getting-started/components/#column-header-controls) marker — most consumers drop that component rather than call this hook directly.
+The even-split alternative to single-column flex fill. On load (and when the container grows or columns toggle) it grows the resizable columns by an equal share of the leftover space so they fill the available width, seeding `columnSizing`. Backs off permanently once the user resizes a column or a saved `columnSizing` is restored. Consumed by the opt-in [`<DataTableColumnAutoFit />`](/niko-table/overview/components/#datatablecolumnautofit) marker — most consumers drop that component rather than call this hook directly.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/lib/use-column-auto-fit.ts`} external>Source Code ↗</DocsLink>

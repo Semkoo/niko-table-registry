@@ -999,7 +999,7 @@ Actions component for empty state (buttons, links, etc.).
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-column-resize.tsx`} external>Source Code ↗</DocsLink>
 </div>
 
-Opt-in column resizing. Drop `<DataTableColumnResize />` inside `DataTableRoot` to enable drag grips (and keyboard nudge / double-click autosize) on every header that allows resize. Works with both regular and virtualized headers. Opt out per column with `enableResizing: false`. See the [Column Resize Table](/examples/column-resize-table/) example.
+Opt-in column resizing. Drop `<DataTableColumnResize />` inside `DataTableRoot` to enable drag grips (and keyboard nudge / double-click autosize) on every header that allows resize. Works with both regular and virtualized headers. Opt out per column with `enableResizing: false`. Resizing also switches on default **flex fill** (one column absorbs the leftover width so the table fills its container — dragging the fill column pins it at an explicit width and hands the fill to the next eligible column) and **header-fit** (un-resized columns are floored at their header label width so labels don't truncate). Drags preview via a guide line and apply the new width on release (`columnResizeMode: "onEnd"`). See the [Column Resize Table](/examples/column-resize-table/) example.
 
 ```tsx showLineNumbers
 import { DataTableColumnResize } from "@/components/niko-table/components/data-table-column-resize"
@@ -1016,6 +1016,33 @@ import { DataTableColumnResize } from "@/components/niko-table/components/data-t
 | Name     | Type | Description                                       |
 | -------- | ---- | ------------------------------------------------- |
 | _(none)_ | —    | No props — presence enables resize for the table. |
+
+---
+
+### DataTableColumnAutoFit
+
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-column-auto-fit.tsx`} external>Source Code ↗</DocsLink>
+</div>
+
+Opt-in marker that replaces the default single-flex-column fill with an even split: on load, every **resizable** column grows by an equal share of the leftover width to fill the container. Pairs with `<DataTableColumnResize />` (no-ops unless resizing is enabled). Re-fits when the container grows and backs off once the user resizes a column or a saved `columnSizing` is restored, so manual and persisted widths win. See [Auto-fit](/examples/column-resize-table/#auto-fit).
+
+```tsx showLineNumbers
+import { DataTableColumnAutoFit } from "@/components/niko-table/components/data-table-column-auto-fit"
+
+<DataTableRoot data={data} columns={columns}>
+  <DataTableColumnResize />
+  <DataTableColumnAutoFit />
+  <DataTable>
+    <DataTableHeader />
+    <DataTableBody />
+  </DataTable>
+</DataTableRoot>
+```
+
+| Name     | Type | Description                                         |
+| -------- | ---- | --------------------------------------------------- |
+| _(none)_ | —    | No props — presence enables auto-fit for the table. |
 
 ---
 

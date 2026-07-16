@@ -18,6 +18,7 @@
  * so both bodies can import it without pulling the opt-in marker package.
  */
 import { type Header } from "@tanstack/react-table"
+import * as React from "react"
 import { cn } from "@/lib/utils"
 import { DEFAULT_MAX_COLUMN_SIZE, DEFAULT_MIN_COLUMN_SIZE } from "./constants"
 
@@ -117,6 +118,21 @@ export function DataTableColumnResizeHandle<TData>({
   const min = def.minSize ?? DEFAULT_MIN_COLUMN_SIZE
   const max = def.maxSize ?? DEFAULT_MAX_COLUMN_SIZE
 
+  // ARIA value: `getSize()` is wrong for a column without an explicit
+  // `columnSizing` entry — a flex column renders at whatever fills the
+  // container, and header-fit can floor an un-resized column wider than its
+  // declared size. Measure the rendered width when the handle gains focus so
+  // screen readers hear the real width; once an entry exists, `getSize()` is
+  // the truth again (user choice wins, render and ARIA agree).
+  const [focusedWidth, setFocusedWidth] = React.useState<number | null>(null)
+  const hasExplicitWidth =
+    header.getContext().table.getState().columnSizing[header.column.id] != null
+  const ariaValueNow = Math.round(
+    hasExplicitWidth
+      ? header.column.getSize()
+      : (focusedWidth ?? header.column.getSize()),
+  )
+
   // `fallbackWidth` seeds the first nudge for a flex column (no `columnSizing`
   // entry yet) from its rendered width so the arrow key doesn't jump it to the
   // declared `size`. Non-flex columns fall back to `getSize()` as before.
@@ -128,6 +144,13 @@ export function DataTableColumnResizeHandle<TData>({
       return { ...prev, [header.column.id]: next }
     })
   }
+
+  // Tear down an in-flight flex drag if the handle unmounts mid-drag (route
+  // change, dialog close): the window listeners must not linger, and the
+  // eventual pointerup must not commit a width to a table that no longer
+  // exists (a consumer's `onColumnSizingChange` could persist it).
+  const flexDragTeardownRef = React.useRef<(() => void) | null>(null)
+  React.useEffect(() => () => flexDragTeardownRef.current?.(), [])
 
   // Custom drag for the flex column: measure its rendered (filled) width as the
   // start so there's no jump, follow the cursor via the preview line, and write
@@ -148,11 +171,13 @@ export function DataTableColumnResizeHandle<TData>({
       })
     }
     const teardown = () => {
+      flexDragTeardownRef.current = null
       window.removeEventListener("pointermove", onMove)
       window.removeEventListener("pointerup", onUp)
       window.removeEventListener("pointercancel", onCancel)
       setResizePreview(null)
     }
+    flexDragTeardownRef.current = teardown
     // Commit the new width only on a real release. A cancelled pointer (e.g. the
     // browser stealing the gesture) just tears down and keeps the column flexing.
     const onUp = (ev: PointerEvent) => {
@@ -177,10 +202,19 @@ export function DataTableColumnResizeHandle<TData>({
       role="separator"
       aria-orientation="vertical"
       aria-label="Resize column (arrow keys, or double-click to fit)"
-      aria-valuenow={header.column.getSize()}
+      aria-valuenow={ariaValueNow}
       aria-valuemin={min}
-      aria-valuemax={max}
+      // A flex column can legitimately render wider than the declared
+      // `maxSize` (fill ignores it), so keep the ARIA range valid.
+      aria-valuemax={Math.max(max, ariaValueNow)}
       tabIndex={0}
+      onFocus={e => {
+        const width = e.currentTarget
+          .closest("[data-col-id]")
+          ?.getBoundingClientRect().width
+        setFocusedWidth(width ?? null)
+      }}
+      onBlur={() => setFocusedWidth(null)}
       onMouseDown={e => {
         // Keep column-DnD header listeners from treating a resize drag as a
         // reorder start (handle lives inside the sortable `<th>`).
