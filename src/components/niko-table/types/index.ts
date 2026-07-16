@@ -90,6 +90,10 @@ declare module "@tanstack/react-table" {
      * Turn off default flex fill for the whole table, so columns size to their
      * own widths and the table scrolls horizontally instead of stretching to
      * fill. Use for wide, many-column tables meant to scroll.
+     *
+     * Set it statically via `<DataTableRoot meta={{ disableFlexFill: true }}>`
+     * — it's read when table options are built, so toggling it at runtime
+     * alone won't re-apply until another table state change rebuilds them.
      */
     disableFlexFill?: boolean
   }

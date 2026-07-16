@@ -53,6 +53,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Core** — keyboard nudge and double-click autosize now exit auto-fit like a drag does, so the fit no longer redistributes the space a keyboard user just removed
+- **Core** — header-fit floors use the same label fallback as the rendered title (formatted column id), apply only to resizable columns (no phantom floors on utility columns), and keep Map identity when nothing changed (no extra full-table re-render after first paint)
+- **Core** — the resize handle announces the real rendered width (`aria-valuenow`) for fill/floored columns, and an in-flight fill-column drag tears down if the table unmounts (no width committed to a dead table)
+- **Core** — `useColumnSizingPersistence` skips the redundant state write on mount and rejects non-positive stored widths
 - **Core** — `resolveColumnWidth` checks `resizing` before `isFlex`, so a flex column keeps its declared `size` when resizing is off
 - **Core** — regular (and virtualized) body cells use `truncate` so resize-shrunk text ellipsizes instead of overlapping neighbors; resize-on default `minSize` is 40px (matches the grip clamp)
 - **Core** — `DataTableDndBody` honors column resize (`getSize()`, layout lock, truncate) so Row DnD tables can mount `<DataTableColumnResize />`

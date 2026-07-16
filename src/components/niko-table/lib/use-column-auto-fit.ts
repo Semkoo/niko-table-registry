@@ -28,10 +28,16 @@
  * - Only resizable columns are scaled; fixed utility columns (selection,
  *   actions, gutters — `enableResizing: false`) keep their size, and their
  *   width is subtracted from the space the resizable columns fill.
- * - Once the user manually resizes any column, auto-fit stops for the life of
- *   the mount, so their widths are never overwritten.
+ * - Once the user manually resizes any column — drag, keyboard nudge, or
+ *   double-click autosize — auto-fit stops for the life of the mount, so their
+ *   widths are never overwritten.
  * - When the columns already meet or exceed the container width, it does
  *   nothing and horizontal scrolling takes over.
+ * - With width PERSISTENCE wired in, the fitted widths are saved like any
+ *   other `columnSizing` change, and on later visits they count as restored
+ *   sizing — so auto-fit runs once per user, not once per session. That's the
+ *   deliberate trade-off of "restored widths always win": the user keeps a
+ *   stable layout, at the cost of not re-fitting when their viewport grows.
  *
  * Idempotent: after a fit the columns sum to the container width, so the next
  * run finds no surplus and makes no change.
@@ -46,13 +52,23 @@ export function useColumnAutoFit<TData>(
   scrollElement: HTMLElement | null,
   enabled: boolean,
 ): void {
-  // A manual drag/keyboard resize permanently exits auto-fit for this mount —
-  // otherwise a container resize would clobber the width the user just set.
+  // A manual resize permanently exits auto-fit for this mount — otherwise a
+  // container resize would clobber the width the user just set. Drags latch
+  // here via `isResizingColumn`; keyboard nudges, double-click autosize, and
+  // consumer writes don't go through the drag handler, so they latch via the
+  // `lastFitSizingRef` comparison in the fit effect below.
   const userResizedRef = React.useRef(false)
   const isResizingColumn = table.getState().columnSizingInfo.isResizingColumn
   React.useEffect(() => {
     if (isResizingColumn) userResizedRef.current = true
   }, [isResizingColumn])
+
+  // JSON of the sizing this hook last applied. If `columnSizing` is ever
+  // non-empty and NOT what the hook wrote, something else resized a column
+  // (keyboard nudge, double-click autosize, a consumer `setColumnSizing`) —
+  // treat it like a manual drag, or the next fit would redistribute the very
+  // space the user just removed on purpose.
+  const lastFitSizingRef = React.useRef<string | null>(null)
 
   // Sizes already present (restored from persistence, or provided by the
   // consumer) are respected as-is — auto-fit only fills the unsized first-load
@@ -80,6 +96,13 @@ export function useColumnAutoFit<TData>(
   const { columnSizing, columnVisibility, columnOrder } = table.getState()
 
   React.useLayoutEffect(() => {
+    // The width guard is load-bearing for the persistence race, not just a
+    // no-op skip: persisted widths land (via the consumer's storage
+    // subscription) at least one commit BEFORE the ResizeObserver's first
+    // measurement can set `containerWidth`, so gating the capture below behind
+    // a real measurement guarantees restored sizing is visible when it runs.
+    // Capturing earlier (or measuring synchronously in render) would reopen
+    // the reload clobber this ordering prevents.
     if (!enabled || containerWidth <= 0) return
 
     // Capture whether the consumer restored widths on the first measured pass —
@@ -89,6 +112,17 @@ export function useColumnAutoFit<TData>(
         Object.keys(table.getState().columnSizing).length > 0
     }
     if (userResizedRef.current || hadInitialSizingRef.current) return
+
+    // Sizing that this hook didn't write means a manual resize happened
+    // through a path that bypasses `isResizingColumn` (keyboard, autosize,
+    // consumer write) — latch and stop fitting for this mount.
+    if (
+      Object.keys(columnSizing).length > 0 &&
+      JSON.stringify(columnSizing) !== lastFitSizingRef.current
+    ) {
+      userResizedRef.current = true
+      return
+    }
 
     const leafColumns = table.getVisibleLeafColumns()
     const resizable = leafColumns.filter(c => c.getCanResize())
@@ -120,7 +154,11 @@ export function useColumnAutoFit<TData>(
     }
     if (!changed) return
 
-    table.setColumnSizing(prev => ({ ...prev, ...next }))
+    // Record what we're about to write so the external-change check above can
+    // tell hook-applied sizing apart from a user's keyboard/autosize resize.
+    const merged = { ...columnSizing, ...next }
+    lastFitSizingRef.current = JSON.stringify(merged)
+    table.setColumnSizing(() => merged)
     // `table` identity is stable; state slices below drive re-fitting.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enabled, containerWidth, columnSizing, columnVisibility, columnOrder])
