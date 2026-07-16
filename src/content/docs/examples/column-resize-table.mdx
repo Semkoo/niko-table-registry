@@ -222,7 +222,7 @@ export function ControlledResizeTable({ data }: { data: Order[] }) {
 
 ## Persist Widths
 
-Want resized widths to survive a reload? Install the opt-in **`useColumnSizingPersistence`** hook and wire its `columnSizing` + `onColumnSizingChange` into `DataTableRoot`. It's `localStorage`-backed, writes immediately, is SSR-safe, and ignores corrupt storage. Resize a column below, then reload:
+Want resized widths to survive a reload? Install the opt-in **`useColumnSizingPersistence`** hook and wire its `columnSizing` + `onColumnSizingChange` into `DataTableRoot`. It's `localStorage`-backed, writes immediately, syncs across tabs, and ignores corrupt storage. Resize a column below, then reload:
 
 <CodePreview demo="niko-table/column-resize-persisted" />
 
@@ -254,7 +254,9 @@ export function OrdersTable({ rows, orgId }) {
 }
 ```
 
-The hook also returns `resetColumnSizing()` to clear the saved widths. Prefer to own the storage yourself (e.g. sync widths through a per-user settings API instead of `localStorage`)? It's a thin wrapper — copy it and swap the store; all `DataTableRoot` needs is a controlled `columnSizing` + `onColumnSizingChange`.
+The hook also returns `resetColumnSizing()` to clear the saved widths. Because widths are a per-user preference, they **sync across tabs**: resizing (or resetting) the same table in one tab updates the others via the native `storage` event. Idle tabs only re-render when a width actually changed.
+
+Prefer to own the storage yourself (e.g. sync widths through a per-user settings API instead of `localStorage`)? It's a thin wrapper — copy it and swap the store; all `DataTableRoot` needs is a controlled `columnSizing` + `onColumnSizingChange`.
 
 When persistence and `<DataTableColumnAutoFit />` are combined, the fitted widths are saved and restored like any user resize — so auto-fit runs once per user, not on every visit (restored widths always win).
 

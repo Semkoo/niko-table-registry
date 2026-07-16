@@ -712,7 +712,7 @@ useColumnAutoFit(table, scrollElement, resizingEnabled)
 
 ### useColumnSizingPersistence
 
-Opt-in `localStorage` persistence for resized column widths. Column sizing is controlled state on `<DataTableRoot>`, so this hook owns it for you: wire the returned `columnSizing` + `onColumnSizingChange` into the table and widths survive reloads. Writes immediately (resizing runs in `onEnd` mode, so once per drag), is SSR-safe, and sanitizes corrupt / hand-edited storage so a bad value never reaches `column.getSize()`.
+Opt-in `localStorage` persistence for resized column widths. Column sizing is controlled state on `<DataTableRoot>`, so this hook owns it for you: wire the returned `columnSizing` + `onColumnSizingChange` into the table and widths survive reloads. Writes immediately (resizing runs in `onEnd` mode, so once per drag), syncs across tabs via the native `storage` event (an unchanged read keeps state identity, so idle tabs don't re-render), and sanitizes corrupt / hand-edited storage so a bad value never reaches `column.getSize()`.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/lib/use-column-sizing-persistence.ts`} external>Source Code ↗</DocsLink>
