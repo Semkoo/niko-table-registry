@@ -91,18 +91,13 @@ const DndBodyRow = React.memo(function DndBodyRow({
     >
       {visibleCells.map(cell => {
         const size = cell.column.columnDef.size
-        // Flex column: no explicit width so it fills the leftover row width.
-        const isFlex = cell.column.columnDef.meta?.flex === true
         const cellStyle = {
           // Resizing: width tracks `getSize()`; off: unchanged.
-          // Flex: no width — fills the leftover space.
-          width: isFlex
-            ? undefined
-            : columnSizingEnabled
-              ? cell.column.getSize()
-              : size
-                ? `${size}px`
-                : undefined,
+          width: columnSizingEnabled
+            ? cell.column.getSize()
+            : size
+              ? `${size}px`
+              : undefined,
           ...getCommonPinningStyles(cell.column, false),
         }
 
@@ -313,17 +308,11 @@ export function DataTableDndBody<TData>({
         minWidth: tableEl.style.minWidth,
       }
     }
-    const leafColumns = table.getVisibleLeafColumns()
-    const totalDesiredWidth = leafColumns.reduce(
-      (sum, col) => sum + col.getSize(),
-      0,
-    )
-    // A flex column has no fixed width, so the table must stretch to the
-    // container (width 100%) and let that column soak up the surplus; the sized
-    // columns still can't compress below their sum (minWidth).
-    const hasFlex = leafColumns.some(c => c.columnDef.meta?.flex === true)
+    const totalDesiredWidth = table
+      .getVisibleLeafColumns()
+      .reduce((sum, col) => sum + col.getSize(), 0)
     tableEl.style.tableLayout = "fixed"
-    tableEl.style.width = hasFlex ? "100%" : `${totalDesiredWidth}px`
+    tableEl.style.width = `${totalDesiredWidth}px`
     tableEl.style.minWidth = `${totalDesiredWidth}px`
     return restore
   }, [

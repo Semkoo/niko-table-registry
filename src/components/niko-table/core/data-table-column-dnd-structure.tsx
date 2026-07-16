@@ -92,18 +92,13 @@ const DndColumnBodyRow = React.memo(function DndColumnBodyRow({
     >
       {visibleCells.map(cell => {
         const size = cell.column.columnDef.size
-        // Flex column: no explicit width so it fills the leftover row width.
-        const isFlex = cell.column.columnDef.meta?.flex === true
         const cellStyle = {
           // Resizing: width tracks `getSize()`; off: unchanged.
-          // Flex: no width — fills the leftover space.
-          width: isFlex
-            ? undefined
-            : columnSizingEnabled
-              ? cell.column.getSize()
-              : size
-                ? `${size}px`
-                : undefined,
+          width: columnSizingEnabled
+            ? cell.column.getSize()
+            : size
+              ? `${size}px`
+              : undefined,
         }
 
         return (
@@ -204,22 +199,16 @@ export const DataTableDndHeader = React.memo(function DataTableDndHeader({
         <TableRow key={headerGroup.id}>
           {headerGroup.headers.map(header => {
             const size = header.column.columnDef.size
-            // A flex column has no explicit width — under `table-layout: fixed`
-            // it soaks up the leftover row width. Not drag-resizable.
-            const isFlex = header.column.columnDef.meta?.flex === true
             return (
               <TableDraggableHeader
                 key={header.id}
                 header={header}
                 style={{
-                  // Flex: no width — fills the leftover space.
-                  width: isFlex
-                    ? undefined
-                    : resizing
-                      ? header.getSize()
-                      : size
-                        ? `${size}px`
-                        : undefined,
+                  width: resizing
+                    ? header.getSize()
+                    : size
+                      ? `${size}px`
+                      : undefined,
                 }}
               >
                 {header.isPlaceholder ? null : (
@@ -230,7 +219,7 @@ export const DataTableDndHeader = React.memo(function DataTableDndHeader({
                     )}
                   </DataTableColumnHeaderRoot>
                 )}
-                {resizing && !isFlex && header.column.getCanResize() && (
+                {resizing && header.column.getCanResize() && (
                   <DataTableColumnResizeHandle header={header} />
                 )}
               </TableDraggableHeader>
@@ -401,17 +390,11 @@ export function DataTableDndColumnBody<TData>({
         minWidth: tableEl.style.minWidth,
       }
     }
-    const leafColumns = table.getVisibleLeafColumns()
-    const totalDesiredWidth = leafColumns.reduce(
-      (sum, col) => sum + col.getSize(),
-      0,
-    )
-    // A flex column has no fixed width, so the table must stretch to the
-    // container (width 100%) and let that column soak up the surplus; the sized
-    // columns still can't compress below their sum (minWidth).
-    const hasFlex = leafColumns.some(c => c.columnDef.meta?.flex === true)
+    const totalDesiredWidth = table
+      .getVisibleLeafColumns()
+      .reduce((sum, col) => sum + col.getSize(), 0)
     tableEl.style.tableLayout = "fixed"
-    tableEl.style.width = hasFlex ? "100%" : `${totalDesiredWidth}px`
+    tableEl.style.width = `${totalDesiredWidth}px`
     tableEl.style.minWidth = `${totalDesiredWidth}px`
     return restore
   }, [

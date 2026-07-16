@@ -47,6 +47,16 @@
           "target": "components/niko-table/lib/column-resize-handle.tsx"
         },
         {
+          "path": "src/components/niko-table/lib/flex-columns.ts",
+          "type": "registry:lib",
+          "target": "components/niko-table/lib/flex-columns.ts"
+        },
+        {
+          "path": "src/components/niko-table/lib/use-header-min-widths.ts",
+          "type": "registry:lib",
+          "target": "components/niko-table/lib/use-header-min-widths.ts"
+        },
+        {
           "path": "src/components/niko-table/components/data-table-row-context-menu.tsx",
           "type": "registry:component",
           "target": "components/niko-table/components/data-table-row-context-menu.tsx"

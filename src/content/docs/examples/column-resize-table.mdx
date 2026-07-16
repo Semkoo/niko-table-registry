@@ -11,7 +11,9 @@ Drag any header's right edge to resize that column, or double-click the grip to 
 
 Columns default to a **40px** drag floor (`minSize`) when resize is enabled: override per column with `minSize` / `maxSize`. Body cells use `truncate` so long text ellipsizes instead of spilling into the next column (same as the Data Grid / virtualized bodies).
 
-Add **`<DataTableColumnAutoFit />`** and columns **fill the container on load**: the resizable columns scale up to the available width, then back off once you drag a column or restore a saved layout. Opt-in, so columns keep their declared `size` without it. See [Auto-fit](#auto-fit) and [Persist Widths](#persist-widths).
+**Fill is on by default.** With resize enabled the table stretches to its container and one **flex column** absorbs the leftover width, so a trailing actions column pins to the right edge instead of leaving dead space. The flex column is the first non-pinned data column by default: point it at another with `meta: { flex: true }`, opt a column out with `meta: { flex: false }`, or turn filling off for the whole table with `meta: { disableFlexFill: true }` (`TableMeta`). It's pure layout, never written to `columnSizing`. Un-resized columns are also floored at their **header width** (header-fit) so labels never truncate on load. The flex column stays **resizable** too: dragging its grip pins it at an explicit width and hands the fill to the next eligible column.
+
+Prefer to spread the surplus across every resizable column instead of one flex column? Add **`<DataTableColumnAutoFit />`** to scale them equally on load, backing off once you drag a column or restore a saved layout. See [Auto-fit](#auto-fit) and [Persist Widths](#persist-widths).
 
 <CodePreview demo="niko-table/column-resize" />
 
@@ -132,7 +134,7 @@ const columns: DataTableColumnDef<Order>[] = [
 
 ## Auto-fit
 
-With resize on, cells render at fixed `getSize()` widths instead of flex-filling, so columns that don't add up to the container width leave dead space. Drop **`<DataTableColumnAutoFit />`** next to `<DataTableColumnResize />` and the **resizable** columns scale up to fill the container on load. It's a self-contained, opt-in feature: without it, columns keep their declared `size` and none of the auto-fit code ships. Fixed columns (`enableResizing: false`) keep their size; auto-fit re-fits when the container grows and backs off once the user drags a column or a saved `columnSizing` is restored, so manual and persisted widths win. Columns wider than the container scroll horizontally.
+By default a single flex column absorbs the leftover width. When you'd rather distribute the surplus evenly across every resizable column, drop **`<DataTableColumnAutoFit />`** next to `<DataTableColumnResize />` and the **resizable** columns scale up to fill the container on load. It's a self-contained, opt-in feature: without it, columns keep their declared `size` and none of the auto-fit code ships. Fixed columns (`enableResizing: false`) keep their size; auto-fit re-fits when the container grows and backs off once the user drags a column or a saved `columnSizing` is restored, so manual and persisted widths win. Columns wider than the container scroll horizontally.
 
 Install it alongside resize:
 

@@ -18,6 +18,7 @@ import React, {
   useReducer,
 } from "react"
 import { useGeneratedOptions } from "../hooks/use-generated-options"
+import { useHeaderMinWidths } from "../lib/use-header-min-widths"
 import type { DataTableColumnDef, DataTableInstance, Option } from "../types"
 
 export type DataTableContextState = {
@@ -123,6 +124,19 @@ type DataTableContextProps<TData> = DataTableContextState & {
   scrollContainer: HTMLElement | null
   /** Internal: `<DataTable>` registers its scroll container element here. */
   registerScrollContainer: (el: HTMLElement | null) => void
+  /**
+   * Header-fit floors: `columnId -> minimum width` so an un-resized column is
+   * never rendered narrower than its own header label (measured, never written
+   * to `columnSizing`). Empty when resizing is off. Read by the header, body,
+   * and the min-width lock so they agree on widths.
+   */
+  headerMinWidths: ReadonlyMap<string, number>
+  /**
+   * Drive the resize preview line for a flex-column drag (which resizes outside
+   * TanStack). Pass `{ resizingColumnId, deltaOffset }` while dragging and
+   * `null` on release. Normal (TanStack) resizes ignore this.
+   */
+  setColumnResizePreview: (info: ColumnResizeInfo | null) => void
   /**
    * Toggle a row's selection with standard Shift-range support: a plain
    * click toggles one row and sets the anchor; a Shift+click selects every row
@@ -531,17 +545,33 @@ export function DataTableProvider<TData>({
   // This replaces N separate per-column scans in faceted filter consumers.
   const generatedOptionsMap = useGeneratedOptions(table)
 
+  // Header-fit: measure each header's natural width (once, off-DOM canvas) so
+  // un-resized columns are floored at their header width and never truncate
+  // their label on load. Only meaningful when resizing is on.
+  const headerMinWidths = useHeaderMinWidths(
+    table,
+    scrollContainer,
+    table.options.enableColumnResizing ?? false,
+  )
+
   // Publish the in-flight resize offset for the preview guide line (see
-  // ColumnResizeInfoContext). `columnSizingInfo` mutates every pointer move
-  // during a drag; this provider re-renders with it (it owns no memo boundary),
-  // but the memoized value below stays stable — only the preview line, which
-  // reads this dedicated context, re-renders per frame.
+  // ColumnResizeInfoContext). Normal columns resize through TanStack, so the
+  // offset comes from `columnSizingInfo` (mutates every pointer move; this
+  // provider re-renders with it). Flex columns resize through a custom drag
+  // (TanStack can't size a width-less column) that publishes its offset via
+  // `setColumnResizePreview` — that manual value wins while a flex drag is live.
+  const [manualResizePreview, setManualResizePreview] =
+    React.useState<ColumnResizeInfo | null>(null)
   const columnSizingInfo = table.getState().columnSizingInfo
   const resizingColumnId = columnSizingInfo.isResizingColumn || null
   const resizeDeltaOffset = columnSizingInfo.deltaOffset ?? 0
   const columnResizeInfo = React.useMemo<ColumnResizeInfo>(
-    () => ({ resizingColumnId, deltaOffset: resizeDeltaOffset }),
-    [resizingColumnId, resizeDeltaOffset],
+    () =>
+      manualResizePreview ?? {
+        resizingColumnId,
+        deltaOffset: resizeDeltaOffset,
+      },
+    [manualResizePreview, resizingColumnId, resizeDeltaOffset],
   )
 
   // Memoize so context consumers (10+ filter/action components) only re-render
@@ -559,6 +589,8 @@ export function DataTableProvider<TData>({
         registerRowScroller,
         scrollContainer,
         registerScrollContainer,
+        headerMinWidths,
+        setColumnResizePreview: setManualResizePreview,
         flashingRowIds,
         flashingCellKeys,
         flashRows,
@@ -576,6 +608,8 @@ export function DataTableProvider<TData>({
       registerRowScroller,
       scrollContainer,
       registerScrollContainer,
+      headerMinWidths,
+      setManualResizePreview,
       flashingRowIds,
       flashingCellKeys,
       flashRows,
