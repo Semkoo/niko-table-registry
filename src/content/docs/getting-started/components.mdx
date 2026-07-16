@@ -55,17 +55,19 @@ Top-of-table filter controls. Each component is independent — install only wha
 
 Per-column controls embedded in the column header dropdown.
 
-| Name                               | What it does                                     |
-| ---------------------------------- | ------------------------------------------------ |
-| `data-table-column-sort`           | Header sort option with asc/desc/clear.          |
-| `data-table-column-hide`           | Header option to hide/show the column.           |
-| `data-table-column-pin`            | Header option to pin column left/right.          |
-| `data-table-column-resize`         | Column resize handle + double-click to auto-fit. |
-| `data-table-column-faceted-filter` | Header faceted filter with multi-select options. |
-| `data-table-column-slider-filter`  | Header slider filter for numeric range.          |
-| `data-table-column-date-filter`    | Header date filter with calendar picker.         |
+| Name                                   | What it does                                                                                                                               |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `data-table-column-sort`               | Header sort option with asc/desc/clear.                                                                                                    |
+| `data-table-column-hide`               | Header option to hide/show the column.                                                                                                     |
+| `data-table-column-pin`                | Header option to pin column left/right.                                                                                                    |
+| `data-table-column-resize`             | Column resize handle + double-click to auto-fit. Flex fill + header-fit are on by default once resizing is enabled.                        |
+| `data-table-column-auto-fit`           | Opt-in `<DataTableColumnAutoFit />` marker — even-splits leftover width across resizable columns (alternative to single-column flex fill). |
+| `data-table-column-sizing-persistence` | `useColumnSizingPersistence(storageKey)` hook — persists resized widths to `localStorage`.                                                 |
+| `data-table-column-faceted-filter`     | Header faceted filter with multi-select options.                                                                                           |
+| `data-table-column-slider-filter`      | Header slider filter for numeric range.                                                                                                    |
+| `data-table-column-date-filter`        | Header date filter with calendar picker.                                                                                                   |
 
-<CliCommandCode action="run" command="shadcn@latest add @niko-table/data-table-column-sort @niko-table/data-table-column-hide @niko-table/data-table-column-pin @niko-table/data-table-column-resize" />
+<CliCommandCode action="run" command="shadcn@latest add @niko-table/data-table-column-sort @niko-table/data-table-column-hide @niko-table/data-table-column-pin @niko-table/data-table-column-resize @niko-table/data-table-column-auto-fit @niko-table/data-table-column-sizing-persistence" />
 
 ## Drag and Drop
 
