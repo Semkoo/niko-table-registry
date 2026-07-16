@@ -15,6 +15,7 @@ description: Latest updates and release notes for Niko Table.
 - **Header-fit** — un-resized columns are floored at their header width (measured off-DOM), so a compact column never truncates its label on load.
 - **Resizable fill column** — the fill column resizes via a drag that starts from its rendered width (no jump) and hands the fill to the next column on release.
 - **Column auto-fit** — opt-in `<DataTableColumnAutoFit />` marker that spreads leftover space evenly across resizable columns (the alternative to single-column fill); fixed columns keep their size, restored/persisted widths win. [example](/examples/column-resize-table/)
+- **Column sizing persistence** — opt-in `useColumnSizingPersistence(storageKey)` hook: wire its `columnSizing` + `onColumnSizingChange` into `<DataTableRoot>` and resized widths persist to `localStorage` (immediate write, SSR-safe). [Persist Widths](/examples/column-resize-table/#persist-widths)
 - Docs — full registry catalog (resize + Data Grid + axis DnD packages), Install Everything lists all items, homepage/`CliCommandCode` namespace install
 - Docs — Data Grid intro live demo includes **Current Table State** panel
 - Docs — Manual Installation project tree includes `grid/`, column resize, flash/scroll hooks

@@ -182,49 +182,39 @@ export function ControlledResizeTable({ data }: { data: Order[] }) {
 
 ## Persist Widths
 
-Save `columnSizing` anywhere so widths survive a reload, usually `localStorage`. Read it once on mount (restored widths win over auto-fit) and write on every change. Resize a column below, then reload:
+Want resized widths to survive a reload? Install the opt-in **`useColumnSizingPersistence`** hook and wire its `columnSizing` + `onColumnSizingChange` into `DataTableRoot`. It's `localStorage`-backed, writes immediately, is SSR-safe, and ignores corrupt storage. Resize a column below, then reload:
 
 <CodePreview demo="niko-table/column-resize-persisted" />
 
-A minimal `localStorage`-backed hook. Pass its `columnSizing` / `setColumnSizing` straight to `DataTableRoot`. Swap the store for your own settings API to sync per-user:
+<CliCommandCode action="run" command="shadcn@latest add @niko-table/data-table-column-sizing-persistence" />
 
-```tsx showLineNumbers title="use-persisted-column-sizing.ts"
-import { useCallback, useState } from "react"
-import type { ColumnSizingState } from "@tanstack/react-table"
+```tsx showLineNumbers title="orders-table.tsx"
+import { useColumnSizingPersistence } from "@/components/niko-table/lib/use-column-sizing-persistence"
 
-export function usePersistedColumnSizing(storageKey: string) {
-  const [columnSizing, setState] = useState<ColumnSizingState>(() => {
-    if (typeof window === "undefined") return {}
-    try {
-      const raw = window.localStorage.getItem(storageKey)
-      return raw ? (JSON.parse(raw) as ColumnSizingState) : {}
-    } catch {
-      return {}
-    }
-  })
-
-  const setColumnSizing = useCallback(
-    (
-      updater:
-        | ColumnSizingState
-        | ((prev: ColumnSizingState) => ColumnSizingState),
-    ) => {
-      setState((prev) => {
-        const next = typeof updater === "function" ? updater(prev) : updater
-        try {
-          window.localStorage.setItem(storageKey, JSON.stringify(next))
-        } catch {
-          // Quota / private mode: drop persistence.
-        }
-        return next
-      })
-    },
-    [storageKey],
+export function OrdersTable({ rows, orgId }) {
+  // Scope the key per table (and per tenant/user if widths shouldn't be shared).
+  const { columnSizing, onColumnSizingChange } = useColumnSizingPersistence(
+    `orders-table:${orgId}`,
   )
 
-  return { columnSizing, setColumnSizing }
+  return (
+    <DataTableRoot
+      data={rows}
+      columns={columns}
+      state={{ columnSizing }}
+      onColumnSizingChange={onColumnSizingChange}
+    >
+      <DataTable>
+        <DataTableHeader />
+        <DataTableBody />
+      </DataTable>
+      <DataTableColumnResize />
+    </DataTableRoot>
+  )
 }
 ```
+
+The hook also returns `resetColumnSizing()` to clear the saved widths. Prefer to own the storage yourself (e.g. sync widths through a per-user settings API instead of `localStorage`)? It's a thin wrapper — copy it and swap the store; all `DataTableRoot` needs is a controlled `columnSizing` + `onColumnSizingChange`.
 
 > Persist column **width** like visibility and order: a per-user preference, not URL state. Restored widths take precedence over auto-fit, so a saved layout is never overwritten.
 
