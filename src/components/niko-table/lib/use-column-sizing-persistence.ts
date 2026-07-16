@@ -41,6 +41,10 @@
  * - Writes immediately. Resizing runs in `onEnd` mode, so this fires once per
  *   drag (not per frame), and an immediate write can't be lost on a hard
  *   refresh the way a debounced one can.
+ * - Syncs across tabs. Widths are a per-user preference, so resizing (or
+ *   resetting) the same table in one tab updates the others via the native
+ *   `storage` event. Only same-key changes are read, and an unchanged read
+ *   keeps state identity, so idle tabs don't re-render.
  * - SSR note: `localStorage` is only read on the client, so nothing crashes on
  *   the server — but in an SSR framework the client's first (hydration) render
  *   already has the stored widths while the server HTML was rendered with
@@ -113,15 +117,36 @@ export function useColumnSizingPersistence(
   // render-time ref write and never re-create on unrelated renders.
   const columnSizingRef = React.useRef(columnSizing)
 
-  // Re-load when the key changes (e.g. switching tenant / scope). Skips when
-  // the content already matches (the mount run after the initializer, or a
-  // key change landing on identical data), so no wasted re-render and no
-  // identity churn for consumers keyed on `columnSizing` (e.g. auto-fit).
+  // Pull whatever is in storage into state. Every sync goes through the
+  // equality check, so an unchanged read keeps the previous identity: no wasted
+  // re-render and no churn for consumers keyed on `columnSizing` (e.g.
+  // auto-fit). A removed key reads as `{}` and clears the widths.
   React.useEffect(() => {
-    const next = readStored(storageKey)
-    if (sizingEqual(columnSizingRef.current, next)) return
-    columnSizingRef.current = next
-    setColumnSizing(next)
+    const sync = () => {
+      const next = readStored(storageKey)
+      if (sizingEqual(columnSizingRef.current, next)) return
+      columnSizingRef.current = next
+      setColumnSizing(next)
+    }
+
+    // Re-load when the key changes (e.g. switching tenant / scope). The run on
+    // mount is normally a no-op — the initializer already read the same key.
+    sync()
+
+    if (typeof window === "undefined") return
+
+    // Cross-tab sync: keep widths in step when the same table is open in
+    // another tab. The native `storage` event only fires in OTHER tabs, so this
+    // tab's own writes never echo back — no self-write guard needed.
+    const onStorage = (event: StorageEvent) => {
+      // Ignore sessionStorage and unrelated keys. `key === null` means
+      // `localStorage.clear()`, which must re-read (and clear) like any reset.
+      if (event.storageArea && event.storageArea !== window.localStorage) return
+      if (event.key !== null && event.key !== storageKey) return
+      sync()
+    }
+    window.addEventListener("storage", onStorage)
+    return () => window.removeEventListener("storage", onStorage)
   }, [storageKey])
 
   const onColumnSizingChange = React.useCallback<OnChangeFn<ColumnSizingState>>(
