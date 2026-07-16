@@ -96,9 +96,12 @@ export function resolveColumnWidth<TData>(
     headerMinWidths: ReadonlyMap<string, number>
   },
 ): number | string | undefined {
-  if (params.isFlex) return undefined
   const size = column.columnDef.size
+  // Off (no resizing): the declared `size`. Flex only means "fill the surplus"
+  // under the fixed layout that resizing turns on, so a flex column keeps its
+  // declared size here — check resizing before flex.
   if (!params.resizing) return size ? `${size}px` : undefined
+  if (params.isFlex) return undefined
   const base = column.getSize()
   if (params.columnSizing[column.id] != null) return base
   const headerMin = params.headerMinWidths.get(column.id) ?? 0
