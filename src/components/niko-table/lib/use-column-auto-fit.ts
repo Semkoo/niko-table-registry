@@ -54,12 +54,14 @@ export function useColumnAutoFit<TData>(
     if (isResizingColumn) userResizedRef.current = true
   }, [isResizingColumn])
 
-  // Sizes already present at mount (restored from persistence, or provided by
-  // the consumer) are respected as-is — auto-fit only fills the unsized
-  // first-load case, so it never overwrites a saved column layout.
-  const hadInitialSizingRef = React.useRef(
-    Object.keys(table.getState().columnSizing).length > 0,
-  )
+  // Sizes already present (restored from persistence, or provided by the
+  // consumer) are respected as-is — auto-fit only fills the unsized first-load
+  // case, so it never overwrites a saved column layout. Captured lazily on the
+  // first *measured* pass (see below), NOT at mount: on a full page load the
+  // first render is SSR/hydration where `columnSizing` is momentarily empty
+  // (localStorage-backed widths arrive a tick later), and latching `false` there
+  // would let auto-fit clobber the persisted widths. `null` = not yet captured.
+  const hadInitialSizingRef = React.useRef<boolean | null>(null)
 
   // Reactively track the container's inner width so a fit re-runs when the
   // available space changes (window resize, sidebar collapse, panel dock).
@@ -78,13 +80,15 @@ export function useColumnAutoFit<TData>(
   const { columnSizing, columnVisibility, columnOrder } = table.getState()
 
   React.useLayoutEffect(() => {
-    if (
-      !enabled ||
-      userResizedRef.current ||
-      hadInitialSizingRef.current ||
-      containerWidth <= 0
-    )
-      return
+    if (!enabled || containerWidth <= 0) return
+
+    // Capture whether the consumer restored widths on the first measured pass —
+    // by now hydration has settled and localStorage-backed `columnSizing` is in.
+    if (hadInitialSizingRef.current === null) {
+      hadInitialSizingRef.current =
+        Object.keys(table.getState().columnSizing).length > 0
+    }
+    if (userResizedRef.current || hadInitialSizingRef.current) return
 
     const leafColumns = table.getVisibleLeafColumns()
     const resizable = leafColumns.filter(c => c.getCanResize())

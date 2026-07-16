@@ -142,6 +142,7 @@ your-project/
 │   │       │   ├── data-table-row-dnd.tsx
 │   │       │   ├── data-table-column-dnd.tsx
 │   │       │   ├── data-table-column-resize.tsx                   # Opt-in <DataTableColumnResize />
+│   │       │   ├── data-table-column-auto-fit.tsx                 # Opt-in <DataTableColumnAutoFit /> (even-split fill)
 │   │       │   ├── data-table-column-actions.tsx
 │   │       │   ├── data-table-column-header.tsx
 │   │       │   ├── data-table-column-title.tsx
@@ -215,7 +216,10 @@ your-project/
 │   │       │   ├── format.ts
 │   │       │   ├── styles.ts
 │   │       │   ├── column-resize-handle.tsx                     # Shared resize grip (headers)
-│   │       │   ├── use-column-auto-fit.ts                       # Fill container: scale resizable columns to width on load
+│   │       │   ├── flex-columns.ts                              # Flex fill + header-fit width resolution (on by default)
+│   │       │   ├── use-header-min-widths.ts                     # Header-fit: measure header labels off-DOM to floor widths
+│   │       │   ├── use-column-auto-fit.ts                       # Opt-in even-split fill: grow resizable columns to width on load
+│   │       │   ├── use-column-sizing-persistence.ts             # Opt-in: persist resized widths to localStorage
 │   │       │   ├── create-scroll-handler.ts                     # Shared scroll-listener factory used by every body
 │   │       │   └── row-click.ts                                    # Shared row-click guard used by every body
 │   │       │

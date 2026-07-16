@@ -1,7 +1,5 @@
 "use client"
 
-import { useCallback, useState } from "react"
-import type { ColumnSizingState } from "@tanstack/react-table"
 import { DataTableRoot } from "@/components/niko-table/core/data-table-root"
 import { DataTable } from "@/components/niko-table/core/data-table"
 import {
@@ -11,6 +9,7 @@ import {
 import { DataTableColumnHeader } from "@/components/niko-table/components/data-table-column-header"
 import { DataTableColumnTitle } from "@/components/niko-table/components/data-table-column-title"
 import { DataTableColumnResize } from "@/components/niko-table/components/data-table-column-resize"
+import { useColumnSizingPersistence } from "@/components/niko-table/lib/use-column-sizing-persistence"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -125,55 +124,11 @@ const columns: DataTableColumnDef<Order>[] = [
 
 const STORAGE_KEY = "niko-table:column-resize-demo"
 
-/**
- * Persist `columnSizing` to `localStorage`. Reads once on mount (so restored
- * widths win over auto-fit) and writes on every change. Swap `localStorage`
- * for your own store, such as a user-settings API.
- */
-function usePersistedColumnSizing(storageKey: string) {
-  const [columnSizing, setState] = useState<ColumnSizingState>(() => {
-    if (typeof window === "undefined") return {}
-    try {
-      const raw = window.localStorage.getItem(storageKey)
-      return raw ? (JSON.parse(raw) as ColumnSizingState) : {}
-    } catch {
-      return {}
-    }
-  })
-
-  const setColumnSizing = useCallback(
-    (
-      updater:
-        ColumnSizingState | ((prev: ColumnSizingState) => ColumnSizingState),
-    ) => {
-      setState(prev => {
-        const next = typeof updater === "function" ? updater(prev) : updater
-        try {
-          window.localStorage.setItem(storageKey, JSON.stringify(next))
-        } catch {
-          // Quota / private mode: drop persistence silently.
-        }
-        return next
-      })
-    },
-    [storageKey],
-  )
-
-  const clear = useCallback(() => {
-    try {
-      window.localStorage.removeItem(storageKey)
-    } catch {
-      // Ignore.
-    }
-    setState({})
-  }, [storageKey])
-
-  return { columnSizing, setColumnSizing, clear }
-}
-
 export default function ColumnResizePersistedTable() {
-  const { columnSizing, setColumnSizing, clear } =
-    usePersistedColumnSizing(STORAGE_KEY)
+  // Opt-in persistence: wire the returned columnSizing + onColumnSizingChange
+  // into DataTableRoot and resized widths survive a reload.
+  const { columnSizing, onColumnSizingChange, resetColumnSizing } =
+    useColumnSizingPersistence(STORAGE_KEY)
 
   const resizedCount = Object.keys(columnSizing).length
 
@@ -183,9 +138,9 @@ export default function ColumnResizePersistedTable() {
         <p className="text-sm text-muted-foreground">
           Resize a column, then reload. Widths are restored from{" "}
           <code>localStorage</code>. On first load, before anything is saved,
-          the columns auto-fit to the container width.
+          the columns fill the container width.
         </p>
-        <Button variant="outline" size="sm" onClick={clear}>
+        <Button variant="outline" size="sm" onClick={resetColumnSizing}>
           Reset widths
         </Button>
       </div>
@@ -194,7 +149,7 @@ export default function ColumnResizePersistedTable() {
         data={data}
         columns={columns}
         state={{ columnSizing }}
-        onColumnSizingChange={setColumnSizing}
+        onColumnSizingChange={onColumnSizingChange}
       >
         <DataTableColumnResize />
         <DataTable>

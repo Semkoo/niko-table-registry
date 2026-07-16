@@ -892,6 +892,24 @@
       ]
     },
     {
+      "name": "data-table-column-sizing-persistence",
+      "type": "registry:lib",
+      "title": "DataTable Column Sizing Persistence",
+      "description": "Opt-in localStorage persistence for column widths. Call useColumnSizingPersistence(storageKey) and wire the returned columnSizing + onColumnSizingChange into <DataTableRoot> so resized widths survive reloads. Writes immediately, SSR-safe, and sanitizes corrupt storage.",
+      "dependencies": [],
+      "registryDependencies": [
+        "https://niko-table.com/r/data-table.json",
+        "https://niko-table.com/r/data-table-column-resize.json"
+      ],
+      "files": [
+        {
+          "path": "src/components/niko-table/lib/use-column-sizing-persistence.ts",
+          "type": "registry:lib",
+          "target": "components/niko-table/lib/use-column-sizing-persistence.ts"
+        }
+      ]
+    },
+    {
       "name": "data-table-grid",
       "type": "registry:block",
       "title": "Data Grid (editable)",

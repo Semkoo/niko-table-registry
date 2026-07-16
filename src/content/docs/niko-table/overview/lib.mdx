@@ -593,3 +593,163 @@ Internal helpers that resolve `globalFilter` / column-filter combinations to a f
 Provides the row-filtering logic that backs the table's filtered row model — combines per-column filters with the global filter, applies the right `extendedFilter` / `globalFilter` / `numberRangeFilter` / `dateRangeFilter` based on column meta, and returns the visible row set.
 
 This module is internal to the table's filter pipeline. Consumers normally interact with it indirectly via `tableOptions.filterFns` (which `DataTableRoot` wires automatically). If you're building a fully custom filter pipeline you can import the named helpers from this file directly — see the source for the current export surface.
+
+## Column Sizing Layout
+
+Helpers that keep a resizable table filling its container and its header labels legible. Flex fill and header-fit are on automatically once column resizing is enabled; the auto-fit and persistence helpers are opt-in.
+
+### resolveFlexColumnIds
+
+Resolves which column(s) render widthless so they absorb the leftover row width (flex fill). Flex fill is **on by default** for resizable tables: the first non-pinned, resizable data column soaks up the surplus so the table fills its container instead of leaving dead space on the right. Pure layout — it never writes `columnSizing`, so there are no persistence side effects.
+
+Overrides via column / table `meta`: `meta.flex === true` flexes that specific column, `meta.flex === false` opts a column out, and `TableMeta.disableFlexFill === true` turns fill off for the whole table. A column the user has explicitly resized is fixed at their width and hands the fill to the next eligible column.
+
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/lib/flex-columns.ts`} external>Source Code ↗</DocsLink>
+</div>
+
+```tsx showLineNumbers
+import { resolveFlexColumnIds } from "@/components/niko-table/lib/flex-columns"
+
+const flexIds = resolveFlexColumnIds(table)
+// → Set { "name" } — the default first data column fills the surplus
+```
+
+#### Parameters
+
+| Name    | Type           | Description             |
+| ------- | -------------- | ----------------------- |
+| `table` | `Table<TData>` | TanStack Table instance |
+
+#### Returns
+
+`ReadonlySet<string>` - Column ids to render widthless. Empty when fill is off (`disableFlexFill`, resizing disabled) or no eligible column exists.
+
+### resolveColumnWidth
+
+The width to render for a single column. Centralizes the flex + header-fit rules so the header, body cells, and the min-width lock all agree. Returns the declared `size` when resizing is off, `undefined` for the flex column, exactly `getSize()` for a user-resized column, and otherwise floors the width at the header's natural width so the label never truncates on load. Pure layout — `headerMinWidths` is measured, never written back into `columnSizing`.
+
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/lib/flex-columns.ts`} external>Source Code ↗</DocsLink>
+</div>
+
+```tsx showLineNumbers
+import { resolveColumnWidth } from "@/components/niko-table/lib/flex-columns"
+
+const width = resolveColumnWidth(column, {
+  resizing: true,
+  isFlex: flexIds.has(column.id),
+  columnSizing: table.getState().columnSizing,
+  headerMinWidths,
+})
+```
+
+#### Parameters
+
+| Name                     | Type                          | Description                                        |
+| ------------------------ | ----------------------------- | -------------------------------------------------- |
+| `column`                 | `Column<TData>`               | TanStack Table column instance                     |
+| `params.resizing`        | `boolean`                     | Whether column resizing is enabled                 |
+| `params.isFlex`          | `boolean`                     | Whether this column is a flex (fill) column        |
+| `params.columnSizing`    | `ColumnSizingState`           | Current column sizing state                        |
+| `params.headerMinWidths` | `ReadonlyMap<string, number>` | Measured header widths (from `useHeaderMinWidths`) |
+
+#### Returns
+
+`number | string | undefined` - The width to render (`undefined` for the flex column or an unsized off state).
+
+### useHeaderMinWidths
+
+Measures each column header's natural width off-DOM (a reusable canvas, so no reflow) and floors un-resized columns at their header width — header-fit — so labels don't truncate on load. Returns a `columnId → minWidth` map; a column the user has explicitly resized is left alone. Pure measurement, nothing is written to `columnSizing`. Recomputes only when the visible columns, their labels, or the header font change.
+
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/lib/use-header-min-widths.ts`} external>Source Code ↗</DocsLink>
+</div>
+
+```tsx showLineNumbers
+import { useHeaderMinWidths } from "@/components/niko-table/lib/use-header-min-widths"
+
+const headerMinWidths = useHeaderMinWidths(table, scrollElement, resizingEnabled)
+```
+
+#### Parameters
+
+| Name            | Type                  | Description                                      |
+| --------------- | --------------------- | ------------------------------------------------ |
+| `table`         | `Table<TData>`        | TanStack Table instance                          |
+| `scrollElement` | `HTMLElement \| null` | The table's scroll container (for reading fonts) |
+| `enabled`       | `boolean`             | Whether header-fit measurement is active         |
+
+#### Returns
+
+`ReadonlyMap<string, number>` - Minimum width in px per column id (label width + header chrome).
+
+### useColumnAutoFit
+
+The even-split alternative to single-column flex fill. On load (and when the container grows or columns toggle) it grows the resizable columns by an equal share of the leftover space so they fill the available width, seeding `columnSizing`. Backs off permanently once the user resizes a column or a saved `columnSizing` is restored. Consumed by the opt-in [`<DataTableColumnAutoFit />`](/getting-started/components/#column-header-controls) marker — most consumers drop that component rather than call this hook directly.
+
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/lib/use-column-auto-fit.ts`} external>Source Code ↗</DocsLink>
+</div>
+
+```tsx showLineNumbers
+import { useColumnAutoFit } from "@/components/niko-table/lib/use-column-auto-fit"
+
+useColumnAutoFit(table, scrollElement, resizingEnabled)
+```
+
+#### Parameters
+
+| Name            | Type                  | Description                                       |
+| --------------- | --------------------- | ------------------------------------------------- |
+| `table`         | `Table<TData>`        | TanStack Table instance                           |
+| `scrollElement` | `HTMLElement \| null` | The table's scroll container (measured for width) |
+| `enabled`       | `boolean`             | Whether auto-fit is active (needs resizing on)    |
+
+#### Returns
+
+`void` - Side-effecting hook; seeds `columnSizing` via `table.setColumnSizing`.
+
+### useColumnSizingPersistence
+
+Opt-in `localStorage` persistence for resized column widths. Column sizing is controlled state on `<DataTableRoot>`, so this hook owns it for you: wire the returned `columnSizing` + `onColumnSizingChange` into the table and widths survive reloads. Writes immediately (resizing runs in `onEnd` mode, so once per drag), is SSR-safe, and sanitizes corrupt / hand-edited storage so a bad value never reaches `column.getSize()`.
+
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/lib/use-column-sizing-persistence.ts`} external>Source Code ↗</DocsLink>
+</div>
+
+```tsx showLineNumbers
+import { useColumnSizingPersistence } from "@/components/niko-table/lib/use-column-sizing-persistence"
+
+const { columnSizing, onColumnSizingChange, resetColumnSizing } =
+  useColumnSizingPersistence(`orders-table:${orgId}`)
+
+<DataTableRoot
+  data={rows}
+  columns={columns}
+  state={{ columnSizing }}
+  onColumnSizingChange={onColumnSizingChange}
+>
+  <DataTable>
+    <DataTableHeader />
+    <DataTableBody />
+  </DataTable>
+  <DataTableColumnResize />
+</DataTableRoot>
+```
+
+#### Parameters
+
+| Name         | Type     | Description                                                   |
+| ------------ | -------- | ------------------------------------------------------------- |
+| `storageKey` | `string` | `localStorage` key. Scope it per table (and per tenant/user). |
+
+#### Returns
+
+`ColumnSizingPersistence` — an object with:
+
+| Property               | Type                            | Description                                                       |
+| ---------------------- | ------------------------------- | ----------------------------------------------------------------- |
+| `columnSizing`         | `ColumnSizingState`             | Controlled widths to pass to `<DataTableRoot state={{ … }} />`    |
+| `onColumnSizingChange` | `OnChangeFn<ColumnSizingState>` | Pass to `<DataTableRoot onColumnSizingChange={…} />`              |
+| `resetColumnSizing`    | `() => void`                    | Clears stored widths and resets every column to its declared size |
