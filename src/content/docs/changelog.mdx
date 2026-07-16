@@ -10,7 +10,7 @@ description: Latest updates and release notes for Niko Table.
 - **Data Grid** (`data-table-grid`) — composable, virtualized spreadsheet grid: `useDataGrid` + `<DataGrid>` + opt-in children. [Introduction](/data-grid/introduction/)
 - **Persistence** (`data-table-grid-changes`) — `useGridChanges` → create / update / delete. [Persistence](/examples/persistence-grid/)
 - **Inline validation** — `CellState.error` tooltip on the cell. [Validation](/examples/validation-grid/)
-- **Column resize** — `<DataTableColumnResize />`; [example](/examples/column-resize-table/)
+- **Column resize** — `<DataTableColumnResize />`; drag grips, keyboard nudge, double-click autosize. [example](/examples/column-resize-table/)
 - **Column fill on by default** — the first non-pinned data column absorbs the leftover row width, so tables fill the container and a trailing actions column pins right, with no per-table setup. `meta.flex` overrides which column fills; `meta.flex: false` / `TableMeta.disableFlexFill` opt out. Pure layout, never persisted. [example](/examples/column-resize-table/)
 - **Header-fit** — un-resized columns are floored at their header width (measured off-DOM), so a compact column never truncates its label on load.
 - **Resizable fill column** — the fill column resizes via a drag that starts from its rendered width (no jump) and hands the fill to the next column on release.
@@ -41,6 +41,10 @@ description: Latest updates and release notes for Niko Table.
 
 ### Fixed
 
+- Keyboard nudge and double-click autosize exit auto-fit like a drag, so the fit no longer redistributes space a keyboard user just removed
+- Header-fit floors follow the rendered title's fallback (formatted column id), apply only to resizable columns, and skip identity churn when unchanged (no extra full-table re-render on load)
+- Resize handle announces the real rendered width for fill/floored columns; an interrupted fill-column drag tears down cleanly on unmount
+- `useColumnSizingPersistence` skips redundant mount re-reads and rejects non-positive stored widths
 - `resolveColumnWidth` keeps a flex column's declared size when resizing is off (checks `resizing` before `isFlex`)
 - Column-resize grip is idle-invisible (shows on hover/focus/drag) so it doesn’t read as a header divider offset from body `border-r`
 - Body cells truncate on column resize (no text spill into neighbors); default `minSize` 40px when resize is enabled

@@ -26,6 +26,11 @@ All notable changes to the data-table component.
 
 #### Core
 
+- **Auto-fit vs. keyboard/autosize resizes** — keyboard nudges and double-click autosize bypass `columnSizingInfo.isResizingColumn`, so auto-fit kept re-fitting over them (a keyboard user shrinking a column got the space redistributed right back). The hook now records the sizing it applied and latches off when `columnSizing` changes to anything it didn't write.
+- **Header-fit label fallback + scope** — floors now use the same fallback chain as the rendered title (`meta.label` → string header → formatted column id), so composable-title columns without `meta.label` get a floor; floors apply only to resizable columns so utility columns (`enableResizing: false`) can't pick up a phantom floor from the id fallback. A JSX `<DataTableColumnTitle title="..." />` override should be mirrored into `meta.label`.
+- **Header-fit re-measure identity** — a re-measure with identical results keeps the previous Map identity, so memoized body rows no longer re-render once after first paint when no floor changed.
+- **Resize handle ARIA + unmount teardown** — `aria-valuenow` announces the rendered width for fill/floored columns (measured on focus; once a `columnSizing` entry exists, `getSize()` is the truth again) and `aria-valuemax` stays valid when the fill exceeds the declared max; an in-flight fill-column drag tears down on unmount so a later pointerup can't commit a width to a dead table.
+- **`useColumnSizingPersistence`** — the mount/key-change effect skips content-equal re-reads (no wasted re-render or identity churn) and `sanitize` rejects non-positive widths; the SSR note now describes the hydration-mismatch trade-off honestly.
 - **`resolveColumnWidth` — flex vs. resizing order** — checks `resizing` before `isFlex`, so a flex column keeps its declared `size` when resizing is off.
 - **Column-resize grip idle state** — grip bar is `opacity-0` until hover/focus/drag so it doesn’t act as a faux header divider (drifted 1–2px from real body `border-r` on bordered grids).
 - **Column resize overflow** — regular + virtualized body cells use `truncate` so shrink-via-resize ellipsizes instead of spilling into neighbors; when resize is enabled, default `minSize` is 40px (aligned with the grip clamp; TanStack’s built-in floor was 20).

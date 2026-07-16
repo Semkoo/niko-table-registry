@@ -176,6 +176,14 @@ interface TableMeta<TData extends RowData> {
 }
 ```
 
+Pass table metadata through the **table-level** `meta` option on `DataTableRoot` — not a column's `meta`:
+
+```tsx
+<DataTableRoot data={data} columns={columns} meta={{ disableFlexFill: true }}>
+```
+
+`disableFlexFill` is read when the table options are built, so set it statically rather than toggling it at runtime.
+
 ## Row Types
 
 ### DataTableRow
