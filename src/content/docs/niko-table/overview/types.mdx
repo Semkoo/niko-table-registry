@@ -146,6 +146,15 @@ interface ColumnMeta<TData extends RowData, TValue> {
   unit?: string
   icon?: React.ComponentType<{ className?: string }>
 
+  // Layout
+  /** Controls which column absorbs leftover row width (flex fill).
+   *  Fill is on by default for resizable tables — the first non-pinned,
+   *  resizable data column flexes automatically. Set `true` to make THIS
+   *  column the one that fills instead of the default; set `false` to opt a
+   *  column out of ever being auto-picked. Pure layout — never written to
+   *  `columnSizing`. */
+  flex?: boolean
+
   // Row Expansion
   expandedContent?: (row: TData) => React.ReactNode
 }
@@ -159,6 +168,11 @@ Extended table metadata interface (augments TanStack Table's TableMeta).
 interface TableMeta<TData extends RowData> {
   joinOperator?: JoinOperator
   hasIndividualJoinOperators?: boolean
+  /** Turns flex fill off for the whole table. Flex fill (the first resizable
+   *  data column absorbing leftover row width) is on by default when column
+   *  resizing is enabled; set `true` for a wide table meant to scroll
+   *  horizontally rather than fill its container. */
+  disableFlexFill?: boolean
 }
 ```
 
@@ -234,7 +248,7 @@ type FilterVariantValues = typeof FILTER_VARIANTS
 
 The types module augments TanStack Table's type definitions to add custom metadata:
 
-- **ColumnMeta** - Adds label, placeholder, variant, options, and other filter-related metadata
-- **TableMeta** - Adds joinOperator and hasIndividualJoinOperators for filter logic
+- **ColumnMeta** - Adds label, placeholder, variant, options, `flex` (layout fill), and other filter-related metadata
+- **TableMeta** - Adds joinOperator, hasIndividualJoinOperators for filter logic, and `disableFlexFill` for layout
 
 This allows TypeScript to provide proper type checking and autocomplete for column and table metadata throughout the data table components.
