@@ -43,13 +43,17 @@ import {
   DataTableVirtualizedSkeleton,
 } from "@/components/niko-table/core/data-table-virtualized-structure"
 import type { CellEditorProps } from "@/components/niko-table/grid/cells/cell-props"
+import { GridSelectCell } from "@/components/niko-table/grid/cells/grid-select-cell"
 import { GridTextCell } from "@/components/niko-table/grid/cells/grid-text-cell"
+import { DataGridMove } from "@/components/niko-table/grid/components/grid-move"
 import { DataGridClipboard } from "@/components/niko-table/grid/components/grid-clipboard"
 import { DataGridFillHandle } from "@/components/niko-table/grid/components/grid-fill-handle"
 import { GridRowMenu } from "@/components/niko-table/grid/components/grid-row-menu"
 import {
   DataGridAddRows,
+  DataGridRedo,
   DataGridToolbar,
+  DataGridUndo,
 } from "@/components/niko-table/grid/components/grid-toolbar"
 import { DataGrid } from "@/components/niko-table/grid/core/data-grid"
 import { DataGridCell } from "@/components/niko-table/grid/core/data-grid-context"
@@ -119,7 +123,7 @@ const LAST_NAMES = ["Chen", "Park", "Diaz", "Novak", "Osei", "Kaur"]
 const ROLES = ["Admin", "Editor", "Viewer"]
 
 // The "database" — mutated by saveEmployees, like real server data.
-const employeeDb: Employee[] = Array.from({ length: 120 }, (_, i) => {
+const employeeDb: Employee[] = Array.from({ length: 400 }, (_, i) => {
   const first = FIRST_NAMES[i % FIRST_NAMES.length]
   const last =
     LAST_NAMES[Math.floor(i / FIRST_NAMES.length) % LAST_NAMES.length]
@@ -209,14 +213,23 @@ const LABELS: Record<string, string> = {
   email: "Email",
   role: "Role",
 }
-const CHUNK_SIZE = 30
+const CHUNK_SIZE = 50
 
-const resolveCell = (_columnId: string, raw: string): CellState<string> => ({
-  raw,
-  value: raw || null,
-  status: raw === "" ? "empty" : "valid",
-})
-const cell = (raw: string): CellState<string> => resolveCell("", raw)
+/**
+ * Client-side validation runs on every keystroke: emails must contain an @.
+ * The server stays the authority (it re-checks on save) — this just gives
+ * instant feedback before the round trip.
+ */
+const resolveCell = (columnId: string, raw: string): CellState<string> => {
+  const trimmed = raw.trim()
+  if (trimmed === "") {
+    return { raw, value: null, status: "empty" }
+  }
+  if (columnId === "email" && !trimmed.includes("@")) {
+    return { raw, value: null, status: "invalid", error: "Email needs an @" }
+  }
+  return { raw, value: trimmed, status: "valid" }
+}
 
 const rawOf = (value: GridRow[string]): string =>
   typeof value === "object" && value != null ? value.raw : ""
@@ -224,9 +237,9 @@ const rawOf = (value: GridRow[string]): string =>
 /** API row → grid row (each column becomes a CellState). */
 const toGridRow = (e: Employee): GridRow => ({
   id: e.id,
-  name: cell(e.name),
-  email: cell(e.email),
-  role: cell(e.role),
+  name: resolveCell("name", e.name),
+  email: resolveCell("email", e.email),
+  role: resolveCell("role", e.role),
 })
 
 /** Grid row → API row (raw strings only — plain JSON for the wire). */
@@ -271,7 +284,7 @@ export default function GridServerSideExample() {
   const grid = useDataGrid<GridRow>({
     columnIds: COLUMN_IDS,
     createEmptyRow,
-    maxRows: 500,
+    maxRows: 1000,
   })
   const changes = useGridChanges(grid, { isEqual: rowsEqual })
 
@@ -382,6 +395,20 @@ export default function GridServerSideExample() {
   }, [changes])
 
   const dirtyCount = changes.dirtyRowIds.size
+
+  // Rows with client-side validation errors — Save stays disabled until
+  // they're fixed (the server would reject them anyway)
+  const invalidCount = React.useMemo(
+    () =>
+      grid.rows.filter(row =>
+        COLUMN_IDS.some(id => {
+          const value = row[id]
+          return typeof value === "object" && value?.status === "invalid"
+        }),
+      ).length,
+    [grid.rows],
+  )
+
   const columns = useEmployeeColumns()
 
   return (
@@ -397,9 +424,18 @@ export default function GridServerSideExample() {
           <DataTableColumnResize />
           <DataGridClipboard resolveCell={resolveCell} />
           <DataGridFillHandle />
+          <DataGridMove />
           <DataGridToolbar>
             <DataGridAddRows count={1} />
+            <DataGridUndo />
+            <DataGridRedo />
             <div className="ml-auto flex items-center gap-2">
+              {invalidCount > 0 && (
+                <Badge variant="destructive">
+                  {invalidCount}{" "}
+                  {invalidCount === 1 ? "row needs" : "rows need"} fixing
+                </Badge>
+              )}
               {changes.isDirty ? (
                 <Badge variant="outline">
                   {dirtyCount} unsaved {dirtyCount === 1 ? "row" : "rows"}
@@ -419,7 +455,11 @@ export default function GridServerSideExample() {
               <Button
                 size="sm"
                 onClick={onSave}
-                disabled={!changes.isDirty || save.phase === "saving"}
+                disabled={
+                  !changes.isDirty ||
+                  invalidCount > 0 ||
+                  save.phase === "saving"
+                }
               >
                 {save.phase === "saving" ? (
                   <Loader2
@@ -474,21 +514,21 @@ export default function GridServerSideExample() {
               </DataTableRowContextMenuSlot>
             </DataTableVirtualizedBody>
           </DataTable>
+          <div
+            className="flex items-center justify-between text-xs text-muted-foreground"
+            role="status"
+          >
+            <span>
+              {grid.rows.length} of {total} rows loaded — scroll to load more
+            </span>
+            {isFetching && (
+              <span className="flex items-center gap-1">
+                <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
+                Loading more rows...
+              </span>
+            )}
+          </div>
         </DataGrid>
-        <div
-          className="flex items-center gap-2 text-xs text-muted-foreground"
-          role="status"
-        >
-          <span>
-            {grid.rows.length} of {total} rows loaded — scroll to load more
-          </span>
-          {isFetching && (
-            <Loader2
-              className="size-3.5 animate-spin"
-              aria-label="Loading more rows"
-            />
-          )}
-        </div>
       </DataTableRoot>
 
       {/* Demo-only: what travels over the wire */}
@@ -498,8 +538,9 @@ export default function GridServerSideExample() {
           <CardDescription>
             Rows stream in via <code>fetchEmployees</code> as you scroll; Save
             sends this changeset to <code>saveEmployees</code>. Swap both mock
-            functions for real API calls and any database works. Tip: clear a
-            name or email and hit Save to see server-side validation reject the
+            functions for real API calls and any database works. Tip: remove the
+            @ from an email to see client-side validation flag it instantly;
+            clear a name and hit Save to see server-side validation reject the
             row.
           </CardDescription>
         </CardHeader>
@@ -524,7 +565,7 @@ export default function GridServerSideExample() {
   )
 }
 
-/** Column defs: every column renders a text editor via DataGridCell. */
+/** Column defs: text editors for name/email, a select editor for role. */
 function useEmployeeColumns(): DataTableColumnDef<GridRow>[] {
   return React.useMemo(
     () =>
@@ -536,15 +577,24 @@ function useEmployeeColumns(): DataTableColumnDef<GridRow>[] {
         meta: { label: LABELS[columnId] },
         cell: ctx => (
           <DataGridCell row={ctx.row.original} columnId={columnId}>
-            {(props: CellEditorProps) => (
-              <GridTextCell
-                {...props}
-                resolve={raw => resolveCell(columnId, raw)}
-                placeholder={
-                  columnId === "email" ? "name@company.com" : LABELS[columnId]
-                }
-              />
-            )}
+            {(props: CellEditorProps) =>
+              columnId === "role" ? (
+                <GridSelectCell
+                  {...props}
+                  options={ROLES.map(role => ({ label: role, value: role }))}
+                  placeholder="Select…"
+                  displayLabel={props.cell.value ?? undefined}
+                />
+              ) : (
+                <GridTextCell
+                  {...props}
+                  resolve={raw => resolveCell(columnId, raw)}
+                  placeholder={
+                    columnId === "email" ? "name@company.com" : LABELS[columnId]
+                  }
+                />
+              )
+            }
           </DataGridCell>
         ),
       })),

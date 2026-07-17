@@ -8,9 +8,11 @@ import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-c
 
 Hands pagination, sorting, and filtering off to your API and uses [TanStack Query](https://tanstack.com/query/latest) for caching, background revalidation, and request dedup. The table only ever talks to one function with a serializable request shape — so it works with **any database or backend**: SQL, Prisma, Drizzle, Supabase, REST, GraphQL. State lives in `useState` only; a refresh resets filters — use the [Server-Side Nuqs Table](/examples/server-side-nuqs-table/) if you also need URL persistence.
 
-<CodePreview demo="niko-table/server-side-state" />
+## Live demo (mocked)
 
-The demo above ships with a **mock server** (an in-memory array plus latency) so every filter works out of the box. Everything in its clearly-marked `MOCK SERVER` section is a stand-in for your backend.
+The demo runs against a **mock server** — an in-memory array of 2,000 products plus simulated latency — so every filter, sort, and page works out of the box with no database. Everything in its clearly-marked `MOCK SERVER` section is a stand-in for your backend.
+
+<CodePreview demo="niko-table/server-side-state" />
 
 ## Installation
 

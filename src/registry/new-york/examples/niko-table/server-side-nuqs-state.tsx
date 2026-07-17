@@ -192,7 +192,7 @@ type ProductQueryResult = {
  * filter excluded:  SELECT category, COUNT(*) ... GROUP BY category.
  * ---------------------------------------------------------------------- */
 
-// The "database" — 15 base products expanded to 500 rows.
+// The "database" — 15 base products expanded to 2,000 rows.
 const initialData: Product[] = [
   {
     id: "1",
@@ -643,7 +643,7 @@ function fetchProducts(
           return
         }
 
-        const allProducts = generateMockProducts(500)
+        const allProducts = generateMockProducts(2000)
         const filtered = filterProductsByQuery(allProducts, query)
 
         // Cross-filter facets (each column's own filter excluded)

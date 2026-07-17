@@ -8,6 +8,10 @@ import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-c
 
 Rows stream in from your API as the user scrolls (no pagination — the virtualized body prefetches the next chunk before the bottom is reached), get edited locally in the grid, and travel back as a `created` / `updated` / `deleted` changeset. The server validates each row; failures stay dirty and highlighted so the user fixes and retries. The grid is database-agnostic — it only talks to two serializable functions you implement against any backend.
 
+## Live demo (mocked)
+
+The demo runs against a **mock server** — an in-memory "database" of 400 employees with simulated latency that persists your saves — so scrolling, editing, and saving all work out of the box. Everything in its `MOCK SERVER` section is a stand-in for your backend.
+
 <CodePreview demo="niko-table/grid-server-side-state" />
 
 ## Installation

@@ -8,9 +8,11 @@ import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-c
 
 Combines TanStack Query (data fetching, caching, request dedup) with [nuqs](https://nuqs.dev/) URL state, so the URL itself becomes the cache key — share a link, and the recipient sees the exact same filtered, sorted, paginated view. Same database-agnostic wire contract as the [Server-Side Table](/examples/server-side-table/); read that page first, this one only covers the URL layer.
 
-<CodePreview demo="niko-table/server-side-nuqs-state" />
+## Live demo (mocked)
 
-Try it: filter or sort the demo, watch the "URL State" card update, and imagine pasting that URL to a teammate. The demo ships with a mock server so every filter works out of the box; everything in its `MOCK SERVER` section is a stand-in for your backend.
+The demo runs against a **mock server** — an in-memory array of 2,000 products plus simulated latency — so every filter works out of the box with no database; everything in its `MOCK SERVER` section is a stand-in for your backend. Try it: filter or sort, watch the "URL State" card update, and imagine pasting that URL to a teammate.
+
+<CodePreview demo="niko-table/server-side-nuqs-state" />
 
 ## Installation
 
