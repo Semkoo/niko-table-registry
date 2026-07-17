@@ -258,6 +258,10 @@ export default defineConfig({
               label: "Server-Side Nuqs Table",
               slug: "examples/server-side-nuqs-table",
             },
+            {
+              label: "Drizzle ORM",
+              slug: "examples/drizzle-orm",
+            },
           ],
         },
         {

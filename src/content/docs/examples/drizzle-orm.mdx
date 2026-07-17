@@ -1,0 +1,359 @@
+---
+title: Drizzle ORM
+description: Implement the server-side wire contract with Drizzle ORM and Postgres — filters, sorting, pagination, and cross-filter facets as real SQL.
+---
+
+The [Server-Side Table](/examples/server-side-table/) examples talk to one function with a serializable request shape. This guide implements that function for real with [Drizzle ORM](https://orm.drizzle.team/) on Postgres: every filter widget, the advanced filter menu (including OR logic), sorting, pagination, and cross-filter facets become SQL. Nothing on the client changes — you swap the example's `MOCK SERVER` section for a `fetch` call to the route built here.
+
+The same recipe ports directly to MySQL/SQLite Drizzle dialects, and the structure mirrors Prisma or raw SQL if you prefer those.
+
+## 1. Schema
+
+```ts showLineNumbers title="db/schema.ts"
+import {
+  boolean,
+  integer,
+  pgTable,
+  text,
+  timestamp,
+} from "drizzle-orm/pg-core"
+
+export const products = pgTable("products", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  category: text("category").notNull(),
+  brand: text("brand").notNull(),
+  price: integer("price").notNull(),
+  stock: integer("stock").notNull(),
+  rating: integer("rating").notNull(),
+  inStock: boolean("in_stock").notNull(),
+  releaseDate: timestamp("release_date").notNull(),
+})
+```
+
+```ts showLineNumbers title="db/index.ts"
+import { drizzle } from "drizzle-orm/node-postgres"
+
+export const db = drizzle(process.env.DATABASE_URL!)
+```
+
+## 2. Column mapping
+
+Bridge the table's column ids to Drizzle columns once — everything else stays generic:
+
+```ts showLineNumbers title="server/column-map.ts"
+import type { AnyPgColumn } from "drizzle-orm/pg-core"
+import { products } from "@/db/schema"
+
+export const columnMap: Record<string, AnyPgColumn> = {
+  name: products.name,
+  category: products.category,
+  brand: products.brand,
+  price: products.price,
+  stock: products.stock,
+  rating: products.rating,
+  inStock: products.inStock,
+  releaseDate: products.releaseDate,
+}
+
+// columns the global search input scans
+export const searchableColumns = [
+  products.name,
+  products.category,
+  products.brand,
+]
+```
+
+## 3. The request — same wire contract as the examples
+
+```ts showLineNumbers title="server/types.ts"
+import type { ColumnFiltersState, SortingState } from "@tanstack/react-table"
+
+export type ProductQuery = {
+  page: number
+  pageSize: number
+  sorting: SortingState
+  search: string | { filters: MenuFilter[]; joinOperator: "or" | "mixed" }
+  columnFilters: ColumnFiltersState
+}
+
+/** ExtendedColumnFilter as it arrives over the wire (filterId optional). */
+export type MenuFilter = {
+  id: string
+  operator: string
+  value: unknown
+  joinOperator?: "and" | "or"
+}
+```
+
+## 4. Filters → WHERE
+
+Two value shapes travel in `columnFilters` (see the [value-shape table](/examples/server-side-table/#what-arrives-in-columnfilters)): plain widget values and `ExtendedColumnFilter` objects from the advanced filter menu. One function dispatches both:
+
+```ts showLineNumbers title="server/build-where.ts"
+import {
+  and,
+  asc,
+  between,
+  desc,
+  eq,
+  gt,
+  gte,
+  ilike,
+  inArray,
+  isNull,
+  lt,
+  lte,
+  ne,
+  not,
+  notIlike,
+  notInArray,
+  or,
+  sql,
+  type SQL,
+} from "drizzle-orm"
+import { columnMap, searchableColumns } from "./column-map"
+import type { MenuFilter, ProductQuery } from "./types"
+
+/** One advanced-filter-menu rule → SQL condition. */
+function menuFilterToSql(filter: MenuFilter): SQL | undefined {
+  const column = columnMap[filter.id]
+  if (!column) return undefined
+  const value = filter.value
+
+  switch (filter.operator) {
+    case "ilike":
+      return ilike(column, `%${String(value)}%`)
+    case "not.ilike":
+      return notIlike(column, `%${String(value)}%`)
+    case "eq":
+      return eq(column, value)
+    case "neq":
+      return ne(column, value)
+    case "gt":
+      return gt(column, value)
+    case "gte":
+      return gte(column, value)
+    case "lt":
+      return lt(column, value)
+    case "lte":
+      return lte(column, value)
+    case "in":
+      return Array.isArray(value) ? inArray(column, value) : undefined
+    case "not.in":
+      return Array.isArray(value) ? notInArray(column, value) : undefined
+    case "empty":
+      return or(isNull(column), eq(column, ""))
+    case "not.empty":
+      return not(or(isNull(column), eq(column, ""))!)
+    default:
+      return undefined
+  }
+}
+
+/** One columnFilters entry (widget value OR menu filter) → SQL condition. */
+function columnFilterToSql(id: string, value: unknown): SQL | undefined {
+  // advanced filter menu entries carry an `operator`
+  if (
+    value &&
+    typeof value === "object" &&
+    !Array.isArray(value) &&
+    "operator" in value
+  ) {
+    return menuFilterToSql(value as MenuFilter)
+  }
+
+  const column = columnMap[id]
+  if (!column || value == null || value === "") return undefined
+
+  // single date filter: bare ms timestamp → match the calendar day
+  if (typeof value === "number" && id === "releaseDate") {
+    const day = new Date(value)
+    const next = new Date(value + 24 * 60 * 60 * 1000)
+    return and(gte(column, day), lt(column, next))
+  }
+
+  // [min, max] tuple from slider / date-range filters (null = open-ended)
+  if (
+    Array.isArray(value) &&
+    value.length === 2 &&
+    !value.every(v => typeof v === "string")
+  ) {
+    const [min, max] = value as [unknown, unknown]
+    const lo = min == null ? undefined : toColumnValue(id, min)
+    const hi = max == null ? undefined : toColumnValue(id, max)
+    if (lo != null && hi != null) return between(column, lo, hi)
+    if (lo != null) return gte(column, lo)
+    if (hi != null) return lte(column, hi)
+    return undefined
+  }
+
+  // string[] from faceted multi-select
+  if (Array.isArray(value)) {
+    return value.length > 0 ? inArray(column, value) : undefined
+  }
+
+  if (typeof value === "boolean") return eq(column, value)
+
+  return ilike(column, `%${String(value)}%`)
+}
+
+/** Timestamp columns receive Date objects; everything else passes through. */
+function toColumnValue(id: string, value: unknown): unknown {
+  return id === "releaseDate" ? new Date(Number(value)) : value
+}
+
+/**
+ * All conditions for a query. `excludeColumnId` powers facet computation:
+ * a column's facet is computed under every filter EXCEPT its own.
+ */
+export function buildWhere(
+  query: ProductQuery,
+  excludeColumnId?: string,
+): SQL | undefined {
+  const conditions: (SQL | undefined)[] = []
+
+  // global text search across the searchable columns
+  if (typeof query.search === "string" && query.search) {
+    conditions.push(
+      or(...searchableColumns.map(c => ilike(c, `%${query.search}%`))),
+    )
+  }
+
+  // OR / MIXED logic from the advanced filter menu (rides in `search`)
+  if (typeof query.search === "object" && "filters" in query.search) {
+    const orConditions = query.search.filters
+      .filter(f => f.id !== excludeColumnId)
+      .map(menuFilterToSql)
+      .filter(Boolean) as SQL[]
+    if (orConditions.length > 0) conditions.push(or(...orConditions))
+  }
+
+  // AND logic: every columnFilters entry must match
+  for (const filter of query.columnFilters) {
+    if (filter.id === excludeColumnId) continue
+    conditions.push(columnFilterToSql(filter.id, filter.value))
+  }
+
+  const defined = conditions.filter(Boolean) as SQL[]
+  return defined.length > 0 ? and(...defined) : undefined
+}
+
+/** query.sorting → ORDER BY. */
+export function buildOrderBy(query: ProductQuery): SQL[] {
+  return query.sorting
+    .filter(s => columnMap[s.id])
+    .map(s => (s.desc ? desc(columnMap[s.id]) : asc(columnMap[s.id])))
+}
+```
+
+> **Serialization note:** date filters send **ms timestamps** (numbers), which survive JSON. Convert them to `Date` at the boundary (`toColumnValue`) for `timestamp` columns.
+
+## 5. Facets — grouped counts with the column's own filter excluded
+
+```ts showLineNumbers title="server/facets.ts"
+import { count, max, min } from "drizzle-orm"
+import { db } from "@/db"
+import { products } from "@/db/schema"
+import { buildWhere } from "./build-where"
+import { columnMap } from "./column-map"
+import type { ProductQuery } from "./types"
+
+const FACET_SELECT_COLUMNS = ["category", "brand"] as const
+const FACET_RANGE_COLUMNS = ["price"] as const
+
+export async function computeFacets(query: ProductQuery) {
+  const select: Record<string, Array<{ value: string; count: number }>> = {}
+  const range: Record<string, [number, number]> = {}
+
+  await Promise.all([
+    ...FACET_SELECT_COLUMNS.map(async col => {
+      const rows = await db
+        .select({ value: columnMap[col], count: count() })
+        .from(products)
+        .where(buildWhere(query, col)) // own filter excluded
+        .groupBy(columnMap[col])
+        .orderBy(columnMap[col])
+      select[col] = rows.map(r => ({
+        value: String(r.value),
+        count: Number(r.count),
+      }))
+    }),
+    ...FACET_RANGE_COLUMNS.map(async col => {
+      const [row] = await db
+        .select({ min: min(columnMap[col]), max: max(columnMap[col]) })
+        .from(products)
+        .where(buildWhere(query, col))
+      if (row?.min != null && row?.max != null) {
+        range[col] = [Number(row.min), Number(row.max)]
+      }
+    }),
+  ])
+
+  return { select, range }
+}
+```
+
+## 6. The API route
+
+```ts showLineNumbers title="app/api/products/route.ts (Next.js App Router)"
+import { count } from "drizzle-orm"
+import { db } from "@/db"
+import { products } from "@/db/schema"
+import { buildOrderBy, buildWhere } from "@/server/build-where"
+import { computeFacets } from "@/server/facets"
+import type { ProductQuery } from "@/server/types"
+
+export async function POST(request: Request) {
+  const query = (await request.json()) as ProductQuery
+  const where = buildWhere(query)
+
+  const [data, [{ total }], facets] = await Promise.all([
+    db
+      .select()
+      .from(products)
+      .where(where)
+      .orderBy(...buildOrderBy(query))
+      .limit(query.pageSize)
+      .offset(query.page * query.pageSize),
+    db.select({ total: count() }).from(products).where(where),
+    computeFacets(query),
+  ])
+
+  return Response.json({ data, total: Number(total), facets })
+}
+```
+
+Validate `query` before trusting it in production (zod works well) — cap `pageSize`, allowlist sortable/filterable column ids (the `columnMap` lookup already drops unknown ids).
+
+## 7. Point the example at it
+
+In the [Server-Side Table](/examples/server-side-table/) example, delete the `MOCK SERVER` section and replace `fetchProducts` with:
+
+```tsx showLineNumbers
+async function fetchProducts(query: ProductQuery): Promise<ProductQueryResult> {
+  const res = await fetch("/api/products", {
+    method: "POST",
+    body: JSON.stringify(query),
+  })
+  if (!res.ok) throw new Error("Failed to fetch products")
+  const result = await res.json()
+  return {
+    ...result,
+    // timestamps come back as ISO strings — revive them for the Date cells
+    data: result.data.map((p: Product) => ({
+      ...p,
+      releaseDate: new Date(p.releaseDate),
+    })),
+  }
+}
+```
+
+Everything else — columns, toolbar, facets wiring — already works against this response.
+
+## Next
+
+- [Server-Side Table](/examples/server-side-table/) — the wire contract and client wiring this guide implements
+- [Server-Side Nuqs Table](/examples/server-side-nuqs-table/) — same contract with URL state
+- [Server-Side Grid](/examples/server-side-grid/) — the editable grid's fetch/save contract
+- [Drizzle ORM Docs](https://orm.drizzle.team/)
