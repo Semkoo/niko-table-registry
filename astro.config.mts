@@ -262,6 +262,10 @@ export default defineConfig({
               label: "Drizzle ORM",
               slug: "examples/drizzle-orm",
             },
+            {
+              label: "Drizzle ORM + Nuqs",
+              slug: "examples/drizzle-orm-nuqs",
+            },
           ],
         },
         {
