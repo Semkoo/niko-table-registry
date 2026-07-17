@@ -69,6 +69,11 @@ export interface DataGridProps<TRow extends GridRow> {
  *   <DataTable>…</DataTable>
  * </DataGrid>
  */
+
+// Radix's TooltipProvider reads `delayDuration`, Base UI's reads `delay`;
+// spread so it typechecks in both shadcn generations.
+const gridTooltipDelay = { delayDuration: 0, delay: 0 }
+
 export function DataGrid<TRow extends GridRow>({
   grid,
   children,
@@ -607,7 +612,7 @@ export function DataGrid<TRow extends GridRow>({
   )
 
   return (
-    <TooltipProvider delayDuration={0}>
+    <TooltipProvider {...gridTooltipDelay}>
       <DataGridContextProvider value={contextValue}>
         <DataGridInternalsProvider value={internals}>
           <DataGridFeaturesProvider

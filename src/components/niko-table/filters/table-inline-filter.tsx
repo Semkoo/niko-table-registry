@@ -233,9 +233,9 @@ function useSyncFiltersWithTable<TData>(
 
   // Update table meta (happens during render, safe mutation)
   if (table.options.meta) {
-    // eslint-disable-next-line react-hooks/immutability
+     
     table.options.meta.hasIndividualJoinOperators = true
-    // eslint-disable-next-line react-hooks/immutability
+     
     table.options.meta.joinOperator = filterLogic.joinOperator
   }
 
@@ -513,8 +513,12 @@ export function TableInline<TData>({
             {index > 0 && (
               <Select
                 value={filter.joinOperator || JOIN_OPERATORS.AND}
-                onValueChange={(value: JoinOperator) =>
-                  onFilterUpdate(filter.filterId, { joinOperator: value })
+                onValueChange={(value: string | null) =>
+                  // Base UI selects pass null on clear; Radix never does
+                  value &&
+                  onFilterUpdate(filter.filterId, {
+                    joinOperator: value as JoinOperator,
+                  })
                 }
               >
                 <SelectTrigger
@@ -775,16 +779,19 @@ function TableInlineFilterItem<TData>({
         open={showOperatorSelector}
         onOpenChange={setShowOperatorSelector}
         value={filter.operator}
-        onValueChange={(value: FilterOperator) =>
+        onValueChange={(value: string | null) => {
+          // Base UI selects pass null on clear; Radix never does
+          if (!value) return
+          const operator = value as FilterOperator
           onFilterUpdate(filter.filterId, {
-            operator: value,
+            operator,
             value:
-              value === FILTER_OPERATORS.EMPTY ||
-              value === FILTER_OPERATORS.NOT_EMPTY
+              operator === FILTER_OPERATORS.EMPTY ||
+              operator === FILTER_OPERATORS.NOT_EMPTY
                 ? ""
                 : filter.value,
           })
-        }
+        }}
       >
         <SelectTrigger
           title="Change operator"
@@ -1008,8 +1015,9 @@ function onFilterInputRender<TData>({
           open={showValueSelector}
           onOpenChange={setShowValueSelector}
           value={typeof filter.value === "string" ? filter.value : "true"}
-          onValueChange={(value: "true" | "false") =>
-            onFilterUpdate(filter.filterId, { value })
+          onValueChange={(value: string | null) =>
+            // Base UI selects pass null on clear; Radix never does
+            value && onFilterUpdate(filter.filterId, { value })
           }
         >
           <SelectTrigger

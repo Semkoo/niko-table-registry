@@ -16,7 +16,7 @@
  * @description A sort menu component for DataTable that allows users to manage multiple sorting criteria. Users can add, remove, and reorder sorting fields, as well as select sort directions.
  */
 
-import type { ColumnSort, SortDirection, Table } from "@tanstack/react-table"
+import type { ColumnSort, Table } from "@tanstack/react-table"
 import { ArrowDownUp, Trash2, CircleHelp } from "lucide-react"
 import * as React from "react"
 
@@ -73,6 +73,13 @@ interface TableSortItemProps {
   className?: string
 }
 
+/**
+ * Spread (not a literal `asChild` attribute) so the shadcn CLI's Base UI
+ * codemod doesn't rewrite it to `render` — the sortable component keeps the
+ * `asChild` API in both the Radix and Base UI shadcn generations.
+ */
+const sortableAsChild = { asChild: true }
+
 function TableSortItem({
   sort,
   sortItemId,
@@ -117,7 +124,7 @@ function TableSortItem({
   const labels = SORT_LABELS[variant] || SORT_LABELS[FILTER_VARIANTS.TEXT]
 
   return (
-    <SortableItem value={sort.id} asChild>
+    <SortableItem value={sort.id} {...sortableAsChild}>
       <li
         id={sortItemId}
         tabIndex={-1}
@@ -163,8 +170,9 @@ function TableSortItem({
           open={showDirectionSelector}
           onOpenChange={setShowDirectionSelector}
           value={sort.desc ? "desc" : "asc"}
-          onValueChange={(value: SortDirection) =>
-            onSortUpdate(sort.id, { desc: value === "desc" })
+          onValueChange={(value: string | null) =>
+            // Base UI selects pass null on clear; Radix never does
+            value && onSortUpdate(sort.id, { desc: value === "desc" })
           }
         >
           <SelectTrigger
@@ -190,7 +198,7 @@ function TableSortItem({
         >
           <Trash2 />
         </Button>
-        <SortableItemHandle asChild>
+        <SortableItemHandle {...sortableAsChild}>
           <Button
             variant="outline"
             size="icon"
@@ -426,7 +434,7 @@ export function TableSortMenu<TData>({
             </p>
           </div>
           {sorting.length > 0 && (
-            <SortableContent asChild>
+            <SortableContent {...sortableAsChild}>
               <ul className="flex max-h-[300px] flex-col gap-2 overflow-y-auto p-1">
                 {sorting.map(sort => (
                   <TableSortItem

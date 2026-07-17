@@ -222,9 +222,20 @@ function useFacetedContext(name: string) {
   return context
 }
 
+/**
+ * Spread (not a literal `asChild` attribute) so the shadcn CLI's Base UI
+ * codemod doesn't rewrite it to `render` — the sortable component keeps the
+ * `asChild` API in both the Radix and Base UI shadcn generations.
+ */
+const sortableAsChild = { asChild: true }
+
 interface FacetedProps<
   Multiple extends boolean = false,
-> extends React.ComponentProps<typeof Popover> {
+  // Base UI's Popover types onOpenChange as (open, eventDetails) with both
+  // params required; declare our own single-param callback so calling it
+  // with just `open` typechecks in both shadcn generations
+> extends Omit<React.ComponentProps<typeof Popover>, "onOpenChange"> {
+  onOpenChange?: (open: boolean) => void
   value?: FacetedValue<Multiple>
   onValueChange?: (value: FacetedValue<Multiple> | undefined) => void
   children?: React.ReactNode
@@ -674,9 +685,8 @@ function useSyncFiltersWithTable<TData>(
   // This is safe because we're only mutating table.options.meta, not triggering re-renders
   // Custom filter logic can read this meta to apply correct join operators
   if (table.options.meta) {
-     
     table.options.meta.hasIndividualJoinOperators = true
-     
+
     table.options.meta.joinOperator = filterLogic.joinOperator
   }
 
@@ -964,7 +974,7 @@ export function TableFilterMenu<TData>({
               </p>
             </div>
             {filters.length > 0 ? (
-              <SortableContent asChild>
+              <SortableContent {...sortableAsChild}>
                 <ul className="flex max-h-[300px] flex-col gap-2 overflow-y-auto p-1">
                   {filters.map((filter, index) => (
                     <TableFilterItem<TData>
@@ -1085,7 +1095,7 @@ function TableFilterItem<TData>({
   if (!column) return null
 
   return (
-    <SortableItem value={filter.filterId} asChild>
+    <SortableItem value={filter.filterId} {...sortableAsChild}>
       <li
         id={filterItemId}
         tabIndex={-1}
@@ -1146,7 +1156,7 @@ function TableFilterItem<TData>({
         </Button>
 
         {/* Drag handle */}
-        <SortableItemHandle asChild>
+        <SortableItemHandle {...sortableAsChild}>
           <Button
             variant="outline"
             size="icon"
@@ -1254,8 +1264,10 @@ function FilterBooleanSelect<TData>({
     <Select
       open={showValueSelector}
       onOpenChange={setShowValueSelector}
-      value={filter.value}
+      value={typeof filter.value === "string" ? filter.value : undefined}
       onValueChange={value =>
+        // Base UI selects pass null on clear; Radix never does
+        value != null &&
         onFilterUpdate(filter.filterId, {
           value,
         })
@@ -1566,8 +1578,12 @@ function FilterJoinOperator<TData>({
     <div className="min-w-[72px] text-center">
       <Select
         value={filter.joinOperator || JOIN_OPERATORS.AND}
-        onValueChange={(value: JoinOperator) =>
-          onFilterUpdate(filter.filterId, { joinOperator: value })
+        onValueChange={(value: string | null) =>
+          // Base UI selects pass null on clear; Radix never does
+          value &&
+          onFilterUpdate(filter.filterId, {
+            joinOperator: value as JoinOperator,
+          })
         }
       >
         <SelectTrigger
@@ -1580,7 +1596,6 @@ function FilterJoinOperator<TData>({
         </SelectTrigger>
         <SelectContent
           id={joinOperatorListboxId}
-          position="popper"
           className="min-w-(--radix-select-trigger-width) lowercase"
         >
           {dataTableConfig.joinOperators.map(operator => (
@@ -1710,16 +1725,19 @@ function FilterOperatorSelector<TData>({
       open={showOperatorSelector}
       onOpenChange={setShowOperatorSelector}
       value={filter.operator}
-      onValueChange={(value: FilterOperator) =>
+      onValueChange={(value: string | null) => {
+        // Base UI selects pass null on clear; Radix never does
+        if (!value) return
+        const operator = value as FilterOperator
         onFilterUpdate(filter.filterId, {
-          operator: value,
+          operator,
           value:
-            value === FILTER_OPERATORS.EMPTY ||
-            value === FILTER_OPERATORS.NOT_EMPTY
+            operator === FILTER_OPERATORS.EMPTY ||
+            operator === FILTER_OPERATORS.NOT_EMPTY
               ? ""
               : filter.value,
         })
-      }
+      }}
     >
       <SelectTrigger
         aria-controls={operatorListboxId}

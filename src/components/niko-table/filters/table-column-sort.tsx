@@ -103,6 +103,7 @@ export function TableColumnSortOptions<TData, TValue>({
     e:
       | React.MouseEvent
       | React.KeyboardEvent
+      | React.SyntheticEvent // Base UI menu items emit wrapped synthetic events
       | Event
       | {
           detail?: { originalEvent?: { shiftKey?: boolean } }

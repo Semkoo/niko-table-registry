@@ -109,7 +109,9 @@ export function TablePagination<TData>({
   }, [])
 
   const handlePageSizeChange = React.useCallback(
-    (value: string) => {
+    // Base UI selects pass null on clear; Radix never does
+    (value: string | null) => {
+      if (!value) return
       const newPageSize = Number(value)
       const newPageIndex = Math.floor((pageIndex * pageSize) / newPageSize)
       table.setPageSize(newPageSize)
