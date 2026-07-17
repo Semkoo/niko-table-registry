@@ -70,10 +70,8 @@ First, we'll define our columns with filter metadata.
 ```tsx showLineNumbers title="columns.tsx"
 "use client"
 
-import {
-  DataTableColumnHeader,
-  DataTableColumnTitle,
-} from "@/components/niko-table/components/data-table-column-header"
+import { DataTableColumnHeader } from "@/components/niko-table/components/data-table-column-header"
+import { DataTableColumnTitle } from "@/components/niko-table/components/data-table-column-title"
 import { DataTableColumnSortMenu } from "@/components/niko-table/components/data-table-column-sort"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 
@@ -189,10 +187,8 @@ import { DataTableSearchFilter } from "@/components/niko-table/components/data-t
 import { DataTableViewMenu } from "@/components/niko-table/components/data-table-view-menu"
 import { DataTableSortMenu } from "@/components/niko-table/components/data-table-sort-menu"
 import { DataTableFilterMenu } from "@/components/niko-table/components/data-table-filter-menu"
-import {
-  DataTableColumnHeader,
-  DataTableColumnTitle,
-} from "@/components/niko-table/components/data-table-column-header"
+import { DataTableColumnHeader } from "@/components/niko-table/components/data-table-column-header"
+import { DataTableColumnTitle } from "@/components/niko-table/components/data-table-column-title"
 import { DataTableColumnSortMenu } from "@/components/niko-table/components/data-table-column-sort"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 
@@ -307,19 +303,19 @@ The filter menu component allows users to create rule-based filters with multipl
 
 **Props:**
 
-| Name                  | Type                                                | Default      | Description                                            |
-| --------------------- | --------------------------------------------------- | ------------ | ------------------------------------------------------ |
-| `autoOptions`         | `boolean`                                           | `true`       | Auto-generate options for select/multiSelect columns   |
-| `showCounts`          | `boolean`                                           | `true`       | Show counts beside each option                         |
-| `dynamicCounts`       | `boolean`                                           | `true`       | Recompute counts based on currently filtered rows      |
-| `limitToFilteredRows` | `boolean`                                           | `true`       | Generate options from filtered rows only (vs all rows) |
-| `includeColumns`      | `string[]`                                          | -            | Only generate options for these column ids             |
-| `excludeColumns`      | `string[]`                                          | -            | Exclude these column ids from generation               |
-| `limitPerColumn`      | `number`                                            | -            | Limit number of generated options per column           |
-| `mergeStrategy`       | `"preserve" \| "augment" \| "replace"`              | `"preserve"` | How to handle existing static options                  |
-| `filters?`            | `ExtendedColumnFilter[]`                            | -            | Array of filters (for controlled mode)                 |
-| `onFiltersChange?`    | `(filters: ExtendedColumnFilter[] \| null) => void` | -            | Callback when filters change                           |
-| `className`           | `string`                                            | -            | Additional CSS classes                                 |
+| Name                  | Type                                                | Default      | Description                                                                    |
+| --------------------- | --------------------------------------------------- | ------------ | ------------------------------------------------------------------------------ |
+| `autoOptions`         | `boolean`                                           | `true`       | Auto-generate options for select/multiSelect columns                           |
+| `showCounts`          | `boolean`                                           | `true`       | Show counts beside each option                                                 |
+| `dynamicCounts`       | `boolean`                                           | `true`       | Counts recompute at the provider level automatically; prop kept for API parity |
+| `limitToFilteredRows` | `boolean`                                           | `true`       | Generate options from filtered rows only (vs all rows)                         |
+| `includeColumns`      | `string[]`                                          | -            | Only generate options for these column ids                                     |
+| `excludeColumns`      | `string[]`                                          | -            | Exclude these column ids from generation                                       |
+| `limitPerColumn`      | `number`                                            | -            | Limit number of generated options per column                                   |
+| `mergeStrategy`       | `"preserve" \| "augment" \| "replace"`              | `"preserve"` | How to handle existing static options                                          |
+| `filters?`            | `ExtendedColumnFilter[]`                            | -            | Array of filters (for controlled mode)                                         |
+| `onFiltersChange?`    | `(filters: ExtendedColumnFilter[] \| null) => void` | -            | Callback when filters change                                                   |
+| `className`           | `string`                                            | -            | Additional CSS classes                                                         |
 
 **Merge Strategy:**
 

@@ -177,7 +177,8 @@ function columnFilterToSql(id: string, value: unknown): SQL | undefined {
   // single date filter: bare ms timestamp → match the calendar day
   if (typeof value === "number" && id === "releaseDate") {
     const day = new Date(value)
-    const next = new Date(value + 24 * 60 * 60 * 1000)
+    day.setHours(0, 0, 0, 0)
+    const next = new Date(day.getTime() + 24 * 60 * 60 * 1000)
     return and(gte(column, day), lt(column, next))
   }
 

@@ -145,8 +145,8 @@ const columns = useMemo<DataTableColumnDef<Product>[]>(
     {
       id: "name",
       accessorKey: "name",
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column}>
+      header: () => (
+        <DataTableColumnHeader>
           <DataTableColumnTitle>Name</DataTableColumnTitle>
           <DataTableColumnSortMenu />
         </DataTableColumnHeader>
@@ -216,15 +216,16 @@ export function ProductsTable() {
 
   return (
     <DataTableRoot data={data} columns={columns}>
+      <DataTableToolbarSection>
+        <DataTableSearchFilter placeholder="Search products…" />
+      </DataTableToolbarSection>
       <DataTable>
-        <DataTableToolbarSection>
-          <DataTableSearchFilter placeholder="Search products…" />
-        </DataTableToolbarSection>
         <DataTableHeader />
-        <DataTableBody getRowMemoKey={inlineEdit.getRowMemoKey} />
-        <DataTableEmptyBody>...</DataTableEmptyBody>
-        <DataTablePagination />
+        <DataTableBody getRowMemoKey={inlineEdit.getRowMemoKey}>
+          <DataTableEmptyBody>...</DataTableEmptyBody>
+        </DataTableBody>
       </DataTable>
+      <DataTablePagination />
     </DataTableRoot>
   )
 }

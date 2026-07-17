@@ -365,12 +365,18 @@ const filterValue = createFilterValue(filter)
 
 ### processFiltersForLogic
 
-Processes an array of `ExtendedColumnFilter` objects and groups them by join operator (AND/OR) for TanStack Table's column filter state. Returns processed filters and the join operator map.
+Processes an array of `ExtendedColumnFilter` objects and decides how they should be routed: pure-AND rule sets go to TanStack's `columnFilters`; anything with OR (or mixed) join logic must ride in `globalFilter` instead, since TanStack combines column filters with AND only.
 
 ```tsx showLineNumbers
 import { processFiltersForLogic } from "@/components/niko-table/lib/data-table"
 
-const { processedFilters, joinOperators } = processFiltersForLogic(filters)
+const {
+  processedFilters, // filters with normalized joinOperator values
+  hasOrFilters, // any rule joined with OR
+  hasSameColumnFilters, // multiple rules target one column
+  shouldUseGlobalFilter, // true → route via globalFilter, not columnFilters
+  joinOperator, // "and" | "mixed"
+} = processFiltersForLogic(filters)
 ```
 
 ## Style Utilities
@@ -528,6 +534,7 @@ import { SYSTEM_COLUMN_IDS } from "@/components/niko-table/lib/constants"
 // Available IDs:
 SYSTEM_COLUMN_IDS.SELECT // "select" - Row selection checkbox column
 SYSTEM_COLUMN_IDS.EXPAND // "expand" - Row expansion toggle column
+SYSTEM_COLUMN_IDS.ACTIONS // "actions" - Row actions (kebab menu) column
 ```
 
 ### SYSTEM_COLUMN_ID_LIST
@@ -567,11 +574,19 @@ Walks a TanStack Table column / row set and produces deduplicated `{ label, valu
 ```tsx showLineNumbers
 import { buildFacetedOptions } from "@/components/niko-table/lib/build-faceted-options"
 
-const options = buildFacetedOptions({
-  rows: table.getCoreRowModel().rows,
-  columnId: "category",
-  dynamicCounts: true,
-})
+const options = buildFacetedOptions(
+  table,
+  table.getCoreRowModel().rows,
+  "category", // accessorKey
+  table.getState().columnFilters,
+  table.getState().globalFilter,
+  {
+    limitToFilteredRows: true,
+    dynamicCounts: true,
+    showCounts: true,
+    autoOptionsFormat: "capitalize",
+  },
+)
 // → [{ label: "Electronics", value: "electronics", count: 12 }, ...]
 ```
 

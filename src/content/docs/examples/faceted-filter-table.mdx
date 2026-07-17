@@ -64,10 +64,8 @@ First, we'll define our columns with filter functions.
 ```tsx showLineNumbers title="columns.tsx"
 "use client"
 
-import {
-  DataTableColumnHeader,
-  DataTableColumnTitle,
-} from "@/components/niko-table/components/data-table-column-header"
+import { DataTableColumnHeader } from "@/components/niko-table/components/data-table-column-header"
+import { DataTableColumnTitle } from "@/components/niko-table/components/data-table-column-title"
 import { DataTableColumnSortMenu } from "@/components/niko-table/components/data-table-column-sort"
 import { DataTableColumnFacetedFilterMenu } from "@/components/niko-table/components/data-table-column-faceted-filter"
 import { DataTableColumnSliderFilterMenu } from "@/components/niko-table/components/data-table-column-slider-filter-options"
@@ -192,10 +190,8 @@ import { DataTableFacetedFilter } from "@/components/niko-table/components/data-
 import { DataTableSliderFilter } from "@/components/niko-table/components/data-table-slider-filter"
 import { DataTableDateFilter } from "@/components/niko-table/components/data-table-date-filter"
 import { DataTableClearFilter } from "@/components/niko-table/components/data-table-clear-filter"
-import {
-  DataTableColumnHeader,
-  DataTableColumnTitle,
-} from "@/components/niko-table/components/data-table-column-header"
+import { DataTableColumnHeader } from "@/components/niko-table/components/data-table-column-header"
+import { DataTableColumnTitle } from "@/components/niko-table/components/data-table-column-title"
 import { DataTableColumnSortMenu } from "@/components/niko-table/components/data-table-column-sort"
 import { DataTableColumnFacetedFilterMenu } from "@/components/niko-table/components/data-table-column-faceted-filter"
 import { DataTableColumnSliderFilterMenu } from "@/components/niko-table/components/data-table-column-slider-filter-options"
@@ -347,21 +343,21 @@ The faceted filter component shows available options with counts.
 
 **Props:**
 
-| Name                  | Type                   | Default | Description                                                                   |
-| --------------------- | ---------------------- | ------- | ----------------------------------------------------------------------------- |
-| `accessorKey`         | `keyof TData & string` | -       | The column key to filter (required)                                           |
-| `title`               | `string`               | -       | Optional override (defaults to column meta.label or accessor name)            |
-| `options`             | `Option[]`             | -       | Static options; if omitted and column meta allows, options are auto-generated |
-| `multiple`            | `boolean`              | -       | Allow multiple selections (defaults based on column variant)                  |
-| `showCounts`          | `boolean`              | `true`  | Show counts next to options                                                   |
-| `dynamicCounts`       | `boolean`              | `true`  | Counts reflect filtered rows                                                  |
-| `limitToFilteredRows` | `boolean`              | `true`  | Show only options from filtered rows (vs all rows)                            |
+| Name                  | Type                   | Default     | Description                                                                                              |
+| --------------------- | ---------------------- | ----------- | -------------------------------------------------------------------------------------------------------- |
+| `accessorKey`         | `keyof TData & string` | -           | The column key to filter (required)                                                                      |
+| `title`               | `string`               | -           | Optional override (defaults to column meta.label or accessor name)                                       |
+| `options`             | `Option[]`             | -           | Static options; if omitted and column meta allows, options are auto-generated                            |
+| `multiple`            | `boolean`              | -           | Allow multiple selections (defaults based on column variant)                                             |
+| `showCounts`          | `boolean`              | `true`      | Show counts next to options                                                                              |
+| `dynamicCounts`       | `boolean`              | `true`      | Counts reflect filtered rows                                                                             |
+| `limitToFilteredRows` | `boolean`              | `!multiple` | Show only options from filtered rows (vs all rows) — defaults on for single-select, off for multi-select |
 
 ### limitToFilteredRows
 
 The `limitToFilteredRows` prop controls whether the filter shows options from all data or only from the currently filtered rows.
 
-**When `limitToFilteredRows={true}` (default):**
+**When `limitToFilteredRows={true}` (the default for single-select):**
 
 - Options are generated from rows that match other active filters
 - Useful for filters like "Brand" or "Rating" where you want to see only relevant options
