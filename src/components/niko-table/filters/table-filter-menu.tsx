@@ -1386,8 +1386,11 @@ function FilterFacetedSelect<TData>({
               ?.filter(
                 (option: Option) =>
                   option.count !== 0 ||
-                  (Array.isArray(selectedValues) &&
-                    selectedValues.includes(option.value)),
+                  // Keep the active selection visible so it stays un-checkable —
+                  // multi-select holds an array, single-select a bare string.
+                  (Array.isArray(selectedValues)
+                    ? selectedValues.includes(option.value)
+                    : selectedValues === option.value),
               )
               .map((option: Option) => (
                 <FacetedItem key={option.value} value={option.value}>
