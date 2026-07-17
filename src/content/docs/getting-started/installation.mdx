@@ -12,17 +12,11 @@ import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-c
 Before installing the DataTable component, make sure you have:
 
 1. **A React project** (Next.js, Vite, etc.)
-2. **Shadcn UI** set up with the **`new-york` style** ([Installation Guide](https://ui.shadcn.com/docs/installation)) — see the note below
+2. **Shadcn UI** set up in your project ([Installation Guide](https://ui.shadcn.com/docs/installation)) — both the Radix (`new-york`) and Base UI (`base-nova`) generations are supported
 3. **TailwindCSS** configured
 4. **TypeScript** (recommended)
 
-> **⚠️ Base UI styles are not yet supported.** Recent versions of `shadcn init` default to the Base UI generation (`"style": "base-nova"` in `components.json`). Niko Table is written against the **Radix generation** — with a Base UI style, the shared primitives (tooltip, select, slider, sortable, …) install as Base UI variants and the components won't typecheck. Before adding `@niko-table` blocks, set:
->
-> ```json title="components.json"
-> { "style": "new-york" }
-> ```
->
-> In an app that already has Base UI `components/ui/*` files, also reinstall the shared primitives after switching the style so their Radix variants overwrite them.
+> **Works with both shadcn generations.** Niko Table installs cleanly whether your `components.json` style is the classic Radix generation (`"new-york"`) or the newer Base UI generation (`"base-nova"`, the current `shadcn init` default). The source is written to typecheck against both: the shadcn CLI adapts Radix idioms (`asChild` → `render`) during install, and Niko Table's callbacks and props are dual-generation safe. If you hit a type error after install, make sure you're on a recent `shadcn` CLI and re-add the block with `--overwrite`.
 
 ## Configure the Niko Table Registry
 
