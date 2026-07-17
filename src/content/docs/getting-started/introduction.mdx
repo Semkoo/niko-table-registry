@@ -23,7 +23,7 @@ Built for real-world applications with features like:
 - Row selection and bulk actions
 - Column visibility and reordering
 - Virtual scrolling for large datasets
-- Export to CSV/Excel
+- Export to CSV
 
 ### 🎯 Progressive Complexity
 
@@ -47,11 +47,11 @@ Since you own the code, you can:
 
 ### ♿ Accessible by Default
 
-Built on **Radix UI** primitives with semantic table markup where possible:
+Built on your shadcn generation's primitives (**Radix UI** or **Base UI**) with semantic table markup where possible:
 
 - Keyboard support in sort/filter menus and toolbar controls
 - ARIA labels on filter triggers, sliders, and clear actions
-- Screen-reader-friendly patterns via Shadcn/Radix components
+- Screen-reader-friendly patterns via shadcn/ui components
 - **jsx-a11y** lint rules on docs and source
 
 We do not claim third-party WCAG certification; treat complex tables (virtualization, DnD, pinning) like any custom UI and verify with your own accessibility checklist.
@@ -143,7 +143,7 @@ This DataTable provides you with:
 - **Composable components** - Build complex UIs from simple, reusable pieces
 - **State management** - Context-based state sharing with hook-based flexibility
 - **Performance optimization** - Virtual scrolling, memoization, and efficient rendering
-- **Accessibility** - Radix primitives, keyboard-friendly filters/menus, jsx-a11y linting (verify end-to-end in your app)
+- **Accessibility** - shadcn/ui primitives (Radix or Base UI), keyboard-friendly filters/menus, jsx-a11y linting (verify end-to-end in your app)
 - **TypeScript** - Fully typed with comprehensive type definitions
 
 ## Philosophy
@@ -267,13 +267,13 @@ const columns: DataTableColumnDef<User>[] = [
 
 ### vs Building from Scratch
 
-| Feature           | This DataTable | From Scratch        |
-| ----------------- | -------------- | ------------------- |
-| Time to implement | ✅ Minutes     | ❌ Days/weeks       |
-| Accessibility     | ✅ Built-in    | ❌ Must implement   |
-| Mobile support    | ✅ Ready       | ❌ Must build       |
-| Advanced features | ✅ Available   | ❌ Complex to build |
-| Best practices    | ✅ Included    | ❌ Must learn       |
+| Feature           | This DataTable       | From Scratch        |
+| ----------------- | -------------------- | ------------------- |
+| Time to implement | ✅ Minutes           | ❌ Days/weeks       |
+| Accessibility     | ✅ Baseline included | ❌ Must implement   |
+| Mobile support    | ✅ Ready             | ❌ Must build       |
+| Advanced features | ✅ Available         | ❌ Complex to build |
+| Best practices    | ✅ Included          | ❌ Must learn       |
 
 ## Next Steps
 

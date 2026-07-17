@@ -97,9 +97,9 @@ changes.reconcile({ succeededIds, failedIds })
 
 Used by core / feature components: rarely imported from app code.
 
-| Hook                 | Role                                             |
-| -------------------- | ------------------------------------------------ |
-| `useGridKeyboard`    | Scoped keydown state machine                     |
-| `useGridNavigation`  | Arrow / Tab / Home / End movement                |
-| `useGridClipboard`   | TSV serialize / parse helpers                    |
-| `useDataGridContext` | Context (lives in core): throws outside provider |
+| Hook                              | Role                                                                     |
+| --------------------------------- | ------------------------------------------------------------------------ |
+| `useGridKeyboard`                 | Scoped keydown state machine                                             |
+| `useGridNavigation`               | Arrow / Tab / Home / End movement                                        |
+| `parseTsv` / `serializeSelection` | TSV parse / serialize helpers (plain functions, `use-grid-clipboard.ts`) |
+| `useDataGridContext`              | Context (lives in core): throws outside provider                         |

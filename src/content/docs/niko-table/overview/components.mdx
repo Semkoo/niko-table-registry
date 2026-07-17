@@ -361,15 +361,15 @@ import { DataTableSliderFilter } from "@/components/niko-table/components/data-t
 
 #### Props
 
-| Name          | Type                   | Default | Description                                              |
-| ------------- | ---------------------- | ------- | -------------------------------------------------------- |
-| `accessorKey` | `keyof TData & string` | -       | Column accessor key (required).                          |
-| `title`       | `string`               | -       | Custom title.                                            |
-| `min`         | `number`               | -       | Minimum value (auto-detected from data if not provided). |
-| `max`         | `number`               | -       | Maximum value (auto-detected from data if not provided). |
-| `step`        | `number`               | `1`     | Step increment.                                          |
-| `range`       | `[number, number]`     | -       | Range array `[min, max]` (overrides min/max).            |
-| `unit`        | `string`               | -       | Unit label (e.g., "$", "kg").                            |
+| Name          | Type                   | Default | Description                                                                     |
+| ------------- | ---------------------- | ------- | ------------------------------------------------------------------------------- |
+| `accessorKey` | `keyof TData & string` | -       | Column accessor key (required).                                                 |
+| `title`       | `string`               | -       | Custom title.                                                                   |
+| `min`         | `number`               | -       | Minimum value (auto-detected from data if not provided).                        |
+| `max`         | `number`               | -       | Maximum value (auto-detected from data if not provided).                        |
+| `step`        | `number`               | auto    | Step increment; auto-calculated from the range size (`1` only for ranges ≤ 20). |
+| `range`       | `[number, number]`     | -       | Range array `[min, max]` (overrides min/max).                                   |
+| `unit`        | `string`               | -       | Unit label (e.g., "$", "kg").                                                   |
 
 ### DataTableDateFilter
 
@@ -477,10 +477,8 @@ Composable column header container. Provides layout for title, actions, and filt
 </div>
 
 ```tsx showLineNumbers
-import {
-  DataTableColumnHeader,
-  DataTableColumnTitle,
-} from "@/components/niko-table/components/data-table-column-header"
+import { DataTableColumnHeader } from "@/components/niko-table/components/data-table-column-header"
+import { DataTableColumnTitle } from "@/components/niko-table/components/data-table-column-title"
 import { DataTableColumnSortMenu } from "@/components/niko-table/components/data-table-column-sort"
 
 const columns: DataTableColumnDef<User>[] = [
@@ -509,15 +507,11 @@ const columns: DataTableColumnDef<User>[] = [
 The `DataTableColumnHeader` is composable. You can break it down into parts to customize the layout or add custom filters.
 
 ```tsx showLineNumbers
-import {
-  DataTableColumnHeader,
-  DataTableColumnTitle,
-} from "@/components/niko-table/components/data-table-column-header"
+import { DataTableColumnHeader } from "@/components/niko-table/components/data-table-column-header"
+import { DataTableColumnTitle } from "@/components/niko-table/components/data-table-column-title"
 import { DataTableColumnActions } from "@/components/niko-table/components/data-table-column-actions"
-import {
-  DataTableColumnFilter,
-  DataTableColumnFilterTrigger,
-} from "@/components/niko-table/components/data-table-column-filter"
+import { DataTableColumnFilter } from "@/components/niko-table/components/data-table-column-filter"
+import { DataTableColumnFilterTrigger } from "@/components/niko-table/components/data-table-column-filter-trigger"
 import { DataTableColumnSortOptions } from "@/components/niko-table/components/data-table-column-sort"
 import { DataTableColumnHideOptions } from "@/components/niko-table/components/data-table-column-hide"
 import { DataTableColumnPinOptions } from "@/components/niko-table/components/data-table-column-pin"
@@ -550,10 +544,8 @@ const columns: DataTableColumnDef<User>[] = [
 **Standalone filter menus** can also be placed directly inside `DataTableColumnHeader` without needing `DataTableColumnActions`:
 
 ```tsx showLineNumbers
-import {
-  DataTableColumnHeader,
-  DataTableColumnTitle,
-} from "@/components/niko-table/components/data-table-column-header"
+import { DataTableColumnHeader } from "@/components/niko-table/components/data-table-column-header"
+import { DataTableColumnTitle } from "@/components/niko-table/components/data-table-column-title"
 import { DataTableColumnSortMenu } from "@/components/niko-table/components/data-table-column-sort"
 import { DataTableColumnFacetedFilterMenu } from "@/components/niko-table/components/data-table-column-faceted-filter"
 import { DataTableColumnSliderFilterMenu } from "@/components/niko-table/components/data-table-column-slider-filter-options"
@@ -754,13 +746,13 @@ Faceted filter options to compose inside `DataTableColumnActions`. Shows a multi
 
 Standalone faceted filter popover for column header. Renders as a clickable button with filter icon. Auto-generates options from row data when no explicit options are provided.
 
-| Name                  | Type            | Default | Description                                                |
-| --------------------- | --------------- | ------- | ---------------------------------------------------------- |
-| `column`              | `Column<TData>` | -       | Optional override (auto-detected from context).            |
-| `options`             | `Option[]`      | -       | Static options array (auto-generated if omitted).          |
-| `multiple`            | `boolean`       | -       | Allow multiple selection.                                  |
-| `limitToFilteredRows` | `boolean`       | `true`  | Show only options from filtered rows (`false` = all rows). |
-| `className`           | `string`        | -       | Additional CSS classes.                                    |
+| Name                  | Type            | Default     | Description                                                                                              |
+| --------------------- | --------------- | ----------- | -------------------------------------------------------------------------------------------------------- |
+| `column`              | `Column<TData>` | -           | Optional override (auto-detected from context).                                                          |
+| `options`             | `Option[]`      | -           | Static options array (auto-generated if omitted).                                                        |
+| `multiple`            | `boolean`       | -           | Allow multiple selection.                                                                                |
+| `limitToFilteredRows` | `boolean`       | `!multiple` | Show only options from filtered rows (`false` = all rows); defaults on for single-select, off for multi. |
+| `className`           | `string`        | -           | Additional CSS classes.                                                                                  |
 
 ##### DataTableColumnSliderFilterOptions
 
@@ -911,6 +903,7 @@ import {
   DataTableEmptyFilteredMessage,
   DataTableEmptyActions,
 } from "@/components/niko-table/components/data-table-empty-state"
+import { DataTableEmptyBody } from "@/components/niko-table/core/data-table-structure"
 import { PackageOpen } from "lucide-react"
 
 // Complete empty state composition

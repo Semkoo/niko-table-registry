@@ -62,23 +62,24 @@ export function MyTable({ data }: { data: User[] }) {
 
 The `config` prop accepts a `DataTableConfig` object with the following properties:
 
-| Name                 | Type      | Default | Description                                                                                                 |
-| -------------------- | --------- | ------- | ----------------------------------------------------------------------------------------------------------- |
-| `enablePagination`   | `boolean` | `true`  | Enable pagination.                                                                                          |
-| `enableFilters`      | `boolean` | `true`  | Enable filtering.                                                                                           |
-| `enableSorting`      | `boolean` | `true`  | Enable sorting.                                                                                             |
-| `enableRowSelection` | `boolean` | `false` | Enable row selection.                                                                                       |
-| `enableMultiSort`    | `boolean` | `true`  | Enable multi-column sorting.                                                                                |
-| `enableGrouping`     | `boolean` | `false` | Enable column grouping.                                                                                     |
-| `enableExpanding`    | `boolean` | `false` | Enable row expansion.                                                                                       |
-| `manualSorting`      | `boolean` | `false` | Enable server-side sorting.                                                                                 |
-| `manualPagination`   | `boolean` | `false` | Enable server-side pagination.                                                                              |
-| `manualFiltering`    | `boolean` | `false` | Enable server-side filtering.                                                                               |
-| `pageCount`          | `number`  | -       | Total pages (required for server-side pagination).                                                          |
-| `initialPageSize`    | `number`  | `10`    | Initial page size.                                                                                          |
-| `initialPageIndex`   | `number`  | `0`     | Initial page index.                                                                                         |
-| `autoResetPageIndex` | `boolean` | -       | Auto-reset page on filter/sort change. Defaults to `false` when `manualPagination: true`, otherwise `true`. |
-| `autoResetExpanded`  | `boolean` | `true`  | Auto-reset expanded rows on filter/sort change.                                                             |
+| Name                   | Type      | Default | Description                                                                                             |
+| ---------------------- | --------- | ------- | ------------------------------------------------------------------------------------------------------- |
+| `enablePagination`     | `boolean` | `false` | Enable pagination. Auto-enabled when `DataTablePagination` is detected.                                 |
+| `enableFilters`        | `boolean` | `false` | Enable filtering. Auto-enabled when filter components are detected.                                     |
+| `enableSorting`        | `boolean` | `false` | Enable sorting. Auto-enabled when sort components are detected.                                         |
+| `enableRowSelection`   | `boolean` | `false` | Enable row selection.                                                                                   |
+| `enableMultiSort`      | `boolean` | `true`  | Enable multi-column sorting.                                                                            |
+| `enableGrouping`       | `boolean` | `true`  | Enable column grouping.                                                                                 |
+| `enableExpanding`      | `boolean` | `false` | Enable row expansion.                                                                                   |
+| `manualSorting`        | `boolean` | `false` | Enable server-side sorting.                                                                             |
+| `manualPagination`     | `boolean` | `false` | Enable server-side pagination.                                                                          |
+| `manualFiltering`      | `boolean` | `false` | Enable server-side filtering.                                                                           |
+| `pageCount`            | `number`  | -       | Total pages (required for server-side pagination).                                                      |
+| `initialPageSize`      | `number`  | `10`    | Initial page size.                                                                                      |
+| `initialPageIndex`     | `number`  | `0`     | Initial page index.                                                                                     |
+| `autoResetPageIndex`   | `boolean` | `false` | Auto-reset page on filter/sort change. Off by default (prevents flushSync warnings); opt in explicitly. |
+| `autoResetExpanded`    | `boolean` | `false` | Auto-reset expanded rows on filter/sort change.                                                         |
+| `enableColumnResizing` | `boolean` | `false` | Enable column resizing. Auto-enabled when `DataTableColumnResize` is detected.                          |
 
 ### DataTableProvider
 
@@ -188,16 +189,16 @@ import {
 
 #### Props
 
-| Name               | Type                           | Default | Description                                                                                                                                                                              |
-| ------------------ | ------------------------------ | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `className`        | `string`                       | -       | Additional CSS classes.                                                                                                                                                                  |
-| `children`         | `React.ReactNode`              | -       | Child components (Skeleton, EmptyBody).                                                                                                                                                  |
-| `onScroll`         | `(event: ScrollEvent) => void` | -       | Scroll event handler.                                                                                                                                                                    |
-| `onScrolledTop`    | `() => void`                   | -       | Called when scrolled to top.                                                                                                                                                             |
-| `onScrolledBottom` | `() => void`                   | -       | Called when scrolled to bottom.                                                                                                                                                          |
-| `scrollThreshold`  | `number`                       | `50`    | Threshold for scroll events.                                                                                                                                                             |
-| `onRowClick`       | `(row: TData) => void`         | -       | Called when a row is clicked.                                                                                                                                                            |
-| `getRowMemoKey`    | `(row: TData) => string`       | -       | Per-row key encoding external row state (inline edits, optimistic overlays). When it changes for a row, only that row re-renders. See [Inline Edit Table](/examples/inline-edit-table/). |
+| Name               | Type                                                         | Default | Description                                                                                                                                                                              |
+| ------------------ | ------------------------------------------------------------ | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `className`        | `string`                                                     | -       | Additional CSS classes.                                                                                                                                                                  |
+| `children`         | `React.ReactNode`                                            | -       | Child components (Skeleton, EmptyBody).                                                                                                                                                  |
+| `onScroll`         | `(event: ScrollEvent) => void`                               | -       | Scroll event handler.                                                                                                                                                                    |
+| `onScrolledTop`    | `() => void`                                                 | -       | Called when scrolled to top.                                                                                                                                                             |
+| `onScrolledBottom` | `() => void`                                                 | -       | Called when scrolled to bottom.                                                                                                                                                          |
+| `scrollThreshold`  | `number`                                                     | `50`    | Threshold for scroll events.                                                                                                                                                             |
+| `onRowClick`       | `(row: TData, event: React.MouseEvent<HTMLElement>) => void` | -       | Called when a row is clicked.                                                                                                                                                            |
+| `getRowMemoKey`    | `(row: TData) => string`                                     | -       | Per-row key encoding external row state (inline edits, optimistic overlays). When it changes for a row, only that row re-renders. See [Inline Edit Table](/examples/inline-edit-table/). |
 
 > **Row memo invalidation:** all six body components are wrapped in `React.memo` for performance. Column toggle / reorder / pin already invalidate rows (the `columnLayoutSignature` prop encodes them). If your column `cell` functions read **external state** (inline edit drafts, optimistic overlays) wire `getRowMemoKey` so that state change forces only the affected row to re-render.
 
@@ -588,12 +589,12 @@ import { DataTableRowDndProvider } from "@/components/niko-table/components/data
 
 #### Props
 
-| Name            | Type                     | Default | Description                                                                                   |
-| --------------- | ------------------------ | ------- | --------------------------------------------------------------------------------------------- |
-| `children`      | `React.ReactNode`        | -       | Child components.                                                                             |
-| `className`     | `string`                 | -       | Additional CSS classes.                                                                       |
-| `onRowClick`    | `(row: TData) => void`   | -       | Called when a row is clicked.                                                                 |
-| `getRowMemoKey` | `(row: TData) => string` | -       | Per-row key encoding external row state. When it changes for a row, only that row re-renders. |
+| Name            | Type                                                         | Default | Description                                                                                   |
+| --------------- | ------------------------------------------------------------ | ------- | --------------------------------------------------------------------------------------------- |
+| `children`      | `React.ReactNode`                                            | -       | Child components.                                                                             |
+| `className`     | `string`                                                     | -       | Additional CSS classes.                                                                       |
+| `onRowClick`    | `(row: TData, event: React.MouseEvent<HTMLElement>) => void` | -       | Called when a row is clicked.                                                                 |
+| `getRowMemoKey` | `(row: TData) => string`                                     | -       | Per-row key encoding external row state. When it changes for a row, only that row re-renders. |
 
 #### DataTableDndHeader
 
@@ -628,12 +629,12 @@ DnD-aware table body for column drag-and-drop. Each cell follows its column's dr
 
 #### Props
 
-| Name            | Type                     | Default | Description                                                                                   |
-| --------------- | ------------------------ | ------- | --------------------------------------------------------------------------------------------- |
-| `children`      | `React.ReactNode`        | -       | Child components.                                                                             |
-| `className`     | `string`                 | -       | Additional CSS classes.                                                                       |
-| `onRowClick`    | `(row: TData) => void`   | -       | Called when a row is clicked.                                                                 |
-| `getRowMemoKey` | `(row: TData) => string` | -       | Per-row key encoding external row state. When it changes for a row, only that row re-renders. |
+| Name            | Type                                                         | Default | Description                                                                                   |
+| --------------- | ------------------------------------------------------------ | ------- | --------------------------------------------------------------------------------------------- |
+| `children`      | `React.ReactNode`                                            | -       | Child components.                                                                             |
+| `className`     | `string`                                                     | -       | Additional CSS classes.                                                                       |
+| `onRowClick`    | `(row: TData, event: React.MouseEvent<HTMLElement>) => void` | -       | Called when a row is clicked.                                                                 |
+| `getRowMemoKey` | `(row: TData) => string`                                     | -       | Per-row key encoding external row state. When it changes for a row, only that row re-renders. |
 
 ### Virtualized DnD Components
 

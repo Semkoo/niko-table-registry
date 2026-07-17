@@ -97,6 +97,25 @@ const [filters, setFilters] = useState<ExtendedColumnFilter<Product>[]>([])
 | `onFiltersChange` | `(filters: ExtendedColumnFilter<TData>[] \| null) => void` | Callback when filters change.       |
 | `className`       | `string`                                                   | Additional CSS classes.             |
 
+#### URL serialization helpers
+
+The module also exports two helpers for persisting menu filters (URL params, controlled state):
+
+```tsx showLineNumbers
+import {
+  normalizeFiltersFromUrl,
+  serializeFiltersForUrl,
+} from "@/components/niko-table/filters/table-filter-menu"
+
+// Writing: strip filterId to keep URLs short
+const urlFilters = serializeFiltersForUrl(filters)
+
+// Reading: regenerate missing filterIds deterministically
+const restored = normalizeFiltersFromUrl(urlFilters)
+```
+
+`filterId` is internal to the menu UI — deterministic regeneration keeps input focus stable across re-renders. See the [Server-Side Nuqs Table](/examples/server-side-nuqs-table/) example for full wiring.
+
 ### TableFacetedFilter
 
 Core faceted filter implementation.
@@ -523,9 +542,10 @@ import type { ExtendedColumnFilter } from "@/components/niko-table/types"
 // Basic usage with filter configuration
 const filter: ExtendedColumnFilter<Product> = {
   filterId: "price-range",
-  columnId: "price",
+  id: "price",
+  variant: "range",
   operator: "between",
-  value: [0, 100],
+  value: ["0", "100"],
 }
 
 <TableRangeFilter

@@ -152,7 +152,7 @@ The smallest useful grid: text cells + clipboard + fill.
        <DataGridFillHandle />
        <DataTable maxHeight={360}>
          <DataTableVirtualizedHeader />
-         <DataTableVirtualizedBody estimateSize={36}>
+         <DataTableVirtualizedBody estimateSize={37}>
            <DataTableRowContextMenuSlot>
              <GridRowMenu />
            </DataTableRowContextMenuSlot>
@@ -168,16 +168,16 @@ The smallest useful grid: text cells + clipboard + fill.
 
 Drop any of these inside `<DataGrid>`. Unmounted = zero cost.
 
-| Component                       | Capability                                         |
-| ------------------------------- | -------------------------------------------------- |
-| `DataGridClipboard`             | Copy / cut / paste (quote-aware TSV)               |
-| `DataGridFillHandle`            | Corner-drag fill; `Ctrl/Cmd+Enter` fills selection |
-| `DataGridMove`                  | Drag selection border to move (Ctrl/Cmd to copy)   |
-| `DataGridRowReorder`            | Drag rows by grip (avoid combining with sort)      |
-| `DataGridCrossHighlight`        | Row / column chrome for the selection              |
-| `DataGridStatusBar`             | Count / Sum / Avg / Min / Max                      |
-| `DataTableColumnResize`         | Drag resize; double-click to autosize              |
-| `DataGridUndo` / `DataGridRedo` | History                                            |
+| Component                       | Capability                                                                           |
+| ------------------------------- | ------------------------------------------------------------------------------------ |
+| `DataGridClipboard`             | Copy / cut / paste (quote-aware TSV)                                                 |
+| `DataGridFillHandle`            | Corner-drag fill (`Ctrl/Cmd+Enter` fill-selection works grid-wide, no handle needed) |
+| `DataGridMove`                  | Drag selection border to move (Ctrl/Cmd to copy)                                     |
+| `DataGridRowReorder`            | Drag rows by grip (avoid combining with sort)                                        |
+| `DataGridCrossHighlight`        | Row / column chrome for the selection                                                |
+| `DataGridStatusBar`             | Count / Sum / Avg / Min / Max                                                        |
+| `DataTableColumnResize`         | Drag resize; double-click to autosize                                                |
+| `DataGridUndo` / `DataGridRedo` | History                                                                              |
 
 Filters, sort, pin, and the view menu are regular Niko Table components. Nest them under `DataTableRoot` (beside or inside `<DataGrid>`). Do **not** put `DataGridUndo` / `DataGridAddRows` / clipboard outside `<DataGrid>`.
 

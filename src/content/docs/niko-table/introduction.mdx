@@ -324,9 +324,9 @@ The `config` prop accepts a `DataTableConfig` object:
 
 | Name                 | Type      | Default | Description                                                                        |
 | -------------------- | --------- | ------- | ---------------------------------------------------------------------------------- |
-| `enablePagination`   | `boolean` | `true`  | Enable pagination.                                                                 |
-| `enableFilters`      | `boolean` | `true`  | Enable filtering.                                                                  |
-| `enableSorting`      | `boolean` | `true`  | Enable sorting.                                                                    |
+| `enablePagination`   | `boolean` | `false` | Enable pagination (auto-enabled when `DataTablePagination` is rendered).           |
+| `enableFilters`      | `boolean` | `false` | Enable filtering (auto-enabled when filter components are rendered).               |
+| `enableSorting`      | `boolean` | `false` | Enable sorting (auto-enabled when sort components are rendered).                   |
 | `enableRowSelection` | `boolean` | `false` | Enable row selection.                                                              |
 | `enableMultiSort`    | `boolean` | `true`  | Enable multi-column sorting.                                                       |
 | `enableGrouping`     | `boolean` | `false` | Enable column grouping.                                                            |

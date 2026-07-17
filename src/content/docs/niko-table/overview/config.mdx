@@ -22,9 +22,9 @@ The configuration defines which operators are available for each filter variant:
 
 - **Text Operators**: `ilike`, `not.ilike`, `eq`, `neq`, `empty`, `not.empty`
 - **Numeric Operators**: `eq`, `neq`, `lt`, `lte`, `gt`, `gte`, `between`, `empty`, `not.empty`
-- **Date Operators**: `eq`, `neq`, `lt`, `lte`, `gt`, `gte`, `between`, `relative`
+- **Date Operators**: `eq`, `neq`, `lt`, `lte`, `gt`, `gte`, `between`, `empty`, `not.empty` (`relative` is defined in the enum but not yet wired into the menus)
 - **Boolean Operators**: `eq`, `neq`
-- **Select Operators**: `eq`, `neq`, `in`, `not.in`, `empty`, `not.empty`
+- **Select Operators**: `eq`, `neq`, `empty`, `not.empty`
 - **Multi-Select Operators**: `in`, `not.in`, `empty`, `not.empty`
 
 ### Sort Icons Configuration
@@ -33,15 +33,15 @@ Sort icons are configured per data type variant:
 
 - **Text**: `ArrowDownAZ` (asc), `ArrowDownZA` (desc), `ArrowUpDown` (unsorted)
 - **Number**: `ArrowDown01` (asc), `ArrowDown10` (desc), `ArrowUpDown` (unsorted)
-- **Date**: `Calendar` (asc), `Calendar` (desc), `ArrowUpDown` (unsorted)
-- **Boolean**: `Check` (asc), `XIcon` (desc), `ArrowUpDown` (unsorted)
+- **Date**: `ArrowUpDown` (asc), `ArrowUpDown` (desc), `Calendar` (unsorted)
+- **Boolean**: `XIcon` (asc — false first), `Check` (desc — true first), `ArrowUpDown` (unsorted)
 
 ### Sort Labels
 
 Human-readable labels for sort directions:
 
-- **Ascending**: "A-Z" (text), "0-9" (number), "Old-New" (date), "False-True" (boolean)
-- **Descending**: "Z-A" (text), "9-0" (number), "New-Old" (date), "True-False" (boolean)
+- **Ascending**: "Asc" (text), "Low to High" (number), "Oldest First" (date), "False First" (boolean)
+- **Descending**: "Desc" (text), "High to Low" (number), "Newest First" (date), "True First" (boolean)
 
 ## Feature Detection
 
