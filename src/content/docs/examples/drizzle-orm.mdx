@@ -3,9 +3,17 @@ title: Drizzle ORM
 description: Implement the server-side wire contract with Drizzle ORM and Postgres — filters, sorting, pagination, and cross-filter facets as real SQL.
 ---
 
+import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
+
 The [Server-Side Table](/examples/server-side-table/) examples talk to one function with a serializable request shape. This guide implements that function for real with [Drizzle ORM](https://orm.drizzle.team/) on Postgres: every filter widget, the advanced filter menu (including OR logic), sorting, pagination, and cross-filter facets become SQL. Nothing on the client changes — you swap the example's `MOCK SERVER` section for a `fetch` call to the route built here.
 
 The same recipe ports directly to MySQL/SQLite Drizzle dialects, and the structure mirrors Prisma or raw SQL if you prefer those.
+
+## Live demo (mocked)
+
+The demo below runs this guide's `buildWhere` / `buildOrderBy` / `computeFacets` code, verbatim, against a mocked ~80-line stand-in for Drizzle's operators that compiles each condition to a predicate **and** SQL text. Filter, search, and sort — the **Generated SQL** card shows the exact statement a real Postgres would receive:
+
+<CodePreview demo="niko-table/drizzle-state" />
 
 ## 1. Schema
 

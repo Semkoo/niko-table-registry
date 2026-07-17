@@ -29,6 +29,7 @@ export type Demo =
   | "niko-table/advanced-nuqs-state"
   | "niko-table/server-side-state"
   | "niko-table/server-side-nuqs-state"
+  | "niko-table/drizzle-state"
   | "niko-table/basic-state"
   | "niko-table/search-state"
   | "niko-table/row-dnd"
