@@ -100,10 +100,10 @@ import { useDerivedColumnTitle } from "@/components/niko-table/hooks/use-derived
 function ColumnHeader({ column }: { column: Column<Product> }) {
   // Priority: title prop → column.meta.label → formatted accessorKey
   const title = useDerivedColumnTitle(column, "first_name")
-  // Returns "First Name" (formatted from accessorKey)
+  // Returns "FirstName" (formatLabel capitalizes; dashes/underscores become spaces, camelCase does not)
 
   const titleWithMeta = useDerivedColumnTitle(column, "firstName")
-  // Returns column.columnDef.meta.label if set, otherwise "First Name"
+  // Returns column.columnDef.meta.label if set, otherwise "FirstName"
 
   const titleWithOverride = useDerivedColumnTitle(column, "firstName", "Custom Title")
   // Returns "Custom Title" (explicit title always wins)

@@ -244,11 +244,11 @@ export function OrdersTable({ rows, orgId }) {
       state={{ columnSizing }}
       onColumnSizingChange={onColumnSizingChange}
     >
+      <DataTableColumnResize />
       <DataTable>
         <DataTableHeader />
         <DataTableBody />
       </DataTable>
-      <DataTableColumnResize />
     </DataTableRoot>
   )
 }

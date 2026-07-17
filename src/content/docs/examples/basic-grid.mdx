@@ -8,7 +8,7 @@ import CollapsiblePreview from "@/components/markdown/collapsible-preview.astro"
 import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
 import { Aside } from "@astrojs/starlight/components"
 
-The smallest useful Data Grid: `useDataGrid` + `<DataGrid>` + `GridTextCell`. You get keyboard navigation, undo/redo, and a virtualized body. Clipboard, fill, and other features stay opt-in children you add later.
+The smallest useful Data Grid: `useDataGrid` + `<DataGrid>` + `GridTextCell`. You get keyboard navigation, undo/redo, and a virtualized body. Clipboard, fill, toolbar, and the row menu are opt-in children — the demo below mounts the common ones; leave out what you don't need.
 
 This page is the reference shape for new grid examples: see [Documentation Guidelines](/contributing/documentation-guidelines/).
 
@@ -26,13 +26,14 @@ This page is the reference shape for new grid examples: see [Documentation Guide
 
 ## What’s included
 
-| Piece            | Role                                                 |
-| ---------------- | ---------------------------------------------------- |
-| `useDataGrid`    | Headless rows, focus, edit lifecycle, undo/redo      |
-| `<DataGrid>`     | Keyboard nav + selection around `DataTable`          |
-| `<DataGridCell>` | Id-addressed cell wrapper (not TanStack `row.index`) |
-| `GridTextCell`   | Text editor (display shell; editor mounts on edit)   |
-| Virtualized body | Fixed-height scroll container required               |
+| Piece            | Role                                                  |
+| ---------------- | ----------------------------------------------------- |
+| `useDataGrid`    | Headless rows, focus, edit lifecycle, undo/redo       |
+| `<DataGrid>`     | Keyboard nav + selection around `DataTable`           |
+| `<DataGridCell>` | Id-addressed cell wrapper (not TanStack `row.index`)  |
+| `GridTextCell`   | Text editor (display shell; editor mounts on edit)    |
+| Virtualized body | Fixed-height scroll container required                |
+| Opt-in children  | Demo mounts clipboard, fill handle, toolbar, row menu |
 
 ## Composition
 
@@ -45,9 +46,9 @@ const grid = useDataGrid({
 
 <DataTableRoot data={grid.rows} columns={columns} getRowId={(r) => r.id}>
   <DataGrid grid={grid}>
-    <DataTable>
+    <DataTable maxHeight={360}>
       <DataTableVirtualizedHeader />
-      <DataTableVirtualizedBody height={360} />
+      <DataTableVirtualizedBody estimateSize={37} />
     </DataTable>
   </DataGrid>
 </DataTableRoot>

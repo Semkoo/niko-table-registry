@@ -26,14 +26,14 @@ Context-aware pieces under `grid/components/` and typed editors under `grid/cell
 
 Children of `<DataGrid>`. Unmounted = tree-shaken.
 
-| Component                | Capability                                  |
-| ------------------------ | ------------------------------------------- |
-| `DataGridClipboard`      | Copy / cut / paste (`resolveCell` required) |
-| `DataGridFillHandle`     | Corner fill; double-click auto-fill         |
-| `DataGridMove`           | Drag block to move (Ctrl/Cmd = copy)        |
-| `DataGridRowReorder`     | Row drag: prefer without active sort        |
-| `DataGridCrossHighlight` | Selection chrome on header / gutter         |
-| `DataGridStatusBar`      | Aggregate the selection                     |
+| Component                | Capability                                                                                    |
+| ------------------------ | --------------------------------------------------------------------------------------------- |
+| `DataGridClipboard`      | Copy / cut / paste (`resolveCell` optional — needed only for paste; copy/cut work without it) |
+| `DataGridFillHandle`     | Corner fill; double-click auto-fill                                                           |
+| `DataGridMove`           | Drag block to move (Ctrl/Cmd = copy)                                                          |
+| `DataGridRowReorder`     | Row drag: prefer without active sort                                                          |
+| `DataGridCrossHighlight` | Selection chrome on header / gutter                                                           |
+| `DataGridStatusBar`      | Aggregate the selection                                                                       |
 
 ### DataGridClipboard
 
@@ -48,9 +48,9 @@ Children of `<DataGrid>`. Unmounted = tree-shaken.
 </DataGrid>
 ```
 
-| Prop          | Type                                                   | Description                           |
-| ------------- | ------------------------------------------------------ | ------------------------------------- |
-| `resolveCell` | `(columnId: string, raw: string) => CellState<string>` | Map pasted / cut text into cell state |
+| Prop           | Type                                                   | Description                                                                    |
+| -------------- | ------------------------------------------------------ | ------------------------------------------------------------------------------ |
+| `resolveCell?` | `(columnId: string, raw: string) => CellState<string>` | Map pasted text into cell state (required for paste; copy/cut work without it) |
 
 ### DataGridFillHandle / DataGridMove / DataGridRowReorder
 

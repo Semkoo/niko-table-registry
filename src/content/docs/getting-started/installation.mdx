@@ -238,7 +238,7 @@ The DataTable registry automatically installs a custom `components/ui/table.tsx`
 
 ### Monorepo / Non-Standard Layouts
 
-If your project uses a non-standard UI component path (e.g., `packages/ui/src/components/` instead of `src/components/ui/`), the shadcn CLI may place `table.tsx` in the wrong location. This is a [known upstream issue](https://github.com/shadcn-ui/ui/issues) with `registry:ui` path resolution.
+If your project uses a non-standard UI component path (e.g., `packages/ui/src/components/` instead of `src/components/ui/`), the shadcn CLI may place `table.tsx` in the wrong location. This is a known upstream shadcn CLI quirk with `registry:ui` path resolution.
 
 **Workaround:** After installing, check that `table.tsx` landed in the correct directory. If it was placed in a nested `ui/` folder, move it to your actual UI components path and ensure it exports `TableComponent`:
 
@@ -317,8 +317,8 @@ Let's build your first table. We'll start with a simple table and progressively 
          <span
            className={
              row.original.status === "active"
-               ? "text-green-600"
-               : "text-gray-400"
+               ? "text-success"
+               : "text-muted-foreground"
            }
          >
            {row.original.status}
@@ -404,7 +404,7 @@ Different examples require different dependencies. Here's what you need for each
 - `@tanstack/react-table`
 - Shadcn: `table`, `button`, `input`, `dropdown-menu`, `popover`, `command`, `checkbox`, `select`, `scroll-area`, `separator`, `skeleton`, `tooltip`
 - **Inline Filters**: Included in DataTable components (no additional dependencies)
-- **Sortable Rows** (optional): [DiceUI Sortable](https://www.diceui.com/docs/components/sortable) - `@dnd-kit/core`, `@dnd-kit/modifiers`, `@dnd-kit/sortable`, `@dnd-kit/utilities`, `@radix-ui/react-slot`
+- **Sortable Rows** (optional): `@niko-table/data-table-row-dnd` — installs its `@dnd-kit` dependencies automatically (built on [DiceUI Sortable](https://www.diceui.com/docs/components/sortable) patterns)
 
 ### Advanced Table with URL State (nuqs)
 
@@ -412,7 +412,7 @@ Different examples require different dependencies. Here's what you need for each
 - `nuqs` ([nuqs.dev](https://nuqs.dev/)) - Type-safe search params state manager for URL state management
 - Shadcn: All components from Advanced Table
 - **Inline Filters**: Included in DataTable components (no additional dependencies)
-- **Sortable Rows** (optional): [DiceUI Sortable](https://www.diceui.com/docs/components/sortable) - `@dnd-kit/core`, `@dnd-kit/modifiers`, `@dnd-kit/sortable`, `@dnd-kit/utilities`, `@radix-ui/react-slot`
+- **Sortable Rows** (optional): `@niko-table/data-table-row-dnd` — installs its `@dnd-kit` dependencies automatically (built on [DiceUI Sortable](https://www.diceui.com/docs/components/sortable) patterns)
 
 ## Optional Dependencies
 
@@ -430,7 +430,11 @@ nuqs provides type-safe search params state management, perfect for syncing tabl
 
 ### Sortable/Draggable Rows
 
-For drag-and-drop row reordering, follow the [DiceUI Sortable installation guide](https://www.diceui.com/docs/components/sortable).
+For drag-and-drop row reordering, install the registry block — it brings its `@dnd-kit` dependencies with it:
+
+<CliCommandCode action="run" command="shadcn@latest add @niko-table/data-table-row-dnd" />
+
+See the [Row DnD Table example](/examples/row-dnd-table/) for usage. (The sortable primitives follow [DiceUI Sortable](https://www.diceui.com/docs/components/sortable) patterns.)
 
 ## Project Structure
 
