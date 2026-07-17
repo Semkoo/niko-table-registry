@@ -511,6 +511,7 @@ function FilterToolbar({
           accessorKey="category"
           title="Category"
           options={categoryOptions}
+          limitToFilteredRows
           multiple
         />
         <DataTableFacetedFilter
