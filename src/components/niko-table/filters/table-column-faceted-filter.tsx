@@ -33,6 +33,7 @@ import {
 } from "./table-faceted-filter"
 import { useDerivedColumnTitle } from "../hooks/use-derived-column-title"
 import { useGeneratedOptionsForColumn } from "../hooks/use-generated-options"
+import { extractFilterSelectedValues } from "../lib/build-faceted-options"
 import { formatLabel } from "../lib/format"
 import type { Option } from "../types"
 
@@ -190,6 +191,12 @@ export function TableColumnFacetedFilterMenu<TData, TValue>({
   // Default: multi-select shows all options, single-select filters to visible rows
   limitToFilteredRows ??= !multiple
 
+  // A column's own selected values must never be narrowed or count-0 hidden
+  // away — otherwise a selection excluded by another filter disappears from
+  // its own facet and can't be un-checked. Recomputed on every render so it
+  // tracks the current selection.
+  const selectedValues = extractFilterSelectedValues(column.getFilterValue())
+
   const derivedTitle = useDerivedColumnTitle(column, column.id, title)
 
   // Auto-generate options from column meta (works for select/multiSelect variants).
@@ -259,15 +266,18 @@ export function TableColumnFacetedFilterMenu<TData, TValue>({
 
     // If static options exist in meta with augment strategy, use them with counts
     const metaOptions = (meta as Record<string, unknown>)?.options as
-      | Option[]
-      | undefined
+      Option[] | undefined
     const mergeStrategy = (meta as Record<string, unknown>)?.mergeStrategy as
-      | string
-      | undefined
+      string | undefined
 
     if (metaOptions && metaOptions.length > 0 && mergeStrategy === "augment") {
       return metaOptions
-        .filter(opt => !limitToFilteredRows || availableOptions.has(opt.value))
+        .filter(
+          opt =>
+            !limitToFilteredRows ||
+            availableOptions.has(opt.value) ||
+            selectedValues.has(opt.value),
+        )
         .map(opt => ({
           ...opt,
           count: showCounts ? (valueCounts.get(opt.value) ?? 0) : undefined,
@@ -276,11 +286,17 @@ export function TableColumnFacetedFilterMenu<TData, TValue>({
 
     if (metaOptions && metaOptions.length > 0) {
       return limitToFilteredRows
-        ? metaOptions.filter(opt => availableOptions.has(opt.value))
+        ? metaOptions.filter(
+            opt =>
+              availableOptions.has(opt.value) || selectedValues.has(opt.value),
+          )
         : metaOptions
     }
 
-    return Array.from(availableOptions)
+    const fallbackValues = limitToFilteredRows
+      ? new Set([...availableOptions, ...selectedValues])
+      : availableOptions
+    return Array.from(fallbackValues)
       .map(value => ({
         label: autoOptionsFormat ? formatLabel(value) : value,
         value,
@@ -294,6 +310,7 @@ export function TableColumnFacetedFilterMenu<TData, TValue>({
     dynamicCounts,
     coreRows,
     filteredRows,
+    selectedValues,
   ])
 
   /**
@@ -351,8 +368,16 @@ export function TableColumnFacetedFilterMenu<TData, TValue>({
         ...opt,
         count: opt.count ?? valueCounts.get(opt.value) ?? 0,
       }))
-      .filter(opt => opt.count !== 0)
-  }, [options, table, column, dynamicCounts, coreRows, filteredRows])
+      .filter(opt => opt.count !== 0 || selectedValues.has(opt.value))
+  }, [
+    options,
+    table,
+    column,
+    dynamicCounts,
+    coreRows,
+    filteredRows,
+    selectedValues,
+  ])
 
   const resolvedOptions =
     enrichedCallerOptions ??
