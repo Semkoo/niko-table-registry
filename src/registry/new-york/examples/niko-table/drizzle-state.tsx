@@ -48,6 +48,7 @@ import { DataTableColumnHeader } from "@/components/niko-table/components/data-t
 import { DataTableColumnTitle } from "@/components/niko-table/components/data-table-column-title"
 import { DataTableColumnSortMenu } from "@/components/niko-table/components/data-table-column-sort"
 import { DataTableColumnFacetedFilterMenu } from "@/components/niko-table/components/data-table-column-faceted-filter"
+import { DataTableFacetedFilter } from "@/components/niko-table/components/data-table-faceted-filter"
 import { DataTableColumnSliderFilterMenu } from "@/components/niko-table/components/data-table-column-slider-filter-options"
 import { DataTableColumnDateFilterMenu } from "@/components/niko-table/components/data-table-column-date-filter-options"
 import { DataTableToolbarSection } from "@/components/niko-table/components/data-table-toolbar-section"
@@ -747,16 +748,51 @@ const brandOptions = [
 
 type ProductFacets = ProductQueryResult["facets"]
 
-function buildColumns(facets?: ProductFacets): DataTableColumnDef<Product>[] {
-  const mergeCounts = (
-    staticOpts: typeof categoryOptions,
-    facet: Array<{ value: string; count: number }> | undefined,
-  ) => {
-    if (!facet) return staticOpts
-    const m = new Map(facet.map(f => [f.value, f.count]))
-    return staticOpts.map(opt => ({ ...opt, count: m.get(opt.value) ?? 0 }))
-  }
+type FacetOption = { label: string; value: string; count?: number }
 
+/** Merge server facet counts onto a static option list (count 0 when absent). */
+function mergeCounts(
+  staticOpts: FacetOption[],
+  facet: Array<{ value: string; count: number }> | undefined,
+): FacetOption[] {
+  if (!facet) return staticOpts
+  const m = new Map(facet.map(f => [f.value, f.count]))
+  return staticOpts.map(opt => ({ ...opt, count: m.get(opt.value) ?? 0 }))
+}
+
+/** Selected values for a column, tolerating the menu/faceted `{ value }` shape. */
+function selectedFacetValues(
+  columnFilters: ColumnFiltersState,
+  columnId: string,
+): Set<string> {
+  const entry = columnFilters.find(f => f.id === columnId)
+  if (!entry) return new Set()
+  let raw: unknown = entry.value
+  if (raw && typeof raw === "object" && !Array.isArray(raw) && "value" in raw) {
+    raw = (raw as { value: unknown }).value
+  }
+  if (raw == null || raw === "") return new Set()
+  const values = Array.isArray(raw) ? raw : [raw]
+  return new Set(values.filter(v => v != null && v !== "").map(String))
+}
+
+/**
+ * Toolbar facets carry server counts and must narrow to values still present
+ * in the results — like the header funnels do. The client only holds the
+ * current page, so narrowing happens here from the server counts: drop count-0
+ * options, but keep any currently-selected value so it stays visible and
+ * removable.
+ */
+function narrowFacetOptions(
+  opts: FacetOption[],
+  columnFilters: ColumnFiltersState,
+  columnId: string,
+): FacetOption[] {
+  const selected = selectedFacetValues(columnFilters, columnId)
+  return opts.filter(o => o.count !== 0 || selected.has(o.value))
+}
+
+function buildColumns(facets?: ProductFacets): DataTableColumnDef<Product>[] {
   const categoryOpts = mergeCounts(categoryOptions, facets?.select.category)
   const brandOpts = mergeCounts(brandOptions, facets?.select.brand)
   const priceRange = facets?.range.price
@@ -982,6 +1018,28 @@ function DrizzleTableContent() {
     [queryData?.facets],
   )
 
+  // Toolbar facet options: server counts merged in, then narrowed to values
+  // still present in the results (count-0 dropped, current selection pinned).
+  const facets = queryData?.facets
+  const categoryFacetOptions = useMemo(
+    () =>
+      narrowFacetOptions(
+        mergeCounts(categoryOptions, facets?.select.category),
+        columnFilters,
+        "category",
+      ),
+    [facets?.select.category, columnFilters],
+  )
+  const brandFacetOptions = useMemo(
+    () =>
+      narrowFacetOptions(
+        mergeCounts(brandOptions, facets?.select.brand),
+        columnFilters,
+        "brand",
+      ),
+    [facets?.select.brand, columnFilters],
+  )
+
   const error =
     queryError instanceof Error
       ? queryError.message
@@ -1124,10 +1182,31 @@ function DrizzleTableContent() {
             <DataTableSearchFilter placeholder="Search products..." />
             <DataTableViewMenu />
           </DataTableToolbarSection>
-          <DataTableToolbarSection className="px-0">
+          {/* Facets on the left, sort/filter pushed to the right of the same
+              row (ml-auto). Wraps to a new line on narrow widths. */}
+          <DataTableToolbarSection className="flex-wrap px-0">
+            {/* Toolbar facets read server-computed counts. dynamicCounts /
+                limitToFilteredRows are off because the client holds only the
+                current page — counts and narrowing come from the server. */}
+            <DataTableFacetedFilter
+              accessorKey="category"
+              title="Category"
+              options={categoryFacetOptions}
+              multiple
+              dynamicCounts={false}
+              limitToFilteredRows={false}
+            />
+            <DataTableFacetedFilter
+              accessorKey="brand"
+              title="Brand"
+              options={brandFacetOptions}
+              multiple
+              dynamicCounts={false}
+              limitToFilteredRows={false}
+            />
             {isPlaceholderData && isFetching && (
               <Loader2
-                className="size-4 animate-spin text-muted-foreground"
+                className="ml-auto size-4 animate-spin text-muted-foreground"
                 aria-label="Loading new results"
               />
             )}
