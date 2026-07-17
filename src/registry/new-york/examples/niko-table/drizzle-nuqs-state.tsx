@@ -1301,6 +1301,8 @@ function DrizzleNuqsTableContent() {
             <DataTableSearchFilter placeholder="Search products..." />
             <DataTableViewMenu />
           </DataTableToolbarSection>
+          {/* Facets on the left, sort/filter pushed to the right of the same
+              row (ml-auto). Wraps to a new line on narrow widths. */}
           <DataTableToolbarSection className="flex-wrap px-0">
             {/* Toolbar facets read server-computed counts. dynamicCounts /
                 limitToFilteredRows are off because the client holds only the
@@ -1321,11 +1323,9 @@ function DrizzleNuqsTableContent() {
               dynamicCounts={false}
               limitToFilteredRows={false}
             />
-          </DataTableToolbarSection>
-          <DataTableToolbarSection className="px-0">
             {isPlaceholderData && isFetching && (
               <Loader2
-                className="size-4 animate-spin text-muted-foreground"
+                className="ml-auto size-4 animate-spin text-muted-foreground"
                 aria-label="Loading new results"
               />
             )}
