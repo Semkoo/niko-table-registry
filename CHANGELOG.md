@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Server-Side Grid example** — editable Data Grid backed by a server: rows stream in on scroll (`onNearEnd`, no pagination) and edits travel back as a `created`/`updated`/`deleted` changeset with per-row server validation and `reconcile`; unsaved edits survive chunk merges. [Server-Side Grid](/examples/server-side-grid/)
+- **Drizzle ORM guide** — implements the server-side wire contract with Drizzle + Postgres (column mapping, filter→WHERE dispatch incl. OR logic, ORDER BY, facets as grouped counts, API route), with a live mocked demo that shows the generated SQL for the current view. [Drizzle ORM](/examples/drizzle-orm/)
+- **`normalizeFiltersFromUrl` export** from `filters/table-filter-menu` — counterpart of `serializeFiltersForUrl` for restoring advanced-menu filters from a URL or controlled state without duplicating the helper.
 - **Data Grid (`data-table-grid`)** — composable spreadsheet grid on Niko Table: `useDataGrid` + `<DataGrid>` + opt-in children (clipboard, fill, move, reorder, status bar, six cell editors). Id-addressed so sort/filter keep working. [Introduction](/data-grid/introduction/) · [API](/data-grid/api/)
 - **Persistence (`data-table-grid-changes`)** — `useGridChanges` → `{ created, updated, deleted }`, dirty set, `reconcile`. [Persistence](/examples/persistence-grid/)
 - **Inline validation** — `CellState.error` tooltip on invalid cells. [Validation](/examples/validation-grid/)
@@ -28,6 +31,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Server-side examples reworked around a database-agnostic wire contract** — the table talks to one function taking a serializable `{ page, pageSize, sorting, search, columnFilters }`; a fenced `MOCK SERVER` section (with operator → SQL mapping) is the stand-in for any backend. All filters run server-side out of the box (search, faceted, slider, date incl. single-date timestamps, boolean, advanced menu AND/OR), cross-filter facets included; demos are labeled mocked and ship bigger datasets. [Server-Side Table](/examples/server-side-table/) · [Server-Side Nuqs Table](/examples/server-side-nuqs-table/)
+- **Grid examples flex-fill and breathe** — every grid example mounts `<DataTableColumnResize />` so columns fill the table width, and spaces its toolbar/status/table with `space-y-2` on `<DataGrid>`.
+- **Docs** — installation guide and homepage note that Niko Table targets shadcn's `new-york` (Radix) style; the current `shadcn init` default (`base-nova`, Base UI) is not yet supported.
 - **Column resize applies on drag-end** — `columnResizeMode: "onEnd"` with a container-level preview guide line, so memoized rows don't re-render on every mousemove during a drag.
 - **Composability** — row/column DnD import from `data-table-row-dnd-structure` / `data-table-column-dnd-structure` (virtualized twins likewise); registry packages no longer cross-ship the other axis
 - **Composability** — `DEFAULT_MIN_COLUMN_SIZE` lives in `lib/constants` so `DataTableRoot` no longer imports the resize-handle module for a constant
@@ -53,6 +59,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Registry — fresh installs were broken** — `lib/row-click.ts` and `lib/create-scroll-handler.ts` were imported by the core structure files but shipped by no registry item, so every clean `shadcn add @niko-table/data-table` failed to typecheck with module-not-found errors. Both now ship with `data-table` (#154).
+- **Server-side examples** — single-date column filters (bare ms timestamp) now match rows server-side instead of falling through to a text comparison; large page sizes scroll inside `maxHeight` instead of growing the page.
 - **Core** — keyboard nudge and double-click autosize now exit auto-fit like a drag does, so the fit no longer redistributes the space a keyboard user just removed
 - **Core** — header-fit floors use the same label fallback as the rendered title (formatted column id), apply only to resizable columns (no phantom floors on utility columns), and keep Map identity when nothing changed (no extra full-table re-render after first paint)
 - **Core** — the resize handle announces the real rendered width (`aria-valuenow`) for fill/floored columns, and an in-flight fill-column drag tears down if the table unmounts (no width committed to a dead table)
