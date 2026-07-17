@@ -104,6 +104,45 @@ describe("processFiltersForLogic — same-column equality collapse", () => {
     expect(result.processedFilters).toHaveLength(2)
   })
 
+  it("does NOT collapse same-column filters interleaved with another column", () => {
+    // "brand=apple AND category=clothing OR brand=samsung" evaluates as
+    // (apple ∧ clothing) ∨ samsung under the mixed-filter precedence rules.
+    // Merging the two brands across the category filter would change it to
+    // (apple ∨ samsung) ∧ clothing — a different result — so it must not merge.
+    const filters = [
+      eq("brand", "apple", JOIN_OPERATORS.AND),
+      eq("category", "clothing", JOIN_OPERATORS.AND),
+      eq("brand", "samsung", JOIN_OPERATORS.OR),
+    ]
+
+    const result = processFiltersForLogic(filters)
+
+    expect(result.shouldUseGlobalFilter).toBe(true) // stays MIXED, not collapsed
+    expect(result.processedFilters).toHaveLength(3)
+    const brandFilters = result.processedFilters.filter(f => f.id === "brand")
+    expect(brandFilters).toHaveLength(2)
+    expect(brandFilters.every(f => f.operator === FILTER_OPERATORS.EQ)).toBe(
+      true,
+    )
+  })
+
+  it("collapses a contiguous same-column run even with another column after it", () => {
+    const filters = [
+      eq("brand", "apple", JOIN_OPERATORS.AND),
+      eq("brand", "samsung", JOIN_OPERATORS.OR),
+      eq("category", "clothing", JOIN_OPERATORS.AND),
+    ]
+
+    const result = processFiltersForLogic(filters)
+
+    const brand = result.processedFilters.find(f => f.id === "brand")
+    expect(brand?.operator).toBe(FILTER_OPERATORS.IN)
+    expect(brand?.value).toEqual(["apple", "samsung"])
+    expect(result.processedFilters.find(f => f.id === "category")?.value).toBe(
+      "clothing",
+    )
+  })
+
   it("round-trips to a faceted dropdown showing both values selected", () => {
     // Reproduces the reported bug end-to-end: menu OR pair -> handler write ->
     // faceted `selectedValues` derivation (from table-faceted-filter.tsx).
