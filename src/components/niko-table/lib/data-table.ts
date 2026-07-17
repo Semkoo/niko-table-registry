@@ -122,11 +122,15 @@ function collapseSameColumnEqualityFilters<TData>(
   filters: ExtendedColumnFilter<TData>[],
 ): ExtendedColumnFilter<TData>[] {
   const groups = new Map<string, ExtendedColumnFilter<TData>[]>()
-  for (const filter of filters) {
+  const indicesById = new Map<string, number[]>()
+  filters.forEach((filter, index) => {
     const group = groups.get(filter.id) ?? []
     group.push(filter)
     groups.set(filter.id, group)
-  }
+    const indices = indicesById.get(filter.id) ?? []
+    indices.push(index)
+    indicesById.set(filter.id, indices)
+  })
 
   const emitted = new Set<string>()
   const result: ExtendedColumnFilter<TData>[] = []
@@ -136,7 +140,18 @@ function collapseSameColumnEqualityFilters<TData>(
     // Pending rows (no value yet) pass through untouched — merging them would
     // leak "" into the IN values or make the row vanish from the menu.
     const mergeable = group.filter(member => !isPendingEqualityFilter(member))
+    // Only collapse a contiguous run of the column's filters — nothing from
+    // another column interleaved. Merging across an interleaved filter would
+    // cross an AND/OR clause boundary and change the boolean grouping the
+    // mixed-filter evaluator relies on: e.g. "brand=A AND category=C OR
+    // brand=B" ((A ∧ C) ∨ B) must not become "brand IN (A,B) AND category=C"
+    // ((A ∨ B) ∧ C).
+    const indices = indicesById.get(filter.id) ?? []
+    const contiguous =
+      indices.length > 0 &&
+      indices[indices.length - 1] - indices[0] + 1 === indices.length
     const collapsible =
+      contiguous &&
       mergeable.length > 1 &&
       group.every(member => EQUALITY_OPERATORS.has(member.operator))
 
