@@ -221,9 +221,10 @@ export function TableSliderFilter<TData>({
   )
 
   const onSliderValueChange = React.useCallback(
-    (value: RangeValue) => {
+    // Radix sliders emit number[]; Base UI emits number | readonly number[]
+    (value: RangeValue | number | readonly number[]) => {
       if (Array.isArray(value) && value.length === 2) {
-        applyFilterValue(value)
+        applyFilterValue([value[0], value[1]])
       }
     },
     [applyFilterValue],

@@ -63,6 +63,17 @@ import { DataTableProvider } from "./data-table-context"
  */
 const TABLE_TOOLTIP_DELAY_MS = 1000
 
+/**
+ * Dual-generation tooltip delay: Radix's provider reads `delayDuration`,
+ * Base UI's reads `delay`, and each ignores the other prop. Spread as an
+ * object (not literal attributes) so it typechecks against both shadcn
+ * generations and the CLI's Base UI codemod leaves it alone.
+ */
+const tooltipProviderDelay = {
+  delayDuration: TABLE_TOOLTIP_DELAY_MS,
+  delay: TABLE_TOOLTIP_DELAY_MS,
+}
+
 export interface DataTableConfig {
   // Feature toggles
   enablePagination?: boolean
@@ -780,7 +791,7 @@ function DataTableRootInternal<TData, TValue>({
       columns={processedColumns as DataTableColumnDef<TData>[]}
       isLoading={isLoading}
     >
-      <TooltipProvider delayDuration={TABLE_TOOLTIP_DELAY_MS}>
+      <TooltipProvider {...tooltipProviderDelay}>
         <div className={cn("w-full min-w-0 space-y-4", className)}>
           {children}
         </div>
@@ -807,7 +818,7 @@ export function DataTableRoot<TData, TValue>({
         columns={columns as DataTableColumnDef<TData>[]}
         isLoading={isLoading}
       >
-        <TooltipProvider delayDuration={TABLE_TOOLTIP_DELAY_MS}>
+        <TooltipProvider {...tooltipProviderDelay}>
           <div className={cn("w-full min-w-0 space-y-4", className)}>
             {children}
           </div>

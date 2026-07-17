@@ -7,6 +7,7 @@ description: Latest updates and release notes for Niko Table.
 
 ### Added
 
+- **Base UI support** — all 31 blocks install cleanly into both shadcn generations: Radix (`new-york`) and Base UI (`base-nova`, the current `shadcn init` default). Dual-generation-safe callbacks and props; verified with fresh-app installs of every block under both styles.
 - **Server-Side Grid** — editable grid backed by a server: rows stream in on scroll (no pagination), edits save as a validated `created`/`updated`/`deleted` changeset with `reconcile`. [example](/examples/server-side-grid/)
 - **Drizzle ORM guide** — the server-side wire contract implemented with Drizzle + Postgres, with a live mocked demo that shows the generated SQL as you filter and sort. [guide](/examples/drizzle-orm/)
 - **`normalizeFiltersFromUrl`** exported from `filters/table-filter-menu` (counterpart of `serializeFiltersForUrl`) for restoring advanced-menu filters from URL or controlled state
@@ -30,7 +31,7 @@ description: Latest updates and release notes for Niko Table.
 
 - **Server-side examples reworked** around a database-agnostic wire contract — one serializable query, a fenced `MOCK SERVER` section with operator → SQL mapping, every filter working server-side out of the box, cross-filter facets, mocked demos with bigger datasets. [Server-Side Table](/examples/server-side-table/) · [Nuqs](/examples/server-side-nuqs-table/)
 - Grid examples mount `<DataTableColumnResize />` (columns flex-fill the table width) and space toolbar/table with `space-y-2`
-- [Installation](/getting-started/installation/) notes Niko Table targets shadcn's `new-york` (Radix) style — the new `shadcn init` default (`base-nova`, Base UI) is not yet supported
+- [Installation](/getting-started/installation/) notes both shadcn generations are supported (`new-york` Radix and `base-nova` Base UI)
 - Docs Source/API links use Astro `DocsLink` (aligned outline buttons; Starlight MDX stripped React `Button asChild`)
 - Install CLI yarn tab uses `yarn dlx`; Installation page is Prerequisites → Registry → Install first
 - [Skills](/getting-started/skills/) — Data Grid coverage + Cursor / Claude Code / Windsurf / agents install paths
