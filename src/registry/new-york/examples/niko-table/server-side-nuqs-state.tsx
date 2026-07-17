@@ -1236,7 +1236,8 @@ function ServerSideNuqsTableContent() {
             />
           </DataTableToolbarSection>
         </DataTableToolbarSection>
-        <DataTable>
+        {/* maxHeight keeps large page sizes scrollable instead of growing the page */}
+        <DataTable maxHeight={500}>
           <DataTableHeader />
           <DataTableBody>
             <DataTableSkeleton rows={pagination.pageSize} />
