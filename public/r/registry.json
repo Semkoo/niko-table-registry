@@ -157,6 +157,16 @@
           "target": "components/niko-table/lib/filter-rows.ts"
         },
         {
+          "path": "src/components/niko-table/lib/create-scroll-handler.ts",
+          "type": "registry:lib",
+          "target": "components/niko-table/lib/create-scroll-handler.ts"
+        },
+        {
+          "path": "src/components/niko-table/lib/row-click.ts",
+          "type": "registry:lib",
+          "target": "components/niko-table/lib/row-click.ts"
+        },
+        {
           "path": "src/components/niko-table/lib/format.ts",
           "type": "registry:lib",
           "target": "components/niko-table/lib/format.ts"
@@ -857,7 +867,7 @@
       "name": "data-table-column-resize",
       "type": "registry:component",
       "title": "DataTable Column Resize",
-      "description": "Opt-in column resizing with drag handles and double-click autosize (measures natural text width). Keyboard-operable handle. Drop <DataTableColumnResize/> into the table to enable — works with DataTableHeader/Body and the virtualized variants.",
+      "description": "Opt-in column resizing with drag handles and double-click autosize (measures natural text width). Keyboard-operable handle. Drop <DataTableColumnResize/> into the table to enable \u2014 works with DataTableHeader/Body and the virtualized variants.",
       "dependencies": [],
       "registryDependencies": ["https://niko-table.com/r/data-table.json"],
       "files": [
@@ -872,7 +882,7 @@
       "name": "data-table-column-auto-fit",
       "type": "registry:component",
       "title": "DataTable Column Auto-fit",
-      "description": "Opt-in even-split fill for resizable columns. Drop <DataTableColumnAutoFit/> next to <DataTableColumnResize/> and the resizable columns grow by an equal share of the leftover space on load (the alternative to the default single-flex-column fill). Self-contained — the body ships no auto-fit code unless you install this.",
+      "description": "Opt-in even-split fill for resizable columns. Drop <DataTableColumnAutoFit/> next to <DataTableColumnResize/> and the resizable columns grow by an equal share of the leftover space on load (the alternative to the default single-flex-column fill). Self-contained \u2014 the body ships no auto-fit code unless you install this.",
       "dependencies": [],
       "registryDependencies": [
         "https://niko-table.com/r/data-table.json",
@@ -913,7 +923,7 @@
       "name": "data-table-grid",
       "type": "registry:block",
       "title": "Data Grid (editable)",
-      "description": "Composable editable spreadsheet grid: a headless engine (focus, selection, edit lifecycle, undo/redo, clipboard — all rowId-addressed so sort/filter work while editing) + a skin composed with DataTableRoot and the virtualized body. Keyboard cell nav, drag range-select with edge auto-scroll, quote-aware TSV copy/cut/paste with one-to-many tiling, fill handle, drag-move, dynamic columns, row drag-to-reorder, selection status bar, cross-highlight, and text/number/checkbox/date/select/combobox cells. Virtualized to 100k+ rows.",
+      "description": "Composable editable spreadsheet grid: a headless engine (focus, selection, edit lifecycle, undo/redo, clipboard \u2014 all rowId-addressed so sort/filter work while editing) + a skin composed with DataTableRoot and the virtualized body. Keyboard cell nav, drag range-select with edge auto-scroll, quote-aware TSV copy/cut/paste with one-to-many tiling, fill handle, drag-move, dynamic columns, row drag-to-reorder, selection status bar, cross-highlight, and text/number/checkbox/date/select/combobox cells. Virtualized to 100k+ rows.",
       "dependencies": ["lucide-react"],
       "registryDependencies": [
         "https://niko-table.com/r/data-table.json",
@@ -1092,8 +1102,8 @@
     {
       "name": "data-table-grid-changes",
       "type": "registry:component",
-      "title": "Data Grid — change tracking & persistence",
-      "description": "Opt-in useGridChanges hook that observes the uncontrolled grid engine and turns edits into a create/update/delete change-set — for staging saves, autosave, and full CRUD with per-row reconcile. Plain React, no dependency. Requires data-table-grid.",
+      "title": "Data Grid \u2014 change tracking & persistence",
+      "description": "Opt-in useGridChanges hook that observes the uncontrolled grid engine and turns edits into a create/update/delete change-set \u2014 for staging saves, autosave, and full CRUD with per-row reconcile. Plain React, no dependency. Requires data-table-grid.",
       "registryDependencies": ["https://niko-table.com/r/data-table-grid.json"],
       "files": [
         {
