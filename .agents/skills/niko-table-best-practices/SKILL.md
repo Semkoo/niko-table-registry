@@ -5,7 +5,7 @@ description: >-
   Table) and the editable Data Grid. Use when the user mentions Niko Table,
   niko-table.com, data table with shadcn, TanStack Table, building a sortable or
   filterable table, faceted filters, advanced filter menu, row or column
-  drag-and-drop, server-side pagination, nuqs, URL state, shareable or
+  drag-and-drop, server-side pagination, server-side grid, infinite scroll, Drizzle ORM, nuqs, URL state, shareable or
   bookmarkable table, row expansion, tree table, row selection, editable
   spreadsheet grid, useDataGrid, DataGrid cell editors, clipboard/fill handle,
   useGridChanges, or any shadcn-compatible data grid — even if they don't name
@@ -24,13 +24,13 @@ At a high level:
 - **New table**: DataTableRoot → ToolbarSection (optional) → DataTable → Header + Body (Skeleton, EmptyBody) → Pagination. Use direct file imports only (no barrel exports).
 - **Adding filters**: Toolbar = DataTableSearchFilter, DataTableFacetedFilter, DataTableFilterMenu. Column headers = DataTableColumnFacetedFilterMenu, DataTableColumnSliderFilterMenu, DataTableColumnDateFilterMenu. Set column `meta` (variant, options, etc.) and `enableColumnFilter: true`.
 - **Row/column DnD**: Row DnD needs `getRowId`, DataTableRowDndProvider outside DataTable; don’t combine row DnD with sorting/filtering. Column DnD is safe with everything.
-- **Server-side**: `config.manualPagination` (and/or manualSorting/manualFiltering), `config.pageCount`, pass `totalCount` to DataTablePagination.
+- **Server-side**: `config.manualPagination` / `manualSorting` / `manualFiltering` + `config.pageCount`, pass `totalCount` to DataTablePagination, and set `maxHeight` on `DataTable` so page-size changes scroll. Structure it around a serializable wire contract — ONE function `fetch(query: { page, pageSize, sorting, search, columnFilters })` → `{ data, total, facets }` — so any backend (SQL, Drizzle, Prisma, Supabase, REST) plugs in; see Server-Side Table example and the Drizzle ORM guide at niko-table.com.
 - **URL state (nuqs):** Wrap app with `NuqsAdapter`; use `useQueryStates` with parsers for pagination, sort, filters, search; pass URL-derived state into `DataTableRoot` and wire `onPaginationChange` / `onSortingChange` / `onColumnFiltersChange` / `onGlobalFilterChange` to `setUrlParams`.
 - **Large lists:** Use `DataTableVirtualizedBody` (from core/structure) instead of `DataTableBody` for 10k+ rows; same children (Skeleton, EmptyBody). See Virtualization Table example.
 - **Sidebar:** Use `DataTableAside` (and trigger) for a detail panel next to the table. See Aside Table example.
-- **Data Grid:** `useDataGrid` + `<DataGrid grid={grid}>` wrapping `DataTable` inside `DataTableRoot`. Opt-in children for clipboard/fill/move. Cell editors via `<DataGridCell>` + `Grid*Cell`. Install `@niko-table/data-table-grid` (+ `data-table-grid-changes` for persistence). See Basic Grid / Data Grid docs on niko-table.com.
+- **Data Grid:** `useDataGrid` + `<DataGrid grid={grid}>` wrapping `DataTable` inside `DataTableRoot`. Opt-in children for clipboard/fill/move. Cell editors via `<DataGridCell>` + `Grid*Cell`. Install `@niko-table/data-table-grid` (+ `data-table-grid-changes` for persistence). Mount `<DataTableColumnResize />` inside the grid so columns flex-fill the width, and pass `className="space-y-2 outline-none"` to `<DataGrid>` for spacing. For grids backed by a server, don't paginate — stream chunks on scroll (see Server-Side patterns below). See Basic Grid / Data Grid docs on niko-table.com.
 
-Your job when using this skill is to figure out where the user is — new table, adding filters/DnD, fixing imports, wiring server-side, URL state (nuqs), row expansion, tree table, or row selection — and give them the right structure, imports, and patterns. If they’re vague (“I want a table”), suggest the minimal template and point to niko-table.com for examples. If they already have a table and want faceted filters or the advanced filter menu, jump to the Filtering section. Stay flexible: some users want copy-paste snippets; others want to understand the two-layer (DataTable* vs Table*) pattern.
+Your job when using this skill is to figure out where the user is — new table, adding filters/DnD, fixing imports, wiring server-side, URL state (nuqs), row expansion, tree table, row selection, or editable Data Grid — and give them the right structure, imports, and patterns. If they’re vague (“I want a table”), suggest the minimal template and point to niko-table.com for examples. If they already have a table and want faceted filters or the advanced filter menu, jump to the Filtering section. If they want spreadsheet editing, go to Data Grid. Stay flexible: some users want copy-paste snippets; others want to understand the two-layer (DataTable* vs Table*) pattern.
 
 Full docs and examples: **https://niko-table.com**. Registry: `https://niko-table.com/r/{name}.json` in `components.json` under `registries["@niko-table"]`.
 
@@ -178,7 +178,7 @@ Sync table state (pagination, sorting, filters, search) with the URL for shareab
 
 - **Parsers:** Define parsers with `parseAsInteger.withDefault(0)` for `pageIndex`/`pageSize`, `parseAsJson` for `sort`/`filters`, `parseAsString` for `search`. Match TanStack Table state shape so URL params map 1:1 to `state`.
 - **Wiring:** `useQueryStates(parsers, { history: "replace" })` → `[urlParams, setUrlParams]`. Derive `pagination`, `sorting`, `columnFilters`, `globalFilter` from `urlParams` (e.g. via `useMemo`). Pass to `DataTableRoot` as `state={{ pagination, sorting, columnFilters, globalFilter }}`. In `onPaginationChange`, `onSortingChange`, `onColumnFiltersChange`, `onGlobalFilterChange`, call `setUrlParams` with the updated slice so the URL stays in sync.
-- **DataTableFilterMenu:** When using the filter menu with nuqs, filters in the URL are often stored as extended filter objects; convert between TanStack `ColumnFiltersState` and that shape in the handlers. See Advanced Nuqs Table and Server-Side Nuqs Table examples at niko-table.com.
+- **DataTableFilterMenu:** When using the filter menu with nuqs, filters in the URL are often stored as extended filter objects; convert between TanStack `ColumnFiltersState` and that shape in the handlers using `serializeFiltersForUrl` / `normalizeFiltersFromUrl` (exported from `filters/table-filter-menu` — they strip/regenerate `filterId` to keep URLs short and input focus stable). See Advanced Nuqs Table and Server-Side Nuqs Table examples at niko-table.com.
 
 ## Installation (for projects without Niko Table)
 
@@ -269,11 +269,12 @@ DataTableRoot data={grid.rows} getRowId={(r) => r.id}
 - **Cells:** Wrap editors in `<DataGridCell row={…} columnId={…}>`. Use `GridTextCell`, `GridNumberCell`, `GridCheckboxCell`, `GridDateCell`, `GridSelectCell` / `GridComboboxCell`. Validity comes from your `resolve` → `CellState`.
 - **Opt-in features:** Mount as children of `<DataGrid>` only — unmounted = tree-shaken.
 - **Persistence:** Separate install `@niko-table/data-table-grid-changes` → `useGridChanges(grid, { initialRows })`.
+- **Server-side grid:** no pagination — stream rows on scroll via `DataTableVirtualizedBody`'s `onNearEnd` + `prefetchThreshold`. Load each chunk with `grid.updateRows(() => rows, { history: false })` + `changes.reset(rows)`, merging around `changes.dirtyRowIds` so unsaved edits survive. Save via `changes.getChangeSet()` → POST `{ created, updated, deleted }` → `changes.reconcile({ succeededIds, failedIds })`; failed rows stay dirty (highlight with `failedRowIds`). Raise `useDataGrid`'s `maxRows` (default 200) above the expected loaded count. See Server-Side Grid example.
 - **Docs:** https://niko-table.com/data-grid/introduction/ · https://niko-table.com/examples/basic-grid/
 
 ## Where to Learn More
 
-- **Online**: https://niko-table.com — installation, examples, component overview, API. Table examples: Simple / Basic / Faceted / Advanced / Nuqs / Server-Side / Row DnD / Column DnD / Virtualization / Aside. Data Grid examples: Basic Grid, Cell Types, Validation, Dynamic Columns, Persistence. For resilience: DataTableErrorBoundary (core/data-table-error-boundary).
+- **Online**: https://niko-table.com — installation, examples, component overview, API. Table examples: Simple / Basic / Faceted / Advanced / Nuqs / Server-Side / Server-Side Nuqs / Infinite Scroll / Row DnD / Column DnD / Virtualization / Aside; the Drizzle ORM guide (with a live mocked demo that shows the generated SQL) implements the server-side wire contract. Data Grid examples: Basic Grid, Cell Types, Validation, Dynamic Columns, Persistence, Server Side. For resilience: DataTableErrorBoundary (core/data-table-error-boundary).
 - **Skills (AI)**: https://niko-table.com/getting-started/skills/ — how to install and use this skill.
 - **Docs guidelines**: https://niko-table.com/contributing/documentation-guidelines/
 - **In-repo** (when working in niko-table-registry): `src/content/docs/` — e.g. `getting-started/installation.mdx`, `niko-table/overview/`, `data-grid/overview/`, `examples/*-table.mdx`, `examples/*-grid.mdx`.

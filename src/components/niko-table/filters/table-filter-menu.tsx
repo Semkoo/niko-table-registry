@@ -143,7 +143,7 @@ type FilterWithoutId<TData> = Omit<ExtendedColumnFilter<TData>, "filterId">
  * @param filters - Filters that may or may not have filterId
  * @returns Filters with guaranteed filterId values
  */
-function normalizeFiltersFromUrl<TData>(
+export function normalizeFiltersFromUrl<TData>(
   filters: (FilterWithoutId<TData> | ExtendedColumnFilter<TData>)[],
 ): ExtendedColumnFilter<TData>[] {
   // Quick check: if all filters already have filterIds, return as-is
@@ -674,9 +674,9 @@ function useSyncFiltersWithTable<TData>(
   // This is safe because we're only mutating table.options.meta, not triggering re-renders
   // Custom filter logic can read this meta to apply correct join operators
   if (table.options.meta) {
-    // eslint-disable-next-line react-hooks/immutability
+     
     table.options.meta.hasIndividualJoinOperators = true
-    // eslint-disable-next-line react-hooks/immutability
+     
     table.options.meta.joinOperator = filterLogic.joinOperator
   }
 

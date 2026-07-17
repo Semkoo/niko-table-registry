@@ -1,32 +1,25 @@
 "use client"
 
 /**
- * Server-Side Data Table Example with TanStack Query
+ * Drizzle ORM Server-Side Table — live, mocked demo
  *
- * Server-side pagination, sorting, and filtering with TanStack Query for
- * fetching, caching, and background updates. Table state lives in React
- * `useState` (no URL persistence — see the Server-Side Nuqs Table example
- * for that).
+ * A browser-runnable companion to the Drizzle ORM guide. The query-building
+ * code (`buildWhere`, `buildOrderBy`, `computeFacets`) is written exactly
+ * like the guide's real Drizzle code — same operators, same dispatch, same
+ * structure. The only difference: the operators here are a ~80-line mock of
+ * drizzle-orm's API that compiles each condition to BOTH
  *
- * ## Database-agnostic by design
+ *   1. a row predicate, so the query executes against an in-memory array
+ *      right in your browser, and
+ *   2. SQL text with bound params, so you can watch the exact statement a
+ *      real Postgres would receive update live as you filter and sort.
  *
- * The table never talks to a database. It talks to ONE function:
+ * To go real: install drizzle-orm, replace the "MOCK DRIZZLE" section with
+ * `import { and, or, eq, ilike, ... } from "drizzle-orm"` and your pgTable
+ * schema, and move fetchProducts behind an API route — the builder code
+ * stays the same. Full walkthrough: the Drizzle ORM guide in the docs.
  *
- *   fetchProducts(query: ProductQuery): Promise<ProductQueryResult>
- *
- * `ProductQuery` is a plain serializable object (page, pageSize, sorting,
- * search, filters) — exactly what you would POST to `/api/products` or pass
- * to a server action. Everything inside the "MOCK SERVER" section below is
- * a stand-in for YOUR backend: replace it with SQL, an ORM (Prisma,
- * Drizzle), Supabase, or any REST/GraphQL API. The rest of the file does
- * not change.
- *
- * Prerequisites:
- *   npm install @tanstack/react-query
- *
- * This example creates its own QueryClientProvider so it is self-contained.
- * In a real app, put the provider in your root layout instead (see the
- * Server-Side Table docs for App Router / Pages Router / SPA setup).
+ * Prerequisites: npm install @tanstack/react-query
  */
 
 import { useCallback, useMemo, useState } from "react"
@@ -92,13 +85,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { AlertCircle, Loader2, SearchX, UserSearch } from "lucide-react"
+import { AlertCircle, Database, Loader2, SearchX } from "lucide-react"
 
 /* -------------------------------------------------------------------------
- * 1. The wire contract — what the table sends to YOUR backend
- *
- * Every field is JSON-serializable, so the same shape works as query params,
- * a POST body, or server-action arguments.
+ * 1. The wire contract — identical to the Server-Side Table example
  * ---------------------------------------------------------------------- */
 
 type Product = {
@@ -113,22 +103,6 @@ type Product = {
   releaseDate: Date
 }
 
-/**
- * The request. This is ALL the backend needs to build a query:
- *
- * - `page` / `pageSize`  → LIMIT / OFFSET
- * - `sorting`            → ORDER BY (multi-column)
- * - `search`             → global text search. When the advanced filter menu
- *                          uses OR/MIXED join logic it stores an object
- *                          `{ filters, joinOperator }` here instead of a
- *                          string (that is how Niko Table routes OR logic).
- * - `columnFilters`      → WHERE clauses. Each entry is `{ id, value }`;
- *                          `value` is either a plain value from a column
- *                          header widget (string, string[], boolean, or a
- *                          `[min, max]` tuple from slider/date filters) or an
- *                          `ExtendedColumnFilter` (`{ operator, value, ... }`)
- *                          from the advanced filter menu.
- */
 type ProductQuery = {
   page: number
   pageSize: number
@@ -137,12 +111,6 @@ type ProductQuery = {
   columnFilters: ColumnFiltersState
 }
 
-/**
- * The response. `facets` powers cross-filter narrowing: the server reports,
- * for each facetable column, which values still exist (and their counts)
- * under every OTHER active filter — so selecting a brand narrows the
- * category options, exactly like a shopping site sidebar.
- */
 type ProductQueryResult = {
   data: Product[]
   total: number
@@ -150,31 +118,336 @@ type ProductQueryResult = {
     select: Record<string, Array<{ value: string; count: number }>>
     range: Record<string, [number, number]>
   }
+  /** Demo-only: the SQL a real Postgres would receive for this query. */
+  debug: { sql: string; params: unknown[] }
 }
 
 /* -------------------------------------------------------------------------
- * 2. MOCK SERVER — replace this whole section with your backend
+ * 2. MOCK DRIZZLE — delete this section in a real app
  *
- * Everything between here and "3. Columns" simulates a database + API with
- * an in-memory array and setTimeout latency. To adapt it, translate each
- * operator to your query builder. With SQL for example:
+ * A miniature stand-in for drizzle-orm's condition builders with the same
+ * call signatures. Each operator compiles to SQL text + bound params AND a
+ * predicate so the query can run against the in-memory rows below. With
+ * real Drizzle you'd write instead:
  *
- *   FILTER_OPERATORS.ILIKE      → WHERE name ILIKE '%' || $1 || '%'
- *   FILTER_OPERATORS.EQ / NEQ   → WHERE brand = $1 / <> $1
- *   FILTER_OPERATORS.GT/GTE/... → WHERE price > $1 / >= $1 ...
- *   FILTER_OPERATORS.IN         → WHERE category = ANY($1)
- *   FILTER_OPERATORS.EMPTY      → WHERE col IS NULL OR col = ''
- *   [min, max] range tuples     → WHERE price BETWEEN $1 AND $2
- *   query.search (string)       → WHERE to_tsvector(...) @@ $1 (or ILIKE)
- *   query.sorting               → ORDER BY col1 ASC, col2 DESC
- *   query.page / pageSize       → LIMIT $2 OFFSET $1 * $2
- *
- * The facet computation maps to grouped counts with each column's own
- * filter excluded:  SELECT category, COUNT(*) ... GROUP BY category.
+ *   import { and, or, not, eq, ne, ilike, notIlike, gt, gte, lt, lte,
+ *            between, inArray, notInArray, isNull, asc, desc } from "drizzle-orm"
  * ---------------------------------------------------------------------- */
 
-// The "database" — 15 base products expanded to 2,000 rows.
-const initialData: Product[] = [
+/** A queryable column: SQL name + accessor into the row object. */
+type Col = { name: string; key: keyof Product }
+
+/** A compiled condition: SQL text (with `?` placeholders) + predicate. */
+type Cond = {
+  sql: string
+  params: unknown[]
+  test: (row: Product) => boolean
+}
+
+type Order = { sql: string; cmp: (a: Product, b: Product) => number }
+
+const num = (v: unknown): number =>
+  v instanceof Date ? v.getTime() : Number(v)
+const lower = (v: unknown): string => String(v).toLowerCase()
+
+const eq = (c: Col, v: unknown): Cond => ({
+  sql: `${c.name} = ?`,
+  params: [v],
+  test: r => lower(r[c.key]) === lower(v),
+})
+const ne = (c: Col, v: unknown): Cond => ({
+  sql: `${c.name} <> ?`,
+  params: [v],
+  test: r => lower(r[c.key]) !== lower(v),
+})
+const ilike = (c: Col, v: string): Cond => ({
+  sql: `${c.name} ILIKE ?`,
+  params: [v],
+  test: r => lower(r[c.key]).includes(lower(v).replaceAll("%", "")),
+})
+const notIlike = (c: Col, v: string): Cond => ({
+  sql: `${c.name} NOT ILIKE ?`,
+  params: [v],
+  test: r => !lower(r[c.key]).includes(lower(v).replaceAll("%", "")),
+})
+const gt = (c: Col, v: unknown): Cond => ({
+  sql: `${c.name} > ?`,
+  params: [v],
+  test: r => num(r[c.key]) > num(v),
+})
+const gte = (c: Col, v: unknown): Cond => ({
+  sql: `${c.name} >= ?`,
+  params: [v],
+  test: r => num(r[c.key]) >= num(v),
+})
+const lt = (c: Col, v: unknown): Cond => ({
+  sql: `${c.name} < ?`,
+  params: [v],
+  test: r => num(r[c.key]) < num(v),
+})
+const lte = (c: Col, v: unknown): Cond => ({
+  sql: `${c.name} <= ?`,
+  params: [v],
+  test: r => num(r[c.key]) <= num(v),
+})
+const between = (c: Col, lo: unknown, hi: unknown): Cond => ({
+  sql: `${c.name} BETWEEN ? AND ?`,
+  params: [lo, hi],
+  test: r => num(r[c.key]) >= num(lo) && num(r[c.key]) <= num(hi),
+})
+const inArray = (c: Col, values: unknown[]): Cond => ({
+  sql: `${c.name} IN (${values.map(() => "?").join(", ")})`,
+  params: values,
+  test: r => values.some(v => lower(r[c.key]) === lower(v)),
+})
+const notInArray = (c: Col, values: unknown[]): Cond => ({
+  sql: `${c.name} NOT IN (${values.map(() => "?").join(", ")})`,
+  params: values,
+  test: r => !values.some(v => lower(r[c.key]) === lower(v)),
+})
+const isNull = (c: Col): Cond => ({
+  sql: `${c.name} IS NULL`,
+  params: [],
+  test: r => r[c.key] === null || r[c.key] === undefined,
+})
+const not = (cond: Cond): Cond => ({
+  sql: `NOT (${cond.sql})`,
+  params: cond.params,
+  test: r => !cond.test(r),
+})
+const and = (...conds: (Cond | undefined)[]): Cond | undefined =>
+  combine(conds, "AND")
+const or = (...conds: (Cond | undefined)[]): Cond | undefined =>
+  combine(conds, "OR")
+function combine(
+  conds: (Cond | undefined)[],
+  op: "AND" | "OR",
+): Cond | undefined {
+  const defined = conds.filter((c): c is Cond => c !== undefined)
+  if (defined.length === 0) return undefined
+  if (defined.length === 1) return defined[0]
+  return {
+    sql: `(${defined.map(c => c.sql).join(` ${op} `)})`,
+    params: defined.flatMap(c => c.params),
+    test:
+      op === "AND"
+        ? r => defined.every(c => c.test(r))
+        : r => defined.some(c => c.test(r)),
+  }
+}
+const asc = (c: Col): Order => ({
+  sql: `${c.name} ASC`,
+  cmp: (a, b) => (num(a[c.key]) < num(b[c.key]) ? -1 : 1),
+})
+const desc = (c: Col): Order => ({
+  sql: `${c.name} DESC`,
+  cmp: (a, b) => (num(a[c.key]) > num(b[c.key]) ? -1 : 1),
+})
+
+// Text columns compare as strings, not numbers
+const strCmp =
+  (c: Col, dir: 1 | -1) =>
+  (a: Product, b: Product): number =>
+    dir * String(a[c.key]).localeCompare(String(b[c.key]))
+
+/** Render `?` placeholders as $1..$n for display. */
+function numberParams(sql: string): string {
+  let i = 0
+  return sql.replace(/\?/g, () => `$${++i}`)
+}
+
+/* -------------------------------------------------------------------------
+ * 3. Schema + column mapping — mirrors db/schema.ts in the guide
+ * ---------------------------------------------------------------------- */
+
+const products = {
+  id: { name: "id", key: "id" },
+  name: { name: "name", key: "name" },
+  category: { name: "category", key: "category" },
+  brand: { name: "brand", key: "brand" },
+  price: { name: "price", key: "price" },
+  stock: { name: "stock", key: "stock" },
+  rating: { name: "rating", key: "rating" },
+  inStock: { name: "in_stock", key: "inStock" },
+  releaseDate: { name: "release_date", key: "releaseDate" },
+} satisfies Record<string, Col>
+
+/** UI column id → Drizzle column. Unknown ids fall out safely. */
+const columnMap: Record<string, Col> = {
+  name: products.name,
+  category: products.category,
+  brand: products.brand,
+  price: products.price,
+  stock: products.stock,
+  rating: products.rating,
+  inStock: products.inStock,
+  releaseDate: products.releaseDate,
+}
+
+const TEXT_COLUMNS = new Set(["name", "category", "brand", "id"])
+
+/** Columns the global search input scans. */
+const searchableColumns = [products.name, products.category, products.brand]
+
+/* -------------------------------------------------------------------------
+ * 4. Filters → WHERE / ORDER BY — this code is the guide's code, verbatim
+ * ---------------------------------------------------------------------- */
+
+type MenuFilter = ExtendedColumnFilter<Product>
+
+/** One advanced-filter-menu rule → SQL condition. */
+function menuFilterToSql(filter: MenuFilter): Cond | undefined {
+  const column = columnMap[filter.id]
+  if (!column) return undefined
+  const value = filter.value
+
+  const needsValue =
+    filter.operator !== FILTER_OPERATORS.EMPTY &&
+    filter.operator !== FILTER_OPERATORS.NOT_EMPTY
+  if (needsValue && (value === undefined || value === null || value === ""))
+    return undefined
+
+  switch (filter.operator) {
+    case FILTER_OPERATORS.ILIKE:
+      return ilike(column, `%${String(value)}%`)
+    case FILTER_OPERATORS.NOT_ILIKE:
+      return notIlike(column, `%${String(value)}%`)
+    case FILTER_OPERATORS.EQ:
+      return eq(column, value)
+    case FILTER_OPERATORS.NEQ:
+      return ne(column, value)
+    case FILTER_OPERATORS.GT:
+      return gt(column, value)
+    case FILTER_OPERATORS.GTE:
+      return gte(column, value)
+    case FILTER_OPERATORS.LT:
+      return lt(column, value)
+    case FILTER_OPERATORS.LTE:
+      return lte(column, value)
+    case FILTER_OPERATORS.IN:
+      return Array.isArray(value) ? inArray(column, value) : undefined
+    case FILTER_OPERATORS.NOT_IN:
+      return Array.isArray(value) ? notInArray(column, value) : undefined
+    case FILTER_OPERATORS.EMPTY:
+      return or(isNull(column), eq(column, ""))
+    case FILTER_OPERATORS.NOT_EMPTY:
+      return not(or(isNull(column), eq(column, ""))!)
+    default:
+      return undefined
+  }
+}
+
+/** One columnFilters entry (widget value OR menu filter) → SQL condition. */
+function columnFilterToSql(id: string, value: unknown): Cond | undefined {
+  // advanced filter menu entries carry an `operator`
+  if (
+    value &&
+    typeof value === "object" &&
+    !Array.isArray(value) &&
+    "operator" in value
+  ) {
+    return menuFilterToSql(value as MenuFilter)
+  }
+
+  const column = columnMap[id]
+  if (!column || value == null || value === "") return undefined
+
+  // single date filter: bare ms timestamp → match the calendar day
+  if (typeof value === "number" && id === "releaseDate") {
+    const day = new Date(value)
+    day.setHours(0, 0, 0, 0)
+    const next = new Date(day.getTime() + 24 * 60 * 60 * 1000)
+    return and(gte(column, day), lt(column, next))
+  }
+
+  // [min, max] tuple from slider / date-range filters (null = open-ended)
+  if (
+    Array.isArray(value) &&
+    value.length === 2 &&
+    !value.every(v => typeof v === "string")
+  ) {
+    const [min, max] = value as [unknown, unknown]
+    const lo = min == null ? undefined : toColumnValue(id, min)
+    const hi = max == null ? undefined : toColumnValue(id, max)
+    if (lo != null && hi != null) return between(column, lo, hi)
+    if (lo != null) return gte(column, lo)
+    if (hi != null) return lte(column, hi)
+    return undefined
+  }
+
+  // string[] from faceted multi-select
+  if (Array.isArray(value)) {
+    return value.length > 0 ? inArray(column, value) : undefined
+  }
+
+  if (typeof value === "boolean") return eq(column, value)
+
+  return ilike(column, `%${String(value)}%`)
+}
+
+/** Timestamp columns receive Date objects; everything else passes through. */
+function toColumnValue(id: string, value: unknown): unknown {
+  return id === "releaseDate" ? new Date(Number(value)) : value
+}
+
+/**
+ * All conditions for a query. `excludeColumnId` powers facet computation:
+ * a column's facet is computed under every filter EXCEPT its own.
+ */
+function buildWhere(
+  query: ProductQuery,
+  excludeColumnId?: string,
+): Cond | undefined {
+  const conditions: (Cond | undefined)[] = []
+
+  // global text search across the searchable columns
+  if (typeof query.search === "string" && query.search) {
+    const term = query.search
+    conditions.push(or(...searchableColumns.map(c => ilike(c, `%${term}%`))))
+  }
+
+  // OR / MIXED logic from the advanced filter menu (rides in `search`)
+  if (
+    typeof query.search === "object" &&
+    query.search &&
+    "filters" in query.search
+  ) {
+    const filterObj = query.search as { filters: MenuFilter[] }
+    const orConditions = (filterObj.filters ?? [])
+      .filter(f => f.id !== excludeColumnId)
+      .map(menuFilterToSql)
+    conditions.push(or(...orConditions))
+  }
+
+  // AND logic: every columnFilters entry must match
+  for (const filter of query.columnFilters) {
+    if (filter.id === excludeColumnId) continue
+    conditions.push(columnFilterToSql(filter.id, filter.value))
+  }
+
+  return and(...conditions)
+}
+
+/** query.sorting → ORDER BY. */
+function buildOrderBy(query: ProductQuery): Order[] {
+  return query.sorting
+    .filter(s => columnMap[s.id])
+    .map(s => {
+      const column = columnMap[s.id]
+      const order = s.desc ? desc(column) : asc(column)
+      // mock-only: text columns need string comparison for the predicate
+      return TEXT_COLUMNS.has(s.id)
+        ? { ...order, cmp: strCmp(column, s.desc ? -1 : 1) }
+        : order
+    })
+}
+
+/* -------------------------------------------------------------------------
+ * 5. MOCK DATABASE + API — with real Drizzle this is an API route
+ *    executing db.select().from(products).where(...).orderBy(...)
+ * ---------------------------------------------------------------------- */
+
+const baseProducts: Product[] = [
   {
     id: "1",
     name: "iPhone 15 Pro",
@@ -342,355 +615,115 @@ const initialData: Product[] = [
   },
 ]
 
-function generateMockProducts(count: number): Product[] {
-  const result: Product[] = []
-  const baseCount = initialData.length
-
-  for (let i = 0; i < count; i++) {
-    const baseProduct = initialData[i % baseCount]
-    const variation = Math.floor(i / baseCount)
-
-    result.push({
-      ...baseProduct,
-      id: `${baseProduct.id}-${variation}`,
-      name:
-        variation > 0
-          ? `${baseProduct.name} (${variation + 1})`
-          : baseProduct.name,
-      price: baseProduct.price + variation * 10,
-      stock: Math.max(0, baseProduct.stock - variation * 5),
-      rating: baseProduct.rating,
-      inStock: baseProduct.stock - variation * 5 > 0,
-      releaseDate: new Date(
-        baseProduct.releaseDate.getTime() - variation * 24 * 60 * 60 * 1000,
-      ),
-    })
+// The "database" — 15 base products expanded to 500 rows.
+const productRows: Product[] = Array.from({ length: 500 }, (_, i) => {
+  const base = baseProducts[i % baseProducts.length]
+  const variation = Math.floor(i / baseProducts.length)
+  return {
+    ...base,
+    id: `${base.id}-${variation}`,
+    name: variation > 0 ? `${base.name} (${variation + 1})` : base.name,
+    price: base.price + variation * 10,
+    stock: Math.max(0, base.stock - variation * 5),
+    inStock: base.stock - variation * 5 > 0,
+    releaseDate: new Date(
+      base.releaseDate.getTime() - variation * 24 * 60 * 60 * 1000,
+    ),
   }
+})
 
-  return result
-}
-
-/** Match one advanced-filter-menu rule (`ExtendedColumnFilter`). */
-function matchesFilter(
-  product: Product,
-  filter: ExtendedColumnFilter<Product>,
-): boolean {
-  const productValue = product[filter.id as keyof Product]
-  const filterValue = filter.value
-
-  if (
-    filter.operator === FILTER_OPERATORS.EMPTY ||
-    filter.operator === FILTER_OPERATORS.NOT_EMPTY
-  ) {
-    // These operators don't need a value
-  } else if (!filterValue || filterValue === "") {
-    return true
-  }
-
-  switch (filter.operator) {
-    case FILTER_OPERATORS.EQ:
-      return (
-        String(productValue).toLowerCase() === String(filterValue).toLowerCase()
-      )
-    case FILTER_OPERATORS.NEQ:
-      return (
-        String(productValue).toLowerCase() !== String(filterValue).toLowerCase()
-      )
-    case FILTER_OPERATORS.ILIKE:
-      return String(productValue)
-        .toLowerCase()
-        .includes(String(filterValue).toLowerCase())
-    case FILTER_OPERATORS.NOT_ILIKE:
-      return !String(productValue)
-        .toLowerCase()
-        .includes(String(filterValue).toLowerCase())
-    case FILTER_OPERATORS.GT:
-      return Number(productValue) > Number(filterValue)
-    case FILTER_OPERATORS.LT:
-      return Number(productValue) < Number(filterValue)
-    case FILTER_OPERATORS.GTE:
-      return Number(productValue) >= Number(filterValue)
-    case FILTER_OPERATORS.LTE:
-      return Number(productValue) <= Number(filterValue)
-    case FILTER_OPERATORS.EMPTY:
-      return (
-        productValue === null ||
-        productValue === undefined ||
-        String(productValue).trim() === ""
-      )
-    case FILTER_OPERATORS.NOT_EMPTY:
-      return (
-        productValue !== null &&
-        productValue !== undefined &&
-        String(productValue).trim() !== ""
-      )
-    case FILTER_OPERATORS.IN:
-      if (Array.isArray(filterValue)) {
-        return filterValue.some(
-          v => String(productValue).toLowerCase() === String(v).toLowerCase(),
-        )
-      }
-      return false
-    case FILTER_OPERATORS.NOT_IN:
-      if (Array.isArray(filterValue)) {
-        return !filterValue.some(
-          v => String(productValue).toLowerCase() === String(v).toLowerCase(),
-        )
-      }
-      return true
-    default:
-      return true
-  }
-}
-
-/**
- * Match one entry of `query.columnFilters` against a product.
- *
- * Column-header widgets write PLAIN values (`column.setFilterValue(raw)`):
- * `[min, max]` tuples from slider/date menus, `string[]` from faceted
- * multi-select, booleans, strings. The advanced filter menu writes
- * `ExtendedColumnFilter` objects with an `operator`. Both shapes travel in
- * the same array, so dispatch on shape.
- */
-function matchesColumnFilter(
-  product: Product,
-  columnId: string,
-  value: unknown,
-): boolean {
-  if (value === null || value === undefined || value === "") return true
-
-  if (
-    typeof value === "object" &&
-    !Array.isArray(value) &&
-    "operator" in value
-  ) {
-    return matchesFilter(product, value as ExtendedColumnFilter<Product>)
-  }
-
-  const productValue = product[columnId as keyof Product]
-
-  // Single-date filter: a bare millisecond timestamp — match the calendar day
-  if (productValue instanceof Date && typeof value === "number") {
-    const filterDate = new Date(value)
-    return (
-      productValue.getFullYear() === filterDate.getFullYear() &&
-      productValue.getMonth() === filterDate.getMonth() &&
-      productValue.getDate() === filterDate.getDate()
-    )
-  }
-
-  // [min, max] range tuple from slider or date-range filters
-  if (Array.isArray(value) && value.length === 2 && !isStringArray(value)) {
-    const [a, b] = value as [unknown, unknown]
-    if (a == null && b == null) return true
-    const productNum =
-      productValue instanceof Date
-        ? productValue.getTime()
-        : Number(productValue)
-    const lo = a == null ? -Infinity : toNumber(a)
-    const hi = b == null ? Infinity : toNumber(b)
-    return productNum >= lo && productNum <= hi
-  }
-
-  // string[] from faceted multi-select
-  if (Array.isArray(value)) {
-    if (value.length === 0) return true
-    return value.some(
-      v => String(productValue).toLowerCase() === String(v).toLowerCase(),
-    )
-  }
-
-  if (typeof value === "boolean") {
-    return Boolean(productValue) === value
-  }
-
-  if (typeof value === "string" || typeof value === "number") {
-    return String(productValue)
-      .toLowerCase()
-      .includes(String(value).toLowerCase())
-  }
-
-  return true
-}
-
-function isStringArray(arr: unknown[]): boolean {
-  return arr.every(v => typeof v === "string")
-}
-
-function toNumber(v: unknown): number {
-  if (v instanceof Date) return v.getTime()
-  return Number(v)
-}
-
-/** True when a columnFilters entry value came from the advanced filter menu. */
-function isMenuFilterValue(
-  value: unknown,
-): value is ExtendedColumnFilter<Product> {
-  return (
-    !!value &&
-    typeof value === "object" &&
-    !Array.isArray(value) &&
-    "operator" in value
-  )
-}
-
-/**
- * Apply every filter in the query, optionally excluding one column.
- * The exclusion is used for facet computation: a column's own facet counts
- * are computed under every filter EXCEPT its own, so its unselected options
- * stay visible.
- */
-function filterProductsByQuery(
-  products: Product[],
-  query: ProductQuery,
-  excludeColumnId?: string,
-): Product[] {
-  let filtered = [...products]
-
-  // Global text search across all fields
-  if (typeof query.search === "string" && query.search) {
-    const searchTerm = query.search.toLowerCase()
-    filtered = filtered.filter(product =>
-      Object.values(product).some(value =>
-        String(value).toLowerCase().includes(searchTerm),
-      ),
-    )
-  }
-
-  // OR / MIXED logic from the advanced filter menu (routed via globalFilter)
-  if (
-    typeof query.search === "object" &&
-    query.search &&
-    "filters" in query.search
-  ) {
-    const filterObj = query.search as {
-      filters: ExtendedColumnFilter<Product>[]
-      joinOperator: string
-    }
-    const orFilters = (filterObj.filters || []).filter(
-      f =>
-        f.value &&
-        f.value !== "" &&
-        (!excludeColumnId || f.id !== excludeColumnId),
-    )
-
-    if (orFilters.length > 0) {
-      filtered = filtered.filter(product =>
-        orFilters.some(filter => matchesFilter(product, filter)),
-      )
-    }
-  }
-
-  // AND logic: every columnFilters entry must match
-  if (query.columnFilters.length > 0) {
-    filtered = filtered.filter(product =>
-      query.columnFilters.every(filter => {
-        if (excludeColumnId && filter.id === excludeColumnId) return true
-        return matchesColumnFilter(product, filter.id, filter.value)
-      }),
-    )
-  }
-
-  return filtered
-}
-
-// Columns that get server-computed facets
 const FACET_SELECT_COLUMNS = ["category", "brand"] as const
 const FACET_RANGE_COLUMNS = ["price"] as const
 
+/** Grouped counts / min-max with the column's own filter excluded. */
+function computeFacets(query: ProductQuery): ProductQueryResult["facets"] {
+  const select: ProductQueryResult["facets"]["select"] = {}
+  const range: ProductQueryResult["facets"]["range"] = {}
+
+  for (const col of FACET_SELECT_COLUMNS) {
+    const where = buildWhere(query, col)
+    const rows = where ? productRows.filter(where.test) : productRows
+    const counts = new Map<string, number>()
+    for (const row of rows) {
+      const v = String(row[col])
+      counts.set(v, (counts.get(v) ?? 0) + 1)
+    }
+    select[col] = [...counts.entries()]
+      .map(([value, count]) => ({ value, count }))
+      .sort((a, b) => a.value.localeCompare(b.value))
+  }
+  for (const col of FACET_RANGE_COLUMNS) {
+    const where = buildWhere(query, col)
+    const rows = where ? productRows.filter(where.test) : productRows
+    if (rows.length === 0) continue
+    const values = rows.map(r => Number(r[col]))
+    range[col] = [Math.min(...values), Math.max(...values)]
+  }
+
+  return { select, range }
+}
+
 /**
- * The fake API endpoint. Swap this single function for a real call:
+ * The fake API route. With real Drizzle this is:
  *
- *   async function fetchProducts(query: ProductQuery) {
- *     const res = await fetch("/api/products", {
- *       method: "POST",
- *       body: JSON.stringify(query),
- *     })
- *     if (!res.ok) throw new Error("Failed to fetch products")
- *     return res.json() as Promise<ProductQueryResult>
- *   }
+ *   const [data, [{ total }], facets] = await Promise.all([
+ *     db.select().from(products).where(where)
+ *       .orderBy(...buildOrderBy(query))
+ *       .limit(query.pageSize).offset(query.page * query.pageSize),
+ *     db.select({ total: count() }).from(products).where(where),
+ *     computeFacets(query),
+ *   ])
  */
 function fetchProducts(
   query: ProductQuery,
-  delay = 500,
+  delay = 400,
 ): Promise<ProductQueryResult> {
-  return new Promise((resolve, reject) => {
+  return new Promise(resolve => {
     setTimeout(() => {
-      try {
-        // Simulate an occasional server error (every 20th page) so the
-        // error + retry UI can be demonstrated
-        if (query.page > 0 && query.page % 20 === 0) {
-          reject(new Error("Server error: Failed to fetch products"))
-          return
-        }
+      const where = buildWhere(query)
+      const orderBy = buildOrderBy(query)
 
-        const allProducts = generateMockProducts(2000)
-        const filtered = filterProductsByQuery(allProducts, query)
-
-        // Cross-filter facets (each column's own filter excluded)
-        const facets: ProductQueryResult["facets"] = { select: {}, range: {} }
-        for (const col of FACET_SELECT_COLUMNS) {
-          const facetFiltered = filterProductsByQuery(allProducts, query, col)
-          const counts = new Map<string, number>()
-          for (const p of facetFiltered) {
-            const v = String(p[col])
-            if (!v.trim()) continue
-            counts.set(v, (counts.get(v) ?? 0) + 1)
+      let rows = where ? productRows.filter(where.test) : [...productRows]
+      if (orderBy.length > 0) {
+        rows = [...rows].sort((a, b) => {
+          for (const order of orderBy) {
+            const result = order.cmp(a, b)
+            if (result !== 0) return result
           }
-          facets.select[col] = [...counts.entries()]
-            .map(([value, count]) => ({ value, count }))
-            .sort((a, b) => a.value.localeCompare(b.value))
-        }
-        for (const col of FACET_RANGE_COLUMNS) {
-          const facetFiltered = filterProductsByQuery(allProducts, query, col)
-          if (facetFiltered.length === 0) continue
-          let lo = Infinity
-          let hi = -Infinity
-          for (const p of facetFiltered) {
-            const v = Number(p[col])
-            if (Number.isFinite(v)) {
-              if (v < lo) lo = v
-              if (v > hi) hi = v
-            }
-          }
-          if (Number.isFinite(lo) && Number.isFinite(hi)) {
-            facets.range[col] = [lo, hi]
-          }
-        }
-
-        // ORDER BY
-        if (query.sorting.length > 0) {
-          filtered.sort((a, b) => {
-            for (const sort of query.sorting) {
-              const aValue = a[sort.id as keyof Product]
-              const bValue = b[sort.id as keyof Product]
-              if (aValue === bValue) continue
-              const comparison = aValue < bValue ? -1 : 1
-              return sort.desc ? -comparison : comparison
-            }
-            return 0
-          })
-        }
-
-        // LIMIT / OFFSET
-        const total = filtered.length
-        const start = query.page * query.pageSize
-        const paginated = filtered.slice(start, start + query.pageSize)
-
-        resolve({ data: paginated, total, facets })
-      } catch (error) {
-        reject(error)
+          return 0
+        })
       }
+
+      const total = rows.length
+      const offset = query.page * query.pageSize
+      const data = rows.slice(offset, offset + query.pageSize)
+
+      // the statement a real Postgres would receive
+      const sql = numberParams(
+        [
+          "SELECT * FROM products",
+          where ? `WHERE ${where.sql}` : "",
+          orderBy.length > 0
+            ? `ORDER BY ${orderBy.map(o => o.sql).join(", ")}`
+            : "",
+          `LIMIT ${query.pageSize} OFFSET ${offset}`,
+        ]
+          .filter(Boolean)
+          .join("\n"),
+      )
+
+      resolve({
+        data,
+        total,
+        facets: computeFacets(query),
+        debug: { sql, params: where?.params ?? [] },
+      })
     }, delay)
   })
 }
 
 /* -------------------------------------------------------------------------
- * 3. Columns
- *
- * `autoOptions: false` everywhere options appear: with server-side data the
- * table only ever holds ONE page of rows, so client-side option generation
- * would be wrong. Options and ranges come from `facets` instead.
+ * 6. Columns — same as the Server-Side Table example
  * ---------------------------------------------------------------------- */
 
 const categoryOptions = [
@@ -714,12 +747,6 @@ const brandOptions = [
 
 type ProductFacets = ProductQueryResult["facets"]
 
-/**
- * Build columns from the latest server facets. Faceted columns receive
- * merged `options` (static labels + server counts) so unselected values stay
- * visible after other filters narrow the row set; the price slider receives
- * the server-computed `range` so it can always be widened back.
- */
 function buildColumns(facets?: ProductFacets): DataTableColumnDef<Product>[] {
   const mergeCounts = (
     staticOpts: typeof categoryOptions,
@@ -820,14 +847,6 @@ function buildColumns(facets?: ProductFacets): DataTableColumnDef<Product>[] {
         label: "Stock",
         variant: FILTER_VARIANTS.NUMBER,
       },
-      cell: ({ row }) => {
-        const stock = Number(row.getValue("stock"))
-        return (
-          <div className={stock < 10 ? "font-medium text-destructive" : ""}>
-            {stock}
-          </div>
-        )
-      },
       enableColumnFilter: true,
     },
     {
@@ -899,23 +918,31 @@ function buildColumns(facets?: ProductFacets): DataTableColumnDef<Product>[] {
 }
 
 /* -------------------------------------------------------------------------
- * 4. The table
+ * 7. The table — same wiring as the Server-Side Table example
  * ---------------------------------------------------------------------- */
 
-function ServerSideTableContent() {
+/** True when a columnFilters entry value came from the advanced filter menu. */
+function isMenuFilterValue(
+  value: unknown,
+): value is ExtendedColumnFilter<Product> {
+  return (
+    !!value &&
+    typeof value === "object" &&
+    !Array.isArray(value) &&
+    "operator" in value
+  )
+}
+
+function DrizzleTableContent() {
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 10,
   })
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-  // Holds the search string — or, when the advanced filter menu uses
-  // OR/MIXED join logic, a `{ filters, joinOperator }` object
   const [globalFilter, setGlobalFilter] = useState<string | object>("")
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
 
-  // Batch rapid filter clicks (e.g. toggling several faceted options) into a
-  // single server request
   const debouncedColumnFilters = useDebounce(columnFilters, 300)
 
   const {
@@ -926,9 +953,8 @@ function ServerSideTableContent() {
     isPlaceholderData,
     refetch,
   } = useQuery({
-    // Include every parameter that affects the result
     queryKey: [
-      "products",
+      "drizzle-products",
       pagination.pageIndex,
       pagination.pageSize,
       sorting,
@@ -943,7 +969,7 @@ function ServerSideTableContent() {
         search: globalFilter,
         columnFilters: debouncedColumnFilters,
       }),
-    placeholderData: keepPreviousData, // keep rows visible while refetching
+    placeholderData: keepPreviousData,
   })
 
   const data = queryData?.data ?? []
@@ -951,7 +977,6 @@ function ServerSideTableContent() {
   const pageCount =
     totalCount > 0 ? Math.ceil(totalCount / pagination.pageSize) : 1
 
-  // Rebuild columns whenever the server reports new facets
   const columns = useMemo(
     () => buildColumns(queryData?.facets),
     [queryData?.facets],
@@ -964,8 +989,6 @@ function ServerSideTableContent() {
         ? "Failed to fetch data"
         : null
 
-  // Every filter/sort change resets to the first page — the old page index
-  // may not exist in the new result set
   const handleSortingChange = useCallback((updater: Updater<SortingState>) => {
     setSorting(prev =>
       typeof updater === "function" ? updater(prev) : updater,
@@ -985,8 +1008,6 @@ function ServerSideTableContent() {
 
   const handleGlobalFilterChange = useCallback((value: string | object) => {
     setGlobalFilter(prev => {
-      // The search input emits "" on mount/clear; don't let that wipe an
-      // OR-filter object the advanced filter menu stored here
       if (value === "" && typeof prev === "object" && prev !== null) {
         return prev
       }
@@ -995,13 +1016,6 @@ function ServerSideTableContent() {
     setPagination(prev => ({ ...prev, pageIndex: 0 }))
   }, [])
 
-  /**
-   * The advanced filter menu is controlled: its rules live in our state so
-   * they can be routed to the right slot. AND-joined rules become
-   * columnFilters entries (alongside the column-widget filters); OR/MIXED
-   * rules move into globalFilter as `{ filters, joinOperator }`, because
-   * TanStack combines columnFilters with AND only.
-   */
   const menuFilters = useMemo(() => {
     if (
       typeof globalFilter === "object" &&
@@ -1021,8 +1035,6 @@ function ServerSideTableContent() {
   const handleMenuFiltersChange = useCallback(
     (filters: ExtendedColumnFilter<Product>[] | null) => {
       const next = filters ?? []
-      // Column-widget filters (faceted, slider, date) are preserved; only
-      // the menu-owned entries are rewritten
       if (next.length === 0) {
         setColumnFilters(prev => prev.filter(f => !isMenuFilterValue(f.value)))
         setGlobalFilter(prev => (typeof prev === "object" ? "" : prev))
@@ -1134,7 +1146,7 @@ function ServerSideTableContent() {
             <DataTableEmptyBody>
               <DataTableEmptyMessage>
                 <DataTableEmptyIcon>
-                  <UserSearch className="size-12" />
+                  <Database className="size-12" />
                 </DataTableEmptyIcon>
                 <DataTableEmptyTitle>No products found</DataTableEmptyTitle>
                 <DataTableEmptyDescription>
@@ -1161,14 +1173,17 @@ function ServerSideTableContent() {
         />
       </DataTableRoot>
 
-      {/* Demo-only: shows the exact query the table would send to a server */}
+      {/* Demo-only: the SQL a real Postgres would receive for this view */}
       <Card>
         <CardHeader>
-          <CardTitle>Server Query</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <Database className="size-4" aria-hidden="true" />
+            Generated SQL
+          </CardTitle>
           <CardDescription>
-            The serializable request the table sends on every change — swap the
-            mock <code>fetchProducts</code> for a real API that accepts this
-            shape and any database works.
+            Filter, search, and sort the table — this is the statement the
+            guide&apos;s Drizzle code produces for the current view (the demo
+            executes it with a mocked query builder in your browser).
           </CardDescription>
           <CardAction>
             <Button variant="outline" size="sm" onClick={resetAllState}>
@@ -1177,29 +1192,21 @@ function ServerSideTableContent() {
           </CardAction>
         </CardHeader>
         <CardContent className="space-y-3 text-xs">
-          <div className="flex justify-between">
-            <span className="font-medium">Status:</span>
-            <span>
-              {isLoading
-                ? "Initial load..."
-                : isFetching
-                  ? "Fetching..."
-                  : `${totalCount} rows on server, showing ${data.length}`}
-            </span>
-          </div>
           <pre className="overflow-auto rounded bg-muted p-2">
-            {JSON.stringify(
-              {
-                page: pagination.pageIndex,
-                pageSize: pagination.pageSize,
-                sorting,
-                search: globalFilter,
-                columnFilters: debouncedColumnFilters,
-              },
-              null,
-              2,
-            )}
+            {queryData?.debug.sql ?? "Loading..."}
           </pre>
+          <div>
+            <span className="font-medium">Params: </span>
+            <code className="break-all">
+              {JSON.stringify(queryData?.debug.params ?? [])}
+            </code>
+          </div>
+          <div className="flex justify-between text-muted-foreground">
+            <span>
+              {totalCount} matching rows, showing {data.length}
+            </span>
+            <span>{isFetching ? "Executing..." : "Done"}</span>
+          </div>
         </CardContent>
       </Card>
     </div>
@@ -1210,7 +1217,7 @@ function ServerSideTableContent() {
  * Self-contained wrapper. In a real app create the QueryClient once at your
  * app root and wrap the layout with QueryClientProvider instead.
  */
-export default function ServerSideStateTableExample() {
+export default function DrizzleStateTableExample() {
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -1226,7 +1233,7 @@ export default function ServerSideStateTableExample() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ServerSideTableContent />
+      <DrizzleTableContent />
     </QueryClientProvider>
   )
 }
