@@ -3,125 +3,45 @@
 /**
  * Server-Side Data Table Example with TanStack Query
  *
- * This example demonstrates server-side pagination, sorting, and filtering
- * using TanStack Query for efficient data fetching, caching, and state management.
- * This example does NOT use URL state persistence - state is managed with React useState.
+ * Server-side pagination, sorting, and filtering with TanStack Query for
+ * fetching, caching, and background updates. Table state lives in React
+ * `useState` (no URL persistence — see the Server-Side Nuqs Table example
+ * for that).
+ *
+ * ## Database-agnostic by design
+ *
+ * The table never talks to a database. It talks to ONE function:
+ *
+ *   fetchProducts(query: ProductQuery): Promise<ProductQueryResult>
+ *
+ * `ProductQuery` is a plain serializable object (page, pageSize, sorting,
+ * search, filters) — exactly what you would POST to `/api/products` or pass
+ * to a server action. Everything inside the "MOCK SERVER" section below is
+ * a stand-in for YOUR backend: replace it with SQL, an ORM (Prisma,
+ * Drizzle), Supabase, or any REST/GraphQL API. The rest of the file does
+ * not change.
  *
  * Prerequisites:
- * 1. Install TanStack Query:
- *    npm install @tanstack/react-query
+ *   npm install @tanstack/react-query
  *
- * IMPORTANT SETUP REQUIRED:
- * This component includes QueryClientProvider at the component level
- * for a complete, self-contained example. For production apps, it's recommended to add
- * this provider at your root layout instead:
- *
- * For Next.js App Router:
- * 1. Wrap your app with QueryClientProvider in app/layout.tsx:
- *    ```tsx
- *    import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
- *
- *    const queryClient = new QueryClient({
- *      defaultOptions: {
- *        queries: {
- *          staleTime: 60 * 1000, // 1 minute
- *          refetchOnWindowFocus: false,
- *        },
- *      },
- *    })
- *
- *    export default function RootLayout({ children }) {
- *      return (
- *        <html>
- *          <body>
- *            <QueryClientProvider client={queryClient}>
- *              {children}
- *            </QueryClientProvider>
- *          </body>
- *        </html>
- *      )
- *    }
- *    ```
- *
- * For Next.js Pages Router:
- * 1. Wrap your app with QueryClientProvider in pages/_app.tsx:
- *    ```tsx
- *    import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
- *
- *    const queryClient = new QueryClient({
- *      defaultOptions: {
- *        queries: {
- *          staleTime: 60 * 1000,
- *          refetchOnWindowFocus: false,
- *        },
- *      },
- *    })
- *
- *    export default function App({ Component, pageProps }) {
- *      return (
- *        <QueryClientProvider client={queryClient}>
- *          <Component {...pageProps} />
- *        </QueryClientProvider>
- *      )
- *    }
- *    ```
- *
- * For React SPA (Vite, CRA, etc.):
- * 1. Wrap your app with QueryClientProvider in src/main.tsx:
- *    ```tsx
- *    import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
- *
- *    const queryClient = new QueryClient({
- *      defaultOptions: {
- *        queries: {
- *          staleTime: 60 * 1000,
- *          refetchOnWindowFocus: false,
- *        },
- *      },
- *    })
- *
- *    createRoot(document.getElementById('root')!).render(
- *      <QueryClientProvider client={queryClient}>
- *        <App />
- *      </QueryClientProvider>
- *    )
- *    ```
- *
- * Features:
- * - Automatic caching and refetching (TanStack Query)
- * - Background updates
- * - Request deduplication
- * - Loading and error states
- * - Server-side pagination, sorting, and filtering
- * - Optimistic updates support
- * - Query invalidation support
- * - keepPreviousData for smooth pagination
- *
- * Learn more:
- * - TanStack Query: https://tanstack.com/query/latest
+ * This example creates its own QueryClientProvider so it is self-contained.
+ * In a real app, put the provider in your root layout instead (see the
+ * Server-Side Table docs for App Router / Pages Router / SPA setup).
  */
 
+import { useCallback, useMemo, useState } from "react"
 import {
-  useState,
-  useCallback,
-  useMemo,
-  useRef,
-  useEffect,
-  startTransition,
-} from "react"
-import {
-  useQuery,
-  useQueryClient,
+  keepPreviousData,
   QueryClient,
   QueryClientProvider,
-  keepPreviousData,
+  useQuery,
 } from "@tanstack/react-query"
 import type {
+  ColumnFiltersState,
   PaginationState,
   SortingState,
-  ColumnFiltersState,
-  VisibilityState,
   Updater,
+  VisibilityState,
 } from "@tanstack/react-table"
 import { DataTableRoot } from "@/components/niko-table/core/data-table-root"
 import { DataTable } from "@/components/niko-table/core/data-table"
@@ -149,15 +69,15 @@ import { DataTableSearchFilter } from "@/components/niko-table/components/data-t
 import { DataTableViewMenu } from "@/components/niko-table/components/data-table-view-menu"
 import { DataTableSortMenu } from "@/components/niko-table/components/data-table-sort-menu"
 import { DataTableFilterMenu } from "@/components/niko-table/components/data-table-filter-menu"
-import { DataTableInlineFilter } from "@/components/niko-table/components/data-table-inline-filter"
 import { DataTablePagination } from "@/components/niko-table/components/data-table-pagination"
 import { daysAgo } from "@/components/niko-table/lib/format"
 import {
-  JOIN_OPERATORS,
   FILTER_OPERATORS,
   FILTER_VARIANTS,
 } from "@/components/niko-table/lib/constants"
 import { processFiltersForLogic } from "@/components/niko-table/lib/data-table"
+import { normalizeFiltersFromUrl } from "@/components/niko-table/filters/table-filter-menu"
+import { useDebounce } from "@/components/niko-table/hooks/use-debounce"
 import type {
   DataTableColumnDef,
   ExtendedColumnFilter,
@@ -172,9 +92,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Loader2, AlertCircle, UserSearch, SearchX } from "lucide-react"
-import { useDebounce } from "@/components/niko-table/hooks/use-debounce"
+import { AlertCircle, Loader2, SearchX, UserSearch } from "lucide-react"
+
+/* -------------------------------------------------------------------------
+ * 1. The wire contract — what the table sends to YOUR backend
+ *
+ * Every field is JSON-serializable, so the same shape works as query params,
+ * a POST body, or server-action arguments.
+ * ---------------------------------------------------------------------- */
 
 type Product = {
   id: string
@@ -188,8 +113,67 @@ type Product = {
   releaseDate: Date
 }
 
-// Static product data - same as other examples for consistency
-// In a real app, this would be fetched from a server
+/**
+ * The request. This is ALL the backend needs to build a query:
+ *
+ * - `page` / `pageSize`  → LIMIT / OFFSET
+ * - `sorting`            → ORDER BY (multi-column)
+ * - `search`             → global text search. When the advanced filter menu
+ *                          uses OR/MIXED join logic it stores an object
+ *                          `{ filters, joinOperator }` here instead of a
+ *                          string (that is how Niko Table routes OR logic).
+ * - `columnFilters`      → WHERE clauses. Each entry is `{ id, value }`;
+ *                          `value` is either a plain value from a column
+ *                          header widget (string, string[], boolean, or a
+ *                          `[min, max]` tuple from slider/date filters) or an
+ *                          `ExtendedColumnFilter` (`{ operator, value, ... }`)
+ *                          from the advanced filter menu.
+ */
+type ProductQuery = {
+  page: number
+  pageSize: number
+  sorting: SortingState
+  search: string | object
+  columnFilters: ColumnFiltersState
+}
+
+/**
+ * The response. `facets` powers cross-filter narrowing: the server reports,
+ * for each facetable column, which values still exist (and their counts)
+ * under every OTHER active filter — so selecting a brand narrows the
+ * category options, exactly like a shopping site sidebar.
+ */
+type ProductQueryResult = {
+  data: Product[]
+  total: number
+  facets: {
+    select: Record<string, Array<{ value: string; count: number }>>
+    range: Record<string, [number, number]>
+  }
+}
+
+/* -------------------------------------------------------------------------
+ * 2. MOCK SERVER — replace this whole section with your backend
+ *
+ * Everything between here and "3. Columns" simulates a database + API with
+ * an in-memory array and setTimeout latency. To adapt it, translate each
+ * operator to your query builder. With SQL for example:
+ *
+ *   FILTER_OPERATORS.ILIKE      → WHERE name ILIKE '%' || $1 || '%'
+ *   FILTER_OPERATORS.EQ / NEQ   → WHERE brand = $1 / <> $1
+ *   FILTER_OPERATORS.GT/GTE/... → WHERE price > $1 / >= $1 ...
+ *   FILTER_OPERATORS.IN         → WHERE category = ANY($1)
+ *   FILTER_OPERATORS.EMPTY      → WHERE col IS NULL OR col = ''
+ *   [min, max] range tuples     → WHERE price BETWEEN $1 AND $2
+ *   query.search (string)       → WHERE to_tsvector(...) @@ $1 (or ILIKE)
+ *   query.sorting               → ORDER BY col1 ASC, col2 DESC
+ *   query.page / pageSize       → LIMIT $2 OFFSET $1 * $2
+ *
+ * The facet computation maps to grouped counts with each column's own
+ * filter excluded:  SELECT category, COUNT(*) ... GROUP BY category.
+ * ---------------------------------------------------------------------- */
+
+// The "database" — 15 base products expanded to 500 rows.
 const initialData: Product[] = [
   {
     id: "1",
@@ -358,9 +342,7 @@ const initialData: Product[] = [
   },
 ]
 
-// Generate larger dataset by duplicating and varying the initial data
-// In a real app, this would come from a server API
-const generateMockProducts = (count: number): Product[] => {
+function generateMockProducts(count: number): Product[] {
   const result: Product[] = []
   const baseCount = initialData.length
 
@@ -388,30 +370,7 @@ const generateMockProducts = (count: number): Product[] => {
   return result
 }
 
-// Server-side API simulation
-type ServerResponse<T> = {
-  data: T[]
-  total: number
-  page: number
-  pageSize: number
-  /**
-   * Cross-filter facets — see ServerResponse in server-side-nuqs-state.tsx.
-   */
-  facets: {
-    select: Record<string, Array<{ value: string; count: number }>>
-    range: Record<string, [number, number]>
-  }
-}
-
-type FetchParams = {
-  page: number
-  pageSize: number
-  sorting: SortingState
-  globalFilter: string | object
-  columnFilters: ColumnFiltersState
-}
-
-// Helper function to check if a product matches a single filter
+/** Match one advanced-filter-menu rule (`ExtendedColumnFilter`). */
 function matchesFilter(
   product: Product,
   filter: ExtendedColumnFilter<Product>,
@@ -423,7 +382,7 @@ function matchesFilter(
     filter.operator === FILTER_OPERATORS.EMPTY ||
     filter.operator === FILTER_OPERATORS.NOT_EMPTY
   ) {
-    // These don't need a value
+    // These operators don't need a value
   } else if (!filterValue || filterValue === "") {
     return true
   }
@@ -485,20 +444,13 @@ function matchesFilter(
 }
 
 /**
- * Dispatch a TanStack column-filter value against a product.
+ * Match one entry of `query.columnFilters` against a product.
  *
- * WHY: The column header carries multiple filter UIs (slider, date, faceted
- * multi-select, boolean, text) that all call `column.setFilterValue(rawValue)`.
- * The filter menu, by contrast, stuffs an `ExtendedColumnFilter` object into
- * `filter.value`. Both shapes flow through the same TanStack columnFilters
- * array — this function picks the right matcher per value shape.
- *
- * IMPACT: Slider/date/faceted/boolean filters now actually filter rows on the
- * server (previously the early-return at the call site silently dropped them).
- *
- * WHAT: Detects ExtendedColumnFilter via `operator` field. Falls back to value
- * shape: number tuple → range, date tuple → date range, string[] → IN,
- * boolean → equals, string → ILIKE.
+ * Column-header widgets write PLAIN values (`column.setFilterValue(raw)`):
+ * `[min, max]` tuples from slider/date menus, `string[]` from faceted
+ * multi-select, booleans, strings. The advanced filter menu writes
+ * `ExtendedColumnFilter` objects with an `operator`. Both shapes travel in
+ * the same array, so dispatch on shape.
  */
 function matchesColumnFilter(
   product: Product,
@@ -517,6 +469,17 @@ function matchesColumnFilter(
 
   const productValue = product[columnId as keyof Product]
 
+  // Single-date filter: a bare millisecond timestamp — match the calendar day
+  if (productValue instanceof Date && typeof value === "number") {
+    const filterDate = new Date(value)
+    return (
+      productValue.getFullYear() === filterDate.getFullYear() &&
+      productValue.getMonth() === filterDate.getMonth() &&
+      productValue.getDate() === filterDate.getDate()
+    )
+  }
+
+  // [min, max] range tuple from slider or date-range filters
   if (Array.isArray(value) && value.length === 2 && !isStringArray(value)) {
     const [a, b] = value as [unknown, unknown]
     if (a == null && b == null) return true
@@ -529,6 +492,7 @@ function matchesColumnFilter(
     return productNum >= lo && productNum <= hi
   }
 
+  // string[] from faceted multi-select
   if (Array.isArray(value)) {
     if (value.length === 0) return true
     return value.some(
@@ -558,19 +522,34 @@ function toNumber(v: unknown): number {
   return Number(v)
 }
 
-// Filter products using all filter params, optionally excluding one column's filter.
-// Used for both main data filtering and facet computation (where we exclude the
-// facet column's own filter so users can see all available values for that column).
-function filterProductsByParams(
+/** True when a columnFilters entry value came from the advanced filter menu. */
+function isMenuFilterValue(
+  value: unknown,
+): value is ExtendedColumnFilter<Product> {
+  return (
+    !!value &&
+    typeof value === "object" &&
+    !Array.isArray(value) &&
+    "operator" in value
+  )
+}
+
+/**
+ * Apply every filter in the query, optionally excluding one column.
+ * The exclusion is used for facet computation: a column's own facet counts
+ * are computed under every filter EXCEPT its own, so its unselected options
+ * stay visible.
+ */
+function filterProductsByQuery(
   products: Product[],
-  params: FetchParams,
+  query: ProductQuery,
   excludeColumnId?: string,
 ): Product[] {
   let filtered = [...products]
 
-  // Apply global search filter (server-side) - string search
-  if (typeof params.globalFilter === "string" && params.globalFilter) {
-    const searchTerm = params.globalFilter.toLowerCase()
+  // Global text search across all fields
+  if (typeof query.search === "string" && query.search) {
+    const searchTerm = query.search.toLowerCase()
     filtered = filtered.filter(product =>
       Object.values(product).some(value =>
         String(value).toLowerCase().includes(searchTerm),
@@ -578,13 +557,13 @@ function filterProductsByParams(
     )
   }
 
-  // Apply OR filters from globalFilter (when it's an object with filters)
+  // OR / MIXED logic from the advanced filter menu (routed via globalFilter)
   if (
-    typeof params.globalFilter === "object" &&
-    params.globalFilter &&
-    "filters" in params.globalFilter
+    typeof query.search === "object" &&
+    query.search &&
+    "filters" in query.search
   ) {
-    const filterObj = params.globalFilter as {
+    const filterObj = query.search as {
       filters: ExtendedColumnFilter<Product>[]
       joinOperator: string
     }
@@ -602,55 +581,59 @@ function filterProductsByParams(
     }
   }
 
-  // Apply AND filters from columnFilters (server-side).
-  // Values can be either an `ExtendedColumnFilter` (from the filter menu) or a
-  // plain TanStack column-filter value (tuple from slider/date, array from
-  // multi-select, boolean, string). Dispatch on shape so all column-header
-  // filter UIs actually filter the row set.
-  if (params.columnFilters.length > 0) {
-    filtered = filtered.filter(product => {
-      return params.columnFilters.every(filter => {
+  // AND logic: every columnFilters entry must match
+  if (query.columnFilters.length > 0) {
+    filtered = filtered.filter(product =>
+      query.columnFilters.every(filter => {
         if (excludeColumnId && filter.id === excludeColumnId) return true
         return matchesColumnFilter(product, filter.id, filter.value)
-      })
-    })
+      }),
+    )
   }
 
   return filtered
 }
 
-// Simulate server-side filtering, sorting, and pagination
+// Columns that get server-computed facets
+const FACET_SELECT_COLUMNS = ["category", "brand"] as const
+const FACET_RANGE_COLUMNS = ["price"] as const
+
+/**
+ * The fake API endpoint. Swap this single function for a real call:
+ *
+ *   async function fetchProducts(query: ProductQuery) {
+ *     const res = await fetch("/api/products", {
+ *       method: "POST",
+ *       body: JSON.stringify(query),
+ *     })
+ *     if (!res.ok) throw new Error("Failed to fetch products")
+ *     return res.json() as Promise<ProductQueryResult>
+ *   }
+ */
 function fetchProducts(
-  params: FetchParams,
+  query: ProductQuery,
   delay = 500,
-): Promise<ServerResponse<Product>> {
+): Promise<ProductQueryResult> {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
       try {
-        // Simulate occasional errors (~5% of page indices, deterministic for demos)
-        if (params.page > 0 && params.page % 20 === 0) {
+        // Simulate an occasional server error (every 20th page) so the
+        // error + retry UI can be demonstrated
+        if (query.page > 0 && query.page % 20 === 0) {
           reject(new Error("Server error: Failed to fetch products"))
           return
         }
 
-        // Generate a large dataset
         const allProducts = generateMockProducts(500)
+        const filtered = filterProductsByQuery(allProducts, query)
 
-        // Apply all filters
-        const filtered = filterProductsByParams(allProducts, params)
-
-        // Cross-filter facets — see server-side-nuqs-state.tsx for the full doc.
-        const selectColumns = ["category", "brand"] as const
-        const rangeColumns = ["price"] as const
-        const facets: ServerResponse<Product>["facets"] = {
-          select: {},
-          range: {},
-        }
-        for (const col of selectColumns) {
-          const facetFiltered = filterProductsByParams(allProducts, params, col)
+        // Cross-filter facets (each column's own filter excluded)
+        const facets: ProductQueryResult["facets"] = { select: {}, range: {} }
+        for (const col of FACET_SELECT_COLUMNS) {
+          const facetFiltered = filterProductsByQuery(allProducts, query, col)
           const counts = new Map<string, number>()
           for (const p of facetFiltered) {
-            const v = String(p[col as keyof Product])
+            const v = String(p[col])
             if (!v.trim()) continue
             counts.set(v, (counts.get(v) ?? 0) + 1)
           }
@@ -658,13 +641,13 @@ function fetchProducts(
             .map(([value, count]) => ({ value, count }))
             .sort((a, b) => a.value.localeCompare(b.value))
         }
-        for (const col of rangeColumns) {
-          const facetFiltered = filterProductsByParams(allProducts, params, col)
+        for (const col of FACET_RANGE_COLUMNS) {
+          const facetFiltered = filterProductsByQuery(allProducts, query, col)
           if (facetFiltered.length === 0) continue
           let lo = Infinity
           let hi = -Infinity
           for (const p of facetFiltered) {
-            const v = Number(p[col as keyof Product])
+            const v = Number(p[col])
             if (Number.isFinite(v)) {
               if (v < lo) lo = v
               if (v > hi) hi = v
@@ -675,41 +658,40 @@ function fetchProducts(
           }
         }
 
-        // Apply server-side sorting
-        if (params.sorting.length > 0) {
+        // ORDER BY
+        if (query.sorting.length > 0) {
           filtered.sort((a, b) => {
-            for (const sort of params.sorting) {
+            for (const sort of query.sorting) {
               const aValue = a[sort.id as keyof Product]
               const bValue = b[sort.id as keyof Product]
-
               if (aValue === bValue) continue
-
-              const comparison = aValue < bValue ? -1 : aValue > bValue ? 1 : 0
-
+              const comparison = aValue < bValue ? -1 : 1
               return sort.desc ? -comparison : comparison
             }
             return 0
           })
         }
 
+        // LIMIT / OFFSET
         const total = filtered.length
-        const start = params.page * params.pageSize
-        const end = start + params.pageSize
-        const paginated = filtered.slice(start, end)
+        const start = query.page * query.pageSize
+        const paginated = filtered.slice(start, start + query.pageSize)
 
-        resolve({
-          data: paginated,
-          total,
-          page: params.page,
-          pageSize: params.pageSize,
-          facets,
-        })
+        resolve({ data: paginated, total, facets })
       } catch (error) {
         reject(error)
       }
     }, delay)
   })
 }
+
+/* -------------------------------------------------------------------------
+ * 3. Columns
+ *
+ * `autoOptions: false` everywhere options appear: with server-side data the
+ * table only ever holds ONE page of rows, so client-side option generation
+ * would be wrong. Options and ranges come from `facets` instead.
+ * ---------------------------------------------------------------------- */
 
 const categoryOptions = [
   { label: "Electronics", value: "electronics" },
@@ -730,329 +712,212 @@ const brandOptions = [
   { label: "HP", value: "hp" },
 ]
 
-const columns: DataTableColumnDef<Product>[] = [
-  {
-    accessorKey: "name",
-    header: () => (
-      <DataTableColumnHeader>
-        <DataTableColumnTitle />
-        <DataTableColumnSortMenu />
-      </DataTableColumnHeader>
-    ),
-    meta: {
-      label: "Product Name",
-      variant: FILTER_VARIANTS.TEXT,
-    },
-    enableColumnFilter: true,
-  },
-  {
-    accessorKey: "category",
-    header: () => (
-      <DataTableColumnHeader>
-        <DataTableColumnTitle />
-        <DataTableColumnSortMenu variant={FILTER_VARIANTS.TEXT} />
-        <DataTableColumnFacetedFilterMenu />
-      </DataTableColumnHeader>
-    ),
-    meta: {
-      label: "Category",
-      variant: FILTER_VARIANTS.SELECT,
-      options: categoryOptions,
-      // Disable auto-generation for server-side tables - use static options as-is
-      // since coreRows only contain server-filtered data, not the full dataset
-      autoOptions: false,
-    },
-    cell: ({ row }) => {
-      const category = row.getValue("category") as string
-      const option = categoryOptions.find(opt => opt.value === category)
-      return <span>{option?.label || category}</span>
-    },
-    enableColumnFilter: true,
-  },
-  {
-    accessorKey: "brand",
-    header: () => (
-      <DataTableColumnHeader>
-        <DataTableColumnTitle />
-        <DataTableColumnSortMenu variant={FILTER_VARIANTS.TEXT} />
-        <DataTableColumnFacetedFilterMenu />
-      </DataTableColumnHeader>
-    ),
-    meta: {
-      label: "Brand",
-      variant: FILTER_VARIANTS.SELECT,
-      options: brandOptions,
-      // Disable auto-generation for server-side tables - use static options as-is
-      autoOptions: false,
-    },
-    enableColumnFilter: true,
-  },
-  {
-    accessorKey: "price",
-    header: () => (
-      <DataTableColumnHeader>
-        <DataTableColumnTitle />
-        <DataTableColumnSortMenu variant={FILTER_VARIANTS.NUMBER} />
-        <DataTableColumnSliderFilterMenu />
-      </DataTableColumnHeader>
-    ),
-    meta: {
-      label: "Price",
-      unit: "$",
-      variant: FILTER_VARIANTS.NUMBER,
-    },
-    cell: ({ row }) => {
-      const price = parseFloat(row.getValue("price"))
-      return <div className="font-medium">${price.toFixed(2)}</div>
-    },
-    enableColumnFilter: true,
-  },
-  {
-    accessorKey: "stock",
-    header: () => (
-      <DataTableColumnHeader>
-        <DataTableColumnTitle />
-        <DataTableColumnSortMenu variant={FILTER_VARIANTS.NUMBER} />
-      </DataTableColumnHeader>
-    ),
-    meta: {
-      label: "Stock",
-      variant: FILTER_VARIANTS.NUMBER,
-    },
-    cell: ({ row }) => {
-      const stock = Number(row.getValue("stock"))
-      return (
-        <div className={stock < 10 ? "font-medium text-red-600" : ""}>
-          {stock}
-        </div>
-      )
-    },
-    enableColumnFilter: true,
-  },
-  {
-    accessorKey: "rating",
-    header: () => (
-      <DataTableColumnHeader>
-        <DataTableColumnTitle />
-        <DataTableColumnSortMenu variant={FILTER_VARIANTS.NUMBER} />
-      </DataTableColumnHeader>
-    ),
-    meta: {
-      label: "Rating",
-      variant: FILTER_VARIANTS.NUMBER,
-    },
-    cell: ({ row }) => {
-      const rating = Number(row.getValue("rating"))
-      return (
-        <div className="flex items-center gap-1">
-          <span>{rating}</span>
-          <span className="text-yellow-500">★</span>
-        </div>
-      )
-    },
-    enableColumnFilter: true,
-  },
-  {
-    accessorKey: "inStock",
-    header: () => (
-      <DataTableColumnHeader>
-        <DataTableColumnTitle />
-        <DataTableColumnSortMenu />
-        <DataTableColumnFacetedFilterMenu />
-      </DataTableColumnHeader>
-    ),
-    meta: {
-      label: "In Stock",
-      variant: FILTER_VARIANTS.BOOLEAN,
-    },
-    cell: ({ row }) => {
-      const inStock = Boolean(row.getValue("inStock"))
-      return (
-        <Badge variant={inStock ? "default" : "secondary"}>
-          {inStock ? "Yes" : "No"}
-        </Badge>
-      )
-    },
-    enableColumnFilter: true,
-  },
-  {
-    accessorKey: "releaseDate",
-    header: () => (
-      <DataTableColumnHeader>
-        <DataTableColumnTitle />
-        <DataTableColumnSortMenu />
-        <DataTableColumnDateFilterMenu />
-      </DataTableColumnHeader>
-    ),
-    meta: {
-      label: "Release Date",
-      variant: FILTER_VARIANTS.DATE,
-    },
-    cell: ({ row }) => {
-      const date = row.getValue("releaseDate") as Date
-      return <span>{date.toLocaleDateString()}</span>
-    },
-    enableColumnFilter: true,
-  },
-]
-
-function StandardFilterToolbar({
-  filters,
-  onFiltersChange,
-}: {
-  filters: ExtendedColumnFilter<Product>[]
-  onFiltersChange: (filters: ExtendedColumnFilter<Product>[] | null) => void
-}) {
-  return (
-    <DataTableToolbarSection>
-      <DataTableToolbarSection className="px-0">
-        <DataTableSearchFilter placeholder="Search products..." />
-        <DataTableViewMenu />
-      </DataTableToolbarSection>
-      <DataTableToolbarSection className="px-0">
-        <DataTableSortMenu className="ml-auto" />
-        <DataTableFilterMenu
-          filters={filters}
-          onFiltersChange={onFiltersChange}
-        />
-      </DataTableToolbarSection>
-    </DataTableToolbarSection>
-  )
-}
-
-function InlineFilterToolbar({
-  filters,
-  onFiltersChange,
-}: {
-  filters: ExtendedColumnFilter<Product>[]
-  onFiltersChange: (filters: ExtendedColumnFilter<Product>[]) => void
-}) {
-  return (
-    <DataTableToolbarSection>
-      <DataTableToolbarSection className="px-0">
-        <DataTableSearchFilter placeholder="Search products..." />
-        <DataTableViewMenu />
-      </DataTableToolbarSection>
-      <DataTableToolbarSection className="px-0">
-        <DataTableInlineFilter
-          filters={filters}
-          onFiltersChange={onFiltersChange}
-        />
-      </DataTableToolbarSection>
-    </DataTableToolbarSection>
-  )
-}
+type ProductFacets = ProductQueryResult["facets"]
 
 /**
- * Normalize filters to ensure they have unique filterIds
- * This is critical when loading filters from URL, as they may not have filterIds
- * or may have duplicate IDs when multiple filters share the same column
- *
- * IMPORTANT: This function preserves filter object references when possible
- * to prevent unnecessary re-renders and focus loss in input fields.
+ * Build columns from the latest server facets. Faceted columns receive
+ * merged `options` (static labels + server counts) so unselected values stay
+ * visible after other filters narrow the row set; the price slider receives
+ * the server-computed `range` so it can always be widened back.
  */
-function normalizeFiltersWithUniqueIds<TData>(
-  filters: (
-    Omit<ExtendedColumnFilter<TData>, "filterId"> | ExtendedColumnFilter<TData>
-  )[],
-): ExtendedColumnFilter<TData>[] {
-  // Quick check: if all filters already have unique filterIds, return as-is
-  // This preserves object references and prevents unnecessary re-renders
-  const hasAllIds = filters.every(
-    (f): f is ExtendedColumnFilter<TData> => "filterId" in f && !!f.filterId,
-  )
-  if (hasAllIds) {
-    const ids = new Set(
-      filters.map(f => (f as ExtendedColumnFilter<TData>).filterId),
-    )
-    // If all IDs are unique, return filters unchanged (preserve references)
-    if (ids.size === filters.length) {
-      return filters as ExtendedColumnFilter<TData>[]
-    }
+function buildColumns(facets?: ProductFacets): DataTableColumnDef<Product>[] {
+  const mergeCounts = (
+    staticOpts: typeof categoryOptions,
+    facet: Array<{ value: string; count: number }> | undefined,
+  ) => {
+    if (!facet) return staticOpts
+    const m = new Map(facet.map(f => [f.value, f.count]))
+    return staticOpts.map(opt => ({ ...opt, count: m.get(opt.value) ?? 0 }))
   }
 
-  // Need to normalize - some filters missing IDs or have duplicates
-  const seenIds = new Set<string>()
+  const categoryOpts = mergeCounts(categoryOptions, facets?.select.category)
+  const brandOpts = mergeCounts(brandOptions, facets?.select.brand)
+  const priceRange = facets?.range.price
 
-  return filters.map((filter, index) => {
-    // If filter already has a filterId, check if it's unique
-    if ("filterId" in filter && filter.filterId) {
-      // If this ID was already seen, regenerate it to ensure uniqueness
-      if (seenIds.has(filter.filterId)) {
-        // Generate a new unique ID based on index (not value) to keep it stable
-        const uniqueId = `filter-${filter.id}-${index}-dup${seenIds.size}`
-          .toLowerCase()
-          .replace(/[^a-z0-9-]/g, "-")
-          .replace(/-+/g, "-")
-          .substring(0, 100)
-
-        seenIds.add(uniqueId)
-        return {
-          ...filter,
-          filterId: uniqueId,
-        } as ExtendedColumnFilter<TData>
-      }
-
-      // ID is unique, preserve it (and the filter object reference)
-      seenIds.add(filter.filterId)
-      return filter as ExtendedColumnFilter<TData>
-    }
-
-    // Filter doesn't have a filterId, generate one
-    // IMPORTANT: Use index as the primary uniqueness factor, not value
-    // This ensures filterId stays stable when only the value changes,
-    // preventing React from treating it as a new filter and losing focus
-    const uniqueId = `filter-${filter.id}-${index}`
-      .toLowerCase()
-      .replace(/[^a-z0-9-]/g, "-")
-      .replace(/-+/g, "-")
-      .substring(0, 100)
-
-    // Ensure the generated ID is unique (in case of collisions)
-    let finalId = uniqueId
-    let counter = 0
-    while (seenIds.has(finalId)) {
-      finalId = `${uniqueId}-${counter}`
-      counter++
-    }
-
-    seenIds.add(finalId)
-    return {
-      ...filter,
-      filterId: finalId,
-    } as ExtendedColumnFilter<TData>
-  })
+  return [
+    {
+      accessorKey: "name",
+      header: () => (
+        <DataTableColumnHeader>
+          <DataTableColumnTitle />
+          <DataTableColumnSortMenu />
+        </DataTableColumnHeader>
+      ),
+      meta: {
+        label: "Product Name",
+        variant: FILTER_VARIANTS.TEXT,
+      },
+      enableColumnFilter: true,
+    },
+    {
+      accessorKey: "category",
+      header: () => (
+        <DataTableColumnHeader>
+          <DataTableColumnTitle />
+          <DataTableColumnSortMenu variant={FILTER_VARIANTS.TEXT} />
+          <DataTableColumnFacetedFilterMenu options={categoryOpts} />
+        </DataTableColumnHeader>
+      ),
+      meta: {
+        label: "Category",
+        variant: FILTER_VARIANTS.SELECT,
+        options: categoryOptions,
+        autoOptions: false,
+      },
+      cell: ({ row }) => {
+        const category = row.getValue("category") as string
+        const option = categoryOptions.find(opt => opt.value === category)
+        return <span>{option?.label || category}</span>
+      },
+      enableColumnFilter: true,
+    },
+    {
+      accessorKey: "brand",
+      header: () => (
+        <DataTableColumnHeader>
+          <DataTableColumnTitle />
+          <DataTableColumnSortMenu variant={FILTER_VARIANTS.TEXT} />
+          <DataTableColumnFacetedFilterMenu options={brandOpts} />
+        </DataTableColumnHeader>
+      ),
+      meta: {
+        label: "Brand",
+        variant: FILTER_VARIANTS.SELECT,
+        options: brandOptions,
+        autoOptions: false,
+      },
+      enableColumnFilter: true,
+    },
+    {
+      accessorKey: "price",
+      header: () => (
+        <DataTableColumnHeader>
+          <DataTableColumnTitle />
+          <DataTableColumnSortMenu variant={FILTER_VARIANTS.NUMBER} />
+          <DataTableColumnSliderFilterMenu range={priceRange} />
+        </DataTableColumnHeader>
+      ),
+      meta: {
+        label: "Price",
+        unit: "$",
+        variant: FILTER_VARIANTS.NUMBER,
+      },
+      cell: ({ row }) => {
+        const price = parseFloat(row.getValue("price"))
+        return <div className="font-medium">${price.toFixed(2)}</div>
+      },
+      enableColumnFilter: true,
+    },
+    {
+      accessorKey: "stock",
+      header: () => (
+        <DataTableColumnHeader>
+          <DataTableColumnTitle />
+          <DataTableColumnSortMenu variant={FILTER_VARIANTS.NUMBER} />
+        </DataTableColumnHeader>
+      ),
+      meta: {
+        label: "Stock",
+        variant: FILTER_VARIANTS.NUMBER,
+      },
+      cell: ({ row }) => {
+        const stock = Number(row.getValue("stock"))
+        return (
+          <div className={stock < 10 ? "font-medium text-destructive" : ""}>
+            {stock}
+          </div>
+        )
+      },
+      enableColumnFilter: true,
+    },
+    {
+      accessorKey: "rating",
+      header: () => (
+        <DataTableColumnHeader>
+          <DataTableColumnTitle />
+          <DataTableColumnSortMenu variant={FILTER_VARIANTS.NUMBER} />
+        </DataTableColumnHeader>
+      ),
+      meta: {
+        label: "Rating",
+        variant: FILTER_VARIANTS.NUMBER,
+      },
+      cell: ({ row }) => {
+        const rating = Number(row.getValue("rating"))
+        return (
+          <div className="flex items-center gap-1">
+            <span>{rating}</span>
+            <span aria-hidden="true">★</span>
+          </div>
+        )
+      },
+      enableColumnFilter: true,
+    },
+    {
+      accessorKey: "inStock",
+      header: () => (
+        <DataTableColumnHeader>
+          <DataTableColumnTitle />
+          <DataTableColumnSortMenu />
+          <DataTableColumnFacetedFilterMenu />
+        </DataTableColumnHeader>
+      ),
+      meta: {
+        label: "In Stock",
+        variant: FILTER_VARIANTS.BOOLEAN,
+      },
+      cell: ({ row }) => {
+        const inStock = Boolean(row.getValue("inStock"))
+        return (
+          <Badge variant={inStock ? "default" : "secondary"}>
+            {inStock ? "Yes" : "No"}
+          </Badge>
+        )
+      },
+      enableColumnFilter: true,
+    },
+    {
+      accessorKey: "releaseDate",
+      header: () => (
+        <DataTableColumnHeader>
+          <DataTableColumnTitle />
+          <DataTableColumnSortMenu />
+          <DataTableColumnDateFilterMenu />
+        </DataTableColumnHeader>
+      ),
+      meta: {
+        label: "Release Date",
+        variant: FILTER_VARIANTS.DATE,
+      },
+      cell: ({ row }) => {
+        const date = row.getValue("releaseDate") as Date
+        return <span>{date.toLocaleDateString()}</span>
+      },
+      enableColumnFilter: true,
+    },
+  ]
 }
 
-function ServerSideStateTableContent() {
-  // State management with useState - no URL persistence
-  const [filterMode, setFilterMode] = useState<"standard" | "inline">(
-    "standard",
-  )
-  const [globalFilter, setGlobalFilter] = useState<string | object>("")
-  const [sorting, setSorting] = useState<SortingState>([])
-  const [standardColumnFilters, setStandardColumnFilters] =
-    useState<ColumnFiltersState>([])
-  const [inlineColumnFilters, setInlineColumnFilters] =
-    useState<ColumnFiltersState>([])
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
+/* -------------------------------------------------------------------------
+ * 4. The table
+ * ---------------------------------------------------------------------- */
+
+function ServerSideTableContent() {
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 10,
   })
+  const [sorting, setSorting] = useState<SortingState>([])
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+  // Holds the search string — or, when the advanced filter menu uses
+  // OR/MIXED join logic, a `{ filters, joinOperator }` object
+  const [globalFilter, setGlobalFilter] = useState<string | object>("")
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
 
-  // Get active column filters based on filter mode
-  const columnFilters =
-    filterMode === "standard" ? standardColumnFilters : inlineColumnFilters
-
-  // PERFORMANCE: Debounce column filters to batch rapid filter changes (e.g. clicking
-  // multiple faceted filter options) into a single server request instead of one per click
+  // Batch rapid filter clicks (e.g. toggling several faceted options) into a
+  // single server request
   const debouncedColumnFilters = useDebounce(columnFilters, 300)
 
-  // Use TanStack Query for server-side data fetching
-  // This provides automatic caching, refetching, and error handling
-  // Using placeholderData: keepPreviousData prevents UI jumps during pagination
-  // by keeping the previous data visible while new data is being fetched
   const {
     data: queryData,
     isLoading,
@@ -1061,6 +926,7 @@ function ServerSideStateTableContent() {
     isPlaceholderData,
     refetch,
   } = useQuery({
+    // Include every parameter that affects the result
     queryKey: [
       "products",
       pagination.pageIndex,
@@ -1068,620 +934,138 @@ function ServerSideStateTableContent() {
       sorting,
       globalFilter,
       debouncedColumnFilters,
-      filterMode,
     ],
     queryFn: () =>
       fetchProducts({
         page: pagination.pageIndex,
         pageSize: pagination.pageSize,
         sorting,
-        globalFilter,
+        search: globalFilter,
         columnFilters: debouncedColumnFilters,
       }),
-    staleTime: 30000, // Consider data fresh for 30 seconds
-    gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
-    placeholderData: keepPreviousData, // Keep previous data visible during pagination
+    placeholderData: keepPreviousData, // keep rows visible while refetching
   })
 
-  // Extract data, total, and facets from query response
   const data = queryData?.data ?? []
   const totalCount = queryData?.total ?? 0
-  const facets = queryData?.facets
-
-  // Create dynamic columns with cross-filter facets piped in from the server.
-  // Faceted columns receive `options` so unselected values stay visible after
-  // a filter narrows the row set. Slider columns receive `range={facets.range[col]}`
-  // so the slider can still be widened back. Each column's own filter is
-  // excluded from its facet computation server-side.
-  const dynamicColumns = useMemo(() => {
-    /**
-     * Cross-filter narrowing — see server-side-nuqs-state.tsx for full doc.
-     * The faceted filter hides options with `count === 0` by default, so we
-     * just merge counts; absent values get count 0 and disappear.
-     */
-    const mergeCounts = (
-      staticOpts: typeof categoryOptions,
-      facet: Array<{ value: string; count: number }> | undefined,
-    ) => {
-      if (!facet) return staticOpts
-      const m = new Map(facet.map(f => [f.value, f.count]))
-      return staticOpts.map(opt => ({ ...opt, count: m.get(opt.value) ?? 0 }))
-    }
-    const categoryOpts = mergeCounts(categoryOptions, facets?.select.category)
-    const brandOpts = mergeCounts(brandOptions, facets?.select.brand)
-    const priceRange = facets?.range.price
-
-    return columns.map(col => {
-      const key = (col as { accessorKey?: string }).accessorKey
-      if (key === "category") {
-        return {
-          ...col,
-          header: () => (
-            <DataTableColumnHeader>
-              <DataTableColumnTitle />
-              <DataTableColumnSortMenu variant={FILTER_VARIANTS.TEXT} />
-              <DataTableColumnFacetedFilterMenu options={categoryOpts} />
-            </DataTableColumnHeader>
-          ),
-        } as DataTableColumnDef<Product>
-      }
-      if (key === "brand") {
-        return {
-          ...col,
-          header: () => (
-            <DataTableColumnHeader>
-              <DataTableColumnTitle />
-              <DataTableColumnSortMenu variant={FILTER_VARIANTS.TEXT} />
-              <DataTableColumnFacetedFilterMenu options={brandOpts} />
-            </DataTableColumnHeader>
-          ),
-        } as DataTableColumnDef<Product>
-      }
-      if (key === "price" && priceRange) {
-        return {
-          ...col,
-          header: () => (
-            <DataTableColumnHeader>
-              <DataTableColumnTitle />
-              <DataTableColumnSortMenu variant={FILTER_VARIANTS.NUMBER} />
-              <DataTableColumnSliderFilterMenu range={priceRange} />
-            </DataTableColumnHeader>
-          ),
-        } as DataTableColumnDef<Product>
-      }
-      return col
-    })
-  }, [facets])
-
-  const error = queryError
-    ? queryError instanceof Error
-      ? queryError.message
-      : "Failed to fetch data"
-    : null
-
-  // Get query client for prefetching
-  const queryClient = useQueryClient()
-
-  // Track prefetching state
-  const [prefetchingState, setPrefetchingState] = useState<{
-    next: boolean
-    previous: boolean
-  }>({ next: false, previous: false })
-  const effectRunRef = useRef(0)
-  const abortControllerRef = useRef<AbortController | null>(null)
-
-  // Prefetch next and previous pages for smoother navigation
-  useEffect(() => {
-    const totalPages = Math.ceil(totalCount / pagination.pageSize)
-    const currentPage = pagination.pageIndex
-    const currentRun = ++effectRunRef.current
-
-    // Abort any previous prefetch operations
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort()
-    }
-
-    // Create new abort controller for this effect run
-    const abortController = new AbortController()
-    abortControllerRef.current = abortController
-
-    // Reset prefetching state immediately when effect runs
-    // Use startTransition to mark as non-urgent and avoid cascading renders
-    startTransition(() => {
-      setPrefetchingState({ next: false, previous: false })
-    })
-
-    // Helper to safely update state only if this effect run is still current
-    const safeSetState = (
-      updater: (prev: { next: boolean; previous: boolean }) => {
-        next: boolean
-        previous: boolean
-      },
-    ) => {
-      if (
-        currentRun === effectRunRef.current &&
-        !abortController.signal.aborted
-      ) {
-        setPrefetchingState(updater)
-      }
-    }
-
-    // Prefetch next page if it exists
-    if (currentPage + 1 < totalPages && !abortController.signal.aborted) {
-      safeSetState(prev => ({ ...prev, next: true }))
-
-      queryClient
-        .prefetchQuery({
-          queryKey: [
-            "products",
-            currentPage + 1,
-            pagination.pageSize,
-            sorting,
-            globalFilter,
-            columnFilters,
-            filterMode,
-          ],
-          queryFn: () =>
-            fetchProducts({
-              page: currentPage + 1,
-              pageSize: pagination.pageSize,
-              sorting,
-              globalFilter,
-              columnFilters,
-            }),
-          staleTime: 30000,
-        })
-        .then(() => {
-          safeSetState(prev => ({ ...prev, next: false }))
-        })
-        .catch(() => {
-          // Reset on error too
-          safeSetState(prev => ({ ...prev, next: false }))
-        })
-    }
-
-    // Prefetch previous page if it exists
-    if (currentPage > 0 && !abortController.signal.aborted) {
-      safeSetState(prev => ({ ...prev, previous: true }))
-
-      queryClient
-        .prefetchQuery({
-          queryKey: [
-            "products",
-            currentPage - 1,
-            pagination.pageSize,
-            sorting,
-            globalFilter,
-            columnFilters,
-            filterMode,
-          ],
-          queryFn: () =>
-            fetchProducts({
-              page: currentPage - 1,
-              pageSize: pagination.pageSize,
-              sorting,
-              globalFilter,
-              columnFilters,
-            }),
-          staleTime: 30000,
-        })
-        .then(() => {
-          safeSetState(prev => ({ ...prev, previous: false }))
-        })
-        .catch(() => {
-          // Reset on error too
-          safeSetState(prev => ({ ...prev, previous: false }))
-        })
-    }
-
-    // Cleanup function: reset state and abort operations when effect re-runs
-    return () => {
-      // Reset state immediately (cleanup is safe to do synchronously)
-      setPrefetchingState({ next: false, previous: false })
-      // Abort any ongoing prefetch operations
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort()
-        abortControllerRef.current = null
-      }
-      // Note: Don't reset effectRunRef.current here - it's already been incremented
-      // by the new effect run. Setting it to 0 would break the safeSetState checks.
-    }
-  }, [
-    queryClient,
-    pagination.pageIndex,
-    pagination.pageSize,
-    totalCount,
-    sorting,
-    globalFilter,
-    columnFilters,
-    filterMode,
-  ])
-
-  const resetAllState = useCallback(() => {
-    setGlobalFilter("")
-    setSorting([])
-    setStandardColumnFilters([])
-    setInlineColumnFilters([])
-    setColumnVisibility({})
-    setPagination({ pageIndex: 0, pageSize: 10 })
-    setFilterMode("standard")
-  }, [])
-
-  // Helper to display global filter state
-  const getGlobalFilterDisplay = () => {
-    if (typeof globalFilter === "string") {
-      return globalFilter || "None"
-    }
-    if (
-      typeof globalFilter === "object" &&
-      globalFilter &&
-      "filters" in globalFilter
-    ) {
-      const filterObj = globalFilter as {
-        filters: unknown[]
-        joinOperator: string
-      }
-      return `OR Filter (${filterObj.filters?.length || 0} conditions)`
-    }
-    return "None"
-  }
-
-  // Extract actual filter data for display
-  const displayFilters = useMemo(() => {
-    if (
-      typeof globalFilter === "object" &&
-      globalFilter &&
-      "filters" in globalFilter
-    ) {
-      const filterObj = globalFilter as {
-        filters: unknown[]
-        joinOperator: string
-      }
-      return filterObj.filters || []
-    }
-    return columnFilters
-  }, [columnFilters, globalFilter])
-
-  // Enhanced filter statistics
-  const filterStats = useMemo(() => {
-    // Check if using OR logic (stored in globalFilter as object)
-    if (
-      typeof globalFilter === "object" &&
-      globalFilter &&
-      "filters" in globalFilter
-    ) {
-      const filterObj = globalFilter as {
-        filters: Array<{
-          joinOperator?: string
-          value?: unknown
-        }>
-        joinOperator: string
-      }
-      const filters = filterObj.filters || []
-
-      const hasAndFilters = filters.some(
-        (filter, index) =>
-          index === 0 || filter.joinOperator === JOIN_OPERATORS.AND,
-      )
-      const hasOrFilters = filters.some(
-        (filter, index) =>
-          index > 0 && filter.joinOperator === JOIN_OPERATORS.OR,
-      )
-
-      return {
-        totalFilters: filters.length,
-        hasAndFilters,
-        hasOrFilters,
-        effectiveJoinOperator: hasOrFilters
-          ? JOIN_OPERATORS.MIXED
-          : JOIN_OPERATORS.AND,
-        activeFilters: filters.filter(f => f.value && f.value !== "").length,
-        currentMode: filterMode,
-      }
-    }
-
-    // For AND logic (stored in columnFilters)
-    const activeFilters =
-      filterMode === "inline" ? inlineColumnFilters : standardColumnFilters
-    const hasAndFilters = activeFilters.length > 0
-    const hasOrFilters = activeFilters.some(
-      filter =>
-        typeof filter.value === "object" &&
-        filter.value &&
-        "joinOperator" in filter.value &&
-        filter.value.joinOperator === "or",
-    )
-
-    return {
-      totalFilters: activeFilters.length,
-      hasAndFilters,
-      hasOrFilters,
-      effectiveJoinOperator: hasOrFilters
-        ? JOIN_OPERATORS.MIXED
-        : JOIN_OPERATORS.AND,
-      activeFilters: activeFilters.filter(f => f.value && f.value !== "")
-        .length,
-      currentMode: filterMode,
-    }
-  }, [standardColumnFilters, inlineColumnFilters, filterMode, globalFilter])
-
-  // Get current filter mode
-  const getFilterMode = () => {
-    if (
-      typeof globalFilter === "object" &&
-      globalFilter &&
-      "filters" in globalFilter
-    ) {
-      const filterObj = globalFilter as {
-        filters: unknown[]
-        joinOperator: string
-      }
-      if (filterObj.joinOperator === "mixed") {
-        return "MIXED"
-      }
-      return filterObj.joinOperator.toUpperCase()
-    }
-
-    const hasOrOperators = columnFilters.some(
-      filter =>
-        typeof filter.value === "object" &&
-        filter.value &&
-        "joinOperator" in filter.value &&
-        filter.value.joinOperator === "or",
-    )
-
-    return hasOrOperators ? "MIXED" : "AND"
-  }
-
-  // Handlers for pagination
-  // Use functional update to avoid dependency on pagination state
-  // This prevents stale closures and ensures the latest state is always used
-  const handlePaginationChange = useCallback(
-    (updater: Updater<PaginationState>) => {
-      setPagination(prevPagination => {
-        const newPagination =
-          typeof updater === "function" ? updater(prevPagination) : updater
-        return newPagination
-      })
-    },
-    [], // Empty deps - functional update ensures we always use latest state
-  )
-
-  // Handlers for sorting
-  const handleSortingChange = useCallback(
-    (updater: Updater<SortingState>) => {
-      const newSorting =
-        typeof updater === "function" ? updater(sorting) : updater
-      setSorting(newSorting.length > 0 ? newSorting : [])
-    },
-    [sorting],
-  )
-
-  // Handlers for filters (standard mode)
-  const handleStandardColumnFiltersChange = useCallback(
-    (updater: Updater<ColumnFiltersState>) => {
-      const newFilters =
-        typeof updater === "function" ? updater(standardColumnFilters) : updater
-
-      setStandardColumnFilters(newFilters)
-      setPagination(prev => ({ ...prev, pageIndex: 0 }))
-    },
-    [standardColumnFilters],
-  )
-
-  // Handlers for filters (inline mode)
-  const handleInlineColumnFiltersChange = useCallback(
-    (updater: Updater<ColumnFiltersState>) => {
-      const newFilters =
-        typeof updater === "function" ? updater(inlineColumnFilters) : updater
-
-      setInlineColumnFilters(newFilters)
-      setPagination(prev => ({ ...prev, pageIndex: 0 }))
-    },
-    [inlineColumnFilters],
-  )
-
-  // Track previous globalFilter value to prevent infinite loops
-  const prevGlobalFilterRef = useRef<string | object | undefined>(undefined)
-
-  // Handlers for global filter (handles both search string and OR filter object)
-  const handleGlobalFilterChange = useCallback(
-    (value: string | object) => {
-      // Prevent infinite loops - check if value actually changed
-      const valueStr = JSON.stringify(value)
-      const prevStr = JSON.stringify(prevGlobalFilterRef.current)
-      if (valueStr === prevStr) {
-        return
-      }
-
-      // Update ref before calling setState
-      prevGlobalFilterRef.current = value
-
-      if (typeof value === "string") {
-        // Simple search string
-        // Don't clear globalFilter with empty string if we already have OR filters
-        if (
-          value === "" &&
-          typeof globalFilter === "object" &&
-          globalFilter &&
-          "filters" in globalFilter
-        ) {
-          // Empty string received but globalFilter has OR filters - ignore to prevent clearing
-          return
-        }
-
-        setGlobalFilter(value)
-        setPagination(prev => ({ ...prev, pageIndex: 0 }))
-      } else {
-        // OR filter object - store in globalFilter
-        setGlobalFilter(value)
-        setPagination(prev => ({ ...prev, pageIndex: 0 }))
-      }
-    },
-    [globalFilter],
-  )
-
-  // Handlers for column visibility
-  const handleColumnVisibilityChange = useCallback(
-    (updater: Updater<VisibilityState>) => {
-      const newVisibility =
-        typeof updater === "function" ? updater(columnVisibility) : updater
-      setColumnVisibility(newVisibility)
-    },
-    [columnVisibility],
-  )
-
-  // Extract ExtendedColumnFilter from globalFilter or columnFilters (standard mode)
-  const currentStandardFilters = useMemo(() => {
-    // Check if filters are in globalFilter (OR/MIXED logic)
-    if (
-      typeof globalFilter === "object" &&
-      globalFilter &&
-      "filters" in globalFilter &&
-      filterMode === "standard"
-    ) {
-      const filterObj = globalFilter as {
-        filters: ExtendedColumnFilter<Product>[]
-      }
-      return filterObj.filters || []
-    }
-
-    // Otherwise extract from columnFilters (AND logic)
-    return standardColumnFilters
-      .map(cf => cf.value)
-      .filter(
-        (v): v is ExtendedColumnFilter<Product> =>
-          v !== null && typeof v === "object" && "id" in v,
-      )
-  }, [standardColumnFilters, globalFilter, filterMode])
-
-  // Normalize filters to ensure they have unique filterIds
-  // The normalization function is deterministic (uses index-based IDs), so it produces
-  // stable results when filters haven't changed, preventing unnecessary re-renders
-  const normalizedStandardFilters = useMemo(
-    () => normalizeFiltersWithUniqueIds(currentStandardFilters),
-    [currentStandardFilters],
-  )
-
-  // Extract ExtendedColumnFilter from globalFilter or columnFilters (inline mode)
-  const currentInlineFilters = useMemo(() => {
-    // Check if filters are in globalFilter (OR/MIXED logic)
-    if (
-      typeof globalFilter === "object" &&
-      globalFilter &&
-      "filters" in globalFilter &&
-      filterMode === "inline"
-    ) {
-      const filterObj = globalFilter as {
-        filters: ExtendedColumnFilter<Product>[]
-      }
-      return filterObj.filters || []
-    }
-
-    // Otherwise extract from columnFilters (AND logic)
-    return inlineColumnFilters
-      .map(cf => cf.value)
-      .filter(
-        (v): v is ExtendedColumnFilter<Product> =>
-          v !== null && typeof v === "object" && "id" in v,
-      )
-  }, [inlineColumnFilters, globalFilter, filterMode])
-
-  // Normalize filters to ensure they have unique filterIds
-  // The normalization function is deterministic (uses index-based IDs), so it produces
-  // stable results when filters haven't changed, preventing unnecessary re-renders
-  const normalizedInlineFilters = useMemo(
-    () => normalizeFiltersWithUniqueIds(currentInlineFilters),
-    [currentInlineFilters],
-  )
-
-  // Direct filter change handlers - sync filter UI changes directly to state
-  const handleStandardFiltersChange = useCallback(
-    (filters: ExtendedColumnFilter<Product>[] | null) => {
-      // When clearing filters (null or empty array), also clear globalFilter
-      if (!filters || filters.length === 0) {
-        setStandardColumnFilters([])
-        setGlobalFilter("")
-        setPagination(prev => ({ ...prev, pageIndex: 0 }))
-      } else {
-        // Use core utility to process filters and determine routing
-        const result = processFiltersForLogic(filters)
-
-        if (result.shouldUseGlobalFilter) {
-          // Use globalFilter for OR/MIXED logic
-          setStandardColumnFilters([])
-          setGlobalFilter({
-            filters: result.processedFilters,
-            joinOperator: result.joinOperator,
-          })
-          setPagination(prev => ({ ...prev, pageIndex: 0 }))
-        } else {
-          // Use columnFilters for AND logic
-          const columnFiltersState: ColumnFiltersState =
-            result.processedFilters.map(filter => ({
-              id: filter.id,
-              value: filter,
-            }))
-          setStandardColumnFilters(columnFiltersState)
-          setGlobalFilter("")
-          setPagination(prev => ({ ...prev, pageIndex: 0 }))
-        }
-      }
-    },
-    [],
-  )
-
-  const handleInlineFiltersChange = useCallback(
-    (filters: ExtendedColumnFilter<Product>[]) => {
-      // When clearing filters (empty array), also clear globalFilter
-      if (filters.length === 0) {
-        setInlineColumnFilters([])
-        setGlobalFilter("")
-        setPagination(prev => ({ ...prev, pageIndex: 0 }))
-      } else {
-        // Use core utility to process filters and determine routing
-        const result = processFiltersForLogic(filters)
-
-        if (result.shouldUseGlobalFilter) {
-          // Use globalFilter for OR/MIXED logic
-          setInlineColumnFilters([])
-          setGlobalFilter({
-            filters: result.processedFilters,
-            joinOperator: result.joinOperator,
-          })
-          setPagination(prev => ({ ...prev, pageIndex: 0 }))
-        } else {
-          // Use columnFilters for AND logic
-          const columnFiltersState: ColumnFiltersState =
-            result.processedFilters.map(filter => ({
-              id: filter.id,
-              value: filter,
-            }))
-          setInlineColumnFilters(columnFiltersState)
-          setGlobalFilter("")
-          setPagination(prev => ({ ...prev, pageIndex: 0 }))
-        }
-      }
-    },
-    [],
-  )
-
-  // Manual refresh function - TanStack Query handles refetching automatically
-  const handleRefresh = useCallback(() => {
-    refetch()
-  }, [refetch])
-
-  // Calculate pageCount for manual pagination
   const pageCount =
     totalCount > 0 ? Math.ceil(totalCount / pagination.pageSize) : 1
 
+  // Rebuild columns whenever the server reports new facets
+  const columns = useMemo(
+    () => buildColumns(queryData?.facets),
+    [queryData?.facets],
+  )
+
+  const error =
+    queryError instanceof Error
+      ? queryError.message
+      : queryError
+        ? "Failed to fetch data"
+        : null
+
+  // Every filter/sort change resets to the first page — the old page index
+  // may not exist in the new result set
+  const handleSortingChange = useCallback((updater: Updater<SortingState>) => {
+    setSorting(prev =>
+      typeof updater === "function" ? updater(prev) : updater,
+    )
+    setPagination(prev => ({ ...prev, pageIndex: 0 }))
+  }, [])
+
+  const handleColumnFiltersChange = useCallback(
+    (updater: Updater<ColumnFiltersState>) => {
+      setColumnFilters(prev =>
+        typeof updater === "function" ? updater(prev) : updater,
+      )
+      setPagination(prev => ({ ...prev, pageIndex: 0 }))
+    },
+    [],
+  )
+
+  const handleGlobalFilterChange = useCallback((value: string | object) => {
+    setGlobalFilter(prev => {
+      // The search input emits "" on mount/clear; don't let that wipe an
+      // OR-filter object the advanced filter menu stored here
+      if (value === "" && typeof prev === "object" && prev !== null) {
+        return prev
+      }
+      return value
+    })
+    setPagination(prev => ({ ...prev, pageIndex: 0 }))
+  }, [])
+
+  /**
+   * The advanced filter menu is controlled: its rules live in our state so
+   * they can be routed to the right slot. AND-joined rules become
+   * columnFilters entries (alongside the column-widget filters); OR/MIXED
+   * rules move into globalFilter as `{ filters, joinOperator }`, because
+   * TanStack combines columnFilters with AND only.
+   */
+  const menuFilters = useMemo(() => {
+    if (
+      typeof globalFilter === "object" &&
+      globalFilter !== null &&
+      "filters" in globalFilter
+    ) {
+      const filterObj = globalFilter as {
+        filters: ExtendedColumnFilter<Product>[]
+      }
+      return normalizeFiltersFromUrl(filterObj.filters ?? [])
+    }
+    return normalizeFiltersFromUrl(
+      columnFilters.map(cf => cf.value).filter(isMenuFilterValue),
+    )
+  }, [globalFilter, columnFilters])
+
+  const handleMenuFiltersChange = useCallback(
+    (filters: ExtendedColumnFilter<Product>[] | null) => {
+      const next = filters ?? []
+      // Column-widget filters (faceted, slider, date) are preserved; only
+      // the menu-owned entries are rewritten
+      if (next.length === 0) {
+        setColumnFilters(prev => prev.filter(f => !isMenuFilterValue(f.value)))
+        setGlobalFilter(prev => (typeof prev === "object" ? "" : prev))
+      } else {
+        const result = processFiltersForLogic(next)
+        if (result.shouldUseGlobalFilter) {
+          setColumnFilters(prev =>
+            prev.filter(f => !isMenuFilterValue(f.value)),
+          )
+          setGlobalFilter({
+            filters: result.processedFilters,
+            joinOperator: result.joinOperator,
+          })
+        } else {
+          setColumnFilters(prev => [
+            ...prev.filter(f => !isMenuFilterValue(f.value)),
+            ...result.processedFilters.map(filter => ({
+              id: filter.id,
+              value: filter,
+            })),
+          ])
+          setGlobalFilter(prev => (typeof prev === "object" ? "" : prev))
+        }
+      }
+      setPagination(prev => ({ ...prev, pageIndex: 0 }))
+    },
+    [],
+  )
+
+  const resetAllState = useCallback(() => {
+    setPagination({ pageIndex: 0, pageSize: 10 })
+    setSorting([])
+    setColumnFilters([])
+    setGlobalFilter("")
+    setColumnVisibility({})
+  }, [])
+
   return (
     <div className="w-full space-y-4">
-      {/* Error Display */}
       {error && (
         <Card className="border-destructive">
           <CardContent className="flex items-center gap-2 pt-6">
-            <AlertCircle className="h-5 w-5 text-destructive" />
+            <AlertCircle className="size-5 text-destructive" />
             <div className="flex-1">
               <p className="text-sm font-medium text-destructive">
                 Error loading data
@@ -1691,8 +1075,8 @@ function ServerSideStateTableContent() {
             <Button
               variant="outline"
               size="sm"
-              onClick={handleRefresh}
-              disabled={isLoading}
+              onClick={() => refetch()}
+              disabled={isFetching}
             >
               Retry
             </Button>
@@ -1700,458 +1084,121 @@ function ServerSideStateTableContent() {
         </Card>
       )}
 
-      <div className="flex justify-between space-y-4">
-        <Tabs
-          value={filterMode}
-          onValueChange={value => {
-            const newMode = value as "standard" | "inline"
-
-            if (newMode === "standard") {
-              // Switching to standard: clear inline filters
-              setFilterMode("standard")
-              setInlineColumnFilters([])
-              setPagination(prev => ({ ...prev, pageIndex: 0 }))
-            } else {
-              // Switching to inline: clear standard filters
-              setFilterMode("inline")
-              setStandardColumnFilters([])
-              setPagination(prev => ({ ...prev, pageIndex: 0 }))
-            }
-          }}
-          className="w-full"
-        >
-          <div className="flex w-full items-center justify-between">
-            <TabsList>
-              <TabsTrigger value="standard">Standard Filters</TabsTrigger>
-              <TabsTrigger value="inline">Inline Filters</TabsTrigger>
-            </TabsList>
-
-            {/* Loading Indicator */}
-            {/* Only show loading indicator on initial load, not during pagination */}
-            {isLoading && (
-              <div className="flex items-center gap-2 rounded-lg border bg-muted/30 p-2 text-xs">
-                <Loader2 className="h-3 w-3 animate-spin" />
-                <span className="text-muted-foreground">
-                  Loading products from server...
-                </span>
-              </div>
-            )}
-            {/* Show subtle indicator during pagination/filtering (when using previous data) */}
+      <DataTableRoot
+        data={data}
+        columns={columns}
+        isLoading={isLoading}
+        config={{
+          manualPagination: true,
+          manualSorting: true,
+          manualFiltering: true,
+          pageCount,
+        }}
+        state={{
+          pagination,
+          sorting,
+          columnFilters,
+          globalFilter,
+          columnVisibility,
+        }}
+        onPaginationChange={setPagination}
+        onSortingChange={handleSortingChange}
+        onColumnFiltersChange={handleColumnFiltersChange}
+        onGlobalFilterChange={handleGlobalFilterChange}
+        onColumnVisibilityChange={setColumnVisibility}
+      >
+        <DataTableToolbarSection>
+          <DataTableToolbarSection className="px-0">
+            <DataTableSearchFilter placeholder="Search products..." />
+            <DataTableViewMenu />
+          </DataTableToolbarSection>
+          <DataTableToolbarSection className="px-0">
             {isPlaceholderData && isFetching && (
-              <div className="flex items-center gap-2 rounded-lg border bg-muted/30 p-2 text-xs">
-                <Loader2 className="h-3 w-3 animate-spin" />
-                <span className="text-muted-foreground">
-                  Loading new page...
-                </span>
-              </div>
+              <Loader2
+                className="size-4 animate-spin text-muted-foreground"
+                aria-label="Loading new results"
+              />
             )}
-            {/* Show prefetching indicators */}
-            {!isLoading && !isPlaceholderData && (
-              <div className="flex items-center gap-2">
-                {prefetchingState.next && (
-                  <div className="flex items-center gap-2 rounded-lg border bg-muted/30 p-2 text-xs">
-                    <Loader2 className="h-3 w-3 animate-spin" />
-                    <span className="text-muted-foreground">
-                      Prefetching next page...
-                    </span>
-                  </div>
-                )}
-                {prefetchingState.previous && (
-                  <div className="flex items-center gap-2 rounded-lg border bg-muted/30 p-2 text-xs">
-                    <Loader2 className="h-3 w-3 animate-spin" />
-                    <span className="text-muted-foreground">
-                      Prefetching previous page...
-                    </span>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
+            <DataTableSortMenu className="ml-auto" />
+            <DataTableFilterMenu
+              filters={menuFilters}
+              onFiltersChange={handleMenuFiltersChange}
+            />
+          </DataTableToolbarSection>
+        </DataTableToolbarSection>
+        <DataTable>
+          <DataTableHeader />
+          <DataTableBody>
+            <DataTableSkeleton rows={pagination.pageSize} />
+            <DataTableEmptyBody>
+              <DataTableEmptyMessage>
+                <DataTableEmptyIcon>
+                  <UserSearch className="size-12" />
+                </DataTableEmptyIcon>
+                <DataTableEmptyTitle>No products found</DataTableEmptyTitle>
+                <DataTableEmptyDescription>
+                  There are no products to display at this time.
+                </DataTableEmptyDescription>
+              </DataTableEmptyMessage>
+              <DataTableEmptyFilteredMessage>
+                <DataTableEmptyIcon>
+                  <SearchX className="size-12" />
+                </DataTableEmptyIcon>
+                <DataTableEmptyTitle>No matches found</DataTableEmptyTitle>
+                <DataTableEmptyDescription>
+                  Try adjusting your filters or search to find what you&apos;re
+                  looking for.
+                </DataTableEmptyDescription>
+              </DataTableEmptyFilteredMessage>
+            </DataTableEmptyBody>
+          </DataTableBody>
+        </DataTable>
+        <DataTablePagination
+          totalCount={totalCount}
+          isLoading={isLoading}
+          isFetching={isFetching}
+        />
+      </DataTableRoot>
 
-          <TabsContent value="standard" className="space-y-4">
-            <DataTableRoot
-              data={data}
-              columns={dynamicColumns}
-              isLoading={isLoading}
-              config={{
-                manualPagination: true,
-                manualFiltering: true,
-                manualSorting: true,
-                pageCount,
-              }}
-              state={{
-                globalFilter,
-                sorting,
-                columnFilters: standardColumnFilters,
-                columnVisibility,
-                pagination,
-              }}
-              onGlobalFilterChange={handleGlobalFilterChange}
-              onSortingChange={handleSortingChange}
-              onColumnFiltersChange={handleStandardColumnFiltersChange}
-              onColumnVisibilityChange={handleColumnVisibilityChange}
-              onPaginationChange={handlePaginationChange}
-            >
-              <StandardFilterToolbar
-                filters={normalizedStandardFilters}
-                onFiltersChange={handleStandardFiltersChange}
-              />
-              <DataTable>
-                <DataTableHeader />
-                <DataTableBody>
-                  <DataTableSkeleton rows={pagination.pageSize} />
-                  <DataTableEmptyBody>
-                    <DataTableEmptyMessage>
-                      <DataTableEmptyIcon>
-                        <UserSearch className="size-12" />
-                      </DataTableEmptyIcon>
-                      <DataTableEmptyTitle>
-                        No products found
-                      </DataTableEmptyTitle>
-                      <DataTableEmptyDescription>
-                        There are no products to display at this time.
-                      </DataTableEmptyDescription>
-                    </DataTableEmptyMessage>
-                    <DataTableEmptyFilteredMessage>
-                      <DataTableEmptyIcon>
-                        <SearchX className="size-12" />
-                      </DataTableEmptyIcon>
-                      <DataTableEmptyTitle>
-                        No matches found
-                      </DataTableEmptyTitle>
-                      <DataTableEmptyDescription>
-                        Try adjusting your filters or search to find what
-                        you&apos;re looking for.
-                      </DataTableEmptyDescription>
-                    </DataTableEmptyFilteredMessage>
-                  </DataTableEmptyBody>
-                </DataTableBody>
-              </DataTable>
-              <DataTablePagination
-                totalCount={totalCount}
-                isLoading={isLoading}
-                isFetching={isFetching}
-                disableNextPage={isLoading}
-                disablePreviousPage={isLoading}
-              />
-            </DataTableRoot>
-          </TabsContent>
-
-          <TabsContent value="inline" className="space-y-4">
-            <DataTableRoot
-              data={data}
-              columns={dynamicColumns}
-              isLoading={isLoading}
-              config={{
-                manualPagination: true,
-                manualFiltering: true,
-                manualSorting: true,
-                pageCount,
-              }}
-              state={{
-                globalFilter,
-                sorting,
-                columnFilters: inlineColumnFilters,
-                columnVisibility,
-                pagination,
-              }}
-              onGlobalFilterChange={handleGlobalFilterChange}
-              onSortingChange={handleSortingChange}
-              onColumnFiltersChange={handleInlineColumnFiltersChange}
-              onColumnVisibilityChange={handleColumnVisibilityChange}
-              onPaginationChange={handlePaginationChange}
-            >
-              <InlineFilterToolbar
-                filters={normalizedInlineFilters}
-                onFiltersChange={handleInlineFiltersChange}
-              />
-              <DataTable>
-                <DataTableHeader />
-                <DataTableBody>
-                  <DataTableSkeleton rows={pagination.pageSize} />
-                  <DataTableEmptyBody>
-                    <DataTableEmptyMessage>
-                      <DataTableEmptyIcon>
-                        <UserSearch className="size-12" />
-                      </DataTableEmptyIcon>
-                      <DataTableEmptyTitle>
-                        No products found
-                      </DataTableEmptyTitle>
-                      <DataTableEmptyDescription>
-                        There are no products to display at this time.
-                      </DataTableEmptyDescription>
-                    </DataTableEmptyMessage>
-                    <DataTableEmptyFilteredMessage>
-                      <DataTableEmptyIcon>
-                        <SearchX className="size-12" />
-                      </DataTableEmptyIcon>
-                      <DataTableEmptyTitle>
-                        No matches found
-                      </DataTableEmptyTitle>
-                      <DataTableEmptyDescription>
-                        Try adjusting your filters or search to find what
-                        you&apos;re looking for.
-                      </DataTableEmptyDescription>
-                    </DataTableEmptyFilteredMessage>
-                  </DataTableEmptyBody>
-                </DataTableBody>
-              </DataTable>
-              <DataTablePagination
-                totalCount={totalCount}
-                isLoading={isLoading}
-                isFetching={isFetching}
-                disableNextPage={isLoading}
-                disablePreviousPage={isLoading}
-              />
-            </DataTableRoot>
-          </TabsContent>
-        </Tabs>
-      </div>
-
-      {/* State Display for demonstration */}
+      {/* Demo-only: shows the exact query the table would send to a server */}
       <Card>
         <CardHeader>
-          <CardTitle>Server-Side Table State</CardTitle>
+          <CardTitle>Server Query</CardTitle>
           <CardDescription>
-            All state is managed with React useState. Data is fetched from a
-            mocked API with delays using TanStack Query. State does NOT persist
-            across page refreshes.
+            The serializable request the table sends on every change — swap the
+            mock <code>fetchProducts</code> for a real API that accepts this
+            shape and any database works.
           </CardDescription>
           <CardAction>
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={resetAllState}>
-                Reset All State
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleRefresh}
-                disabled={isLoading || isFetching}
-              >
-                {isLoading || isFetching ? (
-                  <>
-                    <Loader2 className="mr-2 h-3 w-3 animate-spin" />
-                    Loading...
-                  </>
-                ) : (
-                  "Refresh Data"
-                )}
-              </Button>
-            </div>
+            <Button variant="outline" size="sm" onClick={resetAllState}>
+              Reset All State
+            </Button>
           </CardAction>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid gap-2 text-xs text-muted-foreground">
-            <div className="flex justify-between">
-              <span className="font-medium">Loading State:</span>
-              <span className="text-foreground">
-                {isLoading ? (
-                  <span className="flex items-center gap-1 text-blue-600">
-                    <Loader2 className="h-3 w-3 animate-spin" />
-                    Initial Loading...
-                  </span>
-                ) : isPlaceholderData ? (
-                  <span className="flex items-center gap-1 text-orange-600">
-                    <Loader2 className="h-3 w-3 animate-spin" />
-                    Loading (showing previous data)...
-                  </span>
-                ) : isFetching ? (
-                  <span className="flex items-center gap-1 text-yellow-600">
-                    <Loader2 className="h-3 w-3 animate-spin" />
-                    Refetching...
-                  </span>
-                ) : (
-                  <span className="text-green-600">✓ Ready</span>
-                )}
-              </span>
-            </div>
-
-            <div className="flex justify-between">
-              <span className="font-medium">Total Items (Server):</span>
-              <span className="text-foreground">{totalCount}</span>
-            </div>
-
-            <div className="flex justify-between">
-              <span className="font-medium">Current Page Items:</span>
-              <span className="text-foreground">{data.length}</span>
-            </div>
-
-            <div className="flex justify-between">
-              <span className="font-medium">Search Query:</span>
-              <span className="text-foreground">
-                {getGlobalFilterDisplay()}
-              </span>
-            </div>
-
-            <div className="flex justify-between">
-              <span className="font-medium">Filter Mode:</span>
-              <span className="text-foreground">{filterMode}</span>
-            </div>
-
-            <div className="flex justify-between">
-              <span className="font-medium">Active Filters:</span>
-              <span className="text-foreground">{columnFilters.length}</span>
-            </div>
-
-            <div className="flex justify-between">
-              <span className="font-medium">Standard Filters:</span>
-              <span className="text-foreground">
-                {standardColumnFilters.length}
-              </span>
-            </div>
-
-            <div className="flex justify-between">
-              <span className="font-medium">Inline Filters:</span>
-              <span className="text-foreground">
-                {inlineColumnFilters.length}
-              </span>
-            </div>
-
-            <div className="flex justify-between">
-              <span className="font-medium">Enhanced Filters:</span>
-              <span className="text-foreground">
-                {filterStats.totalFilters}
-              </span>
-            </div>
-
-            <div className="flex justify-between">
-              <span className="font-medium">Active Enhanced:</span>
-              <span className="text-foreground">
-                {filterStats.activeFilters}
-              </span>
-            </div>
-
-            <div className="flex justify-between">
-              <span className="font-medium">Join Logic:</span>
-              <span className="text-foreground">
-                {filterStats.effectiveJoinOperator}
-              </span>
-            </div>
-
-            <div className="flex justify-between">
-              <span className="font-medium">Sorting:</span>
-              <span className="text-foreground">
-                {sorting.length > 0
-                  ? sorting
-                      .map(s => `${s.id} ${s.desc ? "desc" : "asc"}`)
-                      .join(", ")
-                  : "None"}
-              </span>
-            </div>
-
-            <div className="flex justify-between">
-              <span className="font-medium">Page:</span>
-              <span className="text-foreground">
-                {pagination.pageIndex + 1} of{" "}
-                {Math.ceil(totalCount / pagination.pageSize)} (Size:{" "}
-                {pagination.pageSize})
-              </span>
-            </div>
-
-            <div className="flex justify-between">
-              <span className="font-medium">Hidden Columns:</span>
-              <span className="text-foreground">
-                {
-                  Object.values(columnVisibility).filter(v => v === false)
-                    .length
-                }
-              </span>
-            </div>
+        <CardContent className="space-y-3 text-xs">
+          <div className="flex justify-between">
+            <span className="font-medium">Status:</span>
+            <span>
+              {isLoading
+                ? "Initial load..."
+                : isFetching
+                  ? "Fetching..."
+                  : `${totalCount} rows on server, showing ${data.length}`}
+            </span>
           </div>
-
-          {/* Detailed state (collapsible) */}
-          <details className="border-t pt-4">
-            <summary className="cursor-pointer text-xs font-medium hover:text-foreground">
-              View Full State Object
-            </summary>
-            <div className="mt-4 space-y-3 text-xs">
-              <div>
-                <strong>Server Response:</strong>
-                <pre className="mt-1 overflow-auto rounded bg-muted p-2">
-                  {JSON.stringify(
-                    {
-                      totalCount,
-                      currentPageItems: data.length,
-                      page: pagination.pageIndex + 1,
-                      pageSize: pagination.pageSize,
-                    },
-                    null,
-                    2,
-                  )}
-                </pre>
-              </div>
-              <div>
-                <strong>Enhanced Filters:</strong>
-                <pre className="mt-1 overflow-auto rounded bg-muted p-2">
-                  {displayFilters.length > 0
-                    ? JSON.stringify(displayFilters, null, 2)
-                    : "No enhanced filters"}
-                </pre>
-              </div>
-              <div>
-                <strong>Filter Stats:</strong>
-                <pre className="mt-1 overflow-auto rounded bg-muted p-2">
-                  {JSON.stringify(filterStats, null, 2)}
-                </pre>
-              </div>
-              <div>
-                <strong>Filter Mode:</strong> {getFilterMode()}
-                <div className="mt-1 text-muted-foreground">
-                  {getFilterMode() === "AND"
-                    ? "All conditions must match (stored in columnFilters)"
-                    : getFilterMode() === "OR"
-                      ? "Any condition can match (stored in globalFilter)"
-                      : "Mixed logic - individual AND/OR operators per filter"}
-                </div>
-              </div>
-              <div>
-                <strong>Sorting:</strong>
-                <pre className="mt-1 overflow-auto rounded bg-muted p-2">
-                  {JSON.stringify(sorting, null, 2)}
-                </pre>
-              </div>
-              <div>
-                <strong>Column Filters State (AND logic):</strong>
-                <pre className="mt-1 overflow-auto rounded bg-muted p-2">
-                  {JSON.stringify(columnFilters, null, 2)}
-                </pre>
-              </div>
-              <div>
-                <strong>Global Filter State (OR logic):</strong>
-                <pre className="mt-1 overflow-auto rounded bg-muted p-2">
-                  {JSON.stringify(globalFilter, null, 2)}
-                </pre>
-              </div>
-              <div>
-                <strong>Pagination:</strong>
-                <pre className="mt-1 overflow-auto rounded bg-muted p-2">
-                  {JSON.stringify(pagination, null, 2)}
-                </pre>
-              </div>
-              <div>
-                <strong>Column Visibility:</strong>
-                <pre className="mt-1 overflow-auto rounded bg-muted p-2">
-                  {JSON.stringify(columnVisibility, null, 2)}
-                </pre>
-              </div>
-            </div>
-          </details>
-
-          <div className="rounded-md border border-blue-200 bg-blue-50 p-3 dark:border-blue-800 dark:bg-blue-950">
-            <p className="text-xs text-blue-900 dark:text-blue-100">
-              <strong>💡 Tip:</strong> This example uses TanStack Query for
-              server-side data fetching with automatic caching. State is managed
-              with React useState and does NOT persist across page refreshes.
-              For URL state persistence, see the{" "}
-              <a
-                href="/data-table/server-side-nuqs-table"
-                className="underline hover:text-blue-700 dark:hover:text-blue-300"
-              >
-                Server-Side Nuqs Table
-              </a>{" "}
-              example.
-            </p>
-          </div>
+          <pre className="overflow-auto rounded bg-muted p-2">
+            {JSON.stringify(
+              {
+                page: pagination.pageIndex,
+                pageSize: pagination.pageSize,
+                sorting,
+                search: globalFilter,
+                columnFilters: debouncedColumnFilters,
+              },
+              null,
+              2,
+            )}
+          </pre>
         </CardContent>
       </Card>
     </div>
@@ -2159,30 +1206,18 @@ function ServerSideStateTableContent() {
 }
 
 /**
- * Main component wrapped in QueryClientProvider
- *
- * This example includes QueryClientProvider at the component level
- * since it's a standalone example.
- *
- * For production apps, it's recommended to add this provider at your root layout instead:
- * - Next.js App Router: Wrap in app/layout.tsx
- * - Next.js Pages Router: Wrap in pages/_app.tsx
- * - React SPA: Wrap in src/main.tsx
- *
- * See the component documentation at the top of this file for detailed setup instructions.
+ * Self-contained wrapper. In a real app create the QueryClient once at your
+ * app root and wrap the layout with QueryClientProvider instead.
  */
 export default function ServerSideStateTableExample() {
-  // Create a QueryClient instance with sensible defaults for server-side data tables
-  // Using useState with lazy initializer ensures it's only created once
   const [queryClient] = useState(
     () =>
       new QueryClient({
         defaultOptions: {
           queries: {
-            staleTime: 30 * 1000, // Consider data fresh for 30 seconds
-            gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
-            refetchOnWindowFocus: false, // Don't refetch on window focus for data tables
-            retry: 1, // Retry failed requests once
+            staleTime: 30 * 1000,
+            refetchOnWindowFocus: false,
+            retry: 1,
           },
         },
       }),
@@ -2190,7 +1225,7 @@ export default function ServerSideStateTableExample() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ServerSideStateTableContent />
+      <ServerSideTableContent />
     </QueryClientProvider>
   )
 }

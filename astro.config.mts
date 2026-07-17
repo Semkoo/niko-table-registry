@@ -292,6 +292,7 @@ export default defineConfig({
               slug: "examples/dynamic-columns-grid",
             },
             { label: "Persistence", slug: "examples/persistence-grid" },
+            { label: "Server Side", slug: "examples/server-side-grid" },
           ],
         },
         {

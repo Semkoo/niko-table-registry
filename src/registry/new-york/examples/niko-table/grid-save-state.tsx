@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/collapsible"
 import { DataTableRowContextMenuSlot } from "@/components/niko-table/components/data-table-row-context-menu-slot"
 import { DataTable } from "@/components/niko-table/core/data-table"
+import { DataTableColumnResize } from "@/components/niko-table/components/data-table-column-resize"
 import { DataTableRoot } from "@/components/niko-table/core/data-table-root"
 import {
   DataTableVirtualizedBody,
@@ -199,7 +200,9 @@ function GridSaveStateInner({ onReset }: { onReset: () => void }) {
   return (
     <div className="w-full space-y-4">
       <DataTableRoot data={grid.rows} columns={columns} getRowId={r => r.id}>
-        <DataGrid grid={grid}>
+        <DataGrid grid={grid} className="space-y-2 outline-none">
+          {/* Flex-fill + drag-resizable columns */}
+          <DataTableColumnResize />
           <DataGridClipboard resolveCell={resolveCell} />
           <DataGridFillHandle />
           <DataGridToolbar>

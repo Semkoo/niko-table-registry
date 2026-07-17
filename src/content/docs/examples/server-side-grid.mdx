@@ -1,0 +1,128 @@
+---
+title: Server-Side Grid
+description: Editable grid backed by a server — rows stream in on scroll, edits travel back as a validated changeset.
+---
+
+import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
+import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
+
+Rows stream in from your API as the user scrolls (no pagination — the virtualized body prefetches the next chunk before the bottom is reached), get edited locally in the grid, and travel back as a `created` / `updated` / `deleted` changeset. The server validates each row; failures stay dirty and highlighted so the user fixes and retries. The grid is database-agnostic — it only talks to two serializable functions you implement against any backend.
+
+<CodePreview demo="niko-table/grid-server-side-state" />
+
+## Installation
+
+<CliCommandCode action="run" command="shadcn@latest add @niko-table/data-table-grid @niko-table/data-table-grid-changes @niko-table/data-table-column-resize" />
+
+## The wire contract
+
+The grid never touches a database. It talks to two functions with plain JSON shapes — implement them with SQL, Prisma, Drizzle, Supabase, or any REST/GraphQL API:
+
+```tsx showLineNumbers
+type EmployeeQuery = { offset: number; limit: number } // LIMIT / OFFSET
+type EmployeeQueryResult = { data: Employee[]; total: number }
+
+// straight from useGridChanges().getChangeSet()
+type EmployeeChangeSet = {
+  created: Employee[] // INSERT
+  updated: Employee[] // UPDATE ... WHERE id
+  deleted: string[] // DELETE ... WHERE id
+}
+type EmployeeSaveResult = {
+  succeededIds: string[]
+  failedIds: string[] // rows the server rejected — stay dirty in the grid
+}
+
+declare function fetchEmployees(q: EmployeeQuery): Promise<EmployeeQueryResult>
+declare function saveEmployees(c: EmployeeChangeSet): Promise<EmployeeSaveResult>
+```
+
+## Streaming rows on scroll
+
+`DataTableVirtualizedBody` exposes `onNearEnd` — it fires once when the user renders into the last `prefetchThreshold` rows, so the next chunk loads _before_ they hit the bottom (it also catches scrollbar jumps and too-short initial renders, unlike a raw scroll listener):
+
+```tsx showLineNumbers
+const loadMore = async () => {
+  if (isFetching || !hasMore) return
+  setIsFetching(true)
+  try {
+    const result = await fetchEmployees({ offset: loaded.length, limit: CHUNK_SIZE })
+    setLoaded(prev => [...prev, ...result.data])
+    setTotal(result.total)
+  } finally {
+    setIsFetching(false)
+  }
+}
+
+<DataTableVirtualizedBody
+  estimateSize={37}
+  fixedRowHeight
+  prefetchThreshold={10}
+  onNearEnd={() => {
+    if (hasMore && !isFetching) void loadMore()
+  }}
+>
+```
+
+## Merging chunks without losing edits
+
+New chunks arrive _while the user is editing_, so the sync can't just replace the grid's rows. Re-baseline change tracking to the server snapshot, then rebuild the rows keeping every dirty row's current values (edited rows in place, locally-created rows appended at the end):
+
+```tsx showLineNumbers
+const serverRows = React.useMemo(() => loaded.map(toGridRow), [loaded])
+
+React.useEffect(() => {
+  if (lastSyncedRef.current === serverRows) return // once per snapshot
+  lastSyncedRef.current = serverRows
+  const dirtyIds = new Set(changes.dirtyRowIds)
+  changes.reset(serverRows) // baseline = what the server has
+  grid.updateRows(
+    prev => {
+      const prevById = new Map(prev.map(r => [r.id, r]))
+      const serverIds = new Set(serverRows.map(r => r.id))
+      const merged = serverRows.map(r =>
+        dirtyIds.has(r.id) && prevById.has(r.id) ? prevById.get(r.id)! : r,
+      )
+      for (const r of prev)
+        if (!serverIds.has(r.id) && dirtyIds.has(r.id)) merged.push(r)
+      return merged
+    },
+    { history: false }, // data loads don't belong in the undo stack
+  )
+}, [serverRows, grid, changes])
+```
+
+The recompute against the new baseline re-flags the kept rows as dirty automatically.
+
+## Saving with reconcile
+
+```tsx showLineNumbers
+const onSave = async () => {
+  const { created, updated, deleted } = changes.getChangeSet()
+  const result = await saveEmployees({
+    created: created.map(toEmployee),
+    updated: updated.map(toEmployee),
+    deleted,
+  })
+  // succeeded rows become clean; failed rows stay dirty (highlight them
+  // via changes.failedRowIds in getRowClassName)
+  changes.reconcile(result)
+  // mirror the successful writes into the local server snapshot
+  // (or refetch) — the sync effect re-baselines from it
+  setLoaded(applySuccessfulWrites)
+}
+```
+
+## Key points
+
+- **Prefer `onNearEnd` over `onScrolledBottom`** for virtualized infinite scroll — it's virtualizer-index-driven, fires once per approach, and handles fast scrollbar drags.
+- **Convert at the boundary.** API rows are plain JSON; grid rows hold a `CellState` per column. Keep two small mappers (`toGridRow` / `toEmployee`) and the rest of the file never mixes the shapes.
+- **Server owns validation.** The demo rejects rows without a name or valid email; `reconcile` keeps them dirty and `failedRowIds` drives the row highlight.
+- **Raise `maxRows`.** `useDataGrid` caps rows at 200 by default; set it above your expected loaded-row count.
+- **Created-row ids stay client-generated.** `useGridChanges` does not remap ids, so either store the client id or reload after save.
+
+## Next
+
+- [Persistence](/examples/persistence-grid/) — `useGridChanges` in depth (autosave, staging, reverts)
+- [Server-Side Table](/examples/server-side-table/) — the same contract for read-only tables with full filtering
+- [Virtualization Table](/examples/virtualization-table/) — the virtualized body on its own
