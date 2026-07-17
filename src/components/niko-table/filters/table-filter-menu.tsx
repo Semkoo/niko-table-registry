@@ -60,6 +60,7 @@ import {
 } from "@/components/ui/sortable"
 import { dataTableConfig } from "../config/data-table"
 import {
+  expandMergedEqualityFilters,
   getDefaultFilterOperator,
   getFilterOperators,
   processFiltersForLogic,
@@ -804,8 +805,15 @@ export function TableFilterMenu<TData>({
   const initialFilters = useInitialFilters(table, controlledFilters)
   const [internalFilters, setInternalFilters] = React.useState(initialFilters)
 
-  // Use controlled values if provided, otherwise use internal state
-  const filters = controlledFilters ?? internalFilters
+  // Use controlled values if provided, otherwise use internal state.
+  // Display expands merged multi-value IN entries (the canonical columnFilters
+  // shape the faceted dropdown reads) back into one simple "is" row per value;
+  // edits re-collapse on sync via processFiltersForLogic.
+  const rawFilters = controlledFilters ?? internalFilters
+  const filters = React.useMemo(
+    () => expandMergedEqualityFilters(rawFilters),
+    [rawFilters],
+  )
   const isControlled = Boolean(controlledFilters)
 
   // Handler that works with both controlled and internal state
@@ -1371,10 +1379,16 @@ function FilterFacetedSelect<TData>({
           <FacetedEmpty>No options found.</FacetedEmpty>
           <FacetedGroup>
             {/* Cross-filter narrowing: hide options at count 0 (matches the
-                rule used by `TableColumnFacetedFilterMenu`). Pure label-only
-                option lists (no counts) render unchanged. */}
+                rule used by `TableColumnFacetedFilterMenu`). A currently
+                selected value is always kept so it can still be un-checked.
+                Pure label-only option lists (no counts) render unchanged. */}
             {options
-              ?.filter((option: Option) => option.count !== 0)
+              ?.filter(
+                (option: Option) =>
+                  option.count !== 0 ||
+                  (Array.isArray(selectedValues) &&
+                    selectedValues.includes(option.value)),
+              )
               .map((option: Option) => (
                 <FacetedItem key={option.value} value={option.value}>
                   {option.icon && <option.icon />}
