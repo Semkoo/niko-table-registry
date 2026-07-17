@@ -105,14 +105,25 @@ export function buildFacetedOptions<TData>(
   // static options and for producing the auto-derived option list.
   const availableValues = collectRowValues(optionRows, accessorKey)
 
+  // The column's own currently-selected values must never be narrowed away:
+  // otherwise a selection that another filter excludes (e.g. Brand=Apple while
+  // Category=Clothing) vanishes from its own facet — the pill disappears and
+  // the value can't be un-checked, even though the filter is still applied.
+  const selectedValues = getSelectedValues(columnFilters, accessorKey)
+  const keepValue = (value: string) =>
+    availableValues.has(value) || selectedValues.has(value)
+
   // Build the base option list (no counts yet).
   let baseOptions: Option[]
   if (staticOptions) {
     baseOptions = limitToFilteredRows
-      ? staticOptions.filter(opt => availableValues.has(opt.value))
+      ? staticOptions.filter(opt => keepValue(opt.value))
       : staticOptions
   } else {
-    baseOptions = Array.from(availableValues)
+    const optionValues = limitToFilteredRows
+      ? new Set([...availableValues, ...selectedValues])
+      : availableValues
+    baseOptions = Array.from(optionValues)
       .map(value => ({
         value,
         label: formatOptionLabel
@@ -149,6 +160,31 @@ export function buildFacetedOptions<TData>(
     ...opt,
     count: valueCounts.get(opt.value) ?? 0,
   }))
+}
+
+/**
+ * Extract the set of selected values from a single column's filter value,
+ * tolerating every shape it can take: the `ExtendedColumnFilter` object written
+ * by the faceted control and the advanced menu (`{ value: string | string[] }`),
+ * and the legacy bare array / scalar.
+ */
+export function extractFilterSelectedValues(rawValue: unknown): Set<string> {
+  let raw = rawValue
+  if (raw && typeof raw === "object" && !Array.isArray(raw) && "value" in raw) {
+    raw = (raw as { value: unknown }).value
+  }
+  if (raw == null || raw === "") return new Set()
+
+  const values = Array.isArray(raw) ? raw : [raw]
+  return new Set(values.filter(v => v != null && v !== "").map(String))
+}
+
+function getSelectedValues(
+  columnFilters: Array<{ id: string; value: unknown }>,
+  accessorKey: string,
+): Set<string> {
+  const entry = columnFilters.find(filter => filter.id === accessorKey)
+  return entry ? extractFilterSelectedValues(entry.value) : new Set()
 }
 
 function collectRowValues<TData>(

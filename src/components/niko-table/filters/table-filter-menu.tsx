@@ -1371,10 +1371,16 @@ function FilterFacetedSelect<TData>({
           <FacetedEmpty>No options found.</FacetedEmpty>
           <FacetedGroup>
             {/* Cross-filter narrowing: hide options at count 0 (matches the
-                rule used by `TableColumnFacetedFilterMenu`). Pure label-only
-                option lists (no counts) render unchanged. */}
+                rule used by `TableColumnFacetedFilterMenu`). A currently
+                selected value is always kept so it can still be un-checked.
+                Pure label-only option lists (no counts) render unchanged. */}
             {options
-              ?.filter((option: Option) => option.count !== 0)
+              ?.filter(
+                (option: Option) =>
+                  option.count !== 0 ||
+                  (Array.isArray(selectedValues) &&
+                    selectedValues.includes(option.value)),
+              )
               .map((option: Option) => (
                 <FacetedItem key={option.value} value={option.value}>
                   {option.icon && <option.icon />}
