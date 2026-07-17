@@ -1,25 +1,33 @@
 "use client"
 
 /**
- * Drizzle ORM Server-Side Table — live, mocked demo
+ * Drizzle ORM Server-Side Table + nuqs URL state — live, mocked demo
  *
- * A browser-runnable companion to the Drizzle ORM guide. The query-building
- * code (`buildWhere`, `buildOrderBy`, `computeFacets`) is written exactly
- * like the guide's real Drizzle code — same operators, same dispatch, same
- * structure. The only difference: the operators here are a ~80-line mock of
- * drizzle-orm's API that compiles each condition to BOTH
+ * The Drizzle ORM guide's demo, with every state slice (page, sorting,
+ * search, filters, column visibility) stored in the URL via nuqs — so any
+ * view is shareable, bookmarkable, and survives reload. The query-building
+ * code (`buildWhere`, `buildOrderBy`, `computeFacets`) is identical to the
+ * Drizzle guide — same operators, same dispatch, same SQL — only the state
+ * source changes from local `useState` to `useQueryStates`.
  *
- *   1. a row predicate, so the query executes against an in-memory array
- *      right in your browser, and
- *   2. SQL text with bound params, so you can watch the exact statement a
- *      real Postgres would receive update live as you filter and sort.
+ * The operators here are a ~80-line mock of drizzle-orm's API that compiles
+ * each condition to BOTH a row predicate (executed against an in-memory
+ * array in your browser) and SQL text with bound params (shown live in the
+ * Generated SQL card).
  *
  * To go real: install drizzle-orm, replace the "MOCK DRIZZLE" section with
  * `import { and, or, eq, ilike, ... } from "drizzle-orm"` and your pgTable
  * schema, and move fetchProducts behind an API route — the builder code
  * stays the same. Full walkthrough: the Drizzle ORM guide in the docs.
  *
- * Prerequisites: npm install @tanstack/react-query
+ * Prerequisites: npm install @tanstack/react-query nuqs
+ *
+ * nuqs needs an adapter for your router; this example wraps its own
+ * NuqsAdapter (React SPA). Swap it for your framework's adapter:
+ *   - Next.js App Router:   import { NuqsAdapter } from "nuqs/adapters/next/app"
+ *   - Next.js Pages Router: import { NuqsAdapter } from "nuqs/adapters/next/pages"
+ *   - React SPA (Vite, ..): import { NuqsAdapter } from "nuqs/adapters/react"
+ * See https://nuqs.dev/docs/adapters.
  */
 
 import { useCallback, useMemo, useState } from "react"
@@ -29,6 +37,13 @@ import {
   QueryClientProvider,
   useQuery,
 } from "@tanstack/react-query"
+import { NuqsAdapter } from "nuqs/adapters/react"
+import {
+  parseAsInteger,
+  parseAsJson,
+  parseAsString,
+  useQueryStates,
+} from "nuqs"
 import type {
   ColumnFiltersState,
   PaginationState,
@@ -70,7 +85,10 @@ import {
   FILTER_VARIANTS,
 } from "@/components/niko-table/lib/constants"
 import { processFiltersForLogic } from "@/components/niko-table/lib/data-table"
-import { normalizeFiltersFromUrl } from "@/components/niko-table/filters/table-filter-menu"
+import {
+  normalizeFiltersFromUrl,
+  serializeFiltersForUrl,
+} from "@/components/niko-table/filters/table-filter-menu"
 import { useDebounce } from "@/components/niko-table/hooks/use-debounce"
 import type {
   DataTableColumnDef,
@@ -969,15 +987,76 @@ function isMenuFilterValue(
   )
 }
 
-function DrizzleTableContent() {
-  const [pagination, setPagination] = useState<PaginationState>({
-    pageIndex: 0,
-    pageSize: 10,
+/* -------------------------------------------------------------------------
+ * URL state (nuqs)
+ *
+ * One parser per state slice. The parser keys double as the URL param names,
+ * e.g. ?page=2&perPage=20&sort=[{"id":"price","desc":true}]. Identical to the
+ * server-side-nuqs example — the only difference in this file is the Drizzle
+ * data layer.
+ * ---------------------------------------------------------------------- */
+
+/** OR/MIXED filter payload from the advanced filter menu. */
+type GlobalFilterObject = {
+  filters: ExtendedColumnFilter<Product>[]
+  joinOperator: string
+}
+
+const tableStateParsers = {
+  page: parseAsInteger.withDefault(0),
+  perPage: parseAsInteger.withDefault(10),
+  sort: parseAsJson<SortingState>(value => value as SortingState).withDefault(
+    [],
+  ),
+  // Mixed-shape columnFilters (widget values + menu filter objects); filterIds
+  // are stripped on write and regenerated on read to keep URLs short
+  filters: parseAsJson<ColumnFiltersState>(
+    value => value as ColumnFiltersState,
+  ).withDefault([]),
+  search: parseAsString.withDefault(""),
+  // OR/MIXED advanced filters — only ever an object. No default: nuqs yields
+  // `null` when the param is absent
+  global: parseAsJson<GlobalFilterObject | null>(value => {
+    if (value && typeof value === "object" && "filters" in value) {
+      return value as GlobalFilterObject
+    }
+    return null
+  }),
+  cols: parseAsJson<VisibilityState>(
+    value => value as VisibilityState,
+  ).withDefault({}),
+}
+
+/** Strip filterIds from menu-authored entries to keep URLs short. */
+function serializeColumnFiltersForUrl(
+  filters: ColumnFiltersState,
+): ColumnFiltersState {
+  return filters.map(f => {
+    if (isMenuFilterValue(f.value)) {
+      const [serialized] = serializeFiltersForUrl([f.value])
+      return { id: f.id, value: serialized }
+    }
+    return f
   })
-  const [sorting, setSorting] = useState<SortingState>([])
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-  const [globalFilter, setGlobalFilter] = useState<string | object>("")
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
+}
+
+function DrizzleNuqsTableContent() {
+  const [urlParams, setUrlParams] = useQueryStates(tableStateParsers, {
+    history: "replace",
+    scroll: false,
+    shallow: true,
+  })
+
+  // URL → TanStack table state
+  const pagination = useMemo<PaginationState>(
+    () => ({ pageIndex: urlParams.page, pageSize: urlParams.perPage }),
+    [urlParams.page, urlParams.perPage],
+  )
+  const sorting = urlParams.sort
+  const columnFilters = urlParams.filters
+  const columnVisibility = urlParams.cols
+  // string search and the OR/MIXED filter object share the globalFilter slot
+  const globalFilter: string | object = urlParams.global ?? urlParams.search
 
   const debouncedColumnFilters = useDebounce(columnFilters, 300)
 
@@ -1047,88 +1126,128 @@ function DrizzleTableContent() {
         ? "Failed to fetch data"
         : null
 
-  const handleSortingChange = useCallback((updater: Updater<SortingState>) => {
-    setSorting(prev =>
-      typeof updater === "function" ? updater(prev) : updater,
-    )
-    setPagination(prev => ({ ...prev, pageIndex: 0 }))
-  }, [])
+  // TanStack table state → URL. Every filter/sort change resets to the first
+  // page — the old page index may not exist in the new result set.
+  const handlePaginationChange = useCallback(
+    (updater: Updater<PaginationState>) => {
+      const next = typeof updater === "function" ? updater(pagination) : updater
+      void setUrlParams({ page: next.pageIndex, perPage: next.pageSize })
+    },
+    [pagination, setUrlParams],
+  )
+
+  const handleSortingChange = useCallback(
+    (updater: Updater<SortingState>) => {
+      const next = typeof updater === "function" ? updater(sorting) : updater
+      void setUrlParams({ sort: next.length > 0 ? next : null, page: 0 })
+    },
+    [sorting, setUrlParams],
+  )
 
   const handleColumnFiltersChange = useCallback(
     (updater: Updater<ColumnFiltersState>) => {
-      setColumnFilters(prev =>
-        typeof updater === "function" ? updater(prev) : updater,
-      )
-      setPagination(prev => ({ ...prev, pageIndex: 0 }))
+      const next =
+        typeof updater === "function" ? updater(columnFilters) : updater
+      void setUrlParams({
+        filters: next.length > 0 ? serializeColumnFiltersForUrl(next) : null,
+        page: 0,
+      })
     },
-    [],
+    [columnFilters, setUrlParams],
   )
 
-  const handleGlobalFilterChange = useCallback((value: string | object) => {
-    setGlobalFilter(prev => {
-      if (value === "" && typeof prev === "object" && prev !== null) {
-        return prev
-      }
-      return value
-    })
-    setPagination(prev => ({ ...prev, pageIndex: 0 }))
-  }, [])
+  const handleColumnVisibilityChange = useCallback(
+    (updater: Updater<VisibilityState>) => {
+      const next =
+        typeof updater === "function" ? updater(columnVisibility) : updater
+      void setUrlParams({ cols: Object.keys(next).length > 0 ? next : null })
+    },
+    [columnVisibility, setUrlParams],
+  )
+
+  const handleGlobalFilterChange = useCallback(
+    (value: string | object) => {
+      // Only search strings arrive here; OR/MIXED objects are written by
+      // handleMenuFiltersChange. The search input emits "" on mount/clear —
+      // don't let that wipe an active OR-filter object
+      if (typeof value !== "string") return
+      if (value === "" && urlParams.global) return
+      void setUrlParams({ search: value || null, page: 0 })
+    },
+    [urlParams.global, setUrlParams],
+  )
 
   const menuFilters = useMemo(() => {
-    if (
-      typeof globalFilter === "object" &&
-      globalFilter !== null &&
-      "filters" in globalFilter
-    ) {
-      const filterObj = globalFilter as {
-        filters: ExtendedColumnFilter<Product>[]
-      }
-      return normalizeFiltersFromUrl(filterObj.filters ?? [])
+    if (urlParams.global) {
+      return normalizeFiltersFromUrl(urlParams.global.filters ?? [])
     }
     return normalizeFiltersFromUrl(
       columnFilters.map(cf => cf.value).filter(isMenuFilterValue),
     )
-  }, [globalFilter, columnFilters])
+  }, [urlParams.global, columnFilters])
 
   const handleMenuFiltersChange = useCallback(
     (filters: ExtendedColumnFilter<Product>[] | null) => {
       const next = filters ?? []
+      // Column-widget filters (faceted, slider, date) are preserved; only the
+      // menu-owned entries are rewritten
+      const widgetFilters = columnFilters.filter(
+        f => !isMenuFilterValue(f.value),
+      )
       if (next.length === 0) {
-        setColumnFilters(prev => prev.filter(f => !isMenuFilterValue(f.value)))
-        setGlobalFilter(prev => (typeof prev === "object" ? "" : prev))
-      } else {
-        const result = processFiltersForLogic(next)
-        if (result.shouldUseGlobalFilter) {
-          setColumnFilters(prev =>
-            prev.filter(f => !isMenuFilterValue(f.value)),
-          )
-          setGlobalFilter({
-            filters: result.processedFilters,
+        void setUrlParams({
+          filters:
+            widgetFilters.length > 0
+              ? serializeColumnFiltersForUrl(widgetFilters)
+              : null,
+          global: null,
+          page: 0,
+        })
+        return
+      }
+      const result = processFiltersForLogic(next)
+      if (result.shouldUseGlobalFilter) {
+        void setUrlParams({
+          filters:
+            widgetFilters.length > 0
+              ? serializeColumnFiltersForUrl(widgetFilters)
+              : null,
+          global: {
+            filters: serializeFiltersForUrl(
+              result.processedFilters,
+            ) as ExtendedColumnFilter<Product>[],
             joinOperator: result.joinOperator,
-          })
-        } else {
-          setColumnFilters(prev => [
-            ...prev.filter(f => !isMenuFilterValue(f.value)),
+          },
+          page: 0,
+        })
+      } else {
+        void setUrlParams({
+          filters: serializeColumnFiltersForUrl([
+            ...widgetFilters,
             ...result.processedFilters.map(filter => ({
               id: filter.id,
               value: filter,
             })),
-          ])
-          setGlobalFilter(prev => (typeof prev === "object" ? "" : prev))
-        }
+          ]),
+          global: null,
+          page: 0,
+        })
       }
-      setPagination(prev => ({ ...prev, pageIndex: 0 }))
     },
-    [],
+    [columnFilters, setUrlParams],
   )
 
   const resetAllState = useCallback(() => {
-    setPagination({ pageIndex: 0, pageSize: 10 })
-    setSorting([])
-    setColumnFilters([])
-    setGlobalFilter("")
-    setColumnVisibility({})
-  }, [])
+    void setUrlParams({
+      page: null,
+      perPage: null,
+      sort: null,
+      filters: null,
+      search: null,
+      global: null,
+      cols: null,
+    })
+  }, [setUrlParams])
 
   return (
     <div className="w-full space-y-4">
@@ -1171,11 +1290,11 @@ function DrizzleTableContent() {
           globalFilter,
           columnVisibility,
         }}
-        onPaginationChange={setPagination}
+        onPaginationChange={handlePaginationChange}
         onSortingChange={handleSortingChange}
         onColumnFiltersChange={handleColumnFiltersChange}
         onGlobalFilterChange={handleGlobalFilterChange}
-        onColumnVisibilityChange={setColumnVisibility}
+        onColumnVisibilityChange={handleColumnVisibilityChange}
       >
         <DataTableToolbarSection>
           <DataTableToolbarSection className="px-0">
@@ -1296,7 +1415,7 @@ function DrizzleTableContent() {
  * Self-contained wrapper. In a real app create the QueryClient once at your
  * app root and wrap the layout with QueryClientProvider instead.
  */
-export default function DrizzleStateTableExample() {
+export default function DrizzleNuqsTableExample() {
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -1312,7 +1431,9 @@ export default function DrizzleStateTableExample() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <DrizzleTableContent />
+      <NuqsAdapter>
+        <DrizzleNuqsTableContent />
+      </NuqsAdapter>
     </QueryClientProvider>
   )
 }

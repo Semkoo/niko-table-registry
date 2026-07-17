@@ -1,0 +1,73 @@
+---
+title: Drizzle ORM + Nuqs
+description: The Drizzle ORM server-side table with the full table state persisted in the URL via nuqs — shareable, bookmarkable, refresh-proof.
+---
+
+import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
+import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
+
+The [Drizzle ORM](/examples/drizzle-orm/) guide turns every filter, sort, and page into real SQL. This variant keeps that exact backend and moves the table state into the URL with [nuqs](https://nuqs.dev/), so any filtered/sorted/paginated view is shareable, bookmarkable, and survives reload. The Drizzle query-building code (`buildWhere` / `buildOrderBy` / `computeFacets`) is unchanged — only the state source flips from local `useState` to `useQueryStates`.
+
+Read the [Drizzle ORM](/examples/drizzle-orm/) guide for the SQL layer and the [Server-Side Nuqs Table](/examples/server-side-nuqs-table/) for the URL layer in depth; this page only shows how they combine.
+
+## Live demo (mocked)
+
+The demo runs this guide's Drizzle code against a mocked query builder in your browser and shows the **Generated SQL** for the current view. Filter or sort, then reload the page — the view is restored from the URL. The toolbar **Category** and **Brand** facets read server-computed counts and narrow to the values still present in the results.
+
+<CodePreview demo="niko-table/drizzle-nuqs-state" />
+
+## Installation
+
+Install the DataTable core and add-ons for this example:
+
+<CliCommandCode action="run" command="shadcn@latest add @niko-table/data-table @niko-table/data-table-pagination @niko-table/data-table-search-filter @niko-table/data-table-view-menu @niko-table/data-table-sort-menu @niko-table/data-table-filter-menu @niko-table/data-table-column-sort @niko-table/data-table-faceted-filter @niko-table/data-table-column-faceted-filter @niko-table/data-table-column-slider-filter @niko-table/data-table-column-date-filter" />
+
+Install additional dependencies:
+
+<CliCommandCode action="install" command="@tanstack/react-query nuqs" />
+
+> First time using `@niko-table`? See the [Installation Guide](/getting-started/installation#configure-the-niko-table-registry) to set up the registry.
+
+## What changes vs the Drizzle guide
+
+Only the state layer. The data fetch, `buildWhere` / `buildOrderBy` / `computeFacets`, and the API route are identical.
+
+- **State lives in the URL.** `useQueryStates` replaces the `useState` slices for page, sorting, filters, search, and column visibility — same parsers as the [Server-Side Nuqs Table](/examples/server-side-nuqs-table/#url-state-parsers).
+- **The query key is the URL.** TanStack Query keys off the URL-derived state, so a shared link resolves to the same cache entry, and an SSR page can run the same query from the incoming search params.
+- **`filterId` is stripped on write** (`serializeFiltersForUrl`) and **regenerated on read** (`normalizeFiltersFromUrl`) to keep URLs short. The advanced menu's AND rules live in the `filters` param; OR/MIXED rules move to the `global` param.
+
+## Toolbar facets on a server-side table
+
+The Category and Brand toolbar facets get their options from the server (`computeFacets`), so they need server counts, not client-derived ones:
+
+```tsx showLineNumbers
+<DataTableFacetedFilter
+  accessorKey="category"
+  title="Category"
+  options={categoryFacetOptions} // server counts, count-0 dropped, selection pinned
+  multiple
+  dynamicCounts={false} // don't recount from the client's current page
+  limitToFilteredRows={false} // don't narrow from client rows either
+/>
+```
+
+The client only holds the current page, so counting and narrowing must come from the server. `dynamicCounts={false}` and `limitToFilteredRows={false}` turn off the client-side passes; the example narrows the list itself — dropping `count === 0` options while keeping any currently-selected value so it stays removable.
+
+## When to Use
+
+**✅ Use Drizzle ORM + Nuqs when:**
+
+- You're building the [Drizzle ORM](/examples/drizzle-orm/) server-side table, and
+- Views must be shareable, bookmarkable, or survive refreshes
+- You want SSR to render the first paint from the URL's search params
+
+**❌ Consider other options when:**
+
+- URL noise matters more than shareability — use the [Drizzle ORM](/examples/drizzle-orm/) guide as-is
+- You're not on Drizzle — the [Server-Side Nuqs Table](/examples/server-side-nuqs-table/) shows the same URL layer over the database-agnostic wire contract
+
+## Next Steps
+
+- [Drizzle ORM](/examples/drizzle-orm/) — the SQL layer: schema, column mapping, filters → WHERE, facets, API route
+- [Server-Side Nuqs Table](/examples/server-side-nuqs-table/) — the URL layer in depth
+- [nuqs Docs](https://nuqs.dev/)

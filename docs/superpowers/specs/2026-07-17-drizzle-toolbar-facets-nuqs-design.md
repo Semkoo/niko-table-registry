@@ -26,10 +26,21 @@ Two additions around the Drizzle ORM example (`src/registry/new-york/examples/ni
   - Add `"niko-table/drizzle-nuqs-state"` to the `Demo` union in `src/components/markdown/code-preview/_code-preview-internal.tsx`.
   - Sidebar entry (label "Drizzle ORM + Nuqs", slug `examples/drizzle-orm-nuqs`) right after "Drizzle ORM" in `astro.config.mts`.
 
+## Shared-component change (approved during implementation)
+
+`buildFacetedOptions` (`lib/build-faceted-options.ts`) now prefers a
+caller-supplied `count` over the row-derived count (`opt.count ?? recomputed`),
+matching the header-funnel path. Required because the toolbar facet recomputes
+counts from the client rows, which on a server-side table only see the current
+page — this preserves the real server-computed facet counts. Backward
+compatible: only callers who already put counts on their options are affected.
+Ships in `data-table-faceted-filter` and `data-table-column-faceted-filter`, so
+the registry is rebuilt for those.
+
 ## Out of scope
 
-- No shared-component changes (facet narrowing / selected-value pinning already work via existing components).
-- Examples are not registry items, so no `registry.json` / `public/r` changes and no registry rebuild.
+- No other shared-component changes (facet narrowing / selected-value pinning already work).
+- Examples are not registry items, so no example `registry.json` / `public/r` changes.
 
 ## Verification
 

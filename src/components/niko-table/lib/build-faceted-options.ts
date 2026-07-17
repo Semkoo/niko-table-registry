@@ -147,7 +147,11 @@ export function buildFacetedOptions<TData>(
 
   return baseOptions.map(opt => ({
     ...opt,
-    count: valueCounts.get(opt.value) ?? 0,
+    // Prefer a caller-supplied count over the row-derived one. On a server-side
+    // table the rows are only the current page, so the caller passes true
+    // server-computed facet counts; keep them. Options without a count fall
+    // back to the row-derived value. Matches the header-funnel path.
+    count: opt.count ?? valueCounts.get(opt.value) ?? 0,
   }))
 }
 
