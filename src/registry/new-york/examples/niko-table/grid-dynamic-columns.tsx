@@ -17,6 +17,7 @@ import { DataTableColumnTitle } from "@/components/niko-table/components/data-ta
 import { DataTableRowContextMenuSlot } from "@/components/niko-table/components/data-table-row-context-menu-slot"
 import { DataTableViewDndMenu } from "@/components/niko-table/components/data-table-view-dnd-menu"
 import { DataTable } from "@/components/niko-table/core/data-table"
+import { DataTableColumnResize } from "@/components/niko-table/components/data-table-column-resize"
 import { DataTableRoot } from "@/components/niko-table/core/data-table-root"
 import {
   DataTableVirtualizedBody,
@@ -125,7 +126,9 @@ export function GridDynamicColumns() {
 
   return (
     <DataTableRoot data={grid.rows} columns={columns} getRowId={r => r.id}>
-      <DataGrid grid={grid}>
+      <DataGrid grid={grid} className="space-y-2 outline-none">
+        {/* Flex-fill + drag-resizable columns */}
+        <DataTableColumnResize />
         <DataGridClipboard resolveCell={resolveCell} />
         <DataGridColumns value={cols}>
           <DataGridToolbar>

@@ -258,6 +258,10 @@ export default defineConfig({
               label: "Server-Side Nuqs Table",
               slug: "examples/server-side-nuqs-table",
             },
+            {
+              label: "Drizzle ORM",
+              slug: "examples/drizzle-orm",
+            },
           ],
         },
         {
@@ -292,6 +296,7 @@ export default defineConfig({
               slug: "examples/dynamic-columns-grid",
             },
             { label: "Persistence", slug: "examples/persistence-grid" },
+            { label: "Server Side", slug: "examples/server-side-grid" },
           ],
         },
         {

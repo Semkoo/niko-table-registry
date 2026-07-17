@@ -19,6 +19,7 @@
  */
 import { Badge } from "@/components/ui/badge"
 import { DataTable } from "@/components/niko-table/core/data-table"
+import { DataTableColumnResize } from "@/components/niko-table/components/data-table-column-resize"
 import { DataTableRoot } from "@/components/niko-table/core/data-table-root"
 import {
   DataTableVirtualizedBody,
@@ -238,7 +239,9 @@ export function GridValidation() {
 
   return (
     <DataTableRoot data={grid.rows} columns={columns} getRowId={r => r.id}>
-      <DataGrid grid={grid}>
+      <DataGrid grid={grid} className="space-y-2 outline-none">
+        {/* Flex-fill + drag-resizable columns */}
+        <DataTableColumnResize />
         <DataGridClipboard resolveCell={resolveCell} />
         <DataGridFillHandle />
         <DataGridToolbar>
