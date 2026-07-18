@@ -147,9 +147,13 @@ function collapseSameColumnEqualityFilters<TData>(
     // brand=B" ((A ∧ C) ∨ B) must not become "brand IN (A,B) AND category=C"
     // ((A ∨ B) ∧ C).
     const indices = indicesById.get(filter.id) ?? []
+    const firstIndex = indices[0]
+    const lastIndex = indices[indices.length - 1]
     const contiguous =
       indices.length > 0 &&
-      indices[indices.length - 1] - indices[0] + 1 === indices.length
+      firstIndex !== undefined &&
+      lastIndex !== undefined &&
+      lastIndex - firstIndex + 1 === indices.length
     const collapsible =
       contiguous &&
       mergeable.length > 1 &&
@@ -175,7 +179,8 @@ function collapseSameColumnEqualityFilters<TData>(
     }
 
     result.push({
-      ...mergeable[0], // preserve id, filterId and the group's leading joinOperator
+      // collapsible guarantees mergeable.length > 1, so mergeable[0] exists.
+      ...mergeable[0]!, // preserve id, filterId and the group's leading joinOperator
       value: values,
       variant: FILTER_VARIANTS.MULTI_SELECT,
       operator: FILTER_OPERATORS.IN,
