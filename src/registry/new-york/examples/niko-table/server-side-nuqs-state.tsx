@@ -992,7 +992,18 @@ function ServerSideNuqsTableContent() {
 
   // Batch rapid filter clicks (e.g. toggling several faceted options) into a
   // single server request
-  const debouncedColumnFilters = useDebounce(columnFilters, 300)
+  // Debounce search + columnFilters as ONE snapshot, not separately. A single
+  // advanced-menu action can write both URL params at once; debouncing them
+  // on their own clocks would let the undebounced field reach the request
+  // slightly ahead of the other, transiently mixing a new filter with a
+  // stale one (and the reverse on clear). Sorting/pagination stay undebounced.
+  const debouncedInput = useDebounce(
+    useMemo(
+      () => ({ search: globalFilter, columnFilters }),
+      [globalFilter, columnFilters],
+    ),
+    300,
+  )
 
   const {
     data: queryData,
@@ -1008,16 +1019,16 @@ function ServerSideNuqsTableContent() {
       pagination.pageIndex,
       pagination.pageSize,
       sorting,
-      globalFilter,
-      debouncedColumnFilters,
+      debouncedInput.search,
+      debouncedInput.columnFilters,
     ],
     queryFn: () =>
       fetchProducts({
         page: pagination.pageIndex,
         pageSize: pagination.pageSize,
         sorting,
-        search: globalFilter,
-        columnFilters: debouncedColumnFilters,
+        search: debouncedInput.search,
+        columnFilters: debouncedInput.columnFilters,
       }),
     placeholderData: keepPreviousData, // keep rows visible while refetching
   })
@@ -1304,8 +1315,8 @@ function ServerSideNuqsTableContent() {
                 page: pagination.pageIndex,
                 pageSize: pagination.pageSize,
                 sorting,
-                search: globalFilter,
-                columnFilters: debouncedColumnFilters,
+                search: debouncedInput.search,
+                columnFilters: debouncedInput.columnFilters,
               },
               null,
               2,

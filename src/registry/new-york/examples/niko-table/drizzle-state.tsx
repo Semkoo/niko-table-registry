@@ -296,6 +296,22 @@ const searchableColumns = [products.name, products.category, products.brand]
 
 type MenuFilter = ExtendedColumnFilter<Product>
 
+/**
+ * Comparison operators bind their value straight into the query. A non-scalar
+ * value (an accidentally-nested object/array) would otherwise reach the
+ * builder as-is — with a real driver that's a malformed bound parameter, not
+ * a graceful no-op — so guard to the shapes a column value can actually be.
+ */
+function isComparableScalar(value: unknown): boolean {
+  return (
+    value === null ||
+    value instanceof Date ||
+    typeof value === "string" ||
+    typeof value === "number" ||
+    typeof value === "boolean"
+  )
+}
+
 /** One advanced-filter-menu rule → SQL condition. */
 function menuFilterToSql(filter: MenuFilter): Cond | undefined {
   const column = columnMap[filter.id]
@@ -314,17 +330,17 @@ function menuFilterToSql(filter: MenuFilter): Cond | undefined {
     case FILTER_OPERATORS.NOT_ILIKE:
       return notIlike(column, `%${String(value)}%`)
     case FILTER_OPERATORS.EQ:
-      return eq(column, value)
+      return isComparableScalar(value) ? eq(column, value) : undefined
     case FILTER_OPERATORS.NEQ:
-      return ne(column, value)
+      return isComparableScalar(value) ? ne(column, value) : undefined
     case FILTER_OPERATORS.GT:
-      return gt(column, value)
+      return isComparableScalar(value) ? gt(column, value) : undefined
     case FILTER_OPERATORS.GTE:
-      return gte(column, value)
+      return isComparableScalar(value) ? gte(column, value) : undefined
     case FILTER_OPERATORS.LT:
-      return lt(column, value)
+      return isComparableScalar(value) ? lt(column, value) : undefined
     case FILTER_OPERATORS.LTE:
-      return lte(column, value)
+      return isComparableScalar(value) ? lte(column, value) : undefined
     case FILTER_OPERATORS.IN:
       return Array.isArray(value) ? inArray(column, value) : undefined
     case FILTER_OPERATORS.NOT_IN:
@@ -979,7 +995,18 @@ function DrizzleTableContent() {
   const [globalFilter, setGlobalFilter] = useState<string | object>("")
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
 
-  const debouncedColumnFilters = useDebounce(columnFilters, 300)
+  // Debounce search + columnFilters as ONE snapshot, not separately. A single
+  // advanced-menu action can write both at once; debouncing them on their own
+  // clocks would let the undebounced field reach the request slightly ahead
+  // of the other, transiently mixing a new filter with a stale one (and the
+  // reverse on clear). Sorting/pagination stay undebounced.
+  const debouncedInput = useDebounce(
+    useMemo(
+      () => ({ search: globalFilter, columnFilters }),
+      [globalFilter, columnFilters],
+    ),
+    300,
+  )
 
   const {
     data: queryData,
@@ -994,16 +1021,16 @@ function DrizzleTableContent() {
       pagination.pageIndex,
       pagination.pageSize,
       sorting,
-      globalFilter,
-      debouncedColumnFilters,
+      debouncedInput.search,
+      debouncedInput.columnFilters,
     ],
     queryFn: () =>
       fetchProducts({
         page: pagination.pageIndex,
         pageSize: pagination.pageSize,
         sorting,
-        search: globalFilter,
-        columnFilters: debouncedColumnFilters,
+        search: debouncedInput.search,
+        columnFilters: debouncedInput.columnFilters,
       }),
     placeholderData: keepPreviousData,
   })

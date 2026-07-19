@@ -915,8 +915,18 @@ function ServerSideTableContent() {
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
 
   // Batch rapid filter clicks (e.g. toggling several faceted options) into a
-  // single server request
-  const debouncedColumnFilters = useDebounce(columnFilters, 300)
+  // single server request. Debounce search + columnFilters as ONE snapshot,
+  // not separately — a single advanced-menu action can write both at once,
+  // and debouncing them on their own clocks would let the undebounced field
+  // reach the request slightly ahead of the other, transiently mixing a new
+  // filter with a stale one (and the reverse on clear).
+  const debouncedInput = useDebounce(
+    useMemo(
+      () => ({ search: globalFilter, columnFilters }),
+      [globalFilter, columnFilters],
+    ),
+    300,
+  )
 
   const {
     data: queryData,
@@ -932,16 +942,16 @@ function ServerSideTableContent() {
       pagination.pageIndex,
       pagination.pageSize,
       sorting,
-      globalFilter,
-      debouncedColumnFilters,
+      debouncedInput.search,
+      debouncedInput.columnFilters,
     ],
     queryFn: () =>
       fetchProducts({
         page: pagination.pageIndex,
         pageSize: pagination.pageSize,
         sorting,
-        search: globalFilter,
-        columnFilters: debouncedColumnFilters,
+        search: debouncedInput.search,
+        columnFilters: debouncedInput.columnFilters,
       }),
     placeholderData: keepPreviousData, // keep rows visible while refetching
   })
@@ -1193,8 +1203,8 @@ function ServerSideTableContent() {
                 page: pagination.pageIndex,
                 pageSize: pagination.pageSize,
                 sorting,
-                search: globalFilter,
-                columnFilters: debouncedColumnFilters,
+                search: debouncedInput.search,
+                columnFilters: debouncedInput.columnFilters,
               },
               null,
               2,

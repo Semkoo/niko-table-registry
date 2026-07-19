@@ -61,7 +61,7 @@ src/registry/new-york/examples/niko-table/
    - Optional short “What’s included” / usage notes
    - Next links to related overview or examples
 
-4. **Sidebar**: add an entry under **Data Grid Examples** in `astro.config.mts` (`slug: "examples/<name>-grid"`).
+4. **Sidebar**: add an entry under **Data Grid Examples** in `astro.config.mts` (`slug: "examples/<name>-grid"`). The slug must match a file at `src/content/docs/<slug>.mdx` or `src/content/docs/<slug>/index.mdx`. A missing file throws Starlight’s `The slug "…" specified in the Starlight sidebar config does not exist` error (clear `.astro/` and restart `pnpm dev` if the file exists but the error persists).
 
 5. **Cross-links**: from Introduction / overview pages, link to the example; don’t paste a second live demo of the same feature into overview.
 
@@ -100,8 +100,8 @@ Scroll restore for the theme sidebar lives in `src/components/overrides/head.ast
 - [ ] Overview vs Examples split is clear (no duplicate nav items)
 - [ ] Demo is registered and renders in `CodePreview`
 - [ ] Mock data is deterministic
-- [ ] Sidebar entry added in `astro.config.mts`
-- [ ] Internal links point at the new paths
+- [ ] Sidebar entry added in `astro.config.mts` and `pnpm run check:sidebar` passes
+- [ ] Internal links point at the new paths (homepage / changelog / related Next Steps when relevant)
 - [ ] `pnpm run build` (or at least `astro check`) passes
 
 ## Related

@@ -10,6 +10,7 @@ description: Latest updates and release notes for Niko Table.
 - **Base UI support** — all 31 registry items install cleanly into both shadcn generations: Radix (`new-york`) and Base UI (`base-nova`, the current `shadcn init` default). Dual-generation-safe callbacks and props; verified with fresh-app installs of every block under both styles.
 - **Server-Side Grid** — editable grid backed by a server: rows stream in on scroll (no pagination), edits save as a validated `created`/`updated`/`deleted` changeset with `reconcile`. [example](/examples/server-side-grid/)
 - **Drizzle ORM guide** — the server-side wire contract implemented with Drizzle + Postgres, with a live mocked demo that shows the generated SQL as you filter and sort. [guide](/examples/drizzle-orm/)
+- **Drizzle ORM + Nuqs** — the same Drizzle SQL layer with table state in the URL via nuqs (shareable, bookmarkable, refresh-proof). [guide](/examples/drizzle-orm-nuqs/)
 - **`normalizeFiltersFromUrl`** exported from `filters/table-filter-menu` (counterpart of `serializeFiltersForUrl`) for restoring advanced-menu filters from URL or controlled state
 - **Data Grid** (`data-table-grid`) — composable, virtualized spreadsheet grid: `useDataGrid` + `<DataGrid>` + opt-in children. [Introduction](/data-grid/introduction/)
 - **Persistence** (`data-table-grid-changes`) — `useGridChanges` → create / update / delete. [Persistence](/examples/persistence-grid/)
