@@ -15,7 +15,8 @@
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
-    "build": "astro check && shadcn build && astro build",
+    "check:sidebar": "node scripts/check-sidebar-slugs.mjs",
+    "build": "node scripts/check-sidebar-slugs.mjs && astro check && shadcn build && astro build",
     "preview": "astro preview",
     "astro": "astro",
     "registry:build": "shadcn build",

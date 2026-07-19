@@ -1,17 +1,17 @@
 ---
 title: Drizzle ORM
-description: Implement the server-side wire contract with Drizzle ORM and Postgres — filters, sorting, pagination, and cross-filter facets as real SQL.
+description: "Implement the server-side wire contract with Drizzle ORM and Postgres: filters, sorting, pagination, and cross-filter facets as real SQL."
 ---
 
 import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
 
-The [Server-Side Table](/examples/server-side-table/) examples talk to one function with a serializable request shape. This guide implements that function for real with [Drizzle ORM](https://orm.drizzle.team/) on Postgres: every filter widget, the advanced filter menu (including OR logic), sorting, pagination, and cross-filter facets become SQL. Nothing on the client changes — you swap the example's `MOCK SERVER` section for a `fetch` call to the route built here.
+The [Server-Side Table](/examples/server-side-table/) examples talk to one function with a serializable request shape. This guide implements that function for real with [Drizzle ORM](https://orm.drizzle.team/) on Postgres: every filter widget, the advanced filter menu (including OR logic), sorting, pagination, and cross-filter facets become SQL. Nothing on the client changes: you swap the example's `MOCK SERVER` section for a `fetch` call to the route built here.
 
 The same recipe ports directly to MySQL/SQLite Drizzle dialects, and the structure mirrors Prisma or raw SQL if you prefer those.
 
 ## Live demo (mocked)
 
-The demo below runs this guide's `buildWhere` / `buildOrderBy` / `computeFacets` code, verbatim, against a mocked ~80-line stand-in for Drizzle's operators that compiles each condition to a predicate **and** SQL text. Filter, search, and sort — the **Generated SQL** card shows the exact statement a real Postgres would receive:
+The demo below runs this guide's `buildWhere` / `buildOrderBy` / `computeFacets` code, verbatim, against a mocked ~80-line stand-in for Drizzle's operators that compiles each condition to a predicate **and** SQL text. Filter, search, and sort: the **Generated SQL** card shows the exact statement a real Postgres would receive:
 
 <CodePreview demo="niko-table/drizzle-state" />
 
@@ -47,7 +47,7 @@ export const db = drizzle(process.env.DATABASE_URL!)
 
 ## 2. Column mapping
 
-Bridge the table's column ids to Drizzle columns once — everything else stays generic:
+Bridge the table's column ids to Drizzle columns once: everything else stays generic:
 
 ```ts showLineNumbers title="server/column-map.ts"
 import type { AnyPgColumn } from "drizzle-orm/pg-core"
@@ -72,7 +72,7 @@ export const searchableColumns = [
 ]
 ```
 
-## 3. The request — same wire contract as the examples
+## 3. The request: same wire contract as the examples
 
 ```ts showLineNumbers title="server/types.ts"
 import type { ColumnFiltersState, SortingState } from "@tanstack/react-table"
@@ -123,6 +123,22 @@ import {
 import { columnMap, searchableColumns } from "./column-map"
 import type { MenuFilter, ProductQuery } from "./types"
 
+/**
+ * Comparison operators bind their value straight into the query. A non-scalar
+ * value (an accidentally-nested object/array) would otherwise reach the
+ * builder as-is: a malformed bound parameter for the driver, not a graceful
+ * no-op. Guard to the shapes a column value can actually be.
+ */
+function isComparableScalar(value: unknown): boolean {
+  return (
+    value === null ||
+    value instanceof Date ||
+    typeof value === "string" ||
+    typeof value === "number" ||
+    typeof value === "boolean"
+  )
+}
+
 /** One advanced-filter-menu rule → SQL condition. */
 function menuFilterToSql(filter: MenuFilter): SQL | undefined {
   const column = columnMap[filter.id]
@@ -135,17 +151,17 @@ function menuFilterToSql(filter: MenuFilter): SQL | undefined {
     case "not.ilike":
       return notIlike(column, `%${String(value)}%`)
     case "eq":
-      return eq(column, value)
+      return isComparableScalar(value) ? eq(column, value) : undefined
     case "neq":
-      return ne(column, value)
+      return isComparableScalar(value) ? ne(column, value) : undefined
     case "gt":
-      return gt(column, value)
+      return isComparableScalar(value) ? gt(column, value) : undefined
     case "gte":
-      return gte(column, value)
+      return isComparableScalar(value) ? gte(column, value) : undefined
     case "lt":
-      return lt(column, value)
+      return isComparableScalar(value) ? lt(column, value) : undefined
     case "lte":
-      return lte(column, value)
+      return isComparableScalar(value) ? lte(column, value) : undefined
     case "in":
       return Array.isArray(value) ? inArray(column, value) : undefined
     case "not.in":
@@ -258,7 +274,7 @@ export function buildOrderBy(query: ProductQuery): SQL[] {
 
 > **Serialization note:** date filters send **ms timestamps** (numbers), which survive JSON. Convert them to `Date` at the boundary (`toColumnValue`) for `timestamp` columns.
 
-## 5. Facets — grouped counts with the column's own filter excluded
+## 5. Facets: grouped counts with the column's own filter excluded
 
 ```ts showLineNumbers title="server/facets.ts"
 import { count, max, min } from "drizzle-orm"
@@ -333,7 +349,7 @@ export async function POST(request: Request) {
 }
 ```
 
-Validate `query` before trusting it in production (zod works well) — cap `pageSize`, allowlist sortable/filterable column ids (the `columnMap` lookup already drops unknown ids).
+Validate `query` before trusting it in production (zod works well): cap `pageSize`, allowlist sortable/filterable column ids (the `columnMap` lookup already drops unknown ids).
 
 ## 7. Point the example at it
 
@@ -349,7 +365,7 @@ async function fetchProducts(query: ProductQuery): Promise<ProductQueryResult> {
   const result = await res.json()
   return {
     ...result,
-    // timestamps come back as ISO strings — revive them for the Date cells
+    // timestamps come back as ISO strings: revive them for the Date cells
     data: result.data.map((p: Product) => ({
       ...p,
       releaseDate: new Date(p.releaseDate),
@@ -358,11 +374,12 @@ async function fetchProducts(query: ProductQuery): Promise<ProductQueryResult> {
 }
 ```
 
-Everything else — columns, toolbar, facets wiring — already works against this response.
+Everything else (columns, toolbar, facets wiring) already works against this response.
 
 ## Next
 
-- [Server-Side Table](/examples/server-side-table/) — the wire contract and client wiring this guide implements
-- [Server-Side Nuqs Table](/examples/server-side-nuqs-table/) — same contract with URL state
-- [Server-Side Grid](/examples/server-side-grid/) — the editable grid's fetch/save contract
+- [Drizzle ORM + Nuqs](/examples/drizzle-orm-nuqs/): same SQL layer with table state in the URL
+- [Server-Side Table](/examples/server-side-table/): the wire contract and client wiring this guide implements
+- [Server-Side Nuqs Table](/examples/server-side-nuqs-table/): same contract with URL state
+- [Server-Side Grid](/examples/server-side-grid/): the editable grid's fetch/save contract
 - [Drizzle ORM Docs](https://orm.drizzle.team/)
