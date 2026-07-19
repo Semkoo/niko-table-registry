@@ -4,13 +4,15 @@ Optional editable spreadsheet layer on top of the data table. Same open-code / r
 
 ```
 grid/
-├── core/         # useDataGrid wiring via DataGrid, context, feature registration
+├── core/         # DataGrid shell, context, feature registration
 ├── components/   # Clipboard, fill, move, toolbar, status bar, reorder, menus, …
-├── cells/        # Display shell + typed editors (text, number, checkbox, date, select, …)
+├── cells/        # Display shell + typed editors
 ├── hooks/        # useDataGrid, navigation, clipboard, columns, changes, …
 ├── types/        # Cell / row / grid types
 └── config/       # Shortcut metadata
 ```
+
+Each subdirectory has a short `README.md`.
 
 **Composable:** mount only the children you need under `<DataGrid>`. Unmounted features attach no listeners.
 
