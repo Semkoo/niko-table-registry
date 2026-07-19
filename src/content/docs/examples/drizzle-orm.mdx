@@ -123,6 +123,22 @@ import {
 import { columnMap, searchableColumns } from "./column-map"
 import type { MenuFilter, ProductQuery } from "./types"
 
+/**
+ * Comparison operators bind their value straight into the query. A non-scalar
+ * value (an accidentally-nested object/array) would otherwise reach the
+ * builder as-is — a malformed bound parameter for the driver, not a graceful
+ * no-op — so guard to the shapes a column value can actually be.
+ */
+function isComparableScalar(value: unknown): boolean {
+  return (
+    value === null ||
+    value instanceof Date ||
+    typeof value === "string" ||
+    typeof value === "number" ||
+    typeof value === "boolean"
+  )
+}
+
 /** One advanced-filter-menu rule → SQL condition. */
 function menuFilterToSql(filter: MenuFilter): SQL | undefined {
   const column = columnMap[filter.id]
@@ -135,17 +151,17 @@ function menuFilterToSql(filter: MenuFilter): SQL | undefined {
     case "not.ilike":
       return notIlike(column, `%${String(value)}%`)
     case "eq":
-      return eq(column, value)
+      return isComparableScalar(value) ? eq(column, value) : undefined
     case "neq":
-      return ne(column, value)
+      return isComparableScalar(value) ? ne(column, value) : undefined
     case "gt":
-      return gt(column, value)
+      return isComparableScalar(value) ? gt(column, value) : undefined
     case "gte":
-      return gte(column, value)
+      return isComparableScalar(value) ? gte(column, value) : undefined
     case "lt":
-      return lt(column, value)
+      return isComparableScalar(value) ? lt(column, value) : undefined
     case "lte":
-      return lte(column, value)
+      return isComparableScalar(value) ? lte(column, value) : undefined
     case "in":
       return Array.isArray(value) ? inArray(column, value) : undefined
     case "not.in":
