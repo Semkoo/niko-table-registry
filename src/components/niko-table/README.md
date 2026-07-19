@@ -30,6 +30,7 @@ niko-table/
 └── types/          # TypeScript types (types/index.ts is the types module)
 ```
 
+Each of those folders has a short `README.md` with import notes and links.
 **No barrel exports** for UI modules. Import from the file path directly (tree-shaking + shadcn copy pattern). Types may use `types/index.ts`.
 
 ```tsx
