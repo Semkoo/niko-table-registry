@@ -35,10 +35,20 @@ export function getFilteredRowsExcludingColumn<TData>(
     return coreRows
   }
 
+  // Set of real column ids (leaf columns, including hidden accessor columns).
+  // `columnFilters` can carry filter ids that have no matching client column
+  // (for example a filter resolved entirely server-side). Those are skipped
+  // below — checking membership here avoids TanStack's `table.getColumn` dev
+  // warning ("Column with id 'x' does not exist") that fires before the
+  // `!column` guard would catch it.
+  const columnIds = new Set(table.getAllLeafColumns().map(c => c.id))
+
   // Filter rows manually, excluding the current column's filter
   return coreRows.filter(row => {
     // Apply column filters (excluding the current column)
     for (const filter of otherFilters) {
+      if (!columnIds.has(filter.id)) continue
+
       const column = table.getColumn(filter.id)
       if (!column) continue
 
