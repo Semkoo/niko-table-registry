@@ -3,7 +3,8 @@ import { Code } from "@astrojs/starlight/components"
 import fs from "node:fs/promises"
 import {
   type Demo,
-  CodePreviewInternal,
+  CodePreviewTabBar,
+  CodePreviewDemo,
 } from "@/components/markdown/code-preview/_code-preview-internal"
 
 type Props = { demo: Demo }
@@ -21,12 +22,38 @@ const fileContents = (
 )
 ---
 
-<div>
-  <CodePreviewInternal demo={demo} client:load>
-    <Code
-      code={fileContents}
-      lang="tsx"
-      class="h-full rounded-none [&>figure.frame]:h-full [&>figure.frame>pre]:h-full"
-    />
-  </CodePreviewInternal>
+{
+  /*
+  Keep <Code> outside client islands. Expressive Code emits its base stylesheet
+  as a page asset; when <Code> is only slotted into a client:load island, that
+  CSS link is dropped and line numbers stack above each line of code.
+*/
+}
+<div
+  class="not-content flex flex-col gap-2"
+  data-code-preview
+  data-state="preview"
+>
+  <CodePreviewTabBar demo={demo} client:load />
+  <div
+    data-slot="card"
+    class="no-scrollbar min-h-[450px] overflow-y-auto rounded-lg border bg-transparent p-0 text-card-foreground shadow-sm"
+  >
+    <div
+      data-code-preview-panel="preview"
+      class="flex h-full items-center justify-center p-4 [[data-code-preview][data-state=code]_&]:hidden"
+    >
+      <CodePreviewDemo demo={demo} client:load />
+    </div>
+    <div
+      data-code-preview-panel="code"
+      class="hidden h-full [[data-code-preview][data-state=code]_&]:block"
+    >
+      <Code
+        code={fileContents}
+        lang="tsx"
+        class="h-full rounded-none [&>figure.frame]:h-full [&>figure.frame>pre]:h-full"
+      />
+    </div>
+  </div>
 </div>

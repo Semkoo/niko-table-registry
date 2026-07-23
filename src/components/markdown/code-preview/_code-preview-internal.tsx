@@ -1,6 +1,5 @@
-import { lazy, Suspense, type ReactNode } from "react"
-import { Card, CardContent } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { lazy, Suspense, useEffect, useRef, useState } from "react"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Loader2Icon } from "lucide-react"
 import { OpenInV0Button } from "@/components/open-in-v0-button"
 import { SERVER_URL } from "@/data/env"
@@ -62,56 +61,59 @@ export type Demo =
   | "niko-table/grid-validation-state"
   | "niko-table/grid-portaled-cell"
 
-export function CodePreviewInternal({
-  demo,
-  children,
-}: {
-  demo: Demo
-  children: ReactNode
-}) {
-  const [componentName, demoName] = demo.split("/")
-  const Component = getComponent(componentName, demoName)
-  // Installable registry blocks are named data-table, data-table-pagination, etc.; no niko-table.json
+type Tab = "preview" | "code"
+
+/**
+ * Tab chrome only. The highlighted `<Code>` block is SSR’d as a sibling in
+ * `code-preview.astro` (outside this island) so Expressive Code’s stylesheet
+ * is emitted onto the page — client-island slots strip that CSS link.
+ */
+export function CodePreviewTabBar({ demo }: { demo: Demo }) {
+  const [tab, setTab] = useState<Tab>("preview")
+  const rootRef = useRef<HTMLDivElement>(null)
+  const [componentName] = demo.split("/")
   const registryBlock =
     componentName === "niko-table" ? "data-table" : componentName
 
+  useEffect(() => {
+    rootRef.current
+      ?.closest("[data-code-preview]")
+      ?.setAttribute("data-state", tab)
+  }, [tab])
+
   return (
-    <Tabs defaultValue="preview" className="not-content">
-      <TabsList className="w-full">
-        <TabsTrigger value="preview" className="grow-0">
-          Preview
-        </TabsTrigger>
-        <TabsTrigger value="code" className="grow-0">
-          Code
-        </TabsTrigger>
-        <OpenInV0Button
-          url={`${SERVER_URL}/r/${registryBlock}.json`}
-          className="ml-auto"
-        />
-      </TabsList>
-      <Card className="no-scrollbar min-h-[450px] overflow-y-auto rounded-lg bg-transparent p-0">
-        <CardContent className="h-full p-0">
-          <TabsContent
-            value="preview"
-            className="flex h-full items-center justify-center p-4"
-          >
-            <Suspense
-              fallback={<Loader2Icon className="size-16 animate-spin" />}
-            >
-              {/* eslint-disable-next-line react-hooks/static-components */}
-              <Component />
-            </Suspense>
-          </TabsContent>
-          <TabsContent
-            value="code"
-            forceMount
-            className="h-full data-[state=inactive]:hidden"
-          >
-            {children}
-          </TabsContent>
-        </CardContent>
-      </Card>
-    </Tabs>
+    <div ref={rootRef}>
+      <Tabs
+        value={tab}
+        onValueChange={value => setTab(value as Tab)}
+        className="gap-0"
+      >
+        <TabsList className="w-full">
+          <TabsTrigger value="preview" className="grow-0">
+            Preview
+          </TabsTrigger>
+          <TabsTrigger value="code" className="grow-0">
+            Code
+          </TabsTrigger>
+          <OpenInV0Button
+            url={`${SERVER_URL}/r/${registryBlock}.json`}
+            className="ml-auto"
+          />
+        </TabsList>
+      </Tabs>
+    </div>
+  )
+}
+
+export function CodePreviewDemo({ demo }: { demo: Demo }) {
+  const [componentName, demoName] = demo.split("/")
+  const Component = getComponent(componentName, demoName)
+
+  return (
+    <Suspense fallback={<Loader2Icon className="size-16 animate-spin" />}>
+      {/* eslint-disable-next-line react-hooks/static-components */}
+      <Component />
+    </Suspense>
   )
 }
 

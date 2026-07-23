@@ -50,7 +50,7 @@ src/registry/new-york/examples/niko-table/
 
 1. **Registry demo**: add a self-contained example under `src/registry/new-york/examples/niko-table/` (e.g. `grid-foo.tsx`). Import only from `@/components/niko-table/...` direct paths and `@/components/ui`. Use deterministic mock data (no `Math.random()` / `Date.now()`).
 
-2. **Register the demo name**: add the string to `CodePreviewInternal`’s `Demo` union in `src/components/markdown/code-preview/_code-preview-internal.tsx`, and wire the lazy import map there.
+2. **Register the demo name**: add the string to the `Demo` union in `src/components/markdown/code-preview/_code-preview-internal.tsx`, and wire the lazy import map there.
 
 3. **Example MDX**: create `src/content/docs/examples/<name>-grid.mdx` with:
 
