@@ -10,7 +10,19 @@
  * https://github.com/Semkoo/niko-table-registry
  */
 
-import type { ScrollEvent } from "../core/data-table-virtualized-structure"
+/**
+ * Snapshot of the scroll container at the moment of a scroll event.
+ * Defined here (not on a body structure file) so the non-virtualized core
+ * does not need to depend on the virtualized package for a shared type.
+ */
+export interface ScrollEvent {
+  scrollTop: number
+  scrollHeight: number
+  clientHeight: number
+  isTop: boolean
+  isBottom: boolean
+  percentage: number
+}
 
 /**
  * Builds the body-scroll listener used by every data-table body

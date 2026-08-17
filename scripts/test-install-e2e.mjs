@@ -63,9 +63,11 @@ async function main() {
     run("pnpm install")
 
     console.log(
-      "Adding shadcn base components (skeleton, alert, button, dropdown-menu)...",
+      "Adding shadcn base components (skeleton, alert, button, dropdown-menu, context-menu)...",
     )
-    run("pnpm dlx shadcn@latest add skeleton alert button dropdown-menu --yes")
+    run(
+      "pnpm dlx shadcn@latest add skeleton alert button dropdown-menu context-menu --yes",
+    )
 
     console.log(`Adding data-table from registry: ${dataTableUrl}`)
     run(`echo y | pnpm dlx shadcn@latest add "${dataTableUrl}" --yes`, {

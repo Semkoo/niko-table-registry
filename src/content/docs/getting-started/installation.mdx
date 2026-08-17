@@ -38,14 +38,14 @@ To use the `@niko-table/` namespace with the shadcn CLI, you must first register
 
 Install in two steps (or all at once):
 
-1. **Install the core once** — one command copies the base table (Root, DataTable, context, structure, column header, empty state, hooks, lib, types) into your project.
-2. **Add features one by one** — run the CLI for each feature you need (pagination, search filter, DnD, etc.). Each add-on depends on the core, so the CLI will install or reuse it.
+1. **Install the owner once** — `@niko-table/data-table` copies `DataTableRoot`, chrome, and (transitively) `data-table-core` + `data-table-ui` into your project.
+2. **Add features one by one** — run the CLI for each feature you need (pagination, search filter, DnD, etc.). Each add-on depends on `data-table-core`, so the CLI installs or reuses the shared floor without pulling Root or overwriting `table.tsx`.
 
-Now install the core:
+Now install the owner:
 
 <Installation registryItem="data-table" />
 
-**This installs only the core.** For pagination, filters, DnD, virtualization, aside, and other features, add the optional blocks below (one by one) or use **Install Everything**.
+**This installs the full table owner** (`data-table` + `data-table-core` + `data-table-ui`). For pagination, filters, DnD, virtualization, aside, and other features, add the optional blocks below (one by one) or use **Install Everything**. If you own the TanStack instance yourself and only need controls + structure, skip `data-table` and install the control items directly — see [Components](/getting-started/components/#core).
 
 ## Install Everything
 
@@ -232,13 +232,15 @@ Learn more in the [Introduction](/getting-started/introduction/#state-management
 
 ## Custom Table Component
 
-The DataTable registry automatically installs a custom `components/ui/table.tsx` that extends the default Shadcn table with:
+`@niko-table/data-table` pulls `@niko-table/data-table-ui`, which installs a custom `components/ui/table.tsx` that extends the default Shadcn table with:
 
-- A `TableComponent` export (used internally by DataTable)
+- A `TableComponent` export (used internally by DataTable — plain `<table>` without the scroll wrapper)
 - `data-slot` attributes on all elements
-- A container div for overflow handling
+- A scroll container with `tabIndex={0}` so keyboard users can focus and arrow-scroll it (WCAG 2.1.1)
 
-> **Note:** This is **100% backward compatible** — your existing Shadcn tables will continue to work exactly as before. If you already have a `table.tsx`, the CLI will prompt you before overwriting.
+À-la-carte controls that only depend on `data-table-core` **do not** install this file, so a deliberately customized `table.tsx` will not be overwritten. Install `@niko-table/data-table-ui` yourself when you want our primitive, or keep yours if it exports `TableComponent`.
+
+> **Note:** Our `table.tsx` is **100% backward compatible** with existing Shadcn tables. If you already have a `table.tsx` and install `data-table` / `data-table-ui`, the CLI will prompt before overwriting.
 
 ### Monorepo / Non-Standard Layouts
 

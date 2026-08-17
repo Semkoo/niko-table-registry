@@ -7,8 +7,10 @@ description: Latest updates and release notes for Niko Table.
 
 ### Added
 
+- **`data-table-ui`** — optional `components/ui/table.tsx` (`TableComponent` + `tabIndex={0}` scroll container). Pulled by `data-table`; skipped by `data-table-core` so customized tables survive controls-only installs. Part of [#180](https://github.com/Semkoo/niko-table-registry/issues/180)
+- **`data-table-core`** — shared floor (context, structure, types) split out of `data-table`. À-la-carte controls depend on it so server-driven installs skip `DataTableRoot`. [Components](/getting-started/components/#core) · closes [#180](https://github.com/Semkoo/niko-table-registry/issues/180)
 - **Row grouping / aggregation** — `@niko-table/data-table-column-group` with **Group by** / **Stop grouping by** in column menus; TanStack aggregations and `getGroupingValue` (e.g. group by month). [Grouping Table](/examples/grouping-table/)
-- **Base UI support** — all 31 registry items install cleanly into both shadcn generations: Radix (`new-york`) and Base UI (`base-nova`, the current `shadcn init` default). Dual-generation-safe callbacks and props; verified with fresh-app installs of every block under both styles.
+- **Base UI support** — all registry items install cleanly into both shadcn generations: Radix (`new-york`) and Base UI (`base-nova`, the current `shadcn init` default). Dual-generation-safe callbacks and props; verified with fresh-app installs of every block under both styles.
 - **Server-Side Grid** — editable grid backed by a server: rows stream in on scroll (no pagination), edits save as a validated `created`/`updated`/`deleted` changeset with `reconcile`. [example](/examples/server-side-grid/)
 - **Drizzle ORM guide** — the server-side wire contract implemented with Drizzle + Postgres, with a live mocked demo that shows the generated SQL as you filter and sort. [guide](/examples/drizzle-orm/)
 - **Drizzle ORM + Nuqs** — the same Drizzle SQL layer with table state in the URL via nuqs (shareable, bookmarkable, refresh-proof). [guide](/examples/drizzle-orm-nuqs/)

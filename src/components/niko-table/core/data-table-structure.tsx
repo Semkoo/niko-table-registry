@@ -27,25 +27,17 @@ import { DataTableEmptyState } from "../components/data-table-empty-state"
 import { DataTableRowContextMenu } from "../components/data-table-row-context-menu"
 import { useResolvedRowContextMenuRenderer } from "../components/data-table-row-context-menu-slot"
 import { DataTableColumnResizeHandle } from "../lib/column-resize-handle"
-import { createScrollHandler } from "../lib/create-scroll-handler"
+import {
+  createScrollHandler,
+  type ScrollEvent,
+} from "../lib/create-scroll-handler"
 import { renderCellContent } from "../lib/render-cell-content"
 import { resolveColumnWidth, resolveFlexColumnIds } from "../lib/flex-columns"
 import { resolveRowFromClick } from "../lib/row-click"
 import { getCommonPinningStyles } from "../lib/styles"
 import { flashCellKey, useDataTable } from "./data-table-context"
 
-// ============================================================================
-// ScrollEvent Type
-// ============================================================================
-
-export interface ScrollEvent {
-  scrollTop: number
-  scrollHeight: number
-  clientHeight: number
-  isTop: boolean
-  isBottom: boolean
-  percentage: number
-}
+export type { ScrollEvent }
 
 // ============================================================================
 // DataTableHeader
