@@ -18,6 +18,7 @@ import {
   getFacetedRowModel,
   getFacetedUniqueValues,
   getFilteredRowModel,
+  getGroupedRowModel,
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
@@ -27,6 +28,7 @@ import {
   type ExpandedState,
   type FilterFn,
   type FilterFnOption,
+  type GroupingState,
   type PaginationState,
   type RowSelectionState,
   type SortingState,
@@ -91,6 +93,12 @@ export interface DataTableConfig {
    * Double-click a grip to autosize; columns opt out with `enableResizing: false`.
    */
   enableColumnResizing?: boolean
+  /**
+   * When grouping is active, how grouped columns are placed in the column flow.
+   * TanStack default: `'reorder'` (move grouped columns to the start).
+   * `'remove'` hides them; `false` leaves them in place.
+   */
+  groupedColumnMode?: false | "reorder" | "remove"
 
   // Manual modes (for server-side)
   manualSorting?: boolean
@@ -133,6 +141,7 @@ interface TableRootProps<TData, TValue> extends Partial<TableOptions<TData>> {
   onColumnFiltersChange?: (updater: Updater<ColumnFiltersState>) => void
   onRowSelectionChange?: (updater: Updater<RowSelectionState>) => void
   onExpandedChange?: (updater: Updater<ExpandedState>) => void
+  onGroupingChange?: (updater: Updater<GroupingState>) => void
   onColumnOrderChange?: (updater: Updater<ColumnOrderState>) => void
   onRowSelection?: (selectedRows: TData[]) => void
 }
@@ -153,6 +162,7 @@ function DataTableRootInternal<TData, TValue>({
   onColumnFiltersChange,
   onRowSelectionChange,
   onExpandedChange,
+  onGroupingChange,
   onColumnOrderChange,
   onColumnPinningChange,
   onColumnSizingChange,
@@ -201,6 +211,7 @@ function DataTableRootInternal<TData, TValue>({
       enableGrouping: config?.enableGrouping,
       enableExpanding: config?.enableExpanding ?? hasExpandColumn,
       enableColumnResizing: config?.enableColumnResizing,
+      groupedColumnMode: config?.groupedColumnMode,
       manualSorting: config?.manualSorting,
       manualPagination: config?.manualPagination,
       manualFiltering: config?.manualFiltering,
@@ -224,6 +235,7 @@ function DataTableRootInternal<TData, TValue>({
       config?.enableGrouping,
       config?.enableExpanding,
       config?.enableColumnResizing,
+      config?.groupedColumnMode,
       hasExpandColumn,
       config?.manualSorting,
       config?.manualPagination,
@@ -268,10 +280,12 @@ function DataTableRootInternal<TData, TValue>({
       enableMultiSort:
         finalConfig.enableMultiSort ?? detectedFeatures.enableMultiSort ?? true,
       enableGrouping:
-        finalConfig.enableGrouping ?? detectedFeatures.enableGrouping ?? true,
+        finalConfig.enableGrouping ?? detectedFeatures.enableGrouping ?? false,
       enableExpanding:
         finalConfig.enableExpanding ??
         detectedFeatures.enableExpanding ??
+        finalConfig.enableGrouping ??
+        detectedFeatures.enableGrouping ??
         false,
       enableColumnResizing:
         finalConfig.enableColumnResizing ??
@@ -310,6 +324,9 @@ function DataTableRootInternal<TData, TValue>({
   )
   const [expanded, setExpanded] = React.useState<ExpandedState>(
     restInitialState?.expanded ?? {},
+  )
+  const [grouping, setGrouping] = React.useState<GroupingState>(
+    restInitialState?.grouping ?? [],
   )
   const [columnPinning, setColumnPinning] = React.useState<{
     left: string[]
@@ -452,6 +469,13 @@ function DataTableRootInternal<TData, TValue>({
     [],
   )
 
+  const handleGroupingChange = React.useCallback(
+    (u: Updater<GroupingState>) => {
+      if (isMountedRef.current) setGrouping(u)
+    },
+    [],
+  )
+
   const handlePaginationChange = React.useCallback(
     (u: Updater<PaginationState>) => {
       if (isMountedRef.current) setPagination(u)
@@ -550,6 +574,7 @@ function DataTableRootInternal<TData, TValue>({
   const controlledColumnOrder = restState?.columnOrder ?? columnOrder
   const controlledColumnSizing = restState?.columnSizing ?? columnSizing
   const controlledExpanded = restState?.expanded ?? expanded
+  const controlledGrouping = restState?.grouping ?? grouping
   const controlledPagination = restState?.pagination ?? pagination
 
   // System columns (select, expand) follow the first data column's pinning so
@@ -645,6 +670,7 @@ function DataTableRootInternal<TData, TValue>({
         columnFilters: controlledColumnFilters,
         globalFilter: controlledGlobalFilter,
         expanded: controlledExpanded,
+        grouping: controlledGrouping,
         pagination: controlledPagination,
       },
       enableColumnResizing: detectFeatures.enableColumnResizing,
@@ -660,7 +686,9 @@ function DataTableRootInternal<TData, TValue>({
       enableSorting: detectFeatures.enableSorting,
       enableMultiSort: detectFeatures.enableMultiSort,
       enableGrouping: detectFeatures.enableGrouping,
-      enableExpanding: detectFeatures.enableExpanding,
+      enableExpanding:
+        detectFeatures.enableExpanding || detectFeatures.enableGrouping,
+      groupedColumnMode: finalConfig.groupedColumnMode ?? "reorder",
       manualSorting: detectFeatures.manualSorting,
       manualPagination: detectFeatures.manualPagination,
       manualFiltering: detectFeatures.manualFiltering,
@@ -680,6 +708,7 @@ function DataTableRootInternal<TData, TValue>({
       onColumnPinningChange: onColumnPinningChange ?? handleColumnPinningChange,
       onColumnOrderChange: onColumnOrderChange ?? handleColumnOrderChange,
       onExpandedChange: onExpandedChange ?? handleExpandedChange,
+      onGroupingChange: onGroupingChange ?? handleGroupingChange,
       onPaginationChange: onPaginationChange ?? handlePaginationChange,
       getCoreRowModel: getCoreRowModel(),
       getFacetedRowModel: detectFeatures.enableFilters
@@ -697,12 +726,16 @@ function DataTableRootInternal<TData, TValue>({
       getSortedRowModel: detectFeatures.enableSorting
         ? getSortedRowModel()
         : undefined,
+      getGroupedRowModel: detectFeatures.enableGrouping
+        ? getGroupedRowModel()
+        : undefined,
       getPaginationRowModel: detectFeatures.enablePagination
         ? getPaginationRowModel()
         : undefined,
-      getExpandedRowModel: detectFeatures.enableExpanding
-        ? getExpandedRowModel()
-        : undefined,
+      getExpandedRowModel:
+        detectFeatures.enableExpanding || detectFeatures.enableGrouping
+          ? getExpandedRowModel()
+          : undefined,
       filterFns: {
         extended: extendedFilter,
         numberRange: numberRangeFilter,
@@ -762,6 +795,8 @@ function DataTableRootInternal<TData, TValue>({
       handleColumnSizingChange,
       onExpandedChange,
       handleExpandedChange,
+      onGroupingChange,
+      handleGroupingChange,
       onPaginationChange,
       handlePaginationChange,
       getRowId,
@@ -774,6 +809,7 @@ function DataTableRootInternal<TData, TValue>({
       controlledColumnOrder,
       controlledColumnSizing,
       controlledExpanded,
+      controlledGrouping,
       controlledPagination,
       // Add column pinning state to dependencies so the table updates when it changes
       finalColumnPinning,
