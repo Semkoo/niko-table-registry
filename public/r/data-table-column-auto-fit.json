@@ -5,7 +5,7 @@
   "description": "Opt-in even-split fill for resizable columns. Drop <DataTableColumnAutoFit/> next to <DataTableColumnResize/> and the resizable columns grow by an equal share of the leftover space on load (the alternative to the default single-flex-column fill). Self-contained — the body ships no auto-fit code unless you install this.",
   "dependencies": [],
   "registryDependencies": [
-    "https://niko-table.com/r/data-table.json",
+    "https://niko-table.com/r/data-table-core.json",
     "https://niko-table.com/r/data-table-column-resize.json"
   ],
   "files": [

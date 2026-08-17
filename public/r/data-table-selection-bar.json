@@ -5,7 +5,7 @@
   "description": "Bulk actions bar that appears when rows are selected.",
   "dependencies": [],
   "registryDependencies": [
-    "https://niko-table.com/r/data-table.json",
+    "https://niko-table.com/r/data-table-core.json",
     "button",
     "badge"
   ],

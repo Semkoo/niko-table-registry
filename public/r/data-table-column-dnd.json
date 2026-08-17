@@ -10,7 +10,7 @@
     "@dnd-kit/utilities"
   ],
   "registryDependencies": [
-    "https://niko-table.com/r/data-table.json"
+    "https://niko-table.com/r/data-table-core.json"
   ],
   "files": [
     {

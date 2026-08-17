@@ -8,7 +8,7 @@
     "react-day-picker"
   ],
   "registryDependencies": [
-    "https://niko-table.com/r/data-table.json",
+    "https://niko-table.com/r/data-table-core.json",
     "button",
     "calendar",
     "popover",
