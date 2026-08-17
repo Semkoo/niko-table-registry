@@ -1,5 +1,6 @@
 User-agent: *
 Allow: /
 Disallow: /r/
+Disallow: /manual-install/
 
 Sitemap: https://niko-table.com/sitemap-index.xml
