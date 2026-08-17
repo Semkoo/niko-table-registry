@@ -5,7 +5,7 @@
   "description": "Opt-in column resizing with drag handles and double-click autosize (measures natural text width). Keyboard-operable handle. Drop <DataTableColumnResize/> into the table to enable — works with DataTableHeader/Body and the virtualized variants.",
   "dependencies": [],
   "registryDependencies": [
-    "https://niko-table.com/r/data-table.json"
+    "https://niko-table.com/r/data-table-core.json"
   ],
   "files": [
     {

@@ -7,19 +7,24 @@ import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-c
 
 A cheat sheet of every component you can install from the Niko Table registry. Browse by category to find what you need — or just grep this page.
 
-Each addon transitively pulls in `data-table` (the core), so installing any single addon also installs everything required to render a basic table. You never need to install `data-table` explicitly unless you only want the bare core.
+Each addon transitively pulls in `data-table-core` (context, structure, types — not `DataTableRoot`). Installing any control gives you enough to render a body when you own the TanStack instance. For the usual `DataTableRoot` + chrome install, add `@niko-table/data-table` (it depends on `data-table-core`).
 
 > First time using `@niko-table`? Set up the registry once: see the [Installation Guide](/getting-started/installation/#configure-the-niko-table-registry).
 
 ## Core
 
-The foundation. Every other component depends on it.
+The shared floor (`data-table-core`) plus the full owner (`data-table`).
 
-| Name         | What it does                                                                                                                             |
-| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `data-table` | Core DataTable with `DataTableRoot`, context, structure, column header, toolbar section, empty state. Includes the `Table` UI primitive. |
+| Name              | What it does                                                                                                                                                       |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `data-table-core` | Context, non-virtualized structure, types, config, and the lib/hooks bodies and controls need. No `DataTableRoot`.                                                 |
+| `data-table`      | Full owner on top of core: `DataTableRoot`, `DataTable`, toolbar/column chrome, feature detection, scroll/flash hooks. Includes the `Table` UI primitive via core. |
 
 <CliCommandCode action="run" command="shadcn@latest add @niko-table/data-table" />
+
+When you own the table instance yourself (manual server-driven mode), install controls only — they resolve `data-table-core` and skip Root:
+
+<CliCommandCode action="run" command="shadcn@latest add @niko-table/data-table-pagination @niko-table/data-table-search-filter @niko-table/data-table-faceted-filter @niko-table/data-table-clear-filter @niko-table/data-table-column-sort" />
 
 ## Virtualization
 

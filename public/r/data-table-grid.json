@@ -7,7 +7,7 @@
     "lucide-react"
   ],
   "registryDependencies": [
-    "https://niko-table.com/r/data-table.json",
+    "https://niko-table.com/r/data-table-core.json",
     "https://niko-table.com/r/data-table-virtualized.json",
     "https://niko-table.com/r/data-table-column-resize.json",
     "button",

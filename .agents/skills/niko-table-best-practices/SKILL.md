@@ -21,7 +21,7 @@ A skill for building and configuring data tables with Niko Table: structure, fil
 
 At a high level:
 
-- **New table**: DataTableRoot → ToolbarSection (optional) → DataTable → Header + Body (Skeleton, EmptyBody) → Pagination. Use direct file imports only (no barrel exports).
+- **New table**: DataTableRoot → ToolbarSection (optional) → DataTable → Header + Body (Skeleton, EmptyBody) → Pagination. Use direct file imports only (no barrel exports). Install `@niko-table/data-table` for the owner; à-la-carte controls depend on `@niko-table/data-table-core` (context + structure, no Root) when you own the TanStack instance.
 - **Adding filters**: Toolbar = DataTableSearchFilter, DataTableFacetedFilter, DataTableFilterMenu. Column headers = DataTableColumnFacetedFilterMenu, DataTableColumnSliderFilterMenu, DataTableColumnDateFilterMenu. Set column `meta` (variant, options, etc.) and `enableColumnFilter: true`.
 - **Row/column DnD**: Row DnD needs `getRowId`, DataTableRowDndProvider outside DataTable; don’t combine row DnD with sorting/filtering. Column DnD is safe with everything.
 - **Grouping**: Mount `DataTableColumnGroupOptions` in `DataTableColumnActions` (or `config.enableGrouping`). Use `aggregationFn` / `aggregatedCell` for rollups and `getGroupingValue` for buckets (e.g. month). Don’t combine with row DnD or with tree `getSubRows` — tree = nested data; grouping = flat rows bucketed by column. See Grouping Table / Tree Table on niko-table.com.
@@ -191,7 +191,7 @@ Sync table state (pagination, sorting, filters, search) with the URL for shareab
      "@niko-table": "https://niko-table.com/r/{name}.json"
    }
    ```
-4. **Core**: `shadcn@latest add @niko-table/data-table` (also installs/updates `components/ui/table.tsx` with `TableComponent`; backward compatible with existing Shadcn table).
+4. **Core**: `shadcn@latest add @niko-table/data-table` (pulls `data-table-core` + Root/chrome; also installs/updates `components/ui/table.tsx` with `TableComponent`; backward compatible with existing Shadcn table). For controls-only / own TanStack instance: install the control items — they resolve `data-table-core` without Root.
 5. **Add-ons** (examples): `@niko-table/data-table-pagination`, `@niko-table/data-table-search-filter`, `@niko-table/data-table-view-menu`, `@niko-table/data-table-sort-menu`, `@niko-table/data-table-filter-menu`, plus column-level filter/sort components as needed. Match names from the registry at niko-table.com.
 6. **Server-side**: For `manualPagination`/`manualSorting`/`manualFiltering`, set `config.pageCount` (e.g. `Math.ceil(totalCount / pageSize)`) and pass `totalCount` to `DataTablePagination` when using server-driven data.
 
