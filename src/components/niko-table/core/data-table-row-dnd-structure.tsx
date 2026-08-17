@@ -15,10 +15,11 @@ import React from "react"
 import { cn } from "@/lib/utils"
 import { useDataTable } from "./data-table-context"
 import { TableRow, TableBody, TableCell } from "@/components/ui/table"
-import { flexRender, type Row } from "@tanstack/react-table"
+import { type Row } from "@tanstack/react-table"
 import { DataTableRowContextMenu } from "../components/data-table-row-context-menu"
 import { useResolvedRowContextMenuRenderer } from "../components/data-table-row-context-menu-slot"
 import { resolveRowFromClick } from "../lib/row-click"
+import { renderCellContent } from "../lib/render-cell-content"
 import { getCommonPinningStyles } from "../lib/styles"
 import {
   TableDraggableRow,
@@ -113,7 +114,7 @@ const DndBodyRow = React.memo(function DndBodyRow({
                 "bg-background group-hover:bg-muted/50 group-data-[context-menu-open]:bg-muted/50 group-data-[state=selected]:bg-muted",
             )}
           >
-            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+            {renderCellContent(cell)}
           </TableCell>
         )
       })}

@@ -21,7 +21,7 @@
 
 import React from "react"
 import { useVirtualizer } from "@tanstack/react-virtual"
-import { flexRender, type Row } from "@tanstack/react-table"
+import { type Row } from "@tanstack/react-table"
 import { cn } from "@/lib/utils"
 import { useDataTable } from "./data-table-context"
 import { TableRow, TableBody, TableCell } from "@/components/ui/table"
@@ -29,6 +29,7 @@ import { DataTableRowContextMenu } from "../components/data-table-row-context-me
 import { useResolvedRowContextMenuRenderer } from "../components/data-table-row-context-menu-slot"
 import { createScrollHandler } from "../lib/create-scroll-handler"
 import { resolveRowFromClick } from "../lib/row-click"
+import { renderCellContent } from "../lib/render-cell-content"
 import { getCommonPinningStyles } from "../lib/styles"
 import {
   SortableContext,
@@ -271,7 +272,7 @@ const VirtualizedDndBodyRowInner = function VirtualizedDndBodyRow<TData>({
             )}
             style={cellStyle}
           >
-            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+            {renderCellContent(cell)}
           </TableCell>
         )
       })}

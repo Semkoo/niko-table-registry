@@ -19,6 +19,8 @@ Attach arbitrary React — a sub-table, charts, a key-value detail block — to 
 
 The Row Expansion Table allows users to expand rows to view more details inline. This is useful for showing additional information without navigating away or opening a modal.
 
+Not a [Tree Table](/examples/tree-table/) (nested `getSubRows`) and not [Grouping](/examples/grouping-table/) (column buckets) — expansion here reveals an **inline detail panel** for one flat row.
+
 ## Installation
 
 Install the DataTable core and add-ons for this example:
@@ -554,11 +556,12 @@ excludeColumns={["expand"] as unknown as (keyof Order)[]}
 
 **❌ Consider other options when:**
 
-- You need to show details for all rows (use [Aside Table](/examples/aside-table/))
-- Expanded content is very large (use [Aside Table](/examples/aside-table/))
-- You don't need additional details (use [Basic Table](/examples/basic-table/))
+- Data is hierarchical parent/child rows — use [Tree Table](/examples/tree-table/)
+- You want to bucket flat rows by column values — use [Grouping Table](/examples/grouping-table/)
+- Expanded content is very large or always visible — use [Aside Table](/examples/aside-table/)
 
 ## Next Steps
 
-- [Aside Table](/examples/aside-table/) - Show details in sidebars
-- [Tree Table](/examples/tree-table/) - Hierarchical data with expansion
+- [Aside Table](/examples/aside-table/) — show details in sidebars
+- [Tree Table](/examples/tree-table/) — nested data with `getSubRows`
+- [Grouping Table](/examples/grouping-table/) — bucket flat rows by column values

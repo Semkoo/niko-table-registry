@@ -30,6 +30,7 @@ import { DataTableRowContextMenu } from "../components/data-table-row-context-me
 import { useResolvedRowContextMenuRenderer } from "../components/data-table-row-context-menu-slot"
 import { DataTableColumnResizeHandle } from "../lib/column-resize-handle"
 import { createScrollHandler } from "../lib/create-scroll-handler"
+import { renderCellContent } from "../lib/render-cell-content"
 import { resolveColumnWidth, resolveFlexColumnIds } from "../lib/flex-columns"
 import { isInteractiveClickTarget } from "../lib/row-click"
 import { getCommonPinningStyles } from "../lib/styles"
@@ -448,14 +449,14 @@ const VirtualizedBodyRowInner = function VirtualizedBodyRow<TData>({
             data-col-id={cell.column.id}
             className={cn(
               // Ellipsis on shrink (same as regular body / grid display cells).
-              "truncate",
+              !cell.getIsGrouped() && "truncate",
               cell.column.getIsPinned() &&
                 "bg-background group-hover:bg-muted/50 group-data-[context-menu-open]:bg-muted/50 group-data-[state=selected]:bg-muted",
               getCellClassName?.(row.original as TData, cell.column.id),
             )}
             style={cellStyle}
           >
-            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+            {renderCellContent(cell)}
           </TableCell>
         )
       })}

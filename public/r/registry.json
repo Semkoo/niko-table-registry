@@ -167,6 +167,11 @@
           "target": "components/niko-table/lib/row-click.ts"
         },
         {
+          "path": "src/components/niko-table/lib/render-cell-content.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/lib/render-cell-content.tsx"
+        },
+        {
           "path": "src/components/niko-table/lib/format.ts",
           "type": "registry:lib",
           "target": "components/niko-table/lib/format.ts"
@@ -664,6 +669,31 @@
           "path": "src/components/niko-table/filters/table-column-pin.tsx",
           "type": "registry:component",
           "target": "components/niko-table/filters/table-column-pin.tsx"
+        }
+      ]
+    },
+    {
+      "name": "data-table-column-group",
+      "type": "registry:component",
+      "title": "DataTable Column Group",
+      "description": "Column header option to group rows by column values with TanStack aggregation support.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": [
+        "https://niko-table.com/r/data-table.json",
+        "button",
+        "dropdown-menu",
+        "tooltip"
+      ],
+      "files": [
+        {
+          "path": "src/components/niko-table/components/data-table-column-group.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-column-group.tsx"
+        },
+        {
+          "path": "src/components/niko-table/filters/table-column-group.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/table-column-group.tsx"
         }
       ]
     },
