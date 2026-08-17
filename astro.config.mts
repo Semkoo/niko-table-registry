@@ -198,6 +198,10 @@ export default defineConfig({
               slug: "examples/column-pinning-table",
             },
             {
+              label: "Grouping Table",
+              slug: "examples/grouping-table",
+            },
+            {
               label: "Column Resize Table",
               slug: "examples/column-resize-table",
             },

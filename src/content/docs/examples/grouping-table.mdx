@@ -1,0 +1,180 @@
+---
+title: Grouping Table
+description: Group rows by column values with expand/collapse and TanStack aggregations (sum, count, and custom getGroupingValue for month buckets).
+---
+
+import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
+import CollapsiblePreview from "@/components/markdown/collapsible-preview.astro"
+import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
+
+Collapse orders into region, status, or calendar-month bands from the column actions menu — the same **Group by** / **Stop grouping by** pattern used by MUI X and other data grids. Nested groups follow the order you group columns; numeric columns can roll up with TanStack `aggregationFn` (this demo sums **Amount**).
+
+<CodePreview demo="niko-table/grouping" />
+
+<CollapsiblePreview>
+  <CodePreview demo="niko-table/grouping-state" />
+</CollapsiblePreview>
+
+## Introduction
+
+Grouping collapses rows that share a value into a single expandable band, with an optional rollup (sum, count, …) on the group row. Add **Group by** to any column's actions menu and users pick the grouping at runtime; nest bands by grouping more than one column. Built on TanStack Table's `getGroupedRowModel`, so you drop in one registry piece and mount the option where you want it.
+
+## Installation
+
+<CliCommandCode action="run" command="shadcn@latest add @niko-table/data-table @niko-table/data-table-column-group @niko-table/data-table-column-sort @niko-table/data-table-pagination @niko-table/data-table-search-filter @niko-table/data-table-view-menu" />
+
+> First time using `@niko-table`? See the [Installation Guide](/getting-started/installation#configure-the-niko-table-registry) to set up the registry.
+
+## Column menu: Group by
+
+Compose group actions into the header menu like other column controls:
+
+```tsx showLineNumbers
+import { DataTableColumnGroupOptions } from "@/components/niko-table/components/data-table-column-group"
+
+header: () => (
+  <DataTableColumnHeader>
+    <DataTableColumnTitle title="Region" />
+    <DataTableColumnActions>
+      <DataTableColumnSortOptions />
+      <DataTableColumnGroupOptions />
+    </DataTableColumnActions>
+  </DataTableColumnHeader>
+),
+```
+
+Opt columns out with `enableGrouping: false` so **Group by** does not appear (IDs, free-text fields, etc.).
+
+## Expand / collapse all
+
+The group toggle lives on each band, but a toolbar shortcut is handy. `table.toggleAllRowsExpanded()` reads from context — no extra state:
+
+```tsx showLineNumbers
+import { useDataTable } from "@/components/niko-table/core/data-table-context"
+
+function GroupingExpansionControls() {
+  const { table } = useDataTable<Order>()
+  const hasGrouping = table.getState().grouping.length > 0
+
+  return (
+    <>
+      <Button
+        variant="outline"
+        size="sm"
+        disabled={!hasGrouping}
+        onClick={() => table.toggleAllRowsExpanded(true)}
+      >
+        Expand All
+      </Button>
+      <Button
+        variant="outline"
+        size="sm"
+        disabled={!hasGrouping}
+        onClick={() => table.toggleAllRowsExpanded(false)}
+      >
+        Collapse All
+      </Button>
+    </>
+  )
+}
+```
+
+Drop `<GroupingExpansionControls />` inside `DataTableToolbarSection` next to the search input.
+
+## Aggregations
+
+Set `aggregationFn` on columns that should roll up on group rows. Built-ins include `sum`, `count`, `min`, `max`, `mean`, `median`, and more — see [TanStack Grouping](https://tanstack.com/table/v8/docs/guide/grouping).
+
+```tsx showLineNumbers
+{
+  accessorKey: "amount",
+  aggregationFn: "sum",
+  cell: ({ getValue }) => formatCurrency(Number(getValue())),
+  aggregatedCell: ({ getValue }) => (
+    <span className="font-medium tabular-nums">
+      {formatCurrency(Number(getValue()))}
+    </span>
+  ),
+}
+```
+
+## Group by month
+
+Use `getGroupingValue` to derive a bucket (e.g. `YYYY-MM`) without changing the underlying date cell for leaf rows:
+
+```tsx showLineNumbers
+{
+  accessorKey: "date",
+  getGroupingValue: row => row.date.slice(0, 7),
+  cell: ({ getValue, row }) => {
+    const value = String(getValue())
+    if (row.getIsGrouped()) return formatMonthKey(value)
+    return new Date(`${value}T00:00:00`).toLocaleDateString("en-US")
+  },
+}
+```
+
+## Controlled state
+
+```tsx showLineNumbers
+const [grouping, setGrouping] = useState<GroupingState>(["region"])
+const [expanded, setExpanded] = useState<ExpandedState>(true)
+
+<DataTableRoot
+  data={data}
+  columns={columns}
+  state={{ grouping, expanded }}
+  onGroupingChange={setGrouping}
+  onExpandedChange={setExpanded}
+>
+```
+
+Or seed once with `initialState={{ grouping: ["region"], expanded: true }}`.
+
+## Config
+
+| Option                     | Purpose                                                                               |
+| -------------------------- | ------------------------------------------------------------------------------------- |
+| `config.enableGrouping`    | Force grouping on/off (otherwise detected from column group UI)                       |
+| `config.groupedColumnMode` | `'reorder'` (default), `'remove'`, or `false` — TanStack placement of grouped columns |
+| `config.enableExpanding`   | Forced on when grouping is active so group rows can collapse                          |
+
+## Tree vs Grouping
+
+Both expand/collapse, but they are different features — use **one per table**:
+
+|                       | [Tree Table](/examples/tree-table/) | Grouping                                      |
+| --------------------- | ----------------------------------- | --------------------------------------------- |
+| Source                | Nested data via `getSubRows`        | Flat data + column buckets                    |
+| Who defines structure | Your data model                     | User / `grouping` state                       |
+| Aggregations          | Not the main model                  | `aggregationFn` / `aggregatedCell`            |
+| Typical UI            | Indent + chevron per level          | **Group by** in the column menu + `(n)` count |
+
+[Row Expansion](/examples/row-expansion-table/) is a third pattern: one flat row opens an inline detail panel — not nested rows and not column buckets.
+
+## Constraints
+
+- Prefer **not** combining row DnD with grouping (manual order vs grouped order conflict) — same guidance as sorting + row DnD.
+- Column DnD, sorting, filtering, pagination, and virtualization remain compatible.
+- Server-side / `manualGrouping` is out of scope for this release (TanStack notes it needs heavy custom rendering).
+
+## When to use
+
+**✅ Use grouping when:**
+
+- Summarizing large lists by region, status, category, or month
+- Showing rollups (sum of amount, count of rows) on group headers
+- Migrating from MUI X / similar grids that expose **Group by** in the column menu
+
+**❌ Consider other options when:**
+
+- Rows form a fixed parent/child hierarchy — use a [Tree Table](/examples/tree-table/) instead
+- You need per-row detail panels — use [Row Expansion](/examples/row-expansion-table/)
+- Grouping is computed on the server — `manualGrouping` is out of scope for this release
+
+## Next steps
+
+- [Tree Table](/examples/tree-table/) — nested data with `getSubRows`
+- [Row Expansion Table](/examples/row-expansion-table/) — inline detail panels
+- [Column Pinning Table](/examples/column-pinning-table/) — keep ID columns visible while scrolling grouped views
+- [Faceted Filter Table](/examples/faceted-filter-table/) — narrow before grouping

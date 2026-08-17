@@ -62,24 +62,24 @@ export function MyTable({ data }: { data: User[] }) {
 
 The `config` prop accepts a `DataTableConfig` object with the following properties:
 
-| Name                   | Type      | Default | Description                                                                                             |
-| ---------------------- | --------- | ------- | ------------------------------------------------------------------------------------------------------- |
-| `enablePagination`     | `boolean` | `false` | Enable pagination. Auto-enabled when `DataTablePagination` is detected.                                 |
-| `enableFilters`        | `boolean` | `false` | Enable filtering. Auto-enabled when filter components are detected.                                     |
-| `enableSorting`        | `boolean` | `false` | Enable sorting. Auto-enabled when sort components are detected.                                         |
-| `enableRowSelection`   | `boolean` | `false` | Enable row selection.                                                                                   |
-| `enableMultiSort`      | `boolean` | `true`  | Enable multi-column sorting.                                                                            |
-| `enableGrouping`       | `boolean` | `true`  | Enable column grouping.                                                                                 |
-| `enableExpanding`      | `boolean` | `false` | Enable row expansion.                                                                                   |
-| `manualSorting`        | `boolean` | `false` | Enable server-side sorting.                                                                             |
-| `manualPagination`     | `boolean` | `false` | Enable server-side pagination.                                                                          |
-| `manualFiltering`      | `boolean` | `false` | Enable server-side filtering.                                                                           |
-| `pageCount`            | `number`  | -       | Total pages (required for server-side pagination).                                                      |
-| `initialPageSize`      | `number`  | `10`    | Initial page size.                                                                                      |
-| `initialPageIndex`     | `number`  | `0`     | Initial page index.                                                                                     |
-| `autoResetPageIndex`   | `boolean` | `false` | Auto-reset page on filter/sort change. Off by default (prevents flushSync warnings); opt in explicitly. |
-| `autoResetExpanded`    | `boolean` | `false` | Auto-reset expanded rows on filter/sort change.                                                         |
-| `enableColumnResizing` | `boolean` | `false` | Enable column resizing. Auto-enabled when `DataTableColumnResize` is detected.                          |
+| Name                   | Type      | Default | Description                                                                                                   |
+| ---------------------- | --------- | ------- | ------------------------------------------------------------------------------------------------------------- |
+| `enablePagination`     | `boolean` | `false` | Enable pagination. Auto-enabled when `DataTablePagination` is detected.                                       |
+| `enableFilters`        | `boolean` | `false` | Enable filtering. Auto-enabled when filter components are detected.                                           |
+| `enableSorting`        | `boolean` | `false` | Enable sorting. Auto-enabled when sort components are detected.                                               |
+| `enableRowSelection`   | `boolean` | `false` | Enable row selection.                                                                                         |
+| `enableMultiSort`      | `boolean` | `true`  | Enable multi-column sorting.                                                                                  |
+| `enableGrouping`       | `boolean` | `false` | Enable column grouping. Auto-enabled when column group UI is detected. Do not combine with tree `getSubRows`. |
+| `enableExpanding`      | `boolean` | `false` | Enable row expansion.                                                                                         |
+| `manualSorting`        | `boolean` | `false` | Enable server-side sorting.                                                                                   |
+| `manualPagination`     | `boolean` | `false` | Enable server-side pagination.                                                                                |
+| `manualFiltering`      | `boolean` | `false` | Enable server-side filtering.                                                                                 |
+| `pageCount`            | `number`  | -       | Total pages (required for server-side pagination).                                                            |
+| `initialPageSize`      | `number`  | `10`    | Initial page size.                                                                                            |
+| `initialPageIndex`     | `number`  | `0`     | Initial page index.                                                                                           |
+| `autoResetPageIndex`   | `boolean` | `false` | Auto-reset page on filter/sort change. Off by default (prevents flushSync warnings); opt in explicitly.       |
+| `autoResetExpanded`    | `boolean` | `false` | Auto-reset expanded rows on filter/sort change.                                                               |
+| `enableColumnResizing` | `boolean` | `false` | Enable column resizing. Auto-enabled when `DataTableColumnResize` is detected.                                |
 
 ### DataTableProvider
 

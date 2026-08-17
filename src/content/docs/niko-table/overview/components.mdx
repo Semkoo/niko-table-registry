@@ -515,6 +515,7 @@ import { DataTableColumnFilterTrigger } from "@/components/niko-table/components
 import { DataTableColumnSortOptions } from "@/components/niko-table/components/data-table-column-sort"
 import { DataTableColumnHideOptions } from "@/components/niko-table/components/data-table-column-hide"
 import { DataTableColumnPinOptions } from "@/components/niko-table/components/data-table-column-pin"
+import { DataTableColumnGroupOptions } from "@/components/niko-table/components/data-table-column-group"
 import { DataTableColumnFacetedFilterOptions } from "@/components/niko-table/components/data-table-column-faceted-filter"
 import { DataTableColumnSliderFilterOptions } from "@/components/niko-table/components/data-table-column-slider-filter-options"
 import { DataTableColumnDateFilterOptions } from "@/components/niko-table/components/data-table-column-date-filter-options"
@@ -532,6 +533,7 @@ const columns: DataTableColumnDef<User>[] = [
           </DataTableColumnFilter>
           <DataTableColumnSortOptions />
           <DataTableColumnPinOptions />
+          <DataTableColumnGroupOptions />
           <DataTableColumnHideOptions />
         </DataTableColumnActions>
       </DataTableColumnHeader>
@@ -710,6 +712,22 @@ Pinning options to compose inside `DataTableColumnActions`. Renders pin left/rig
 ##### DataTableColumnPinMenu
 
 Standalone pinning menu for column header. Renders as a clickable button.
+
+| Name        | Type     | Description             |
+| ----------- | -------- | ----------------------- |
+| `className` | `string` | Additional CSS classes. |
+
+##### DataTableColumnGroupOptions
+
+Grouping options to compose inside `DataTableColumnActions`. Renders **Group by** / **Stop grouping by**. Feature detection turns on `getGroupedRowModel` + expand/collapse. For nested data hierarchies, use a [Tree Table](/examples/tree-table/) (`getSubRows`) instead — don’t combine the two.
+
+| Name            | Type      | Default | Description                                       |
+| --------------- | --------- | ------- | ------------------------------------------------- |
+| `withSeparator` | `boolean` | `true`  | Whether to render a separator before the options. |
+
+##### DataTableColumnGroupMenu
+
+Standalone grouping menu for column header. Renders as a clickable button.
 
 | Name        | Type     | Description             |
 | ----------- | -------- | ----------------------- |
@@ -1189,6 +1207,14 @@ Renders the "Hide column" menu item. Honors `column.getCanHide()`. Wraps `TableC
 </div>
 
 Renders the "Pin to left" / "Pin to right" / "Unpin" menu items. Honors `column.getCanPin()`. Wraps `TableColumnPin` from `filters/`.
+
+### data-table-column-group
+
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-column-group.tsx`} external>Source Code ↗</DocsLink>
+</div>
+
+Renders **Group by** / **Stop grouping by** menu items. Honors `column.getCanGroup()`. Wraps `TableColumnGroup` from `filters/`. See [Grouping Table](/examples/grouping-table/). Not the same as a [Tree Table](/examples/tree-table/) (`getSubRows`) — use one or the other per table.
 
 ### data-table-column-filter
 

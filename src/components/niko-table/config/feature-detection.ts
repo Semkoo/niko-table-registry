@@ -104,6 +104,12 @@ const COMPONENT_FEATURES: Record<string, FeatureRequirements> = {
   DataTableColumnSortMenu: { enableSorting: true, enableMultiSort: true },
   TableColumnSortOptions: { enableSorting: true, enableMultiSort: true },
   DataTableColumnSortOptions: { enableSorting: true, enableMultiSort: true },
+
+  // Grouping — also needs expanding so group rows can collapse/expand
+  TableColumnGroupOptions: { enableGrouping: true, enableExpanding: true },
+  DataTableColumnGroupOptions: { enableGrouping: true, enableExpanding: true },
+  TableColumnGroupMenu: { enableGrouping: true, enableExpanding: true },
+  DataTableColumnGroupMenu: { enableGrouping: true, enableExpanding: true },
 }
 
 /**
@@ -190,6 +196,9 @@ export function detectFeaturesFromChildren(
               getCanPin: () => true,
               getIsPinned: () => false,
               pin: () => {},
+              getCanGroup: () => true,
+              getIsGrouped: () => false,
+              toggleGrouping: () => {},
               columnDef: { meta: {} },
               id: "mock",
             },

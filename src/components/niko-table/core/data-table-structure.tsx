@@ -28,6 +28,7 @@ import { DataTableRowContextMenu } from "../components/data-table-row-context-me
 import { useResolvedRowContextMenuRenderer } from "../components/data-table-row-context-menu-slot"
 import { DataTableColumnResizeHandle } from "../lib/column-resize-handle"
 import { createScrollHandler } from "../lib/create-scroll-handler"
+import { renderCellContent } from "../lib/render-cell-content"
 import { resolveColumnWidth, resolveFlexColumnIds } from "../lib/flex-columns"
 import { resolveRowFromClick } from "../lib/row-click"
 import { getCommonPinningStyles } from "../lib/styles"
@@ -254,13 +255,14 @@ const BodyRow = React.memo(function BodyRow({
             className={cn(
               // Match virtualized/grid: clip overflow. `truncate` adds ellipsis
               // on top of shadcn TableCell's `whitespace-nowrap` so shrink-via-
-              // resize doesn't paint into neighboring columns.
-              "truncate",
+              // resize doesn't paint into neighboring columns. Skip on grouped
+              // cells so the expand control + count stay visible.
+              !cell.getIsGrouped() && "truncate",
               cell.column.getIsPinned() &&
                 "bg-background group-hover:bg-muted/50 group-data-[context-menu-open]:bg-muted/50 group-data-[state=selected]:bg-muted",
             )}
           >
-            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+            {renderCellContent(cell)}
           </TableCell>
         )
       })}

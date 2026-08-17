@@ -38,6 +38,8 @@ export type Demo =
   | "niko-table/column-dnd-state"
   | "niko-table/column-pinning"
   | "niko-table/column-pinning-state"
+  | "niko-table/grouping"
+  | "niko-table/grouping-state"
   | "niko-table/column-resize"
   | "niko-table/column-resize-state"
   | "niko-table/column-resize-autofit"

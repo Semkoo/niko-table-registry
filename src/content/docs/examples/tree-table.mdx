@@ -19,6 +19,19 @@ Renders nested row models (`subRows`) with collapsible parents and optional casc
 
 The Tree Table displays hierarchical data with parent and child relationships. Rows can be expanded to show nested data, and selection can cascade to children.
 
+## Tree vs Grouping
+
+Both expand/collapse, but they are different features — use **one per table**:
+
+|                       | Tree                         | [Grouping Table](/examples/grouping-table/)   |
+| --------------------- | ---------------------------- | --------------------------------------------- |
+| Source                | Nested data via `getSubRows` | Flat data + column buckets                    |
+| Who defines structure | Your data model              | User / `grouping` state                       |
+| Aggregations          | Not the main model           | `aggregationFn` / `aggregatedCell`            |
+| Typical UI            | Indent + chevron per level   | **Group by** in the column menu + `(n)` count |
+
+[Row Expansion](/examples/row-expansion-table/) is a third pattern: one flat row opens an inline detail panel — not nested rows and not column buckets.
+
 ## Installation
 
 Install the DataTable core and add-ons for this example:
@@ -491,11 +504,12 @@ For hierarchical selection (selecting a parent selects all children), you'll nee
 
 **❌ Don't use Tree Table when:**
 
-- Data is flat (use [Basic Table](/examples/basic-table/))
-- You don't need hierarchical structure
-- You prefer sidebars for details (use [Aside Table](/examples/aside-table/))
+- Data is flat and you want to bucket by column values — use [Grouping Table](/examples/grouping-table/)
+- You need per-row detail panels — use [Row Expansion](/examples/row-expansion-table/)
+- You prefer sidebars for details — use [Aside Table](/examples/aside-table/)
 
 ## Next Steps
 
-- [Row Expansion Table](/examples/row-expansion-table/) - Simple row expansion
-- [Advanced Table](/examples/advanced-table/) - Combine with other features
+- [Grouping Table](/examples/grouping-table/) — bucket flat rows by column values
+- [Row Expansion Table](/examples/row-expansion-table/) — inline detail panels
+- [Advanced Table](/examples/advanced-table/) — combine with other features

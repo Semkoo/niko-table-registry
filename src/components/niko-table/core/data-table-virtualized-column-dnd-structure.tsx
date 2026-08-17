@@ -36,6 +36,7 @@ import { DataTableRowContextMenu } from "../components/data-table-row-context-me
 import { useResolvedRowContextMenuRenderer } from "../components/data-table-row-context-menu-slot"
 import { createScrollHandler } from "../lib/create-scroll-handler"
 import { resolveRowFromClick } from "../lib/row-click"
+import { renderCellContent } from "../lib/render-cell-content"
 import { getCommonPinningStyles } from "../lib/styles"
 import {
   TableDraggableHeader,
@@ -183,7 +184,7 @@ const VirtualizedDndColumnBodyRowInner = function VirtualizedDndColumnBodyRow<
               minHeight: `${estimateSize}px`,
             }}
           >
-            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+            {renderCellContent(cell)}
           </TableDragAlongCell>
         )
       })}

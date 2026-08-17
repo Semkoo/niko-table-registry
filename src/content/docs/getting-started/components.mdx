@@ -60,6 +60,7 @@ Per-column controls embedded in the column header dropdown.
 | `data-table-column-sort`               | Header sort option with asc/desc/clear.                                                                                                    |
 | `data-table-column-hide`               | Header option to hide/show the column.                                                                                                     |
 | `data-table-column-pin`                | Header option to pin column left/right.                                                                                                    |
+| `data-table-column-group`              | Header **Group by** / **Stop grouping by** (flat-row buckets + aggregations — not tree `getSubRows`).                                      |
 | `data-table-column-resize`             | Column resize handle + double-click to autosize. Flex fill + header-fit are on by default once resizing is enabled.                        |
 | `data-table-column-auto-fit`           | Opt-in `<DataTableColumnAutoFit />` marker — even-splits leftover width across resizable columns (alternative to single-column flex fill). |
 | `data-table-column-sizing-persistence` | `useColumnSizingPersistence(storageKey)` hook — persists resized widths to `localStorage`.                                                 |
@@ -67,7 +68,7 @@ Per-column controls embedded in the column header dropdown.
 | `data-table-column-slider-filter`      | Header slider filter for numeric range.                                                                                                    |
 | `data-table-column-date-filter`        | Header date filter with calendar picker.                                                                                                   |
 
-<CliCommandCode action="run" command="shadcn@latest add @niko-table/data-table-column-sort @niko-table/data-table-column-hide @niko-table/data-table-column-pin @niko-table/data-table-column-resize @niko-table/data-table-column-auto-fit @niko-table/data-table-column-sizing-persistence" />
+<CliCommandCode action="run" command="shadcn@latest add @niko-table/data-table-column-sort @niko-table/data-table-column-hide @niko-table/data-table-column-pin @niko-table/data-table-column-group @niko-table/data-table-column-resize @niko-table/data-table-column-auto-fit @niko-table/data-table-column-sizing-persistence" />
 
 ## Drag and Drop
 
@@ -118,7 +119,9 @@ Not sure where to start? Find the example that looks closest to what you're buil
 - [Column DnD Table](/examples/column-dnd-table/) — column reorder + DnD view menu
 - [Row DnD Table](/examples/row-dnd-table/) — row reorder
 - [Data Grid](/data-grid/introduction/) — editable spreadsheet
-- [Tree Table](/examples/tree-table/) — expandable rows
+- [Tree Table](/examples/tree-table/) — nested data (`getSubRows`)
+- [Grouping Table](/examples/grouping-table/) — bucket flat rows by column values
+- [Row Expansion Table](/examples/row-expansion-table/) — inline detail panels
 - [Inline Edit Table](/examples/inline-edit-table/) — `getRowMemoKey` pattern
 
 Each example page lists exactly the registry items it uses.

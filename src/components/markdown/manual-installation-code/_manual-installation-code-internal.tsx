@@ -1,19 +1,72 @@
-import { useState } from "react"
-import { ChevronDown, ChevronRight, Copy, Check } from "lucide-react"
+import { Check, ChevronDown, ChevronRight, Copy, Loader2 } from "lucide-react"
+import { useCallback, useRef, useState } from "react"
+
 import { Button } from "@/components/ui/button"
 
-type FilesByDirectory = Record<string, Array<{ path: string; content: string }>>
+type FileEntry = { id: string; path: string }
+type FilesByDirectory = Record<string, FileEntry[]>
+type LoadedFile = { content: string; html: string }
 
 export function ManualInstallationCodeInternal({
   filesByDirectory,
-  highlightedCode,
 }: {
   filesByDirectory: FilesByDirectory
-  highlightedCode: Record<string, string>
 }) {
   const [expandedDirs, setExpandedDirs] = useState<Set<string>>(new Set())
   const [expandedFiles, setExpandedFiles] = useState<Set<string>>(new Set())
+  const [loadedFiles, setLoadedFiles] = useState<Record<string, LoadedFile>>({})
+  const [failedFiles, setFailedFiles] = useState<Set<string>>(new Set())
+  const [pendingFiles, setPendingFiles] = useState<Set<string>>(new Set())
   const [copiedFile, setCopiedFile] = useState<string | null>(null)
+
+  // Dedupe concurrent requests for the same file (expand + copy can race).
+  const inFlight = useRef<Map<string, Promise<LoadedFile>>>(new Map())
+
+  const loadFile = useCallback(
+    async (id: string): Promise<LoadedFile | null> => {
+      const cached = loadedFiles[id]
+      if (cached) return cached
+
+      const existing = inFlight.current.get(id)
+      if (existing) return existing
+
+      const request = (async () => {
+        const response = await fetch(
+          `/manual-install/${id.split("/").map(encodeURIComponent).join("/")}.json`,
+        )
+        if (!response.ok) {
+          throw new Error(`Request failed with ${response.status}`)
+        }
+        return (await response.json()) as LoadedFile
+      })()
+
+      inFlight.current.set(id, request)
+      setPendingFiles(prev => new Set(prev).add(id))
+
+      try {
+        const file = await request
+        setLoadedFiles(prev => ({ ...prev, [id]: file }))
+        setFailedFiles(prev => {
+          if (!prev.has(id)) return prev
+          const next = new Set(prev)
+          next.delete(id)
+          return next
+        })
+        return file
+      } catch {
+        setFailedFiles(prev => new Set(prev).add(id))
+        return null
+      } finally {
+        inFlight.current.delete(id)
+        setPendingFiles(prev => {
+          const next = new Set(prev)
+          next.delete(id)
+          return next
+        })
+      }
+    },
+    [loadedFiles],
+  )
 
   const toggleDirectory = (dir: string) => {
     setExpandedDirs(prev => {
@@ -27,21 +80,30 @@ export function ManualInstallationCodeInternal({
     })
   }
 
-  const toggleFile = (filePath: string) => {
+  const toggleFile = (id: string) => {
+    const willExpand = !expandedFiles.has(id)
+
     setExpandedFiles(prev => {
       const next = new Set(prev)
-      if (next.has(filePath)) {
-        next.delete(filePath)
+      if (next.has(id)) {
+        next.delete(id)
       } else {
-        next.add(filePath)
+        next.add(id)
       }
       return next
     })
+
+    if (willExpand) {
+      void loadFile(id)
+    }
   }
 
-  const copyFile = async (filePath: string, content: string) => {
-    await navigator.clipboard.writeText(content)
-    setCopiedFile(filePath)
+  const copyFile = async (id: string) => {
+    const file = await loadFile(id)
+    if (!file) return
+
+    await navigator.clipboard.writeText(file.content)
+    setCopiedFile(id)
     setTimeout(() => setCopiedFile(null), 2000)
   }
 
@@ -54,6 +116,12 @@ export function ManualInstallationCodeInternal({
 
   return (
     <div className="not-content space-y-4">
+      <style>{`
+        [data-theme="light"] .dark-only { display: none; }
+        [data-theme="dark"] .light-only { display: none; }
+        :root:not([data-theme]) .light-only { display: none; }
+      `}</style>
+
       {sortedDirs.map(dir => {
         const files = filesByDirectory[dir]
         const isExpanded = expandedDirs.has(dir)
@@ -78,16 +146,20 @@ export function ManualInstallationCodeInternal({
             {isExpanded && (
               <div className="border-t">
                 {files.map(file => {
-                  const isFileExpanded = expandedFiles.has(file.path)
-                  const isCopied = copiedFile === file.path
+                  const isFileExpanded = expandedFiles.has(file.id)
+                  const isCopied = copiedFile === file.id
+                  const isPending = pendingFiles.has(file.id)
+                  const hasFailed = failedFiles.has(file.id)
+                  const loaded = loadedFiles[file.id]
                   const fileName = file.path.split("/").pop()
 
                   return (
-                    <div key={file.path} className="border-b last:border-b-0">
+                    <div key={file.id} className="border-b last:border-b-0">
                       <div className="flex items-center gap-2 bg-muted/30 px-4 py-2">
                         <button
-                          onClick={() => toggleFile(file.path)}
+                          onClick={() => toggleFile(file.id)}
                           className="flex flex-1 items-center gap-2 text-left transition-colors hover:text-foreground"
+                          aria-expanded={isFileExpanded}
                         >
                           {isFileExpanded ? (
                             <ChevronDown className="size-4" />
@@ -99,7 +171,9 @@ export function ManualInstallationCodeInternal({
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => copyFile(file.path, file.content)}
+                          onClick={() => copyFile(file.id)}
+                          disabled={isPending}
+                          aria-label={`Copy ${fileName}`}
                           className="size-8 p-0"
                         >
                           {isCopied ? (
@@ -112,17 +186,28 @@ export function ManualInstallationCodeInternal({
 
                       {isFileExpanded && (
                         <>
-                          <style>{`
-                            [data-theme="light"] .dark-only { display: none; }
-                            [data-theme="dark"] .light-only { display: none; }
-                            :root:not([data-theme]) .light-only { display: none; }
-                          `}</style>
-                          <div
-                            className="max-h-[600px] overflow-auto"
-                            dangerouslySetInnerHTML={{
-                              __html: highlightedCode[file.path] || "",
-                            }}
-                          />
+                          {loaded ? (
+                            <div
+                              className="max-h-[600px] overflow-auto"
+                              dangerouslySetInnerHTML={{ __html: loaded.html }}
+                            />
+                          ) : hasFailed ? (
+                            <div className="flex items-center gap-2 px-4 py-3 text-sm text-muted-foreground">
+                              <span>Could not load this file.</span>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => void loadFile(file.id)}
+                              >
+                                Retry
+                              </Button>
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-2 px-4 py-3 text-sm text-muted-foreground">
+                              <Loader2 className="size-4 animate-spin" />
+                              Loading {fileName}…
+                            </div>
+                          )}
                         </>
                       )}
                     </div>
