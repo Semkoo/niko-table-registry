@@ -21,6 +21,9 @@ function Table({ className, ...props }: React.ComponentProps<"table">) {
   return (
     <div
       data-slot="table-container"
+      // Scroll containers with no focusable child are otherwise unreachable
+      // from the keyboard (WCAG 2.1.1). tabIndex={0} lets arrow keys scroll.
+      tabIndex={0}
       className="relative w-full overflow-x-auto"
     >
       <TableComponent className={className} {...props} />

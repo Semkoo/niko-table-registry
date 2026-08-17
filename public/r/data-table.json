@@ -2,13 +2,14 @@
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "data-table",
   "title": "Data Table",
-  "description": "Full DataTable owner (DataTableRoot, DataTable chrome, feature detection) on top of data-table-core. Prefer this for typical installs; à-la-carte controls depend on data-table-core instead.",
+  "description": "Full DataTable owner (DataTableRoot, DataTable chrome, feature detection) on top of data-table-core, plus the Table UI primitive via data-table-ui. Prefer this for typical installs; à-la-carte controls depend on data-table-core instead and will not overwrite a customized components/ui/table.tsx.",
   "dependencies": [
     "@tanstack/react-table",
     "lucide-react"
   ],
   "registryDependencies": [
     "https://niko-table.com/r/data-table-core.json",
+    "https://niko-table.com/r/data-table-ui.json",
     "alert",
     "button",
     "dropdown-menu"

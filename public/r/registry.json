@@ -4,17 +4,25 @@
   "homepage": "https://niko-table.com",
   "items": [
     {
-      "name": "data-table-core",
-      "type": "registry:block",
-      "title": "Data Table Core",
-      "description": "Shared floor for Niko Table: context, non-virtualized structure, types, config, and the lib/hooks bodies and controls need. Does not include DataTableRoot \u2014 install @niko-table/data-table for the full owner, or use this under \u00e0-la-carte controls when you own the TanStack instance.",
-      "dependencies": ["@tanstack/react-table", "lucide-react"],
-      "registryDependencies": ["skeleton", "button", "context-menu"],
+      "name": "data-table-ui",
+      "type": "registry:ui",
+      "title": "Data Table UI (table.tsx)",
+      "description": "Shadcn table primitive extended with TableComponent and a keyboard-focusable scroll container (tabIndex={0}, WCAG 2.1.1). Optional when you already ship a compatible components/ui/table.tsx \u2014 install explicitly or via @niko-table/data-table. \u00c0-la-carte controls that only pull data-table-core do not install this file, so customized tables are not overwritten.",
       "files": [
         {
           "path": "src/components/ui/table.tsx",
           "type": "registry:ui"
-        },
+        }
+      ]
+    },
+    {
+      "name": "data-table-core",
+      "type": "registry:block",
+      "title": "Data Table Core",
+      "description": "Shared floor for Niko Table: context, non-virtualized structure, types, config, and the lib/hooks bodies and controls need. Does not include DataTableRoot or components/ui/table.tsx \u2014 install @niko-table/data-table for the full owner (pulls table.tsx), @niko-table/data-table-ui for the table primitive alone, or bring your own compatible table.tsx with a TableComponent export.",
+      "dependencies": ["@tanstack/react-table", "lucide-react"],
+      "registryDependencies": ["skeleton", "button", "context-menu"],
+      "files": [
         {
           "path": "src/components/niko-table/core/data-table-context.tsx",
           "type": "registry:component",
@@ -121,10 +129,11 @@
       "name": "data-table",
       "type": "registry:block",
       "title": "Data Table",
-      "description": "Full DataTable owner (DataTableRoot, DataTable chrome, feature detection) on top of data-table-core. Prefer this for typical installs; \u00e0-la-carte controls depend on data-table-core instead.",
+      "description": "Full DataTable owner (DataTableRoot, DataTable chrome, feature detection) on top of data-table-core, plus the Table UI primitive via data-table-ui. Prefer this for typical installs; \u00e0-la-carte controls depend on data-table-core instead and will not overwrite a customized components/ui/table.tsx.",
       "dependencies": ["@tanstack/react-table", "lucide-react"],
       "registryDependencies": [
         "https://niko-table.com/r/data-table-core.json",
+        "https://niko-table.com/r/data-table-ui.json",
         "alert",
         "button",
         "dropdown-menu"
