@@ -10,3 +10,6 @@ onlyBuiltDependencies:
   - esbuild
   - msw
   - sharp
+minimumReleaseAgeExclude:
+  - "@hookform/resolvers@5.9.1"
+  - nuqs@2.9.6
