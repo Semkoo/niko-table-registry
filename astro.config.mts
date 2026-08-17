@@ -354,7 +354,6 @@ export default defineConfig({
               link: "/contributing/",
             },
           ],
-          footerText: "",
         }),
       ],
     }),
