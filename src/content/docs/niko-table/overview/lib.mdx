@@ -275,7 +275,7 @@ formatQueryString(urlParams, urlKeys)
 
 ## Table Features
 
-In Table v8, every behavior was bundled into `useReactTable`. In Table v9 you import only what you need — the same idea as Niko's **Composable** principle: mix and match components, install only the registry pieces you need. Registry items are that idea at the UI layer; this file is that idea at the table-engine layer.
+In Table v8, every behavior was bundled into `useReactTable`. In Table v9 you import only what you need — the same idea as this registry's **Composable** principle: mix and match `DataTable*` components, install only the registry pieces you need. Registry items are that idea at the UI layer; this file is that idea at the table-engine layer.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/lib/data-table-features.ts`} external>Source Code ↗</DocsLink>
@@ -292,7 +292,7 @@ import { features } from "@/components/niko-table/lib/data-table-features"
 const table = useTable({ features, data, columns })
 ```
 
-`NikoTableFeatures` is the type of that object, and every Niko type alias is pre-bound to it (`DataTableInstance<TData>` is `Table<NikoTableFeatures, TData>`, and so on), so you rarely name it directly.
+`DataTableFeatures` is the type of that object, and every `DataTable*` type alias is pre-bound to it (`DataTableInstance<TData>` is `Table<DataTableFeatures, TData>`, and so on), so you rarely name it directly.
 
 #### Trimming it down
 

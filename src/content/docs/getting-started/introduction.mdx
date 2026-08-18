@@ -5,11 +5,11 @@ description: Open-code React data tables for shadcn/ui—composable DataTable* c
 
 import { GITHUB_REPO_URL } from "@/data/env"
 
-## What is Niko Table?
+## What is this registry?
 
 **Nobody's table, everyone's solution.**
 
-Just like Shadcn, Niko Table is **not a component library**. Instead, it's a comprehensive **DataTable component** that you copy into your project and customize to your needs. It's built with TanStack Table and Shadcn UI, providing enterprise-grade features while remaining fully under your control.
+Just like Shadcn, this is **not a component library**. It is a registry of **`DataTable*` components** that you copy into your project and customize. Built with TanStack Table and Shadcn UI — enterprise-grade features, fully under your control. `niko-table` is the registry name (`@niko-table/...`); the components you mount are `DataTable`, `DataTableRoot`, and friends.
 
 ## Why Use This DataTable?
 
@@ -118,7 +118,7 @@ Build tables by composing components - start simple and add features as needed:
 
 ## Composability map
 
-Niko Table is **mix-and-match**: install only the registry items you need, render only the children you want, and swap body strategies without rewriting column defs. TanStack Table v9 matches that at the engine: v8 bundled every behavior into `useReactTable`; v9 lets you import only what you need via `lib/data-table-features.ts` (the file you trim after install, same as omitting components you never mount).
+`DataTable` is **mix-and-match**: install only the registry items you need, render only the children you want, and swap body strategies without rewriting column defs. TanStack Table v9 matches that at the engine: v8 bundled every behavior into `useReactTable`; v9 lets you import only what you need via `lib/data-table-features.ts` (the file you trim after install, same as omitting components you never mount).
 
 | Layer               | What you choose                                                                             | Notes                                                                                             |
 | ------------------- | ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |

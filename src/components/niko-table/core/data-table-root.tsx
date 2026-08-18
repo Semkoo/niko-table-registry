@@ -41,7 +41,7 @@ import {
   SYSTEM_COLUMN_IDS,
   SYSTEM_COLUMN_ID_LIST,
 } from "../lib/constants"
-import { features, type NikoTableFeatures } from "../lib/data-table-features"
+import { features, type DataTableFeatures } from "../lib/data-table-features"
 import { globalFilter as globalFilterFn } from "../lib/filter-functions"
 import { type DataTableColumnDef, type GlobalFilter } from "../types"
 import { DataTableProvider } from "./data-table-context"
@@ -106,14 +106,14 @@ export interface DataTableConfig {
 }
 
 interface TableRootProps<TData extends RowData, TValue = unknown> extends Omit<
-  Partial<TableOptions<NikoTableFeatures, TData>>,
+  Partial<TableOptions<DataTableFeatures, TData>>,
   // `key` is dropped so React's reserved `key` prop keeps its own semantics
   // — TanStack v9 added a `key` table option that would otherwise force
   // `<DataTableRoot key={…}>` to be a string.
   "columns" | "data" | "getRowId" | "key"
 > {
   // Option 1: Pass a pre-configured table instance
-  table?: ReactTable<NikoTableFeatures, TData>
+  table?: ReactTable<DataTableFeatures, TData>
 
   // Option 2: Let DataTableRoot create its own table
   columns?: DataTableColumnDef<TData, TValue>[]
@@ -507,19 +507,19 @@ function DataTableRootInternal<TData extends RowData, TValue>({
       const variant = meta.variant
 
       // Auto-apply filterFn based on variant
-      let autoFilterFn: FilterFnOption<NikoTableFeatures, TData> | undefined
+      let autoFilterFn: FilterFnOption<DataTableFeatures, TData> | undefined
       if (
         variant === FILTER_VARIANTS.RANGE ||
         variant === FILTER_VARIANTS.NUMBER
       ) {
         // For number/range variants, use numberRangeFilter if no explicit filterFn
-        autoFilterFn = "numberRange" as FilterFnOption<NikoTableFeatures, TData>
+        autoFilterFn = "numberRange" as FilterFnOption<DataTableFeatures, TData>
       } else if (
         variant === FILTER_VARIANTS.DATE ||
         variant === FILTER_VARIANTS.DATE_RANGE
       ) {
         // For date variants, use dateRangeFilter if no explicit filterFn
-        autoFilterFn = "dateRange" as FilterFnOption<NikoTableFeatures, TData>
+        autoFilterFn = "dateRange" as FilterFnOption<DataTableFeatures, TData>
       }
 
       // Only override if we have an auto filterFn and no explicit one
@@ -541,7 +541,7 @@ function DataTableRootInternal<TData extends RowData, TValue>({
       // sortable chrome when sorting is off.
       enableSorting: detectFeatures.enableSorting ?? false,
       enableHiding: true,
-      filterFn: "extended" as FilterFnOption<NikoTableFeatures, TData>,
+      filterFn: "extended" as FilterFnOption<DataTableFeatures, TData>,
       // Override TanStack's internal default (150) so unset `size` stays undefined
       // — virtualized flex layout uses this to distinguish fixed vs flexible cols.
       // `column.getSize()` still falls back to 150 internally.
@@ -646,13 +646,13 @@ function DataTableRootInternal<TData extends RowData, TValue>({
 
   // Critical: stable options reference. New object → useTable recreates
   // the instance → state resets and sorting/filter/expand break.
-  const tableOptions = React.useMemo<TableOptions<NikoTableFeatures, TData>>(
+  const tableOptions = React.useMemo<TableOptions<DataTableFeatures, TData>>(
     () => ({
       ...passthroughTableOptions,
       features,
       data,
       columns: processedColumns as ColumnDef<
-        NikoTableFeatures,
+        DataTableFeatures,
         TData,
         unknown
       >[],
@@ -722,8 +722,8 @@ function DataTableRootInternal<TData extends RowData, TValue>({
       // filterFns live on `features` (data-table-features.ts) — do not re-register here.
       // Allow globalFilterFn to be overridden via rest props, otherwise use default
       globalFilterFn:
-        (restGlobalFilterFn as FilterFn<NikoTableFeatures, TData>) ??
-        (globalFilterFn as unknown as FilterFn<NikoTableFeatures, TData>),
+        (restGlobalFilterFn as FilterFn<DataTableFeatures, TData>) ??
+        (globalFilterFn as unknown as FilterFn<DataTableFeatures, TData>),
       // Use provided getRowId or fallback to checking for 'id' property, then index
       getRowId:
         getRowId ??
@@ -798,7 +798,7 @@ function DataTableRootInternal<TData extends RowData, TValue>({
   // Instance ref is stable across state changes; React Compiler warns about
   // incompatible-library here — TanStack manages its own memoization (expected).
 
-  const table = useTable<NikoTableFeatures, TData>(tableOptions)
+  const table = useTable<DataTableFeatures, TData>(tableOptions)
 
   return (
     <DataTableProvider

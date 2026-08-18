@@ -26,7 +26,7 @@ import {
   FILTER_OPERATORS,
   FILTER_VARIANTS,
 } from "../lib/constants"
-import type { NikoTableFeatures } from "../lib/data-table-features"
+import type { DataTableFeatures } from "../lib/data-table-features"
 
 // ============================================================================
 // TANSTACK REACT-TABLE MODULE AUGMENTATION
@@ -184,7 +184,7 @@ export interface QueryKeys {
 export type DataTableColumnDef<
   TData extends RowData,
   TValue = unknown,
-> = ColumnDef<NikoTableFeatures, TData, TValue> & {
+> = ColumnDef<DataTableFeatures, TData, TValue> & {
   // You can extend with additional properties if needed
 }
 
@@ -197,32 +197,32 @@ export type DataTableColumnDef<
  * Alias for TanStack Table Row
  */
 export type DataTableRow<TData extends RowData> = Row<
-  NikoTableFeatures,
+  DataTableFeatures,
   TData
 > & {
   // You can extend with additional properties if needed
 }
 
 export type DataTableColumn<TData extends RowData, TValue = unknown> = Column<
-  NikoTableFeatures,
+  DataTableFeatures,
   TData,
   TValue
 >
 
 export type DataTableHeader<TData extends RowData, TValue = unknown> = Header<
-  NikoTableFeatures,
+  DataTableFeatures,
   TData,
   TValue
 >
 
 export type DataTableCell<TData extends RowData, TValue = unknown> = Cell<
-  NikoTableFeatures,
+  DataTableFeatures,
   TData,
   TValue
 >
 
 export type DataTableInstance<TData extends RowData> = ReactTable<
-  NikoTableFeatures,
+  DataTableFeatures,
   TData
 > & {
   // You can extend with additional properties if needed

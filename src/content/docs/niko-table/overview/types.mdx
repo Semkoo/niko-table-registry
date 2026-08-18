@@ -117,7 +117,7 @@ Extended column definition for data table. Inherits all TanStack Table ColumnDef
 
 ```tsx
 type DataTableColumnDef<TData, TValue = unknown> = ColumnDef<
-  NikoTableFeatures,
+  DataTableFeatures,
   TData,
   TValue
 >
@@ -192,18 +192,18 @@ Pass table metadata through the **table-level** `meta` option on `DataTableRoot`
 
 ### DataTableRow
 
-Data table row type. Alias for TanStack Table's `Row`, pre-bound to Niko's feature set.
+Data table row type. Alias for TanStack Table's `Row`, pre-bound to DataTable's feature set.
 
 ```tsx
-type DataTableRow<TData> = Row<NikoTableFeatures, TData>
+type DataTableRow<TData> = Row<DataTableFeatures, TData>
 ```
 
 ### DataTableInstance
 
-Data table instance type. Alias for TanStack Table's `Table`, pre-bound to Niko's feature set.
+Data table instance type. Alias for TanStack Table's `Table`, pre-bound to DataTable's feature set.
 
 ```tsx
-type DataTableInstance<TData> = Table<NikoTableFeatures, TData>
+type DataTableInstance<TData> = Table<DataTableFeatures, TData>
 ```
 
 ## Query State Types

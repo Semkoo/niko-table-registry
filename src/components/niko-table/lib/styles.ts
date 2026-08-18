@@ -11,11 +11,11 @@
  */
 
 import { type Column, type RowData } from "@tanstack/react-table"
-import type { NikoTableFeatures } from "./data-table-features"
+import type { DataTableFeatures } from "./data-table-features"
 import type React from "react"
 
 export const getCommonPinningStyles = <TData extends RowData>(
-  column: Column<NikoTableFeatures, TData>,
+  column: Column<DataTableFeatures, TData>,
   isHeader: boolean = false,
 ): React.CSSProperties => {
   const isPinned = column.getIsPinned()

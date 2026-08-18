@@ -11,13 +11,13 @@
  */
 
 /**
- * Canonical TanStack Table v9 feature registration for Niko Table.
+ * Canonical TanStack Table v9 feature registration for DataTable.
  *
  * In Table v8, every behavior was bundled into `useReactTable`. In Table v9 you
- * import only what you need — the same principle as Niko's registry:
- * "Composable — mix and match components (install only the registry pieces you
- * need)." Components are the UI layer of that idea; this file is the engine
- * layer.
+ * import only what you need — the same principle as this registry: Composable —
+ * mix and match components (install only the registry pieces you need).
+ * `DataTable*` components are the UI layer of that idea; this file is the
+ * engine layer.
  *
  * `DataTableRoot` passes this object to `useTable`. Feature detection /
  * `enable*` flags still decide *when* behavior runs; registration decides
@@ -25,7 +25,7 @@
  * `sortFns` / `aggregationFns` your tables never use — you own this file after
  * install, just like every other copied component.
  *
- * Pass `NikoTableFeatures` as the first generic to `ColumnDef`, `Column`,
+ * Pass `DataTableFeatures` as the first generic to `ColumnDef`, `Column`,
  * `Row`, and `ReactTable` so feature-gated APIs typecheck.
  */
 
@@ -133,4 +133,4 @@ export const features = tableFeatures({
   },
 })
 
-export type NikoTableFeatures = typeof features
+export type DataTableFeatures = typeof features
