@@ -7,8 +7,8 @@ import { GITHUB_REPO_URL } from "@/data/env"
 import DocsLink from "@/components/markdown/docs-link.astro"
 
 <div className="not-content mb-6 flex items-center gap-2">
-  <DocsLink href="https://tanstack.com/table/latest/docs/introduction" external>Docs ↗</DocsLink>
-  <DocsLink href="https://tanstack.com/table/latest/docs/api/core/table" external>API Reference ↗</DocsLink>
+  <DocsLink href="https://tanstack.com/table/latest/docs/framework/react/overview" external>Docs ↗</DocsLink>
+  <DocsLink href="https://tanstack.com/table/latest/docs/framework/react/guide/migrating" external>Migrating to v9 ↗</DocsLink>
 </div>
 
 The components in `data-table` are built to be composable. You build your table by putting the provided components together. They also compose well with other shadcn/ui components.
@@ -17,7 +17,7 @@ The components in `data-table` are built to be composable. You build your table 
 
 ## Directory Structure
 
-The Niko Table components are organized into logical directories following the file structure in `src/components/niko-table`:
+`DataTable*` components are organized into logical directories under `src/components/niko-table` (the folder the registry copies into your project):
 
 - **`core/`** - Essential table components (DataTableRoot, DataTable, context, structure components)
 - **`components/`** - User-facing context-aware components (automatically connect to table context via `useDataTable` hook)

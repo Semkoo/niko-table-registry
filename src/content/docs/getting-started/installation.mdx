@@ -1,6 +1,6 @@
 ---
 title: Installation
-description: Install Niko Table with the shadcn CLI—add @niko-table/data-table and optional registry components to your React + TanStack Table project.
+description: Install DataTable from the niko-table registry with the shadcn CLI—TanStack Table v9, optional pagination, filters, virtualization, and more.
 ---
 
 import { Steps } from "@astrojs/starlight/components"
@@ -15,10 +15,13 @@ Before installing the DataTable component, make sure you have:
 2. **Shadcn UI** set up in your project ([Installation Guide](https://ui.shadcn.com/docs/installation)) — both the Radix (`new-york`) and Base UI (`base-nova`) generations are supported
 3. **TailwindCSS** configured
 4. **TypeScript** (recommended)
+5. **TanStack Table v9** — this registry targets `@tanstack/react-table@^9`. The CLI pins that range when you install registry items; for a manual add use:
 
-> **Works with both shadcn generations.** Niko Table installs cleanly whether your `components.json` style is the classic Radix generation (`"new-york"`) or the newer Base UI generation (`"base-nova"`, the current `shadcn init` default). The source is written to typecheck against both: the shadcn CLI adapts Radix idioms (`asChild` → `render`) during install, and Niko Table's callbacks and props are dual-generation safe. If you hit a type error after install, make sure you're on a recent `shadcn` CLI and re-add the block with `--overwrite`.
+   <CliCommandCode action="install" command="@tanstack/react-table@^9" />
 
-## Configure the Niko Table Registry
+> **Works with both shadcn generations.** The registry installs cleanly whether your `components.json` style is the classic Radix generation (`"new-york"`) or the newer Base UI generation (`"base-nova"`, the current `shadcn init` default). The source is written to typecheck against both: the shadcn CLI adapts Radix idioms (`asChild` → `render`) during install, and DataTable callbacks and props are dual-generation safe. If you hit a type error after install, make sure you're on a recent `shadcn` CLI and re-add the block with `--overwrite`.
+
+## Configure the registry
 
 To use the `@niko-table/` namespace with the shadcn CLI, you must first register it in your project's `components.json`. Add the `registries` field:
 
@@ -45,7 +48,9 @@ Now install the owner:
 
 <Installation registryItem="data-table" />
 
-**This installs the full table owner** (`data-table` + `data-table-core` + `data-table-ui`). For pagination, filters, DnD, virtualization, aside, and other features, add the optional blocks below (one by one) or use **Install Everything**. If you own the TanStack instance yourself and only need controls + structure, skip `data-table` and install the control items directly — see [Components](/getting-started/components/#core).
+**This installs the full table owner** (`data-table` + `data-table-core` + `data-table-ui`). That includes `lib/data-table-features.ts` — TanStack Table v9's feature registration that `DataTableRoot` passes to `useTable`. Trim it after install the same way you omit registry items you never mount. See [Table Features](/niko-table/introduction/#table-features-tanstack-table-v9).
+
+For pagination, filters, DnD, virtualization, aside, and other features, add the optional blocks below (one by one) or use **Install Everything**. If you own the TanStack instance yourself and only need controls + structure, skip `data-table` and install the control items directly — see [Components](/getting-started/components/#core).
 
 ## Install Everything
 
@@ -366,61 +371,61 @@ Different examples require different dependencies. Here's what you need for each
 
 ### Simple Table
 
-- `@tanstack/react-table`
+- `@tanstack/react-table@^9`
 - Shadcn: `table`
 
 ### Basic Table
 
-- `@tanstack/react-table`
+- `@tanstack/react-table@^9`
 - Shadcn: `table`, `button`, `dropdown-menu`
 
 ### Search Table
 
-- `@tanstack/react-table`
+- `@tanstack/react-table@^9`
 - Shadcn: `table`, `button`, `input`, `dropdown-menu`
 
 ### Faceted Filter Table
 
-- `@tanstack/react-table`
+- `@tanstack/react-table@^9`
 - Shadcn: `table`, `button`, `input`, `dropdown-menu`, `popover`, `command`, `checkbox`, `select`
 
 ### Row Selection Table
 
-- `@tanstack/react-table`
+- `@tanstack/react-table@^9`
 - Shadcn: `table`, `button`, `checkbox`, `dropdown-menu`
 
 ### Row Expansion Table
 
-- `@tanstack/react-table`
+- `@tanstack/react-table@^9`
 - Shadcn: `table`, `button`, `input`, `dropdown-menu`
 
 ### Tree Table
 
-- `@tanstack/react-table`
+- `@tanstack/react-table@^9`
 - Shadcn: `table`, `button`, `input`, `dropdown-menu`
 
 ### Grouping Table
 
-- `@tanstack/react-table`
+- `@tanstack/react-table@^9`
 - Shadcn: `table`, `button`, `input`, `dropdown-menu`
 - Registry: `@niko-table/data-table-column-group`
 
 ### Virtualization Table
 
-- `@tanstack/react-table`
+- `@tanstack/react-table@^9`
 - `@tanstack/react-virtual`
 - Shadcn: `table`, `button`, `input`, `dropdown-menu`, `scroll-area`
 
 ### Advanced Table (All Features)
 
-- `@tanstack/react-table`
+- `@tanstack/react-table@^9`
 - Shadcn: `table`, `button`, `input`, `dropdown-menu`, `popover`, `command`, `checkbox`, `select`, `scroll-area`, `separator`, `skeleton`, `tooltip`
 - **Inline Filters**: Included in DataTable components (no additional dependencies)
 - **Sortable Rows** (optional): `@niko-table/data-table-row-dnd` — installs its `@dnd-kit` dependencies automatically (built on [DiceUI Sortable](https://www.diceui.com/docs/components/sortable) patterns)
 
 ### Advanced Table with URL State (nuqs)
 
-- `@tanstack/react-table`
+- `@tanstack/react-table@^9`
 - `nuqs` ([nuqs.dev](https://nuqs.dev/)) - Type-safe search params state manager for URL state management
 - Shadcn: All components from Advanced Table
 - **Inline Filters**: Included in DataTable components (no additional dependencies)

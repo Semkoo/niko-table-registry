@@ -10,11 +10,11 @@ Core components are the essential building blocks of the data table. They handle
 
 ### DataTableRoot
 
-The `DataTableRoot` component provides the table context to all child components. You should always wrap your table in a `DataTableRoot`. It initializes the TanStack Table instance and manages table state.
+The `DataTableRoot` component provides the table context to all child components. You should always wrap your table in a `DataTableRoot`. It initializes the TanStack Table instance with `useTable` and the shared `features` object from `lib/data-table-features.ts` (TanStack Table v9), and manages table state.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/core/data-table-root.tsx`} external>Source Code ↗</DocsLink>
-  <DocsLink href="https://tanstack.com/table/latest/docs/api/core/table" external>API Reference ↗</DocsLink>
+  <DocsLink href="https://tanstack.com/table/latest/docs/framework/react/guide/migrating" external>Migrating to v9 ↗</DocsLink>
 </div>
 
 ```tsx showLineNumbers
