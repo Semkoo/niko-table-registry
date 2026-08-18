@@ -16,16 +16,18 @@
  * @description A range filter component for DataTable that allows users to filter data based on numerical ranges.
  */
 
-import type { Column } from "@tanstack/react-table"
 import * as React from "react"
 
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
-import type { ExtendedColumnFilter } from "../types"
+import type { DataTableColumn, ExtendedColumnFilter } from "../types"
 
-interface TableRangeFilterProps<TData> extends React.ComponentProps<"div"> {
+import type { RowData } from "@tanstack/react-table"
+interface TableRangeFilterProps<
+  TData extends RowData,
+> extends React.ComponentProps<"div"> {
   filter: ExtendedColumnFilter<TData>
-  column: Column<TData>
+  column: DataTableColumn<TData>
   inputId: string
   onFilterUpdate: (
     filterId: string,
@@ -33,7 +35,7 @@ interface TableRangeFilterProps<TData> extends React.ComponentProps<"div"> {
   ) => void
 }
 
-export function TableRangeFilter<TData>({
+export function TableRangeFilter<TData extends RowData>({
   filter,
   column,
   inputId,

@@ -96,7 +96,7 @@ import type {
   PaginationState,
   SortingState,
   ColumnFiltersState,
-  VisibilityState,
+  ColumnVisibilityState,
   ColumnPinningState,
   Updater,
 } from "@tanstack/react-table"
@@ -605,8 +605,8 @@ const tableStateParsers = {
   ).withDefault(
     null as unknown as { filters: unknown[]; joinOperator: string },
   ),
-  columnVisibility: parseAsJson<VisibilityState>(
-    value => value as VisibilityState,
+  columnVisibility: parseAsJson<ColumnVisibilityState>(
+    value => value as ColumnVisibilityState,
   ).withDefault({}),
   inlineFilters: parseAsJson<ExtendedColumnFilter<Product>[]>(
     value => value as ExtendedColumnFilter<Product>[],
@@ -615,7 +615,7 @@ const tableStateParsers = {
   filterMode: parseAsString.withDefault("standard"),
   pin: parseAsJson<ColumnPinningState>(
     value => value as ColumnPinningState,
-  ).withDefault({ left: [], right: [] }),
+  ).withDefault({ start: [], end: [] }),
 }
 
 // Map internal state keys to URL query parameter names
@@ -648,8 +648,7 @@ const tableStateUrlKeys = {
  */
 function normalizeFiltersWithUniqueIds<TData>(
   filters: (
-    | Omit<ExtendedColumnFilter<TData>, "filterId">
-    | ExtendedColumnFilter<TData>
+    Omit<ExtendedColumnFilter<TData>, "filterId"> | ExtendedColumnFilter<TData>
   )[],
 ): ExtendedColumnFilter<TData>[] {
   // Quick check: if all filters already have unique filterIds, return as-is
@@ -784,8 +783,7 @@ function AdvancedNuqsTableContent() {
 
   // Get filter mode from URL
   const filterMode = (urlParams.filterMode || "standard") as
-    | "standard"
-    | "inline"
+    "standard" | "inline"
 
   // Global filter from URL - separate search (text) from globalFilter (complex filters)
   // - search: simple text search string
@@ -857,7 +855,7 @@ function AdvancedNuqsTableContent() {
 
   // Column pinning state from URL
   const columnPinning: ColumnPinningState = useMemo(() => {
-    return urlParams.pin || { left: [], right: [] }
+    return urlParams.pin || { start: [], end: [] }
   }, [urlParams.pin])
 
   // Handlers for pagination
@@ -1091,7 +1089,7 @@ function AdvancedNuqsTableContent() {
 
   // Handlers for column visibility
   const handleColumnVisibilityChange = useCallback(
-    (updater: Updater<VisibilityState>) => {
+    (updater: Updater<ColumnVisibilityState>) => {
       const newVisibility =
         typeof updater === "function"
           ? updater(urlParams.columnVisibility)

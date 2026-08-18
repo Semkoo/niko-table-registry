@@ -78,7 +78,7 @@ const tableStateParsers = {
   global: parseAsJson<GlobalFilterObject | null>(v =>
     v && typeof v === "object" && "filters" in v ? (v as GlobalFilterObject) : null,
   ).withDefault(null),
-  cols: parseAsJson<VisibilityState>(v => v as VisibilityState).withDefault({}),
+  cols: parseAsJson<ColumnVisibilityState>(v => v as ColumnVisibilityState).withDefault({}),
 }
 
 const [urlParams, setUrlParams] = useQueryStates(tableStateParsers, {

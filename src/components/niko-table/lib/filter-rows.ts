@@ -10,7 +10,8 @@
  * https://github.com/Semkoo/niko-table-registry
  */
 
-import type { Table, Row } from "@tanstack/react-table"
+import type { RowData } from "@tanstack/react-table"
+import type { DataTableInstance, DataTableRow } from "../types"
 
 /**
  * Get filtered rows excluding a specific column's filter.
@@ -18,13 +19,13 @@ import type { Table, Row } from "@tanstack/react-table"
  * options that exist in the filtered dataset (from other filters) but
  * not be limited by the current column's own filter.
  */
-export function getFilteredRowsExcludingColumn<TData>(
-  table: Table<TData>,
-  coreRows: Row<TData>[],
+export function getFilteredRowsExcludingColumn<TData extends RowData>(
+  table: DataTableInstance<TData>,
+  coreRows: DataTableRow<TData>[],
   excludeColumnId: string,
   columnFilters: Array<{ id: string; value: unknown }>,
   globalFilter: unknown,
-): Row<TData>[] {
+): DataTableRow<TData>[] {
   // Filter out the current column's filter
   const otherFilters = columnFilters.filter(
     filter => filter.id !== excludeColumnId,
@@ -52,32 +53,23 @@ export function getFilteredRowsExcludingColumn<TData>(
       const column = table.getColumn(filter.id)
       if (!column) continue
 
-      const filterValue = filter.value
-      const filterFn = column.columnDef.filterFn || "extended"
-
-      // Skip if filter function is a string (built-in) and we don't have access
-      if (typeof filterFn === "string") {
-        // Use the table's filterFns
-        const fn = table.options.filterFns?.[filterFn]
-        if (fn && typeof fn === "function") {
-          if (!fn(row, filter.id, filterValue, () => {})) {
-            return false
-          }
-        }
-      } else if (typeof filterFn === "function") {
-        if (!filterFn(row, filter.id, filterValue, () => {})) {
-          return false
-        }
+      // `getFilterFn` resolves the column's `filterFn` through the registry
+      // declared on `tableFeatures({ filterFns })`, so string names and inline
+      // functions both come back as a callable.
+      const filterFn = column.getFilterFn()
+      if (filterFn && !filterFn(row, filter.id, filter.value, () => {})) {
+        return false
       }
     }
 
     // Apply global filter if present
     if (globalFilter) {
-      const globalFilterFn = table.options.globalFilterFn
-      if (globalFilterFn && typeof globalFilterFn === "function") {
-        if (!globalFilterFn(row, "global", globalFilter, () => {})) {
-          return false
-        }
+      const globalFilterFn = table.getGlobalFilterFn()
+      if (
+        globalFilterFn &&
+        !globalFilterFn(row, "global", globalFilter, () => {})
+      ) {
+        return false
       }
     }
 

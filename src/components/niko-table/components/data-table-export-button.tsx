@@ -17,7 +17,8 @@ import {
   type TableExportButtonProps,
 } from "../filters/table-export-button"
 
-export type DataTableExportButtonProps<TData> = Omit<
+import type { RowData } from "@tanstack/react-table"
+export type DataTableExportButtonProps<TData extends RowData> = Omit<
   TableExportButtonProps<TData>,
   "table"
 >
@@ -33,7 +34,7 @@ export type DataTableExportButtonProps<TData> = Omit<
  * </DataTableRoot>
  * ```
  */
-export function DataTableExportButton<TData>({
+export function DataTableExportButton<TData extends RowData>({
   ...props
 }: DataTableExportButtonProps<TData>) {
   const { table } = useDataTable<TData>()

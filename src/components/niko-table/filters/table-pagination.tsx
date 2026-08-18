@@ -13,7 +13,6 @@
  */
 
 import React from "react"
-import { type Table } from "@tanstack/react-table"
 import { Button } from "@/components/ui/button"
 import {
   Select,
@@ -26,8 +25,10 @@ import { Input } from "@/components/ui/input"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
 
-export interface TablePaginationProps<TData> {
-  table: Table<TData>
+import type { DataTableInstance } from "../types"
+import type { RowData } from "@tanstack/react-table"
+export interface TablePaginationProps<TData extends RowData> {
+  table: DataTableInstance<TData>
   pageSizeOptions?: number[]
   defaultPageSize?: number
   /**
@@ -64,7 +65,7 @@ export interface TablePaginationProps<TData> {
    */
   onPaginationReady?: () => void
 }
-export function TablePagination<TData>({
+export function TablePagination<TData extends RowData>({
   table,
   pageSizeOptions = [10, 25, 50, 100],
   defaultPageSize = pageSizeOptions[0],
@@ -79,7 +80,7 @@ export function TablePagination<TData>({
   onPreviousPage,
   onPaginationReady,
 }: TablePaginationProps<TData>) {
-  const { pageIndex, pageSize } = table.getState().pagination
+  const { pageIndex, pageSize } = table.state.pagination
 
   // Use totalCount if provided (server-side), otherwise use filtered row model (client-side)
   const totalRows = totalCount ?? table.getFilteredRowModel().rows.length

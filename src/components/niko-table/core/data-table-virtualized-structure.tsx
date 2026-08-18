@@ -11,7 +11,7 @@
  * users (and future LLMs reading this code) benefit:
  * https://github.com/Semkoo/niko-table-registry
  */
-import { flexRender, type Row } from "@tanstack/react-table"
+import { flexRender } from "@tanstack/react-table"
 import { useVirtualizer } from "@tanstack/react-virtual"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
@@ -43,6 +43,8 @@ import {
   useDataTableActiveCell,
 } from "./data-table-context"
 
+import type { DataTableRow } from "../types"
+import type { RowData } from "@tanstack/react-table"
 // ============================================================================
 // Row measurement helper
 // ============================================================================
@@ -108,7 +110,7 @@ export const DataTableVirtualizedHeader = React.memo(
 
     // Flex fill is on by default: which column soaks up the leftover width.
     const flexColumnIds = resolveFlexColumnIds(table)
-    const columnSizing = table.getState().columnSizing
+    const columnSizing = table.state.columnSizing
 
     return (
       <TableHeader
@@ -322,8 +324,8 @@ DataTableVirtualizedFlexHeader.displayName = "DataTableVirtualizedFlexHeader"
  * Composite key (`${row.id}-${isExpanded}`) stays on the parent so the
  * row remounts on expansion toggle and `ResizeObserver` re-attaches.
  */
-interface VirtualizedBodyRowProps<TData> {
-  row: Row<TData>
+interface VirtualizedBodyRowProps<TData extends RowData> {
+  row: DataTableRow<TData>
   virtualIndex: number
   expandColumnId: string | undefined
   isExpanded: boolean
@@ -363,7 +365,9 @@ interface VirtualizedBodyRowProps<TData> {
 /** Fade-pulse animation applied to a flashing cell (keyframe in the provider). */
 const FLASH_ANIMATION = "niko-row-flash 1.2s ease-out"
 
-const VirtualizedBodyRowInner = function VirtualizedBodyRow<TData>({
+const VirtualizedBodyRowInner = function VirtualizedBodyRow<
+  TData extends RowData,
+>({
   row,
   virtualIndex,
   expandColumnId,
@@ -493,7 +497,7 @@ const VirtualizedBodyRow = React.memo(
 // DataTableVirtualizedBody
 // ============================================================================
 
-export interface DataTableVirtualizedBodyProps<TData> {
+export interface DataTableVirtualizedBodyProps<TData extends RowData> {
   children?: React.ReactNode
   estimateSize?: number
   overscan?: number
@@ -570,7 +574,7 @@ export interface DataTableVirtualizedBodyProps<TData> {
   renderRowContextMenu?: (row: TData) => React.ReactNode
 }
 
-export function DataTableVirtualizedBody<TData>({
+export function DataTableVirtualizedBody<TData extends RowData>({
   children,
   estimateSize = 34,
   overscan = 20,
@@ -613,7 +617,7 @@ export function DataTableVirtualizedBody<TData>({
   )
 
   const { columnVisibility, columnOrder, columnPinning, columnSizing } =
-    table.getState()
+    table.state
 
   // Flex fill is on by default: which column soaks up the leftover row width.
   // `columnSizing` is a dep — resizing a flex column pins it and shifts the
@@ -1003,7 +1007,7 @@ export function DataTableVirtualizedBody<TData>({
         return (
           <VirtualizedBodyRow
             key={`${row.id}-${isExpanded}`}
-            row={row as Row<TData>}
+            row={row as DataTableRow<TData>}
             virtualIndex={virtualRow.index}
             expandColumnId={expandColumnId}
             isExpanded={isExpanded}
@@ -1106,7 +1110,7 @@ export function DataTableVirtualizedEmptyBody({
 
   // Hooks first (rules-of-hooks), then early-return below skips work when
   // the table has rows.
-  const tableState = table.getState()
+  const tableState = table.state
   const isFiltered = React.useMemo(
     () =>
       (tableState.globalFilter && tableState.globalFilter.length > 0) ||

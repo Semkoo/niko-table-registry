@@ -12,7 +12,6 @@
  * https://github.com/Semkoo/niko-table-registry
  */
 import React from "react"
-import type { Column } from "@tanstack/react-table"
 import { CircleHelp, SlidersHorizontal } from "lucide-react"
 
 import {
@@ -36,6 +35,8 @@ import { Slider } from "@/components/ui/slider"
 import { cn } from "@/lib/utils"
 import { useDerivedColumnTitle } from "../hooks/use-derived-column-title"
 
+import type { DataTableColumn } from "../types"
+import type { RowData } from "@tanstack/react-table"
 type RangeValue = [number, number]
 
 function parseValuesAsNumbers(value: unknown): RangeValue | undefined {
@@ -77,7 +78,7 @@ function getIsValidRange(value: unknown): value is RangeValue {
  * </TableColumnActions>
  * ```
  */
-export function TableColumnSliderFilterOptions<TData, TValue>({
+export function TableColumnSliderFilterOptions<TData extends RowData, TValue>({
   column,
   title,
   range: manualRange,
@@ -88,7 +89,7 @@ export function TableColumnSliderFilterOptions<TData, TValue>({
   onValueChange,
   withSeparator = true,
 }: {
-  column: Column<TData, TValue>
+  column: DataTableColumn<TData, TValue>
   title?: string
   /**
    * Manual range [min, max] (overrides min/max props and column.meta.range)
@@ -352,7 +353,7 @@ TableColumnSliderFilterOptions.displayName = "TableColumnSliderFilterOptions"
  * />
  * ```
  */
-export function TableColumnSliderFilterMenu<TData, TValue>({
+export function TableColumnSliderFilterMenu<TData extends RowData, TValue>({
   column,
   title,
   className,
@@ -361,7 +362,7 @@ export function TableColumnSliderFilterMenu<TData, TValue>({
   React.ComponentProps<typeof TableColumnSliderFilterOptions>,
   "withSeparator" | "column"
 > & {
-  column: Column<TData, TValue>
+  column: DataTableColumn<TData, TValue>
   className?: string
 }) {
   return (

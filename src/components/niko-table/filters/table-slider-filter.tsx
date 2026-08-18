@@ -16,7 +16,6 @@
  * @description A slider filter component for DataTable that allows users to filter numerical data within a specified range. It supports manual configuration of range, min/max values, step size, and unit labels.
  */
 
-import type { Column } from "@tanstack/react-table"
 import { PlusCircle, XCircle } from "lucide-react"
 import * as React from "react"
 import { Button } from "@/components/ui/button"
@@ -31,6 +30,8 @@ import { Separator } from "@/components/ui/separator"
 import { Slider } from "@/components/ui/slider"
 import { cn } from "@/lib/utils"
 
+import type { DataTableColumn } from "../types"
+import type { RowData } from "@tanstack/react-table"
 interface Range {
   min: number
   max: number
@@ -61,8 +62,8 @@ function parseValuesAsNumbers(value: unknown): RangeValue | undefined {
   return undefined
 }
 
-export interface TableSliderFilterProps<TData> {
-  column: Column<TData, unknown>
+export interface TableSliderFilterProps<TData extends RowData> {
+  column: DataTableColumn<TData, unknown>
   title?: string
   /**
    * Manual range [min, max] (overrides min/max props and column.meta.range)
@@ -87,7 +88,7 @@ export interface TableSliderFilterProps<TData> {
   onValueChange?: (value: [number, number] | undefined) => void
 }
 
-export function TableSliderFilter<TData>({
+export function TableSliderFilter<TData extends RowData>({
   column,
   title,
   range: manualRange,

@@ -71,7 +71,7 @@ The DataTable uses a **two-layer architecture** for maximum flexibility:
 
 - `DataTableSearchFilter`, `DataTableFilterMenu`, `DataTableSortMenu`, `DataTablePagination`, etc.
 
-**Filters** (`table-*.tsx` in `/filters` folder) - Core implementation components that accept a `table` prop directly and use TanStack Table hooks (like `table.getState()`, `table.setGlobalFilter()`, etc.). These can be used standalone:
+**Filters** (`table-*.tsx` in `/filters` folder) - Core implementation components that accept a `table` prop directly and read from the TanStack Table instance (like `table.state`, `table.setGlobalFilter()`, etc.). These can be used standalone:
 
 - `TableSearchFilter`, `TableFilterMenu`, `TableSortMenu`, etc.
 
@@ -93,7 +93,8 @@ The DataTable uses a **two-layer architecture** for maximum flexibility:
 </DataTableRoot>
 
 // Advanced: Use Filter components directly
-const table = useReactTable({ data, columns, ... })
+// `features` comes from @/components/niko-table/lib/data-table-features
+const table = useTable({ features, data, columns, ... })
 <TableSearchFilter table={table} />  {/* Pass table prop directly */}
 ```
 

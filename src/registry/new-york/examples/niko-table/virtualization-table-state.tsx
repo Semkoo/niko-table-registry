@@ -6,7 +6,7 @@ import type {
   PaginationState,
   SortingState,
   ColumnFiltersState,
-  VisibilityState,
+  ColumnVisibilityState,
   ExpandedState,
   ColumnPinningState,
 } from "@tanstack/react-table"
@@ -147,15 +147,16 @@ export default function VirtualizedTableStateExample() {
   const [globalFilter, setGlobalFilter] = useState<string | object>("")
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
+  const [columnVisibility, setColumnVisibility] =
+    useState<ColumnVisibilityState>({})
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 100, // Larger page size for virtualization
   })
   const [expanded, setExpanded] = useState<ExpandedState>({})
   const [columnPinning, setColumnPinning] = useState<ColumnPinningState>({
-    left: [],
-    right: [],
+    start: [],
+    end: [],
   })
 
   const columns: DataTableColumnDef<Product>[] = React.useMemo(
@@ -336,7 +337,7 @@ export default function VirtualizedTableStateExample() {
     setColumnVisibility({})
     setPagination({ pageIndex: 0, pageSize: 100 })
     setExpanded({})
-    setColumnPinning({ left: [], right: [] })
+    setColumnPinning({ start: [], end: [] })
   }
 
   // Calculate filtered data for display metrics
@@ -504,8 +505,8 @@ export default function VirtualizedTableStateExample() {
             <div className="flex justify-between">
               <span className="font-medium">Pinned Columns:</span>
               <span className="text-foreground">
-                {columnPinning.left?.length || 0} Left,{" "}
-                {columnPinning.right?.length || 0} Right
+                {columnPinning.start?.length || 0} Left,{" "}
+                {columnPinning.end?.length || 0} Right
               </span>
             </div>
           </div>

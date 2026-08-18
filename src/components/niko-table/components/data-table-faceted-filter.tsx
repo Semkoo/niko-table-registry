@@ -12,7 +12,6 @@
  * https://github.com/Semkoo/niko-table-registry
  */
 import * as React from "react"
-import type { Table } from "@tanstack/react-table"
 import {
   TableFacetedFilter,
   TableFacetedFilterContent,
@@ -20,12 +19,13 @@ import {
   type TableFacetedFilterProps,
 } from "../filters/table-faceted-filter"
 import { useDataTable } from "../core/data-table-context"
-import type { Option } from "../types"
+import type { DataTableInstance, Option } from "../types"
 import { useDerivedColumnTitle } from "../hooks/use-derived-column-title"
 import { useGeneratedOptionsForColumn } from "../hooks/use-generated-options"
 import { buildFacetedOptions } from "../lib/build-faceted-options"
 
-type DataTableFacetedFilterProps<TData, TValue> = Omit<
+import type { RowData } from "@tanstack/react-table"
+type DataTableFacetedFilterProps<TData extends RowData, TValue> = Omit<
   TableFacetedFilterProps<TData, TValue>,
   "column" | "options"
 > & {
@@ -94,8 +94,8 @@ type DataTableFacetedFilterProps<TData, TValue> = Omit<
  * />
  */
 
-interface UseFacetedOptionsArgs<TData> {
-  table: Table<TData>
+interface UseFacetedOptionsArgs<TData extends RowData> {
+  table: DataTableInstance<TData>
   accessorKey: string
   options?: Option[]
   showCounts: boolean
@@ -107,7 +107,7 @@ interface UseFacetedOptionsArgs<TData> {
 // Resolves option list in priority order: 1) caller `options`, 2) meta-aware
 // generator (select/multiSelect), 3) data-derived fallback. Memo gates it so
 // we don't walk rows twice.
-function useFacetedOptions<TData>({
+function useFacetedOptions<TData extends RowData>({
   table,
   accessorKey,
   options,
@@ -138,7 +138,7 @@ function useFacetedOptions<TData>({
     : metaGenerated
 
   // Pull state slices for memo reactivity.
-  const state = table.getState()
+  const state = table.state
   const columnFilters = state.columnFilters
   const globalFilter = state.globalFilter
 
@@ -213,7 +213,7 @@ function useFacetedOptions<TData>({
  * title derivation, and options resolution in one place so the wrappers stay
  * thin.
  */
-function useFacetedFilterSetup<TData>({
+function useFacetedFilterSetup<TData extends RowData>({
   accessorKey,
   options,
   showCounts,
@@ -246,7 +246,10 @@ function useFacetedFilterSetup<TData>({
   return { table, column, derivedTitle, dynamicOptions }
 }
 
-export function DataTableFacetedFilter<TData, TValue = unknown>({
+export function DataTableFacetedFilter<
+  TData extends RowData,
+  TValue = unknown,
+>({
   accessorKey,
   options,
   showCounts = true,
@@ -298,7 +301,10 @@ export function DataTableFacetedFilter<TData, TValue = unknown>({
 
 DataTableFacetedFilter.displayName = "DataTableFacetedFilter"
 
-export function DataTableFacetedFilterContent<TData, TValue = unknown>({
+export function DataTableFacetedFilterContent<
+  TData extends RowData,
+  TValue = unknown,
+>({
   accessorKey,
   options,
   showCounts = true,

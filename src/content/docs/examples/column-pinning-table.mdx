@@ -68,8 +68,8 @@ Set `initialState.columnPinning` to pin columns on mount:
   columns={columns}
   initialState={{
     columnPinning: {
-      left: ["id"], // Pin Order ID to left
-      right: ["actions"], // Pin actions to right
+      start: ["id"], // Pin Order ID to the start (left in LTR)
+      end: ["actions"], // Pin actions to the end (right in LTR)
     },
   }}
 >
@@ -142,8 +142,8 @@ import { type ColumnPinningState } from "@tanstack/react-table"
 
 export function ControlledPinningTable({ data }: { data: Order[] }) {
   const [columnPinning, setColumnPinning] = useState<ColumnPinningState>({
-    left: ["id"],
-    right: ["actions"],
+    start: ["id"],
+    end: ["actions"],
   })
 
   return (

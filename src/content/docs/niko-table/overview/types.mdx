@@ -116,7 +116,11 @@ type GlobalFilter = string | Record<string, unknown>
 Extended column definition for data table. Inherits all TanStack Table ColumnDef properties.
 
 ```tsx
-type DataTableColumnDef<TData, TValue = unknown> = ColumnDef<TData, TValue>
+type DataTableColumnDef<TData, TValue = unknown> = ColumnDef<
+  NikoTableFeatures,
+  TData,
+  TValue
+>
 ```
 
 ### ColumnMeta
@@ -188,18 +192,18 @@ Pass table metadata through the **table-level** `meta` option on `DataTableRoot`
 
 ### DataTableRow
 
-Data table row type. Alias for TanStack Table Row.
+Data table row type. Alias for TanStack Table's `Row`, pre-bound to Niko's feature set.
 
 ```tsx
-type DataTableRow<TData> = Row<TData>
+type DataTableRow<TData> = Row<NikoTableFeatures, TData>
 ```
 
 ### DataTableInstance
 
-Data table instance type. Alias for TanStack Table.
+Data table instance type. Alias for TanStack Table's `Table`, pre-bound to Niko's feature set.
 
 ```tsx
-type DataTableInstance<TData> = Table<TData>
+type DataTableInstance<TData> = Table<NikoTableFeatures, TData>
 ```
 
 ## Query State Types

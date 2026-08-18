@@ -11,6 +11,7 @@
  * users (and future LLMs reading this code) benefit:
  * https://github.com/Semkoo/niko-table-registry
  */
+import type { RowData } from "@tanstack/react-table"
 import React from "react"
 import { useDataTable } from "../core/data-table-context"
 import {
@@ -21,7 +22,10 @@ import { useGeneratedOptions } from "../hooks/use-generated-options"
 import { FILTER_VARIANTS } from "../lib/constants"
 import type { Option } from "../types"
 
-type BaseInlineProps<TData> = Omit<TableInlineProps<TData>, "table">
+type BaseInlineProps<TData extends RowData> = Omit<
+  TableInlineProps<TData>,
+  "table"
+>
 
 interface AutoOptionProps {
   autoOptions?: boolean
@@ -40,10 +44,10 @@ interface AutoOptionProps {
   mergeStrategy?: "preserve" | "augment" | "replace"
 }
 
-type DataTableInlineFilterProps<TData> = BaseInlineProps<TData> &
-  AutoOptionProps
+type DataTableInlineFilterProps<TData extends RowData> =
+  BaseInlineProps<TData> & AutoOptionProps
 
-export function DataTableInlineFilter<TData>({
+export function DataTableInlineFilter<TData extends RowData>({
   autoOptions = true,
   showCounts = true,
   dynamicCounts = true,

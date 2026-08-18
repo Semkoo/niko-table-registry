@@ -12,30 +12,24 @@
  * https://github.com/Semkoo/niko-table-registry
  */
 import {
-  getCoreRowModel,
-  getExpandedRowModel,
-  getFacetedMinMaxValues,
-  getFacetedRowModel,
-  getFacetedUniqueValues,
-  getFilteredRowModel,
-  getGroupedRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  useReactTable,
+  useTable,
+  type ColumnDef,
   type ColumnFiltersState,
   type ColumnOrderState,
+  type ColumnPinningState,
   type ColumnSizingState,
+  type ColumnVisibilityState,
   type ExpandedState,
   type FilterFn,
   type FilterFnOption,
   type GroupingState,
   type PaginationState,
+  type ReactTable,
+  type RowData,
   type RowSelectionState,
   type SortingState,
-  type Table,
   type TableOptions,
   type Updater,
-  type VisibilityState,
 } from "@tanstack/react-table"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
@@ -47,12 +41,8 @@ import {
   SYSTEM_COLUMN_IDS,
   SYSTEM_COLUMN_ID_LIST,
 } from "../lib/constants"
-import {
-  dateRangeFilter,
-  extendedFilter,
-  globalFilter as globalFilterFn,
-  numberRangeFilter,
-} from "../lib/filter-functions"
+import { features, type NikoTableFeatures } from "../lib/data-table-features"
+import { globalFilter as globalFilterFn } from "../lib/filter-functions"
 import { type DataTableColumnDef, type GlobalFilter } from "../types"
 import { DataTableProvider } from "./data-table-context"
 
@@ -115,9 +105,15 @@ export interface DataTableConfig {
   autoResetExpanded?: boolean
 }
 
-interface TableRootProps<TData, TValue> extends Partial<TableOptions<TData>> {
+interface TableRootProps<TData extends RowData, TValue = unknown> extends Omit<
+  Partial<TableOptions<NikoTableFeatures, TData>>,
+  // `key` is dropped so React's reserved `key` prop keeps its own semantics
+  // — TanStack v9 added a `key` table option that would otherwise force
+  // `<DataTableRoot key={…}>` to be a string.
+  "columns" | "data" | "getRowId" | "key"
+> {
   // Option 1: Pass a pre-configured table instance
-  table?: Table<TData>
+  table?: ReactTable<NikoTableFeatures, TData>
 
   // Option 2: Let DataTableRoot create its own table
   columns?: DataTableColumnDef<TData, TValue>[]
@@ -137,7 +133,7 @@ interface TableRootProps<TData, TValue> extends Partial<TableOptions<TData>> {
   onGlobalFilterChange?: (value: GlobalFilter) => void
   onPaginationChange?: (updater: Updater<PaginationState>) => void
   onSortingChange?: (updater: Updater<SortingState>) => void
-  onColumnVisibilityChange?: (updater: Updater<VisibilityState>) => void
+  onColumnVisibilityChange?: (updater: Updater<ColumnVisibilityState>) => void
   onColumnFiltersChange?: (updater: Updater<ColumnFiltersState>) => void
   onRowSelectionChange?: (updater: Updater<RowSelectionState>) => void
   onExpandedChange?: (updater: Updater<ExpandedState>) => void
@@ -147,7 +143,7 @@ interface TableRootProps<TData, TValue> extends Partial<TableOptions<TData>> {
 }
 
 // Internal component that handles hooks for direct props mode
-function DataTableRootInternal<TData, TValue>({
+function DataTableRootInternal<TData extends RowData, TValue>({
   columns,
   data,
   children,
@@ -315,7 +311,9 @@ function DataTableRootInternal<TData, TValue>({
     restInitialState?.rowSelection ?? {},
   )
   const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>(restInitialState?.columnVisibility ?? {})
+    React.useState<ColumnVisibilityState>(
+      restInitialState?.columnVisibility ?? {},
+    )
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     restInitialState?.columnFilters ?? [],
   )
@@ -328,12 +326,9 @@ function DataTableRootInternal<TData, TValue>({
   const [grouping, setGrouping] = React.useState<GroupingState>(
     restInitialState?.grouping ?? [],
   )
-  const [columnPinning, setColumnPinning] = React.useState<{
-    left: string[]
-    right: string[]
-  }>({
-    left: restInitialState?.columnPinning?.left ?? [],
-    right: restInitialState?.columnPinning?.right ?? [],
+  const [columnPinning, setColumnPinning] = React.useState<ColumnPinningState>({
+    start: restInitialState?.columnPinning?.start ?? [],
+    end: restInitialState?.columnPinning?.end ?? [],
   })
   const [columnOrder, setColumnOrder] = React.useState<ColumnOrderState>(
     restInitialState?.columnOrder ?? [],
@@ -428,20 +423,20 @@ function DataTableRootInternal<TData, TValue>({
   )
 
   const handleColumnVisibilityChange = React.useCallback(
-    (u: Updater<VisibilityState>) => {
+    (u: Updater<ColumnVisibilityState>) => {
       if (isMountedRef.current) setColumnVisibility(u)
     },
     [],
   )
 
   const handleColumnPinningChange = React.useCallback(
-    (updater: Updater<{ left?: string[]; right?: string[] }>) => {
+    (updater: Updater<ColumnPinningState>) => {
       if (!isMountedRef.current) return
       setColumnPinning(prev => {
         const next = typeof updater === "function" ? updater(prev) : updater
         return {
-          left: next.left ?? [],
-          right: next.right ?? [],
+          start: next.start ?? [],
+          end: next.end ?? [],
         }
       })
     },
@@ -512,19 +507,19 @@ function DataTableRootInternal<TData, TValue>({
       const variant = meta.variant
 
       // Auto-apply filterFn based on variant
-      let autoFilterFn: FilterFnOption<TData> | undefined
+      let autoFilterFn: FilterFnOption<NikoTableFeatures, TData> | undefined
       if (
         variant === FILTER_VARIANTS.RANGE ||
         variant === FILTER_VARIANTS.NUMBER
       ) {
         // For number/range variants, use numberRangeFilter if no explicit filterFn
-        autoFilterFn = "numberRange" as FilterFnOption<TData>
+        autoFilterFn = "numberRange" as FilterFnOption<NikoTableFeatures, TData>
       } else if (
         variant === FILTER_VARIANTS.DATE ||
         variant === FILTER_VARIANTS.DATE_RANGE
       ) {
         // For date variants, use dateRangeFilter if no explicit filterFn
-        autoFilterFn = "dateRange" as FilterFnOption<TData>
+        autoFilterFn = "dateRange" as FilterFnOption<NikoTableFeatures, TData>
       }
 
       // Only override if we have an auto filterFn and no explicit one
@@ -546,7 +541,7 @@ function DataTableRootInternal<TData, TValue>({
       // sortable chrome when sorting is off.
       enableSorting: detectFeatures.enableSorting ?? false,
       enableHiding: true,
-      filterFn: "extended" as FilterFnOption<TData>,
+      filterFn: "extended" as FilterFnOption<NikoTableFeatures, TData>,
       // Override TanStack's internal default (150) so unset `size` stays undefined
       // — virtualized flex layout uses this to distinguish fixed vs flexible cols.
       // `column.getSize()` still falls back to 150 internally.
@@ -606,17 +601,17 @@ function DataTableRootInternal<TData, TValue>({
     if (!firstDataColId) return controlledColumnPinning
 
     // 2. Check pinning state of the first data column
-    const isPinnedLeft = controlledColumnPinning.left?.includes(firstDataColId)
-    const isPinnedRight =
-      controlledColumnPinning.right?.includes(firstDataColId)
+    const isPinnedStart =
+      controlledColumnPinning.start?.includes(firstDataColId)
+    const isPinnedEnd = controlledColumnPinning.end?.includes(firstDataColId)
 
     // If not fixed to either side, return default (system cols float naturally)
-    if (!isPinnedLeft && !isPinnedRight) {
+    if (!isPinnedStart && !isPinnedEnd) {
       return controlledColumnPinning
     }
 
-    const left = [...(controlledColumnPinning.left ?? [])]
-    const right = [...(controlledColumnPinning.right ?? [])]
+    const start = [...(controlledColumnPinning.start ?? [])]
+    const end = [...(controlledColumnPinning.end ?? [])]
 
     // 3. Prepare system columns list
     const systemColsPresent: string[] = []
@@ -624,38 +619,43 @@ function DataTableRootInternal<TData, TValue>({
     if (hasExpandColumn) systemColsPresent.push(SYSTEM_COLUMN_IDS.EXPAND)
 
     // 4. Clean existing lists (remove system cols to avoid duplication)
-    const cleanLeft = left.filter(id => !SYSTEM_COLUMN_ID_LIST.includes(id))
-    const cleanRight = right.filter(id => !SYSTEM_COLUMN_ID_LIST.includes(id))
+    const cleanStart = start.filter(id => !SYSTEM_COLUMN_ID_LIST.includes(id))
+    const cleanEnd = end.filter(id => !SYSTEM_COLUMN_ID_LIST.includes(id))
 
     // 5. Construct new pinning state
-    if (isPinnedLeft) {
-      // Pin Left: [System, ...Others]
+    if (isPinnedStart) {
+      // Pin start (LTR left): [System, ...Others]
       return {
-        left: [...systemColsPresent, ...cleanLeft],
-        right: cleanRight,
+        start: [...systemColsPresent, ...cleanStart],
+        end: cleanEnd,
       }
     }
 
-    if (isPinnedRight) {
-      // Pin Right: [System, ...Others]
-      // We place system cols *before* others in the Right group so they appear
-      // to the immediate left of the right-pinned data columns.
+    if (isPinnedEnd) {
+      // Pin end (LTR right): [System, ...Others]
+      // We place system cols *before* others in the end group so they appear
+      // to the immediate left of the end-pinned data columns.
       return {
-        left: cleanLeft,
-        right: [...systemColsPresent, ...cleanRight],
+        start: cleanStart,
+        end: [...systemColsPresent, ...cleanEnd],
       }
     }
 
     return controlledColumnPinning
   }, [controlledColumnPinning, columns, hasSelectColumn, hasExpandColumn])
 
-  // Critical: stable options reference. New object → useReactTable recreates
+  // Critical: stable options reference. New object → useTable recreates
   // the instance → state resets and sorting/filter/expand break.
-  const tableOptions = React.useMemo<TableOptions<TData>>(
+  const tableOptions = React.useMemo<TableOptions<NikoTableFeatures, TData>>(
     () => ({
       ...passthroughTableOptions,
+      features,
       data,
-      columns: processedColumns,
+      columns: processedColumns as ColumnDef<
+        NikoTableFeatures,
+        TData,
+        unknown
+      >[],
       defaultColumn,
       state: {
         ...restState,
@@ -689,9 +689,18 @@ function DataTableRootInternal<TData, TValue>({
       enableExpanding:
         detectFeatures.enableExpanding || detectFeatures.enableGrouping,
       groupedColumnMode: finalConfig.groupedColumnMode ?? "reorder",
-      manualSorting: detectFeatures.manualSorting,
-      manualPagination: detectFeatures.manualPagination,
-      manualFiltering: detectFeatures.manualFiltering,
+      // When a feature is off, skip its client row model (v8 omitted get*RowModel).
+      // `manual*` still wins for server-side modes when the feature is on.
+      manualSorting:
+        detectFeatures.manualSorting || !detectFeatures.enableSorting,
+      manualPagination:
+        detectFeatures.manualPagination || !detectFeatures.enablePagination,
+      manualFiltering:
+        detectFeatures.manualFiltering || !detectFeatures.enableFilters,
+      manualGrouping: !detectFeatures.enableGrouping,
+      manualExpanding: !(
+        detectFeatures.enableExpanding || detectFeatures.enableGrouping
+      ),
       // Enable auto-reset behaviors by default (standard TanStack Table behavior)
       // Can be overridden via config
       autoResetPageIndex: finalConfig.autoResetPageIndex,
@@ -710,41 +719,11 @@ function DataTableRootInternal<TData, TValue>({
       onExpandedChange: onExpandedChange ?? handleExpandedChange,
       onGroupingChange: onGroupingChange ?? handleGroupingChange,
       onPaginationChange: onPaginationChange ?? handlePaginationChange,
-      getCoreRowModel: getCoreRowModel(),
-      getFacetedRowModel: detectFeatures.enableFilters
-        ? getFacetedRowModel()
-        : undefined,
-      getFacetedUniqueValues: detectFeatures.enableFilters
-        ? getFacetedUniqueValues()
-        : undefined,
-      getFacetedMinMaxValues: detectFeatures.enableFilters
-        ? getFacetedMinMaxValues()
-        : undefined,
-      getFilteredRowModel: detectFeatures.enableFilters
-        ? getFilteredRowModel()
-        : undefined,
-      getSortedRowModel: detectFeatures.enableSorting
-        ? getSortedRowModel()
-        : undefined,
-      getGroupedRowModel: detectFeatures.enableGrouping
-        ? getGroupedRowModel()
-        : undefined,
-      getPaginationRowModel: detectFeatures.enablePagination
-        ? getPaginationRowModel()
-        : undefined,
-      getExpandedRowModel:
-        detectFeatures.enableExpanding || detectFeatures.enableGrouping
-          ? getExpandedRowModel()
-          : undefined,
-      filterFns: {
-        extended: extendedFilter,
-        numberRange: numberRangeFilter,
-        dateRange: dateRangeFilter,
-      },
+      // filterFns live on `features` (data-table-features.ts) — do not re-register here.
       // Allow globalFilterFn to be overridden via rest props, otherwise use default
       globalFilterFn:
-        (restGlobalFilterFn as FilterFn<TData>) ??
-        (globalFilterFn as unknown as FilterFn<TData>),
+        (restGlobalFilterFn as FilterFn<NikoTableFeatures, TData>) ??
+        (globalFilterFn as unknown as FilterFn<NikoTableFeatures, TData>),
       // Use provided getRowId or fallback to checking for 'id' property, then index
       getRowId:
         getRowId ??
@@ -819,7 +798,7 @@ function DataTableRootInternal<TData, TValue>({
   // Instance ref is stable across state changes; React Compiler warns about
   // incompatible-library here — TanStack manages its own memoization (expected).
 
-  const table = useReactTable<TData>(tableOptions)
+  const table = useTable<NikoTableFeatures, TData>(tableOptions)
 
   return (
     <DataTableProvider
@@ -837,7 +816,7 @@ function DataTableRootInternal<TData, TValue>({
 }
 
 // Main wrapper component
-export function DataTableRoot<TData, TValue>({
+export function DataTableRoot<TData extends RowData, TValue>({
   table: externalTable,
   columns,
   data,

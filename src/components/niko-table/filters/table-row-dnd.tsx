@@ -12,7 +12,7 @@
  * https://github.com/Semkoo/niko-table-registry
  */
 import React, { type CSSProperties } from "react"
-import type { Table, Row } from "@tanstack/react-table"
+import type { RowData } from "@tanstack/react-table"
 import {
   DndContext,
   KeyboardSensor,
@@ -39,14 +39,15 @@ import { TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
+import type { DataTableInstance, DataTableRow } from "../types"
 // ============================================================================
 // TableRowDndProvider
 // ============================================================================
 
-export interface TableRowDndProviderProps<TData> {
+export interface TableRowDndProviderProps<TData extends RowData> {
   children: React.ReactNode
   /** The table instance */
-  table: Table<TData>
+  table: DataTableInstance<TData>
   /** The data array (needed for arrayMove reordering) */
   data: TData[]
   /** Callback when rows are reordered. Receives the new data array. */
@@ -55,7 +56,7 @@ export interface TableRowDndProviderProps<TData> {
   modifiers?: Modifier[]
 }
 
-export function TableRowDndProvider<TData>({
+export function TableRowDndProvider<TData extends RowData>({
   children,
   table,
   data,
@@ -108,9 +109,9 @@ TableRowDndProvider.displayName = "TableRowDndProvider"
 // TableDraggableRow
 // ============================================================================
 
-export interface TableDraggableRowProps<TData> {
+export interface TableDraggableRowProps<TData extends RowData> {
   /** The row instance from TanStack Table */
-  row: Row<TData>
+  row: DataTableRow<TData>
   /**
    * Position in the current display model (post sort/filter). Used for
    * `scrollRowIntoView` / `flashRows`. Defaults to TanStack source `row.index`
@@ -121,7 +122,7 @@ export interface TableDraggableRowProps<TData> {
   className?: string
 }
 
-export function TableDraggableRow<TData>({
+export function TableDraggableRow<TData extends RowData>({
   row,
   displayIndex = row.index,
   children,

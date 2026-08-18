@@ -298,25 +298,25 @@ The `DataTableRoot` component is used to provide the table context to all child 
 
 ### Props
 
-| Name                       | Type                                             | Description                                        |
-| -------------------------- | ------------------------------------------------ | -------------------------------------------------- |
-| `children`                 | `React.ReactNode`                                | Child components (required).                       |
-| `data`                     | `TData[]`                                        | The data array to display in the table.            |
-| `columns`                  | `DataTableColumnDef<TData>[]`                    | Column definitions array.                          |
-| `table`                    | `Table<TData>`                                   | Pre-configured TanStack Table instance (optional). |
-| `config`                   | `DataTableConfig`                                | Configuration object for feature toggles.          |
-| `state`                    | `Partial<TableState>`                            | Controlled table state (pagination, sorting, etc). |
-| `isLoading`                | `boolean`                                        | Loading state for the table.                       |
-| `getRowId`                 | `(row: TData, index: number) => string`          | Custom function to get row IDs.                    |
-| `className`                | `string`                                         | Additional CSS classes.                            |
-| `onGlobalFilterChange`     | `(value: GlobalFilter) => void`                  | Callback when global filter changes.               |
-| `onPaginationChange`       | `(updater: Updater<PaginationState>) => void`    | Callback when pagination changes.                  |
-| `onSortingChange`          | `(updater: Updater<SortingState>) => void`       | Callback when sorting changes.                     |
-| `onColumnFiltersChange`    | `(updater: Updater<ColumnFiltersState>) => void` | Callback when column filters change.               |
-| `onColumnVisibilityChange` | `(updater: Updater<VisibilityState>) => void`    | Callback when column visibility changes.           |
-| `onRowSelectionChange`     | `(updater: Updater<RowSelectionState>) => void`  | Callback when row selection changes.               |
-| `onExpandedChange`         | `(updater: Updater<ExpandedState>) => void`      | Callback when expanded state changes.              |
-| `onRowSelection`           | `(selectedRows: TData[]) => void`                | Callback with selected row data.                   |
+| Name                       | Type                                                | Description                                        |
+| -------------------------- | --------------------------------------------------- | -------------------------------------------------- |
+| `children`                 | `React.ReactNode`                                   | Child components (required).                       |
+| `data`                     | `TData[]`                                           | The data array to display in the table.            |
+| `columns`                  | `DataTableColumnDef<TData>[]`                       | Column definitions array.                          |
+| `table`                    | `DataTableInstance<TData>`                          | Pre-configured TanStack Table instance (optional). |
+| `config`                   | `DataTableConfig`                                   | Configuration object for feature toggles.          |
+| `state`                    | `Partial<TableState>`                               | Controlled table state (pagination, sorting, etc). |
+| `isLoading`                | `boolean`                                           | Loading state for the table.                       |
+| `getRowId`                 | `(row: TData, index: number) => string`             | Custom function to get row IDs.                    |
+| `className`                | `string`                                            | Additional CSS classes.                            |
+| `onGlobalFilterChange`     | `(value: GlobalFilter) => void`                     | Callback when global filter changes.               |
+| `onPaginationChange`       | `(updater: Updater<PaginationState>) => void`       | Callback when pagination changes.                  |
+| `onSortingChange`          | `(updater: Updater<SortingState>) => void`          | Callback when sorting changes.                     |
+| `onColumnFiltersChange`    | `(updater: Updater<ColumnFiltersState>) => void`    | Callback when column filters change.               |
+| `onColumnVisibilityChange` | `(updater: Updater<ColumnVisibilityState>) => void` | Callback when column visibility changes.           |
+| `onRowSelectionChange`     | `(updater: Updater<RowSelectionState>) => void`     | Callback when row selection changes.               |
+| `onExpandedChange`         | `(updater: Updater<ExpandedState>) => void`         | Callback when expanded state changes.              |
+| `onRowSelection`           | `(selectedRows: TData[]) => void`                   | Callback with selected row data.                   |
 
 ### Config
 

@@ -29,7 +29,7 @@
  * so consumers who don't need DnD don't pay the `@dnd-kit/*` bundle cost.
  */
 
-import type { Column, Table } from "@tanstack/react-table"
+import type { RowData } from "@tanstack/react-table"
 import { Check, ChevronsUpDown, RotateCcw, Settings2 } from "lucide-react"
 import * as React from "react"
 import { Button } from "@/components/ui/button"
@@ -49,12 +49,15 @@ import {
 import { cn } from "@/lib/utils"
 import { formatLabel } from "../lib/format"
 
-function getColumnTitle<TData>(column: Column<TData, unknown>): string {
+import type { DataTableColumn, DataTableInstance } from "../types"
+function getColumnTitle<TData extends RowData>(
+  column: DataTableColumn<TData, unknown>,
+): string {
   return column.columnDef.meta?.label ?? formatLabel(column.id)
 }
 
-export interface TableViewMenuProps<TData> {
-  table: Table<TData>
+export interface TableViewMenuProps<TData extends RowData> {
+  table: DataTableInstance<TData>
   className?: string
   onColumnVisibilityChange?: (columnId: string, isVisible: boolean) => void
   /**
@@ -74,14 +77,14 @@ export interface TableViewMenuProps<TData> {
   resetLabel?: string
 }
 
-interface MenuRowProps<TData> {
-  column: Column<TData, unknown>
+interface MenuRowProps<TData extends RowData> {
+  column: DataTableColumn<TData, unknown>
   isLocked: boolean
   isVisible: boolean
   onToggle: (columnId: string) => void
 }
 
-const MenuRow = React.memo(function MenuRow<TData>({
+const MenuRow = React.memo(function MenuRow<TData extends RowData>({
   column,
   isLocked,
   isVisible,
@@ -106,9 +109,9 @@ const MenuRow = React.memo(function MenuRow<TData>({
       />
     </CommandItem>
   )
-}) as <TData>(props: MenuRowProps<TData>) => React.ReactElement
+}) as <TData extends RowData>(props: MenuRowProps<TData>) => React.ReactElement
 
-export function TableViewMenu<TData>({
+export function TableViewMenu<TData extends RowData>({
   table,
   onColumnVisibilityChange,
   lockedColumnIds,

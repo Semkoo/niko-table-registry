@@ -21,7 +21,7 @@
 
 import React from "react"
 import { useVirtualizer } from "@tanstack/react-virtual"
-import { flexRender, type Row } from "@tanstack/react-table"
+import { flexRender } from "@tanstack/react-table"
 import { cn } from "@/lib/utils"
 import { useDataTable } from "./data-table-context"
 import {
@@ -44,6 +44,8 @@ import {
 } from "../filters/table-column-dnd"
 import type { ScrollEvent } from "./data-table-virtualized-structure"
 
+import type { DataTableRow } from "../types"
+import type { RowData } from "@tanstack/react-table"
 // ============================================================================
 // Stable measureElement — computed once at module level
 // ============================================================================
@@ -83,8 +85,8 @@ const measureElement:
  * expansion changes local to one row instead of cascading across the
  * viewport. `TableDragAlongCell` manages per-cell drag state internally.
  */
-interface VirtualizedDndColumnBodyRowProps<TData> {
-  row: Row<TData>
+interface VirtualizedDndColumnBodyRowProps<TData extends RowData> {
+  row: DataTableRow<TData>
   virtualIndex: number
   expandColumnId: string | undefined
   isExpanded: boolean
@@ -110,7 +112,7 @@ interface VirtualizedDndColumnBodyRowProps<TData> {
 }
 
 const VirtualizedDndColumnBodyRowInner = function VirtualizedDndColumnBodyRow<
-  TData,
+  TData extends RowData,
 >({
   row,
   virtualIndex,
@@ -323,7 +325,7 @@ DataTableVirtualizedDndHeader.displayName = "DataTableVirtualizedDndHeader"
 // DataTableVirtualizedDndColumnBody (Column DnD + Virtualization)
 // ============================================================================
 
-export interface DataTableVirtualizedDndColumnBodyProps<TData> {
+export interface DataTableVirtualizedDndColumnBodyProps<TData extends RowData> {
   children?: React.ReactNode
   estimateSize?: number
   overscan?: number
@@ -388,7 +390,7 @@ export interface DataTableVirtualizedDndColumnBodyProps<TData> {
  *   </DataTable>
  * </DataTableColumnDndProvider>
  */
-export function DataTableVirtualizedDndColumnBody<TData>({
+export function DataTableVirtualizedDndColumnBody<TData extends RowData>({
   children,
   estimateSize = 34,
   overscan = 20,
@@ -418,7 +420,7 @@ export function DataTableVirtualizedDndColumnBody<TData>({
   // to invalidate on column toggle / reorder / pin / resize. For external row
   // state (inline edits, optimistic overlays), pass `getRowMemoKey`.
   const { columnVisibility, columnOrder, columnPinning, columnSizing } =
-    table.getState()
+    table.state
   const resizing = table.options.enableColumnResizing ?? false
   const columnLayoutSignature = React.useMemo(
     () =>
@@ -566,7 +568,7 @@ export function DataTableVirtualizedDndColumnBody<TData>({
         return (
           <VirtualizedDndColumnBodyRow
             key={row.id}
-            row={row as Row<TData>}
+            row={row as DataTableRow<TData>}
             virtualIndex={virtualRow.index}
             expandColumnId={expandColumnId}
             isExpanded={row.getIsExpanded()}

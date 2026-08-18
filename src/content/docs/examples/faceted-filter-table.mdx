@@ -462,14 +462,14 @@ import type {
   PaginationState,
   SortingState,
   ColumnFiltersState,
-  VisibilityState,
+  ColumnVisibilityState,
 } from "@tanstack/react-table"
 
 export function ControlledFacetedFilterTable({ data }: { data: Product[] }) {
   const [globalFilter, setGlobalFilter] = useState<string | object>("")
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
+  const [columnVisibility, setColumnVisibility] = useState<ColumnVisibilityState>({})
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 10,

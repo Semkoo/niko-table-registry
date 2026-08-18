@@ -292,7 +292,7 @@ import { Button } from "@/components/ui/button"
 
 function CustomSearchInput() {
   const { table } = useDataTable<Customer>()
-  const globalFilter = table.getState().globalFilter
+  const globalFilter = table.state.globalFilter
 
   return (
     <div className="relative">

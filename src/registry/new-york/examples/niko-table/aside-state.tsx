@@ -5,7 +5,7 @@ import type {
   PaginationState,
   SortingState,
   ColumnFiltersState,
-  VisibilityState,
+  ColumnVisibilityState,
   ColumnPinningState,
 } from "@tanstack/react-table"
 import { DataTableRoot } from "@/components/niko-table/core/data-table-root"
@@ -317,14 +317,15 @@ export default function AsideTableStateExample() {
   const [globalFilter, setGlobalFilter] = useState<string | object>("")
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
+  const [columnVisibility, setColumnVisibility] =
+    useState<ColumnVisibilityState>({})
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 8,
   })
   const [columnPinning, setColumnPinning] = useState<ColumnPinningState>({
-    left: [],
-    right: [],
+    start: [],
+    end: [],
   })
 
   // Selected customer for aside panel
@@ -340,7 +341,7 @@ export default function AsideTableStateExample() {
     setSorting([])
     setColumnFilters([])
     setColumnVisibility({})
-    setColumnPinning({ left: [], right: [] })
+    setColumnPinning({ start: [], end: [] })
     setPagination({ pageIndex: 0, pageSize: 8 })
     setSelectedCustomerId(null)
   }

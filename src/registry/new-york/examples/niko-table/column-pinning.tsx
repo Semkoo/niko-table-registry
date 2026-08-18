@@ -308,8 +308,8 @@ export default function ColumnPinningTable() {
       columns={columns}
       initialState={{
         columnPinning: {
-          left: ["id"],
-          right: ["actions"],
+          start: ["id"],
+          end: ["actions"],
         },
       }}
     >

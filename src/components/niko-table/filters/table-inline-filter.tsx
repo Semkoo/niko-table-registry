@@ -14,7 +14,7 @@
 // Inline-filter module: utilities, sync hooks, value-input renderers, and the
 // `TableInline` toolbar.
 
-import type { Column, Table } from "@tanstack/react-table"
+import type { RowData } from "@tanstack/react-table"
 import {
   BadgeCheck,
   CalendarIcon,
@@ -64,6 +64,8 @@ import {
 } from "../lib/constants"
 import { dataTableConfig } from "../config/data-table"
 import type {
+  DataTableColumn,
+  DataTableInstance,
   ExtendedColumnFilter,
   FilterOperator,
   JoinOperator,
@@ -77,7 +79,7 @@ import { TableRangeFilter } from "./table-range-filter"
  * Create a deterministic filter ID based on filter properties
  * This ensures filters can be shared via URL and will have consistent IDs
  */
-function createFilterId<TData>(
+function createFilterId<TData extends RowData>(
   filter: Omit<ExtendedColumnFilter<TData>, "filterId">,
   index?: number,
 ): string {
@@ -101,7 +103,10 @@ function createFilterId<TData>(
 /**
  * Type for filters without filterId (for URL serialization)
  */
-type FilterWithoutId<TData> = Omit<ExtendedColumnFilter<TData>, "filterId">
+type FilterWithoutId<TData extends RowData> = Omit<
+  ExtendedColumnFilter<TData>,
+  "filterId"
+>
 
 /**
  * Normalize filters loaded from URL by ensuring they have filterId
@@ -113,7 +118,7 @@ type FilterWithoutId<TData> = Omit<ExtendedColumnFilter<TData>, "filterId">
  * @param filters - Filters that may or may not have filterId
  * @returns Filters with guaranteed filterId values
  */
-function normalizeFiltersFromUrl<TData>(
+function normalizeFiltersFromUrl<TData extends RowData>(
   filters: (FilterWithoutId<TData> | ExtendedColumnFilter<TData>)[],
 ): ExtendedColumnFilter<TData>[] {
   return filters.map((filter, index) => {
@@ -141,8 +146,8 @@ function normalizeFiltersFromUrl<TData>(
  *
  * @debug Check React DevTools > Components > useInitialFilters to see returned value
  */
-function useInitialFilters<TData>(
-  table: Table<TData>,
+function useInitialFilters<TData extends RowData>(
+  table: DataTableInstance<TData>,
   controlledFilters?: ExtendedColumnFilter<TData>[],
 ): ExtendedColumnFilter<TData>[] {
   const initialFilters = React.useMemo(() => {
@@ -157,7 +162,7 @@ function useInitialFilters<TData>(
       return normalized
     }
 
-    const globalFilter = table.getState().globalFilter
+    const globalFilter = table.state.globalFilter
     if (
       globalFilter &&
       typeof globalFilter === "object" &&
@@ -176,7 +181,7 @@ function useInitialFilters<TData>(
       return normalized
     }
 
-    const columnFilters = table.getState().columnFilters
+    const columnFilters = table.state.columnFilters
     if (columnFilters && columnFilters.length > 0) {
       const extractedFilters = columnFilters
         .map(cf => cf.value)
@@ -216,12 +221,12 @@ function useInitialFilters<TData>(
  * - In controlled mode: only updates table.meta (parent handles table state)
  *
  * @debug
- * - Check table.getState().globalFilter to see OR filters
- * - Check table.getState().columnFilters to see AND filters
+ * - Check table.state.globalFilter to see OR filters
+ * - Check table.state.columnFilters to see AND filters
  * - Check table.options.meta.joinOperator to see current join logic
  */
-function useSyncFiltersWithTable<TData>(
-  table: Table<TData>,
+function useSyncFiltersWithTable<TData extends RowData>(
+  table: DataTableInstance<TData>,
   filters: ExtendedColumnFilter<TData>[],
   isControlled: boolean,
 ) {
@@ -233,9 +238,8 @@ function useSyncFiltersWithTable<TData>(
 
   // Update table meta (happens during render, safe mutation)
   if (table.options.meta) {
-     
     table.options.meta.hasIndividualJoinOperators = true
-     
+
     table.options.meta.joinOperator = filterLogic.joinOperator
   }
 
@@ -298,13 +302,15 @@ function useSyncFiltersWithTable<TData>(
   }, [filters, filterLogic, table, isControlled])
 }
 
-export interface TableInlineProps<TData> extends React.ComponentProps<"div"> {
-  table: Table<TData>
+export interface TableInlineProps<
+  TData extends RowData,
+> extends React.ComponentProps<"div"> {
+  table: DataTableInstance<TData>
   filters?: ExtendedColumnFilter<TData>[]
   onFiltersChange?: (filters: ExtendedColumnFilter<TData>[]) => void
 }
 
-export function TableInline<TData>({
+export function TableInline<TData extends RowData>({
   table,
   filters: controlledFilters,
   onFiltersChange: controlledOnFiltersChange,
@@ -355,7 +361,7 @@ export function TableInline<TData>({
 
   const [open, setOpen] = React.useState(false)
   const [selectedColumn, setSelectedColumn] =
-    React.useState<Column<TData> | null>(null)
+    React.useState<DataTableColumn<TData> | null>(null)
   const [inputValue, setInputValue] = React.useState("")
   const triggerRef = React.useRef<HTMLButtonElement>(null)
   const inputRef = React.useRef<HTMLInputElement>(null)
@@ -372,7 +378,7 @@ export function TableInline<TData>({
   }, [])
 
   const onFilterAdd = React.useCallback(
-    (column: Column<TData>, value: string) => {
+    (column: DataTableColumn<TData>, value: string) => {
       if (
         !value.trim() &&
         column.columnDef.meta?.variant !== FILTER_VARIANTS.BOOLEAN
@@ -642,10 +648,10 @@ export function TableInline<TData>({
 }
 TableInline.displayName = "TableInline"
 
-interface TableInlineFilterItemProps<TData> {
+interface TableInlineFilterItemProps<TData extends RowData> {
   filter: ExtendedColumnFilter<TData>
   filterItemId: string
-  columns: Column<TData>[]
+  columns: DataTableColumn<TData>[]
   onFilterUpdate: (
     filterId: string,
     updates: Partial<Omit<ExtendedColumnFilter<TData>, "filterId">>,
@@ -653,7 +659,7 @@ interface TableInlineFilterItemProps<TData> {
   onFilterRemove: (filterId: string) => void
 }
 
-function TableInlineFilterItem<TData>({
+function TableInlineFilterItem<TData extends RowData>({
   filter,
   filterItemId,
   columns,
@@ -839,13 +845,13 @@ function TableInlineFilterItem<TData>({
 }
 TableInlineFilterItem.displayName = "TableInlineFilterItem"
 
-interface FilterValueSelectorProps<TData> {
-  column: Column<TData>
+interface FilterValueSelectorProps<TData extends RowData> {
+  column: DataTableColumn<TData>
   value: string
   onSelect: (value: string) => void
 }
 
-function FilterValueSelector<TData>({
+function FilterValueSelector<TData extends RowData>({
   column,
   value,
   onSelect,
@@ -933,7 +939,7 @@ function FilterValueSelector<TData>({
 }
 FilterValueSelector.displayName = "FilterValueSelector"
 
-function onFilterInputRender<TData>({
+function onFilterInputRender<TData extends RowData>({
   filter,
   column,
   inputId,
@@ -942,7 +948,7 @@ function onFilterInputRender<TData>({
   setShowValueSelector,
 }: {
   filter: ExtendedColumnFilter<TData>
-  column: Column<TData>
+  column: DataTableColumn<TData>
   inputId: string
   onFilterUpdate: (
     filterId: string,

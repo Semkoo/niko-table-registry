@@ -5,7 +5,7 @@ import type {
   PaginationState,
   SortingState,
   ColumnSizingState,
-  VisibilityState,
+  ColumnVisibilityState,
 } from "@tanstack/react-table"
 import { DataTableRoot } from "@/components/niko-table/core/data-table-root"
 import { DataTable } from "@/components/niko-table/core/data-table"
@@ -437,7 +437,8 @@ export default function ColumnResizeStateTable() {
   const [tableKey, setTableKey] = useState(0)
   const [globalFilter, setGlobalFilter] = useState<string | object>("")
   const [sorting, setSorting] = useState<SortingState>([])
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
+  const [columnVisibility, setColumnVisibility] =
+    useState<ColumnVisibilityState>({})
   const [columnSizing, setColumnSizing] = useState<ColumnSizingState>({})
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,

@@ -17,11 +17,12 @@
  * DataTableVirtualizedHeader when `enableColumnResizing` is on. Lives in core
  * so both bodies can import it without pulling the opt-in marker package.
  */
-import { type Header } from "@tanstack/react-table"
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import { DEFAULT_MAX_COLUMN_SIZE, DEFAULT_MIN_COLUMN_SIZE } from "./constants"
 
+import type { RowData } from "@tanstack/react-table"
+import type { DataTableHeader } from "../types"
 /** Room for cell chrome the text measurement doesn't cover. */
 const AUTOSIZE_CELL_PADDING = 24 // horizontal padding + buffer
 const AUTOSIZE_HEADER_CHROME = 52 // sort/menu trigger + resize grip
@@ -56,8 +57,8 @@ function widestTextWidth(el: Element): number {
  * cell/header text (mounted cells only — for virtualized tables, what's on
  * screen) and sets that column's size.
  */
-function autosizeColumn<TData>(
-  header: Header<TData, unknown>,
+function autosizeColumn<TData extends RowData>(
+  header: DataTableHeader<TData, unknown>,
   handle: Element,
 ) {
   const root = handle.closest('[data-slot="table"]')
@@ -88,8 +89,8 @@ function autosizeColumn<TData>(
  * nudge the width (Shift = larger step), Enter autosizes; exposes
  * `aria-value*`.
  */
-export interface DataTableColumnResizeHandleProps<TData> {
-  header: Header<TData, unknown>
+export interface DataTableColumnResizeHandleProps<TData extends RowData> {
+  header: DataTableHeader<TData, unknown>
   /**
    * This column is currently the flex (fill) column. Flex columns have no width
    * TanStack can drive, so they resize through a custom pointer drag that starts
@@ -107,7 +108,7 @@ export interface DataTableColumnResizeHandleProps<TData> {
   ) => void
 }
 
-export function DataTableColumnResizeHandle<TData>({
+export function DataTableColumnResizeHandle<TData extends RowData>({
   header,
   isFlex = false,
   setResizePreview,
@@ -126,7 +127,8 @@ export function DataTableColumnResizeHandle<TData>({
   // the truth again (user choice wins, render and ARIA agree).
   const [focusedWidth, setFocusedWidth] = React.useState<number | null>(null)
   const hasExplicitWidth =
-    header.getContext().table.getState().columnSizing[header.column.id] != null
+    header.getContext().table.atoms.columnSizing?.get()?.[header.column.id] !=
+    null
   const ariaValueNow = Math.round(
     hasExplicitWidth
       ? header.column.getSize()

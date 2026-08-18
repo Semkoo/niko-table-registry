@@ -5,7 +5,7 @@ import type {
   PaginationState,
   SortingState,
   ColumnPinningState,
-  VisibilityState,
+  ColumnVisibilityState,
 } from "@tanstack/react-table"
 import { DataTableRoot } from "@/components/niko-table/core/data-table-root"
 import { DataTable } from "@/components/niko-table/core/data-table"
@@ -319,10 +319,11 @@ const columns: DataTableColumnDef<Order>[] = [
 export default function ColumnPinningStateTable() {
   const [globalFilter, setGlobalFilter] = useState<string | object>("")
   const [sorting, setSorting] = useState<SortingState>([])
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
+  const [columnVisibility, setColumnVisibility] =
+    useState<ColumnVisibilityState>({})
   const [columnPinning, setColumnPinning] = useState<ColumnPinningState>({
-    left: ["id"],
-    right: ["actions"],
+    start: ["id"],
+    end: ["actions"],
   })
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
@@ -333,7 +334,7 @@ export default function ColumnPinningStateTable() {
     setGlobalFilter("")
     setSorting([])
     setColumnVisibility({})
-    setColumnPinning({ left: [], right: [] })
+    setColumnPinning({ start: [], end: [] })
     setPagination({ pageIndex: 0, pageSize: 10 })
   }
 
@@ -442,8 +443,8 @@ export default function ColumnPinningStateTable() {
             <div className="flex justify-between">
               <span className="font-medium">Pinned Columns:</span>
               <span className="text-foreground">
-                {columnPinning.left?.length || 0} Left,{" "}
-                {columnPinning.right?.length || 0} Right
+                {columnPinning.start?.length || 0} Left,{" "}
+                {columnPinning.end?.length || 0} Right
               </span>
             </div>
           </div>

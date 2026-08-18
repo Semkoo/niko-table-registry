@@ -11,6 +11,7 @@
  * users (and future LLMs reading this code) benefit:
  * https://github.com/Semkoo/niko-table-registry
  */
+import type { RowData } from "@tanstack/react-table"
 import React from "react"
 
 import { TableColumnFilterTrigger } from "../filters/table-column-faceted-filter"
@@ -19,7 +20,7 @@ import { useColumnHeaderContext } from "./data-table-column-header"
 /**
  * A standard filter trigger button (Funnel icon) using context.
  */
-export function DataTableColumnFilterTrigger<TData, TValue>(
+export function DataTableColumnFilterTrigger<TData extends RowData, TValue>(
   props: Omit<React.ComponentProps<typeof TableColumnFilterTrigger>, "column">,
 ) {
   const { column } = useColumnHeaderContext<TData, TValue>(true)

@@ -10,24 +10,25 @@
  * https://github.com/Semkoo/niko-table-registry
  */
 
-import { type Column } from "@tanstack/react-table"
+import { type Column, type RowData } from "@tanstack/react-table"
+import type { NikoTableFeatures } from "./data-table-features"
 import type React from "react"
 
-export const getCommonPinningStyles = <TData>(
-  column: Column<TData>,
+export const getCommonPinningStyles = <TData extends RowData>(
+  column: Column<NikoTableFeatures, TData>,
   isHeader: boolean = false,
 ): React.CSSProperties => {
   const isPinned = column.getIsPinned()
   if (!isPinned) return {}
 
-  const isLeft = isPinned === "left"
+  const isLeft = isPinned === "start"
   const columnSize = column.getSize()
 
   return {
     position: "sticky",
     top: isHeader ? 0 : undefined,
-    left: isLeft ? `${column.getStart("left")}px` : undefined,
-    right: !isLeft ? `${column.getAfter("right")}px` : undefined,
+    left: isLeft ? `${column.getStart("start")}px` : undefined,
+    right: !isLeft ? `${column.getAfter("end")}px` : undefined,
     opacity: 1,
     width: columnSize,
     minWidth: columnSize, // Prevent column from shrinking

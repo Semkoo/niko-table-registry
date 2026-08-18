@@ -21,7 +21,7 @@ import type {
   PaginationState,
   SortingState,
   ColumnFiltersState,
-  VisibilityState,
+  ColumnVisibilityState,
   RowSelectionState,
   ExpandedState,
   ColumnPinningState,
@@ -539,7 +539,8 @@ export default function AllFeaturesTableExample() {
   const [globalFilter, setGlobalFilter] = useState<string | object>("")
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
+  const [columnVisibility, setColumnVisibility] =
+    useState<ColumnVisibilityState>({})
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({})
   const [expanded, setExpanded] = useState<ExpandedState>({})
   const [pagination, setPagination] = useState<PaginationState>({
@@ -547,8 +548,8 @@ export default function AllFeaturesTableExample() {
     pageSize: 10,
   })
   const [columnPinning, setColumnPinning] = useState<ColumnPinningState>({
-    left: [],
-    right: [],
+    start: [],
+    end: [],
   })
 
   // Sidebar state
@@ -567,7 +568,7 @@ export default function AllFeaturesTableExample() {
     setColumnVisibility({})
     setRowSelection({})
     setExpanded({})
-    setColumnPinning({ left: [], right: [] })
+    setColumnPinning({ start: [], end: [] })
     setPagination({ pageIndex: 0, pageSize: 10 })
     setSelectedProductId(null)
   }, [])
@@ -1277,8 +1278,8 @@ export default function AllFeaturesTableExample() {
             <div className="flex justify-between">
               <span className="font-medium">Pinned Columns:</span>
               <span className="text-foreground">
-                {columnPinning.left?.length || 0} Left,{" "}
-                {columnPinning.right?.length || 0} Right
+                {columnPinning.start?.length || 0} Left,{" "}
+                {columnPinning.end?.length || 0} Right
               </span>
             </div>
           </div>

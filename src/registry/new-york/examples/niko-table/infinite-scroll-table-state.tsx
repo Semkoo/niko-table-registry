@@ -6,7 +6,7 @@ import type {
   PaginationState,
   SortingState,
   ColumnFiltersState,
-  VisibilityState,
+  ColumnVisibilityState,
   ExpandedState,
   ColumnPinningState,
 } from "@tanstack/react-table"
@@ -176,11 +176,12 @@ export default function InfiniteScrollTableStateExample() {
   const [globalFilter, setGlobalFilter] = useState<string | object>("")
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
+  const [columnVisibility, setColumnVisibility] =
+    useState<ColumnVisibilityState>({})
   const [expanded, setExpanded] = useState<ExpandedState>({})
   const [columnPinning, setColumnPinning] = useState<ColumnPinningState>({
-    left: [],
-    right: [],
+    start: [],
+    end: [],
   })
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
@@ -218,7 +219,7 @@ export default function InfiniteScrollTableStateExample() {
     setColumnFilters([])
     setColumnVisibility({})
     setExpanded({})
-    setColumnPinning({ left: [], right: [] })
+    setColumnPinning({ start: [], end: [] })
     setPagination({ pageIndex: 0, pageSize: 500 })
   }, [])
 
@@ -563,8 +564,8 @@ export default function InfiniteScrollTableStateExample() {
             <div className="flex justify-between">
               <span className="font-medium">Pinned Columns:</span>
               <span className="text-foreground">
-                {columnPinning.left?.length || 0} Left,{" "}
-                {columnPinning.right?.length || 0} Right
+                {columnPinning.start?.length || 0} Left,{" "}
+                {columnPinning.end?.length || 0} Right
               </span>
             </div>
           </div>

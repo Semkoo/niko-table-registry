@@ -20,6 +20,7 @@ import React, {
 import { useGeneratedOptions } from "../hooks/use-generated-options"
 import { useHeaderMinWidths } from "../lib/use-header-min-widths"
 import type { DataTableColumnDef, DataTableInstance, Option } from "../types"
+import type { RowData } from "@tanstack/react-table"
 
 export type DataTableContextState = {
   isLoading: boolean
@@ -88,7 +89,7 @@ export function flashCellKey(rowId: string, columnId: string): string {
   return `${rowId}:${columnId}`
 }
 
-type DataTableContextProps<TData> = DataTableContextState & {
+type DataTableContextProps<TData extends RowData> = DataTableContextState & {
   table: DataTableInstance<TData>
   columns: DataTableColumnDef<TData>[]
   generatedOptionsMap: Record<string, Option[]>
@@ -223,7 +224,9 @@ const DataTableContext = createContext<DataTableContextProps<any> | undefined>(
   undefined,
 )
 
-export function useDataTable<TData>(): DataTableContextProps<TData> {
+export function useDataTable<
+  TData extends RowData,
+>(): DataTableContextProps<TData> {
   const context = useContext(DataTableContext)
   if (context === undefined) {
     throw new Error("useDataTable must be used within DataTableRoot")
@@ -259,7 +262,7 @@ function deriveInitialState(isLoading?: boolean): DataTableContextState {
   }
 }
 
-interface DataTableProviderProps<TData> {
+interface DataTableProviderProps<TData extends RowData> {
   children: React.ReactNode
   table: DataTableInstance<TData>
   columns?: DataTableColumnDef<TData>[]
@@ -313,7 +316,7 @@ function useFlashSet(): [
   return [set, flash]
 }
 
-export function DataTableProvider<TData>({
+export function DataTableProvider<TData extends RowData>({
   children,
   table,
   columns,
@@ -394,7 +397,7 @@ export function DataTableProvider<TData>({
         const a = model.rows.findIndex(r => r.id === anchorId)
         const b = model.rows.findIndex(r => r.id === rowId)
         if (a === -1 || b === -1) return
-        const next = { ...table.getState().rowSelection }
+        const next = { ...table.state.rowSelection }
         for (let i = Math.min(a, b); i <= Math.max(a, b); i++) {
           const r = model.rows[i]
           if (r?.getCanSelect()) next[r.id] = true
@@ -471,7 +474,7 @@ export function DataTableProvider<TData>({
 
   // Table instance ref is stable across state changes — extract individual
   // state slices so context consumers re-render on filter/sort/select.
-  const tableState = table.getState()
+  const tableState = table.state
 
   const globalFilter = tableState.globalFilter
   const sorting = tableState.sorting
@@ -556,15 +559,15 @@ export function DataTableProvider<TData>({
 
   // Publish the in-flight resize offset for the preview guide line (see
   // ColumnResizeInfoContext). Normal columns resize through TanStack, so the
-  // offset comes from `columnSizingInfo` (mutates every pointer move; this
+  // offset comes from `columnResizing` (mutates every pointer move; this
   // provider re-renders with it). Flex columns resize through a custom drag
   // (TanStack can't size a width-less column) that publishes its offset via
   // `setColumnResizePreview` — that manual value wins while a flex drag is live.
   const [manualResizePreview, setManualResizePreview] =
     React.useState<ColumnResizeInfo | null>(null)
-  const columnSizingInfo = table.getState().columnSizingInfo
-  const resizingColumnId = columnSizingInfo.isResizingColumn || null
-  const resizeDeltaOffset = columnSizingInfo.deltaOffset ?? 0
+  const columnResizing = table.state.columnResizing
+  const resizingColumnId = columnResizing.isResizingColumn || null
+  const resizeDeltaOffset = columnResizing.deltaOffset ?? 0
   const columnResizeInfo = React.useMemo<ColumnResizeInfo>(
     () =>
       manualResizePreview ?? {
@@ -620,7 +623,10 @@ export function DataTableProvider<TData>({
   )
 
   return (
-    <DataTableContext.Provider value={value}>
+    <DataTableContext.Provider
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- generic table context is invariant under ReactTable options
+      value={value as DataTableContextProps<any>}
+    >
       <ActiveCellSetterContext.Provider value={setActiveCell}>
         <ActiveCellValueContext.Provider value={activeCell}>
           <ColumnResizeInfoContext.Provider value={columnResizeInfo}>

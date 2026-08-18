@@ -16,7 +16,7 @@
  * @description A sort menu component for DataTable that allows users to manage multiple sorting criteria. Users can add, remove, and reorder sorting fields, as well as select sort directions.
  */
 
-import type { ColumnSort, Table } from "@tanstack/react-table"
+import type { ColumnSort, RowData } from "@tanstack/react-table"
 import { ArrowDownUp, Trash2, CircleHelp } from "lucide-react"
 import * as React from "react"
 
@@ -62,6 +62,7 @@ import { ChevronsUpDown, Grip } from "lucide-react"
 import { SORT_LABELS } from "../config/data-table"
 import { FILTER_VARIANTS } from "../lib/constants"
 
+import type { DataTableInstance } from "../types"
 interface TableSortItemProps {
   sort: ColumnSort
   sortItemId: string
@@ -212,10 +213,10 @@ function TableSortItem({
   )
 }
 
-export interface TableSortMenuProps<TData> extends React.ComponentProps<
-  typeof PopoverContent
-> {
-  table: Table<TData>
+export interface TableSortMenuProps<
+  TData extends RowData,
+> extends React.ComponentProps<typeof PopoverContent> {
+  table: DataTableInstance<TData>
   debounceMs?: number
   throttleMs?: number
   shallow?: boolean
@@ -227,7 +228,7 @@ export interface TableSortMenuProps<TData> extends React.ComponentProps<
   onSortingChange?: (sorting: ColumnSort[]) => void
 }
 
-export function TableSortMenu<TData>({
+export function TableSortMenu<TData extends RowData>({
   table,
   onSortingChange: externalOnSortingChange,
   className,
@@ -247,7 +248,7 @@ export function TableSortMenu<TData>({
   const [open, setOpen] = React.useState(false)
   const addButtonRef = React.useRef<HTMLButtonElement>(null)
 
-  const sorting = table.getState().sorting
+  const sorting = table.state.sorting
   // Hide "Add sort" when adding a second entry would silently replace the
   // first (`enableMultiSort: false`). The first sort can still be added
   // from the menu when no sort exists yet.
@@ -263,9 +264,7 @@ export function TableSortMenu<TData>({
       // closure-captured `sorting` — eliminates any chance of drift if the
       // callback fires from an interaction queued before the latest render.
       const nextSorting =
-        typeof updater === "function"
-          ? updater(table.getState().sorting)
-          : updater
+        typeof updater === "function" ? updater(table.state.sorting) : updater
       table.setSorting(nextSorting)
       externalOnSortingChange?.(nextSorting)
     },

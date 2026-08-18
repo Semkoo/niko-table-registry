@@ -34,7 +34,7 @@ import type {
   PaginationState,
   SortingState,
   Updater,
-  VisibilityState,
+  ColumnVisibilityState,
 } from "@tanstack/react-table"
 import { DataTableRoot } from "@/components/niko-table/core/data-table-root"
 import { DataTable } from "@/components/niko-table/core/data-table"
@@ -993,7 +993,8 @@ function DrizzleTableContent() {
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [globalFilter, setGlobalFilter] = useState<string | object>("")
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
+  const [columnVisibility, setColumnVisibility] =
+    useState<ColumnVisibilityState>({})
 
   // Debounce search + columnFilters as ONE snapshot, not separately. A single
   // advanced-menu action can write both at once; debouncing them on their own

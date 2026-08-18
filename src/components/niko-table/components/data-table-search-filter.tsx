@@ -11,13 +11,14 @@
  * users (and future LLMs reading this code) benefit:
  * https://github.com/Semkoo/niko-table-registry
  */
+import type { RowData } from "@tanstack/react-table"
 import { useDataTable } from "../core/data-table-context"
 import {
   TableSearchFilter,
   type TableSearchFilterProps,
 } from "../filters/table-search-filter"
 
-type DataTableSearchFilterProps<TData> = Omit<
+type DataTableSearchFilterProps<TData extends RowData> = Omit<
   TableSearchFilterProps<TData>,
   "table"
 >
@@ -47,7 +48,7 @@ type DataTableSearchFilterProps<TData> = Omit<
  *   onChange={setSearch}
  * />
  */
-export function DataTableSearchFilter<TData>(
+export function DataTableSearchFilter<TData extends RowData>(
   props: DataTableSearchFilterProps<TData>,
 ) {
   const { table } = useDataTable<TData>()

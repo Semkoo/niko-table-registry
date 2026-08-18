@@ -108,7 +108,7 @@ export function DataGrid<TRow extends GridRow>({
   // what the table actually renders (visibility, pinning, column order). Keeps
   // keyboard traversal, selection bounds, and paste targeting aligned with the
   // mounted cells when the user hides or pins columns via the header menus.
-  const { columnVisibility, columnOrder, columnPinning } = table.getState()
+  const { columnVisibility, columnOrder, columnPinning } = table.state
   const gridColumnIds = grid.columnIds
   const columnIds = React.useMemo(() => {
     const editable = new Set(gridColumnIds)

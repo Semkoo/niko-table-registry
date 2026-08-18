@@ -305,7 +305,7 @@ import { useState } from "react"
 import type {
   PaginationState,
   SortingState,
-  VisibilityState,
+  ColumnVisibilityState,
 } from "@tanstack/react-table"
 
 export function ControlledBasicTable({ data }: { data: Product[] }) {
@@ -314,7 +314,7 @@ export function ControlledBasicTable({ data }: { data: Product[] }) {
     pageSize: 10,
   })
   const [sorting, setSorting] = useState<SortingState>([])
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
+  const [columnVisibility, setColumnVisibility] = useState<ColumnVisibilityState>({})
 
   return (
     <DataTableRoot

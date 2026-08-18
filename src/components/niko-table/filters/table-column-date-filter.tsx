@@ -12,7 +12,6 @@
  * https://github.com/Semkoo/niko-table-registry
  */
 import React from "react"
-import type { Column } from "@tanstack/react-table"
 import type { DateRange } from "react-day-picker"
 import { CircleHelp, CalendarIcon, CalendarX2 } from "lucide-react"
 
@@ -36,6 +35,8 @@ import { useDerivedColumnTitle } from "../hooks/use-derived-column-title"
 import { formatDate } from "../lib/format"
 import { cn } from "@/lib/utils"
 
+import type { DataTableColumn } from "../types"
+import type { RowData } from "@tanstack/react-table"
 type DateSelection = Date[] | DateRange
 
 function parseAsDate(timestamp: number | string | undefined): Date | undefined {
@@ -82,13 +83,13 @@ function parseColumnFilterValue(value: unknown) {
  * </TableColumnActions>
  * ```
  */
-export function TableColumnDateFilterOptions<TData, TValue>({
+export function TableColumnDateFilterOptions<TData extends RowData, TValue>({
   column,
   title,
   multiple = true,
   withSeparator = true,
 }: {
-  column: Column<TData, TValue>
+  column: DataTableColumn<TData, TValue>
   title?: string
   /** Whether to allow date range selection. Defaults to true. */
   multiple?: boolean
@@ -238,7 +239,7 @@ TableColumnDateFilterOptions.displayName = "TableColumnDateFilterOptions"
  * />
  * ```
  */
-export function TableColumnDateFilterMenu<TData, TValue>({
+export function TableColumnDateFilterMenu<TData extends RowData, TValue>({
   column,
   title,
   className,
@@ -247,7 +248,7 @@ export function TableColumnDateFilterMenu<TData, TValue>({
   React.ComponentProps<typeof TableColumnDateFilterOptions>,
   "withSeparator" | "column"
 > & {
-  column: Column<TData, TValue>
+  column: DataTableColumn<TData, TValue>
   className?: string
 }) {
   return (

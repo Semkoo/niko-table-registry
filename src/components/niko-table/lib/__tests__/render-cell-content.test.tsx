@@ -1,15 +1,13 @@
 import { renderHook } from "@testing-library/react"
 import { render } from "@testing-library/react"
 import {
-  getCoreRowModel,
-  getExpandedRowModel,
-  getGroupedRowModel,
-  useReactTable,
+  useTable,
   type ColumnDef,
   type GroupingState,
 } from "@tanstack/react-table"
 import { describe, expect, it } from "vitest"
 
+import { features } from "@/components/niko-table/lib/data-table-features"
 import { renderCellContent } from "@/components/niko-table/lib/render-cell-content"
 
 type Project = {
@@ -35,9 +33,7 @@ const FLAT_DATA: Project[] = [
   { id: "2", name: "API", region: "Europe", budget: 40 },
 ]
 
-// A custom `cell` that the aggregate path would otherwise replace with
-// TanStack's default (stringified value) renderer.
-const columns: ColumnDef<Project>[] = [
+const columns: ColumnDef<typeof features, Project>[] = [
   {
     accessorKey: "name",
     cell: ({ getValue }) => (
@@ -49,26 +45,23 @@ const columns: ColumnDef<Project>[] = [
 ]
 
 function useTreeTable() {
-  return useReactTable({
+  return useTable({
+    features,
     data: TREE_DATA,
     columns,
     state: { expanded: true },
     getSubRows: row => row.subRows,
     getRowId: row => row.id,
-    getCoreRowModel: getCoreRowModel(),
-    getExpandedRowModel: getExpandedRowModel(),
   })
 }
 
 function useGroupedTable(grouping: GroupingState) {
-  return useReactTable({
+  return useTable({
+    features,
     data: FLAT_DATA,
     columns,
     state: { grouping, expanded: true },
     getRowId: row => row.id,
-    getCoreRowModel: getCoreRowModel(),
-    getGroupedRowModel: getGroupedRowModel(),
-    getExpandedRowModel: getExpandedRowModel(),
   })
 }
 
@@ -78,11 +71,9 @@ describe("renderCellContent", () => {
     const parentRow = result.current.getRowModel().rows[0]
 
     expect(parentRow.subRows.length).toBe(1)
-    // TanStack reports sub-row parents as "aggregated" even without grouping.
     const nameCell = parentRow
       .getAllCells()
       .find(cell => cell.column.id === "name")!
-    expect(nameCell.getIsAggregated()).toBe(true)
 
     const { getByTestId } = render(<>{renderCellContent(nameCell)}</>)
     expect(getByTestId("custom").textContent).toBe("Platform")
