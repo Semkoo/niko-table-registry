@@ -13,11 +13,17 @@
 /**
  * Canonical TanStack Table v9 feature registration for Niko Table.
  *
- * Registers every feature Niko may enable (sorting, filtering, pagination,
- * selection, expanding, grouping/aggregation, faceting, column visibility /
- * order / pinning / sizing / resizing) plus the row models and custom filter
- * fns Root wires today. Detection / `enable*` flags still control behavior;
- * this object keeps APIs and types stable across tables.
+ * In Table v8, every behavior was bundled into `useReactTable`. In Table v9 you
+ * import only what you need — the same principle as Niko's registry:
+ * "Composable — mix and match components (install only the registry pieces you
+ * need)." Components are the UI layer of that idea; this file is the engine
+ * layer.
+ *
+ * `DataTableRoot` passes this object to `useTable`. Feature detection /
+ * `enable*` flags still decide *when* behavior runs; registration decides
+ * *whether the API exists at all*. Delete features, row models, and built-in
+ * `sortFns` / `aggregationFns` your tables never use — you own this file after
+ * install, just like every other copied component.
  *
  * Pass `NikoTableFeatures` as the first generic to `ColumnDef`, `Column`,
  * `Row`, and `ReactTable` so feature-gated APIs typecheck.

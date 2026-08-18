@@ -275,13 +275,13 @@ formatQueryString(urlParams, urlKeys)
 
 ## Table Features
 
-The single place where Niko Table declares which TanStack Table v9 features, row models, and filter/sort/aggregation functions its components may use.
+In Table v8, every behavior was bundled into `useReactTable`. In Table v9 you import only what you need — the same idea as Niko's **Composable** principle: mix and match components, install only the registry pieces you need. Registry items are that idea at the UI layer; this file is that idea at the table-engine layer.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/lib/data-table-features.ts`} external>Source Code ↗</DocsLink>
 </div>
 
-TanStack Table v9 no longer bundles every behavior into the core. A feature's API only exists on the table instance once the feature is registered, so `DataTableRoot` passes this object to `useTable` for you.
+A feature's API only exists on the table instance once it is registered. `DataTableRoot` passes this object to `useTable` for you. Feature detection / `enable*` flags still decide _when_ behavior runs; registration decides _whether the API exists at all_.
 
 ### features
 
@@ -296,7 +296,7 @@ const table = useTable({ features, data, columns })
 
 #### Trimming it down
 
-The file registers everything the component library can use — sorting, filtering, faceting, grouping, aggregation, pagination, expanding, selection, column visibility/ordering/pinning/sizing/resizing — plus the row models they need. Since you own the file, delete the features and the built-in `sortFns` / `aggregationFns` your tables never reference to shrink your bundle. Removing a feature removes its API: calling `table.setGrouping()` without `columnGroupingFeature` will fail at runtime, not at build time.
+The shipped file registers everything the component library can use — sorting, filtering, faceting, grouping, aggregation, pagination, expanding, selection, column visibility/ordering/pinning/sizing/resizing — plus the row models they need. After install you own the file: delete the features and the built-in `sortFns` / `aggregationFns` your tables never reference, the same way you omit registry items you never mount. Removing a feature removes its API: calling `table.setGrouping()` without `columnGroupingFeature` fails at runtime, not at build time.
 
 #### Adding your own filter function
 
