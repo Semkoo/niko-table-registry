@@ -100,12 +100,13 @@ Notes:
 
 Copied v8 code keeps working until you bump the dependency and re-add the components. Expect:
 
-| v8                                       | v9                              |
-| ---------------------------------------- | ------------------------------- |
-| `useReactTable` + `get*RowModel` options | `useTable` + `features`         |
-| `table.getState().x`                     | `table.state.x`                 |
-| `VisibilityState`                        | `ColumnVisibilityState`         |
-| `columnPinning: { left, right }`         | `columnPinning: { start, end }` |
+| v8                                       | v9                                                                                           |
+| ---------------------------------------- | -------------------------------------------------------------------------------------------- |
+| `useReactTable` + `get*RowModel` options | `useTable` + `features`                                                                      |
+| `table.getState().x`                     | `table.state.x`                                                                              |
+| `VisibilityState`                        | `ColumnVisibilityState`                                                                      |
+| `columnPinning: { left, right }`         | `columnPinning: { start, end }`                                                              |
+| `createColumnHelper<TData>()`            | `createDataTableColumnHelper<TData>()` (or `createColumnHelper<DataTableFeatures, TData>()`) |
 
 ## Anatomy
 

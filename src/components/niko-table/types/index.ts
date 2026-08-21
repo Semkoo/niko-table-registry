@@ -188,6 +188,17 @@ export type DataTableColumnDef<
   // You can extend with additional properties if needed
 }
 
+/**
+ * Mixed column arrays (plain objects and `createDataTableColumnHelper` results).
+ * Per-column `TValue` varies, so the array uses `any` the same way TanStack's
+ * `columns` option does.
+ */
+export type DataTableColumns<TData extends RowData> = DataTableColumnDef<
+  TData,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  any
+>[]
+
 // ============================================================================
 // ROW TYPES
 // ============================================================================
