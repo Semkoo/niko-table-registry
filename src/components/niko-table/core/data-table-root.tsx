@@ -43,7 +43,11 @@ import {
 } from "../lib/constants"
 import { features, type DataTableFeatures } from "../lib/data-table-features"
 import { globalFilter as globalFilterFn } from "../lib/filter-functions"
-import { type DataTableColumnDef, type GlobalFilter } from "../types"
+import {
+  type DataTableColumnDef,
+  type DataTableColumns,
+  type GlobalFilter,
+} from "../types"
 import { DataTableProvider } from "./data-table-context"
 
 /**
@@ -105,7 +109,7 @@ export interface DataTableConfig {
   autoResetExpanded?: boolean
 }
 
-interface TableRootProps<TData extends RowData, TValue = unknown> extends Omit<
+interface TableRootProps<TData extends RowData> extends Omit<
   Partial<TableOptions<DataTableFeatures, TData>>,
   // `key` is dropped so React's reserved `key` prop keeps its own semantics
   // — TanStack v9 added a `key` table option that would otherwise force
@@ -116,7 +120,7 @@ interface TableRootProps<TData extends RowData, TValue = unknown> extends Omit<
   table?: ReactTable<DataTableFeatures, TData>
 
   // Option 2: Let DataTableRoot create its own table
-  columns?: DataTableColumnDef<TData, TValue>[]
+  columns?: DataTableColumns<TData>
   data?: TData[]
 
   children: React.ReactNode
@@ -143,7 +147,7 @@ interface TableRootProps<TData extends RowData, TValue = unknown> extends Omit<
 }
 
 // Internal component that handles hooks for direct props mode
-function DataTableRootInternal<TData extends RowData, TValue>({
+function DataTableRootInternal<TData extends RowData>({
   columns,
   data,
   children,
@@ -178,8 +182,8 @@ function DataTableRootInternal<TData extends RowData, TValue>({
   // Spread into `tableOptions` but NOT in the memo deps. Lift any passthrough
   // option that needs to invalidate the memo into the destructure list above.
   ...passthroughTableOptions
-}: Omit<TableRootProps<TData, TValue>, "table"> & {
-  columns: DataTableColumnDef<TData, TValue>[]
+}: Omit<TableRootProps<TData>, "table"> & {
+  columns: DataTableColumns<TData>
   data: TData[]
 }) {
   // Memoize so `columns.some()` only runs when the columns array changes.
@@ -584,7 +588,7 @@ function DataTableRootInternal<TData extends RowData, TValue>({
 
     // Helper to safely extract column ID (handles both id and accessorKey)
     const getColumnId = (
-      col: DataTableColumnDef<TData, TValue>,
+      col: DataTableColumnDef<TData>,
     ): string | undefined => {
       if (col.id) return col.id
       // Type-safe check for accessorKey property
@@ -823,7 +827,7 @@ function DataTableRootInternal<TData extends RowData, TValue>({
 }
 
 // Main wrapper component
-export function DataTableRoot<TData extends RowData, TValue>({
+export function DataTableRoot<TData extends RowData>({
   table: externalTable,
   columns,
   data,
@@ -831,7 +835,7 @@ export function DataTableRoot<TData extends RowData, TValue>({
   className,
   isLoading,
   ...rest
-}: TableRootProps<TData, TValue>) {
+}: TableRootProps<TData>) {
   // If a table instance is provided, use it directly (no hooks needed)
   if (externalTable) {
     return (

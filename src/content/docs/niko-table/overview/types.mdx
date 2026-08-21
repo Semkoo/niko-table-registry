@@ -123,6 +123,27 @@ type DataTableColumnDef<TData, TValue = unknown> = ColumnDef<
 >
 ```
 
+For static columns, [`createDataTableColumnHelper<TData>()`](/niko-table/overview/lib/#createdatatablecolumnhelper) is the runtime counterpart: it pre-binds `DataTableFeatures` the same way this alias does, and cells get a typed `getValue()`. Helper results mix per-column value types, so pass them as `DataTableColumns<TData>` (what `DataTableRoot` accepts). Plain `DataTableColumnDef<TData>[]` arrays stay the better fit for dynamic columns and copy-paste examples.
+
+```tsx
+import { createDataTableColumnHelper } from "@/components/niko-table/lib/data-table-features"
+
+const columnHelper = createDataTableColumnHelper<Product>()
+const columns = [
+  columnHelper.accessor("price", {
+    cell: ({ getValue }) => getValue().toFixed(2),
+  }),
+]
+```
+
+### DataTableColumns
+
+Mixed column arrays for `DataTableRoot`. Helper columns each carry their own `TValue`, so they are not assignable to `DataTableColumnDef<TData>[]` (that alias defaults `TValue` to `unknown`). Use this alias instead.
+
+```tsx
+type DataTableColumns<TData> = DataTableColumnDef<TData, any>[]
+```
+
 ### ColumnMeta
 
 Extended column metadata interface (augments TanStack Table's ColumnMeta).
