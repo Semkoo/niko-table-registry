@@ -818,12 +818,12 @@ function GridAllFeaturesInner({ onReset }: { onReset: () => void }) {
                 : "bg-background hover:bg-muted",
             )}
           >
-            {count.toLocaleString()} rows
+            {count.toLocaleString("en-US")} rows
           </button>
         ))}
         {genMs != null && (
           <span className="text-xs text-muted-foreground tabular-nums">
-            built {rowCount.toLocaleString()} rows in {genMs}ms
+            built {rowCount.toLocaleString("en-US")} rows in {genMs}ms
           </span>
         )}
       </div>

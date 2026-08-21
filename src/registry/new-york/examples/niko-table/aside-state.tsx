@@ -214,7 +214,9 @@ const columns: DataTableColumnDef<Customer>[] = [
     ),
     cell: ({ row }) => {
       const revenue = parseFloat(row.getValue("revenue"))
-      return <div className="font-medium">${revenue.toLocaleString()}</div>
+      return (
+        <div className="font-medium">${revenue.toLocaleString("en-US")}</div>
+      )
     },
   },
 ]
@@ -614,7 +616,7 @@ export default function AsideTableStateExample() {
                           Revenue
                         </span>
                         <span className="text-sm">
-                          ${selectedCustomer.revenue.toLocaleString()}
+                          ${selectedCustomer.revenue.toLocaleString("en-US")}
                         </span>
                       </div>
                       <div className="flex flex-col gap-1">
@@ -625,7 +627,7 @@ export default function AsideTableStateExample() {
                           $
                           {Math.round(
                             selectedCustomer.revenue / selectedCustomer.orders,
-                          ).toLocaleString()}
+                          ).toLocaleString("en-US")}
                         </span>
                       </div>
                     </div>
@@ -693,21 +695,24 @@ export default function AsideTableStateExample() {
             <div className="flex justify-between">
               <span className="font-medium">Total Revenue:</span>
               <span className="text-foreground">
-                ${customerMetrics.totalRevenue.toLocaleString()}
+                ${customerMetrics.totalRevenue.toLocaleString("en-US")}
               </span>
             </div>
 
             <div className="flex justify-between">
               <span className="font-medium">Total Orders:</span>
               <span className="text-foreground">
-                {customerMetrics.totalOrders.toLocaleString()}
+                {customerMetrics.totalOrders.toLocaleString("en-US")}
               </span>
             </div>
 
             <div className="flex justify-between">
               <span className="font-medium">Average Revenue:</span>
               <span className="text-foreground">
-                ${Math.round(customerMetrics.averageRevenue).toLocaleString()}
+                $
+                {Math.round(customerMetrics.averageRevenue).toLocaleString(
+                  "en-US",
+                )}
               </span>
             </div>
 
@@ -766,7 +771,7 @@ export default function AsideTableStateExample() {
                     {index + 1}. {customer.name}
                   </span>
                   <span className="font-medium">
-                    ${customer.revenue.toLocaleString()}
+                    ${customer.revenue.toLocaleString("en-US")}
                   </span>
                 </div>
               ))}

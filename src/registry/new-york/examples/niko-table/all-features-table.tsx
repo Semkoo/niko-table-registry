@@ -416,7 +416,7 @@ function ProductDetails({ product }: { product: Product }) {
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Release Date:</span>
-                <span>{product.releaseDate.toLocaleDateString()}</span>
+                <span>{product.releaseDate.toLocaleDateString("en-US")}</span>
               </div>
             </div>
           </div>
@@ -1017,7 +1017,7 @@ export default function AllFeaturesTableExample() {
         },
         cell: ({ row }) => {
           const date = row.getValue("releaseDate") as Date
-          return <span>{date.toLocaleDateString()}</span>
+          return <span>{date.toLocaleDateString("en-US")}</span>
         },
         enableColumnFilter: true,
       },

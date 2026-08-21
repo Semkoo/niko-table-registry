@@ -253,7 +253,7 @@ const columns: DataTableColumnDef<Order>[] = [
       </DataTableColumnHeader>
     ),
     cell: ({ row }) => {
-      return new Date(row.getValue("date")).toLocaleDateString()
+      return new Date(row.getValue("date")).toLocaleDateString("en-US")
     },
   },
   {

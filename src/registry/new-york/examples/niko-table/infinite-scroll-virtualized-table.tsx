@@ -326,7 +326,9 @@ export default function InfiniteScrollVirtualizedTableExample() {
         ),
         cell: ({ row }) => {
           const revenue = row.getValue("revenue") as number
-          return <div className="font-mono">${revenue.toLocaleString()}</div>
+          return (
+            <div className="font-mono">${revenue.toLocaleString("en-US")}</div>
+          )
         },
       },
       {
@@ -339,7 +341,7 @@ export default function InfiniteScrollVirtualizedTableExample() {
         ),
         cell: ({ row }) => {
           const date = row.getValue("releaseDate") as Date
-          return <span>{date.toLocaleDateString()}</span>
+          return <span>{date.toLocaleDateString("en-US")}</span>
         },
       },
     ],

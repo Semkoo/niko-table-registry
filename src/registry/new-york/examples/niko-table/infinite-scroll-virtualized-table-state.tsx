@@ -372,7 +372,9 @@ export default function InfiniteScrollVirtualizedTableStateExample() {
         ),
         cell: ({ row }) => {
           const revenue = row.getValue("revenue") as number
-          return <div className="font-mono">${revenue.toLocaleString()}</div>
+          return (
+            <div className="font-mono">${revenue.toLocaleString("en-US")}</div>
+          )
         },
       },
       {
@@ -385,7 +387,7 @@ export default function InfiniteScrollVirtualizedTableStateExample() {
         ),
         cell: ({ row }) => {
           const date = row.getValue("releaseDate") as Date
-          return <span>{date.toLocaleDateString()}</span>
+          return <span>{date.toLocaleDateString("en-US")}</span>
         },
       },
     ],
@@ -486,7 +488,7 @@ export default function InfiniteScrollVirtualizedTableStateExample() {
           <CardTitle>Infinite Scroll Virtualized Table State</CardTitle>
           <CardDescription>
             Live view of the controlled table state with{" "}
-            {TOTAL_POOL.length.toLocaleString()} total products
+            {TOTAL_POOL.length.toLocaleString("en-US")} total products
           </CardDescription>
           <CardAction>
             <Button variant="outline" size="sm" onClick={resetAllState}>
@@ -508,14 +510,14 @@ export default function InfiniteScrollVirtualizedTableStateExample() {
             <div className="flex justify-between">
               <span className="font-medium">Total Items:</span>
               <span className="text-foreground">
-                {TOTAL_POOL.length.toLocaleString()}
+                {TOTAL_POOL.length.toLocaleString("en-US")}
               </span>
             </div>
 
             <div className="flex justify-between">
               <span className="font-medium">Loaded Rows:</span>
               <span className="text-foreground">
-                {loaded.length.toLocaleString()}
+                {loaded.length.toLocaleString("en-US")}
               </span>
             </div>
 

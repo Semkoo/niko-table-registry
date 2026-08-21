@@ -251,7 +251,7 @@ const columns: DataTableColumnDef<Product>[] = [
     },
     cell: ({ row }) => {
       const date = row.getValue("releaseDate") as Date
-      return <span>{date.toLocaleDateString()}</span>
+      return <span>{date.toLocaleDateString("en-US")}</span>
     },
     enableColumnFilter: true,
   },

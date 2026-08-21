@@ -310,7 +310,9 @@ export default function VirtualizedTableStateExample() {
         ),
         cell: ({ row }) => {
           const revenue = row.getValue("revenue") as number
-          return <div className="font-mono">${revenue.toLocaleString()}</div>
+          return (
+            <div className="font-mono">${revenue.toLocaleString("en-US")}</div>
+          )
         },
       },
       {
@@ -323,7 +325,7 @@ export default function VirtualizedTableStateExample() {
         ),
         cell: ({ row }) => {
           const date = row.getValue("releaseDate") as Date
-          return <span>{date.toLocaleDateString()}</span>
+          return <span>{date.toLocaleDateString("en-US")}</span>
         },
       },
     ],
@@ -429,7 +431,7 @@ export default function VirtualizedTableStateExample() {
           <CardTitle>Virtualized Table State</CardTitle>
           <CardDescription>
             Live view of the virtualized table state with{" "}
-            {data.length.toLocaleString()} total items
+            {data.length.toLocaleString("en-US")} total items
           </CardDescription>
           <CardAction>
             <Button variant="outline" size="sm" onClick={resetAllState}>
@@ -451,14 +453,14 @@ export default function VirtualizedTableStateExample() {
             <div className="flex justify-between">
               <span className="font-medium">Total Items:</span>
               <span className="text-foreground">
-                {data.length.toLocaleString()}
+                {data.length.toLocaleString("en-US")}
               </span>
             </div>
 
             <div className="flex justify-between">
               <span className="font-medium">Filtered Items:</span>
               <span className="text-foreground">
-                {filteredRowCount.toLocaleString()}
+                {filteredRowCount.toLocaleString("en-US")}
               </span>
             </div>
 

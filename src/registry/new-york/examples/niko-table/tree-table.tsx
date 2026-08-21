@@ -642,7 +642,9 @@ export default function TreeTable() {
         ),
         cell: ({ row }) => {
           const budget = row.getValue("budget") as number
-          return <div className="font-mono">${budget.toLocaleString()}</div>
+          return (
+            <div className="font-mono">${budget.toLocaleString("en-US")}</div>
+          )
         },
       },
     ],

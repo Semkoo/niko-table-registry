@@ -663,7 +663,9 @@ export default function TreeTableStateExample() {
         ),
         cell: ({ row }) => {
           const budget = row.getValue("budget") as number
-          return <div className="font-mono">${budget.toLocaleString()}</div>
+          return (
+            <div className="font-mono">${budget.toLocaleString("en-US")}</div>
+          )
         },
       },
     ],
@@ -915,7 +917,7 @@ export default function TreeTableStateExample() {
             <div className="flex justify-between">
               <span className="font-medium">Selected Budget:</span>
               <span className="text-foreground">
-                ${totalSelectedBudget.toLocaleString()}
+                ${totalSelectedBudget.toLocaleString("en-US")}
               </span>
             </div>
 
