@@ -11,6 +11,7 @@
  * users (and future LLMs reading this code) benefit:
  * https://github.com/Semkoo/niko-table-registry
  */
+import type { RowData } from "@tanstack/react-table"
 import React from "react"
 
 import {
@@ -22,7 +23,7 @@ import { useColumnHeaderContext } from "./data-table-column-header"
 /**
  * Hide options for column header menu using context.
  */
-export function DataTableColumnHideOptions<TData, TValue>(
+export function DataTableColumnHideOptions<TData extends RowData, TValue>(
   props: Omit<React.ComponentProps<typeof TableColumnHideOptions>, "column">,
 ) {
   const { column } = useColumnHeaderContext<TData, TValue>(true)
@@ -34,7 +35,7 @@ DataTableColumnHideOptions.displayName = "DataTableColumnHideOptions"
 /**
  * Standalone hide menu for column header using context.
  */
-export function DataTableColumnHideMenu<TData, TValue>(
+export function DataTableColumnHideMenu<TData extends RowData, TValue>(
   props: Omit<React.ComponentProps<typeof TableColumnHideMenu>, "column">,
 ) {
   const { column } = useColumnHeaderContext<TData, TValue>(true)

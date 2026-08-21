@@ -21,11 +21,12 @@ import {
   type TableRowDragHandleProps,
 } from "../filters/table-row-dnd"
 
+import type { RowData } from "@tanstack/react-table"
 // ============================================================================
 // DataTableRowDndProvider
 // ============================================================================
 
-export type DataTableRowDndProviderProps<TData> = Omit<
+export type DataTableRowDndProviderProps<TData extends RowData> = Omit<
   TableRowDndProviderProps<TData>,
   "table"
 >
@@ -43,7 +44,7 @@ export type DataTableRowDndProviderProps<TData> = Omit<
  *   </DataTableRowDndProvider>
  * </DataTableRoot>
  */
-export function DataTableRowDndProvider<TData>(
+export function DataTableRowDndProvider<TData extends RowData>(
   props: DataTableRowDndProviderProps<TData>,
 ) {
   const { table } = useDataTable<TData>()
@@ -56,7 +57,8 @@ DataTableRowDndProvider.displayName = "DataTableRowDndProvider"
 // DataTableDraggableRow
 // ============================================================================
 
-export type DataTableDraggableRowProps<TData> = TableDraggableRowProps<TData>
+export type DataTableDraggableRowProps<TData extends RowData> =
+  TableDraggableRowProps<TData>
 
 /**
  * Context-aware draggable row component.
@@ -70,7 +72,7 @@ export type DataTableDraggableRowProps<TData> = TableDraggableRowProps<TData>
  *   ))}
  * </DataTableDraggableRow>
  */
-export function DataTableDraggableRow<TData>(
+export function DataTableDraggableRow<TData extends RowData>(
   props: DataTableDraggableRowProps<TData>,
 ) {
   return <TableDraggableRow<TData> {...props} />

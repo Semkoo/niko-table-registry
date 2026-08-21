@@ -4,7 +4,8 @@
  * Shared row-click guard. Centralized so the interactive-element list
  * stays in sync across all body variants.
  */
-import type { Table } from "@tanstack/react-table"
+import type { RowData } from "@tanstack/react-table"
+import type { DataTableInstance } from "../types"
 
 /**
  * Returns `true` when the click landed on (or inside) an interactive
@@ -51,9 +52,9 @@ export function isInteractiveClickTarget(target: HTMLElement): boolean {
  * For delegated `<tbody>` handlers. Returns the matched row, or `null`
  * if the click should be ignored (interactive target or no row found).
  */
-export function resolveRowFromClick<TData>(
+export function resolveRowFromClick<TData extends RowData>(
   target: HTMLElement,
-  table: Table<TData>,
+  table: DataTableInstance<TData>,
 ) {
   if (isInteractiveClickTarget(target)) return null
   const rowEl = target.closest("tr[data-row-id]")

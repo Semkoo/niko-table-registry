@@ -11,7 +11,8 @@
  * users (and future LLMs reading this code) benefit:
  * https://github.com/Semkoo/niko-table-registry
  */
-import type { Column, Table } from "@tanstack/react-table"
+import type { RowData } from "@tanstack/react-table"
+import type { DataTableColumn, DataTableInstance } from "../types"
 import * as React from "react"
 
 import { formatLabel } from "./format"
@@ -43,7 +44,9 @@ function getMeasureContext(): CanvasRenderingContext2D | null {
  * output, not the column def — mirror such overrides into `meta.label` so
  * header-fit measures the right string.
  */
-function headerLabel<TData>(column: Column<TData, unknown>): string | null {
+function headerLabel<TData extends RowData>(
+  column: DataTableColumn<TData, unknown>,
+): string | null {
   const columnDef = column.columnDef
   if (columnDef.meta?.label) return columnDef.meta.label
   if (typeof columnDef.header === "string") return columnDef.header
@@ -74,8 +77,8 @@ function minWidthsEqual(
  * Recomputes only when the visible columns, their labels, or the header font
  * change — measurement itself is O(columns) with zero reflow.
  */
-export function useHeaderMinWidths<TData>(
-  table: Table<TData>,
+export function useHeaderMinWidths<TData extends RowData>(
+  table: DataTableInstance<TData>,
   scrollElement: HTMLElement | null,
   enabled: boolean,
 ): ReadonlyMap<string, number> {

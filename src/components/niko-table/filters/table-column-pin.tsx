@@ -11,7 +11,7 @@
  * users (and future LLMs reading this code) benefit:
  * https://github.com/Semkoo/niko-table-registry
  */
-import type { Column } from "@tanstack/react-table"
+import type { RowData } from "@tanstack/react-table"
 import { Check, CircleHelp, Pin, PinOff } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 
+import type { DataTableColumn } from "../types"
 /**
  * Dropdown menu items for pinning a column.
  * Use inside a DropdownMenuContent or as a child of TableColumnActions.
@@ -42,11 +43,11 @@ import { cn } from "@/lib/utils"
  * </TableColumnActions>
  * ```
  */
-export function TableColumnPinOptions<TData, TValue>({
+export function TableColumnPinOptions<TData extends RowData, TValue>({
   column,
   withSeparator = true,
 }: {
-  column: Column<TData, TValue>
+  column: DataTableColumn<TData, TValue>
   /** Whether to render a separator before the options. Defaults to true. */
   withSeparator?: boolean
 }) {
@@ -70,26 +71,26 @@ export function TableColumnPinOptions<TData, TValue>({
         </Tooltip>
       </DropdownMenuLabel>
       <DropdownMenuItem
-        onSelect={() => column.pin("left")}
+        onSelect={() => column.pin("start")}
         className={cn(
           "flex items-center",
-          isPinned === "left" && "bg-accent text-accent-foreground",
+          isPinned === "start" && "bg-accent text-accent-foreground",
         )}
       >
         <Pin className="mr-2 size-4 -rotate-45" />
         <span className="flex-1">Pin to Left</span>
-        {isPinned === "left" && <Check className="ml-2 size-4" />}
+        {isPinned === "start" && <Check className="ml-2 size-4" />}
       </DropdownMenuItem>
       <DropdownMenuItem
-        onSelect={() => column.pin("right")}
+        onSelect={() => column.pin("end")}
         className={cn(
           "flex items-center",
-          isPinned === "right" && "bg-accent text-accent-foreground",
+          isPinned === "end" && "bg-accent text-accent-foreground",
         )}
       >
         <Pin className="mr-2 size-4 rotate-45" />
         <span className="flex-1">Pin to Right</span>
-        {isPinned === "right" && <Check className="ml-2 size-4" />}
+        {isPinned === "end" && <Check className="ml-2 size-4" />}
       </DropdownMenuItem>
       {isPinned && (
         <DropdownMenuItem
@@ -114,11 +115,11 @@ export function TableColumnPinOptions<TData, TValue>({
  * <TableColumnPinMenu column={column} />
  * ```
  */
-export function TableColumnPinMenu<TData, TValue>({
+export function TableColumnPinMenu<TData extends RowData, TValue>({
   column,
   className,
 }: {
-  column: Column<TData, TValue>
+  column: DataTableColumn<TData, TValue>
   className?: string
 }) {
   const canPin = column.getCanPin()
@@ -155,26 +156,26 @@ export function TableColumnPinMenu<TData, TValue>({
           </Tooltip>
         </DropdownMenuLabel>
         <DropdownMenuItem
-          onSelect={() => column.pin("left")}
+          onSelect={() => column.pin("start")}
           className={cn(
             "flex items-center",
-            isPinned === "left" && "bg-accent text-accent-foreground",
+            isPinned === "start" && "bg-accent text-accent-foreground",
           )}
         >
           <Pin className="mr-2 size-4 -rotate-45" />
           <span className="flex-1">Pin to Left</span>
-          {isPinned === "left" && <Check className="ml-2 size-4" />}
+          {isPinned === "start" && <Check className="ml-2 size-4" />}
         </DropdownMenuItem>
         <DropdownMenuItem
-          onSelect={() => column.pin("right")}
+          onSelect={() => column.pin("end")}
           className={cn(
             "flex items-center",
-            isPinned === "right" && "bg-accent text-accent-foreground",
+            isPinned === "end" && "bg-accent text-accent-foreground",
           )}
         >
           <Pin className="mr-2 size-4 rotate-45" />
           <span className="flex-1">Pin to Right</span>
-          {isPinned === "right" && <Check className="ml-2 size-4" />}
+          {isPinned === "end" && <Check className="ml-2 size-4" />}
         </DropdownMenuItem>
         <DropdownMenuItem
           onSelect={() => column.pin(false)}

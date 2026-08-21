@@ -20,7 +20,7 @@ import {
   TableBody,
   TableCell,
 } from "@/components/ui/table"
-import { flexRender, type Row } from "@tanstack/react-table"
+import { flexRender } from "@tanstack/react-table"
 import { DataTableColumnHeaderRoot } from "../components/data-table-column-header"
 import { DataTableColumnResizeHandle } from "../lib/column-resize-handle"
 import { DataTableRowContextMenu } from "../components/data-table-row-context-menu"
@@ -32,6 +32,8 @@ import {
   TableDragAlongCell,
 } from "../filters/table-column-dnd"
 
+import type { DataTableRow } from "../types"
+import type { RowData } from "@tanstack/react-table"
 // ============================================================================
 // DndColumnBodyRow — memoized row
 // ============================================================================
@@ -43,7 +45,7 @@ import {
  * internally, so cell-level memoization isn't required here.
  */
 interface DndColumnBodyRowProps {
-  row: Row<unknown>
+  row: DataTableRow<RowData>
   expandColumnId: string | undefined
   isClickable: boolean
   isExpanded: boolean
@@ -238,7 +240,7 @@ DataTableDndHeader.displayName = "DataTableDndHeader"
 // DataTableDndColumnBody (Column DnD)
 // ============================================================================
 
-export interface DataTableDndColumnBodyProps<TData> {
+export interface DataTableDndColumnBodyProps<TData extends RowData> {
   children?: React.ReactNode
   className?: string
   /**
@@ -286,7 +288,7 @@ export interface DataTableDndColumnBodyProps<TData> {
  *   </DataTable>
  * </DataTableColumnDndProvider>
  */
-export function DataTableDndColumnBody<TData>({
+export function DataTableDndColumnBody<TData extends RowData>({
   children,
   className,
   onRowClick,
@@ -323,7 +325,7 @@ export function DataTableDndColumnBody<TData>({
   // to invalidate on column toggle / reorder / pin / resize. For external row
   // state (inline edits, optimistic overlays), pass `getRowMemoKey`.
   const { columnVisibility, columnOrder, columnPinning, columnSizing } =
-    table.getState()
+    table.state
   const resizing = table.options.enableColumnResizing ?? false
   const columnLayoutSignature = React.useMemo(
     () =>
@@ -417,7 +419,7 @@ export function DataTableDndColumnBody<TData>({
         ? rows.map(row => (
             <DndColumnBodyRow
               key={row.id}
-              row={row as Row<unknown>}
+              row={row as DataTableRow<RowData>}
               expandColumnId={expandColumnId}
               isClickable={isClickable}
               isExpanded={row.getIsExpanded()}

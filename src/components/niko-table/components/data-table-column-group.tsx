@@ -9,6 +9,7 @@
  * users (and future LLMs reading this code) benefit:
  * https://github.com/Semkoo/niko-table-registry
  */
+import type { RowData } from "@tanstack/react-table"
 import React from "react"
 
 import {
@@ -20,7 +21,7 @@ import { useColumnHeaderContext } from "./data-table-column-header"
 /**
  * Grouping options for column header menu using context.
  */
-export function DataTableColumnGroupOptions<TData, TValue>(
+export function DataTableColumnGroupOptions<TData extends RowData, TValue>(
   props: Omit<React.ComponentProps<typeof TableColumnGroupOptions>, "column">,
 ) {
   const { column } = useColumnHeaderContext<TData, TValue>(true)
@@ -32,7 +33,7 @@ DataTableColumnGroupOptions.displayName = "DataTableColumnGroupOptions"
 /**
  * Standalone grouping menu for column header using context.
  */
-export function DataTableColumnGroupMenu<TData, TValue>(
+export function DataTableColumnGroupMenu<TData extends RowData, TValue>(
   props: Omit<React.ComponentProps<typeof TableColumnGroupMenu>, "column">,
 ) {
   const { column } = useColumnHeaderContext<TData, TValue>(true)

@@ -15,7 +15,7 @@
 // useSyncFiltersWithTable), filter input components, sub-components, and the
 // `TableFilterMenu` popover.
 
-import type { Column, Table } from "@tanstack/react-table"
+import type { RowData } from "@tanstack/react-table"
 import {
   CalendarIcon,
   Check,
@@ -77,6 +77,8 @@ import {
 } from "../lib/constants"
 import { useGeneratedOptionsForColumn } from "../hooks/use-generated-options"
 import type {
+  DataTableColumn,
+  DataTableInstance,
   ExtendedColumnFilter,
   FilterOperator,
   JoinOperator,
@@ -94,7 +96,7 @@ const PrecomputedOptionsContext = React.createContext<
  * Create a deterministic filter ID based on filter properties
  * This ensures filters can be shared via URL and will have consistent IDs
  */
-function createFilterId<TData>(
+function createFilterId<TData extends RowData>(
   filter: Omit<ExtendedColumnFilter<TData>, "filterId">,
   index?: number,
 ): string {
@@ -119,7 +121,9 @@ function createFilterId<TData>(
  * Create a unique key for a filter based on its properties (not filterId)
  * This allows matching filters even if filterId is changed in the URL
  */
-function getFilterKey<TData>(filter: ExtendedColumnFilter<TData>): string {
+function getFilterKey<TData extends RowData>(
+  filter: ExtendedColumnFilter<TData>,
+): string {
   const valueStr =
     typeof filter.value === "string"
       ? filter.value
@@ -132,7 +136,10 @@ function getFilterKey<TData>(filter: ExtendedColumnFilter<TData>): string {
 /**
  * Type for filters without filterId (for URL serialization)
  */
-type FilterWithoutId<TData> = Omit<ExtendedColumnFilter<TData>, "filterId">
+type FilterWithoutId<TData extends RowData> = Omit<
+  ExtendedColumnFilter<TData>,
+  "filterId"
+>
 
 /**
  * Normalize filters loaded from URL by ensuring they have filterId
@@ -144,7 +151,7 @@ type FilterWithoutId<TData> = Omit<ExtendedColumnFilter<TData>, "filterId">
  * @param filters - Filters that may or may not have filterId
  * @returns Filters with guaranteed filterId values
  */
-export function normalizeFiltersFromUrl<TData>(
+export function normalizeFiltersFromUrl<TData extends RowData>(
   filters: (FilterWithoutId<TData> | ExtendedColumnFilter<TData>)[],
 ): ExtendedColumnFilter<TData>[] {
   // Quick check: if all filters already have filterIds, return as-is
@@ -184,7 +191,7 @@ export function normalizeFiltersFromUrl<TData>(
  * @param filters - Filters with filterId
  * @returns Filters without filterId (suitable for URL storage)
  */
-export function serializeFiltersForUrl<TData>(
+export function serializeFiltersForUrl<TData extends RowData>(
   filters: ExtendedColumnFilter<TData>[],
 ): FilterWithoutId<TData>[] {
   return filters.map(filter => {
@@ -469,7 +476,7 @@ function FacetedItem(props: FacetedItemProps) {
  * @param reorderedFilters - Filters in their new order
  * @returns Normalized filters with correct joinOperator values
  */
-function normalizeFilterJoinOperators<TData>(
+function normalizeFilterJoinOperators<TData extends RowData>(
   originalFilters: ExtendedColumnFilter<TData>[],
   reorderedFilters: ExtendedColumnFilter<TData>[],
 ): ExtendedColumnFilter<TData>[] {
@@ -597,8 +604,8 @@ function normalizeFilterJoinOperators<TData>(
  *
  * @debug Check React DevTools > Components > useInitialFilters to see returned value
  */
-function useInitialFilters<TData>(
-  table: Table<TData>,
+function useInitialFilters<TData extends RowData>(
+  table: DataTableInstance<TData>,
   controlledFilters?: ExtendedColumnFilter<TData>[],
 ): ExtendedColumnFilter<TData>[] {
   // Derive initial filters from table state only once on mount
@@ -613,7 +620,7 @@ function useInitialFilters<TData>(
     }
 
     // Check if table has globalFilter with filters object (OR filters)
-    const globalFilter = table.getState().globalFilter
+    const globalFilter = table.state.globalFilter
     if (
       globalFilter &&
       typeof globalFilter === "object" &&
@@ -633,7 +640,7 @@ function useInitialFilters<TData>(
     }
 
     // Otherwise check columnFilters (AND filters)
-    const columnFilters = table.getState().columnFilters
+    const columnFilters = table.state.columnFilters
     if (columnFilters && columnFilters.length > 0) {
       const extractedFilters = columnFilters
         .map(cf => cf.value)
@@ -668,8 +675,8 @@ function useInitialFilters<TData>(
 // logic is encoded by writing `joinOperator` into `table.options.meta` and
 // reading it from a custom pre-filter, since TanStack combines cross-column
 // filters with AND by default.
-function useSyncFiltersWithTable<TData>(
-  table: Table<TData>,
+function useSyncFiltersWithTable<TData extends RowData>(
+  table: DataTableInstance<TData>,
   filters: ExtendedColumnFilter<TData>[],
   isControlled: boolean,
 ) {
@@ -766,10 +773,10 @@ function useSyncFiltersWithTable<TData>(
   }, [filters, filterLogic, table, isControlled])
 }
 
-interface TableFilterMenuProps<TData> extends React.ComponentProps<
-  typeof PopoverContent
-> {
-  table: Table<TData>
+interface TableFilterMenuProps<
+  TData extends RowData,
+> extends React.ComponentProps<typeof PopoverContent> {
+  table: DataTableInstance<TData>
   filters?: ExtendedColumnFilter<TData>[]
   onFiltersChange?: (filters: ExtendedColumnFilter<TData>[] | null) => void
   joinOperator?: JoinOperator
@@ -781,7 +788,7 @@ interface TableFilterMenuProps<TData> extends React.ComponentProps<
   precomputedOptions?: Record<string, Option[]>
 }
 
-export function TableFilterMenu<TData>({
+export function TableFilterMenu<TData extends RowData>({
   table,
   filters: controlledFilters,
   onFiltersChange: controlledOnFiltersChange,
@@ -1038,12 +1045,12 @@ export function TableFilterMenu<TData>({
   )
 }
 
-interface TableFilterItemProps<TData> {
+interface TableFilterItemProps<TData extends RowData> {
   filter: ExtendedColumnFilter<TData>
   index: number
   filterItemId: string
-  table: Table<TData>
-  columns: Column<TData>[]
+  table: DataTableInstance<TData>
+  columns: DataTableColumn<TData>[]
   onFilterUpdate: (
     filterId: string,
     updates: Partial<Omit<ExtendedColumnFilter<TData>, "filterId">>,
@@ -1051,7 +1058,7 @@ interface TableFilterItemProps<TData> {
   onFilterRemove: (filterId: string) => void
 }
 
-function TableFilterItem<TData>({
+function TableFilterItem<TData extends RowData>({
   filter,
   index,
   filterItemId,
@@ -1181,12 +1188,12 @@ function TableFilterItem<TData>({
 
 /* ----------------------------- Filter Input Components ---------------------------- */
 
-interface FilterInputProps<TData> {
+interface FilterInputProps<TData extends RowData> {
   filter: ExtendedColumnFilter<TData>
   inputId: string
-  table: Table<TData>
-  column: Column<TData>
-  columnMeta?: Column<TData>["columnDef"]["meta"]
+  table: DataTableInstance<TData>
+  column: DataTableColumn<TData>
+  columnMeta?: DataTableColumn<TData>["columnDef"]["meta"]
   onFilterUpdate: (
     filterId: string,
     updates: Partial<Omit<ExtendedColumnFilter<TData>, "filterId">>,
@@ -1198,7 +1205,7 @@ interface FilterInputProps<TData> {
 /**
  * Empty state filter input for isEmpty/isNotEmpty operators
  */
-function FilterEmptyInput<TData>({
+function FilterEmptyInput<TData extends RowData>({
   inputId,
   columnMeta,
   filter,
@@ -1220,7 +1227,7 @@ FilterEmptyInput.displayName = "FilterEmptyInput"
 /**
  * Text or number input for text/number/range variants
  */
-function FilterTextNumberInput<TData>({
+function FilterTextNumberInput<TData extends RowData>({
   filter,
   inputId,
   columnMeta,
@@ -1256,7 +1263,7 @@ FilterTextNumberInput.displayName = "FilterTextNumberInput"
 /**
  * Boolean select input
  */
-function FilterBooleanSelect<TData>({
+function FilterBooleanSelect<TData extends RowData>({
   filter,
   inputId,
   columnMeta,
@@ -1302,7 +1309,7 @@ FilterBooleanSelect.displayName = "FilterBooleanSelect"
 /**
  * Select/multi-select faceted input
  */
-function FilterFacetedSelect<TData>({
+function FilterFacetedSelect<TData extends RowData>({
   filter,
   inputId,
   table,
@@ -1413,7 +1420,7 @@ function FilterFacetedSelect<TData>({
 /**
  * Date picker input for date/dateRange variants
  */
-function FilterDatePicker<TData>({
+function FilterDatePicker<TData extends RowData>({
   filter,
   inputId,
   columnMeta,
@@ -1508,7 +1515,9 @@ function FilterDatePicker<TData>({
 /**
  * Main filter input renderer - delegates to specific input components
  */
-function FilterValueInput<TData>(props: FilterInputProps<TData>) {
+function FilterValueInput<TData extends RowData>(
+  props: FilterInputProps<TData>,
+) {
   const { filter, column, inputId, onFilterUpdate } = props
 
   // Empty state for isEmpty/isNotEmpty operators
@@ -1567,7 +1576,7 @@ FilterDatePicker.displayName = "FilterDatePicker"
 /**
  * Join operator selector (AND/OR) for filters after the first one
  */
-function FilterJoinOperator<TData>({
+function FilterJoinOperator<TData extends RowData>({
   filter,
   index,
   filterItemId,
@@ -1630,7 +1639,7 @@ FilterJoinOperator.displayName = "FilterJoinOperator"
 /**
  * Field selector for choosing which column to filter
  */
-function FilterFieldSelector<TData>({
+function FilterFieldSelector<TData extends RowData>({
   filter,
   filterItemId,
   columns,
@@ -1640,7 +1649,7 @@ function FilterFieldSelector<TData>({
 }: {
   filter: ExtendedColumnFilter<TData>
   filterItemId: string
-  columns: Column<TData>[]
+  columns: DataTableColumn<TData>[]
   onFilterUpdate: (
     filterId: string,
     updates: Partial<Omit<ExtendedColumnFilter<TData>, "filterId">>,
@@ -1718,7 +1727,7 @@ FilterFieldSelector.displayName = "FilterFieldSelector"
 /**
  * Operator selector for choosing filter operation (equals, contains, etc.)
  */
-function FilterOperatorSelector<TData>({
+function FilterOperatorSelector<TData extends RowData>({
   filter,
   filterItemId,
   onFilterUpdate,
@@ -1788,7 +1797,9 @@ FilterOperatorSelector.displayName = "FilterOperatorSelector"
 
 // Add displayName to DataTableFilterItem for React DevTools
 interface DataTableFilterItemType {
-  <TData>(props: TableFilterItemProps<TData>): React.JSX.Element | null
+  <TData extends RowData>(
+    props: TableFilterItemProps<TData>,
+  ): React.JSX.Element | null
   displayName?: string
 }
 

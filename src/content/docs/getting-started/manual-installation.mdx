@@ -24,7 +24,7 @@ The DataTable components use a two-layer architecture for maximum flexibility:
 
 - **Components** (`data-table-*.tsx` in `/components` folder) - Context-aware wrapper components that use `useDataTable()` hook to automatically get the table from `DataTableRoot` context. These eliminate prop drilling and are the recommended way to use components:
   - `DataTableSearchFilter`, `DataTableFilterMenu`, `DataTableSortMenu`, `DataTablePagination`, etc.
-- **Filters** (`table-*.tsx` in `/filters` folder) - Core implementation components that accept a `table` prop directly and use TanStack Table hooks (like `table.getState()`, `table.setGlobalFilter()`, etc.). These can be used standalone:
+- **Filters** (`table-*.tsx` in `/filters` folder) - Core implementation components that accept a `table` prop directly and read from the TanStack Table instance (like `table.state`, `table.setGlobalFilter()`, etc.). These can be used standalone:
   - `TableSearchFilter`, `TableFilterMenu`, `TableSortMenu`, etc.
 
 **Why this architecture?**
@@ -38,7 +38,11 @@ The DataTable components use a two-layer architecture for maximum flexibility:
 <Steps>
   1. **Install the required dependencies**
 
-     <CliCommandCode action="install" command="@tanstack/react-table" />
+     This registry targets TanStack Table **v9**:
+
+     <CliCommandCode action="install" command="@tanstack/react-table@^9" />
+
+     You also need `lib/data-table-features.ts` from the files below — that is the `tableFeatures()` registration `DataTableRoot` passes to `useTable`. See [Table Features](/niko-table/introduction/#table-features-tanstack-table-v9).
 
 2.  **Install the required Shadcn UI components**
 
@@ -214,6 +218,7 @@ your-project/
 │   │       ├── lib/                         # Utility functions
 │   │       │   ├── constants.ts
 │   │       │   ├── data-table.ts
+│   │       │   ├── data-table-features.ts                   # TanStack Table v9 tableFeatures() registration
 │   │       │   ├── filter-functions.ts
 │   │       │   ├── filter-rows.ts
 │   │       │   ├── build-faceted-options.ts

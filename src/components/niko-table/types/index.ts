@@ -12,23 +12,35 @@
 
 import * as React from "react"
 import {
-  type Table,
+  type Cell,
+  type Column,
   type ColumnDef,
+  type Header,
+  type ReactTable,
   type Row,
   type RowData,
+  type TableFeatures,
 } from "@tanstack/react-table"
 import {
   JOIN_OPERATORS,
   FILTER_OPERATORS,
   FILTER_VARIANTS,
 } from "../lib/constants"
+import type { DataTableFeatures } from "../lib/data-table-features"
 
 // ============================================================================
 // TANSTACK REACT-TABLE MODULE AUGMENTATION
 // ============================================================================
 declare module "@tanstack/react-table" {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  interface ColumnMeta<TData extends RowData, TValue> {
+  // TypeScript requires an augmentation to repeat the original type parameters
+  // verbatim (same names), so `TFeatures` / `TValue` stay declared even though
+  // only `TData` is referenced below.
+  /* eslint-disable @typescript-eslint/no-unused-vars */
+  interface ColumnMeta<
+    TFeatures extends TableFeatures,
+    TData extends RowData,
+    TValue,
+  > {
     // Display
     label?: string
     placeholder?: string
@@ -82,8 +94,7 @@ declare module "@tanstack/react-table" {
     expandedContent?: (row: TData) => React.ReactNode
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  interface TableMeta<TData extends RowData> {
+  interface TableMeta<TFeatures extends TableFeatures, TData extends RowData> {
     joinOperator?: JoinOperator
     hasIndividualJoinOperators?: boolean
     /**
@@ -97,6 +108,7 @@ declare module "@tanstack/react-table" {
      */
     disableFlexFill?: boolean
   }
+  /* eslint-enable @typescript-eslint/no-unused-vars */
 }
 
 // ============================================================================
@@ -169,10 +181,10 @@ export interface QueryKeys {
  * Extended column definition for data table
  * Inherits all TanStack Table ColumnDef properties
  */
-export type DataTableColumnDef<TData, TValue = unknown> = ColumnDef<
-  TData,
-  TValue
-> & {
+export type DataTableColumnDef<
+  TData extends RowData,
+  TValue = unknown,
+> = ColumnDef<DataTableFeatures, TData, TValue> & {
   // You can extend with additional properties if needed
 }
 
@@ -184,11 +196,35 @@ export type DataTableColumnDef<TData, TValue = unknown> = ColumnDef<
  * Data table row type
  * Alias for TanStack Table Row
  */
-export type DataTableRow<TData> = Row<TData> & {
+export type DataTableRow<TData extends RowData> = Row<
+  DataTableFeatures,
+  TData
+> & {
   // You can extend with additional properties if needed
 }
 
-export type DataTableInstance<TData> = Table<TData> & {
+export type DataTableColumn<TData extends RowData, TValue = unknown> = Column<
+  DataTableFeatures,
+  TData,
+  TValue
+>
+
+export type DataTableHeader<TData extends RowData, TValue = unknown> = Header<
+  DataTableFeatures,
+  TData,
+  TValue
+>
+
+export type DataTableCell<TData extends RowData, TValue = unknown> = Cell<
+  DataTableFeatures,
+  TData,
+  TValue
+>
+
+export type DataTableInstance<TData extends RowData> = ReactTable<
+  DataTableFeatures,
+  TData
+> & {
   // You can extend with additional properties if needed
 }
 

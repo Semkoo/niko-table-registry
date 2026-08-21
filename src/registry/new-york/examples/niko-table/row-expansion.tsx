@@ -344,7 +344,7 @@ export default function RowExpansionSimpleExample() {
         ),
         cell: ({ row }) => (
           <div className="text-sm">
-            {new Date(row.getValue("date")).toLocaleDateString()}
+            {new Date(row.getValue("date")).toLocaleDateString("en-US")}
           </div>
         ),
       },

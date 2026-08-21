@@ -12,13 +12,14 @@
  * https://github.com/Semkoo/niko-table-registry
  */
 import * as React from "react"
-import type { Table } from "@tanstack/react-table"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { X } from "lucide-react"
 
-export interface TableClearFilterProps<TData> {
-  table: Table<TData>
+import type { DataTableInstance } from "../types"
+import type { RowData } from "@tanstack/react-table"
+export interface TableClearFilterProps<TData extends RowData> {
+  table: DataTableInstance<TData>
   className?: string
   variant?: "default" | "outline" | "ghost"
   size?: "default" | "sm" | "lg"
@@ -49,11 +50,11 @@ export interface TableClearFilterProps<TData> {
  *
  * @example
  * ```tsx
- * const table = useReactTable({ ... })
+ * const table = useTable({ features, ... })
  * <TableClearFilter table={table} />
  * ```
  */
-export function TableClearFilter<TData>({
+export function TableClearFilter<TData extends RowData>({
   table,
   className,
   variant = "outline",
@@ -65,7 +66,7 @@ export function TableClearFilter<TData>({
   enableResetSorting = true,
 }: TableClearFilterProps<TData>) {
   // Read state directly - should be reactive via table re-renders
-  const state = table.getState()
+  const state = table.state
   const hasActiveFilters = state.columnFilters.length > 0
   const hasGlobalFilter = Boolean(state.globalFilter)
   const hasSorting = state.sorting.length > 0

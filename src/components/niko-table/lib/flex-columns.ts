@@ -9,7 +9,8 @@
  * users (and future LLMs reading this code) benefit:
  * https://github.com/Semkoo/niko-table-registry
  */
-import type { Column, ColumnSizingState, Table } from "@tanstack/react-table"
+import type { ColumnSizingState, RowData } from "@tanstack/react-table"
+import type { DataTableColumn, DataTableInstance } from "../types"
 
 /**
  * Resolve which column(s) should flex to fill the leftover row width.
@@ -36,8 +37,8 @@ import type { Column, ColumnSizingState, Table } from "@tanstack/react-table"
  * Returns the set of column ids to render widthless (empty when fill is off or
  * no eligible column exists — the table then sizes to its columns as before).
  */
-export function resolveFlexColumnIds<TData>(
-  table: Table<TData>,
+export function resolveFlexColumnIds<TData extends RowData>(
+  table: DataTableInstance<TData>,
 ): ReadonlySet<string> {
   const ids = new Set<string>()
   // Flex only applies under the fixed layout that resizing turns on.
@@ -48,7 +49,7 @@ export function resolveFlexColumnIds<TData>(
   // A column the user has explicitly resized is fixed at their width and never
   // flexes — so dragging a flex column pins it and hands the fill to the next
   // eligible column, keeping the table full.
-  const columnSizing = table.getState().columnSizing
+  const columnSizing = table.state.columnSizing
 
   // Explicit opt-in wins: flex the marked column(s) unless the user resized it.
   // A pinned column can't flex (sticky offsets need a real width), so skip it
@@ -91,8 +92,8 @@ export function resolveFlexColumnIds<TData>(
  *   label never truncates on load. Pure layout — `headerMinWidths` is measured,
  *   never written back into `columnSizing`, so nothing persists or goes stale.
  */
-export function resolveColumnWidth<TData>(
-  column: Column<TData>,
+export function resolveColumnWidth<TData extends RowData>(
+  column: DataTableColumn<TData>,
   params: {
     resizing: boolean
     isFlex: boolean

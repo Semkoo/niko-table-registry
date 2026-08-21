@@ -9,8 +9,8 @@ import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-c
 import DocsLink from "@/components/markdown/docs-link.astro"
 
 <div className="not-content mb-6 flex items-center gap-2">
-  <DocsLink href="https://tanstack.com/table/latest/docs/introduction" external>Docs ↗</DocsLink>
-  <DocsLink href="https://tanstack.com/table/latest/docs/api/core/table" external>API Reference ↗</DocsLink>
+  <DocsLink href="https://tanstack.com/table/latest/docs/framework/react/overview" external>Docs ↗</DocsLink>
+  <DocsLink href="https://tanstack.com/table/latest/docs/framework/react/guide/migrating" external>Migrating to v9 ↗</DocsLink>
 </div>
 
 <figure className="flex flex-col gap-4">
@@ -57,6 +57,55 @@ We now have a solid foundation to build on top of. Composable. Themeable. Custom
    Need more (virtualization, DnD, Data Grid)? See the [Installation Guide](/getting-started/installation/) or [Components](/getting-started/components/).
 
 </Steps>
+
+## Table Features (TanStack Table v9)
+
+This registry targets **TanStack Table v9**. In v8, every behavior was bundled into `useReactTable`. In v9 you import only what you need via `tableFeatures()` — the same **Composable** idea as installing only the registry pieces you mount.
+
+`DataTableRoot` wires this for you. Installing `@niko-table/data-table` (or `data-table-core`) copies `lib/data-table-features.ts` into your project. That file is the engine-layer trim point: delete features, row models, and built-in `sortFns` / `aggregationFns` your tables never use.
+
+```tsx showLineNumbers title="components/niko-table/lib/data-table-features.ts"
+import {
+  columnFilteringFeature,
+  // …
+  createFilteredRowModel,
+  createPaginatedRowModel,
+  createSortedRowModel,
+  rowPaginationFeature,
+  rowSortingFeature,
+  tableFeatures,
+} from "@tanstack/react-table"
+
+export const features = tableFeatures({
+  columnFilteringFeature,
+  rowPaginationFeature,
+  rowSortingFeature,
+  filteredRowModel: createFilteredRowModel(),
+  paginatedRowModel: createPaginatedRowModel(),
+  sortedRowModel: createSortedRowModel(),
+  // filterFns / sortFns / aggregationFns you actually use
+})
+
+export type DataTableFeatures = typeof features
+```
+
+Notes:
+
+- There are no more `get*RowModel` table options. Row models for optional features are registered on the features object.
+- `DataTableRoot` still uses feature detection / `config.enable*` to decide _when_ behavior runs. Registration decides _whether the API exists_.
+- When you own the table instance yourself, pass `features` into `useTable({ features, data, columns })` and wrap with `DataTableProvider`. See [Core](/niko-table/overview/core/).
+- Full reference: [Library → Table Features](/niko-table/overview/lib/#table-features). TanStack's [migration guide](https://tanstack.com/table/latest/docs/framework/react/guide/migrating).
+
+### Upgrading an existing install
+
+Copied v8 code keeps working until you bump the dependency and re-add the components. Expect:
+
+| v8                                       | v9                              |
+| ---------------------------------------- | ------------------------------- |
+| `useReactTable` + `get*RowModel` options | `useTable` + `features`         |
+| `table.getState().x`                     | `table.state.x`                 |
+| `VisibilityState`                        | `ColumnVisibilityState`         |
+| `columnPinning: { left, right }`         | `columnPinning: { start, end }` |
 
 ## Anatomy
 
@@ -298,25 +347,25 @@ The `DataTableRoot` component is used to provide the table context to all child 
 
 ### Props
 
-| Name                       | Type                                             | Description                                        |
-| -------------------------- | ------------------------------------------------ | -------------------------------------------------- |
-| `children`                 | `React.ReactNode`                                | Child components (required).                       |
-| `data`                     | `TData[]`                                        | The data array to display in the table.            |
-| `columns`                  | `DataTableColumnDef<TData>[]`                    | Column definitions array.                          |
-| `table`                    | `Table<TData>`                                   | Pre-configured TanStack Table instance (optional). |
-| `config`                   | `DataTableConfig`                                | Configuration object for feature toggles.          |
-| `state`                    | `Partial<TableState>`                            | Controlled table state (pagination, sorting, etc). |
-| `isLoading`                | `boolean`                                        | Loading state for the table.                       |
-| `getRowId`                 | `(row: TData, index: number) => string`          | Custom function to get row IDs.                    |
-| `className`                | `string`                                         | Additional CSS classes.                            |
-| `onGlobalFilterChange`     | `(value: GlobalFilter) => void`                  | Callback when global filter changes.               |
-| `onPaginationChange`       | `(updater: Updater<PaginationState>) => void`    | Callback when pagination changes.                  |
-| `onSortingChange`          | `(updater: Updater<SortingState>) => void`       | Callback when sorting changes.                     |
-| `onColumnFiltersChange`    | `(updater: Updater<ColumnFiltersState>) => void` | Callback when column filters change.               |
-| `onColumnVisibilityChange` | `(updater: Updater<VisibilityState>) => void`    | Callback when column visibility changes.           |
-| `onRowSelectionChange`     | `(updater: Updater<RowSelectionState>) => void`  | Callback when row selection changes.               |
-| `onExpandedChange`         | `(updater: Updater<ExpandedState>) => void`      | Callback when expanded state changes.              |
-| `onRowSelection`           | `(selectedRows: TData[]) => void`                | Callback with selected row data.                   |
+| Name                       | Type                                                | Description                                        |
+| -------------------------- | --------------------------------------------------- | -------------------------------------------------- |
+| `children`                 | `React.ReactNode`                                   | Child components (required).                       |
+| `data`                     | `TData[]`                                           | The data array to display in the table.            |
+| `columns`                  | `DataTableColumnDef<TData>[]`                       | Column definitions array.                          |
+| `table`                    | `DataTableInstance<TData>`                          | Pre-configured TanStack Table instance (optional). |
+| `config`                   | `DataTableConfig`                                   | Configuration object for feature toggles.          |
+| `state`                    | `Partial<TableState>`                               | Controlled table state (pagination, sorting, etc). |
+| `isLoading`                | `boolean`                                           | Loading state for the table.                       |
+| `getRowId`                 | `(row: TData, index: number) => string`             | Custom function to get row IDs.                    |
+| `className`                | `string`                                            | Additional CSS classes.                            |
+| `onGlobalFilterChange`     | `(value: GlobalFilter) => void`                     | Callback when global filter changes.               |
+| `onPaginationChange`       | `(updater: Updater<PaginationState>) => void`       | Callback when pagination changes.                  |
+| `onSortingChange`          | `(updater: Updater<SortingState>) => void`          | Callback when sorting changes.                     |
+| `onColumnFiltersChange`    | `(updater: Updater<ColumnFiltersState>) => void`    | Callback when column filters change.               |
+| `onColumnVisibilityChange` | `(updater: Updater<ColumnVisibilityState>) => void` | Callback when column visibility changes.           |
+| `onRowSelectionChange`     | `(updater: Updater<RowSelectionState>) => void`     | Callback when row selection changes.               |
+| `onExpandedChange`         | `(updater: Updater<ExpandedState>) => void`         | Callback when expanded state changes.              |
+| `onRowSelection`           | `(selectedRows: TData[]) => void`                   | Callback with selected row data.                   |
 
 ### Config
 

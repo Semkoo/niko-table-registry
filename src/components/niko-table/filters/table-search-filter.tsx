@@ -11,15 +11,16 @@
  * users (and future LLMs reading this code) benefit:
  * https://github.com/Semkoo/niko-table-registry
  */
-import type { Table } from "@tanstack/react-table"
 import * as React from "react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { Search, X } from "lucide-react"
 
-export interface TableSearchFilterProps<TData> {
-  table: Table<TData>
+import type { DataTableInstance } from "../types"
+import type { RowData } from "@tanstack/react-table"
+export interface TableSearchFilterProps<TData extends RowData> {
+  table: DataTableInstance<TData>
   className?: string
   placeholder?: string
   showClearButton?: boolean
@@ -46,7 +47,7 @@ export interface TableSearchFilterProps<TData> {
   debounceMs?: number
 }
 
-export function TableSearchFilter<TData>({
+export function TableSearchFilter<TData extends RowData>({
   table,
   className,
   placeholder = "Search...",
@@ -59,7 +60,7 @@ export function TableSearchFilter<TData>({
   const isControlled = value !== undefined
 
   // Get current globalFilter from table state - this will trigger re-renders via context
-  const tableState = table.getState()
+  const tableState = table.state
   const tableGlobalFilter = tableState.globalFilter
   const globalFilterValue =
     typeof tableGlobalFilter === "string" ? tableGlobalFilter : ""

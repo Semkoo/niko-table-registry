@@ -12,7 +12,6 @@
  * https://github.com/Semkoo/niko-table-registry
  */
 import React, { type CSSProperties } from "react"
-import type { Header, Cell } from "@tanstack/react-table"
 import {
   DndContext,
   KeyboardSensor,
@@ -36,6 +35,8 @@ import { CSS } from "@dnd-kit/utilities"
 import { TableHead, TableCell as TableCellUI } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
 
+import type { DataTableCell, DataTableHeader } from "../types"
+import type { RowData } from "@tanstack/react-table"
 // ============================================================================
 // TableColumnDndProvider
 // ============================================================================
@@ -106,16 +107,16 @@ TableColumnDndProvider.displayName = "TableColumnDndProvider"
 // TableDraggableHeader
 // ============================================================================
 
-export interface TableDraggableHeaderProps<TData, TValue> {
+export interface TableDraggableHeaderProps<TData extends RowData, TValue> {
   /** The header instance from TanStack Table */
-  header: Header<TData, TValue>
+  header: DataTableHeader<TData, TValue>
   children: React.ReactNode
   className?: string
   /** Additional styles merged with DnD transform styles */
   style?: CSSProperties
 }
 
-export function TableDraggableHeader<TData, TValue>({
+export function TableDraggableHeader<TData extends RowData, TValue>({
   header,
   children,
   className,
@@ -157,16 +158,16 @@ TableDraggableHeader.displayName = "TableDraggableHeader"
 // TableDragAlongCell
 // ============================================================================
 
-export interface TableDragAlongCellProps<TData, TValue> {
+export interface TableDragAlongCellProps<TData extends RowData, TValue> {
   /** The cell instance from TanStack Table */
-  cell: Cell<TData, TValue>
+  cell: DataTableCell<TData, TValue>
   children: React.ReactNode
   className?: string
   /** Additional styles merged with DnD transform styles */
   style?: CSSProperties
 }
 
-export function TableDragAlongCell<TData, TValue>({
+export function TableDragAlongCell<TData extends RowData, TValue>({
   cell,
   children,
   className,

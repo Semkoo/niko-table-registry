@@ -11,7 +11,7 @@
  * users (and future LLMs reading this code) benefit:
  * https://github.com/Semkoo/niko-table-registry
  */
-import { flexRender, type Row } from "@tanstack/react-table"
+import { flexRender } from "@tanstack/react-table"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
   TableBody,
@@ -37,6 +37,8 @@ import { resolveRowFromClick } from "../lib/row-click"
 import { getCommonPinningStyles } from "../lib/styles"
 import { flashCellKey, useDataTable } from "./data-table-context"
 
+import type { DataTableRow } from "../types"
+import type { RowData } from "@tanstack/react-table"
 export type { ScrollEvent }
 
 // ============================================================================
@@ -68,7 +70,7 @@ export const DataTableHeader = React.memo(function DataTableHeader({
   // Flex fill is on by default: resolve which column soaks up the leftover
   // width (explicit `meta.flex`, else the first non-pinned data column).
   const flexColumnIds = resolveFlexColumnIds(table)
-  const columnSizing = table.getState().columnSizing
+  const columnSizing = table.state.columnSizing
 
   return (
     <TableHeader
@@ -155,7 +157,7 @@ DataTableHeader.displayName = "DataTableHeader"
  * renders unless the source data array reference changes).
  */
 interface BodyRowProps {
-  row: Row<unknown>
+  row: DataTableRow<RowData>
   /** Position in the current display model (post sort/filter) — for scroll/flash. */
   displayIndex: number
   expandColumnId: string | undefined
@@ -292,7 +294,7 @@ BodyRow.displayName = "BodyRow"
 // DataTableBody
 // ============================================================================
 
-export interface DataTableBodyProps<TData> {
+export interface DataTableBodyProps<TData extends RowData> {
   children?: React.ReactNode
   className?: string
   onScroll?: (event: ScrollEvent) => void
@@ -323,7 +325,7 @@ export interface DataTableBodyProps<TData> {
   renderRowContextMenu?: (row: TData) => React.ReactNode
 }
 
-export function DataTableBody<TData>({
+export function DataTableBody<TData extends RowData>({
   children,
   className,
   onScroll,
@@ -410,7 +412,7 @@ export function DataTableBody<TData>({
   )
 
   const { columnVisibility, columnOrder, columnPinning, columnSizing } =
-    table.getState()
+    table.state
   const resizing = table.options.enableColumnResizing ?? false
 
   // Flex fill is on by default: which column soaks up the leftover row width.
@@ -562,7 +564,7 @@ export function DataTableBody<TData>({
         ? rows.map((row, displayIndex) => (
             <BodyRow
               key={row.id}
-              row={row as Row<unknown>}
+              row={row as DataTableRow<RowData>}
               displayIndex={displayIndex}
               expandColumnId={expandColumnId}
               isClickable={isClickable}
@@ -632,7 +634,7 @@ export function DataTableEmptyBody({
 
   // Hooks first (rules-of-hooks), then early-return below skips work when
   // the empty state isn't visible.
-  const tableState = table.getState()
+  const tableState = table.state
   const isFiltered = React.useMemo(
     () =>
       (tableState.globalFilter && tableState.globalFilter.length > 0) ||

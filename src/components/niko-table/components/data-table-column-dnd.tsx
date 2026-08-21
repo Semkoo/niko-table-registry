@@ -11,6 +11,7 @@
  * users (and future LLMs reading this code) benefit:
  * https://github.com/Semkoo/niko-table-registry
  */
+import type { RowData } from "@tanstack/react-table"
 import {
   TableColumnDndProvider,
   type TableColumnDndProviderProps,
@@ -63,8 +64,10 @@ DataTableColumnDndProvider.displayName = "DataTableColumnDndProvider"
 // DataTableDraggableHeader
 // ============================================================================
 
-export type DataTableDraggableHeaderProps<TData, TValue> =
-  TableDraggableHeaderProps<TData, TValue>
+export type DataTableDraggableHeaderProps<
+  TData extends RowData,
+  TValue,
+> = TableDraggableHeaderProps<TData, TValue>
 
 /**
  * Context-aware draggable header cell for column DnD.
@@ -74,7 +77,7 @@ export type DataTableDraggableHeaderProps<TData, TValue> =
  *   {flexRender(header.column.columnDef.header, header.getContext())}
  * </DataTableDraggableHeader>
  */
-export function DataTableDraggableHeader<TData, TValue>(
+export function DataTableDraggableHeader<TData extends RowData, TValue>(
   props: DataTableDraggableHeaderProps<TData, TValue>,
 ) {
   return <TableDraggableHeader<TData, TValue> {...props} />
@@ -86,8 +89,10 @@ DataTableDraggableHeader.displayName = "DataTableDraggableHeader"
 // DataTableDragAlongCell
 // ============================================================================
 
-export type DataTableDragAlongCellProps<TData, TValue> =
-  TableDragAlongCellProps<TData, TValue>
+export type DataTableDragAlongCellProps<
+  TData extends RowData,
+  TValue,
+> = TableDragAlongCellProps<TData, TValue>
 
 /**
  * Context-aware cell that follows column drag position.
@@ -97,7 +102,7 @@ export type DataTableDragAlongCellProps<TData, TValue> =
  *   {flexRender(cell.column.columnDef.cell, cell.getContext())}
  * </DataTableDragAlongCell>
  */
-export function DataTableDragAlongCell<TData, TValue>(
+export function DataTableDragAlongCell<TData extends RowData, TValue>(
   props: DataTableDragAlongCellProps<TData, TValue>,
 ) {
   return <TableDragAlongCell<TData, TValue> {...props} />

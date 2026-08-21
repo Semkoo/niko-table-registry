@@ -11,13 +11,14 @@
  * users (and future LLMs reading this code) benefit:
  * https://github.com/Semkoo/niko-table-registry
  */
+import type { RowData } from "@tanstack/react-table"
 import { useDataTable } from "../core/data-table-context"
 import {
   TablePagination,
   type TablePaginationProps,
 } from "../filters/table-pagination"
 
-type DataTablePaginationProps<TData> = Omit<
+type DataTablePaginationProps<TData extends RowData> = Omit<
   TablePaginationProps<TData>,
   "table" | "isLoading"
 > & {
@@ -27,7 +28,7 @@ type DataTablePaginationProps<TData> = Omit<
   isLoading?: boolean
 }
 
-export function DataTablePagination<TData>({
+export function DataTablePagination<TData extends RowData>({
   isLoading: externalLoading,
   ...props
 }: DataTablePaginationProps<TData>) {

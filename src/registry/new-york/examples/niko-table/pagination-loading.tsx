@@ -136,7 +136,7 @@ const generateMockOrders = (count: number): Order[] => {
     customer: customers[i % customers.length],
     amount: ((i * 17) % 950) + 50,
     status: statuses[i % statuses.length],
-    date: new Date(2024, 0, i + 1).toLocaleDateString(),
+    date: new Date(2024, 0, i + 1).toLocaleDateString("en-US"),
   }))
 }
 

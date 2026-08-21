@@ -12,29 +12,32 @@
  * https://github.com/Semkoo/niko-table-registry
  */
 import React from "react"
-import type { Column } from "@tanstack/react-table"
+import type { RowData } from "@tanstack/react-table"
 
 import { cn } from "@/lib/utils"
 
+import type { DataTableColumn } from "../types"
 // ============================================================================
 // CONTEXT
 // ============================================================================
 
-interface TableColumnHeaderContextValue<TData, TValue> {
-  column: Column<TData, TValue>
+interface TableColumnHeaderContextValue<TData extends RowData, TValue> {
+  column: DataTableColumn<TData, TValue>
 }
 
 const TableColumnHeaderContext = React.createContext<
-  TableColumnHeaderContextValue<unknown, unknown> | undefined
+  TableColumnHeaderContextValue<RowData, unknown> | undefined
 >(undefined)
 
-export function useColumnHeaderContext<TData, TValue>(
+export function useColumnHeaderContext<TData extends RowData, TValue>(
   required: true,
 ): TableColumnHeaderContextValue<TData, TValue>
-export function useColumnHeaderContext<TData, TValue>(
+export function useColumnHeaderContext<TData extends RowData, TValue>(
   required: false,
 ): TableColumnHeaderContextValue<TData, TValue> | undefined
-export function useColumnHeaderContext<TData, TValue>(required = true) {
+export function useColumnHeaderContext<TData extends RowData, TValue>(
+  required = true,
+) {
   const context = React.useContext(TableColumnHeaderContext) as
     TableColumnHeaderContextValue<TData, TValue> | undefined
 
@@ -54,16 +57,20 @@ export function useColumnHeaderContext<TData, TValue>(required = true) {
  * Provider for column header context.
  * Used internally by DataTableHeader to provide context to composable header components.
  */
-export function DataTableColumnHeaderRoot<TData, TValue>({
+export function DataTableColumnHeaderRoot<TData extends RowData, TValue>({
   column,
   children,
 }: {
-  column: Column<TData, TValue>
+  column: DataTableColumn<TData, TValue>
   children: React.ReactNode
 }) {
   // Memoize so context subscribers only re-render when `column` identity changes.
   const contextValue = React.useMemo(
-    () => ({ column }) as TableColumnHeaderContextValue<unknown, unknown>,
+    () =>
+      ({ column }) as unknown as TableColumnHeaderContextValue<
+        RowData,
+        unknown
+      >,
     [column],
   )
   return (

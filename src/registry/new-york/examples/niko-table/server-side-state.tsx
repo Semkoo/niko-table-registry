@@ -41,7 +41,7 @@ import type {
   PaginationState,
   SortingState,
   Updater,
-  VisibilityState,
+  ColumnVisibilityState,
 } from "@tanstack/react-table"
 import { DataTableRoot } from "@/components/niko-table/core/data-table-root"
 import { DataTable } from "@/components/niko-table/core/data-table"
@@ -891,7 +891,7 @@ function buildColumns(facets?: ProductFacets): DataTableColumnDef<Product>[] {
       },
       cell: ({ row }) => {
         const date = row.getValue("releaseDate") as Date
-        return <span>{date.toLocaleDateString()}</span>
+        return <span>{date.toLocaleDateString("en-US")}</span>
       },
       enableColumnFilter: true,
     },
@@ -912,7 +912,8 @@ function ServerSideTableContent() {
   // Holds the search string — or, when the advanced filter menu uses
   // OR/MIXED join logic, a `{ filters, joinOperator }` object
   const [globalFilter, setGlobalFilter] = useState<string | object>("")
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
+  const [columnVisibility, setColumnVisibility] =
+    useState<ColumnVisibilityState>({})
 
   // Batch rapid filter clicks (e.g. toggling several faceted options) into a
   // single server request. Debounce search + columnFilters as ONE snapshot,

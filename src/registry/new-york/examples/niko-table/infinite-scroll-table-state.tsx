@@ -6,7 +6,7 @@ import type {
   PaginationState,
   SortingState,
   ColumnFiltersState,
-  VisibilityState,
+  ColumnVisibilityState,
   ExpandedState,
   ColumnPinningState,
 } from "@tanstack/react-table"
@@ -176,11 +176,12 @@ export default function InfiniteScrollTableStateExample() {
   const [globalFilter, setGlobalFilter] = useState<string | object>("")
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
+  const [columnVisibility, setColumnVisibility] =
+    useState<ColumnVisibilityState>({})
   const [expanded, setExpanded] = useState<ExpandedState>({})
   const [columnPinning, setColumnPinning] = useState<ColumnPinningState>({
-    left: [],
-    right: [],
+    start: [],
+    end: [],
   })
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
@@ -218,7 +219,7 @@ export default function InfiniteScrollTableStateExample() {
     setColumnFilters([])
     setColumnVisibility({})
     setExpanded({})
-    setColumnPinning({ left: [], right: [] })
+    setColumnPinning({ start: [], end: [] })
     setPagination({ pageIndex: 0, pageSize: 500 })
   }, [])
 
@@ -370,7 +371,9 @@ export default function InfiniteScrollTableStateExample() {
         ),
         cell: ({ row }) => {
           const revenue = row.getValue("revenue") as number
-          return <div className="font-mono">${revenue.toLocaleString()}</div>
+          return (
+            <div className="font-mono">${revenue.toLocaleString("en-US")}</div>
+          )
         },
       },
       {
@@ -383,7 +386,7 @@ export default function InfiniteScrollTableStateExample() {
         ),
         cell: ({ row }) => {
           const date = row.getValue("releaseDate") as Date
-          return <span>{date.toLocaleDateString()}</span>
+          return <span>{date.toLocaleDateString("en-US")}</span>
         },
       },
     ],
@@ -485,7 +488,7 @@ export default function InfiniteScrollTableStateExample() {
           <CardTitle>Infinite Scroll Table State</CardTitle>
           <CardDescription>
             Live view of the controlled table state with{" "}
-            {TOTAL_POOL.length.toLocaleString()} total products
+            {TOTAL_POOL.length.toLocaleString("en-US")} total products
           </CardDescription>
           <CardAction>
             <Button variant="outline" size="sm" onClick={resetAllState}>
@@ -507,14 +510,14 @@ export default function InfiniteScrollTableStateExample() {
             <div className="flex justify-between">
               <span className="font-medium">Total Items:</span>
               <span className="text-foreground">
-                {TOTAL_POOL.length.toLocaleString()}
+                {TOTAL_POOL.length.toLocaleString("en-US")}
               </span>
             </div>
 
             <div className="flex justify-between">
               <span className="font-medium">Loaded Rows:</span>
               <span className="text-foreground">
-                {loaded.length.toLocaleString()}
+                {loaded.length.toLocaleString("en-US")}
               </span>
             </div>
 
@@ -563,8 +566,8 @@ export default function InfiniteScrollTableStateExample() {
             <div className="flex justify-between">
               <span className="font-medium">Pinned Columns:</span>
               <span className="text-foreground">
-                {columnPinning.left?.length || 0} Left,{" "}
-                {columnPinning.right?.length || 0} Right
+                {columnPinning.start?.length || 0} Left,{" "}
+                {columnPinning.end?.length || 0} Right
               </span>
             </div>
           </div>

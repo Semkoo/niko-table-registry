@@ -12,20 +12,21 @@
  * https://github.com/Semkoo/niko-table-registry
  */
 import React from "react"
-import type { Column } from "@tanstack/react-table"
 import { cn } from "@/lib/utils"
 import { useDerivedColumnTitle } from "../hooks/use-derived-column-title"
 
+import type { DataTableColumn } from "../types"
+import type { RowData } from "@tanstack/react-table"
 /**
  * Renders the column title.
  */
-export function TableColumnTitle<TData, TValue>({
+export function TableColumnTitle<TData extends RowData, TValue>({
   column,
   title,
   className,
   children,
 }: {
-  column: Column<TData, TValue>
+  column: DataTableColumn<TData, TValue>
   title?: string
   className?: string
   children?: React.ReactNode

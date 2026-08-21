@@ -10,11 +10,11 @@ Core components are the essential building blocks of the data table. They handle
 
 ### DataTableRoot
 
-The `DataTableRoot` component provides the table context to all child components. You should always wrap your table in a `DataTableRoot`. It initializes the TanStack Table instance and manages table state.
+The `DataTableRoot` component provides the table context to all child components. You should always wrap your table in a `DataTableRoot`. It initializes the TanStack Table instance with `useTable` and the shared `features` object from `lib/data-table-features.ts` (TanStack Table v9), and manages table state.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/core/data-table-root.tsx`} external>Source Code ↗</DocsLink>
-  <DocsLink href="https://tanstack.com/table/latest/docs/api/core/table" external>API Reference ↗</DocsLink>
+  <DocsLink href="https://tanstack.com/table/latest/docs/framework/react/guide/migrating" external>Migrating to v9 ↗</DocsLink>
 </div>
 
 ```tsx showLineNumbers
@@ -36,7 +36,7 @@ export function MyTable({ data }: { data: User[] }) {
 | `children`  | `React.ReactNode`                       | Child components (required).                       |
 | `data`      | `TData[]`                               | The data array to display in the table.            |
 | `columns`   | `DataTableColumnDef<TData>[]`           | Column definitions array.                          |
-| `table`     | `Table<TData>`                          | Pre-configured TanStack Table instance (optional). |
+| `table`     | `DataTableInstance<TData>`              | Pre-configured TanStack Table instance (optional). |
 | `config`    | `DataTableConfig`                       | Configuration object for feature toggles.          |
 | `isLoading` | `boolean`                               | Loading state for the table.                       |
 | `getRowId`  | `(row: TData, index: number) => string` | Custom function to get row IDs.                    |
@@ -45,18 +45,18 @@ export function MyTable({ data }: { data: User[] }) {
 
 #### Event Handlers
 
-| Name                       | Type                                             | Description                            |
-| -------------------------- | ------------------------------------------------ | -------------------------------------- |
-| `onGlobalFilterChange`     | `(value: GlobalFilter) => void`                  | Called when global filter changes.     |
-| `onPaginationChange`       | `(updater: Updater<PaginationState>) => void`    | Called when pagination changes.        |
-| `onSortingChange`          | `(updater: Updater<SortingState>) => void`       | Called when sorting changes.           |
-| `onColumnFiltersChange`    | `(updater: Updater<ColumnFiltersState>) => void` | Called when column filters change.     |
-| `onColumnVisibilityChange` | `(updater: Updater<VisibilityState>) => void`    | Called when column visibility changes. |
-| `onRowSelectionChange`     | `(updater: Updater<RowSelectionState>) => void`  | Called when row selection changes.     |
-| `onExpandedChange`         | `(updater: Updater<ExpandedState>) => void`      | Called when expanded state changes.    |
-| `onColumnPinningChange`    | `(updater: Updater<ColumnPinningState>) => void` | Called when column pinning changes.    |
-| `onColumnOrderChange`      | `(updater: Updater<ColumnOrderState>) => void`   | Called when column order changes.      |
-| `onRowSelection`           | `(selectedRows: TData[]) => void`                | Called with selected row data.         |
+| Name                       | Type                                                | Description                            |
+| -------------------------- | --------------------------------------------------- | -------------------------------------- |
+| `onGlobalFilterChange`     | `(value: GlobalFilter) => void`                     | Called when global filter changes.     |
+| `onPaginationChange`       | `(updater: Updater<PaginationState>) => void`       | Called when pagination changes.        |
+| `onSortingChange`          | `(updater: Updater<SortingState>) => void`          | Called when sorting changes.           |
+| `onColumnFiltersChange`    | `(updater: Updater<ColumnFiltersState>) => void`    | Called when column filters change.     |
+| `onColumnVisibilityChange` | `(updater: Updater<ColumnVisibilityState>) => void` | Called when column visibility changes. |
+| `onRowSelectionChange`     | `(updater: Updater<RowSelectionState>) => void`     | Called when row selection changes.     |
+| `onExpandedChange`         | `(updater: Updater<ExpandedState>) => void`         | Called when expanded state changes.    |
+| `onColumnPinningChange`    | `(updater: Updater<ColumnPinningState>) => void`    | Called when column pinning changes.    |
+| `onColumnOrderChange`      | `(updater: Updater<ColumnOrderState>) => void`      | Called when column order changes.      |
+| `onRowSelection`           | `(selectedRows: TData[]) => void`                   | Called with selected row data.         |
 
 #### Config Object
 
@@ -83,13 +83,14 @@ The `config` prop accepts a `DataTableConfig` object with the following properti
 
 ### DataTableProvider
 
-Low-level context provider used internally by `DataTableRoot`. Use this directly when you need to provide a pre-configured TanStack Table instance to the context (e.g., when using `useReactTable` yourself).
+Low-level context provider used internally by `DataTableRoot`. Use this directly when you need to provide a pre-configured TanStack Table instance to the context (e.g., when using `useTable` yourself).
 
 ```tsx showLineNumbers
 import { DataTableProvider } from "@/components/niko-table/core/data-table-context"
-import { useReactTable, getCoreRowModel } from "@tanstack/react-table"
+import { useTable } from "@tanstack/react-table"
+import { features } from "@/components/niko-table/lib/data-table-features"
 
-const table = useReactTable({ data, columns, getCoreRowModel: getCoreRowModel() })
+const table = useTable({ features, data, columns })
 
 <DataTableProvider table={table} columns={columns} isLoading={false}>
   {/* child components can use useDataTable() */}

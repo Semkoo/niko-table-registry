@@ -12,7 +12,7 @@
  * https://github.com/Semkoo/niko-table-registry
  */
 import React from "react"
-import type { Column, Table } from "@tanstack/react-table"
+import type { RowData } from "@tanstack/react-table"
 import { Check, CircleHelp } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -37,6 +37,7 @@ import type { SortIconVariant } from "../config/data-table"
 import { FILTER_VARIANTS } from "../lib/constants"
 import type { FilterVariant } from "../lib/constants"
 
+import type { DataTableColumn, DataTableInstance } from "../types"
 /**
  * Sort options menu items for composition inside TableColumnActions.
  *
@@ -47,14 +48,14 @@ import type { FilterVariant } from "../lib/constants"
  * </TableColumnActions>
  * ```
  */
-export function TableColumnSortOptions<TData, TValue>({
+export function TableColumnSortOptions<TData extends RowData, TValue>({
   column,
   table: propTable,
   variant: propVariant,
   withSeparator = true,
 }: {
-  column: Column<TData, TValue>
-  table?: Table<TData>
+  column: DataTableColumn<TData, TValue>
+  table?: DataTableInstance<TData>
   variant?: SortIconVariant
   /** Whether to render a separator before the options. @default true */
   withSeparator?: boolean
@@ -70,7 +71,7 @@ export function TableColumnSortOptions<TData, TValue>({
   const labels = SORT_LABELS[variant] || SORT_LABELS[FILTER_VARIANTS.TEXT]
 
   const sortIndex = column.getSortIndex()
-  const isMultiSort = table && table.getState().sorting.length > 1
+  const isMultiSort = table && table.state.sorting.length > 1
   const showSortBadge = isMultiSort && sortIndex !== -1
 
   /**
@@ -210,14 +211,14 @@ export function TableColumnSortOptions<TData, TValue>({
  * </TableColumnActions>
  * ```
  */
-export function TableColumnSortMenu<TData, TValue>({
+export function TableColumnSortMenu<TData extends RowData, TValue>({
   column,
   table: propTable,
   variant: propVariant,
   className,
 }: {
-  column: Column<TData, TValue>
-  table?: Table<TData>
+  column: DataTableColumn<TData, TValue>
+  table?: DataTableInstance<TData>
   variant?: SortIconVariant
   className?: string
 }) {
@@ -241,7 +242,7 @@ export function TableColumnSortMenu<TData, TValue>({
         : icons.unsorted
 
   const sortIndex = column.getSortIndex()
-  const isMultiSort = table && table.getState().sorting.length > 1
+  const isMultiSort = table && table.state.sorting.length > 1
   const showSortBadge = isMultiSort && sortIndex !== -1
 
   return (

@@ -11,13 +11,14 @@
  * users (and future LLMs reading this code) benefit:
  * https://github.com/Semkoo/niko-table-registry
  */
+import type { RowData } from "@tanstack/react-table"
 import { useDataTable } from "../core/data-table-context"
 import type { TableDateFilterProps } from "../filters/table-date-filter"
 import { TableDateFilter } from "../filters/table-date-filter"
 import { useDerivedColumnTitle } from "../hooks/use-derived-column-title"
 import { FILTER_VARIANTS } from "../lib/constants"
 
-type DataTableDateFilterProps<TData> = Omit<
+type DataTableDateFilterProps<TData extends RowData> = Omit<
   TableDateFilterProps<TData>,
   "column" | "title"
 > & {
@@ -59,7 +60,7 @@ type DataTableDateFilterProps<TData> = Omit<
  * />
  */
 
-export function DataTableDateFilter<TData>({
+export function DataTableDateFilter<TData extends RowData>({
   accessorKey,
   title,
   multiple,

@@ -11,13 +11,17 @@
  * users (and future LLMs reading this code) benefit:
  * https://github.com/Semkoo/niko-table-registry
  */
+import type { RowData } from "@tanstack/react-table"
 import { useDataTable } from "../core/data-table-context"
 import {
   TableSortMenu,
   type TableSortMenuProps,
 } from "../filters/table-sort-menu"
 
-type DataTableSortMenuProps<TData> = Omit<TableSortMenuProps<TData>, "table">
+type DataTableSortMenuProps<TData extends RowData> = Omit<
+  TableSortMenuProps<TData>,
+  "table"
+>
 
 /**
  * A sort menu component that automatically connects to the DataTable context
@@ -38,7 +42,9 @@ type DataTableSortMenuProps<TData> = Omit<TableSortMenuProps<TData>, "table">
  * @example - Custom styling
  * <DataTableSortMenu className="w-[400px]" />
  */
-export function DataTableSortMenu<TData>(props: DataTableSortMenuProps<TData>) {
+export function DataTableSortMenu<TData extends RowData>(
+  props: DataTableSortMenuProps<TData>,
+) {
   const { table } = useDataTable<TData>()
   return <TableSortMenu<TData> table={table} {...props} />
 }

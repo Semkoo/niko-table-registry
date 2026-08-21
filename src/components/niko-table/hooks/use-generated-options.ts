@@ -12,13 +12,13 @@
  * https://github.com/Semkoo/niko-table-registry
  */
 import * as React from "react"
-import type { Table } from "@tanstack/react-table"
 
-import type { Option } from "../types"
+import type { DataTableInstance, Option } from "../types"
 import { formatLabel } from "../lib/format"
 import { FILTER_VARIANTS } from "../lib/constants"
 import { getFilteredRowsExcludingColumn } from "../lib/filter-rows"
 
+import type { RowData } from "@tanstack/react-table"
 export interface GenerateOptionsConfig {
   /**
    * Whether to include counts for each option label
@@ -60,8 +60,8 @@ export interface GenerateOptionsConfig {
  * Generate a map of options for select/multiSelect columns based on table data.
  * Uses either filtered rows (dynamicCounts) or all core rows.
  */
-export function useGeneratedOptions<TData>(
-  table: Table<TData>,
+export function useGeneratedOptions<TData extends RowData>(
+  table: DataTableInstance<TData>,
   config: GenerateOptionsConfig = {},
 ): Record<string, Option[]> {
   const {
@@ -75,7 +75,7 @@ export function useGeneratedOptions<TData>(
   } = config
 
   // Pull state slices to use as memo deps (stable values)
-  const state = table.getState()
+  const state = table.state
   const columnFilters = state.columnFilters
   const globalFilter = state.globalFilter
 
@@ -302,8 +302,8 @@ export function useGeneratedOptions<TData>(
 /**
  * Convenience: generate options only for a specific column id
  */
-export function useGeneratedOptionsForColumn<TData>(
-  table: Table<TData>,
+export function useGeneratedOptionsForColumn<TData extends RowData>(
+  table: DataTableInstance<TData>,
   columnId: string,
   config?: GenerateOptionsConfig,
 ): Option[] {

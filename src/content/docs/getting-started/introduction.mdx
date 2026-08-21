@@ -5,11 +5,11 @@ description: Open-code React data tables for shadcn/ui—composable DataTable* c
 
 import { GITHUB_REPO_URL } from "@/data/env"
 
-## What is Niko Table?
+## What is this registry?
 
 **Nobody's table, everyone's solution.**
 
-Just like Shadcn, Niko Table is **not a component library**. Instead, it's a comprehensive **DataTable component** that you copy into your project and customize to your needs. It's built with TanStack Table and Shadcn UI, providing enterprise-grade features while remaining fully under your control.
+Just like Shadcn, this is **not a component library**. It is a registry of **`DataTable*` components** that you copy into your project and customize. Built with TanStack Table and Shadcn UI — enterprise-grade features, fully under your control. `niko-table` is the registry name (`@niko-table/...`); the components you mount are `DataTable`, `DataTableRoot`, and friends.
 
 ## Why Use This DataTable?
 
@@ -71,7 +71,7 @@ The DataTable uses a **two-layer architecture** for maximum flexibility:
 
 - `DataTableSearchFilter`, `DataTableFilterMenu`, `DataTableSortMenu`, `DataTablePagination`, etc.
 
-**Filters** (`table-*.tsx` in `/filters` folder) - Core implementation components that accept a `table` prop directly and use TanStack Table hooks (like `table.getState()`, `table.setGlobalFilter()`, etc.). These can be used standalone:
+**Filters** (`table-*.tsx` in `/filters` folder) - Core implementation components that accept a `table` prop directly and read from the TanStack Table instance (like `table.state`, `table.setGlobalFilter()`, etc.). These can be used standalone:
 
 - `TableSearchFilter`, `TableFilterMenu`, `TableSortMenu`, etc.
 
@@ -93,7 +93,8 @@ The DataTable uses a **two-layer architecture** for maximum flexibility:
 </DataTableRoot>
 
 // Advanced: Use Filter components directly
-const table = useReactTable({ data, columns, ... })
+// `features` comes from @/components/niko-table/lib/data-table-features
+const table = useTable({ features, data, columns, ... })
 <TableSearchFilter table={table} />  {/* Pass table prop directly */}
 ```
 
@@ -117,7 +118,7 @@ Build tables by composing components - start simple and add features as needed:
 
 ## Composability map
 
-Niko Table is **mix-and-match**: install only the registry items you need, render only the children you want, and swap body strategies without rewriting column defs.
+`DataTable` is **mix-and-match**: install only the registry items you need, render only the children you want, and swap body strategies without rewriting column defs. TanStack Table v9 matches that at the engine: v8 bundled every behavior into `useReactTable`; v9 lets you import only what you need via `lib/data-table-features.ts` (the file you trim after install, same as omitting components you never mount).
 
 | Layer               | What you choose                                                                             | Notes                                                                                             |
 | ------------------- | ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
@@ -156,7 +157,7 @@ You copy the DataTable component code into your project (not install it as a pac
 
 **Required Dependencies:**
 
-- `@tanstack/react-table` - Core table library
+- `@tanstack/react-table@^9` - Core table library (v9: register features in `lib/data-table-features.ts`)
 - Shadcn UI components (via `npx shadcn@latest add ...`) - UI primitives
 - Optional: `@tanstack/react-virtual`, `nuqs`, `@dnd-kit/*` for advanced features
 
@@ -175,7 +176,7 @@ You copy the DataTable component code into your project (not install it as a pac
 
 ### Composition Over Configuration
 
-Build complex tables by composing simple components:
+Build complex tables by composing simple components — and register only the TanStack features those pieces need. Registry installs and `lib/data-table-features.ts` are the same principle at two layers:
 
 ```tsx
 // Start simple

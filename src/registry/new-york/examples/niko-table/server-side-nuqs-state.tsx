@@ -56,7 +56,7 @@ import type {
   PaginationState,
   SortingState,
   Updater,
-  VisibilityState,
+  ColumnVisibilityState,
 } from "@tanstack/react-table"
 import { DataTableRoot } from "@/components/niko-table/core/data-table-root"
 import { DataTable } from "@/components/niko-table/core/data-table"
@@ -910,7 +910,7 @@ function buildColumns(facets?: ProductFacets): DataTableColumnDef<Product>[] {
       },
       cell: ({ row }) => {
         const date = row.getValue("releaseDate") as Date
-        return <span>{date.toLocaleDateString()}</span>
+        return <span>{date.toLocaleDateString("en-US")}</span>
       },
       enableColumnFilter: true,
     },
@@ -950,8 +950,8 @@ const tableStateParsers = {
     }
     return null
   }),
-  cols: parseAsJson<VisibilityState>(
-    value => value as VisibilityState,
+  cols: parseAsJson<ColumnVisibilityState>(
+    value => value as ColumnVisibilityState,
   ).withDefault({}),
 }
 
@@ -1082,7 +1082,7 @@ function ServerSideNuqsTableContent() {
   )
 
   const handleColumnVisibilityChange = useCallback(
-    (updater: Updater<VisibilityState>) => {
+    (updater: Updater<ColumnVisibilityState>) => {
       const next =
         typeof updater === "function" ? updater(columnVisibility) : updater
       void setUrlParams({ cols: Object.keys(next).length > 0 ? next : null })

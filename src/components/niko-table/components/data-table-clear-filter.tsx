@@ -11,13 +11,14 @@
  * users (and future LLMs reading this code) benefit:
  * https://github.com/Semkoo/niko-table-registry
  */
+import type { RowData } from "@tanstack/react-table"
 import { useDataTable } from "../core/data-table-context"
 import {
   TableClearFilter,
   type TableClearFilterProps,
 } from "../filters/table-clear-filter"
 
-type DataTableClearFilterProps<TData> = Omit<
+type DataTableClearFilterProps<TData extends RowData> = Omit<
   TableClearFilterProps<TData>,
   "table"
 >
@@ -52,7 +53,7 @@ type DataTableClearFilterProps<TData> = Omit<
  *   Reset Filters
  * </DataTableClearFilter>
  */
-export function DataTableClearFilter<TData>(
+export function DataTableClearFilter<TData extends RowData>(
   props: DataTableClearFilterProps<TData>,
 ) {
   const { table } = useDataTable<TData>()

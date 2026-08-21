@@ -11,6 +11,7 @@
  * users (and future LLMs reading this code) benefit:
  * https://github.com/Semkoo/niko-table-registry
  */
+import type { RowData } from "@tanstack/react-table"
 import * as React from "react"
 import { useDataTable } from "../core/data-table-context"
 import {
@@ -20,7 +21,7 @@ import {
 import { useDerivedColumnTitle } from "../hooks/use-derived-column-title"
 import { FILTER_VARIANTS } from "../lib/constants"
 
-type DataTableSliderFilterProps<TData> = Omit<
+type DataTableSliderFilterProps<TData extends RowData> = Omit<
   TableSliderFilterProps<TData>,
   "column" | "title"
 > & {
@@ -67,7 +68,7 @@ type DataTableSliderFilterProps<TData> = Omit<
  * />
  */
 
-export function DataTableSliderFilter<TData>({
+export function DataTableSliderFilter<TData extends RowData>({
   accessorKey,
   title,
   ...props

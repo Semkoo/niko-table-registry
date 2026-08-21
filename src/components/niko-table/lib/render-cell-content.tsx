@@ -9,12 +9,14 @@
  * users (and future LLMs reading this code) benefit:
  * https://github.com/Semkoo/niko-table-registry
  */
-import { flexRender, type Cell } from "@tanstack/react-table"
+import { flexRender, type RowData } from "@tanstack/react-table"
 import { ChevronDown, ChevronRight } from "lucide-react"
 import type { ReactNode } from "react"
 
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+
+import type { DataTableCell } from "../types"
 
 /**
  * Renders a body cell with TanStack grouping / aggregation awareness.
@@ -27,16 +29,21 @@ import { cn } from "@/lib/utils"
  * Used by every body structure so grouping works the same for regular,
  * virtualized, and DnD tables.
  */
-export function renderCellContent<TData, TValue>(
-  cell: Cell<TData, TValue>,
+export function renderCellContent<TData extends RowData, TValue>(
+  cell: DataTableCell<TData, TValue>,
 ): ReactNode {
   const context = cell.getContext()
+
+  // Cell context holds the core table, where React `useTable`'s `.state` isn't
+  // attached. `atoms.<slice>.get()` is the snapshot read that works on both,
+  // and is optional because a slice only exists once its feature is registered.
+  const grouping = context.table.atoms.grouping?.get() ?? []
 
   // Only branch when a grouping is actually applied. `getIsAggregated()` is
   // also true for any parent row produced by `getSubRows` (tree tables), and
   // TanStack ships a default `aggregatedCell` that stringifies the value — so
   // an unguarded aggregate branch replaces those rows' real cells.
-  if (context.table.getState().grouping.length === 0) {
+  if (grouping.length === 0) {
     return flexRender(cell.column.columnDef.cell, context)
   }
 

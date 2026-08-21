@@ -20,7 +20,7 @@
       "type": "registry:block",
       "title": "Data Table Core",
       "description": "Shared floor for Niko Table: context, non-virtualized structure, types, config, and the lib/hooks bodies and controls need. Does not include DataTableRoot or components/ui/table.tsx \u2014 install @niko-table/data-table for the full owner (pulls table.tsx), @niko-table/data-table-ui for the table primitive alone, or bring your own compatible table.tsx with a TableComponent export.",
-      "dependencies": ["@tanstack/react-table", "lucide-react"],
+      "dependencies": ["@tanstack/react-table@^9", "lucide-react"],
       "registryDependencies": ["skeleton", "button", "context-menu"],
       "files": [
         {
@@ -119,6 +119,16 @@
           "target": "components/niko-table/config/data-table.ts"
         },
         {
+          "path": "src/components/niko-table/lib/filter-functions.ts",
+          "type": "registry:lib",
+          "target": "components/niko-table/lib/filter-functions.ts"
+        },
+        {
+          "path": "src/components/niko-table/lib/data-table-features.ts",
+          "type": "registry:lib",
+          "target": "components/niko-table/lib/data-table-features.ts"
+        },
+        {
           "path": "src/components/niko-table/types/index.ts",
           "type": "registry:lib",
           "target": "components/niko-table/types/index.ts"
@@ -130,7 +140,7 @@
       "type": "registry:block",
       "title": "Data Table",
       "description": "Full DataTable owner (DataTableRoot, DataTable chrome, feature detection) on top of data-table-core, plus the Table UI primitive via data-table-ui. Prefer this for typical installs; \u00e0-la-carte controls depend on data-table-core instead and will not overwrite a customized components/ui/table.tsx.",
-      "dependencies": ["@tanstack/react-table", "lucide-react"],
+      "dependencies": ["@tanstack/react-table@^9", "lucide-react"],
       "registryDependencies": [
         "https://niko-table.com/r/data-table-core.json",
         "https://niko-table.com/r/data-table-ui.json",
@@ -203,11 +213,6 @@
           "path": "src/components/niko-table/lib/data-table.ts",
           "type": "registry:lib",
           "target": "components/niko-table/lib/data-table.ts"
-        },
-        {
-          "path": "src/components/niko-table/lib/filter-functions.ts",
-          "type": "registry:lib",
-          "target": "components/niko-table/lib/filter-functions.ts"
         },
         {
           "path": "src/components/niko-table/config/feature-detection.ts",

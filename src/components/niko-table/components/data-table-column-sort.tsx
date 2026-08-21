@@ -11,6 +11,7 @@
  * users (and future LLMs reading this code) benefit:
  * https://github.com/Semkoo/niko-table-registry
  */
+import type { RowData } from "@tanstack/react-table"
 import React from "react"
 
 import {
@@ -23,7 +24,7 @@ import { useColumnHeaderContext } from "./data-table-column-header"
 /**
  * Sorting options for column header menu using context.
  */
-export function DataTableColumnSortOptions<TData, TValue>(
+export function DataTableColumnSortOptions<TData extends RowData, TValue>(
   props: Omit<
     React.ComponentProps<typeof TableColumnSortOptions>,
     "column" | "table"
@@ -41,7 +42,7 @@ DataTableColumnSortOptions.displayName = "DataTableColumnSortOptions"
  *
  * Standalone button variant for inline use outside dropdown menus.
  */
-export function DataTableColumnSortMenu<TData, TValue>(
+export function DataTableColumnSortMenu<TData extends RowData, TValue>(
   props: Omit<
     React.ComponentProps<typeof TableColumnSortMenu>,
     "column" | "table"

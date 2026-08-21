@@ -11,13 +11,14 @@
  * users (and future LLMs reading this code) benefit:
  * https://github.com/Semkoo/niko-table-registry
  */
+import type { RowData } from "@tanstack/react-table"
 import React from "react"
 import { useDataTable } from "../core/data-table-context"
 import { TableFilterMenu } from "../filters/table-filter-menu"
 import { FILTER_VARIANTS } from "../lib/constants"
 import type { Option } from "../types"
 
-type BaseTableFilterMenuProps<TData> = Omit<
+type BaseTableFilterMenuProps<TData extends RowData> = Omit<
   React.ComponentProps<typeof TableFilterMenu<TData>>,
   "table"
 >
@@ -54,8 +55,8 @@ interface AutoOptionProps {
   mergeStrategy?: "preserve" | "augment" | "replace"
 }
 
-type DataTableFilterMenuProps<TData> = BaseTableFilterMenuProps<TData> &
-  AutoOptionProps
+type DataTableFilterMenuProps<TData extends RowData> =
+  BaseTableFilterMenuProps<TData> & AutoOptionProps
 
 /**
  * A filter menu component that automatically connects to the DataTable context.
@@ -70,7 +71,7 @@ type DataTableFilterMenuProps<TData> = BaseTableFilterMenuProps<TData> &
  * @example - Custom styling
  * <DataTableFilterMenu className="w-[400px]" />
  */
-export function DataTableFilterMenu<TData>({
+export function DataTableFilterMenu<TData extends RowData>({
   autoOptions = true,
   showCounts = true,
   dynamicCounts = true,

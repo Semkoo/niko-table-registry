@@ -12,7 +12,7 @@ import * as React from "react"
 import type {
   PaginationState,
   SortingState,
-  VisibilityState,
+  ColumnVisibilityState,
 } from "@tanstack/react-table"
 import { DataTableRoot } from "@/components/niko-table/core/data-table-root"
 import { DataTable } from "@/components/niko-table/core/data-table"
@@ -229,7 +229,7 @@ export default function InlineEditStateTable() {
   })
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({})
+    React.useState<ColumnVisibilityState>({})
 
   const inlineEdit = useInlineEdit(setData)
 

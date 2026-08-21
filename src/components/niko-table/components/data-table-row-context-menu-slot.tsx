@@ -2,7 +2,8 @@
 
 import * as React from "react"
 
-export interface DataTableRowContextMenuSlotProps<TData> {
+import type { RowData } from "@tanstack/react-table"
+export interface DataTableRowContextMenuSlotProps<TData extends RowData> {
   /**
    * The row menu. Preferred (shadcn/composable) form is a declarative
    * component that reads the row via `useDataTableRow()`:
@@ -44,7 +45,7 @@ export interface DataTableRowContextMenuSlotProps<TData> {
  *   <DataTableVirtualizedSkeleton rows={8} />
  * </DataTableVirtualizedBody>
  */
-export function DataTableRowContextMenuSlot<TData>(
+export function DataTableRowContextMenuSlot<TData extends RowData>(
   _props: DataTableRowContextMenuSlotProps<TData>,
 ): null {
   return null
@@ -57,7 +58,7 @@ DataTableRowContextMenuSlot.displayName = "DataTableRowContextMenuSlot"
  * `<DataTableRowContextMenuSlot>` child (declarative node or function),
  * honouring its optional `enabledFor` predicate.
  */
-export function resolveRowContextMenuRenderer<TData>(
+export function resolveRowContextMenuRenderer<TData extends RowData>(
   prop: ((row: TData) => React.ReactNode) | undefined,
   children: React.ReactNode,
 ): ((row: TData) => React.ReactNode) | undefined {
@@ -94,7 +95,7 @@ export function resolveRowContextMenuRenderer<TData>(
  * and hand out a stable wrapper that reads it. The wrapper identity only
  * changes when the presence of a menu changes.
  */
-export function useResolvedRowContextMenuRenderer<TData>(
+export function useResolvedRowContextMenuRenderer<TData extends RowData>(
   prop: ((row: TData) => React.ReactNode) | undefined,
   children: React.ReactNode,
 ): ((row: TData) => React.ReactNode) | undefined {

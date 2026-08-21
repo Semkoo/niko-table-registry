@@ -43,7 +43,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
-import type { Column, Table } from "@tanstack/react-table"
+import type { RowData } from "@tanstack/react-table"
 import {
   Check,
   ChevronsUpDown,
@@ -69,12 +69,15 @@ import {
 import { cn } from "@/lib/utils"
 import { formatLabel } from "../lib/format"
 
-function getColumnTitle<TData>(column: Column<TData, unknown>): string {
+import type { DataTableColumn, DataTableInstance } from "../types"
+function getColumnTitle<TData extends RowData>(
+  column: DataTableColumn<TData, unknown>,
+): string {
   return column.columnDef.meta?.label ?? formatLabel(column.id)
 }
 
-export interface TableViewDndMenuProps<TData> {
-  table: Table<TData>
+export interface TableViewDndMenuProps<TData extends RowData> {
+  table: DataTableInstance<TData>
   className?: string
   onColumnVisibilityChange?: (columnId: string, isVisible: boolean) => void
   /** Controlled column order. The menu displays rows in this order. */
@@ -138,14 +141,14 @@ function SortableMenuRow({
   )
 }
 
-interface MenuItemProps<TData> {
-  column: Column<TData, unknown>
+interface MenuItemProps<TData extends RowData> {
+  column: DataTableColumn<TData, unknown>
   isLocked: boolean
   isVisible: boolean
   onToggle: (columnId: string) => void
 }
 
-const MenuItem = React.memo(function MenuItem<TData>({
+const MenuItem = React.memo(function MenuItem<TData extends RowData>({
   column,
   isLocked,
   isVisible,
@@ -170,9 +173,9 @@ const MenuItem = React.memo(function MenuItem<TData>({
       />
     </CommandItem>
   )
-}) as <TData>(props: MenuItemProps<TData>) => React.ReactElement
+}) as <TData extends RowData>(props: MenuItemProps<TData>) => React.ReactElement
 
-export function TableViewDndMenu<TData>({
+export function TableViewDndMenu<TData extends RowData>({
   table,
   onColumnVisibilityChange,
   columnOrder,

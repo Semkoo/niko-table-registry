@@ -12,7 +12,6 @@
  * https://github.com/Semkoo/niko-table-registry
  */
 import React from "react"
-import type { Column } from "@tanstack/react-table"
 
 import {
   TableColumnDateFilterOptions,
@@ -20,15 +19,17 @@ import {
 } from "../filters/table-column-date-filter"
 import { useColumnHeaderContext } from "./data-table-column-header"
 
+import type { DataTableColumn } from "../types"
+import type { RowData } from "@tanstack/react-table"
 /**
  * Date filter options for composing inside DataTableColumnActions using context.
  */
-export function DataTableColumnDateFilterOptions<TData, TValue>(
+export function DataTableColumnDateFilterOptions<TData extends RowData, TValue>(
   props: Omit<
     React.ComponentProps<typeof TableColumnDateFilterOptions>,
     "column"
   > & {
-    column?: Column<TData, TValue>
+    column?: DataTableColumn<TData, TValue>
   },
 ) {
   const context = useColumnHeaderContext<TData, TValue>(false)
@@ -50,12 +51,12 @@ DataTableColumnDateFilterOptions.displayName =
 /**
  * Standalone date filter menu for column header using context.
  */
-export function DataTableColumnDateFilterMenu<TData, TValue>(
+export function DataTableColumnDateFilterMenu<TData extends RowData, TValue>(
   props: Omit<
     React.ComponentProps<typeof TableColumnDateFilterMenu>,
     "column"
   > & {
-    column?: Column<TData, TValue>
+    column?: DataTableColumn<TData, TValue>
   },
 ) {
   const context = useColumnHeaderContext<TData, TValue>(false)

@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import type { VisibilityState } from "@tanstack/react-table"
+import type { ColumnVisibilityState } from "@tanstack/react-table"
 import { DataTableRoot } from "@/components/niko-table/core/data-table-root"
 import { DataTable } from "@/components/niko-table/core/data-table"
 import { DataTableEmptyBody } from "@/components/niko-table/core/data-table-structure"
@@ -178,7 +178,7 @@ export default function ColumnDndStateExample() {
   const [columnOrder, setColumnOrder] =
     React.useState<string[]>(initialColumnOrder)
   const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({})
+    React.useState<ColumnVisibilityState>({})
   const [globalFilter, setGlobalFilter] = React.useState<string | object>("")
 
   const resetAll = () => {

@@ -12,7 +12,7 @@
  * https://github.com/Semkoo/niko-table-registry
  */
 import React from "react"
-import type { Column, Table } from "@tanstack/react-table"
+import type { RowData } from "@tanstack/react-table"
 import { CircleHelp, Filter, FilterX } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -35,17 +35,17 @@ import { useDerivedColumnTitle } from "../hooks/use-derived-column-title"
 import { useGeneratedOptionsForColumn } from "../hooks/use-generated-options"
 import { extractFilterSelectedValues } from "../lib/build-faceted-options"
 import { formatLabel } from "../lib/format"
-import type { Option } from "../types"
+import type { DataTableColumn, DataTableInstance, Option } from "../types"
 
 /**
  * A standard filter trigger button (Funnel icon).
  */
-export function TableColumnFilterTrigger<TData, TValue>({
+export function TableColumnFilterTrigger<TData extends RowData, TValue>({
   column,
   className,
   ...props
 }: {
-  column: Column<TData, TValue>
+  column: DataTableColumn<TData, TValue>
 } & React.ComponentProps<typeof Button>) {
   const isFiltered = column.getIsFiltered()
 
@@ -84,7 +84,7 @@ export function TableColumnFilterTrigger<TData, TValue>({
  * </TableColumnActions>
  * ```
  */
-export function TableColumnFacetedFilterOptions<TData, TValue>({
+export function TableColumnFacetedFilterOptions<TData extends RowData, TValue>({
   column,
   title,
   options = [],
@@ -92,7 +92,7 @@ export function TableColumnFacetedFilterOptions<TData, TValue>({
   multiple = true,
   withSeparator = true,
 }: {
-  column: Column<TData, TValue>
+  column: DataTableColumn<TData, TValue>
   title?: string
   options?: Option[]
   onValueChange?: (value: string[] | undefined) => void
@@ -102,7 +102,7 @@ export function TableColumnFacetedFilterOptions<TData, TValue>({
   withSeparator?: boolean
 }) {
   const { selectedValues, onItemSelect, onReset } = useTableFacetedFilter({
-    column: column as Column<TData, unknown>,
+    column: column as DataTableColumn<TData, unknown>,
     onValueChange,
     multiple,
   })
@@ -152,7 +152,7 @@ export function TableColumnFacetedFilterOptions<TData, TValue>({
  * />
  * ```
  */
-export function TableColumnFacetedFilterMenu<TData, TValue>({
+export function TableColumnFacetedFilterMenu<TData extends RowData, TValue>({
   column,
   table,
   title,
@@ -167,8 +167,8 @@ export function TableColumnFacetedFilterMenu<TData, TValue>({
   React.ComponentProps<typeof TableFacetedFilter>,
   "column" | "trigger" | "options"
 > & {
-  column: Column<TData, TValue>
-  table?: Table<TData>
+  column: DataTableColumn<TData, TValue>
+  table?: DataTableInstance<TData>
   title?: string
   options?: React.ComponentProps<typeof TableFacetedFilter>["options"]
   /**
@@ -203,7 +203,7 @@ export function TableColumnFacetedFilterMenu<TData, TValue>({
   // Use precomputed batch when available to avoid per-column row scans.
   const needsPerColumnGeneration = !precomputedOptions
   const perColumnOptions = useGeneratedOptionsForColumn(
-    table as Table<TData>,
+    table as DataTableInstance<TData>,
     needsPerColumnGeneration ? column.id : "__noop__",
     { limitToFilteredRows, dynamicCounts },
   )

@@ -1,15 +1,15 @@
 ---
 title: Components
-description: Every Niko Table registry item at a glance — name, what it does, install command. Pick what you need; the registry handles core dependencies automatically.
+description: Every DataTable registry item at a glance — name, what it does, install command. Pick what you need; the niko-table registry handles core dependencies automatically.
 ---
 
 import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
 
-A cheat sheet of every component you can install from the Niko Table registry. Browse by category to find what you need — or just grep this page.
+A cheat sheet of every component you can install from the niko-table registry. Browse by category to find what you need — or just grep this page.
 
-Each addon transitively pulls in `data-table-core` (context, structure, types — not `DataTableRoot`, not `table.tsx`). Installing any control gives you enough to render a body when you own the TanStack instance. For the usual `DataTableRoot` + chrome install, add `@niko-table/data-table` (it depends on `data-table-core` + `data-table-ui`).
+Each addon transitively pulls in `data-table-core` (context, structure, types, `lib/data-table-features.ts` — not `DataTableRoot`, not `table.tsx`). Installing any control gives you enough to render a body when you own the TanStack instance. For the usual `DataTableRoot` + chrome install, add `@niko-table/data-table` (it depends on `data-table-core` + `data-table-ui`).
 
-> First time using `@niko-table`? Set up the registry once: see the [Installation Guide](/getting-started/installation/#configure-the-niko-table-registry).
+> First time using `@niko-table`? Set up the registry once: see the [Installation Guide](/getting-started/installation/#configure-the-registry).
 
 ## Core
 

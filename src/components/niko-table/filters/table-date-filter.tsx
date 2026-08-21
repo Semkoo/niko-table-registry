@@ -18,7 +18,6 @@
  * Users can search for columns and toggle their visibility.
  */
 
-import type { Column } from "@tanstack/react-table"
 import { CalendarIcon, XCircle } from "lucide-react"
 import * as React from "react"
 import type { DateRange } from "react-day-picker"
@@ -33,6 +32,8 @@ import {
 import { Separator } from "@/components/ui/separator"
 import { formatDate } from "../lib/format"
 
+import type { DataTableColumn } from "../types"
+import type { RowData } from "@tanstack/react-table"
 type DateSelection = Date[] | DateRange
 
 function getIsDateRange(value: DateSelection): value is DateRange {
@@ -68,14 +69,14 @@ function parseColumnFilterValue(value: unknown) {
   return []
 }
 
-export interface TableDateFilterProps<TData> {
-  column: Column<TData, unknown>
+export interface TableDateFilterProps<TData extends RowData> {
+  column: DataTableColumn<TData, unknown>
   title?: string
   multiple?: boolean
   trigger?: React.ReactNode
 }
 
-export function TableDateFilter<TData>({
+export function TableDateFilter<TData extends RowData>({
   column,
   title,
   multiple,
