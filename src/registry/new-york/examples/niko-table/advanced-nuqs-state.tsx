@@ -613,9 +613,16 @@ const tableStateParsers = {
   ).withDefault([]),
 
   filterMode: parseAsString.withDefault("standard"),
-  pin: parseAsJson<ColumnPinningState>(
-    value => value as ColumnPinningState,
-  ).withDefault({ start: [], end: [] }),
+  // Validate the v9 `{start,end}` shape instead of blind-casting: a URL
+  // carrying anything else (hand-edited params, pre-v9 `{left,right}` links)
+  // parses to empty pinning rather than leaking an invalid shape into state.
+  pin: parseAsJson<ColumnPinningState>(value => {
+    const record = value as Partial<Record<keyof ColumnPinningState, unknown>>
+    return {
+      start: Array.isArray(record?.start) ? (record.start as string[]) : [],
+      end: Array.isArray(record?.end) ? (record.end as string[]) : [],
+    }
+  }).withDefault({ start: [], end: [] }),
 }
 
 // Map internal state keys to URL query parameter names

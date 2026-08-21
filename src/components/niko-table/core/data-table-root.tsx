@@ -170,6 +170,11 @@ function DataTableRootInternal<TData extends RowData, TValue>({
   state: restState,
   initialState: restInitialState,
   globalFilterFn: restGlobalFilterFn,
+  // Lifted out of the passthrough bag: these are emitted after the spread in
+  // `tableOptions`, so a consumer-supplied value (server-driven grouping /
+  // expansion) must win over the feature-derived default.
+  manualGrouping: manualGroupingProp,
+  manualExpanding: manualExpandingProp,
   // Spread into `tableOptions` but NOT in the memo deps. Lift any passthrough
   // option that needs to invalidate the memo into the destructure list above.
   ...passthroughTableOptions
@@ -697,10 +702,10 @@ function DataTableRootInternal<TData extends RowData, TValue>({
         detectFeatures.manualPagination || !detectFeatures.enablePagination,
       manualFiltering:
         detectFeatures.manualFiltering || !detectFeatures.enableFilters,
-      manualGrouping: !detectFeatures.enableGrouping,
-      manualExpanding: !(
-        detectFeatures.enableExpanding || detectFeatures.enableGrouping
-      ),
+      manualGrouping: manualGroupingProp ?? !detectFeatures.enableGrouping,
+      manualExpanding:
+        manualExpandingProp ??
+        !(detectFeatures.enableExpanding || detectFeatures.enableGrouping),
       // Enable auto-reset behaviors by default (standard TanStack Table behavior)
       // Can be overridden via config
       autoResetPageIndex: finalConfig.autoResetPageIndex,
@@ -779,6 +784,8 @@ function DataTableRootInternal<TData extends RowData, TValue>({
       onPaginationChange,
       handlePaginationChange,
       getRowId,
+      manualGroupingProp,
+      manualExpandingProp,
       // Use controlled state values - these update when either external or local state changes
       controlledSorting,
       controlledColumnVisibility,
