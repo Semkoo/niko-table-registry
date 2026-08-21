@@ -26,7 +26,9 @@
  * install, just like every other copied component.
  *
  * Pass `DataTableFeatures` as the first generic to `ColumnDef`, `Column`,
- * `Row`, and `ReactTable` so feature-gated APIs typecheck.
+ * `Row`, and `ReactTable` so feature-gated APIs typecheck. For column defs,
+ * `createDataTableColumnHelper<TData>()` is the runtime counterpart — it
+ * pre-binds that generic the same way `DataTableColumnDef<TData>` does.
  */
 
 import {
@@ -49,6 +51,7 @@ import {
   columnResizingFeature,
   columnSizingFeature,
   columnVisibilityFeature,
+  createColumnHelper,
   createExpandedRowModel,
   createFacetedMinMaxValues,
   createFacetedRowModel,
@@ -70,6 +73,7 @@ import {
   sortFn_text,
   sortFn_textCaseSensitive,
   tableFeatures,
+  type RowData,
 } from "@tanstack/react-table"
 
 import {
@@ -134,3 +138,15 @@ export const features = tableFeatures({
 })
 
 export type DataTableFeatures = typeof features
+
+/**
+ * Pre-bound column helper for DataTable. TanStack v9's `createColumnHelper`
+ * needs the features generic first (`createColumnHelper<DataTableFeatures, TData>()`);
+ * this wraps that the same way `DataTableColumnDef<TData>` pre-binds features.
+ *
+ * Prefer the helper when you want typed `getValue()` in cells. Prefer a plain
+ * `DataTableColumnDef<TData>[]` array for dynamic columns and copy-paste examples.
+ */
+export function createDataTableColumnHelper<TData extends RowData>() {
+  return createColumnHelper<DataTableFeatures, TData>()
+}

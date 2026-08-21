@@ -294,6 +294,30 @@ const table = useTable({ features, data, columns })
 
 `DataTableFeatures` is the type of that object, and every `DataTable*` type alias is pre-bound to it (`DataTableInstance<TData>` is `Table<DataTableFeatures, TData>`, and so on), so you rarely name it directly.
 
+### createDataTableColumnHelper
+
+Pre-bound TanStack Table v9 column helper. TanStack's docs recommend `createColumnHelper()` first for static columns (typed `getValue()` in cells); the raw v9 helper needs the features generic hand-threaded (`createColumnHelper<DataTableFeatures, TData>()`). This wraps it the same way `DataTableColumnDef<TData>` pre-binds features.
+
+```tsx showLineNumbers
+import { createDataTableColumnHelper } from "@/components/niko-table/lib/data-table-features"
+
+const columnHelper = createDataTableColumnHelper<Product>()
+
+const columns = [
+  columnHelper.accessor("name", { header: "Name" }),
+  columnHelper.accessor("price", {
+    header: "Price",
+    cell: ({ getValue }) => getValue().toFixed(2), // `getValue()` is `number`
+  }),
+  columnHelper.display({
+    id: "actions",
+    cell: () => <button type="button">Edit</button>,
+  }),
+]
+```
+
+Use the helper when you want typed `getValue()` in cells. Helper results belong in a `DataTableColumns<TData>` array (what `DataTableRoot` accepts). Use a plain `DataTableColumnDef<TData>[]` for dynamic columns and maximum copy-paste-ability — that is still the default in examples.
+
 #### Trimming it down
 
 The shipped file registers everything the component library can use — sorting, filtering, faceting, grouping, aggregation, pagination, expanding, selection, column visibility/ordering/pinning/sizing/resizing — plus the row models they need. After install you own the file: delete the features and the built-in `sortFns` / `aggregationFns` your tables never reference, the same way you omit registry items you never mount. Removing a feature removes its API: calling `table.setGrouping()` without `columnGroupingFeature` fails at runtime, not at build time.
