@@ -9,7 +9,7 @@
  * users (and future LLMs reading this code) benefit:
  * https://github.com/Semkoo/niko-table-registry
  */
-import type { Column } from "@tanstack/react-table"
+import type { RowData } from "@tanstack/react-table"
 import { CircleHelp, Group, Ungroup } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 
+import type { DataTableColumn } from "../types"
 /**
  * Dropdown menu items for grouping rows by a column.
  * Use inside a DropdownMenuContent or as a child of TableColumnActions.
@@ -39,11 +40,11 @@ import { cn } from "@/lib/utils"
  * </TableColumnActions>
  * ```
  */
-export function TableColumnGroupOptions<TData, TValue>({
+export function TableColumnGroupOptions<TData extends RowData, TValue>({
   column,
   withSeparator = true,
 }: {
-  column: Column<TData, TValue>
+  column: DataTableColumn<TData, TValue>
   /** Whether to render a separator before the options. Defaults to true. */
   withSeparator?: boolean
 }) {
@@ -96,11 +97,11 @@ export function TableColumnGroupOptions<TData, TValue>({
  * <TableColumnGroupMenu column={column} />
  * ```
  */
-export function TableColumnGroupMenu<TData, TValue>({
+export function TableColumnGroupMenu<TData extends RowData, TValue>({
   column,
   className,
 }: {
-  column: Column<TData, TValue>
+  column: DataTableColumn<TData, TValue>
   className?: string
 }) {
   const canGroup = column.getCanGroup()

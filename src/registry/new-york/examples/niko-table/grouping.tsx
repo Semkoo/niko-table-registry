@@ -322,7 +322,7 @@ const columns: DataTableColumnDef<Order>[] = [
 
 function GroupingExpansionControls() {
   const { table } = useDataTable<Order>()
-  const hasGrouping = table.getState().grouping.length > 0
+  const hasGrouping = table.state.grouping.length > 0
 
   return (
     <>

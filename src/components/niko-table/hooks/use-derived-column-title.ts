@@ -10,10 +10,11 @@
  * https://github.com/Semkoo/niko-table-registry
  */
 
-import type { Column } from "@tanstack/react-table"
+import type { RowData } from "@tanstack/react-table"
 import * as React from "react"
 import { formatLabel } from "../lib/format"
 
+import type { DataTableColumn } from "../types"
 /**
  * A hook that derives the title for a column filter component.
  * It follows this priority order:
@@ -38,8 +39,8 @@ import { formatLabel } from "../lib/format"
  * const derivedTitle = useDerivedColumnTitle(column, "first_name")
  * Returns "First Name" (formatted from accessorKey)
  */
-export function useDerivedColumnTitle<TData>(
-  column: Column<TData, unknown> | undefined,
+export function useDerivedColumnTitle<TData extends RowData, TValue = unknown>(
+  column: DataTableColumn<TData, TValue> | undefined,
   accessorKey: string,
   title?: string,
 ): string {

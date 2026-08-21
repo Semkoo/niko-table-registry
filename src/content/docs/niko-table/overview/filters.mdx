@@ -24,14 +24,14 @@ import { TableSearchFilter } from "@/components/niko-table/filters/table-search-
 
 #### Props
 
-| Name              | Type                      | Default       | Description                             |
-| ----------------- | ------------------------- | ------------- | --------------------------------------- |
-| `table`           | `Table<TData>`            | -             | TanStack Table instance (required).     |
-| `placeholder`     | `string`                  | `"Search..."` | Input placeholder text.                 |
-| `value`           | `string`                  | -             | Controlled value.                       |
-| `onChange`        | `(value: string) => void` | -             | Change handler for controlled mode.     |
-| `showClearButton` | `boolean`                 | `true`        | Show clear button when input has value. |
-| `className`       | `string`                  | -             | Additional CSS classes.                 |
+| Name              | Type                       | Default       | Description                             |
+| ----------------- | -------------------------- | ------------- | --------------------------------------- |
+| `table`           | `DataTableInstance<TData>` | -             | TanStack Table instance (required).     |
+| `placeholder`     | `string`                   | `"Search..."` | Input placeholder text.                 |
+| `value`           | `string`                   | -             | Controlled value.                       |
+| `onChange`        | `(value: string) => void`  | -             | Change handler for controlled mode.     |
+| `showClearButton` | `boolean`                  | `true`        | Show clear button when input has value. |
+| `className`       | `string`                   | -             | Additional CSS classes.                 |
 
 ### TablePagination
 
@@ -92,7 +92,7 @@ const [filters, setFilters] = useState<ExtendedColumnFilter<Product>[]>([])
 
 | Name              | Type                                                       | Description                         |
 | ----------------- | ---------------------------------------------------------- | ----------------------------------- |
-| `table`           | `Table<TData>`                                             | TanStack Table instance (required). |
+| `table`           | `DataTableInstance<TData>`                                 | TanStack Table instance (required). |
 | `filters`         | `ExtendedColumnFilter<TData>[]`                            | Controlled filters array.           |
 | `onFiltersChange` | `(filters: ExtendedColumnFilter<TData>[] \| null) => void` | Callback when filters change.       |
 | `className`       | `string`                                                   | Additional CSS classes.             |
@@ -151,7 +151,7 @@ import { TableFacetedFilter } from "@/components/niko-table/filters/table-facete
 
 | Name            | Type                                     | Description                       |
 | --------------- | ---------------------------------------- | --------------------------------- |
-| `column`        | `Column<TData, TValue>`                  | Table column instance (required). |
+| `column`        | `DataTableColumn<TData, TValue>`         | Table column instance (required). |
 | `title`         | `string`                                 | Filter title.                     |
 | `options`       | `Option[]`                               | Static options array.             |
 | `multiple`      | `boolean`                                | Allow multiple selection.         |
@@ -197,7 +197,7 @@ import { TableSliderFilter } from "@/components/niko-table/filters/table-slider-
 
 | Name            | Type                                             | Description                       |
 | --------------- | ------------------------------------------------ | --------------------------------- |
-| `column`        | `Column<TData>`                                  | Table column instance (required). |
+| `column`        | `DataTableColumn<TData>`                         | Table column instance (required). |
 | `title`         | `string`                                         | Filter title.                     |
 | `range`         | `[number, number]`                               | Manual range `[min, max]`.        |
 | `min`           | `number`                                         | Manual minimum value.             |
@@ -233,11 +233,11 @@ import { TableDateFilter } from "@/components/niko-table/filters/table-date-filt
 
 #### Props
 
-| Name       | Type            | Description                       |
-| ---------- | --------------- | --------------------------------- |
-| `column`   | `Column<TData>` | Table column instance (required). |
-| `title`    | `string`        | Filter title.                     |
-| `multiple` | `boolean`       | Enable date range selection.      |
+| Name       | Type                     | Description                       |
+| ---------- | ------------------------ | --------------------------------- |
+| `column`   | `DataTableColumn<TData>` | Table column instance (required). |
+| `title`    | `string`                 | Filter title.                     |
+| `multiple` | `boolean`                | Enable date range selection.      |
 
 ### TableSortMenu
 
@@ -272,7 +272,7 @@ import { TableSortMenu } from "@/components/niko-table/filters/table-sort-menu"
 
 | Name              | Type                              | Description                            |
 | ----------------- | --------------------------------- | -------------------------------------- |
-| `table`           | `Table<TData>`                    | TanStack Table instance (required).    |
+| `table`           | `DataTableInstance<TData>`        | TanStack Table instance (required).    |
 | `debounceMs`      | `number`                          | Debounce delay for sort updates.       |
 | `throttleMs`      | `number`                          | Throttle delay for sort updates.       |
 | `shallow`         | `boolean`                         | Use shallow comparison for sort state. |
@@ -316,7 +316,7 @@ import { TableViewMenu } from "@/components/niko-table/filters/table-view-menu"
 
 | Name                       | Type                                             | Description                                                                                                |
 | -------------------------- | ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------- |
-| `table`                    | `Table<TData>`                                   | TanStack Table instance (required).                                                                        |
+| `table`                    | `DataTableInstance<TData>`                       | TanStack Table instance (required).                                                                        |
 | `className`                | `string`                                         | Additional CSS classes.                                                                                    |
 | `onColumnVisibilityChange` | `(columnId: string, isVisible: boolean) => void` | Callback when visibility changes.                                                                          |
 | `lockedColumnIds`          | `string[]`                                       | Columns shown in the menu but rendered disabled. Useful for required columns marked `enableHiding: false`. |
@@ -352,7 +352,7 @@ const [columnOrder, setColumnOrder] = React.useState<string[]>([])
 
 | Name                       | Type                                             | Description                                                    |
 | -------------------------- | ------------------------------------------------ | -------------------------------------------------------------- |
-| `table`                    | `Table<TData>`                                   | TanStack Table instance (required).                            |
+| `table`                    | `DataTableInstance<TData>`                       | TanStack Table instance (required).                            |
 | `columnOrder`              | `string[]`                                       | Current column order array (required).                         |
 | `onColumnOrderChange`      | `(next: string[]) => void`                       | Callback when a row is dropped in a new position (required).   |
 | `className`                | `string`                                         | Additional CSS classes.                                        |
@@ -388,7 +388,7 @@ const [filters, setFilters] = useState<ExtendedColumnFilter<Product>[]>([])
 
 | Name              | Type                                               | Description                         |
 | ----------------- | -------------------------------------------------- | ----------------------------------- |
-| `table`           | `Table<TData>`                                     | TanStack Table instance (required). |
+| `table`           | `DataTableInstance<TData>`                         | TanStack Table instance (required). |
 | `filters`         | `ExtendedColumnFilter<TData>[]`                    | Controlled filters array.           |
 | `onFiltersChange` | `(filters: ExtendedColumnFilter<TData>[]) => void` | Callback when filters change.       |
 | `className`       | `string`                                           | Additional CSS classes.             |
@@ -430,7 +430,7 @@ import { TableClearFilter } from "@/components/niko-table/filters/table-clear-fi
 
 | Name                       | Type                                | Default     | Description                              |
 | -------------------------- | ----------------------------------- | ----------- | ---------------------------------------- |
-| `table`                    | `Table<TData>`                      | -           | TanStack Table instance (required).      |
+| `table`                    | `DataTableInstance<TData>`          | -           | TanStack Table instance (required).      |
 | `variant`                  | `"default" \| "outline" \| "ghost"` | `"outline"` | Button variant.                          |
 | `size`                     | `"default" \| "sm" \| "lg"`         | `"sm"`      | Button size.                             |
 | `showIcon`                 | `boolean`                           | `true`      | Show clear icon.                         |
@@ -484,18 +484,18 @@ import { TableExportButton, exportTableToCSV } from "@/components/niko-table/fil
 
 #### Props
 
-| Name              | Type              | Default        | Description                                                             |
-| ----------------- | ----------------- | -------------- | ----------------------------------------------------------------------- |
-| `table`           | `Table<TData>`    | -              | TanStack Table instance (required).                                     |
-| `filename`        | `string`          | `"table"`      | Filename for exported CSV (without extension).                          |
-| `excludeColumns`  | `(keyof TData)[]` | -              | Columns to exclude from export.                                         |
-| `onlySelected`    | `boolean`         | `false`        | Export only selected rows.                                              |
-| `useHeaderLabels` | `boolean`         | `false`        | Use `column.columnDef.meta.label` as CSV headers instead of column IDs. |
-| `variant`         | `ButtonVariant`   | `"outline"`    | Button variant.                                                         |
-| `size`            | `ButtonSize`      | `"sm"`         | Button size.                                                            |
-| `label`           | `string`          | `"Export CSV"` | Button label.                                                           |
-| `showIcon`        | `boolean`         | `true`         | Show download icon.                                                     |
-| `className`       | `string`          | -              | Additional CSS classes.                                                 |
+| Name              | Type                       | Default        | Description                                                             |
+| ----------------- | -------------------------- | -------------- | ----------------------------------------------------------------------- |
+| `table`           | `DataTableInstance<TData>` | -              | TanStack Table instance (required).                                     |
+| `filename`        | `string`                   | `"table"`      | Filename for exported CSV (without extension).                          |
+| `excludeColumns`  | `(keyof TData)[]`          | -              | Columns to exclude from export.                                         |
+| `onlySelected`    | `boolean`                  | `false`        | Export only selected rows.                                              |
+| `useHeaderLabels` | `boolean`                  | `false`        | Use `column.columnDef.meta.label` as CSV headers instead of column IDs. |
+| `variant`         | `ButtonVariant`            | `"outline"`    | Button variant.                                                         |
+| `size`            | `ButtonSize`               | `"sm"`         | Button size.                                                            |
+| `label`           | `string`                   | `"Export CSV"` | Button label.                                                           |
+| `showIcon`        | `boolean`                  | `true`         | Show download icon.                                                     |
+| `className`       | `string`                   | -              | Additional CSS classes.                                                 |
 
 ### exportTableToCSV
 
@@ -563,7 +563,7 @@ const filter: ExtendedColumnFilter<Product> = {
 | Name             | Type                                                                                          | Description                       |
 | ---------------- | --------------------------------------------------------------------------------------------- | --------------------------------- |
 | `filter`         | `ExtendedColumnFilter<TData>`                                                                 | Filter configuration (required).  |
-| `column`         | `Column<TData>`                                                                               | Table column instance (required). |
+| `column`         | `DataTableColumn<TData>`                                                                      | Table column instance (required). |
 | `inputId`        | `string`                                                                                      | Unique input ID (required).       |
 | `onFilterUpdate` | `(filterId: string, updates: Partial<Omit<ExtendedColumnFilter<TData>, "filterId">>) => void` | Callback when filter updates.     |
 | `className`      | `string`                                                                                      | Additional CSS classes.           |
@@ -590,11 +590,11 @@ import { TableColumnTitle } from "@/components/niko-table/filters/table-column-t
 
 #### Props
 
-| Name        | Type                    | Description                                              |
-| ----------- | ----------------------- | -------------------------------------------------------- |
-| `column`    | `Column<TData, TValue>` | Table column instance (required).                        |
-| `title`     | `string`                | Custom title (uses `column.meta.label` if not provided). |
-| `className` | `string`                | Additional CSS classes.                                  |
+| Name        | Type                             | Description                                              |
+| ----------- | -------------------------------- | -------------------------------------------------------- |
+| `column`    | `DataTableColumn<TData, TValue>` | Table column instance (required).                        |
+| `title`     | `string`                         | Custom title (uses `column.meta.label` if not provided). |
+| `className` | `string`                         | Additional CSS classes.                                  |
 
 ### TableColumnActions
 
@@ -643,11 +643,11 @@ import {
 
 #### Props
 
-| Name        | Type            | Description                         |
-| ----------- | --------------- | ----------------------------------- |
-| `column`    | `Column<TData>` | Table column instance (required).   |
-| `table`     | `Table<TData>`  | TanStack Table instance (required). |
-| `className` | `string`        | Additional CSS classes.             |
+| Name        | Type                       | Description                         |
+| ----------- | -------------------------- | ----------------------------------- |
+| `column`    | `DataTableColumn<TData>`   | Table column instance (required).   |
+| `table`     | `DataTableInstance<TData>` | TanStack Table instance (required). |
+| `className` | `string`                   | Additional CSS classes.             |
 
 ### TableColumnHideOptions / TableColumnHideMenu
 
@@ -672,10 +672,10 @@ import {
 
 #### Props
 
-| Name        | Type                    | Description                       |
-| ----------- | ----------------------- | --------------------------------- |
-| `column`    | `Column<TData, TValue>` | Table column instance (required). |
-| `className` | `string`                | Additional CSS classes.           |
+| Name        | Type                             | Description                       |
+| ----------- | -------------------------------- | --------------------------------- |
+| `column`    | `DataTableColumn<TData, TValue>` | Table column instance (required). |
+| `className` | `string`                         | Additional CSS classes.           |
 
 ### TableColumnPinOptions / TableColumnPinMenu
 
@@ -700,10 +700,10 @@ import {
 
 #### Props
 
-| Name        | Type                    | Description                       |
-| ----------- | ----------------------- | --------------------------------- |
-| `column`    | `Column<TData, TValue>` | Table column instance (required). |
-| `className` | `string`                | Additional CSS classes.           |
+| Name        | Type                             | Description                       |
+| ----------- | -------------------------------- | --------------------------------- |
+| `column`    | `DataTableColumn<TData, TValue>` | Table column instance (required). |
+| `className` | `string`                         | Additional CSS classes.           |
 
 ### TableColumnFacetedFilterOptions / TableColumnFacetedFilterMenu
 
@@ -728,13 +728,13 @@ import {
 
 #### Props
 
-| Name        | Type            | Description                          |
-| ----------- | --------------- | ------------------------------------ |
-| `column`    | `Column<TData>` | Table column instance (required).    |
-| `table`     | `Table<TData>`  | TanStack Table instance (Menu only). |
-| `options`   | `Option[]`      | Static options array.                |
-| `multiple`  | `boolean`       | Allow multiple selection.            |
-| `className` | `string`        | Additional CSS classes.              |
+| Name        | Type                       | Description                          |
+| ----------- | -------------------------- | ------------------------------------ |
+| `column`    | `DataTableColumn<TData>`   | Table column instance (required).    |
+| `table`     | `DataTableInstance<TData>` | TanStack Table instance (Menu only). |
+| `options`   | `Option[]`                 | Static options array.                |
+| `multiple`  | `boolean`                  | Allow multiple selection.            |
+| `className` | `string`                   | Additional CSS classes.              |
 
 ### TableColumnFilterTrigger
 
@@ -748,10 +748,10 @@ import { TableColumnFilterTrigger } from "@/components/niko-table/filters/table-
 
 #### Props
 
-| Name        | Type                    | Default | Description                                |
-| ----------- | ----------------------- | ------- | ------------------------------------------ |
-| `column`    | `Column<TData, TValue>` | -       | TanStack Table column instance (required). |
-| `className` | `string`                | -       | Additional CSS classes.                    |
+| Name        | Type                             | Default | Description                                |
+| ----------- | -------------------------------- | ------- | ------------------------------------------ |
+| `column`    | `DataTableColumn<TData, TValue>` | -       | TanStack Table column instance (required). |
+| `className` | `string`                         | -       | Additional CSS classes.                    |
 
 All other props are passed through to the underlying `Button` component.
 
@@ -771,13 +771,13 @@ import { TableColumnSliderFilterOptions } from "@/components/niko-table/filters/
 
 #### Props
 
-| Name        | Type            | Description                       |
-| ----------- | --------------- | --------------------------------- |
-| `column`    | `Column<TData>` | Table column instance (required). |
-| `min`       | `number`        | Minimum value.                    |
-| `max`       | `number`        | Maximum value.                    |
-| `step`      | `number`        | Step increment.                   |
-| `className` | `string`        | Additional CSS classes.           |
+| Name        | Type                     | Description                       |
+| ----------- | ------------------------ | --------------------------------- |
+| `column`    | `DataTableColumn<TData>` | Table column instance (required). |
+| `min`       | `number`                 | Minimum value.                    |
+| `max`       | `number`                 | Maximum value.                    |
+| `step`      | `number`                 | Step increment.                   |
+| `className` | `string`                 | Additional CSS classes.           |
 
 ### TableColumnDateFilterOptions
 
@@ -795,11 +795,11 @@ import { TableColumnDateFilterOptions } from "@/components/niko-table/filters/ta
 
 #### Props
 
-| Name        | Type            | Description                       |
-| ----------- | --------------- | --------------------------------- |
-| `column`    | `Column<TData>` | Table column instance (required). |
-| `multiple`  | `boolean`       | Enable date range selection.      |
-| `className` | `string`        | Additional CSS classes.           |
+| Name        | Type                     | Description                       |
+| ----------- | ------------------------ | --------------------------------- |
+| `column`    | `DataTableColumn<TData>` | Table column instance (required). |
+| `multiple`  | `boolean`                | Enable date range selection.      |
+| `className` | `string`                 | Additional CSS classes.           |
 
 ---
 
@@ -884,12 +884,12 @@ Makes a table header cell draggable for column reordering.
 
 #### Props
 
-| Name        | Type                    | Description                                   |
-| ----------- | ----------------------- | --------------------------------------------- |
-| `header`    | `Header<TData, TValue>` | TanStack Table header instance (required).    |
-| `children`  | `React.ReactNode`       | Header content.                               |
-| `className` | `string`                | Additional CSS classes.                       |
-| `style`     | `CSSProperties`         | Additional styles merged with DnD transforms. |
+| Name        | Type                             | Description                                   |
+| ----------- | -------------------------------- | --------------------------------------------- |
+| `header`    | `DataTableHeader<TData, TValue>` | TanStack Table header instance (required).    |
+| `children`  | `React.ReactNode`                | Header content.                               |
+| `className` | `string`                         | Additional CSS classes.                       |
+| `style`     | `CSSProperties`                  | Additional styles merged with DnD transforms. |
 
 ### TableDragAlongCell
 
@@ -897,9 +897,9 @@ Table cell that follows its column's drag position.
 
 #### Props
 
-| Name        | Type                  | Description                                   |
-| ----------- | --------------------- | --------------------------------------------- |
-| `cell`      | `Cell<TData, TValue>` | TanStack Table cell instance (required).      |
-| `children`  | `React.ReactNode`     | Cell content.                                 |
-| `className` | `string`              | Additional CSS classes.                       |
-| `style`     | `CSSProperties`       | Additional styles merged with DnD transforms. |
+| Name        | Type                           | Description                                   |
+| ----------- | ------------------------------ | --------------------------------------------- |
+| `cell`      | `DataTableCell<TData, TValue>` | TanStack Table cell instance (required).      |
+| `children`  | `React.ReactNode`              | Cell content.                                 |
+| `className` | `string`                       | Additional CSS classes.                       |
+| `style`     | `CSSProperties`                | Additional styles merged with DnD transforms. |

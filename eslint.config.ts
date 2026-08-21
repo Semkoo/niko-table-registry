@@ -150,4 +150,13 @@ export default defineConfig([
       "react-hooks/incompatible-library": "off",
     },
   },
+  {
+    // Tests assert invariants: a row, cell, or module that must exist for the
+    // assertion to mean anything. `!` states that intent, and a missing value
+    // fails the test loudly anyway — the same stance the engine code takes.
+    files: ["**/__tests__/**/*.{ts,tsx}", "**/*.test.{ts,tsx}"],
+    rules: {
+      "@typescript-eslint/no-non-null-assertion": "off",
+    },
+  },
 ])

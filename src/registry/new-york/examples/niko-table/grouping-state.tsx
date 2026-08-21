@@ -6,7 +6,7 @@ import type {
   GroupingState,
   PaginationState,
   SortingState,
-  VisibilityState,
+  ColumnVisibilityState,
 } from "@tanstack/react-table"
 import { DataTableRoot } from "@/components/niko-table/core/data-table-root"
 import { DataTable } from "@/components/niko-table/core/data-table"
@@ -305,7 +305,7 @@ const columns: DataTableColumnDef<Order>[] = [
 
 function GroupingExpansionControls() {
   const { table } = useDataTable<Order>()
-  const hasGrouping = table.getState().grouping.length > 0
+  const hasGrouping = table.state.grouping.length > 0
 
   return (
     <>
@@ -337,7 +337,8 @@ export default function GroupingTableStateExample() {
   const [grouping, setGrouping] = useState<GroupingState>(["region"])
   const [expanded, setExpanded] = useState<ExpandedState>(true)
   const [sorting, setSorting] = useState<SortingState>([])
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
+  const [columnVisibility, setColumnVisibility] =
+    useState<ColumnVisibilityState>({})
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 10,

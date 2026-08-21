@@ -10,9 +10,18 @@
  * https://github.com/Semkoo/niko-table-registry
  */
 
-import type { FilterFn, RowData } from "@tanstack/react-table"
+import type { FilterFn, RowData, TableFeatures } from "@tanstack/react-table"
 import type { ExtendedColumnFilter, FilterOperator } from "../types"
 import { JOIN_OPERATORS, FILTER_OPERATORS, FILTER_VARIANTS } from "./constants"
+
+/**
+ * Feature-agnostic filter fn typing for shared Niko filter helpers: these only
+ * read the row, so they stay assignable whatever feature set a table registers.
+ */
+type AnyFilterFn<TData extends RowData = RowData> = FilterFn<
+  TableFeatures,
+  TData
+>
 
 // ============================================================================
 // Regex Cache for Performance
@@ -61,7 +70,7 @@ function getOrCreateRegex(pattern: string, flags: string): RegExp {
 /**
  * Custom filter function that handles our extended filter operators
  */
-export const extendedFilter: FilterFn<RowData> = (
+export const extendedFilter: AnyFilterFn = (
   row,
   columnId,
   filterValue,
@@ -140,7 +149,7 @@ export const extendedFilter: FilterFn<RowData> = (
  * pure OR, and mixed AND/OR (AND has higher precedence than OR — splits
  * filters into OR-separated AND-groups).
  */
-export const globalFilter: FilterFn<RowData> = (
+export const globalFilter: AnyFilterFn = (
   row,
   _columnId,
   filterValue,
@@ -503,7 +512,7 @@ function applyFilterOperator(
  * Filter function for number range (slider) filters
  * Handles array values [min, max] for range filtering
  */
-export const numberRangeFilter: FilterFn<RowData> = (
+export const numberRangeFilter: AnyFilterFn = (
   row,
   columnId,
   filterValue,
@@ -545,7 +554,7 @@ export const numberRangeFilter: FilterFn<RowData> = (
  * Filter function for date range filters
  * Handles both single date (timestamp) and date range [from, to] (timestamps)
  */
-export const dateRangeFilter: FilterFn<RowData> = (
+export const dateRangeFilter: AnyFilterFn = (
   row,
   columnId,
   filterValue,
@@ -620,7 +629,7 @@ export const dateRangeFilter: FilterFn<RowData> = (
  * @param value - The value to filter by
  * @returns ExtendedColumnFilter object with default properties
  */
-export const createFilterValue = <TData extends RowData = RowData>(
+export const createFilterValue = <TData = RowData>(
   operator: FilterOperator,
   value: string | number | boolean | null | undefined | string[],
 ): ExtendedColumnFilter<TData> => {

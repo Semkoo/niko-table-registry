@@ -253,7 +253,7 @@ const columns: DataTableColumnDef<Order>[] = [
       </DataTableColumnHeader>
     ),
     cell: ({ row }) => {
-      return new Date(row.getValue("date")).toLocaleDateString()
+      return new Date(row.getValue("date")).toLocaleDateString("en-US")
     },
   },
   {
@@ -308,8 +308,8 @@ export default function ColumnPinningTable() {
       columns={columns}
       initialState={{
         columnPinning: {
-          left: ["id"],
-          right: ["actions"],
+          start: ["id"],
+          end: ["actions"],
         },
       }}
     >

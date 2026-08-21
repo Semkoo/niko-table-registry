@@ -450,7 +450,7 @@ function SelectableColumnTitle() {
       type="button"
       onClick={() => selectColumn(column.id)}
       title="Select column"
-      className="-mx-1 block min-w-0 max-w-full cursor-pointer rounded px-1 text-left transition-colors hover:bg-muted"
+      className="-mx-1 block max-w-full min-w-0 cursor-pointer rounded px-1 text-left transition-colors hover:bg-muted"
     >
       <DataTableColumnTitle />
     </button>
@@ -522,7 +522,7 @@ function CurrentTableStatePanel({
   onReset: () => void
 }) {
   const { table } = useDataTable<GridRow>()
-  const state = table.getState()
+  const state = table.state
   const sorting = state.sorting
   const columnFilters = state.columnFilters
   const columnVisibility = state.columnVisibility
@@ -584,8 +584,8 @@ function CurrentTableStatePanel({
           <div className="flex justify-between">
             <span className="font-medium">Pinned Columns:</span>
             <span className="text-foreground">
-              {columnPinning.left?.length || 0} Left,{" "}
-              {columnPinning.right?.length || 0} Right
+              {columnPinning.start?.length || 0} Left,{" "}
+              {columnPinning.end?.length || 0} Right
             </span>
           </div>
           <div className="flex justify-between">
@@ -818,12 +818,12 @@ function GridAllFeaturesInner({ onReset }: { onReset: () => void }) {
                 : "bg-background hover:bg-muted",
             )}
           >
-            {count.toLocaleString()} rows
+            {count.toLocaleString("en-US")} rows
           </button>
         ))}
         {genMs != null && (
           <span className="text-xs text-muted-foreground tabular-nums">
-            built {rowCount.toLocaleString()} rows in {genMs}ms
+            built {rowCount.toLocaleString("en-US")} rows in {genMs}ms
           </span>
         )}
       </div>
@@ -831,7 +831,9 @@ function GridAllFeaturesInner({ onReset }: { onReset: () => void }) {
         data={grid.rows}
         columns={columns}
         getRowId={r => r.id}
-        initialState={{ columnPinning: { left: [SYSTEM_COLUMN_IDS.SELECT] } }}
+        initialState={{
+          columnPinning: { start: [SYSTEM_COLUMN_IDS.SELECT], end: [] },
+        }}
       >
         <DataGrid grid={grid} onRequestShortcuts={() => setShortcutsOpen(true)}>
           {/* Opt-in features — mix and match. */}

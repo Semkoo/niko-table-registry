@@ -11,6 +11,7 @@
  * users (and future LLMs reading this code) benefit:
  * https://github.com/Semkoo/niko-table-registry
  */
+import type { RowData } from "@tanstack/react-table"
 import React from "react"
 
 import { TableColumnTitle } from "../filters/table-column-title"
@@ -19,7 +20,7 @@ import { useColumnHeaderContext } from "./data-table-column-header"
 /**
  * Renders the column title using context.
  */
-export function DataTableColumnTitle<TData, TValue>(
+export function DataTableColumnTitle<TData extends RowData, TValue>(
   props: Omit<React.ComponentProps<typeof TableColumnTitle>, "column">,
 ) {
   const { column } = useColumnHeaderContext<TData, TValue>(true)

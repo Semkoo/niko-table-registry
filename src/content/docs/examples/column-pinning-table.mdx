@@ -25,7 +25,7 @@ Install the DataTable core and add-ons for this example:
 
 <CliCommandCode action="run" command="shadcn@latest add @niko-table/data-table @niko-table/data-table-column-pin @niko-table/data-table-column-sort @niko-table/data-table-column-hide @niko-table/data-table-pagination @niko-table/data-table-search-filter @niko-table/data-table-view-menu" />
 
-> First time using `@niko-table`? See the [Installation Guide](/getting-started/installation/#configure-the-niko-table-registry) to set up the registry.
+> First time using `@niko-table`? See the [Installation Guide](/getting-started/installation/#configure-the-registry) to set up the registry.
 
 For other add-ons or manual copy-paste, see the [Installation Guide](/getting-started/installation/).
 
@@ -68,8 +68,8 @@ Set `initialState.columnPinning` to pin columns on mount:
   columns={columns}
   initialState={{
     columnPinning: {
-      left: ["id"], // Pin Order ID to left
-      right: ["actions"], // Pin actions to right
+      start: ["id"], // Pin Order ID to the start (left in LTR)
+      end: ["actions"], // Pin actions to the end (right in LTR)
     },
   }}
 >
@@ -142,8 +142,8 @@ import { type ColumnPinningState } from "@tanstack/react-table"
 
 export function ControlledPinningTable({ data }: { data: Order[] }) {
   const [columnPinning, setColumnPinning] = useState<ColumnPinningState>({
-    left: ["id"],
-    right: ["actions"],
+    start: ["id"],
+    end: ["actions"],
   })
 
   return (

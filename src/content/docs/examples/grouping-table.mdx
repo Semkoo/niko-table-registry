@@ -23,7 +23,7 @@ Grouping collapses rows that share a value into a single expandable band, with a
 
 <CliCommandCode action="run" command="shadcn@latest add @niko-table/data-table @niko-table/data-table-column-group @niko-table/data-table-column-sort @niko-table/data-table-pagination @niko-table/data-table-search-filter @niko-table/data-table-view-menu" />
 
-> First time using `@niko-table`? See the [Installation Guide](/getting-started/installation#configure-the-niko-table-registry) to set up the registry.
+> First time using `@niko-table`? See the [Installation Guide](/getting-started/installation/#configure-the-registry) to set up the registry.
 
 ## Column menu: Group by
 
@@ -54,7 +54,7 @@ import { useDataTable } from "@/components/niko-table/core/data-table-context"
 
 function GroupingExpansionControls() {
   const { table } = useDataTable<Order>()
-  const hasGrouping = table.getState().grouping.length > 0
+  const hasGrouping = table.state.grouping.length > 0
 
   return (
     <>

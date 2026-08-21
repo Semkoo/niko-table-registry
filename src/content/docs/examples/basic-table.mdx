@@ -25,7 +25,7 @@ Install the DataTable core and add-ons for this example:
 
 <CliCommandCode action="run" command="shadcn@latest add @niko-table/data-table @niko-table/data-table-pagination @niko-table/data-table-view-menu @niko-table/data-table-column-sort" />
 
-> First time using `@niko-table`? See the [Installation Guide](/getting-started/installation/#configure-the-niko-table-registry) to set up the registry.
+> First time using `@niko-table`? See the [Installation Guide](/getting-started/installation/#configure-the-registry) to set up the registry.
 
 For other add-ons or manual copy-paste, see the [Installation Guide](/getting-started/installation/).
 
@@ -305,7 +305,7 @@ import { useState } from "react"
 import type {
   PaginationState,
   SortingState,
-  VisibilityState,
+  ColumnVisibilityState,
 } from "@tanstack/react-table"
 
 export function ControlledBasicTable({ data }: { data: Product[] }) {
@@ -314,7 +314,7 @@ export function ControlledBasicTable({ data }: { data: Product[] }) {
     pageSize: 10,
   })
   const [sorting, setSorting] = useState<SortingState>([])
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
+  const [columnVisibility, setColumnVisibility] = useState<ColumnVisibilityState>({})
 
   return (
     <DataTableRoot

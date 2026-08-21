@@ -11,6 +11,7 @@
  * users (and future LLMs reading this code) benefit:
  * https://github.com/Semkoo/niko-table-registry
  */
+import type { RowData } from "@tanstack/react-table"
 import React from "react"
 
 import { TableColumnActions } from "../filters/table-column-actions"
@@ -30,7 +31,7 @@ import { useColumnHeaderContext } from "./data-table-column-header"
  * </DataTableColumnActions>
  * ```
  */
-export function DataTableColumnActions<TData, TValue>(
+export function DataTableColumnActions<TData extends RowData, TValue>(
   props: Omit<React.ComponentProps<typeof TableColumnActions>, "isActive"> & {
     /** Override to manually set active state */
     isActive?: boolean

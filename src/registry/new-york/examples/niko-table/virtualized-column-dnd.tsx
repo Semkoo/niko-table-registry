@@ -205,7 +205,7 @@ const columns: DataTableColumnDef<Employee>[] = [
     size: 120,
     cell: ({ row }) => {
       const salary = row.getValue("salary") as number
-      return <div className="font-mono">${salary.toLocaleString()}</div>
+      return <div className="font-mono">${salary.toLocaleString("en-US")}</div>
     },
   },
 ]

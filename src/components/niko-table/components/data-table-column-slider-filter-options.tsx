@@ -12,7 +12,6 @@
  * https://github.com/Semkoo/niko-table-registry
  */
 import React from "react"
-import type { Column } from "@tanstack/react-table"
 
 import {
   TableColumnSliderFilterOptions,
@@ -20,15 +19,20 @@ import {
 } from "../filters/table-column-slider-filter"
 import { useColumnHeaderContext } from "./data-table-column-header"
 
+import type { DataTableColumn } from "../types"
+import type { RowData } from "@tanstack/react-table"
 /**
  * Slider filter options for composing inside DataTableColumnActions using context.
  */
-export function DataTableColumnSliderFilterOptions<TData, TValue>(
+export function DataTableColumnSliderFilterOptions<
+  TData extends RowData,
+  TValue,
+>(
   props: Omit<
     React.ComponentProps<typeof TableColumnSliderFilterOptions>,
     "column"
   > & {
-    column?: Column<TData, TValue>
+    column?: DataTableColumn<TData, TValue>
   },
 ) {
   const context = useColumnHeaderContext<TData, TValue>(false)
@@ -50,12 +54,12 @@ DataTableColumnSliderFilterOptions.displayName =
 /**
  * Standalone slider filter menu for column header using context.
  */
-export function DataTableColumnSliderFilterMenu<TData, TValue>(
+export function DataTableColumnSliderFilterMenu<TData extends RowData, TValue>(
   props: Omit<
     React.ComponentProps<typeof TableColumnSliderFilterMenu>,
     "column"
   > & {
-    column?: Column<TData, TValue>
+    column?: DataTableColumn<TData, TValue>
   },
 ) {
   const context = useColumnHeaderContext<TData, TValue>(false)

@@ -11,6 +11,7 @@
  * users (and future LLMs reading this code) benefit:
  * https://github.com/Semkoo/niko-table-registry
  */
+import type { RowData } from "@tanstack/react-table"
 import React from "react"
 
 import {
@@ -22,7 +23,7 @@ import { useColumnHeaderContext } from "./data-table-column-header"
 /**
  * Pinning options for column header menu using context.
  */
-export function DataTableColumnPinOptions<TData, TValue>(
+export function DataTableColumnPinOptions<TData extends RowData, TValue>(
   props: Omit<React.ComponentProps<typeof TableColumnPinOptions>, "column">,
 ) {
   const { column } = useColumnHeaderContext<TData, TValue>(true)
@@ -34,7 +35,7 @@ DataTableColumnPinOptions.displayName = "DataTableColumnPinOptions"
 /**
  * Standalone pinning menu for column header using context.
  */
-export function DataTableColumnPinMenu<TData, TValue>(
+export function DataTableColumnPinMenu<TData extends RowData, TValue>(
   props: Omit<React.ComponentProps<typeof TableColumnPinMenu>, "column">,
 ) {
   const { column } = useColumnHeaderContext<TData, TValue>(true)

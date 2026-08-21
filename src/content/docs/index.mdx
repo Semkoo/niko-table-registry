@@ -17,7 +17,7 @@ import { GITHUB_REPO_URL } from "@/data/env"
 
 **Nobody's table, everyone's solution.**
 
-Niko Table is not an opaque npm package — you copy the source into your project and own it. Built with TanStack Table and shadcn/ui.
+This registry is not an opaque npm package — you copy `DataTable` source into your project and own it. Built with TanStack Table and shadcn/ui.
 
 Add the registry once under `registries` in `components.json`, then install:
 
@@ -77,7 +77,7 @@ Selection, expansion, filters, sort, pagination, column visibility, export, and 
 - **Accessible** - shadcn/ui primitives (Radix or Base UI), ARIA labels in filters/menus, keyboard shortcuts; linted with jsx-a11y
 - **Responsive** - Full-width scroll container (`overflow-auto`); touch-friendly controls; stack toolbars as needed on small screens
 - **Customizable** - Full source code access
-- **Composable** - Mix and match components (install only the registry pieces you need)
+- **Composable** - Mix and match `DataTable*` components (install only the registry pieces you need). TanStack Table v9 mirrors that at the engine: register only the features you use in `lib/data-table-features.ts`
 - **Performance** - Virtual scrolling for 10,000+ client-side rows (fixed-height scroll container)
 - **State Management** - Context-based `useDataTable()` with controlled state and optional URL sync (nuqs)
 

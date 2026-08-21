@@ -96,7 +96,7 @@ import type {
   PaginationState,
   SortingState,
   ColumnFiltersState,
-  VisibilityState,
+  ColumnVisibilityState,
   ColumnPinningState,
   Updater,
 } from "@tanstack/react-table"
@@ -338,7 +338,7 @@ const columns: DataTableColumnDef<Product>[] = [
     },
     cell: ({ row }) => {
       const date = row.getValue("releaseDate") as Date
-      return <span>{date.toLocaleDateString()}</span>
+      return <span>{date.toLocaleDateString("en-US")}</span>
     },
     enableColumnFilter: true,
   },
@@ -605,17 +605,24 @@ const tableStateParsers = {
   ).withDefault(
     null as unknown as { filters: unknown[]; joinOperator: string },
   ),
-  columnVisibility: parseAsJson<VisibilityState>(
-    value => value as VisibilityState,
+  columnVisibility: parseAsJson<ColumnVisibilityState>(
+    value => value as ColumnVisibilityState,
   ).withDefault({}),
   inlineFilters: parseAsJson<ExtendedColumnFilter<Product>[]>(
     value => value as ExtendedColumnFilter<Product>[],
   ).withDefault([]),
 
   filterMode: parseAsString.withDefault("standard"),
-  pin: parseAsJson<ColumnPinningState>(
-    value => value as ColumnPinningState,
-  ).withDefault({ left: [], right: [] }),
+  // Validate the v9 `{start,end}` shape instead of blind-casting: a URL
+  // carrying anything else (hand-edited params, pre-v9 `{left,right}` links)
+  // parses to empty pinning rather than leaking an invalid shape into state.
+  pin: parseAsJson<ColumnPinningState>(value => {
+    const record = value as Partial<Record<keyof ColumnPinningState, unknown>>
+    return {
+      start: Array.isArray(record?.start) ? (record.start as string[]) : [],
+      end: Array.isArray(record?.end) ? (record.end as string[]) : [],
+    }
+  }).withDefault({ start: [], end: [] }),
 }
 
 // Map internal state keys to URL query parameter names
@@ -648,8 +655,7 @@ const tableStateUrlKeys = {
  */
 function normalizeFiltersWithUniqueIds<TData>(
   filters: (
-    | Omit<ExtendedColumnFilter<TData>, "filterId">
-    | ExtendedColumnFilter<TData>
+    Omit<ExtendedColumnFilter<TData>, "filterId"> | ExtendedColumnFilter<TData>
   )[],
 ): ExtendedColumnFilter<TData>[] {
   // Quick check: if all filters already have unique filterIds, return as-is
@@ -784,8 +790,7 @@ function AdvancedNuqsTableContent() {
 
   // Get filter mode from URL
   const filterMode = (urlParams.filterMode || "standard") as
-    | "standard"
-    | "inline"
+    "standard" | "inline"
 
   // Global filter from URL - separate search (text) from globalFilter (complex filters)
   // - search: simple text search string
@@ -857,7 +862,7 @@ function AdvancedNuqsTableContent() {
 
   // Column pinning state from URL
   const columnPinning: ColumnPinningState = useMemo(() => {
-    return urlParams.pin || { left: [], right: [] }
+    return urlParams.pin || { start: [], end: [] }
   }, [urlParams.pin])
 
   // Handlers for pagination
@@ -1091,7 +1096,7 @@ function AdvancedNuqsTableContent() {
 
   // Handlers for column visibility
   const handleColumnVisibilityChange = useCallback(
-    (updater: Updater<VisibilityState>) => {
+    (updater: Updater<ColumnVisibilityState>) => {
       const newVisibility =
         typeof updater === "function"
           ? updater(urlParams.columnVisibility)

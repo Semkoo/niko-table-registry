@@ -5,7 +5,7 @@ import type {
   PaginationState,
   SortingState,
   ColumnFiltersState,
-  VisibilityState,
+  ColumnVisibilityState,
   ColumnPinningState,
 } from "@tanstack/react-table"
 import { DataTableRoot } from "@/components/niko-table/core/data-table-root"
@@ -266,7 +266,7 @@ const columns: DataTableColumnDef<Product>[] = [
     },
     cell: ({ row }) => {
       const date = row.getValue("releaseDate") as Date
-      return <span>{date.toLocaleDateString()}</span>
+      return <span>{date.toLocaleDateString("en-US")}</span>
     },
     enableColumnFilter: true,
   },
@@ -469,14 +469,15 @@ export default function AdvancedInlineStateTableExample() {
   const [globalFilter, setGlobalFilter] = useState<string | object>("")
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
+  const [columnVisibility, setColumnVisibility] =
+    useState<ColumnVisibilityState>({})
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 10,
   })
   const [columnPinning, setColumnPinning] = useState<ColumnPinningState>({
-    left: [],
-    right: [],
+    start: [],
+    end: [],
   })
 
   // Extract current filters from table state (like advanced-state.tsx)
@@ -623,7 +624,7 @@ export default function AdvancedInlineStateTableExample() {
     setColumnFilters([])
     setColumnFilters([])
     setColumnVisibility({})
-    setColumnPinning({ left: [], right: [] })
+    setColumnPinning({ start: [], end: [] })
     setPagination({ pageIndex: 0, pageSize: 10 })
   }
 
@@ -771,8 +772,8 @@ export default function AdvancedInlineStateTableExample() {
             <div className="flex justify-between">
               <span className="font-medium">Pinned Columns:</span>
               <span className="text-foreground">
-                {columnPinning.left?.length || 0} Left,{" "}
-                {columnPinning.right?.length || 0} Right
+                {columnPinning.start?.length || 0} Left,{" "}
+                {columnPinning.end?.length || 0} Right
               </span>
             </div>
           </div>

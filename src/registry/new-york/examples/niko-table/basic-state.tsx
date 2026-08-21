@@ -5,7 +5,7 @@ import type {
   PaginationState,
   SortingState,
   ColumnFiltersState,
-  VisibilityState,
+  ColumnVisibilityState,
 } from "@tanstack/react-table"
 import { DataTableRoot } from "@/components/niko-table/core/data-table-root"
 import { DataTable } from "@/components/niko-table/core/data-table"
@@ -128,7 +128,7 @@ const columns: DataTableColumnDef<Product>[] = [
     ),
     cell: ({ row }) => {
       const revenue = row.getValue("revenue") as number
-      return <div className="font-mono">${revenue.toLocaleString()}</div>
+      return <div className="font-mono">${revenue.toLocaleString("en-US")}</div>
     },
   },
   {
@@ -141,7 +141,7 @@ const columns: DataTableColumnDef<Product>[] = [
     ),
     cell: ({ row }) => {
       const date = row.getValue("releaseDate") as Date
-      return <span>{date.toLocaleDateString()}</span>
+      return <span>{date.toLocaleDateString("en-US")}</span>
     },
   },
 ]
@@ -429,7 +429,8 @@ export default function BasicTableStateExample() {
   const [globalFilter, setGlobalFilter] = useState<string | object>("")
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
+  const [columnVisibility, setColumnVisibility] =
+    useState<ColumnVisibilityState>({})
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 5,
@@ -531,7 +532,7 @@ export default function BasicTableStateExample() {
             <div className="flex justify-between">
               <span className="font-medium">Total Inventory Value:</span>
               <span className="text-foreground">
-                ${productMetrics.totalValue.toLocaleString()}
+                ${productMetrics.totalValue.toLocaleString("en-US")}
               </span>
             </div>
 
@@ -545,7 +546,7 @@ export default function BasicTableStateExample() {
             <div className="flex justify-between">
               <span className="font-medium">Total Stock:</span>
               <span className="text-foreground">
-                {productMetrics.totalStock.toLocaleString()}
+                {productMetrics.totalStock.toLocaleString("en-US")}
               </span>
             </div>
 

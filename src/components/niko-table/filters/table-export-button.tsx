@@ -12,10 +12,11 @@
  * https://github.com/Semkoo/niko-table-registry
  */
 import * as React from "react"
-import type { Table } from "@tanstack/react-table"
+import type { RowData } from "@tanstack/react-table"
 import { Button } from "@/components/ui/button"
 import { Download } from "lucide-react"
 
+import type { DataTableInstance } from "../types"
 /**
  * Escape a cell value for CSV output.
  * Handles strings, numbers, booleans, dates, arrays, null, and undefined.
@@ -55,7 +56,7 @@ function escapeCsvValue(value: unknown): string {
   return str
 }
 
-export interface ExportTableToCSVOptions<TData> {
+export interface ExportTableToCSVOptions<TData extends RowData> {
   /** Filename for the exported CSV (without extension). @default "table" */
   filename?: string
   /** Column IDs to exclude from export. */
@@ -91,8 +92,8 @@ export interface ExportTableToCSVOptions<TData> {
  * exportTableToCSV(table, { filename: "selected-users", onlySelected: true })
  * ```
  */
-export function exportTableToCSV<TData>(
-  table: Table<TData>,
+export function exportTableToCSV<TData extends RowData>(
+  table: DataTableInstance<TData>,
   opts: ExportTableToCSVOptions<TData> = {},
 ): void {
   const {
@@ -147,11 +148,11 @@ export function exportTableToCSV<TData>(
   URL.revokeObjectURL(url)
 }
 
-export interface TableExportButtonProps<TData> {
+export interface TableExportButtonProps<TData extends RowData> {
   /**
    * The table instance from TanStack Table
    */
-  table: Table<TData>
+  table: DataTableInstance<TData>
   /**
    * Optional filename for the exported CSV (without extension)
    * @default "table"
@@ -177,12 +178,7 @@ export interface TableExportButtonProps<TData> {
    * @default "outline"
    */
   variant?:
-    | "default"
-    | "destructive"
-    | "outline"
-    | "secondary"
-    | "ghost"
-    | "link"
+    "default" | "destructive" | "outline" | "secondary" | "ghost" | "link"
   /**
    * Button size
    * @default "sm"
@@ -210,11 +206,11 @@ export interface TableExportButtonProps<TData> {
  *
  * @example
  * ```tsx
- * const table = useReactTable({ ... })
+ * const table = useTable({ features, ... })
  * <TableExportButton table={table} filename="products" />
  * ```
  */
-export function TableExportButton<TData>({
+export function TableExportButton<TData extends RowData>({
   table,
   filename = "table",
   excludeColumns,

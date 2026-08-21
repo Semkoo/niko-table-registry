@@ -6,11 +6,10 @@ import type {
   PaginationState,
   SortingState,
   ColumnFiltersState,
-  VisibilityState,
+  ColumnVisibilityState,
   ExpandedState,
   RowSelectionState,
 } from "@tanstack/react-table"
-import type { Row } from "@tanstack/react-table"
 import { DataTableRoot } from "@/components/niko-table/core/data-table-root"
 import { DataTable } from "@/components/niko-table/core/data-table"
 import {
@@ -34,7 +33,10 @@ import { DataTableSelectionBar } from "@/components/niko-table/components/data-t
 import { DataTableToolbarSection } from "@/components/niko-table/components/data-table-toolbar-section"
 import { DataTableViewMenu } from "@/components/niko-table/components/data-table-view-menu"
 import { FILTER_VARIANTS } from "@/components/niko-table/lib/constants"
-import type { DataTableColumnDef } from "@/components/niko-table/types"
+import type {
+  DataTableColumnDef,
+  DataTableRow,
+} from "@/components/niko-table/types"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -153,12 +155,22 @@ const data: Project[] = [
   },
 ]
 
+/**
+ * TanStack Table v9 stores selected row ids only — an unselected row is absent
+ * from `RowSelectionState`, never `false` — so selection is computed as a set
+ * of ids and converted back here.
+ */
+function toRowSelection(ids: Iterable<string>): RowSelectionState {
+  return Object.fromEntries(Array.from(ids, id => [id, true as const]))
+}
+
 export default function TreeTableStateExample() {
   // Controlled state management for all table state
   const [globalFilter, setGlobalFilter] = useState<string | object>("")
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
+  const [columnVisibility, setColumnVisibility] =
+    useState<ColumnVisibilityState>({})
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 10,
@@ -276,8 +288,8 @@ export default function TreeTableStateExample() {
    * Parents are marked as selected when ALL their children are selected
    */
   const updateParentSelection = React.useCallback(
-    (selection: Record<string, boolean>) => {
-      const updatedSelection = { ...selection }
+    (selection: RowSelectionState) => {
+      const selectedIds = new Set(Object.keys(selection))
 
       const processProjects = (projects: Project[]): void => {
         for (const project of projects) {
@@ -285,16 +297,17 @@ export default function TreeTableStateExample() {
             // Process children first (bottom-up approach)
             processProjects(project.subRows)
 
-            // Update parent based on whether all children are selected
-            updatedSelection[project.id] = project.subRows.every(
-              child => updatedSelection[child.id],
-            )
+            if (project.subRows.every(child => selectedIds.has(child.id))) {
+              selectedIds.add(project.id)
+            } else {
+              selectedIds.delete(project.id)
+            }
           }
         }
       }
 
       processProjects(data)
-      return updatedSelection
+      return toRowSelection(selectedIds)
     },
     [],
   )
@@ -305,13 +318,14 @@ export default function TreeTableStateExample() {
   const handleCheckboxChange = React.useCallback(
     (project: Project, isChecked: boolean) => {
       const idsToUpdate = getAllDescendantIds(project)
-      const newSelection = { ...rowSelection }
+      const selectedIds = new Set(Object.keys(rowSelection))
 
       for (const id of idsToUpdate) {
-        newSelection[id] = isChecked
+        if (isChecked) selectedIds.add(id)
+        else selectedIds.delete(id)
       }
 
-      setRowSelection(updateParentSelection(newSelection))
+      setRowSelection(updateParentSelection(toRowSelection(selectedIds)))
     },
     [rowSelection, getAllDescendantIds, updateParentSelection],
   )
@@ -445,7 +459,7 @@ export default function TreeTableStateExample() {
    * Custom global filter function that searches recursively through nested rows
    */
   const customGlobalFilterFn = React.useCallback(
-    (row: Row<Project>, _columnId: string, filterValue: string) => {
+    (row: DataTableRow<Project>, _columnId: string, filterValue: string) => {
       const search = String(filterValue).toLowerCase()
 
       const searchInRow = (project: Project): boolean => {
@@ -507,7 +521,7 @@ export default function TreeTableStateExample() {
                 (areSomeTopLevelSelected && "indeterminate")
               }
               onCheckedChange={value => {
-                const newSelection: Record<string, boolean> = {}
+                const newSelection: RowSelectionState = {}
 
                 if (value) {
                   // Select all leaf nodes
@@ -649,7 +663,9 @@ export default function TreeTableStateExample() {
         ),
         cell: ({ row }) => {
           const budget = row.getValue("budget") as number
-          return <div className="font-mono">${budget.toLocaleString()}</div>
+          return (
+            <div className="font-mono">${budget.toLocaleString("en-US")}</div>
+          )
         },
       },
     ],
@@ -901,7 +917,7 @@ export default function TreeTableStateExample() {
             <div className="flex justify-between">
               <span className="font-medium">Selected Budget:</span>
               <span className="text-foreground">
-                ${totalSelectedBudget.toLocaleString()}
+                ${totalSelectedBudget.toLocaleString("en-US")}
               </span>
             </div>
 

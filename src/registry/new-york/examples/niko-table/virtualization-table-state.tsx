@@ -6,7 +6,7 @@ import type {
   PaginationState,
   SortingState,
   ColumnFiltersState,
-  VisibilityState,
+  ColumnVisibilityState,
   ExpandedState,
   ColumnPinningState,
 } from "@tanstack/react-table"
@@ -147,15 +147,16 @@ export default function VirtualizedTableStateExample() {
   const [globalFilter, setGlobalFilter] = useState<string | object>("")
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
+  const [columnVisibility, setColumnVisibility] =
+    useState<ColumnVisibilityState>({})
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 100, // Larger page size for virtualization
   })
   const [expanded, setExpanded] = useState<ExpandedState>({})
   const [columnPinning, setColumnPinning] = useState<ColumnPinningState>({
-    left: [],
-    right: [],
+    start: [],
+    end: [],
   })
 
   const columns: DataTableColumnDef<Product>[] = React.useMemo(
@@ -309,7 +310,9 @@ export default function VirtualizedTableStateExample() {
         ),
         cell: ({ row }) => {
           const revenue = row.getValue("revenue") as number
-          return <div className="font-mono">${revenue.toLocaleString()}</div>
+          return (
+            <div className="font-mono">${revenue.toLocaleString("en-US")}</div>
+          )
         },
       },
       {
@@ -322,7 +325,7 @@ export default function VirtualizedTableStateExample() {
         ),
         cell: ({ row }) => {
           const date = row.getValue("releaseDate") as Date
-          return <span>{date.toLocaleDateString()}</span>
+          return <span>{date.toLocaleDateString("en-US")}</span>
         },
       },
     ],
@@ -336,7 +339,7 @@ export default function VirtualizedTableStateExample() {
     setColumnVisibility({})
     setPagination({ pageIndex: 0, pageSize: 100 })
     setExpanded({})
-    setColumnPinning({ left: [], right: [] })
+    setColumnPinning({ start: [], end: [] })
   }
 
   // Calculate filtered data for display metrics
@@ -428,7 +431,7 @@ export default function VirtualizedTableStateExample() {
           <CardTitle>Virtualized Table State</CardTitle>
           <CardDescription>
             Live view of the virtualized table state with{" "}
-            {data.length.toLocaleString()} total items
+            {data.length.toLocaleString("en-US")} total items
           </CardDescription>
           <CardAction>
             <Button variant="outline" size="sm" onClick={resetAllState}>
@@ -450,14 +453,14 @@ export default function VirtualizedTableStateExample() {
             <div className="flex justify-between">
               <span className="font-medium">Total Items:</span>
               <span className="text-foreground">
-                {data.length.toLocaleString()}
+                {data.length.toLocaleString("en-US")}
               </span>
             </div>
 
             <div className="flex justify-between">
               <span className="font-medium">Filtered Items:</span>
               <span className="text-foreground">
-                {filteredRowCount.toLocaleString()}
+                {filteredRowCount.toLocaleString("en-US")}
               </span>
             </div>
 
@@ -504,8 +507,8 @@ export default function VirtualizedTableStateExample() {
             <div className="flex justify-between">
               <span className="font-medium">Pinned Columns:</span>
               <span className="text-foreground">
-                {columnPinning.left?.length || 0} Left,{" "}
-                {columnPinning.right?.length || 0} Right
+                {columnPinning.start?.length || 0} Left,{" "}
+                {columnPinning.end?.length || 0} Right
               </span>
             </div>
           </div>

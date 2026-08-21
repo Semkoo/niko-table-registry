@@ -16,7 +16,6 @@
  * @description A faceted filter component for DataTable that allows users to filter data based on multiple selectable options. It supports both single and multiple selection modes.
  */
 
-import type { Column } from "@tanstack/react-table"
 import { Check, PlusCircle, XCircle } from "lucide-react"
 import * as React from "react"
 
@@ -38,15 +37,16 @@ import {
 } from "@/components/ui/popover"
 import { Separator } from "@/components/ui/separator"
 import { cn } from "@/lib/utils"
-import type { ExtendedColumnFilter, Option } from "../types"
+import type { DataTableColumn, ExtendedColumnFilter, Option } from "../types"
 import {
   FILTER_OPERATORS,
   FILTER_VARIANTS,
   JOIN_OPERATORS,
 } from "../lib/constants"
 
-export interface TableFacetedFilterProps<TData, TValue> {
-  column?: Column<TData, TValue>
+import type { RowData } from "@tanstack/react-table"
+export interface TableFacetedFilterProps<TData extends RowData, TValue> {
+  column?: DataTableColumn<TData, TValue>
   title?: string
   options: Option[]
   multiple?: boolean
@@ -61,12 +61,12 @@ export interface TableFacetedFilterProps<TData, TValue> {
   trigger?: React.ReactNode
 }
 
-export function useTableFacetedFilter<TData>({
+export function useTableFacetedFilter<TData extends RowData, TValue = unknown>({
   column,
   onValueChange,
   multiple,
 }: {
-  column?: Column<TData, unknown>
+  column?: DataTableColumn<TData, TValue>
   onValueChange?: (value: string[] | undefined) => void
   multiple?: boolean
 }) {
@@ -161,7 +161,7 @@ export function useTableFacetedFilter<TData>({
   }
 }
 
-export function TableFacetedFilter<TData, TValue>({
+export function TableFacetedFilter<TData extends RowData, TValue>({
   column,
   title,
   options = [],

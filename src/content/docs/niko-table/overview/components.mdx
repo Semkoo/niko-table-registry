@@ -622,10 +622,10 @@ import { DataTableColumnHeaderRoot } from "@/components/niko-table/components/da
 </DataTableColumnHeaderRoot>
 ```
 
-| Name       | Type                    | Description                       |
-| ---------- | ----------------------- | --------------------------------- |
-| `column`   | `Column<TData, TValue>` | Table column instance (required). |
-| `children` | `React.ReactNode`       | Child components.                 |
+| Name       | Type                             | Description                       |
+| ---------- | -------------------------------- | --------------------------------- |
+| `column`   | `DataTableColumn<TData, TValue>` | Table column instance (required). |
+| `children` | `React.ReactNode`                | Child components.                 |
 
 ##### useColumnHeaderContext
 
@@ -753,68 +753,68 @@ Standalone hide menu for column header. Renders as a clickable button.
 
 Faceted filter options to compose inside `DataTableColumnActions`. Shows a multi-select filter list.
 
-| Name        | Type            | Description                                     |
-| ----------- | --------------- | ----------------------------------------------- |
-| `column`    | `Column<TData>` | Optional override (auto-detected from context). |
-| `options`   | `Option[]`      | Static options array.                           |
-| `multiple`  | `boolean`       | Allow multiple selection.                       |
-| `className` | `string`        | Additional CSS classes.                         |
+| Name        | Type                     | Description                                     |
+| ----------- | ------------------------ | ----------------------------------------------- |
+| `column`    | `DataTableColumn<TData>` | Optional override (auto-detected from context). |
+| `options`   | `Option[]`               | Static options array.                           |
+| `multiple`  | `boolean`                | Allow multiple selection.                       |
+| `className` | `string`                 | Additional CSS classes.                         |
 
 ##### DataTableColumnFacetedFilterMenu
 
 Standalone faceted filter popover for column header. Renders as a clickable button with filter icon. Auto-generates options from row data when no explicit options are provided.
 
-| Name                  | Type            | Default     | Description                                                                                              |
-| --------------------- | --------------- | ----------- | -------------------------------------------------------------------------------------------------------- |
-| `column`              | `Column<TData>` | -           | Optional override (auto-detected from context).                                                          |
-| `options`             | `Option[]`      | -           | Static options array (auto-generated if omitted).                                                        |
-| `multiple`            | `boolean`       | -           | Allow multiple selection.                                                                                |
-| `limitToFilteredRows` | `boolean`       | `!multiple` | Show only options from filtered rows (`false` = all rows); defaults on for single-select, off for multi. |
-| `className`           | `string`        | -           | Additional CSS classes.                                                                                  |
+| Name                  | Type                     | Default     | Description                                                                                              |
+| --------------------- | ------------------------ | ----------- | -------------------------------------------------------------------------------------------------------- |
+| `column`              | `DataTableColumn<TData>` | -           | Optional override (auto-detected from context).                                                          |
+| `options`             | `Option[]`               | -           | Static options array (auto-generated if omitted).                                                        |
+| `multiple`            | `boolean`                | -           | Allow multiple selection.                                                                                |
+| `limitToFilteredRows` | `boolean`                | `!multiple` | Show only options from filtered rows (`false` = all rows); defaults on for single-select, off for multi. |
+| `className`           | `string`                 | -           | Additional CSS classes.                                                                                  |
 
 ##### DataTableColumnSliderFilterOptions
 
 Slider filter options to compose inside `DataTableColumnActions`. Shows a range slider for numeric columns.
 
-| Name        | Type            | Description                                     |
-| ----------- | --------------- | ----------------------------------------------- |
-| `column`    | `Column<TData>` | Optional override (auto-detected from context). |
-| `min`       | `number`        | Minimum value.                                  |
-| `max`       | `number`        | Maximum value.                                  |
-| `step`      | `number`        | Step increment.                                 |
-| `className` | `string`        | Additional CSS classes.                         |
+| Name        | Type                     | Description                                     |
+| ----------- | ------------------------ | ----------------------------------------------- |
+| `column`    | `DataTableColumn<TData>` | Optional override (auto-detected from context). |
+| `min`       | `number`                 | Minimum value.                                  |
+| `max`       | `number`                 | Maximum value.                                  |
+| `step`      | `number`                 | Step increment.                                 |
+| `className` | `string`                 | Additional CSS classes.                         |
 
 ##### DataTableColumnSliderFilterMenu
 
 Standalone slider filter popover for column header. Renders as a clickable button with slider icon.
 
-| Name        | Type            | Description                                     |
-| ----------- | --------------- | ----------------------------------------------- |
-| `column`    | `Column<TData>` | Optional override (auto-detected from context). |
-| `min`       | `number`        | Minimum value.                                  |
-| `max`       | `number`        | Maximum value.                                  |
-| `step`      | `number`        | Step increment.                                 |
-| `className` | `string`        | Additional CSS classes.                         |
+| Name        | Type                     | Description                                     |
+| ----------- | ------------------------ | ----------------------------------------------- |
+| `column`    | `DataTableColumn<TData>` | Optional override (auto-detected from context). |
+| `min`       | `number`                 | Minimum value.                                  |
+| `max`       | `number`                 | Maximum value.                                  |
+| `step`      | `number`                 | Step increment.                                 |
+| `className` | `string`                 | Additional CSS classes.                         |
 
 ##### DataTableColumnDateFilterOptions
 
 Date filter options to compose inside `DataTableColumnActions`. Shows a date picker for date columns.
 
-| Name        | Type            | Description                                     |
-| ----------- | --------------- | ----------------------------------------------- |
-| `column`    | `Column<TData>` | Optional override (auto-detected from context). |
-| `multiple`  | `boolean`       | Enable date range selection.                    |
-| `className` | `string`        | Additional CSS classes.                         |
+| Name        | Type                     | Description                                     |
+| ----------- | ------------------------ | ----------------------------------------------- |
+| `column`    | `DataTableColumn<TData>` | Optional override (auto-detected from context). |
+| `multiple`  | `boolean`                | Enable date range selection.                    |
+| `className` | `string`                 | Additional CSS classes.                         |
 
 ##### DataTableColumnDateFilterMenu
 
 Standalone date filter popover for column header. Renders as a clickable button with calendar icon.
 
-| Name        | Type            | Description                                     |
-| ----------- | --------------- | ----------------------------------------------- |
-| `column`    | `Column<TData>` | Optional override (auto-detected from context). |
-| `multiple`  | `boolean`       | Enable date range selection.                    |
-| `className` | `string`        | Additional CSS classes.                         |
+| Name        | Type                     | Description                                     |
+| ----------- | ------------------------ | ----------------------------------------------- |
+| `column`    | `DataTableColumn<TData>` | Optional override (auto-detected from context). |
+| `multiple`  | `boolean`                | Enable date range selection.                    |
+| `className` | `string`                 | Additional CSS classes.                         |
 
 ### DataTableAside
 
@@ -1102,11 +1102,11 @@ import { DataTableDraggableRow } from "@/components/niko-table/components/data-t
 </DataTableDraggableRow>
 ```
 
-| Name        | Type              | Default | Description                             |
-| ----------- | ----------------- | ------- | --------------------------------------- |
-| `row`       | `Row<TData>`      | -       | TanStack Table row instance (required). |
-| `children`  | `React.ReactNode` | -       | Row content (e.g. cells).               |
-| `className` | `string`          | -       | Additional CSS classes.                 |
+| Name        | Type                  | Default | Description                             |
+| ----------- | --------------------- | ------- | --------------------------------------- |
+| `row`       | `DataTableRow<TData>` | -       | TanStack Table row instance (required). |
+| `children`  | `React.ReactNode`     | -       | Row content (e.g. cells).               |
+| `className` | `string`              | -       | Additional CSS classes.                 |
 
 #### DataTableRowDragHandle
 
@@ -1146,21 +1146,21 @@ import { DataTableColumnDndProvider } from "@/components/niko-table/components/d
 
 Context-aware wrapper for `TableDraggableHeader`. Makes header cells draggable.
 
-| Name        | Type                    | Default | Description                                |
-| ----------- | ----------------------- | ------- | ------------------------------------------ |
-| `header`    | `Header<TData, TValue>` | -       | TanStack Table header instance (required). |
-| `children`  | `React.ReactNode`       | -       | Header content.                            |
-| `className` | `string`                | -       | Additional CSS classes.                    |
+| Name        | Type                             | Default | Description                                |
+| ----------- | -------------------------------- | ------- | ------------------------------------------ |
+| `header`    | `DataTableHeader<TData, TValue>` | -       | TanStack Table header instance (required). |
+| `children`  | `React.ReactNode`                | -       | Header content.                            |
+| `className` | `string`                         | -       | Additional CSS classes.                    |
 
 #### DataTableDragAlongCell
 
 Context-aware wrapper for `TableDragAlongCell`. Cell follows column drag position.
 
-| Name        | Type                  | Default | Description                              |
-| ----------- | --------------------- | ------- | ---------------------------------------- |
-| `cell`      | `Cell<TData, TValue>` | -       | TanStack Table cell instance (required). |
-| `children`  | `React.ReactNode`     | -       | Cell content.                            |
-| `className` | `string`              | -       | Additional CSS classes.                  |
+| Name        | Type                           | Default | Description                              |
+| ----------- | ------------------------------ | ------- | ---------------------------------------- |
+| `cell`      | `DataTableCell<TData, TValue>` | -       | TanStack Table cell instance (required). |
+| `children`  | `React.ReactNode`              | -       | Cell content.                            |
+| `className` | `string`                       | -       | Additional CSS classes.                  |
 
 ## Column Header Internal Helpers
 

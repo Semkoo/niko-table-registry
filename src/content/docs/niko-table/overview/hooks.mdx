@@ -29,7 +29,7 @@ export function CustomComponent() {
     <div>
       <p>Showing {rowCount} rows</p>
       <p>
-        Page {table.getState().pagination.pageIndex + 1} of {pageCount}
+        Page {table.state.pagination.pageIndex + 1} of {pageCount}
       </p>
     </div>
   )
@@ -40,7 +40,7 @@ export function CustomComponent() {
 
 | Property       | Type                           | Description                              |
 | -------------- | ------------------------------ | ---------------------------------------- |
-| `table`        | `Table<TData>`                 | The TanStack Table instance.             |
+| `table`        | `DataTableInstance<TData>`     | The TanStack Table instance.             |
 | `columns`      | `DataTableColumnDef<TData>[]`  | Column definitions array.                |
 | `isLoading`    | `boolean`                      | Whether the table is in a loading state. |
 | `setIsLoading` | `(isLoading: boolean) => void` | Function to update loading state.        |
@@ -114,11 +114,11 @@ function ColumnHeader({ column }: { column: Column<Product> }) {
 
 #### Parameters
 
-| Name          | Type            | Description                     |
-| ------------- | --------------- | ------------------------------- |
-| `column`      | `Column<TData>` | The table column.               |
-| `accessorKey` | `string`        | The accessor key of the column. |
-| `title`       | `string`        | Optional title override.        |
+| Name          | Type                     | Description                     |
+| ------------- | ------------------------ | ------------------------------- |
+| `column`      | `DataTableColumn<TData>` | The table column.               |
+| `accessorKey` | `string`                 | The accessor key of the column. |
+| `title`       | `string`                 | Optional title override.        |
 
 #### Returns
 
@@ -158,16 +158,16 @@ function FilterPanel({ table }: { table: Table<Product> }) {
 
 #### Parameters
 
-| Name                         | Type                    | Default | Description                                   |
-| ---------------------------- | ----------------------- | ------- | --------------------------------------------- |
-| `table`                      | `Table<TData>`          | -       | TanStack Table instance (required).           |
-| `config`                     | `GenerateOptionsConfig` | -       | Configuration object.                         |
-| `config.showCounts`          | `boolean`               | `true`  | Include counts for each option.               |
-| `config.dynamicCounts`       | `boolean`               | `true`  | Recompute counts based on filtered rows.      |
-| `config.limitToFilteredRows` | `boolean`               | `true`  | Generate options from filtered rows only.     |
-| `config.includeColumns`      | `string[]`              | -       | Only generate options for these column ids.   |
-| `config.excludeColumns`      | `string[]`              | -       | Exclude these column ids from generation.     |
-| `config.limitPerColumn`      | `number`                | -       | Limit number of generated options per column. |
+| Name                         | Type                       | Default | Description                                   |
+| ---------------------------- | -------------------------- | ------- | --------------------------------------------- |
+| `table`                      | `DataTableInstance<TData>` | -       | TanStack Table instance (required).           |
+| `config`                     | `GenerateOptionsConfig`    | -       | Configuration object.                         |
+| `config.showCounts`          | `boolean`                  | `true`  | Include counts for each option.               |
+| `config.dynamicCounts`       | `boolean`                  | `true`  | Recompute counts based on filtered rows.      |
+| `config.limitToFilteredRows` | `boolean`                  | `true`  | Generate options from filtered rows only.     |
+| `config.includeColumns`      | `string[]`                 | -       | Only generate options for these column ids.   |
+| `config.excludeColumns`      | `string[]`                 | -       | Exclude these column ids from generation.     |
+| `config.limitPerColumn`      | `number`                   | -       | Limit number of generated options per column. |
 
 #### Returns
 
@@ -246,11 +246,11 @@ const categoryOptions = useGeneratedOptionsForColumn(table, "category", {
 
 #### Parameters
 
-| Name       | Type                    | Description                            |
-| ---------- | ----------------------- | -------------------------------------- |
-| `table`    | `Table<TData>`          | TanStack Table instance (required).    |
-| `columnId` | `string`                | The column ID to generate options for. |
-| `config`   | `GenerateOptionsConfig` | Optional configuration object.         |
+| Name       | Type                       | Description                            |
+| ---------- | -------------------------- | -------------------------------------- |
+| `table`    | `DataTableInstance<TData>` | TanStack Table instance (required).    |
+| `columnId` | `string`                   | The column ID to generate options for. |
+| `config`   | `GenerateOptionsConfig`    | Optional configuration object.         |
 
 #### Returns
 

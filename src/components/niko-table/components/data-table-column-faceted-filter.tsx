@@ -12,7 +12,6 @@
  * https://github.com/Semkoo/niko-table-registry
  */
 import React from "react"
-import type { Column } from "@tanstack/react-table"
 
 import {
   TableColumnFacetedFilterOptions,
@@ -21,15 +20,20 @@ import {
 import { useDataTable } from "../core/data-table-context"
 import { useColumnHeaderContext } from "./data-table-column-header"
 
+import type { DataTableColumn } from "../types"
+import type { RowData } from "@tanstack/react-table"
 /**
  * Faceted filter options for composing inside DataTableColumnActions using context.
  */
-export function DataTableColumnFacetedFilterOptions<TData, TValue>(
+export function DataTableColumnFacetedFilterOptions<
+  TData extends RowData,
+  TValue,
+>(
   props: Omit<
     React.ComponentProps<typeof TableColumnFacetedFilterOptions>,
     "column"
   > & {
-    column?: Column<TData, TValue>
+    column?: DataTableColumn<TData, TValue>
   },
 ) {
   const context = useColumnHeaderContext<TData, TValue>(false)
@@ -51,12 +55,12 @@ DataTableColumnFacetedFilterOptions.displayName =
 /**
  * Standalone faceted filter menu for column header using context.
  */
-export function DataTableColumnFacetedFilterMenu<TData, TValue>(
+export function DataTableColumnFacetedFilterMenu<TData extends RowData, TValue>(
   props: Omit<
     React.ComponentProps<typeof TableColumnFacetedFilterMenu>,
     "column" | "table"
   > & {
-    column?: Column<TData, TValue>
+    column?: DataTableColumn<TData, TValue>
   },
 ) {
   const context = useColumnHeaderContext<TData, TValue>(false)

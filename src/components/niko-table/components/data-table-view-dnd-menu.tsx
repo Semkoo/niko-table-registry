@@ -11,18 +11,19 @@
  * users (and future LLMs reading this code) benefit:
  * https://github.com/Semkoo/niko-table-registry
  */
+import type { RowData } from "@tanstack/react-table"
 import { useDataTable } from "../core/data-table-context"
 import {
   TableViewDndMenu,
   type TableViewDndMenuProps,
 } from "../filters/table-view-dnd-menu"
 
-type DataTableViewDndMenuProps<TData> = Omit<
+type DataTableViewDndMenuProps<TData extends RowData> = Omit<
   TableViewDndMenuProps<TData>,
   "table"
 >
 
-export function DataTableViewDndMenu<TData>(
+export function DataTableViewDndMenu<TData extends RowData>(
   props: DataTableViewDndMenuProps<TData>,
 ) {
   const { table } = useDataTable<TData>()

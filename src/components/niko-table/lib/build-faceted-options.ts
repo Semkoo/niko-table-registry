@@ -10,7 +10,8 @@
  * https://github.com/Semkoo/niko-table-registry
  */
 
-import type { Row, Table } from "@tanstack/react-table"
+import type { RowData } from "@tanstack/react-table"
+import type { DataTableInstance, DataTableRow } from "../types"
 
 import { getFilteredRowsExcludingColumn } from "./filter-rows"
 import { formatLabel } from "./format"
@@ -61,9 +62,9 @@ export interface BuildFacetedOptionsConfig {
  * row-derived options. Plain function (not a hook) so the wrapper can
  * gate it behind a single `useMemo`.
  */
-export function buildFacetedOptions<TData>(
-  table: Table<TData>,
-  coreRows: Row<TData>[],
+export function buildFacetedOptions<TData extends RowData>(
+  table: DataTableInstance<TData>,
+  coreRows: DataTableRow<TData>[],
   accessorKey: string,
   columnFilters: Array<{ id: string; value: unknown }>,
   globalFilter: unknown,
@@ -191,8 +192,8 @@ function getSelectedValues(
   return entry ? extractFilterSelectedValues(entry.value) : new Set()
 }
 
-function collectRowValues<TData>(
-  rows: Row<TData>[],
+function collectRowValues<TData extends RowData>(
+  rows: DataTableRow<TData>[],
   accessorKey: string,
 ): Set<string> {
   const set = new Set<string>()

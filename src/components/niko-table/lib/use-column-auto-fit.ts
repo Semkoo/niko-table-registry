@@ -42,13 +42,14 @@
  * Idempotent: after a fit the columns sum to the container width, so the next
  * run finds no surplus and makes no change.
  */
-import type { Table } from "@tanstack/react-table"
+import type { RowData } from "@tanstack/react-table"
+import type { DataTableInstance } from "../types"
 import * as React from "react"
 
 import { DEFAULT_MAX_COLUMN_SIZE, DEFAULT_MIN_COLUMN_SIZE } from "./constants"
 
-export function useColumnAutoFit<TData>(
-  table: Table<TData>,
+export function useColumnAutoFit<TData extends RowData>(
+  table: DataTableInstance<TData>,
   scrollElement: HTMLElement | null,
   enabled: boolean,
 ): void {
@@ -58,7 +59,7 @@ export function useColumnAutoFit<TData>(
   // consumer writes don't go through the drag handler, so they latch via the
   // `lastFitSizingRef` comparison in the fit effect below.
   const userResizedRef = React.useRef(false)
-  const isResizingColumn = table.getState().columnSizingInfo.isResizingColumn
+  const isResizingColumn = table.state.columnResizing.isResizingColumn
   React.useEffect(() => {
     if (isResizingColumn) userResizedRef.current = true
   }, [isResizingColumn])
@@ -93,7 +94,7 @@ export function useColumnAutoFit<TData>(
 
   // Re-derive on any layout-affecting state change. `columnSizing` is included
   // so the effect converges (after a fit it re-runs, finds no surplus, stops).
-  const { columnSizing, columnVisibility, columnOrder } = table.getState()
+  const { columnSizing, columnVisibility, columnOrder } = table.state
 
   React.useLayoutEffect(() => {
     // The width guard is load-bearing for the persistence race, not just a
@@ -109,7 +110,7 @@ export function useColumnAutoFit<TData>(
     // by now hydration has settled and localStorage-backed `columnSizing` is in.
     if (hadInitialSizingRef.current === null) {
       hadInitialSizingRef.current =
-        Object.keys(table.getState().columnSizing).length > 0
+        Object.keys(table.state.columnSizing).length > 0
     }
     if (userResizedRef.current || hadInitialSizingRef.current) return
 

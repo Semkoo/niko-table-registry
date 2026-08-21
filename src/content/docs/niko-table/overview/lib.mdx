@@ -273,6 +273,52 @@ formatQueryString(urlParams, urlKeys)
 
 `string` - Formatted query string (e.g., `?search=i&global={"filters":[...]}`).
 
+## Table Features
+
+In Table v8, every behavior was bundled into `useReactTable`. In Table v9 you import only what you need — the same idea as this registry's **Composable** principle: mix and match `DataTable*` components, install only the registry pieces you need. Registry items are that idea at the UI layer; this file is that idea at the table-engine layer.
+
+<div className="not-content mb-4 flex items-center gap-2">
+  <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/lib/data-table-features.ts`} external>Source Code ↗</DocsLink>
+</div>
+
+A feature's API only exists on the table instance once it is registered. `DataTableRoot` passes this object to `useTable` for you. Feature detection / `enable*` flags still decide _when_ behavior runs; registration decides _whether the API exists at all_.
+
+### features
+
+```tsx showLineNumbers
+import { features } from "@/components/niko-table/lib/data-table-features"
+
+// DataTableRoot does this internally — you only need it for a custom table.
+const table = useTable({ features, data, columns })
+```
+
+`DataTableFeatures` is the type of that object, and every `DataTable*` type alias is pre-bound to it (`DataTableInstance<TData>` is `Table<DataTableFeatures, TData>`, and so on), so you rarely name it directly.
+
+#### Trimming it down
+
+The shipped file registers everything the component library can use — sorting, filtering, faceting, grouping, aggregation, pagination, expanding, selection, column visibility/ordering/pinning/sizing/resizing — plus the row models they need. After install you own the file: delete the features and the built-in `sortFns` / `aggregationFns` your tables never reference, the same way you omit registry items you never mount. Removing a feature removes its API: calling `table.setGrouping()` without `columnGroupingFeature` fails at runtime, not at build time.
+
+#### Adding your own filter function
+
+Register it under `filterFns` and reference it by name from a column:
+
+```tsx showLineNumbers
+export const features = tableFeatures({
+  // ...
+  filterFns: {
+    extended: extendedFilter,
+    numberRange: numberRangeFilter,
+    dateRange: dateRangeFilter,
+    startsWith: (row, columnId, value: string) =>
+      String(row.getValue(columnId)).toLowerCase().startsWith(value.toLowerCase()),
+  },
+})
+
+const columns: DataTableColumnDef<Item>[] = [
+  { accessorKey: "name", filterFn: "startsWith" },
+]
+```
+
 ## Filter Functions
 
 Custom filter functions for TanStack Table with performance optimizations.
@@ -316,9 +362,13 @@ const columns = [
 Custom global filter function that searches across all visible columns. Supports debounced search input.
 
 ```tsx showLineNumbers
+import { useTable } from "@tanstack/react-table"
+
+import { features } from "@/components/niko-table/lib/data-table-features"
 import { globalFilter } from "@/components/niko-table/lib/filter-functions"
 
-const table = useReactTable({
+const table = useTable({
+  features,
   globalFilterFn: globalFilter,
 })
 ```
@@ -403,10 +453,10 @@ const pinningStyles = getCommonPinningStyles(column, false)
 
 #### Parameters
 
-| Name       | Type            | Default | Description                                                                          |
-| ---------- | --------------- | ------- | ------------------------------------------------------------------------------------ |
-| `column`   | `Column<TData>` | -       | TanStack Table column instance                                                       |
-| `isHeader` | `boolean`       | `false` | Whether this is a header cell (sets `top: 0` for vertical stickiness and z-index 20) |
+| Name       | Type                     | Default | Description                                                                          |
+| ---------- | ------------------------ | ------- | ------------------------------------------------------------------------------------ |
+| `column`   | `DataTableColumn<TData>` | -       | TanStack Table column instance                                                       |
+| `isHeader` | `boolean`                | `false` | Whether this is a header cell (sets `top: 0` for vertical stickiness and z-index 20) |
 
 #### Returns
 
@@ -578,8 +628,8 @@ const options = buildFacetedOptions(
   table,
   table.getCoreRowModel().rows,
   "category", // accessorKey
-  table.getState().columnFilters,
-  table.getState().globalFilter,
+  table.state.columnFilters,
+  table.state.globalFilter,
   {
     limitToFilteredRows: true,
     dynamicCounts: true,
@@ -597,7 +647,7 @@ const options = buildFacetedOptions(
 
 ## Row Filtering Helpers
 
-Internal helpers that resolve `globalFilter` / column-filter combinations to a final visible row set. Used by `DataTableRoot` when wiring `tableOptions.getFilteredRowModel`.
+Internal helpers that resolve `globalFilter` / column-filter combinations to a final visible row set. Used by `DataTableRoot` on top of the filtered row model registered in `lib/data-table-features.ts`.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/lib/filter-rows.ts`} external>Source Code ↗</DocsLink>
@@ -607,7 +657,7 @@ Internal helpers that resolve `globalFilter` / column-filter combinations to a f
 
 Provides the row-filtering logic that backs the table's filtered row model — combines per-column filters with the global filter, applies the right `extendedFilter` / `globalFilter` / `numberRangeFilter` / `dateRangeFilter` based on column meta, and returns the visible row set.
 
-This module is internal to the table's filter pipeline. Consumers normally interact with it indirectly via `tableOptions.filterFns` (which `DataTableRoot` wires automatically). If you're building a fully custom filter pipeline you can import the named helpers from this file directly — see the source for the current export surface.
+This module is internal to the table's filter pipeline. Consumers normally interact with it indirectly through the `filterFns` registered in `tableFeatures()` (see `lib/data-table-features.ts`), which `DataTableRoot` passes to the table automatically. If you're building a fully custom filter pipeline you can import the named helpers from this file directly — see the source for the current export surface.
 
 ## Column Sizing Layout
 
@@ -632,9 +682,9 @@ const flexIds = resolveFlexColumnIds(table)
 
 #### Parameters
 
-| Name    | Type           | Description             |
-| ------- | -------------- | ----------------------- |
-| `table` | `Table<TData>` | TanStack Table instance |
+| Name    | Type                       | Description             |
+| ------- | -------------------------- | ----------------------- |
+| `table` | `DataTableInstance<TData>` | TanStack Table instance |
 
 #### Returns
 
@@ -654,7 +704,7 @@ import { resolveColumnWidth } from "@/components/niko-table/lib/flex-columns"
 const width = resolveColumnWidth(column, {
   resizing: true,
   isFlex: flexIds.has(column.id),
-  columnSizing: table.getState().columnSizing,
+  columnSizing: table.state.columnSizing,
   headerMinWidths,
 })
 ```
@@ -663,7 +713,7 @@ const width = resolveColumnWidth(column, {
 
 | Name                     | Type                          | Description                                        |
 | ------------------------ | ----------------------------- | -------------------------------------------------- |
-| `column`                 | `Column<TData>`               | TanStack Table column instance                     |
+| `column`                 | `DataTableColumn<TData>`      | TanStack Table column instance                     |
 | `params.resizing`        | `boolean`                     | Whether column resizing is enabled                 |
 | `params.isFlex`          | `boolean`                     | Whether this column is a flex (fill) column        |
 | `params.columnSizing`    | `ColumnSizingState`           | Current column sizing state                        |
@@ -689,11 +739,11 @@ const headerMinWidths = useHeaderMinWidths(table, scrollElement, resizingEnabled
 
 #### Parameters
 
-| Name            | Type                  | Description                                      |
-| --------------- | --------------------- | ------------------------------------------------ |
-| `table`         | `Table<TData>`        | TanStack Table instance                          |
-| `scrollElement` | `HTMLElement \| null` | The table's scroll container (for reading fonts) |
-| `enabled`       | `boolean`             | Whether header-fit measurement is active         |
+| Name            | Type                       | Description                                      |
+| --------------- | -------------------------- | ------------------------------------------------ |
+| `table`         | `DataTableInstance<TData>` | TanStack Table instance                          |
+| `scrollElement` | `HTMLElement \| null`      | The table's scroll container (for reading fonts) |
+| `enabled`       | `boolean`                  | Whether header-fit measurement is active         |
 
 #### Returns
 
@@ -715,11 +765,11 @@ useColumnAutoFit(table, scrollElement, resizingEnabled)
 
 #### Parameters
 
-| Name            | Type                  | Description                                       |
-| --------------- | --------------------- | ------------------------------------------------- |
-| `table`         | `Table<TData>`        | TanStack Table instance                           |
-| `scrollElement` | `HTMLElement \| null` | The table's scroll container (measured for width) |
-| `enabled`       | `boolean`             | Whether auto-fit is active (needs resizing on)    |
+| Name            | Type                       | Description                                       |
+| --------------- | -------------------------- | ------------------------------------------------- |
+| `table`         | `DataTableInstance<TData>` | TanStack Table instance                           |
+| `scrollElement` | `HTMLElement \| null`      | The table's scroll container (measured for width) |
+| `enabled`       | `boolean`                  | Whether auto-fit is active (needs resizing on)    |
 
 #### Returns
 
