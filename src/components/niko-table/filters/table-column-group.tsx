@@ -116,7 +116,7 @@ export function TableColumnGroupMenu<TData extends RowData, TValue>({
           variant="ghost"
           size="icon"
           className={cn(
-            "size-7 transition-opacity group-hover:opacity-100 dark:text-muted-foreground",
+            "size-7 transition-opacity group-hover:opacity-100 focus-visible:opacity-100 dark:text-muted-foreground",
             isGrouped ? "text-primary opacity-100" : "opacity-0",
             className,
           )}
