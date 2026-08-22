@@ -98,6 +98,16 @@ export interface TableViewDndMenuProps<TData extends RowData> {
   onReset?: () => void
   /** Label for the reset button. Defaults to "Reset to defaults". */
   resetLabel?: string
+  /**
+   * Replaces the default toolbar button.
+   *
+   * Same `trigger` contract the sibling filters already expose
+   * (`TableColumnActions`, `TableDateFilter`, `TableFacetedFilter`), so a
+   * consumer that needs a different trigger shape — a header-sized bare icon
+   * beside a column title, for instance — composes one instead of waiting for
+   * a boolean per shape.
+   */
+  trigger?: React.ReactNode
 }
 
 function SortableMenuRow({
@@ -182,6 +192,8 @@ export function TableViewDndMenu<TData extends RowData>({
   onColumnOrderChange,
   lockedColumnIds,
   onReset,
+
+  trigger,
   resetLabel,
 }: TableViewDndMenuProps<TData>) {
   // Stable across SSR + hydration — see TableColumnDndProvider.
@@ -290,17 +302,19 @@ export function TableViewDndMenu<TData extends RowData>({
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button
-          aria-label="Toggle columns"
-          role="combobox"
-          variant="outline"
-          size="sm"
-          className="ml-auto hidden h-8 lg:flex"
-        >
-          <Settings2 />
-          View
-          <ChevronsUpDown className="ml-auto opacity-50" />
-        </Button>
+        {trigger ?? (
+          <Button
+            aria-label="Toggle columns"
+            role="combobox"
+            variant="outline"
+            size="sm"
+            className="ml-auto hidden h-8 lg:flex"
+          >
+            <Settings2 />
+            View
+            <ChevronsUpDown className="ml-auto opacity-50" />
+          </Button>
+        )}
       </PopoverTrigger>
       <PopoverContent align="end" className="w-fit p-0">
         <Command shouldFilter={false}>
