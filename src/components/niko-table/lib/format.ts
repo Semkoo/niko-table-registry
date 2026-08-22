@@ -112,7 +112,7 @@ export function formatQueryString(
       if (typeof obj === "object" && obj !== null) {
         const keys = Object.keys(obj)
         if (keys.length > 0) {
-          const firstKey = keys[0]
+          const firstKey = keys[0] ?? ""
           const firstValue = (obj as Record<string, unknown>)[firstKey]
           if (Array.isArray(firstValue)) {
             return `{${firstKey}: [...], ...}`
