@@ -507,9 +507,9 @@ export function DataTableVirtualizedDndBody<TData extends RowData>({
   const virtualItems = rowVirtualizer.getVirtualItems()
   const hasVirtualItems = virtualItems.length > 0
 
-  const topSpacerHeight = hasVirtualItems ? virtualItems[0].start : 0
+  const topSpacerHeight = virtualItems[0]?.start ?? 0
   const lastItem = hasVirtualItems
-    ? virtualItems[virtualItems.length - 1]
+    ? (virtualItems[virtualItems.length - 1] ?? null)
     : null
   const bottomSpacerHeight = lastItem
     ? rowVirtualizer.getTotalSize() - lastItem.end
