@@ -27,6 +27,8 @@ All notable changes to the data-table component.
 
 #### Core
 
+- **CSV export neutralises spreadsheet formulas** (`filters/table-export-button`) — `escapeCsvValue` quoted separators and quotes but did nothing about values opening with `=`, `+`, `-`, `@`, tab or carriage return, which Excel, LibreOffice Calc and Google Sheets all evaluate as live formulas. Since rows are arbitrary application data, anyone able to write a record could place executable content in an exported file. Such values are now prefixed with an apostrophe, which every major spreadsheet reads as "the rest is literal text" and does not render. Applied to the array branch as well: quoting is for CSV parsing, not formula prevention — a quoted field opening with `=` is still evaluated.
+
 - **Auto-fit vs. keyboard/autosize resizes** — keyboard nudges and double-click autosize bypass `columnSizingInfo.isResizingColumn`, so auto-fit kept re-fitting over them (a keyboard user shrinking a column got the space redistributed right back). The hook now records the sizing it applied and latches off when `columnSizing` changes to anything it didn't write.
 - **Header-fit label fallback + scope** — floors now use the same fallback chain as the rendered title (`meta.label` → string header → formatted column id), so composable-title columns without `meta.label` get a floor; floors apply only to resizable columns so utility columns (`enableResizing: false`) can't pick up a phantom floor from the id fallback. A JSX `<DataTableColumnTitle title="..." />` override should be mirrored into `meta.label`.
 - **Header-fit re-measure identity** — a re-measure with identical results keeps the previous Map identity, so memoized body rows no longer re-render once after first paint when no floor changed.
