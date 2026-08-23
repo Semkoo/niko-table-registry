@@ -21,6 +21,26 @@ import type { DataTableInstance } from "../types"
  * Escape a cell value for CSV output.
  * Handles strings, numbers, booleans, dates, arrays, null, and undefined.
  */
+/**
+ * Characters that make a spreadsheet treat a cell as a live formula.
+ *
+ * Excel, LibreOffice Calc and Google Sheets all evaluate a cell beginning with
+ * one of these, so an exported value like `=cmd|'/c calc'!A1` becomes
+ * executable content when the file is opened. Table rows are arbitrary
+ * application data, so anyone who can write a record can reach the export.
+ */
+const FORMULA_TRIGGER_PATTERN = /^[=+\-@\t\r]/
+
+/**
+ * Prefix a value a spreadsheet would evaluate with an apostrophe, which every
+ * major spreadsheet reads as "treat the rest as literal text" and does not
+ * render in the cell. Applied before quoting so the apostrophe is inside the
+ * quoted field.
+ */
+function neutralizeFormula(str: string): string {
+  return FORMULA_TRIGGER_PATTERN.test(str) ? `'${str}` : str
+}
+
 function escapeCsvValue(value: unknown): string {
   if (value === null || value === undefined) return ""
 
@@ -29,7 +49,9 @@ function escapeCsvValue(value: unknown): string {
   }
 
   if (Array.isArray(value)) {
-    const joined = value.map(String).join(", ")
+    // Neutralised too: quoting is for CSV parsing, not formula prevention —
+    // a spreadsheet still evaluates a quoted field that opens with `=`.
+    const joined = neutralizeFormula(value.map(String).join(", "))
     return `"${joined.replace(/"/g, '""')}"`
   }
 
@@ -47,8 +69,8 @@ function escapeCsvValue(value: unknown): string {
     }
   }
 
-  // Default: treat as string and escape quotes
-  const str = String(value)
+  // Default: treat as string, neutralise formulas, then escape quotes
+  const str = neutralizeFormula(String(value))
   // Wrap in quotes if the value contains commas, quotes, or newlines
   if (str.includes(",") || str.includes('"') || str.includes("\n")) {
     return `"${str.replace(/"/g, '""')}"`
