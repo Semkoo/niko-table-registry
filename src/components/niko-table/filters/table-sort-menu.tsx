@@ -146,7 +146,7 @@ function TableSortItem({
           </PopoverTrigger>
           <PopoverContent
             id={fieldListboxId}
-            className="w-(--radix-popover-trigger-width) origin-(--radix-popover-content-transform-origin) p-0"
+            className="w-[var(--radix-popover-trigger-width,var(--anchor-width))] origin-[var(--radix-popover-content-transform-origin,var(--transform-origin))] p-0"
           >
             <Command>
               <CommandInput placeholder="Search fields..." />
@@ -184,7 +184,7 @@ function TableSortItem({
           </SelectTrigger>
           <SelectContent
             id={directionListboxId}
-            className="min-w-(--radix-select-trigger-width) origin-(--radix-select-content-transform-origin)"
+            className="min-w-[var(--radix-select-trigger-width,var(--anchor-width))] origin-[var(--radix-select-content-transform-origin,var(--transform-origin))]"
           >
             <SelectItem value="asc">{labels.asc}</SelectItem>
             <SelectItem value="desc">{labels.desc}</SelectItem>
@@ -401,7 +401,7 @@ export function TableSortMenu<TData extends RowData>({
         <PopoverContent
           aria-labelledby={labelId}
           aria-describedby={descriptionId}
-          className="flex w-full max-w-(--radix-popover-content-available-width) origin-(--radix-popover-content-transform-origin) flex-col gap-3.5 p-4 sm:min-w-[380px]"
+          className="flex w-full max-w-[var(--radix-popover-content-available-width,var(--available-width))] origin-[var(--radix-popover-content-transform-origin,var(--transform-origin))] flex-col gap-3.5 p-4 sm:min-w-[380px]"
           {...props}
         >
           <div className="flex flex-col gap-1">
