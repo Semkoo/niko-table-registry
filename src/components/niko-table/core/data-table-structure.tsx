@@ -26,6 +26,8 @@ import { DataTableColumnHeaderRoot } from "../components/data-table-column-heade
 import { DataTableEmptyState } from "../components/data-table-empty-state"
 import { DataTableRowContextMenu } from "../components/data-table-row-context-menu"
 import { useResolvedRowContextMenuRenderer } from "../components/data-table-row-context-menu-slot"
+import { resolveGroupedRowsSlot } from "../components/data-table-grouped-rows"
+import { GroupedBodyRow } from "./data-table-grouped-row"
 import { DataTableColumnResizeHandle } from "../lib/column-resize-handle"
 import {
   createScrollHandler,
@@ -486,6 +488,15 @@ export function DataTableBody<TData extends RowData>({
     children,
   )
 
+  // Composable path: group rows render only when `<DataTableGroupedRows>` is
+  // nested in the body. Its presence is also what feature detection reads to
+  // turn `enableGrouping` / `enableExpanding` on, so there is no config flag
+  // and no renderer prop — compose the component, or don't.
+  const groupedRowsSlot = React.useMemo(
+    () => resolveGroupedRowsSlot(children),
+    [children],
+  )
+
   // The table's own inline sizing captured before resizing overrides it, so a
   // consumer that sets inline `table-layout` / `width` / `min-width` gets those
   // exact values back when resizing turns off — instead of them being blanked.
@@ -561,28 +572,43 @@ export function DataTableBody<TData extends RowData>({
     >
       {/* Only show rows when not loading */}
       {!isLoading && rows?.length
-        ? rows.map((row, displayIndex) => (
-            <BodyRow
-              key={row.id}
-              row={row as DataTableRow<RowData>}
-              displayIndex={displayIndex}
-              expandColumnId={expandColumnId}
-              isClickable={isClickable}
-              isExpanded={row.getIsExpanded()}
-              isSelected={row.getIsSelected()}
-              columnWidths={columnWidths}
-              columnLayoutSignature={columnLayoutSignature}
-              rowMemoKey={
-                getRowMemoKey ? getRowMemoKey(row.original as TData) : ""
-              }
-              isRowFlashing={flashingRowIds.has(row.id)}
-              flashingCellKeys={flashingCellKeys}
-              renderRowContextMenu={
-                resolvedRenderRowContextMenu as
-                  ((row: unknown) => React.ReactNode) | undefined
-              }
-            />
-          ))
+        ? rows.map((row, displayIndex) =>
+            // A grouped row is chrome, not a record: it gets the group renderer
+            // rather than BodyRow, and never carries expanded content or a row
+            // context menu.
+            groupedRowsSlot && row.getIsGrouped() ? (
+              <GroupedBodyRow
+                key={row.id}
+                row={row as DataTableRow<RowData>}
+                displayIndex={displayIndex}
+                isExpanded={row.getIsExpanded()}
+                columnWidths={columnWidths}
+                columnLayoutSignature={columnLayoutSignature}
+                slot={groupedRowsSlot}
+              />
+            ) : (
+              <BodyRow
+                key={row.id}
+                row={row as DataTableRow<RowData>}
+                displayIndex={displayIndex}
+                expandColumnId={expandColumnId}
+                isClickable={isClickable}
+                isExpanded={row.getIsExpanded()}
+                isSelected={row.getIsSelected()}
+                columnWidths={columnWidths}
+                columnLayoutSignature={columnLayoutSignature}
+                rowMemoKey={
+                  getRowMemoKey ? getRowMemoKey(row.original as TData) : ""
+                }
+                isRowFlashing={flashingRowIds.has(row.id)}
+                flashingCellKeys={flashingCellKeys}
+                renderRowContextMenu={
+                  resolvedRenderRowContextMenu as
+                    ((row: unknown) => React.ReactNode) | undefined
+                }
+              />
+            ),
+          )
         : null}
 
       {children}

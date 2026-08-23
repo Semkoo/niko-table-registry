@@ -25,6 +25,59 @@ Grouping collapses rows that share a value into a single expandable band, with a
 
 > First time using `@niko-table`? See the [Installation Guide](/getting-started/installation/#configure-the-registry) to set up the registry.
 
+## Group rows
+
+Nest `DataTableGroupedRows` in the body. That single line is the whole opt-in — it renders the group bands **and** is what feature detection reads to turn `enableGrouping` and `enableExpanding` on, so there is no config flag to set and no renderer to wire up.
+
+```tsx showLineNumbers
+import { DataTableGroupedRows } from "@/components/niko-table/components/data-table-grouped-rows"
+
+<DataTable>
+  <DataTableHeader />
+  <DataTableBody>
+    <DataTableGroupedRows />
+  </DataTableBody>
+</DataTable>
+```
+
+Leave it out and nothing about the table changes — a grouped row model with no `DataTableGroupedRows` renders no bands.
+
+The built-in band shows a chevron, the group value and a `· N rows` count, plus one aggregated cell per column that defines `aggregatedCell` / `aggregationFn`.
+
+### Your own group row
+
+Nest a component instead. It reads the group from `useDataTableGroupRow()` — no render prop, no callback:
+
+```tsx showLineNumbers
+import {
+  DataTableGroupedRows,
+  useDataTableGroupRow,
+} from "@/components/niko-table/components/data-table-grouped-rows"
+
+function RegionGroupRow() {
+  const { groupLabel, count, isExpanded, toggle } = useDataTableGroupRow()
+
+  return (
+    <TableCell colSpan={4} onClick={toggle}>
+      {groupLabel} — {count} orders {isExpanded ? "▾" : "▸"}
+    </TableCell>
+  )
+}
+
+<DataTableBody>
+  <DataTableGroupedRows>
+    <RegionGroupRow />
+  </DataTableGroupedRows>
+</DataTableBody>
+```
+
+Your component renders the row's cells; the body keeps the surrounding `<TableRow>` so column widths, parity and data attributes still line up with the leaf rows beneath.
+
+Two escape hatches:
+
+- `enabledFor` — a per-group predicate. Return `false` and that band falls back to the built-in row.
+- `DataTableGroupedRowCells` is exported, so a custom row can render the built-in cells for the cases it does not special-case.
+
 ## Column menu: Group by
 
 Compose group actions into the header menu like other column controls:
@@ -133,11 +186,11 @@ Or seed once with `initialState={{ grouping: ["region"], expanded: true }}`.
 
 ## Config
 
-| Option                     | Purpose                                                                               |
-| -------------------------- | ------------------------------------------------------------------------------------- |
-| `config.enableGrouping`    | Force grouping on/off (otherwise detected from column group UI)                       |
-| `config.groupedColumnMode` | `'reorder'` (default), `'remove'`, or `false` — TanStack placement of grouped columns |
-| `config.enableExpanding`   | Forced on when grouping is active so group rows can collapse                          |
+| Option                     | Purpose                                                                                                          |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `config.enableGrouping`    | Force grouping on/off. Usually unnecessary — composing `DataTableGroupedRows` or a column group menu turns it on |
+| `config.groupedColumnMode` | `'reorder'` (default), `'remove'`, or `false` — TanStack placement of grouped columns                            |
+| `config.enableExpanding`   | Forced on when grouping is active so group rows can collapse                                                     |
 
 ## Tree vs Grouping
 
@@ -154,8 +207,9 @@ Both expand/collapse, but they are different features — use **one per table**:
 
 ## Constraints
 
+- Group bands render in the standard `DataTableBody`. The virtualized and DnD bodies do not render them — a grouped row model there still groups the data, but you get leaf rows with no band. Documented limitation, not an oversight: a band is a different height from a leaf row, which the virtualizer's size estimate has to account for.
 - Prefer **not** combining row DnD with grouping (manual order vs grouped order conflict) — same guidance as sorting + row DnD.
-- Column DnD, sorting, filtering, pagination, and virtualization remain compatible.
+- Column DnD, sorting, filtering and pagination remain compatible.
 - Server-side / `manualGrouping` is out of scope for this release (TanStack notes it needs heavy custom rendering).
 
 ## When to use
