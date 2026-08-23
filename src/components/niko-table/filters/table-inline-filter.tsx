@@ -583,7 +583,7 @@ export function TableInline<TData extends RowData>({
           </PopoverTrigger>
           <PopoverContent
             align="start"
-            className="w-full max-w-(--radix-popover-content-available-width) origin-(--radix-popover-content-transform-origin) p-0"
+            className="w-full max-w-[var(--radix-popover-content-available-width,var(--available-width))] origin-[var(--radix-popover-content-transform-origin,var(--transform-origin))] p-0"
           >
             <Command loop className="[&_[cmdk-input-wrapper]_svg]:hidden">
               <CommandInput
@@ -735,7 +735,7 @@ function TableInlineFilterItem<TData extends RowData>({
         </PopoverTrigger>
         <PopoverContent
           align="start"
-          className="w-48 origin-(--radix-popover-content-transform-origin) p-0"
+          className="w-48 origin-[var(--radix-popover-content-transform-origin,var(--transform-origin))] p-0"
         >
           <Command loop>
             <CommandInput placeholder="Search fields..." />
@@ -809,7 +809,7 @@ function TableInlineFilterItem<TData extends RowData>({
         </SelectTrigger>
         <SelectContent
           id={operatorListboxId}
-          className="origin-(--radix-select-content-transform-origin)"
+          className="origin-[var(--radix-select-content-transform-origin,var(--transform-origin))]"
         >
           {filterOperators.map(operator => (
             <SelectItem
@@ -1096,7 +1096,7 @@ function onFilterInputRender<TData extends RowData>({
           <PopoverContent
             id={inputListboxId}
             align="start"
-            className="w-48 origin-(--radix-popover-content-transform-origin) p-0"
+            className="w-48 origin-[var(--radix-popover-content-transform-origin,var(--transform-origin))] p-0"
           >
             <Command>
               <CommandInput placeholder="Search options..." />
@@ -1176,7 +1176,7 @@ function onFilterInputRender<TData extends RowData>({
           <PopoverContent
             id={inputListboxId}
             align="start"
-            className="w-auto origin-(--radix-popover-content-transform-origin) p-0"
+            className="w-auto origin-[var(--radix-popover-content-transform-origin,var(--transform-origin))] p-0"
           >
             {filter.operator === FILTER_OPERATORS.BETWEEN ? (
               <Calendar

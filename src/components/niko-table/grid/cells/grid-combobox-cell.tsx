@@ -143,7 +143,7 @@ function GridComboboxEditor(props: GridComboboxCellProps) {
       <PopoverContent
         data-grid-cell-editor=""
         align="start"
-        className="w-[var(--radix-popover-trigger-width)] min-w-48 p-0"
+        className="w-[var(--radix-popover-trigger-width,var(--anchor-width))] min-w-48 p-0"
       >
         <Command>
           {searchable && (
