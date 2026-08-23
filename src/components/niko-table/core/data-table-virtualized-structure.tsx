@@ -28,6 +28,8 @@ import { DataTableColumnHeaderRoot } from "../components/data-table-column-heade
 import { DataTableEmptyState } from "../components/data-table-empty-state"
 import { DataTableRowContextMenu } from "../components/data-table-row-context-menu"
 import { useResolvedRowContextMenuRenderer } from "../components/data-table-row-context-menu-slot"
+import { resolveGroupedRowsSlot } from "../components/data-table-grouped-rows"
+import { GroupedBodyRow } from "./data-table-grouped-row"
 import { DataTableColumnResizeHandle } from "../lib/column-resize-handle"
 import {
   createScrollHandler,
@@ -978,6 +980,13 @@ export function DataTableVirtualizedBody<TData extends RowData>({
     children,
   )
 
+  // Composable path: same marker as the standard body. A band is taller than a
+  // leaf row, so it relies on the virtualizer's dynamic measurement — which is
+  // why `fixedRowHeight` and grouping do not mix (see the grouping docs).
+  const groupedRowsSlot = React.useMemo(
+    () => resolveGroupedRowsSlot(children),
+    [children],
+  )
   return (
     <TableBody ref={parentRef} className={cn(className)}>
       {/* Top spacer — colSpan keeps it within native table layout */}
@@ -1004,6 +1013,28 @@ export function DataTableVirtualizedBody<TData extends RowData>({
         // `ResizeObserver` re-attaches and re-reads the combined height.
         // DnD bodies use a stable key (preserving `useSortable`) and
         // re-measure imperatively instead.
+        const measure = fixedRowHeight
+          ? undefined
+          : columnsLocked
+            ? stableMeasureElement
+            : undefined
+
+        if (groupedRowsSlot && row.getIsGrouped()) {
+          return (
+            <GroupedBodyRow
+              key={`${row.id}-${isExpanded}`}
+              row={row as unknown as DataTableRow<RowData>}
+              displayIndex={virtualRow.index}
+              isExpanded={isExpanded}
+              columnWidths={columnWidths}
+              columnLayoutSignature={columnLayoutSignature}
+              slot={groupedRowsSlot}
+              measureRef={measure}
+              virtualIndex={virtualRow.index}
+            />
+          )
+        }
+
         return (
           <VirtualizedBodyRow
             key={`${row.id}-${isExpanded}`}

@@ -163,3 +163,29 @@ describe("DataTableGroupedRows", () => {
     ).not.toBeNull()
   })
 })
+
+describe("DataTableGroupedRows in a virtualized body", () => {
+  it("renders bands there too, from the same marker", async () => {
+    const { DataTableVirtualizedBody } =
+      await import("../core/data-table-virtualized-structure")
+
+    await act(async () => {
+      render(
+        <DataTableRoot
+          data={people}
+          columns={columns}
+          initialState={{ grouping: ["department"], expanded: true }}
+        >
+          <DataTable>
+            <DataTableHeader />
+            <DataTableVirtualizedBody estimateSize={40}>
+              <DataTableGroupedRows />
+            </DataTableVirtualizedBody>
+          </DataTable>
+        </DataTableRoot>,
+      )
+    })
+
+    expect(groupRows().length).toBeGreaterThan(0)
+  })
+})

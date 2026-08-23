@@ -207,7 +207,8 @@ Both expand/collapse, but they are different features — use **one per table**:
 
 ## Constraints
 
-- Group bands render in the standard `DataTableBody`. The virtualized and DnD bodies do not render them — a grouped row model there still groups the data, but you get leaf rows with no band. Documented limitation, not an oversight: a band is a different height from a leaf row, which the virtualizer's size estimate has to account for.
+- Group bands render in `DataTableBody` and `DataTableVirtualizedBody` — the same `DataTableGroupedRows` marker in either. The DnD bodies do not render bands: manual row order and grouped order conflict, so grouping there is out of scope by design.
+- In a virtualized body, leave `fixedRowHeight` off. A band is taller than a leaf row, so it has to be measured rather than assumed; with fixed heights on, the rows below it drift.
 - Prefer **not** combining row DnD with grouping (manual order vs grouped order conflict) — same guidance as sorting + row DnD.
 - Column DnD, sorting, filtering and pagination remain compatible.
 - Server-side / `manualGrouping` is out of scope for this release (TanStack notes it needs heavy custom rendering).

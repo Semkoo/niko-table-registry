@@ -138,6 +138,17 @@ export interface GroupedBodyRowProps<TData extends RowData = RowData> {
   columnLayoutSignature: string
   /** The nested slot's props, if the caller composed one. */
   slot: DataTableGroupedRowsProps<TData> | undefined
+  /**
+   * Virtualized bodies only: the virtualizer's measure callback. A band is
+   * usually a different height from a leaf row, so it has to be measured
+   * rather than assumed — without this the rows below it drift.
+   */
+  measureRef?: (node: HTMLTableRowElement | null) => void
+  /**
+   * Virtualized bodies only: the row's index in the virtual window, which the
+   * virtualizer reads back off the DOM as `data-index`.
+   */
+  virtualIndex?: number
 }
 
 export const GroupedBodyRow = React.memo(function GroupedBodyRow<
@@ -148,6 +159,8 @@ export const GroupedBodyRow = React.memo(function GroupedBodyRow<
   isExpanded,
   columnWidths,
   slot,
+  measureRef,
+  virtualIndex,
 }: GroupedBodyRowProps<TData>) {
   const groupedColumnId = row.groupingColumnId
   const groupValue = groupedColumnId
@@ -206,6 +219,8 @@ export const GroupedBodyRow = React.memo(function GroupedBodyRow<
       value={contextValue as DataTableGroupRowContextValue}
     >
       <TableRow
+        ref={measureRef}
+        data-index={virtualIndex}
         data-row-index={displayIndex}
         data-row-id={row.id}
         data-row-type="grouped"
