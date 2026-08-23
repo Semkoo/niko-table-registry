@@ -59,6 +59,16 @@
           "target": "components/niko-table/components/data-table-row-context-menu-slot.tsx"
         },
         {
+          "path": "src/components/niko-table/components/data-table-grouped-rows.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-grouped-rows.tsx"
+        },
+        {
+          "path": "src/components/niko-table/core/data-table-grouped-row.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/core/data-table-grouped-row.tsx"
+        },
+        {
           "path": "src/components/niko-table/components/data-table-row-menu.tsx",
           "type": "registry:component",
           "target": "components/niko-table/components/data-table-row-menu.tsx"
