@@ -404,7 +404,7 @@ function FacetedContent(props: React.ComponentProps<typeof PopoverContent>) {
       {...contentProps}
       align="start"
       className={cn(
-        "w-[200px] origin-(--radix-popover-content-transform-origin) p-0",
+        "w-[200px] origin-[var(--radix-popover-content-transform-origin,var(--transform-origin))] p-0",
         className,
       )}
     >
@@ -531,7 +531,9 @@ function normalizeFilterJoinOperators<TData extends RowData>(
     // Try to find original index using filterId first, then fallback to properties
     let currentOriginalIndex = originalIndexMapById.get(filter.filterId) ?? -1
     let previousOriginalIndex =
-      (previousFilter ? originalIndexMapById.get(previousFilter.filterId) : undefined) ?? -1
+      (previousFilter
+        ? originalIndexMapById.get(previousFilter.filterId)
+        : undefined) ?? -1
 
     // If not found by filterId, try matching by properties
     // This handles the case where filterId was changed in the URL
@@ -541,7 +543,9 @@ function normalizeFilterJoinOperators<TData extends RowData>(
     }
     if (previousOriginalIndex === -1) {
       previousOriginalIndex =
-        (previousFilter ? originalIndexMapByKey.get(getFilterKey(previousFilter)) : undefined) ?? -1
+        (previousFilter
+          ? originalIndexMapByKey.get(getFilterKey(previousFilter))
+          : undefined) ?? -1
     }
 
     // If either filter wasn't in original, default to AND
@@ -969,7 +973,7 @@ export function TableFilterMenu<TData extends RowData>({
           <PopoverContent
             aria-describedby={descriptionId}
             aria-labelledby={labelId}
-            className="flex w-full max-w-(--radix-popover-content-available-width) origin-(--radix-popover-content-transform-origin) flex-col gap-3.5 p-4 sm:min-w-[380px]"
+            className="flex w-full max-w-[var(--radix-popover-content-available-width,var(--available-width))] origin-[var(--radix-popover-content-transform-origin,var(--transform-origin))] flex-col gap-3.5 p-4 sm:min-w-[380px]"
             {...props}
           >
             <div className="flex flex-col gap-1">
@@ -1376,7 +1380,7 @@ function FilterFacetedSelect<TData extends RowData>({
       </FacetedTrigger>
       <FacetedContent
         id={inputListboxId}
-        className="w-[200px] origin-(--radix-popover-content-transform-origin)"
+        className="w-[200px] origin-[var(--radix-popover-content-transform-origin,var(--transform-origin))]"
       >
         <FacetedInput
           aria-label={`Search ${columnMeta?.label} options`}
@@ -1465,7 +1469,7 @@ function FilterDatePicker<TData extends RowData>({
       <PopoverContent
         id={inputListboxId}
         align="start"
-        className="w-auto origin-(--radix-popover-content-transform-origin) p-0"
+        className="w-auto origin-[var(--radix-popover-content-transform-origin,var(--transform-origin))] p-0"
       >
         {filter.operator === FILTER_OPERATORS.BETWEEN ? (
           <Calendar
@@ -1622,7 +1626,7 @@ function FilterJoinOperator<TData extends RowData>({
         </SelectTrigger>
         <SelectContent
           id={joinOperatorListboxId}
-          className="min-w-(--radix-select-trigger-width) lowercase"
+          className="min-w-[var(--radix-select-trigger-width,var(--anchor-width))] lowercase"
         >
           {dataTableConfig.joinOperators.map(operator => (
             <SelectItem key={operator} value={operator}>
@@ -1679,7 +1683,7 @@ function FilterFieldSelector<TData extends RowData>({
       <PopoverContent
         id={fieldListboxId}
         align="start"
-        className="w-40 origin-(--radix-popover-content-transform-origin) p-0"
+        className="w-40 origin-[var(--radix-popover-content-transform-origin,var(--transform-origin))] p-0"
       >
         <Command>
           <CommandInput placeholder="Search fields..." />
@@ -1776,7 +1780,7 @@ function FilterOperatorSelector<TData extends RowData>({
       </SelectTrigger>
       <SelectContent
         id={operatorListboxId}
-        className="origin-(--radix-select-content-transform-origin)"
+        className="origin-[var(--radix-select-content-transform-origin,var(--transform-origin))]"
       >
         {filterOperators.map(operator => (
           <SelectItem
