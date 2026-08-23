@@ -28,20 +28,48 @@ import type { DataTableInstance } from "../types"
  * one of these, so an exported value like `=cmd|'/c calc'!A1` becomes
  * executable content when the file is opened. Table rows are arbitrary
  * application data, so anyone who can write a record can reach the export.
+ *
+ * `-` is handled separately: see {@link neutralizeFormula}.
  */
-const FORMULA_TRIGGER_PATTERN = /^[=+\-@\t\r]/
+const FORMULA_TRIGGER_PATTERN = /^[=+@\t\r]/
+
+/**
+ * Whether a string is just a number, commas and surrounding space aside.
+ *
+ * `Number` rejects anything with an operator in it, so `-2+3` is not numeric
+ * while `-1,234.56` is.
+ */
+function isNumericLiteral(str: string): boolean {
+  const cleaned = str.replace(/[,\s]/g, "")
+  return cleaned !== "" && Number.isFinite(Number(cleaned))
+}
 
 /**
  * Prefix a value a spreadsheet would evaluate with an apostrophe, which every
  * major spreadsheet reads as "treat the rest as literal text" and does not
  * render in the cell. Applied before quoting so the apostrophe is inside the
  * quoted field.
+ *
+ * A leading `-` is only neutralised when the value is NOT a number. Treating
+ * every `-` as hostile is the common advice, and it is wrong for tabular data:
+ * negative amounts are ordinary here, and prefixing them writes `'-5.00` into
+ * the file. That is visibly wrong to a reader and, worse, silently wrong to any
+ * importer reading the export back — a column of negatives returns as text.
+ * `-2+3+cmd|'/c calc'!A1` is not a number and is still neutralised, so the
+ * carve-out costs nothing in safety.
  */
 function neutralizeFormula(str: string): string {
-  return FORMULA_TRIGGER_PATTERN.test(str) ? `'${str}` : str
+  if (FORMULA_TRIGGER_PATTERN.test(str)) return `'${str}`
+  if (str.startsWith("-") && !isNumericLiteral(str)) return `'${str}`
+  return str
 }
 
-function escapeCsvValue(value: unknown): string {
+/**
+ * Encode one value as a CSV field: formula-neutralised, quoted when it carries
+ * a separator, quote or newline. Exported so the rules can be tested and
+ * reused; `exportTableToCSV` applies it to every header and cell.
+ */
+export function escapeCsvValue(value: unknown): string {
   if (value === null || value === undefined) return ""
 
   if (value instanceof Date) {
