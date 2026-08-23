@@ -531,7 +531,7 @@ function normalizeFilterJoinOperators<TData extends RowData>(
     // Try to find original index using filterId first, then fallback to properties
     let currentOriginalIndex = originalIndexMapById.get(filter.filterId) ?? -1
     let previousOriginalIndex =
-      originalIndexMapById.get(previousFilter.filterId) ?? -1
+      (previousFilter ? originalIndexMapById.get(previousFilter.filterId) : undefined) ?? -1
 
     // If not found by filterId, try matching by properties
     // This handles the case where filterId was changed in the URL
@@ -541,7 +541,7 @@ function normalizeFilterJoinOperators<TData extends RowData>(
     }
     if (previousOriginalIndex === -1) {
       previousOriginalIndex =
-        originalIndexMapByKey.get(getFilterKey(previousFilter)) ?? -1
+        (previousFilter ? originalIndexMapByKey.get(getFilterKey(previousFilter)) : undefined) ?? -1
     }
 
     // If either filter wasn't in original, default to AND
@@ -561,14 +561,14 @@ function normalizeFilterJoinOperators<TData extends RowData>(
         // Current came after previous in original - use current's original joinOperator
         return {
           ...filter,
-          joinOperator: originalFilters[currentOriginalIndex].joinOperator,
+          joinOperator: originalFilters[currentOriginalIndex]?.joinOperator,
         }
       } else {
         // Current came before previous in original - use previous's original joinOperator
         // (which determines how it joins with what was before it)
         return {
           ...filter,
-          joinOperator: originalFilters[previousOriginalIndex].joinOperator,
+          joinOperator: originalFilters[previousOriginalIndex]?.joinOperator,
         }
       }
     }

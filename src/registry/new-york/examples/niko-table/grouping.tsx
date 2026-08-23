@@ -7,6 +7,7 @@ import {
   DataTableBody,
   DataTableEmptyBody,
 } from "@/components/niko-table/core/data-table-structure"
+import { DataTableGroupedRows } from "@/components/niko-table/components/data-table-grouped-rows"
 import { useDataTable } from "@/components/niko-table/core/data-table-context"
 import { DataTableColumnHeader } from "@/components/niko-table/components/data-table-column-header"
 import { DataTableColumnTitle } from "@/components/niko-table/components/data-table-column-title"
@@ -373,6 +374,10 @@ export default function GroupingTableExample() {
       <DataTable maxHeight={420}>
         <DataTableHeader />
         <DataTableBody>
+          {/* Composing this is the entire grouping opt-in: it renders the
+              group rows AND is what feature detection reads to turn
+              `enableGrouping` / `enableExpanding` on. */}
+          <DataTableGroupedRows />
           <DataTableEmptyBody>
             <DataTableEmptyIcon>
               <PackageSearch className="size-10" />
