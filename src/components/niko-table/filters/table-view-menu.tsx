@@ -75,6 +75,16 @@ export interface TableViewMenuProps<TData extends RowData> {
   onReset?: () => void
   /** Label for the reset button. Defaults to "Reset to defaults". */
   resetLabel?: string
+  /**
+   * Replaces the default toolbar button.
+   *
+   * Same `trigger` contract the sibling filters already expose
+   * (`TableColumnActions`, `TableDateFilter`, `TableFacetedFilter`), so a
+   * consumer that needs a different trigger shape — a header-sized bare icon
+   * beside a column title, for instance — composes one instead of waiting for
+   * a boolean per shape.
+   */
+  trigger?: React.ReactNode
 }
 
 interface MenuRowProps<TData extends RowData> {
@@ -116,6 +126,8 @@ export function TableViewMenu<TData extends RowData>({
   onColumnVisibilityChange,
   lockedColumnIds,
   onReset,
+
+  trigger,
   resetLabel,
 }: TableViewMenuProps<TData>) {
   // Controlled search. cmdk's built-in filter hides non-matching `CommandItem`s
@@ -164,17 +176,19 @@ export function TableViewMenu<TData extends RowData>({
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button
-          aria-label="Toggle columns"
-          role="combobox"
-          variant="outline"
-          size="sm"
-          className="ml-auto hidden h-8 lg:flex"
-        >
-          <Settings2 />
-          View
-          <ChevronsUpDown className="ml-auto opacity-50" />
-        </Button>
+        {trigger ?? (
+          <Button
+            aria-label="Toggle columns"
+            role="combobox"
+            variant="outline"
+            size="sm"
+            className="ml-auto hidden h-8 lg:flex"
+          >
+            <Settings2 />
+            View
+            <ChevronsUpDown className="ml-auto opacity-50" />
+          </Button>
+        )}
       </PopoverTrigger>
       <PopoverContent align="end" className="w-fit p-0">
         <Command shouldFilter={false}>
