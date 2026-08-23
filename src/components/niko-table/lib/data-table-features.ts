@@ -82,38 +82,57 @@ import {
   numberRangeFilter,
 } from "./filter-functions"
 
-export const features = tableFeatures({
-  columnFacetingFeature,
-  columnFilteringFeature,
-  columnGroupingFeature,
+/**
+ * Feature groups — the composable unit of the engine layer.
+ *
+ * Each group is a plain object holding the features, row models and named
+ * functions one capability needs. Spread the ones your tables use into
+ * `tableFeatures({ … })` and the rest never enters the bundle. That is the
+ * engine-side mirror of installing only the `DataTable*` pieces you need —
+ * you compose by listing what you want, not by toggling flags.
+ *
+ * @example
+ * // A read-only table: columns, sorting, nothing else.
+ * export const features = tableFeatures({
+ *   ...coreFeatures,
+ *   ...sortingFeatures,
+ * })
+ */
+
+/** Column visibility, ordering, pinning, sizing and resizing. Always useful. */
+export const coreFeatures = {
   columnOrderingFeature,
   columnPinningFeature,
   columnResizingFeature,
   columnSizingFeature,
   columnVisibilityFeature,
+} as const
+
+/** Column + global filtering, faceting, and the row models they need. */
+export const filteringFeatures = {
+  columnFacetingFeature,
+  columnFilteringFeature,
   globalFilteringFeature,
-  rowAggregationFeature,
-  rowExpandingFeature,
-  rowPaginationFeature,
-  rowSelectionFeature,
-  rowSortingFeature,
   facetedRowModel: createFacetedRowModel(),
   facetedUniqueValues: createFacetedUniqueValues(),
   facetedMinMaxValues: createFacetedMinMaxValues(),
   filteredRowModel: createFilteredRowModel(),
-  sortedRowModel: createSortedRowModel(),
-  groupedRowModel: createGroupedRowModel(),
-  paginatedRowModel: createPaginatedRowModel(),
-  expandedRowModel: createExpandedRowModel(),
   filterFns: {
     extended: extendedFilter,
     numberRange: numberRangeFilter,
     dateRange: dateRangeFilter,
   },
-  // Registered individually rather than via the bulk `sortFns` / `aggregationFns`
-  // exports (deprecated in v9): the keys below are the names columns may use in
-  // `sortFn` / `aggregationFn`, and `'auto'` resolves only what is registered.
-  // Delete any your tables never reference to shrink the bundle.
+} as const
+
+/**
+ * Sorting, plus the sort functions a column may name in `sortFn`.
+ *
+ * `'auto'` resolves only what is registered here, so drop any your tables
+ * never reference.
+ */
+export const sortingFeatures = {
+  rowSortingFeature,
+  sortedRowModel: createSortedRowModel(),
   sortFns: {
     alphanumeric: sortFn_alphanumeric,
     alphanumericCaseSensitive: sortFn_alphanumericCaseSensitive,
@@ -122,6 +141,27 @@ export const features = tableFeatures({
     text: sortFn_text,
     textCaseSensitive: sortFn_textCaseSensitive,
   },
+} as const
+
+/** Row expansion — sub-rows and expanded content. Grouping requires it. */
+export const expandingFeatures = {
+  rowExpandingFeature,
+  expandedRowModel: createExpandedRowModel(),
+} as const
+
+/**
+ * Grouping and aggregation, plus the aggregation functions a column may name
+ * in `aggregationFn`. Includes `expandingFeatures`, because a group that
+ * cannot collapse is not a group.
+ *
+ * Pairs with `<DataTableGroupedRows>` on the UI side — compose both, or
+ * neither.
+ */
+export const groupingFeatures = {
+  ...expandingFeatures,
+  columnGroupingFeature,
+  rowAggregationFeature,
+  groupedRowModel: createGroupedRowModel(),
   aggregationFns: {
     count: aggregationFn_count,
     extent: aggregationFn_extent,
@@ -135,6 +175,33 @@ export const features = tableFeatures({
     unique: aggregationFn_unique,
     uniqueCount: aggregationFn_uniqueCount,
   },
+} as const
+
+/** Client-side pagination. Omit it for server-driven or infinite tables. */
+export const paginationFeatures = {
+  rowPaginationFeature,
+  paginatedRowModel: createPaginatedRowModel(),
+} as const
+
+/** Row selection — checkboxes, the selection bar, bulk actions. */
+export const selectionFeatures = {
+  rowSelectionFeature,
+} as const
+
+/**
+ * Batteries-included default: every group above.
+ *
+ * It exists so a fresh install and every copy-paste example work with no
+ * setup. It is a starting point, not a recommendation — replace it with the
+ * groups your tables actually use and the rest drops out of the bundle.
+ */
+export const features = tableFeatures({
+  ...coreFeatures,
+  ...filteringFeatures,
+  ...sortingFeatures,
+  ...groupingFeatures,
+  ...paginationFeatures,
+  ...selectionFeatures,
 })
 
 export type DataTableFeatures = typeof features

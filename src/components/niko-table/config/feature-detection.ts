@@ -106,6 +106,11 @@ const COMPONENT_FEATURES: Record<string, FeatureRequirements> = {
   DataTableColumnSortOptions: { enableSorting: true, enableMultiSort: true },
 
   // Grouping — also needs expanding so group rows can collapse/expand
+  //
+  // `DataTableGroupedRows` is the body-side marker: composing it is the whole
+  // opt-in, so a table that renders group rows never has to set a config flag.
+  DataTableGroupedRows: { enableGrouping: true, enableExpanding: true },
+  TableGroupedRows: { enableGrouping: true, enableExpanding: true },
   TableColumnGroupOptions: { enableGrouping: true, enableExpanding: true },
   DataTableColumnGroupOptions: { enableGrouping: true, enableExpanding: true },
   TableColumnGroupMenu: { enableGrouping: true, enableExpanding: true },
