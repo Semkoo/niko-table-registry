@@ -68,7 +68,7 @@ export interface TablePaginationProps<TData extends RowData> {
 export function TablePagination<TData extends RowData>({
   table,
   pageSizeOptions = [10, 25, 50, 100],
-  defaultPageSize = pageSizeOptions[0],
+  defaultPageSize = pageSizeOptions[0] ?? 10,
   isLoading,
   isFetching,
   disableNextPage,
