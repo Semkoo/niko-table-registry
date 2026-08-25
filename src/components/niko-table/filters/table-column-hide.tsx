@@ -69,7 +69,7 @@ export function TableColumnHideOptions<TData extends RowData, TValue>({
           </TooltipContent>
         </Tooltip>
       </DropdownMenuLabel>
-      <DropdownMenuItem onSelect={() => column.toggleVisibility(false)}>
+      <DropdownMenuItem onClick={() => column.toggleVisibility(false)}>
         <EyeOff className="mr-2 size-4 text-muted-foreground/70" />
         Hide Column
       </DropdownMenuItem>
@@ -126,7 +126,7 @@ export function TableColumnHideMenu<TData extends RowData, TValue>({
             </TooltipContent>
           </Tooltip>
         </DropdownMenuLabel>
-        <DropdownMenuItem onSelect={() => column.toggleVisibility(false)}>
+        <DropdownMenuItem onClick={() => column.toggleVisibility(false)}>
           <EyeOff className="mr-2 size-4 text-muted-foreground/70" />
           Hide Column
         </DropdownMenuItem>

@@ -101,25 +101,12 @@ export function TableColumnSortOptions<TData extends RowData, TValue>({
 
   const handleSort = (
     direction: "asc" | "desc" | false,
-    e:
-      | React.MouseEvent
-      | React.KeyboardEvent
-      | React.SyntheticEvent // Base UI menu items emit wrapped synthetic events
-      | Event
-      | {
-          detail?: { originalEvent?: { shiftKey?: boolean } }
-          shiftKey?: boolean
-          nativeEvent?: { shiftKey?: boolean }
-        },
+    e: React.MouseEvent,
   ) => {
-    // Detect Shift across event sources (ref → state → native event → Radix CustomEvent.detail).
-    const isMulti =
-      isShiftPressedRef.current ||
-      isShiftPressed ||
-      ("shiftKey" in e && !!e.shiftKey) ||
-      (e as { detail?: { originalEvent?: { shiftKey?: boolean } } }).detail
-        ?.originalEvent?.shiftKey ||
-      (e as { nativeEvent?: { shiftKey?: boolean } }).nativeEvent?.shiftKey
+    // Keyboard activation synthesizes a click whose `shiftKey` is false, so the
+    // window-level ref is what carries Shift for Enter/Space; the event's own
+    // flag covers a plain shift-click.
+    const isMulti = isShiftPressedRef.current || isShiftPressed || e.shiftKey
 
     if (direction === false) {
       column.clearSorting()
@@ -164,7 +151,7 @@ export function TableColumnSortOptions<TData extends RowData, TValue>({
         </Tooltip>
       </DropdownMenuLabel>
       <DropdownMenuItem
-        onSelect={e => handleSort("asc", e)}
+        onClick={e => handleSort("asc", e)}
         className={cn(
           "flex items-center",
           sortState === "asc" && "bg-accent text-accent-foreground",
@@ -175,7 +162,7 @@ export function TableColumnSortOptions<TData extends RowData, TValue>({
         {sortState === "asc" && <Check className="ml-2 size-4" />}
       </DropdownMenuItem>
       <DropdownMenuItem
-        onSelect={e => handleSort("desc", e)}
+        onClick={e => handleSort("desc", e)}
         className={cn(
           "flex items-center",
           sortState === "desc" && "bg-accent text-accent-foreground",
@@ -186,7 +173,7 @@ export function TableColumnSortOptions<TData extends RowData, TValue>({
         {sortState === "desc" && <Check className="ml-2 size-4" />}
       </DropdownMenuItem>
       {sortState && (
-        <DropdownMenuItem onSelect={() => column.clearSorting()}>
+        <DropdownMenuItem onClick={() => column.clearSorting()}>
           <icons.unsorted className="mr-2 size-4 text-muted-foreground/70" />
           Clear Sort
         </DropdownMenuItem>

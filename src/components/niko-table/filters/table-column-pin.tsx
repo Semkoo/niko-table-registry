@@ -71,7 +71,7 @@ export function TableColumnPinOptions<TData extends RowData, TValue>({
         </Tooltip>
       </DropdownMenuLabel>
       <DropdownMenuItem
-        onSelect={() => column.pin("start")}
+        onClick={() => column.pin("start")}
         className={cn(
           "flex items-center",
           isPinned === "start" && "bg-accent text-accent-foreground",
@@ -82,7 +82,7 @@ export function TableColumnPinOptions<TData extends RowData, TValue>({
         {isPinned === "start" && <Check className="ml-2 size-4" />}
       </DropdownMenuItem>
       <DropdownMenuItem
-        onSelect={() => column.pin("end")}
+        onClick={() => column.pin("end")}
         className={cn(
           "flex items-center",
           isPinned === "end" && "bg-accent text-accent-foreground",
@@ -94,7 +94,7 @@ export function TableColumnPinOptions<TData extends RowData, TValue>({
       </DropdownMenuItem>
       {isPinned && (
         <DropdownMenuItem
-          onSelect={() => column.pin(false)}
+          onClick={() => column.pin(false)}
           className="flex items-center"
         >
           <PinOff className="mr-2 size-4" />
@@ -156,7 +156,7 @@ export function TableColumnPinMenu<TData extends RowData, TValue>({
           </Tooltip>
         </DropdownMenuLabel>
         <DropdownMenuItem
-          onSelect={() => column.pin("start")}
+          onClick={() => column.pin("start")}
           className={cn(
             "flex items-center",
             isPinned === "start" && "bg-accent text-accent-foreground",
@@ -167,7 +167,7 @@ export function TableColumnPinMenu<TData extends RowData, TValue>({
           {isPinned === "start" && <Check className="ml-2 size-4" />}
         </DropdownMenuItem>
         <DropdownMenuItem
-          onSelect={() => column.pin("end")}
+          onClick={() => column.pin("end")}
           className={cn(
             "flex items-center",
             isPinned === "end" && "bg-accent text-accent-foreground",
@@ -178,7 +178,7 @@ export function TableColumnPinMenu<TData extends RowData, TValue>({
           {isPinned === "end" && <Check className="ml-2 size-4" />}
         </DropdownMenuItem>
         <DropdownMenuItem
-          onSelect={() => column.pin(false)}
+          onClick={() => column.pin(false)}
           className="flex items-center"
         >
           <PinOff className="mr-2 size-4" />
