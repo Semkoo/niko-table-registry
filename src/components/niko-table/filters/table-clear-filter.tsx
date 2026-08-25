@@ -87,7 +87,14 @@ export function TableClearFilter<TData extends RowData>({
   const hasActiveFilters = state.columnFilters.some(
     filter => !excludeColumnIds.includes(filter.id),
   )
-  const hasGlobalFilter = Boolean(state.globalFilter)
+  // A whitespace-only search is invisible in the input, so counting it as
+  // active pops a Reset the reader cannot account for — they see a button
+  // offering to clear something, and nothing on screen that needs clearing.
+  // Objects (the advanced OR/MIXED filter payload) always count.
+  const hasGlobalFilter =
+    typeof state.globalFilter === "string"
+      ? state.globalFilter.trim().length > 0
+      : Boolean(state.globalFilter)
   const hasSorting = state.sorting.length > 0
 
   // Only check for states that are meant to be reset
