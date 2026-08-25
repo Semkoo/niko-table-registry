@@ -40,6 +40,7 @@ const TAB = ["scope"] as const
 async function renderTable(
   initialFilters: ColumnFiltersState,
   exclude?: readonly string[],
+  globalFilter?: string,
 ) {
   const user = userEvent.setup()
   // Mirrors a URL-backed table: the caller owns columnFilters state.
@@ -53,7 +54,7 @@ async function renderTable(
         data={rows}
         columns={columns}
         getRowId={row => row.id}
-        state={{ columnFilters: filters }}
+        state={{ columnFilters: filters, globalFilter: globalFilter ?? "" }}
         onColumnFiltersChange={updater =>
           setFilters(prev => {
             const next = typeof updater === "function" ? updater(prev) : updater
@@ -129,5 +130,32 @@ describe("TableClearFilter excludeColumnIds", () => {
     })
 
     expect(seen.filters).toEqual([])
+  })
+})
+
+/**
+ * The search box is usually controlled from the URL, so a stray space survives
+ * a reload and keeps offering a Reset for something the reader cannot see. Only
+ * the "is anything active?" question ignores whitespace — the value itself is
+ * left alone, since trimming what is stored would make it impossible to type a
+ * space between two words.
+ */
+describe("TableClearFilter whitespace search", () => {
+  it("shows Reset for a real search term", async () => {
+    await renderTable([], undefined, "bob")
+    expect(reset()).not.toBeNull()
+  })
+
+  it("does not show Reset for a whitespace-only search", async () => {
+    for (const blank of [" ", "   ", "\t"]) {
+      await renderTable([], undefined, blank)
+      expect(reset()).toBeNull()
+      cleanup()
+    }
+  })
+
+  it("still shows Reset for a term padded with spaces", async () => {
+    await renderTable([], undefined, "  bob  ")
+    expect(reset()).not.toBeNull()
   })
 })
