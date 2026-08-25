@@ -31,6 +31,7 @@ import { useResolvedRowContextMenuRenderer } from "../components/data-table-row-
 import { resolveGroupedRowsSlot } from "../components/data-table-grouped-rows"
 import { GroupedBodyRow } from "./data-table-grouped-row"
 import { DataTableColumnResizeHandle } from "../lib/column-resize-handle"
+import { isGlobalFilterActive } from "../lib/filter-functions"
 import {
   createScrollHandler,
   type ScrollEvent,
@@ -1144,7 +1145,7 @@ export function DataTableVirtualizedEmptyBody({
   const tableState = table.state
   const isFiltered = React.useMemo(
     () =>
-      (tableState.globalFilter && tableState.globalFilter.length > 0) ||
+      isGlobalFilterActive(tableState.globalFilter) ||
       (tableState.columnFilters && tableState.columnFilters.length > 0),
     [tableState.globalFilter, tableState.columnFilters],
   )

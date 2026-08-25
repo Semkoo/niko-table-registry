@@ -149,6 +149,19 @@ export const extendedFilter: AnyFilterFn = (
  * pure OR, and mixed AND/OR (AND has higher precedence than OR — splits
  * filters into OR-separated AND-groups).
  */
+/**
+ * Whether a `globalFilter` value represents a search the reader actually made.
+ *
+ * A whitespace-only string does not: it is invisible in the search input, so
+ * treating it as active makes the UI insist something is filtered while showing
+ * nothing that could be. The advanced filter payload is an object and always
+ * counts.
+ */
+export function isGlobalFilterActive(value: unknown): boolean {
+  if (typeof value === "string") return value.trim().length > 0
+  return Boolean(value)
+}
+
 export const globalFilter: AnyFilterFn = (
   row,
   _columnId,
@@ -242,8 +255,16 @@ export const globalFilter: AnyFilterFn = (
     })
   }
 
-  // Regular global search (string search across all columns)
-  const searchValue = String(filterValue).toLowerCase()
+  // Regular global search (string search across all columns).
+  //
+  // Trimmed BEFORE the pattern is built, not merely to decide whether to
+  // search. A trailing space is invisible in the input, but the pattern would
+  // become /bob /i — matching only where a space actually follows — so the
+  // reader gets an empty table and nothing on screen explains why.
+  const searchValue = String(filterValue).trim().toLowerCase()
+
+  // Whitespace-only: nothing was really searched for, so nothing is filtered.
+  if (searchValue === "") return true
 
   // Search across all columns that have filtering enabled
   return row.getAllCells().some(cell => {
