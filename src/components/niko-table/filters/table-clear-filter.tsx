@@ -18,6 +18,10 @@ import { X } from "lucide-react"
 
 import type { DataTableInstance } from "../types"
 import type { RowData } from "@tanstack/react-table"
+
+/** Stable empty default — `excludeColumnIds` is a `useCallback` dependency. */
+const EMPTY_EXCLUDED_COLUMN_IDS: readonly string[] = []
+
 export interface TableClearFilterProps<TData extends RowData> {
   table: DataTableInstance<TData>
   className?: string
@@ -40,6 +44,18 @@ export interface TableClearFilterProps<TData extends RowData> {
    * @default true
    */
   enableResetSorting?: boolean
+  /**
+   * Column ids that are NOT user filters, even though they live in
+   * `columnFilters` — a navigational tab or scope selector the table stores
+   * there so it round-trips through the URL like everything else.
+   *
+   * They neither make the button appear nor get cleared by it. Without this,
+   * selecting such a tab pops a "Reset" the user never asked for, and pressing
+   * it silently navigates them back to the default tab.
+   *
+   * @default [] — every column filter is treated as a user filter
+   */
+  excludeColumnIds?: readonly string[]
 }
 
 /**
@@ -64,10 +80,13 @@ export function TableClearFilter<TData extends RowData>({
   enableResetColumnFilters = true,
   enableResetGlobalFilter = true,
   enableResetSorting = true,
+  excludeColumnIds = EMPTY_EXCLUDED_COLUMN_IDS,
 }: TableClearFilterProps<TData>) {
   // Read state directly - should be reactive via table re-renders
   const state = table.state
-  const hasActiveFilters = state.columnFilters.length > 0
+  const hasActiveFilters = state.columnFilters.some(
+    filter => !excludeColumnIds.includes(filter.id),
+  )
   const hasGlobalFilter = Boolean(state.globalFilter)
   const hasSorting = state.sorting.length > 0
 
@@ -79,7 +98,15 @@ export function TableClearFilter<TData extends RowData>({
 
   const handleClearAll = React.useCallback(() => {
     if (enableResetColumnFilters) {
-      table.resetColumnFilters()
+      if (excludeColumnIds.length > 0) {
+        // Keep the excluded entries exactly as they are — resetColumnFilters()
+        // would drop the tab the user is standing on along with their filters.
+        table.setColumnFilters(prev =>
+          prev.filter(filter => excludeColumnIds.includes(filter.id)),
+        )
+      } else {
+        table.resetColumnFilters()
+      }
     }
     if (enableResetGlobalFilter) {
       table.setGlobalFilter("")
@@ -92,6 +119,7 @@ export function TableClearFilter<TData extends RowData>({
     enableResetColumnFilters,
     enableResetGlobalFilter,
     enableResetSorting,
+    excludeColumnIds,
   ])
 
   if (!hasAnythingToReset) {
