@@ -70,7 +70,7 @@ export function TableColumnGroupOptions<TData extends RowData, TValue>({
       </DropdownMenuLabel>
       {isGrouped ? (
         <DropdownMenuItem
-          onSelect={() => column.toggleGrouping()}
+          onClick={() => column.toggleGrouping()}
           className="flex items-center"
         >
           <Ungroup className="mr-2 size-4" />
@@ -78,7 +78,7 @@ export function TableColumnGroupOptions<TData extends RowData, TValue>({
         </DropdownMenuItem>
       ) : (
         <DropdownMenuItem
-          onSelect={() => column.toggleGrouping()}
+          onClick={() => column.toggleGrouping()}
           className="flex items-center"
         >
           <Group className="mr-2 size-4" />
@@ -140,7 +140,7 @@ export function TableColumnGroupMenu<TData extends RowData, TValue>({
         </DropdownMenuLabel>
         {isGrouped ? (
           <DropdownMenuItem
-            onSelect={() => column.toggleGrouping()}
+            onClick={() => column.toggleGrouping()}
             className="flex items-center"
           >
             <Ungroup className="mr-2 size-4" />
@@ -148,7 +148,7 @@ export function TableColumnGroupMenu<TData extends RowData, TValue>({
           </DropdownMenuItem>
         ) : (
           <DropdownMenuItem
-            onSelect={() => column.toggleGrouping()}
+            onClick={() => column.toggleGrouping()}
             className="flex items-center"
           >
             <Group className="mr-2 size-4" />
