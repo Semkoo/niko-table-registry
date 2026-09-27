@@ -785,6 +785,9 @@ function TableInlineFilterItem<TData extends RowData>({
         open={showOperatorSelector}
         onOpenChange={setShowOperatorSelector}
         value={filter.operator}
+        // Spread so it type-checks against Radix too: Base UI reads the closed
+        // trigger's label only from `items`, Radix ignores the prop.
+        {...{ items: filterOperators }}
         onValueChange={(value: string | null) => {
           // Base UI selects pass null on clear; Radix never does
           if (!value) return
@@ -1025,6 +1028,9 @@ function onFilterInputRender<TData extends RowData>({
             // Base UI selects pass null on clear; Radix never does
             value && onFilterUpdate(filter.filterId, { value })
           }
+          // Spread so it type-checks against Radix too: Base UI reads the
+          // closed trigger's label only from `items`, Radix ignores the prop.
+          {...{ items: dataTableConfig.booleanValues }}
         >
           <SelectTrigger
             id={inputId}
@@ -1034,8 +1040,11 @@ function onFilterInputRender<TData extends RowData>({
             <SelectValue placeholder={filter.value ? "True" : "False"} />
           </SelectTrigger>
           <SelectContent id={inputListboxId}>
-            <SelectItem value="true">True</SelectItem>
-            <SelectItem value="false">False</SelectItem>
+            {dataTableConfig.booleanValues.map(option => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       )

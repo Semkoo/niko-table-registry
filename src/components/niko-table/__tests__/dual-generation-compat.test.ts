@@ -115,6 +115,56 @@ describe("dual-generation (Radix + Base UI) compatibility", () => {
     expect(violations).toEqual([])
   })
 
+  /**
+   * Base UI's `Select.Value` resolves the closed trigger's label ONLY from the
+   * root's `items` prop; it never reads the `SelectItem` children. Without
+   * `items` a Base UI select shows its raw value until opened (`iLike` for
+   * "contains", `true` for "True"). Radix reads the item text, so the Radix
+   * renders in this suite cannot see it.
+   *
+   * A select passes `items` (spread, so it type-checks against Radix too), or
+   * every item renders exactly its own value, so the raw value IS the label.
+   */
+  it("gives every select a label source Base UI can read", () => {
+    /** `${size}` → size, so a stringified value matches its rendered child. */
+    const unwrap = (expr: string) =>
+      expr
+        .trim()
+        .replace(/^`\$\{(.+)\}`$/, "$1")
+        .trim()
+    const violations: string[] = []
+    for (const { path, text } of FILES) {
+      for (const match of text.matchAll(/<Select\b[\s\S]*?<\/Select>/g)) {
+        const block = match[0]
+        if (!/<SelectValue\b[^>]*\/>/.test(block)) continue
+        const openingTag = block.slice(0, block.indexOf("<SelectTrigger"))
+        if (/\bitems[=:]/.test(openingTag)) continue
+        const items = [
+          ...block.matchAll(
+            // The value ends at the `}` followed by whitespace or `>`, so a
+            // template literal like {`${size}`} is captured whole.
+            /<SelectItem\b[^>]*?value=(\{.*?\}(?=[\s>])|"[^"]*")[^>]*>([\s\S]*?)<\/SelectItem>/g,
+          ),
+        ]
+        const selfLabelled =
+          items.length > 0 &&
+          items.every(([, value, child]) => {
+            const renders = child!.trim().match(/^\{([\s\S]+)\}$/)?.[1]
+            return (
+              value!.startsWith("{") &&
+              renders !== undefined &&
+              unwrap(value!.slice(1, -1)) === unwrap(renders)
+            )
+          })
+        if (!selfLabelled) {
+          const line = text.slice(0, match.index).split("\n").length
+          violations.push(`${path}:${line} <Select> — pass items`)
+        }
+      }
+    }
+    expect(violations).toEqual([])
+  })
+
   /** niko-table renders through the consumer's shadcn wrappers, never a primitive directly. */
   it("never imports a primitive package directly", () => {
     const violations = FILES.filter(
