@@ -171,6 +171,9 @@ function TableSortItem({
           open={showDirectionSelector}
           onOpenChange={setShowDirectionSelector}
           value={sort.desc ? "desc" : "asc"}
+          // Spread so it type-checks against Radix too: Base UI reads the
+          // closed trigger's label only from `items`, Radix ignores the prop.
+          {...{ items: labels }}
           onValueChange={(value: string | null) =>
             // Base UI selects pass null on clear; Radix never does
             value && onSortUpdate(sort.id, { desc: value === "desc" })
