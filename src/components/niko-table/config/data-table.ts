@@ -45,10 +45,11 @@ interface SortIcons {
   unsorted: LucideIcon
 }
 
-interface SortLabels {
-  asc: string
-  desc: string
-}
+/**
+ * A mapped type rather than an interface so it can be passed as a Select's
+ * `items` label map (interfaces carry no implicit index signature).
+ */
+type SortLabels = Record<"asc" | "desc", string>
 
 export const SORT_ICONS: Record<SortIconVariant, SortIcons> = {
   [FILTER_VARIANTS.TEXT]: {
@@ -191,6 +192,14 @@ export const dataTableConfig = {
     { label: "Is", value: FILTER_OPERATORS.EQ },
     { label: "Is not", value: FILTER_OPERATORS.NEQ },
   ] satisfies { label: string; value: FilterOperator }[],
+  /**
+   * Choices for a boolean filter's value select. Also handed to the select as
+   * `items`, where Base UI reads the closed trigger's label from.
+   */
+  booleanValues: [
+    { label: "True", value: "true" },
+    { label: "False", value: "false" },
+  ],
   sortOrders: [
     { label: "Asc", value: "asc" as const },
     { label: "Desc", value: "desc" as const },
