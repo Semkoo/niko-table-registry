@@ -272,7 +272,12 @@ export function TableSliderFilter<TData extends RowData>({
           ) : null}
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="start" className="flex w-auto flex-col gap-4">
+      <PopoverContent
+        align="start"
+        // Capped so a long description wraps instead of stretching the
+        // popover across the screen.
+        className="flex w-auto max-w-80 flex-col gap-4"
+      >
         <div className="flex flex-col gap-3">
           <div className="flex h-5 items-center justify-between gap-2">
             <p className="leading-5 font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
