@@ -36,6 +36,7 @@ import {
   createScrollHandler,
   type ScrollEvent,
 } from "../lib/create-scroll-handler"
+import { measureRowWithExpansion } from "../lib/measure-row-with-expansion"
 import { renderCellContent } from "../lib/render-cell-content"
 import { resolveColumnWidth, resolveFlexColumnIds } from "../lib/flex-columns"
 import { isInteractiveClickTarget } from "../lib/row-click"
@@ -48,37 +49,6 @@ import {
 
 import type { DataTableRow } from "../types"
 import type { RowData } from "@tanstack/react-table"
-// ============================================================================
-// Row measurement helper
-// ============================================================================
-
-// Sums base + expanded sibling height (ResizeObserver only sees the base row).
-// Disabled in Firefox where stale `getBoundingClientRect` causes measure loops.
-//
-// Prefers `ResizeObserverEntry.borderBoxSize` for the base row when TanStack
-// Virtual passes the entry through — that height is computed off the same
-// observation that fired the callback, so we skip a forced layout read.
-// Falls back to `getBoundingClientRect` for the initial measure (no entry)
-// and for the expanded sibling (not observed by the virtualizer).
-const measureRowWithExpansion:
-  | ((element: Element, entry?: ResizeObserverEntry | undefined) => number)
-  | undefined =
-  typeof window !== "undefined" && navigator.userAgent.indexOf("Firefox") === -1
-    ? (element, entry) => {
-        const baseHeight =
-          entry?.borderBoxSize?.[0]?.blockSize ??
-          element.getBoundingClientRect().height
-        const next = element.nextElementSibling
-        if (
-          next &&
-          next.getAttribute("data-slot") === "datatable-expanded-row"
-        ) {
-          return baseHeight + next.getBoundingClientRect().height
-        }
-        return baseHeight
-      }
-    : undefined
-
 export type { ScrollEvent }
 
 // ============================================================================
