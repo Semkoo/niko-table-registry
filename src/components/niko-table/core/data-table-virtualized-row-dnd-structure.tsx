@@ -37,39 +37,11 @@ import {
 } from "../filters/table-row-dnd"
 import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
+import { measureRowWithExpansion } from "../lib/measure-row-with-expansion"
 import type { ScrollEvent } from "./data-table-virtualized-structure"
 
 import type { DataTableRow } from "../types"
 import type { RowData } from "@tanstack/react-table"
-// ============================================================================
-// Stable measureElement — computed once at module level
-// ============================================================================
-
-// See `data-table-virtualized-structure.tsx` for full rationale: sums base +
-// adjacent expanded-row height since ResizeObserver only attaches to the base.
-// Prefers `ResizeObserverEntry.borderBoxSize` over `getBoundingClientRect`
-// when TanStack Virtual passes the entry — skips a forced layout read on
-// the hot path. Disabled in Firefox (stale getBoundingClientRect during
-// scroll). Module-scoped for stable reference identity.
-const measureElement:
-  | ((element: Element, entry?: ResizeObserverEntry | undefined) => number)
-  | undefined =
-  typeof window !== "undefined" && navigator.userAgent.indexOf("Firefox") === -1
-    ? (element, entry) => {
-        const baseHeight =
-          entry?.borderBoxSize?.[0]?.blockSize ??
-          element.getBoundingClientRect().height
-        const next = element.nextElementSibling
-        if (
-          next &&
-          next.getAttribute("data-slot") === "datatable-expanded-row"
-        ) {
-          return baseHeight + next.getBoundingClientRect().height
-        }
-        return baseHeight
-      }
-    : undefined
-
 // ============================================================================
 // VirtualizedDraggableRow — internal row component for virtualized row DnD
 // ============================================================================
@@ -465,7 +437,7 @@ export function DataTableVirtualizedDndBody<TData extends RowData>({
     estimateSize: () => estimateSize,
     overscan,
     enabled: !!scrollElement,
-    measureElement,
+    measureElement: measureRowWithExpansion,
   })
 
   /** Single row-click handler with event delegation (useCallback). */

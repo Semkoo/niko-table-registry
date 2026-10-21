@@ -253,6 +253,11 @@
           "path": "src/components/niko-table/core/data-table-virtualized-structure.tsx",
           "type": "registry:component",
           "target": "components/niko-table/core/data-table-virtualized-structure.tsx"
+        },
+        {
+          "path": "src/components/niko-table/lib/measure-row-with-expansion.ts",
+          "type": "registry:lib",
+          "target": "components/niko-table/lib/measure-row-with-expansion.ts"
         }
       ]
     },
