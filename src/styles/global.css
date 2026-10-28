@@ -202,3 +202,10 @@
     scrollbar-width: none;
   }
 }
+
+/* Dual-theme markup from highlightFile (lib/manual-installation-files.ts) */
+[data-theme="light"] .dark-only,
+[data-theme="dark"] .light-only,
+:root:not([data-theme]) .light-only {
+  display: none;
+}
