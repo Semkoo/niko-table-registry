@@ -1,12 +1,10 @@
 ---
-import { Code } from "@astrojs/starlight/components"
 import { InstallationTabsInternal } from "@/components/markdown/installation-tabs/_installation-tabs-internal"
 import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
 import type {
   RegistryFileType,
   RegistryItemSchema,
 } from "@/types/shadcn-registry"
-import { SERVER_URL } from "@/data/env"
 import { ManualInstallCodeCard } from "@/components/manual-install-code-card"
 
 type RegistryItem =
@@ -51,8 +49,7 @@ const filesToCopy = module.files?.map(file => {
     path:
       file.target ??
       `${pathFromType}/${registryItem}.${file.path.split(".").pop()}`,
-    // TODO: In what cases is content undefined?
-    content: file.content ?? "",
+    fileId: toManualInstallId(file.path),
   }
 })
 
@@ -60,22 +57,36 @@ const npmModulesToInstall = module.dependencies
 const registryDependencies = module.registryDependencies
   ?.map(dep => {
     if (dep.startsWith("http")) {
-      // This is a non-shadcn/ui dependency that is hosted on our registry.
-      // Currently other registry dependencies are not supported.
-      const name = dep.split("/").pop()?.split(".")[0]?.replace("-", " ")
+      // A niko-table registry item; the components page catalogs every item.
       return {
-        name,
-        href: `${SERVER_URL}/components/${name}`,
+        name: dep
+          .split("/")
+          .pop()
+          ?.replace(/\.json$/, "")
+          .replaceAll("-", " "),
+        href: "/getting-started/components/",
       }
     } else {
       // This is a shadcn/ui dependency.
       return {
-        name: dep.replace("-", " "),
+        name: dep.replaceAll("-", " "),
         href: `https://ui.shadcn.com/docs/components/${dep}`,
       }
     }
   })
   .filter(d => d.name != null)
+
+// The card loads code from /manual-install/<id>.json, which only serves files
+// under src/components/niko-table — fail the build rather than ship a dead card.
+function toManualInstallId(filePath: string) {
+  const prefix = "src/components/niko-table/"
+  if (!filePath.startsWith(prefix)) {
+    throw new Error(
+      `${registryItem}: ${filePath} is not served by /manual-install`,
+    )
+  }
+  return filePath.slice(prefix.length)
+}
 
 function getFileLocationFromType(type: RegistryFileType) {
   switch (type) {
@@ -163,9 +174,11 @@ function getFileLocationFromType(type: RegistryFileType) {
           <div class="flex flex-col gap-4">
             <p>Copy and paste the following code into your project.</p>
             {filesToCopy.map(file => (
-              <ManualInstallCodeCard client:load filePath={file.path}>
-                <Code code={file.content} lang={file.path?.split(".").pop()} />
-              </ManualInstallCodeCard>
+              <ManualInstallCodeCard
+                client:load
+                filePath={file.path}
+                fileId={file.fileId}
+              />
             ))}
           </div>
         )

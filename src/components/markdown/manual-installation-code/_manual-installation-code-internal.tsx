@@ -116,12 +116,6 @@ export function ManualInstallationCodeInternal({
 
   return (
     <div className="not-content space-y-4">
-      <style>{`
-        [data-theme="light"] .dark-only { display: none; }
-        [data-theme="dark"] .light-only { display: none; }
-        :root:not([data-theme]) .light-only { display: none; }
-      `}</style>
-
       {sortedDirs.map(dir => {
         const files = filesByDirectory[dir]
         const isExpanded = expandedDirs.has(dir)

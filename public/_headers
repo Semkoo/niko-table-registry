@@ -4,6 +4,13 @@
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=()
   Content-Security-Policy: frame-ancestors 'none'
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+
+# Sitemap: short cache so new pages are discovered quickly
+/sitemap-index.xml
+  Cache-Control: public, max-age=3600
+/sitemap-0.xml
+  Cache-Control: public, max-age=3600
 
 /_astro/*
   Cache-Control: public, max-age=31536000, immutable

@@ -44,3 +44,40 @@
 /niko-table/infinite-scroll-virtualized-table/ /examples/infinite-scroll-virtualized-table/ 301
 /niko-table/inline-edit-table /examples/inline-edit-table/ 301
 /niko-table/inline-edit-table/ /examples/inline-edit-table/ 301
+
+# Astro's redirects config emits a 200 meta-refresh page; serve a real 301 instead
+/examples/all-features-grid /examples/composed-grid/ 301
+/examples/all-features-grid/ /examples/composed-grid/ 301
+
+# Section roots have no index page; Google probes them by trimming URLs
+/examples /examples/simple-table/ 301
+/examples/ /examples/simple-table/ 301
+/getting-started /getting-started/introduction/ 301
+/getting-started/ /getting-started/introduction/ 301
+/niko-table /niko-table/introduction/ 301
+/niko-table/ /niko-table/introduction/ 301
+/niko-table/overview /niko-table/overview/core/ 301
+/niko-table/overview/ /niko-table/overview/core/ 301
+/data-grid /data-grid/introduction/ 301
+/data-grid/ /data-grid/introduction/ 301
+
+# Earlier section names (/data-table, /niko-data-table, /niko-tables) → current paths
+/data-table/data-table /niko-table/introduction/ 301
+/data-table/data-table/ /niko-table/introduction/ 301
+/data-table/introduction /niko-table/introduction/ 301
+/data-table/components /niko-table/components/ 301
+/data-table/introduction/ /niko-table/introduction/ 301
+/data-table/components/ /niko-table/components/ 301
+/data-table/* /examples/:splat 301
+/niko-data-table/introduction /niko-table/introduction/ 301
+/niko-data-table/components /niko-table/components/ 301
+/niko-data-table/introduction/ /niko-table/introduction/ 301
+/niko-data-table/components/ /niko-table/components/ 301
+/niko-data-table/overview/* /niko-table/overview/:splat 301
+/niko-data-table/* /examples/:splat 301
+/niko-tables/introduction /niko-table/introduction/ 301
+/niko-tables/components /niko-table/components/ 301
+/niko-tables/introduction/ /niko-table/introduction/ 301
+/niko-tables/components/ /niko-table/components/ 301
+/niko-tables/overview/* /niko-table/overview/:splat 301
+/niko-tables/* /examples/:splat 301
