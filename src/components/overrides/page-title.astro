@@ -10,8 +10,7 @@ const filePath = starlightRoute.entry.filePath
 
 // Extended schema from starlight-theme-black
 const links = (starlightRoute.entry.data as Record<string, unknown>).links as
-  | { doc?: string; api?: string }
-  | undefined
+  { doc?: string; api?: string } | undefined
 
 let rawMarkdown = ""
 try {
@@ -23,88 +22,82 @@ try {
 const pageUrl = Astro.url.href
 ---
 
-{
-  template === "doc" && (
-    <div class="breadcrumb">
-      <div class="truncate">Docs</div>
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-      >
-        <path d="m9 18 6-6-6-6" />
-      </svg>
-      <div class="text-foreground">{title}</div>
-    </div>
-  )
-}
+{template === "doc" && (
+  <div class="breadcrumb">
+    <div class="truncate">Docs</div>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <path d="m9 18 6-6-6-6" />
+    </svg>
+    <div class="text-foreground">{title}</div>
+  </div>
+)}
 
 <div class="page-title-wrapper">
   <h1 id={PAGE_TITLE_ID}>{title}</h1>
-  {
-    rawMarkdown && (
-      <CopyPageButtonInternal
-        client:load
-        rawMarkdown={rawMarkdown}
-        pageUrl={pageUrl}
-      />
-    )
-  }
+  {rawMarkdown && (
+    <CopyPageButtonInternal
+      client:load
+      rawMarkdown={rawMarkdown}
+      pageUrl={pageUrl}
+    />
+  )}
 </div>
 
 {description && <p class="description">{description}</p>}
 
-{
-  links && (
-    <div class="links">
-      {links.doc && (
-        <a href={links.doc} target="_blank" rel="noreferrer">
-          Docs
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="0.75rem"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path d="M15 3h6v6" />
-            <path d="M10 14 21 3" />
-            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-          </svg>
-        </a>
-      )}
+{links && (
+  <div class="links">
+    {links.doc && (
+      <a href={links.doc} target="_blank" rel="noreferrer">
+        Docs
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="0.75rem"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M15 3h6v6" />
+          <path d="M10 14 21 3" />
+          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+        </svg>
+      </a>
+    )}
 
-      {links.api && (
-        <a href={links.api} target="_blank" rel="noreferrer">
-          API
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="0.75rem"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path d="M15 3h6v6" />
-            <path d="M10 14 21 3" />
-            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-          </svg>
-        </a>
-      )}
-    </div>
-  )
-}
+    {links.api && (
+      <a href={links.api} target="_blank" rel="noreferrer">
+        API
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="0.75rem"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M15 3h6v6" />
+          <path d="M10 14 21 3" />
+          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+        </svg>
+      </a>
+    )}
+  </div>
+)}
 
 <style>
   .breadcrumb {

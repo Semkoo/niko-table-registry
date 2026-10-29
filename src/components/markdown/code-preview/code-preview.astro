@@ -22,13 +22,11 @@ const fileContents = (
 )
 ---
 
-{
-  /*
+{/*
   Keep <Code> outside client islands. Expressive Code emits its base stylesheet
   as a page asset; when <Code> is only slotted into a client:load island, that
   CSS link is dropped and line numbers stack above each line of code.
-*/
-}
+*/}
 <div
   class="not-content flex flex-col gap-2"
   data-code-preview

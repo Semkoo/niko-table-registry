@@ -121,12 +121,15 @@ function getFileLocationFromType(type: RegistryFileType) {
         command={`shadcn@latest add @niko-table/${registryItem}`}
       />
       <p class="text-sm text-muted-foreground">
-        Requires the <code>@niko-table</code> registry in your <code
-          >components.json</code
-        >. See the <a
+        Requires the <code>@niko-table</code> registry in your{" "}
+        <code>components.json</code>. See the{" "}
+        <a
           href="/getting-started/installation/#configure-the-niko-table-registry"
-          class="underline underline-offset-3">Installation Guide</a
-        > for setup. Or install directly via URL:
+          class="underline underline-offset-3"
+        >
+          Installation Guide
+        </a>{" "}
+        for setup. Or install directly via URL:
       </p>
       <CliCommandCode
         action="run"
@@ -134,55 +137,48 @@ function getFileLocationFromType(type: RegistryFileType) {
       />
     </div>
     <div class="flex flex-col gap-8">
-      {
-        registryDependencies != null && registryDependencies.length > 0 && (
-          <div class="flex flex-col gap-4">
-            <p>
-              This component relies on other items which must be installed
-              first.
-            </p>
-            <ul class="list-disc pl-10">
-              {registryDependencies.map(dep => (
-                <li>
-                  <a
-                    href={dep.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="capitalize underline underline-offset-3"
-                  >
-                    {dep.name}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )
-      }
-      {
-        npmModulesToInstall != null && npmModulesToInstall.length > 0 && (
-          <div class="flex flex-col gap-4">
-            <p>Install the following dependencies.</p>
-            <CliCommandCode
-              action="install"
-              command={npmModulesToInstall.join(" ")}
-            />
-          </div>
-        )
-      }
-      {
-        filesToCopy != null && filesToCopy.length > 0 && (
-          <div class="flex flex-col gap-4">
-            <p>Copy and paste the following code into your project.</p>
-            {filesToCopy.map(file => (
-              <ManualInstallCodeCard
-                client:load
-                filePath={file.path}
-                fileId={file.fileId}
-              />
+      {registryDependencies != null && registryDependencies.length > 0 && (
+        <div class="flex flex-col gap-4">
+          <p>
+            This component relies on other items which must be installed first.
+          </p>
+          <ul class="list-disc pl-10">
+            {registryDependencies.map(dep => (
+              <li>
+                <a
+                  href={dep.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="capitalize underline underline-offset-3"
+                >
+                  {dep.name}
+                </a>
+              </li>
             ))}
-          </div>
-        )
-      }
+          </ul>
+        </div>
+      )}
+      {npmModulesToInstall != null && npmModulesToInstall.length > 0 && (
+        <div class="flex flex-col gap-4">
+          <p>Install the following dependencies.</p>
+          <CliCommandCode
+            action="install"
+            command={npmModulesToInstall.join(" ")}
+          />
+        </div>
+      )}
+      {filesToCopy != null && filesToCopy.length > 0 && (
+        <div class="flex flex-col gap-4">
+          <p>Copy and paste the following code into your project.</p>
+          {filesToCopy.map(file => (
+            <ManualInstallCodeCard
+              client:load
+              filePath={file.path}
+              fileId={file.fileId}
+            />
+          ))}
+        </div>
+      )}
       <p>Update the import paths to match your project setup.</p>
     </div>
   </InstallationTabsInternal>
