@@ -22,7 +22,7 @@ const { href, external = false } = Astro.props
     "dark:border-input dark:bg-input/30 dark:hover:bg-input/50",
     "no-underline!",
   ]}
-  {...external ? { target: "_blank", rel: "noopener noreferrer" } : {}}
+  {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
 >
   <slot />
 </a>

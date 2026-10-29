@@ -24,21 +24,17 @@ const components = Object.entries(
   .filter(f => f != null)
 ---
 
-<ul
-  class="m-0 grid list-none grid-cols-1 gap-4 text-lg text-foreground/80 md:grid-cols-2 lg:grid-cols-3 lg:text-base"
->
-  {
-    components.map(({ fileName, title }) => {
-      return (
-        <li>
-          <a
-            class="block w-full no-underline hover:underline"
-            href={`/components/${fileName}`}
-          >
-            {title}
-          </a>
-        </li>
-      )
-    })
-  }
+<ul class="m-0 grid list-none grid-cols-1 gap-4 text-lg text-foreground/80 md:grid-cols-2 lg:grid-cols-3 lg:text-base">
+  {components.map(({ fileName, title }) => {
+    return (
+      <li>
+        <a
+          class="block w-full no-underline hover:underline"
+          href={`/components/${fileName}`}
+        >
+          {title}
+        </a>
+      </li>
+    )
+  })}
 </ul>
