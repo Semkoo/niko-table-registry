@@ -147,7 +147,7 @@ function ColumnResizePreviewLine() {
     <div
       aria-hidden
       data-slot="column-resize-preview"
-      className="bg-primary pointer-events-none absolute top-0 z-40 w-px"
+      className="pointer-events-none absolute top-0 z-40 w-px bg-primary"
       style={{ left, height: scrollContainer.scrollHeight }}
     />
   )
