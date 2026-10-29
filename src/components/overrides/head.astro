@@ -130,8 +130,9 @@ const jsonLd =
     const KEY = "niko-sidebar-scroll"
     const run = () => {
       try {
-        if (!matchMedia("(min-width: 48rem)").matches) return
-        const el = document.querySelector("aside.aside .sidebar")
+        if (!matchMedia("(min-width: 50rem)").matches) return
+        // theme-black scrolls the inner content, not Starlight's .sidebar-pane (below 50rem it is a popover).
+        const el = document.querySelector("nav.sidebar .sidebar-content")
         if (!(el instanceof HTMLElement)) return
 
         const persist = () => {
