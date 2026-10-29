@@ -114,17 +114,21 @@ const jsonLd =
     : JSON.stringify([primarySchema(), breadcrumbSchema])
 ---
 
-{processedHead.map(({ tag: Tag, attrs, content }) => (
-  <Tag {...attrs} set:html={content} />
-))}
+{
+  processedHead.map(({ tag: Tag, attrs, content }) => (
+    <Tag {...attrs} set:html={content} />
+  ))
+}
 
 <link rel="canonical" href={canonicalUrl} />
 <link rel="manifest" href="/site.webmanifest" />
 <script is:inline type="application/ld+json" set:html={jsonLd} />
-{/*
+{
+  /*
     Persist theme-black sidebar scroll across MPA navigations.
     Must NOT use `#starlight__sidebar` / SidebarPersister — those freeze this theme.
-  */}
+  */
+}
 <script is:inline>
   ;(() => {
     const KEY = "niko-sidebar-scroll"
