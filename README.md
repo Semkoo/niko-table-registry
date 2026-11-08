@@ -204,7 +204,7 @@ niko-table/
 ├── hooks/         # Table and grid hooks
 ├── config/        # Feature detection
 ├── lib/           # Utilities, constants, formatting
-└── types/         # TypeScript types (may use types/index.ts)
+└── types.ts       # TypeScript types
 ```
 
 ## Documentation

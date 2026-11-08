@@ -27,11 +27,11 @@ niko-table/
 ├── hooks/          # Table helpers (debounce, flash, scroll, options, …)
 ├── config/         # Feature detection
 ├── lib/            # Utilities, constants, filter fns, resize handle, …
-└── types/          # TypeScript types (types/index.ts is the types module)
+└── types.ts        # TypeScript types (TanStack module augmentation)
 ```
 
 Each of those folders has a short `README.md` with import notes and links.
-**No barrel exports** for UI modules. Import from the file path directly (tree-shaking + shadcn copy pattern). Types may use `types/index.ts`.
+**No barrel exports** for UI modules. Import from the file path directly (tree-shaking + shadcn copy pattern). Types: `@/components/niko-table/types`.
 
 ```tsx
 // ✅
@@ -125,7 +125,7 @@ Virtualized tables need a constrained height on `DataTable` (e.g. `height={600}`
 
 ## Column meta (filters / labels)
 
-Extend columns with `meta` for labels, filter variants, options, counts, etc. Types live in `types/index.ts` (TanStack module augmentation).
+Extend columns with `meta` for labels, filter variants, options, counts, etc. Types live in `types.ts` (TanStack module augmentation).
 
 ```tsx
 import type { DataTableColumnDef } from "@/components/niko-table/types"
@@ -156,7 +156,7 @@ Define row actions once as a declarative component using `useDataTableRow` + `Ro
 
 ## Conventions
 
-- Direct file imports only (except `types/index.ts`)
+- Direct file imports only (types: `@/components/niko-table/types`)
 - Semantic color tokens (`bg-success`, `text-destructive`), not hardcoded palette colors
 - Deterministic mock data in examples (no `Math.random()` / `Date.now()`) for SSR-safe demos
 - Prefer overview MDX + examples on the docs site over duplicating long tutorials here

@@ -35,7 +35,7 @@ src/
 - **Two-layer component pattern**:
   - `components/` = context-aware (`DataTable*` prefix, use `useDataTable()` hook)
   - `filters/` = direct prop (`Table*` prefix, accept `table` prop)
-- **No barrel exports**: Use direct file imports only (e.g. `@/components/niko-table/core/data-table-root`, `@/components/niko-table/lib/constants`) for tree-shaking and to follow the shadcn pattern. Do not add or use `index.ts` re-exports for core, components, filters, hooks, lib, or config. Types may use `types/index.ts` as the single types module.
+- **No barrel exports**: Use direct file imports only (e.g. `@/components/niko-table/core/data-table-root`, `@/components/niko-table/lib/constants`) for tree-shaking and to follow the shadcn pattern. Do not add or use `index.ts` re-exports for core, components, filters, hooks, lib, or config. Types live in the single file `types.ts`.
 - Registry examples must be self-contained (import only from `@/components/niko-table/*` direct paths and `@/components/ui`)
 - Use semantic color tokens (`bg-success`, `text-destructive`) not hardcoded Tailwind colors
 

@@ -25,8 +25,8 @@ import {
   JOIN_OPERATORS,
   FILTER_OPERATORS,
   FILTER_VARIANTS,
-} from "../lib/constants"
-import type { DataTableFeatures } from "../lib/data-table-features"
+} from "./lib/constants"
+import type { DataTableFeatures } from "./lib/data-table-features"
 
 // ============================================================================
 // TANSTACK REACT-TABLE MODULE AUGMENTATION
@@ -130,7 +130,7 @@ import type {
   FilterVariant as _FilterVariant,
   FilterOperator as _FilterOperator,
   JoinOperator as _JoinOperator,
-} from "../lib/constants"
+} from "./lib/constants"
 
 export type FilterVariant = _FilterVariant
 export type FilterOperator = _FilterOperator
