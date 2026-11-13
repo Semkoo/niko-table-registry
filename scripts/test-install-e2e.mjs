@@ -46,7 +46,7 @@ const REQUIRED_FILES = [
   "src/components/ui/table.tsx",
   "src/components/niko-table/core/data-table.tsx",
   "src/components/niko-table/core/data-table-root.tsx",
-  "src/components/niko-table/types/index.ts",
+  "src/components/niko-table/types.ts",
 ]
 
 async function main() {

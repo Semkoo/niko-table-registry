@@ -139,9 +139,9 @@
           "target": "components/niko-table/lib/data-table-features.ts"
         },
         {
-          "path": "src/components/niko-table/types/index.ts",
+          "path": "src/components/niko-table/types.ts",
           "type": "registry:lib",
-          "target": "components/niko-table/types/index.ts"
+          "target": "components/niko-table/types.ts"
         }
       ]
     },

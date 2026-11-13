@@ -52,7 +52,7 @@ import { DataTableRoot } from "@/components/niko-table/core/data-table-root"
 import { DataTableRoot } from "@/components/niko-table/core"
 ```
 
-The only allowed barrel is `src/components/niko-table/types/index.ts`, which collects type-only declarations (zero runtime cost).
+Shared types live in the single file `src/components/niko-table/types.ts` (type-only declarations, zero runtime cost).
 
 **Why:** the registry is copy-paste. Barrels defeat tree-shaking, hide circular imports, and make installed code look unlike every other shadcn component. ESLint enforces this via `no-restricted-imports` (configured in `eslint.config.ts`) — violations fail `pnpm lint` and CI.
 

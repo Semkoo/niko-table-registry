@@ -60,7 +60,7 @@ export default defineConfig([
   {
     // No barrel imports inside `niko-table/`. The registry is copy-paste —
     // barrels defeat tree-shaking, hide circular imports, and make installed
-    // code diverge from shadcn conventions. `types/` is the single allowed
+    // code diverge from shadcn conventions. `types.ts` is the single allowed
     // barrel (type-only, zero runtime cost). See CONTRIBUTING.md.
     files: ["**/*.{ts,mts,cts,tsx,jsx}"],
     rules: {
