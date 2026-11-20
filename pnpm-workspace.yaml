@@ -1,6 +1,8 @@
 packages: []
 overrides:
-  vite: ^8.1.4
+  vite: ^8.3.8
+  "@emnapi/core": 1.11.3
+  "@emnapi/runtime": 1.11.3
 allowBuilds:
   esbuild: true
   msw: true
@@ -11,5 +13,13 @@ onlyBuiltDependencies:
   - msw
   - sharp
 minimumReleaseAgeExclude:
-  - "@hookform/resolvers@5.9.1"
+  - "@hookform/resolvers@5.9.1 || 7.0.8"
   - nuqs@2.9.6
+  - "@tanstack/query-core@5.108.2"
+  - "@tanstack/react-query@5.108.2"
+  - starlight-theme-black@0.7.2
+  - lucide-react@1.77.0
+  - tailwind-merge@3.7.1
+  - "@cloudflare/workers-utils@0.56.0"
+  - miniflare@5.20261119.0-beta
+  - wrangler@4.166.0
