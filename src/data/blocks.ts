@@ -42,6 +42,37 @@ export const blocks = [
       "tickets-data.ts",
     ],
   },
+  {
+    name: "team-table",
+    title: "Team Members",
+    description:
+      "A workspace members screen: pinned member and actions columns that stay put while the table scrolls sideways, a Role submenu in the row menu, suspend and remove actions, bulk remove, and an invite dialog.",
+    files: [
+      "team-table.tsx",
+      "invite-member-dialog.tsx",
+      "team-format.ts",
+      "team-data.ts",
+    ],
+  },
+  {
+    name: "request-logs-table",
+    title: "API Request Logs",
+    description:
+      "A developer request log with 5,000 virtualized rows, live error rate and p95 latency, method, status class and region filters, a latency slider, and a details panel with a response preview.",
+    files: [
+      "request-logs-table.tsx",
+      "log-sheet.tsx",
+      "logs-format.ts",
+      "logs-data.ts",
+    ],
+  },
+  {
+    name: "invoices-table",
+    title: "Invoices",
+    description:
+      "A billing screen with invoices grouped by status (count and summed amount per group, switchable off), due-date tracking, KPIs, a due date range filter, and mark paid / remind / copy link / void actions.",
+    files: ["invoices-table.tsx", "invoices-format.ts", "invoices-data.ts"],
+  },
 ] as const
 
 export type BlockName = (typeof blocks)[number]["name"]
