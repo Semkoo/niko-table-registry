@@ -26,7 +26,10 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:registry": "node scripts/test-registry-urls.mjs",
-    "test:install": "node scripts/test-install-e2e.mjs"
+    "test:install": "node scripts/test-install-e2e.mjs",
+    "test:install:local": "node scripts/test-install-local.mjs",
+    "test:install:base": "node scripts/test-install-local.mjs --base base",
+    "test:install:aria": "node scripts/test-install-local.mjs --base aria"
   },
   "lint-staged": {
     "**/*": [
