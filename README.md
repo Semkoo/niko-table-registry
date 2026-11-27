@@ -13,7 +13,7 @@ A shadcn-compatible React data table registry built on [TanStack Table](https://
 - **Data Table**: composable `DataTable*` pieces for sorting, filtering, pagination, selection, expansion, pinning, virtualization, export, and more
 - **Niko Grid**: optional editable spreadsheet layer (`useDataGrid` + `<DataGrid>`) with clipboard, fill, undo/redo, typed editors, and persistence helpers
 - **Registry install**: add `@niko-table` once, then install only the blocks you need via the shadcn CLI
-- **Works with both shadcn generations**: classic Radix (`new-york`) and Base UI (`base-nova`)
+- **Follows your shadcn component library**: Radix UI (`new-york`) and Base UI (`base-nova`) are supported. React Aria is experimental and not installable from the registry yet.
 
 ## Principles
 

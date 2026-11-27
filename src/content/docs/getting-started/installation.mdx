@@ -19,6 +19,8 @@ Before installing the DataTable component, make sure you have:
 
    <CliCommandCode action="install" command="@tanstack/react-table@^9" />
 
+> **React Aria** is experimental and not installable from the registry yet.
+
 > **Works with both shadcn generations.** The registry installs cleanly whether your `components.json` style is the classic Radix generation (`"new-york"`) or the newer Base UI generation (`"base-nova"`, the current `shadcn init` default). The source is written to typecheck against both: the shadcn CLI adapts Radix idioms (`asChild` → `render`) during install, and DataTable callbacks and props are dual-generation safe. If you hit a type error after install, make sure you're on a recent `shadcn` CLI and re-add the block with `--overwrite`.
 
 ## Configure the registry
