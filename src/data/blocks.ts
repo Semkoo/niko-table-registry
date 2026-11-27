@@ -30,6 +30,18 @@ export const blocks = [
       "orders-data.ts",
     ],
   },
+  {
+    name: "tickets-table",
+    title: "Support Tickets",
+    description:
+      "A support inbox with quick views (Mine, Unassigned, At risk), SLA timers, priority and assignee filters, a priority submenu, and assign / solve actions in bulk or per ticket.",
+    files: [
+      "tickets-table.tsx",
+      "ticket-views.tsx",
+      "tickets-format.ts",
+      "tickets-data.ts",
+    ],
+  },
 ] as const
 
 export type BlockName = (typeof blocks)[number]["name"]
