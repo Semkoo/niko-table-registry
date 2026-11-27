@@ -52,6 +52,8 @@ The short version of each release. For every technical detail, see the [full cha
 ### Fixed
 
 - **Adding a second filter no longer freezes or breaks the page.** It happened in the filter menu and the inline filter when two filters used the same column.
+- **Sort and filter menus work cleanly on Base UI and React Aria.** The drag handle is no longer a button inside a button.
+  - After you pick a new sort field, focus stays on that field.
 - **Undo after typing in a grid cell works in development.** With React StrictMode on, the first typed character was saved as its own undo step.
 - **Right-click menus work on draggable rows.** They never opened before, in regular and virtualized tables.
 - **Docs lists show bullets again.** Sub-points are indented.

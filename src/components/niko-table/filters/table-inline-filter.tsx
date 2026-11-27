@@ -599,7 +599,7 @@ export function TableInline<TData extends RowData>({
             align="start"
             className="w-full max-w-[var(--radix-popover-content-available-width,var(--available-width))] origin-[var(--radix-popover-content-transform-origin,var(--transform-origin))] p-0"
           >
-            <Command loop className="[&_[cmdk-input-wrapper]_svg]:hidden">
+            <Command loop>
               <CommandInput
                 ref={inputRef}
                 placeholder={

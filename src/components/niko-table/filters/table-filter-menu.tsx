@@ -28,7 +28,10 @@ import * as React from "react"
 
 import { TableRangeFilter } from "./table-range-filter"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/niko-table/primitives/button"
+import {
+  Button,
+  buttonVariants,
+} from "@/components/niko-table/primitives/button"
 import { Calendar } from "@/components/niko-table/primitives/calendar"
 import {
   Command,
@@ -232,13 +235,6 @@ function useFacetedContext(name: string) {
   }
   return context
 }
-
-/**
- * Spread (not a literal `asChild` attribute) so the shadcn CLI's Base UI
- * codemod doesn't rewrite it to `render` — the sortable component keeps the
- * `asChild` API in both the Radix and Base UI shadcn generations.
- */
-const sortableAsChild = { asChild: true }
 
 interface FacetedProps<
   Multiple extends boolean = false,
@@ -1006,21 +1002,22 @@ export function TableFilterMenu<TData extends RowData>({
               </p>
             </div>
             {filters.length > 0 ? (
-              <SortableContent {...sortableAsChild}>
-                <ul className="flex max-h-[300px] flex-col gap-2 overflow-y-auto p-1">
-                  {filters.map((filter, index) => (
-                    <TableFilterItem<TData>
-                      key={filter.filterId}
-                      filter={filter}
-                      index={index}
-                      filterItemId={`${id}-filter-${filter.filterId}`}
-                      table={table}
-                      columns={columns}
-                      onFilterUpdate={onFilterUpdate}
-                      onFilterRemove={onFilterRemove}
-                    />
-                  ))}
-                </ul>
+              <SortableContent
+                role="list"
+                className="flex max-h-[300px] flex-col gap-2 overflow-y-auto p-1"
+              >
+                {filters.map((filter, index) => (
+                  <TableFilterItem<TData>
+                    key={filter.filterId}
+                    filter={filter}
+                    index={index}
+                    filterItemId={`${id}-filter-${filter.filterId}`}
+                    table={table}
+                    columns={columns}
+                    onFilterUpdate={onFilterUpdate}
+                    onFilterRemove={onFilterRemove}
+                  />
+                ))}
               </SortableContent>
             ) : null}
             <div className="flex w-full items-center gap-2">
@@ -1094,7 +1091,7 @@ function TableFilterItem<TData extends RowData>({
 
   // Handle keyboard shortcuts for removing filters
   const onItemKeyDown = React.useCallback(
-    (event: React.KeyboardEvent<HTMLLIElement>) => {
+    (event: React.KeyboardEvent<HTMLDivElement>) => {
       if (
         event.target instanceof HTMLInputElement ||
         event.target instanceof HTMLTextAreaElement
@@ -1127,78 +1124,80 @@ function TableFilterItem<TData extends RowData>({
   if (!column) return null
 
   return (
-    <SortableItem value={filter.filterId} {...sortableAsChild}>
-      <li
-        id={filterItemId}
-        tabIndex={-1}
-        className="flex items-center gap-2"
-        onKeyDown={onItemKeyDown}
+    // No `asChild`/`render`: the sortable's Base UI and React Aria builds
+    // take `render`, the Radix build `asChild`, so the item stays its own div.
+    <SortableItem
+      value={filter.filterId}
+      id={filterItemId}
+      role="listitem"
+      tabIndex={-1}
+      className="flex items-center gap-2"
+      onKeyDown={onItemKeyDown}
+    >
+      {/* Join operator (AND/OR) or "Where" for first filter */}
+      <FilterJoinOperator
+        filter={filter}
+        index={index}
+        filterItemId={filterItemId}
+        onFilterUpdate={onFilterUpdate}
+      />
+
+      {/* Field selector */}
+      <FilterFieldSelector
+        filter={filter}
+        filterItemId={filterItemId}
+        columns={columns}
+        onFilterUpdate={onFilterUpdate}
+        showFieldSelector={showFieldSelector}
+        setShowFieldSelector={setShowFieldSelector}
+      />
+
+      {/* Operator selector (equals, contains, etc.) */}
+      <FilterOperatorSelector
+        filter={filter}
+        filterItemId={filterItemId}
+        onFilterUpdate={onFilterUpdate}
+        showOperatorSelector={showOperatorSelector}
+        setShowOperatorSelector={setShowOperatorSelector}
+      />
+
+      {/* Value input (text, number, select, date, etc.) */}
+      <div className="min-w-36 flex-1">
+        <FilterValueInput
+          filter={filter}
+          inputId={inputId}
+          table={table}
+          column={column}
+          columnMeta={columnMeta}
+          onFilterUpdate={onFilterUpdate}
+          showValueSelector={showValueSelector}
+          setShowValueSelector={setShowValueSelector}
+        />
+      </div>
+
+      {/* Remove button */}
+      <Button
+        aria-controls={filterItemId}
+        variant="outline"
+        size="icon"
+        className="size-8 rounded"
+        onClick={() => onFilterRemove(filter.filterId)}
+        title="Remove filter"
       >
-        {/* Join operator (AND/OR) or "Where" for first filter */}
-        <FilterJoinOperator
-          filter={filter}
-          index={index}
-          filterItemId={filterItemId}
-          onFilterUpdate={onFilterUpdate}
-        />
+        <Trash2 />
+      </Button>
 
-        {/* Field selector */}
-        <FilterFieldSelector
-          filter={filter}
-          filterItemId={filterItemId}
-          columns={columns}
-          onFilterUpdate={onFilterUpdate}
-          showFieldSelector={showFieldSelector}
-          setShowFieldSelector={setShowFieldSelector}
-        />
-
-        {/* Operator selector (equals, contains, etc.) */}
-        <FilterOperatorSelector
-          filter={filter}
-          filterItemId={filterItemId}
-          onFilterUpdate={onFilterUpdate}
-          showOperatorSelector={showOperatorSelector}
-          setShowOperatorSelector={setShowOperatorSelector}
-        />
-
-        {/* Value input (text, number, select, date, etc.) */}
-        <div className="min-w-36 flex-1">
-          <FilterValueInput
-            filter={filter}
-            inputId={inputId}
-            table={table}
-            column={column}
-            columnMeta={columnMeta}
-            onFilterUpdate={onFilterUpdate}
-            showValueSelector={showValueSelector}
-            setShowValueSelector={setShowValueSelector}
-          />
-        </div>
-
-        {/* Remove button */}
-        <Button
-          aria-controls={filterItemId}
-          variant="outline"
-          size="icon"
-          className="size-8 rounded"
-          onClick={() => onFilterRemove(filter.filterId)}
-          title="Remove filter"
-        >
-          <Trash2 />
-        </Button>
-
-        {/* Drag handle */}
-        <SortableItemHandle {...sortableAsChild}>
-          <Button
-            variant="outline"
-            size="icon"
-            className="size-8 rounded"
-            title="Drag to reorder filters"
-          >
-            <Grip />
-          </Button>
-        </SortableItemHandle>
-      </li>
+      {/* Drag handle */}
+      <SortableItemHandle
+        aria-controls={filterItemId}
+        className={cn(
+          buttonVariants({ variant: "outline", size: "icon" }),
+          "size-8 rounded",
+        )}
+        title="Drag to reorder filters"
+      >
+        <Grip />
+      </SortableItemHandle>
     </SortableItem>
   )
 }
