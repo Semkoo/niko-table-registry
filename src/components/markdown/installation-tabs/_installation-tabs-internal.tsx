@@ -19,7 +19,7 @@ export function InstallationTabsInternal({
       onValueChange={setSelectedTab}
       className="not-content"
     >
-      <TabsList>
+      <TabsList className="nt-switch">
         <TabsTrigger value="cli">CLI</TabsTrigger>
         <TabsTrigger value="manual">Manual</TabsTrigger>
       </TabsList>
