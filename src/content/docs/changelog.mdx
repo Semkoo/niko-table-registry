@@ -18,13 +18,16 @@ The short version of each release. For every technical detail, see the [full cha
   - [Table Examples](/examples/)
   - [Grid Examples](/data-grid/examples/)
 - **GitHub stars.** The header shows the star count.
+- **React Aria (experimental).** Niko Table now installs on shadcn React Aria projects.
+  - Register `https://niko-table.com/r/{style}/{name}.json` in `components.json`. [Installation](/getting-started/installation/#react-aria-experimental)
+  - Known gaps: popovers and menus are always modal, the command list uses cmdk, a picked date cannot be cleared by clicking it again, and a date range only reports once both ends are picked.
 
 ### Changed
 
 - **Installs add a primitives folder.**
   - New files in `components/niko-table/primitives/` pass through to your shadcn components.
   - The table works the same as before.
-  - They prepare for React Aria, which is experimental and not yet installable from the registry.
+  - They let the same table install on React Aria.
 - **Data Grid is now called Niko Grid.**
   - Only the name changed.
   - Install names (`data-table-grid`) and URLs (`/data-grid/`) are the same.

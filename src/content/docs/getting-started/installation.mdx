@@ -19,8 +19,6 @@ Before installing the DataTable component, make sure you have:
 
    <CliCommandCode action="install" command="@tanstack/react-table@^9" />
 
-> **React Aria** is experimental and not installable from the registry yet.
-
 > **Works with both shadcn generations.** The registry installs cleanly whether your `components.json` style is the classic Radix generation (`"new-york"`) or the newer Base UI generation (`"base-nova"`, the current `shadcn init` default). The source is written to typecheck against both: the shadcn CLI adapts Radix idioms (`asChild` → `render`) during install, and DataTable callbacks and props are dual-generation safe. If you hit a type error after install, make sure you're on a recent `shadcn` CLI and re-add the block with `--overwrite`.
 
 ## Configure the registry
@@ -38,6 +36,22 @@ To use the `@niko-table/` namespace with the shadcn CLI, you must first register
 ```
 
 > **Tip:** If you prefer not to modify `components.json`, you can install any component directly via URL instead – see the URL-based commands in each section below.
+
+### React Aria (experimental)
+
+If your `components.json` style starts with `aria-` (for example `aria-nova`), use this line instead:
+
+```json title="components.json"
+{
+  "registries": {
+    "@niko-table": "https://niko-table.com/r/{style}/{name}.json"
+  }
+}
+```
+
+- The CLI fills in `{style}` from your `components.json`. React Aria styles get the React Aria build; every other style gets the same files as the line above, so this line works on Radix and Base UI too.
+- Installing by URL works the same way: `https://niko-table.com/r/aria-nova/data-table.json`.
+- It is experimental. Known gaps: popovers and menus are always modal, the command list uses cmdk, a picked date cannot be cleared by clicking it again, and a date range only reports once both ends are picked.
 
 ## Installation
 

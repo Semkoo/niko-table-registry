@@ -44,12 +44,17 @@ Niko Table uses.
 ## Testing
 
 `pnpm test:install:aria --app <react-aria app>` installs the locally built
-registry into a shadcn `aria-*` app, swaps these files in, then type-checks and
-builds it. This folder is excluded from this repo's `astro check` and ESLint,
+registry into a shadcn `aria-*` app through the `{style}` URL (as a user would),
+then type-checks, builds and runs the app's tests. This folder is excluded from this repo's `astro check` and ESLint,
 which check the Radix build.
 
-## Not done yet
+## How it ships
 
-The registry does not serve these files yet: `public/r` is the Radix build, and
-the installer swap above is test-only. Per-style registry delivery is the next
-step.
+`pnpm run registry:build` runs `shadcn build` (the default build in `public/r`)
+and then `scripts/build-registry-aria.mjs`, which writes `public/r-aria/` with
+these files swapped in, niko-table dependencies pointed at `/r-aria/`, and the
+npm packages they import. `public/_redirects` serves
+`/r/{style}/{name}.json`: `aria-*` styles get `/r-aria/`, every other style
+`/r/`. React Aria users register
+`"@niko-table": "https://niko-table.com/r/{style}/{name}.json"`. A new `aria-*`
+style from shadcn needs one more `_redirects` line.
