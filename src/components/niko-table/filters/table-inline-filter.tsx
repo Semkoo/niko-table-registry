@@ -303,7 +303,12 @@ function useSyncFiltersWithTable<TData extends RowData>(
         )
       }
     }
-  }, [filters, filterLogic, table, isControlled])
+    // Not `table`: TanStack v9 hands out a new table object on every state
+    // change, so this write would re-run itself forever (two filters on one
+    // column write a fresh globalFilter object each time). Its setters act on
+    // the same store from any snapshot.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters, filterLogic, isControlled])
 }
 
 export interface TableInlineProps<
