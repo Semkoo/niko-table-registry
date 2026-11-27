@@ -21,6 +21,8 @@ The short version of each release. For every technical detail, see the [full cha
 - **React Aria (new, experimental).** Niko Table now installs on shadcn React Aria projects, like Radix UI and Base UI.
   - The registry line changed to `https://niko-table.com/r/{style}/{name}.json`. The old line still works on Radix and Base UI. [Installation](/getting-started/installation/#radix-ui-base-ui-and-react-aria)
   - `shadcn search`, `list` and `view` work on React Aria too.
+  - Buttons, popovers, dialogs and tooltips are shadcn's own React Aria components.
+  - A custom trigger you pass to a popover or menu must be a Button.
   - Known gaps:
     - Popovers, menus and the right-click menu are always modal: the page does not scroll while one is open.
     - Arrow keys do not move between menu items and a search box or other controls inside the same menu. Tab and the mouse do.
@@ -28,6 +30,7 @@ The short version of each release. For every technical detail, see the [full cha
     - The command list (search in filters and menus) uses cmdk and keeps the Radix look.
     - A picked date cannot be cleared by clicking it again, and a date range only reports once both ends are picked.
     - Help icons with a tooltip are an extra Tab stop, and tooltips open on hover only after a first click on the page.
+    - Tooltips open with no delay, so the table's 1 second delay on header help icons does not apply.
     - shadcn's own React Aria `components/ui/label.tsx` imports `React` without using it, which fails strict TypeScript (`noUnusedLocals`). Delete that import line. It is a shadcn issue, not Niko Table.
 
 ### Changed
