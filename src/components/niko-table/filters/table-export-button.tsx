@@ -13,7 +13,7 @@
  */
 import * as React from "react"
 import type { RowData } from "@tanstack/react-table"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/niko-table/primitives/button"
 import { Download } from "lucide-react"
 
 import type { DataTableInstance } from "../types"

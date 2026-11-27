@@ -13,14 +13,14 @@
  */
 
 import React from "react"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/niko-table/primitives/button"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/components/niko-table/primitives/select"
 import { Input } from "@/components/ui/input"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"

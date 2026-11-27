@@ -60,12 +60,12 @@ import {
 import { useDataGrid } from "@/components/niko-table/grid/hooks/use-data-grid"
 import { useGridChanges } from "@/components/niko-table/grid/hooks/use-grid-changes"
 import type { GridRow } from "@/components/niko-table/grid/types/grid-cell"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/niko-table/primitives/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/niko-table/primitives/dropdown-menu"
 import { cn } from "@/lib/utils"
 import { categoryOptions, products } from "./inventory-data"
 import {

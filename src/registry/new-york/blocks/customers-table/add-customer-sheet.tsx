@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/niko-table/primitives/button"
 import {
   Field,
   FieldDescription,
@@ -15,7 +15,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/components/niko-table/primitives/select"
 import {
   Sheet,
   SheetClose,
@@ -24,7 +24,7 @@ import {
   SheetFooter,
   SheetHeader,
   SheetTitle,
-} from "@/components/ui/sheet"
+} from "@/components/niko-table/primitives/sheet"
 import { UserPlus } from "lucide-react"
 import {
   planOptions,

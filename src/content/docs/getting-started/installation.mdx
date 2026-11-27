@@ -30,12 +30,20 @@ To use the `@niko-table/` namespace with the shadcn CLI, you must first register
   "$schema": "https://ui.shadcn.com/schema.json",
   // ... your existing config (style, tailwind, aliases, etc.)
   "registries": {
-    "@niko-table": "https://niko-table.com/r/{name}.json"
+    "@niko-table": "https://niko-table.com/r/{style}/{name}.json"
   }
 }
 ```
 
 > **Tip:** If you prefer not to modify `components.json`, you can install any component directly via URL instead – see the URL-based commands in each section below.
+
+### Radix UI, Base UI and React Aria
+
+The same line works for all three. The CLI reads the `style` in your `components.json` and gets the matching version.
+
+- **Radix UI** (`new-york`, `radix-*`) and **Base UI** (`base-*`): supported.
+- **React Aria** (`aria-*`): new. Known gaps: popovers and menus are always modal, the command list uses cmdk, a picked date cannot be cleared by clicking it again, and a date range only reports once both ends are picked.
+- Already registered `https://niko-table.com/r/{name}.json`? It keeps working on Radix and Base UI. Switch to the line above to get React Aria.
 
 ## Installation
 

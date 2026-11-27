@@ -40,13 +40,13 @@ import { SYSTEM_COLUMN_IDS } from "@/components/niko-table/lib/constants"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
+import { Button } from "@/components/niko-table/primitives/button"
+import { Checkbox } from "@/components/niko-table/primitives/checkbox"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/niko-table/primitives/dropdown-menu"
 import {
   ChevronDown,
   ChevronsUp,

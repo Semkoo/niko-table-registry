@@ -11,7 +11,7 @@
  * users (and future LLMs reading this code) benefit:
  * https://github.com/Semkoo/niko-table-registry
  */
-import { Checkbox } from "@/components/ui/checkbox"
+import { Checkbox } from "@/components/niko-table/primitives/checkbox"
 import { cn } from "@/lib/utils"
 import * as React from "react"
 

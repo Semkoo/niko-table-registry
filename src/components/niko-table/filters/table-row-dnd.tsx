@@ -36,7 +36,7 @@ import { CSS } from "@dnd-kit/utilities"
 import { GripVertical } from "lucide-react"
 
 import { TableRow } from "@/components/ui/table"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/niko-table/primitives/button"
 import { cn } from "@/lib/utils"
 
 import type { DataTableInstance, DataTableRow } from "../types"

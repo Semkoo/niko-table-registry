@@ -6,7 +6,7 @@ import {
   FILTER_VARIANTS,
   JOIN_OPERATORS,
 } from "@/components/niko-table/lib/constants"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/niko-table/primitives/button"
 import { ButtonGroup } from "@/components/ui/button-group"
 import { CURRENT_AGENT, type Ticket } from "./tickets-data"
 

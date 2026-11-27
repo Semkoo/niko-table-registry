@@ -18,19 +18,20 @@ import { CircleHelp, CalendarIcon, CalendarX2 } from "lucide-react"
 import {
   DropdownMenuSeparator,
   DropdownMenuLabel,
-} from "@/components/ui/dropdown-menu"
+  DropdownMenuPanel,
+} from "@/components/niko-table/primitives/dropdown-menu"
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/ui/tooltip"
+} from "@/components/niko-table/primitives/tooltip"
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover"
-import { Calendar } from "@/components/ui/calendar"
-import { Button } from "@/components/ui/button"
+} from "@/components/niko-table/primitives/popover"
+import { Calendar } from "@/components/niko-table/primitives/calendar"
+import { Button } from "@/components/niko-table/primitives/button"
 import { useDerivedColumnTitle } from "../hooks/use-derived-column-title"
 import { formatDate } from "../lib/format"
 import { cn } from "@/lib/utils"
@@ -178,48 +179,50 @@ export function TableColumnDateFilterOptions<TData extends RowData, TValue>({
           </TooltipContent>
         </Tooltip>
       </DropdownMenuLabel>
-      <div className="px-2 py-2">
-        <Popover open={showValueSelector} onOpenChange={setShowValueSelector}>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              size="sm"
-              className={cn(
-                "w-full justify-start rounded text-left font-normal",
-                !columnFilterValue && "text-muted-foreground",
+      <DropdownMenuPanel>
+        <div className="px-2 py-2">
+          <Popover open={showValueSelector} onOpenChange={setShowValueSelector}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className={cn(
+                  "w-full justify-start rounded text-left font-normal",
+                  !columnFilterValue && "text-muted-foreground",
+                )}
+              >
+                <CalendarIcon />
+                <span className="truncate">{displayValue}</span>
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent align="start" className="w-auto p-0">
+              {multiple ? (
+                <Calendar
+                  mode="range"
+                  captionLayout="dropdown"
+                  selected={selectedDates as DateRange}
+                  onSelect={onSelect as (date: DateRange | undefined) => void}
+                />
+              ) : (
+                <Calendar
+                  mode="single"
+                  captionLayout="dropdown"
+                  selected={(selectedDates as Date[])[0]}
+                  onSelect={onSelect as (date: Date | undefined) => void}
+                />
               )}
-            >
-              <CalendarIcon />
-              <span className="truncate">{displayValue}</span>
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent align="start" className="w-auto p-0">
-            {multiple ? (
-              <Calendar
-                mode="range"
-                captionLayout="dropdown"
-                selected={selectedDates as DateRange}
-                onSelect={onSelect as (date: DateRange | undefined) => void}
-              />
-            ) : (
-              <Calendar
-                mode="single"
-                captionLayout="dropdown"
-                selected={(selectedDates as Date[])[0]}
-                onSelect={onSelect as (date: Date | undefined) => void}
-              />
-            )}
-          </PopoverContent>
-        </Popover>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onReset}
-          className="mt-2 w-full"
-        >
-          Clear
-        </Button>
-      </div>
+            </PopoverContent>
+          </Popover>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onReset}
+            className="mt-2 w-full"
+          >
+            Clear
+          </Button>
+        </div>
+      </DropdownMenuPanel>
     </>
   )
 }

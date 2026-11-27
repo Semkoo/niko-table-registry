@@ -46,14 +46,14 @@ import { DataTableRowContextMenuSlot } from "@/components/niko-table/components/
 import { SYSTEM_COLUMN_IDS } from "@/components/niko-table/lib/constants"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/niko-table/primitives/button"
 import { TableCell } from "@/components/ui/table"
-import { Checkbox } from "@/components/ui/checkbox"
+import { Checkbox } from "@/components/niko-table/primitives/checkbox"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/niko-table/primitives/dropdown-menu"
 import {
   CheckCheck,
   ChevronRight,

@@ -16,7 +16,7 @@ import { flexRender, type RowData } from "@tanstack/react-table"
 import { ChevronRight } from "lucide-react"
 import React from "react"
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/niko-table/primitives/button"
 import { TableCell, TableRow } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
 

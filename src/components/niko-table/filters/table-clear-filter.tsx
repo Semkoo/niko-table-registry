@@ -12,7 +12,7 @@
  * https://github.com/Semkoo/niko-table-registry
  */
 import * as React from "react"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/niko-table/primitives/button"
 import { cn } from "@/lib/utils"
 import { X } from "lucide-react"
 

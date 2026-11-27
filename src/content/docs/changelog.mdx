@@ -18,9 +18,16 @@ The short version of each release. For every technical detail, see the [full cha
   - [Table Examples](/examples/)
   - [Grid Examples](/data-grid/examples/)
 - **GitHub stars.** The header shows the star count.
+- **React Aria.** Niko Table now installs on shadcn React Aria projects, like Radix UI and Base UI.
+  - The registry line changed to `https://niko-table.com/r/{style}/{name}.json`. The old line still works on Radix and Base UI. [Installation](/getting-started/installation/#radix-ui-base-ui-and-react-aria)
+  - Known gaps: popovers and menus are always modal, the command list uses cmdk, a picked date cannot be cleared by clicking it again, and a date range only reports once both ends are picked.
 
 ### Changed
 
+- **Installs add a primitives folder.**
+  - New files in `components/niko-table/primitives/` pass through to your shadcn components.
+  - The table works the same as before.
+  - They let the same table install on React Aria.
 - **Data Grid is now called Niko Grid.**
   - Only the name changed.
   - Install names (`data-table-grid`) and URLs (`/data-grid/`) are the same.
@@ -36,6 +43,8 @@ The short version of each release. For every technical detail, see the [full cha
 - **Right-click menus work on draggable rows.** They never opened before, in regular and virtualized tables.
 - **Docs lists show bullets again.** Sub-points are indented.
 - **The page-size picker shows its full value.** "10" was cut off next to the arrow.
+- **Some installs were missing a component.**
+  - Data Table, Data Table Core and the column slider filter now install everything they use.
 - **New Vite projects now build.** Installing into a fresh `shadcn init -t vite` app used to fail the type check.
 
 ## July 2026

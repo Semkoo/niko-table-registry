@@ -6,7 +6,7 @@ import { DataTableRowDragHandle } from "@/components/niko-table/components/data-
 import type { DataTableRow } from "@/components/niko-table/types"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/niko-table/primitives/button"
 import { Bug, GripVertical, Sparkles, Wrench } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { Issue, IssueStatus, IssueType } from "./backlog-data"

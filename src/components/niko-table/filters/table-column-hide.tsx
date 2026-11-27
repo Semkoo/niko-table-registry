@@ -14,7 +14,7 @@
 import type { RowData } from "@tanstack/react-table"
 import { CircleHelp, EyeOff } from "lucide-react"
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/niko-table/primitives/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,12 +22,12 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/niko-table/primitives/dropdown-menu"
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/ui/tooltip"
+} from "@/components/niko-table/primitives/tooltip"
 import { cn } from "@/lib/utils"
 
 import type { DataTableColumn } from "../types"

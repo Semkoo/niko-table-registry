@@ -11,13 +11,13 @@
  * users (and future LLMs reading this code) benefit:
  * https://github.com/Semkoo/niko-table-registry
  */
-import { Button } from "@/components/ui/button"
-import { Calendar } from "@/components/ui/calendar"
+import { Button } from "@/components/niko-table/primitives/button"
+import { Calendar } from "@/components/niko-table/primitives/calendar"
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover"
+} from "@/components/niko-table/primitives/popover"
 
 import type { CellEditorProps } from "./cell-props"
 import { cellTriggerClass } from "./cell-styles"

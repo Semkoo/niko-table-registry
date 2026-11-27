@@ -15,7 +15,7 @@ import React from "react"
 import type { RowData } from "@tanstack/react-table"
 import { Check, CircleHelp } from "lucide-react"
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/niko-table/primitives/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,12 +23,12 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/niko-table/primitives/dropdown-menu"
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/ui/tooltip"
+} from "@/components/niko-table/primitives/tooltip"
 import { cn } from "@/lib/utils"
 import { useDataTable } from "../core/data-table-context"
 
@@ -101,7 +101,8 @@ export function TableColumnSortOptions<TData extends RowData, TValue>({
 
   const handleSort = (
     direction: "asc" | "desc" | false,
-    e: React.MouseEvent,
+    // Only `shiftKey` is read: a click event, or a React Aria press event.
+    e: { shiftKey: boolean },
   ) => {
     // Keyboard activation synthesizes a click whose `shiftKey` is false, so the
     // window-level ref is what carries Shift for Enter/Space; the event's own

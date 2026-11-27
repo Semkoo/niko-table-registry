@@ -16,17 +16,20 @@
     "dev": "astro dev",
     "start": "astro dev",
     "check:sidebar": "node scripts/check-sidebar-slugs.mjs",
-    "build": "node scripts/check-sidebar-slugs.mjs && astro check && shadcn build && astro build",
+    "build": "node scripts/check-sidebar-slugs.mjs && astro check && pnpm run registry:build && astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "registry:build": "shadcn build",
+    "registry:build": "shadcn build && node scripts/build-registry-aria.mjs",
     "prepare": "husky",
     "lint": "eslint --fix .",
     "format": "prettier --write .",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:registry": "node scripts/test-registry-urls.mjs",
-    "test:install": "node scripts/test-install-e2e.mjs"
+    "test:install": "node scripts/test-install-e2e.mjs",
+    "test:install:local": "node scripts/test-install-local.mjs",
+    "test:install:base": "node scripts/test-install-local.mjs --base base",
+    "test:install:aria": "node scripts/test-install-local.mjs --base aria"
   },
   "lint-staged": {
     "**/*": [

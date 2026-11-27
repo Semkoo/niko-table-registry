@@ -11,7 +11,7 @@
  * users (and future LLMs reading this code) benefit:
  * https://github.com/Semkoo/niko-table-registry
  */
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/niko-table/primitives/button"
 import {
   Command,
   CommandEmpty,
@@ -19,12 +19,12 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/components/ui/command"
+} from "@/components/niko-table/primitives/command"
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover"
+} from "@/components/niko-table/primitives/popover"
 import * as React from "react"
 
 import type { CellEditorProps, GridComboboxOption } from "./cell-props"

@@ -11,12 +11,12 @@
  * users (and future LLMs reading this code) benefit:
  * https://github.com/Semkoo/niko-table-registry
  */
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/niko-table/primitives/button"
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/ui/tooltip"
+} from "@/components/niko-table/primitives/tooltip"
 import { cn } from "@/lib/utils"
 import { Plus, Redo2, Undo2, X } from "lucide-react"
 

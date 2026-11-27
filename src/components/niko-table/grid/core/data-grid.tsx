@@ -13,7 +13,7 @@
  */
 import * as React from "react"
 
-import { TooltipProvider } from "@/components/ui/tooltip"
+import { TooltipProvider } from "@/components/niko-table/primitives/tooltip"
 
 import { useDataTable } from "../../core/data-table-context"
 import { useDataTableScroll } from "../../hooks/use-data-table-scroll"
