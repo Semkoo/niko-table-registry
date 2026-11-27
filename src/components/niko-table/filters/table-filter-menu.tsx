@@ -705,8 +705,18 @@ function useSyncFiltersWithTable<TData extends RowData>(
     table.options.meta.joinOperator = filterLogic.joinOperator
   }
 
+  // Read the latest table inside the effect without depending on it:
+  // TanStack v9 hands out a new table object on every state change, so a
+  // `table` dependency would re-run this write forever (two filters on one
+  // column write a fresh globalFilter object each time).
+  const tableRef = React.useRef(table)
+  React.useLayoutEffect(() => {
+    tableRef.current = table
+  })
+
   // Sync with table state only when filters change (and not in controlled mode)
   React.useEffect(() => {
+    const table = tableRef.current
     // Skip if controlled - parent handles table state
     if (isControlled) {
       if (process.env.NODE_ENV === "development") {
@@ -777,11 +787,6 @@ function useSyncFiltersWithTable<TData extends RowData>(
         )
       }
     }
-    // Not `table`: TanStack v9 hands out a new table object on every state
-    // change, so this write would re-run itself forever (two filters on one
-    // column write a fresh globalFilter object each time). Its setters act on
-    // the same store from any snapshot.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters, filterLogic, isControlled])
 }
 
