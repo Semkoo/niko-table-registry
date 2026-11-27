@@ -28,7 +28,7 @@
     },
     {
       "path": "src/components/niko-table/primitives/button.tsx",
-      "content": "/**\n * Niko Table's button primitive: the members of the shadcn `button` Niko Table\n * uses, re-exported under the same names. Niko Table imports them from\n * here, never from `@/components/ui/button` directly, so a base whose\n * component has a different shape (React Aria) swaps only this file.\n */\nimport { Button } from \"@/components/ui/button\"\n\nexport { Button }\n",
+      "content": "/**\n * Niko Table's button primitive: the members of the shadcn `button` Niko Table\n * uses, re-exported under the same names. Niko Table imports them from\n * here, never from `@/components/ui/button` directly, so a base whose\n * component has a different shape (React Aria) swaps only this file.\n */\nimport { Button, buttonVariants } from \"@/components/ui/button\"\n\nexport { Button, buttonVariants }\n",
       "type": "registry:component",
       "target": "components/niko-table/primitives/button.tsx"
     },

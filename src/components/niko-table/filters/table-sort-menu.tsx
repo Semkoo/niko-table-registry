@@ -21,7 +21,10 @@ import { ArrowDownUp, Trash2, CircleHelp } from "lucide-react"
 import * as React from "react"
 
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/niko-table/primitives/button"
+import {
+  Button,
+  buttonVariants,
+} from "@/components/niko-table/primitives/button"
 import {
   Command,
   CommandEmpty,
@@ -65,7 +68,7 @@ import { FILTER_VARIANTS } from "../lib/constants"
 import type { DataTableInstance } from "../types"
 interface TableSortItemProps {
   sort: ColumnSort
-  sortItemId: string
+  menuId: string
   columns: { id: string; label: string }[]
   columnLabels: Map<string, string>
   onSortUpdate: (sortId: string, updates: Partial<ColumnSort>) => void
@@ -74,22 +77,19 @@ interface TableSortItemProps {
   className?: string
 }
 
-/**
- * Spread (not a literal `asChild` attribute) so the shadcn CLI's Base UI
- * codemod doesn't rewrite it to `render` — the sortable component keeps the
- * `asChild` API in both the Radix and Base UI shadcn generations.
- */
-const sortableAsChild = { asChild: true }
+const getSortItemId = (menuId: string, sortId: string) =>
+  `${menuId}-sort-${sortId}`
 
 function TableSortItem({
   sort,
-  sortItemId,
+  menuId,
   columns,
   columnLabels,
   onSortUpdate,
   onSortRemove,
   getVariantForColumn,
 }: TableSortItemProps) {
+  const sortItemId = getSortItemId(menuId, sort.id)
   const fieldListboxId = `${sortItemId}-field-listbox`
   const fieldTriggerId = `${sortItemId}-field-trigger`
   const directionListboxId = `${sortItemId}-direction-listbox`
@@ -99,7 +99,7 @@ function TableSortItem({
     React.useState(false)
 
   const onItemKeyDown = React.useCallback(
-    (event: React.KeyboardEvent<HTMLLIElement>) => {
+    (event: React.KeyboardEvent<HTMLDivElement>) => {
       if (
         event.target instanceof HTMLInputElement ||
         event.target instanceof HTMLTextAreaElement
@@ -125,93 +125,106 @@ function TableSortItem({
   const labels = SORT_LABELS[variant] || SORT_LABELS[FILTER_VARIANTS.TEXT]
 
   return (
-    <SortableItem value={sort.id} {...sortableAsChild}>
-      <li
-        id={sortItemId}
-        tabIndex={-1}
-        className="flex items-center gap-2"
-        onKeyDown={onItemKeyDown}
-      >
-        <Popover open={showFieldSelector} onOpenChange={setShowFieldSelector}>
-          <PopoverTrigger asChild>
-            <Button
-              id={fieldTriggerId}
-              aria-controls={fieldListboxId}
-              variant="outline"
-              className="w-44 justify-between rounded font-normal"
-            >
-              <span className="truncate">{columnLabels.get(sort.id)}</span>
-              <ChevronsUpDown className="opacity-50" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent
-            id={fieldListboxId}
-            className="w-[var(--radix-popover-trigger-width,var(--anchor-width))] origin-[var(--radix-popover-content-transform-origin,var(--transform-origin))] p-0"
-          >
-            <Command>
-              <CommandInput placeholder="Search fields..." />
-              <CommandList>
-                <CommandEmpty>No fields found.</CommandEmpty>
-                <CommandGroup>
-                  {columns.map(column => (
-                    <CommandItem
-                      key={column.id}
-                      value={column.id}
-                      onSelect={value => onSortUpdate(sort.id, { id: value })}
-                    >
-                      <span className="truncate">{column.label}</span>
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
-              </CommandList>
-            </Command>
-          </PopoverContent>
-        </Popover>
-        <Select
-          open={showDirectionSelector}
-          onOpenChange={setShowDirectionSelector}
-          value={sort.desc ? "desc" : "asc"}
-          // Spread so it type-checks against Radix too: Base UI reads the
-          // closed trigger's label only from `items`, Radix ignores the prop.
-          {...{ items: labels }}
-          onValueChange={(value: string | null) =>
-            // Base UI selects pass null on clear; Radix never does
-            value && onSortUpdate(sort.id, { desc: value === "desc" })
-          }
-        >
-          <SelectTrigger
-            aria-controls={directionListboxId}
-            className="h-8 w-24 rounded data-size:h-8"
-          >
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent
-            id={directionListboxId}
-            className="min-w-[var(--radix-select-trigger-width,var(--anchor-width))] origin-[var(--radix-select-content-transform-origin,var(--transform-origin))]"
-          >
-            <SelectItem value="asc">{labels.asc}</SelectItem>
-            <SelectItem value="desc">{labels.desc}</SelectItem>
-          </SelectContent>
-        </Select>
-        <Button
-          aria-controls={sortItemId}
-          variant="outline"
-          size="icon"
-          className="size-8 shrink-0 rounded"
-          onClick={() => onSortRemove(sort.id)}
-        >
-          <Trash2 />
-        </Button>
-        <SortableItemHandle {...sortableAsChild}>
+    // No `asChild`/`render`: the sortable's Base UI and React Aria builds
+    // take `render`, the Radix build `asChild`, so the item stays its own div.
+    <SortableItem
+      value={sort.id}
+      id={sortItemId}
+      role="listitem"
+      tabIndex={-1}
+      className="flex items-center gap-2"
+      onKeyDown={onItemKeyDown}
+    >
+      <Popover open={showFieldSelector} onOpenChange={setShowFieldSelector}>
+        <PopoverTrigger asChild>
           <Button
+            id={fieldTriggerId}
+            aria-controls={fieldListboxId}
             variant="outline"
-            size="icon"
-            className="size-8 shrink-0 rounded"
+            className="w-44 justify-between rounded font-normal"
           >
-            <Grip />
+            <span className="truncate">{columnLabels.get(sort.id)}</span>
+            <ChevronsUpDown className="opacity-50" />
           </Button>
-        </SortableItemHandle>
-      </li>
+        </PopoverTrigger>
+        <PopoverContent
+          id={fieldListboxId}
+          className="w-[var(--radix-popover-trigger-width,var(--anchor-width))] origin-[var(--radix-popover-content-transform-origin,var(--transform-origin))] p-0"
+        >
+          <Command>
+            <CommandInput placeholder="Search fields..." />
+            <CommandList>
+              <CommandEmpty>No fields found.</CommandEmpty>
+              <CommandGroup>
+                {columns.map(column => (
+                  <CommandItem
+                    key={column.id}
+                    value={column.id}
+                    onSelect={value => {
+                      onSortUpdate(sort.id, { id: value })
+                      // The row is keyed by field, so it re-mounts: move
+                      // focus to the new row's trigger, not the body.
+                      requestAnimationFrame(() =>
+                        document
+                          .getElementById(
+                            `${getSortItemId(menuId, value)}-field-trigger`,
+                          )
+                          ?.focus(),
+                      )
+                    }}
+                  >
+                    <span className="truncate">{column.label}</span>
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
+      <Select
+        open={showDirectionSelector}
+        onOpenChange={setShowDirectionSelector}
+        value={sort.desc ? "desc" : "asc"}
+        // Spread so it type-checks against Radix too: Base UI reads the
+        // closed trigger's label only from `items`, Radix ignores the prop.
+        {...{ items: labels }}
+        onValueChange={(value: string | null) =>
+          // Base UI selects pass null on clear; Radix never does
+          value && onSortUpdate(sort.id, { desc: value === "desc" })
+        }
+      >
+        <SelectTrigger
+          aria-controls={directionListboxId}
+          className="h-8 w-24 rounded data-size:h-8"
+        >
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent
+          id={directionListboxId}
+          className="min-w-[var(--radix-select-trigger-width,var(--anchor-width))] origin-[var(--radix-select-content-transform-origin,var(--transform-origin))]"
+        >
+          <SelectItem value="asc">{labels.asc}</SelectItem>
+          <SelectItem value="desc">{labels.desc}</SelectItem>
+        </SelectContent>
+      </Select>
+      <Button
+        aria-controls={sortItemId}
+        variant="outline"
+        size="icon"
+        className="size-8 shrink-0 rounded"
+        onClick={() => onSortRemove(sort.id)}
+      >
+        <Trash2 />
+      </Button>
+      <SortableItemHandle
+        aria-controls={sortItemId}
+        className={cn(
+          buttonVariants({ variant: "outline", size: "icon" }),
+          "size-8 shrink-0 rounded",
+        )}
+      >
+        <Grip />
+      </SortableItemHandle>
     </SortableItem>
   )
 }
@@ -436,21 +449,22 @@ export function TableSortMenu<TData extends RowData>({
             </p>
           </div>
           {sorting.length > 0 && (
-            <SortableContent {...sortableAsChild}>
-              <ul className="flex max-h-[300px] flex-col gap-2 overflow-y-auto p-1">
-                {sorting.map(sort => (
-                  <TableSortItem
-                    key={sort.id}
-                    sort={sort}
-                    sortItemId={`${id}-sort-${sort.id}`}
-                    columns={columns}
-                    columnLabels={columnLabels}
-                    onSortUpdate={onSortUpdate}
-                    onSortRemove={onSortRemove}
-                    getVariantForColumn={getVariantForColumn}
-                  />
-                ))}
-              </ul>
+            <SortableContent
+              role="list"
+              className="flex max-h-[300px] flex-col gap-2 overflow-y-auto p-1"
+            >
+              {sorting.map(sort => (
+                <TableSortItem
+                  key={sort.id}
+                  sort={sort}
+                  menuId={id}
+                  columns={columns}
+                  columnLabels={columnLabels}
+                  onSortUpdate={onSortUpdate}
+                  onSortRemove={onSortRemove}
+                  getVariantForColumn={getVariantForColumn}
+                />
+              ))}
             </SortableContent>
           )}
           <div className="flex w-full items-center gap-2">
