@@ -147,6 +147,7 @@ export default defineConfig({
             },
             { label: "Components", slug: "getting-started/components" },
             { label: "Skills", slug: "getting-started/skills" },
+            { label: "Changelog", slug: "changelog" },
           ],
         },
         {
@@ -308,10 +309,6 @@ export default defineConfig({
             { label: "Persistence", slug: "examples/persistence-grid" },
             { label: "Server Side", slug: "examples/server-side-grid" },
           ],
-        },
-        {
-          label: "Changelog",
-          slug: "changelog",
         },
         {
           label: "Contributing",
