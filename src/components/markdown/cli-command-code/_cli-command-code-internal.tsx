@@ -86,10 +86,21 @@ export function CliCommandCodeInternal({
               <TabsContent
                 key={command.label}
                 value={command.label}
-                className="no-scrollbar overflow-x-auto py-3.5 text-muted-foreground"
+                className="py-3.5 text-muted-foreground"
               >
-                <pre>
-                  <code className="px-4">{command.code}</code>
+                {/* Long multi-item commands wrap at spaces instead of running off
+                    the edge; copy still copies the one-line command. */}
+                <pre className="[overflow-wrap:anywhere] whitespace-pre-wrap">
+                  <code className="block px-4">
+                    {command.code.split(" ").map((part, i) => (
+                      // Each argument is one chunk, so lines break between
+                      // items, never inside a name like @niko-table/data-table.
+                      <span key={i}>
+                        {i > 0 ? " " : null}
+                        <span className="inline-block max-w-full">{part}</span>
+                      </span>
+                    ))}
+                  </code>
                 </pre>
               </TabsContent>
             ))}
