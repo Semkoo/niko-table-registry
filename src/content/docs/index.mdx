@@ -11,13 +11,18 @@ hero:
       variant: minimal
 ---
 
+import HomeShowcase from "@/components/markdown/home-showcase.astro"
 import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
 import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
 import { GITHUB_REPO_URL } from "@/data/env"
 
+<HomeShowcase />
+
+## Install
+
 **Nobody's table, everyone's solution.**
 
-This registry is not an opaque npm package — you copy `DataTable` source into your project and own it. Built with TanStack Table and shadcn/ui.
+This registry is not an opaque npm package. You copy `DataTable` source into your project and own it. Built with TanStack Table and shadcn/ui.
 
 Add the registry once under `registries` in `components.json`, then install:
 
@@ -34,12 +39,6 @@ Add the registry once under `registries` in `components.json`, then install:
 Works with Radix UI, Base UI and React Aria. Like shadcn/ui, the CLI installs the version that matches your project.
 
 See [Installation](/getting-started/installation/) for merging into an existing `components.json`.
-
-## Live Demo
-
-<CodePreview demo="niko-table/all-features-table" />
-
-Selection, expansion, filters, sort, pagination, column visibility, export, and asides — composed from registry pieces. Browse more in [Examples](/examples/).
 
 ## Quick Links
 

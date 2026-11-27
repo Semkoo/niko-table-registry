@@ -201,7 +201,7 @@ export function TablePagination<TData extends RowData>({
         >
           <SelectTrigger
             size="sm"
-            className="w-16 focus:ring-0"
+            className="w-auto min-w-16 focus:ring-0"
             aria-label="Select page size"
             aria-labelledby="pagination-page-size-label"
           >
