@@ -1,12 +1,12 @@
 ---
 title: TypeScript Types
-description: TypeScript type definitions and interfaces for the data table.
+description: Every TypeScript type and interface used by the data table.
 ---
 
 import { GITHUB_REPO_URL } from "@/data/env"
 import DocsLink from "@/components/markdown/docs-link.astro"
 
-The `types.ts` file contains all TypeScript type definitions and interfaces used throughout the data table components.
+`types.ts` holds the TypeScript types used across the data table.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/types.ts`} external>Source Code ↗</DocsLink>
@@ -16,7 +16,7 @@ The `types.ts` file contains all TypeScript type definitions and interfaces used
 
 ### Option
 
-Option type for select/multi-select filters.
+An option in a select or multi-select filter.
 
 ```tsx
 interface Option {
@@ -29,7 +29,7 @@ interface Option {
 
 ### FilterVariant
 
-Filter variant type defining the UI control type.
+Sets which UI control a filter uses.
 
 ```tsx
 type FilterVariant =
@@ -45,7 +45,7 @@ type FilterVariant =
 
 ### FilterOperator
 
-Filter operator type defining the comparison logic.
+Sets how a filter compares values.
 
 ```tsx
 type FilterOperator =
@@ -67,7 +67,7 @@ type FilterOperator =
 
 ### JoinOperator
 
-Join operator type for combining multiple filters.
+Sets how several filters combine.
 
 ```tsx
 type JoinOperator = "and" | "or" | "mixed"
@@ -77,7 +77,7 @@ type JoinOperator = "and" | "or" | "mixed"
 
 ### ExtendedColumnFilter
 
-Extended column filter with additional metadata.
+A column filter with extra metadata.
 
 ```tsx
 interface ExtendedColumnFilter<TData> {
@@ -92,7 +92,7 @@ interface ExtendedColumnFilter<TData> {
 
 ### ExtendedColumnSort
 
-Extended column sort for URL state management.
+A column sort, used for URL state.
 
 ```tsx
 interface ExtendedColumnSort<TData> {
@@ -103,7 +103,7 @@ interface ExtendedColumnSort<TData> {
 
 ### GlobalFilter
 
-Global filter type.
+The global (search) filter value.
 
 ```tsx
 type GlobalFilter = string | Record<string, unknown>
@@ -113,7 +113,7 @@ type GlobalFilter = string | Record<string, unknown>
 
 ### DataTableColumnDef
 
-Extended column definition for data table. Inherits all TanStack Table ColumnDef properties.
+The column definition type. It has every TanStack Table `ColumnDef` property.
 
 ```tsx
 type DataTableColumnDef<TData, TValue = unknown> = ColumnDef<
@@ -123,7 +123,12 @@ type DataTableColumnDef<TData, TValue = unknown> = ColumnDef<
 >
 ```
 
-For static columns, [`createDataTableColumnHelper<TData>()`](/niko-table/overview/lib/#createdatatablecolumnhelper) is the runtime counterpart: it pre-binds `DataTableFeatures` the same way this alias does, and cells get a typed `getValue()`. Helper results mix per-column value types, so pass them as `DataTableColumns<TData>` (what `DataTableRoot` accepts). Plain `DataTableColumnDef<TData>[]` arrays stay the better fit for dynamic columns and copy-paste examples.
+For static columns, use [`createDataTableColumnHelper<TData>()`](/niko-table/overview/lib/#createdatatablecolumnhelper).
+
+- **Same binding:** it pre-binds `DataTableFeatures`, like this alias.
+- **Typed cells:** `getValue()` is typed.
+- **Mixed value types:** helper results mix per-column value types. Pass them as `DataTableColumns<TData>` (what `DataTableRoot` accepts).
+- **Plain arrays:** `DataTableColumnDef<TData>[]` fits dynamic columns and copy-paste examples better.
 
 ```tsx
 import { createDataTableColumnHelper } from "@/components/niko-table/lib/data-table-features"
@@ -138,7 +143,7 @@ const columns = [
 
 ### DataTableColumns
 
-Mixed column arrays for `DataTableRoot`. Helper columns each carry their own `TValue`, so they are not assignable to `DataTableColumnDef<TData>[]` (that alias defaults `TValue` to `unknown`). Use this alias instead.
+The column array type for `DataTableRoot`. Helper columns each have their own `TValue`, so they do not fit `DataTableColumnDef<TData>[]` (its `TValue` defaults to `unknown`). Use this alias instead.
 
 ```tsx
 type DataTableColumns<TData> = DataTableColumnDef<TData, any>[]
@@ -146,7 +151,7 @@ type DataTableColumns<TData> = DataTableColumnDef<TData, any>[]
 
 ### ColumnMeta
 
-Extended column metadata interface (augments TanStack Table's ColumnMeta).
+Extra column metadata. It adds to TanStack Table's `ColumnMeta`.
 
 ```tsx
 interface ColumnMeta<TData extends RowData, TValue> {
@@ -187,7 +192,7 @@ interface ColumnMeta<TData extends RowData, TValue> {
 
 ### TableMeta
 
-Extended table metadata interface (augments TanStack Table's TableMeta).
+Extra table metadata. It adds to TanStack Table's `TableMeta`.
 
 ```tsx
 interface TableMeta<TData extends RowData> {
@@ -201,19 +206,19 @@ interface TableMeta<TData extends RowData> {
 }
 ```
 
-Pass table metadata through the **table-level** `meta` option on `DataTableRoot` — not a column's `meta`:
+Pass table metadata through the **table-level** `meta` option on `DataTableRoot`, not a column's `meta`:
 
 ```tsx
 <DataTableRoot data={data} columns={columns} meta={{ disableFlexFill: true }}>
 ```
 
-`disableFlexFill` is read when the table options are built, so set it statically rather than toggling it at runtime.
+`disableFlexFill` is read when the table options are built. Set it statically, not at runtime.
 
 ## Row Types
 
 ### DataTableRow
 
-Data table row type. Alias for TanStack Table's `Row`, pre-bound to DataTable's feature set.
+A row. Alias for TanStack Table's `Row`, bound to DataTable's features.
 
 ```tsx
 type DataTableRow<TData> = Row<DataTableFeatures, TData>
@@ -221,7 +226,7 @@ type DataTableRow<TData> = Row<DataTableFeatures, TData>
 
 ### DataTableInstance
 
-Data table instance type. Alias for TanStack Table's `Table`, pre-bound to DataTable's feature set.
+The table instance. Alias for TanStack Table's `Table`, bound to DataTable's features.
 
 ```tsx
 type DataTableInstance<TData> = Table<DataTableFeatures, TData>
@@ -231,7 +236,7 @@ type DataTableInstance<TData> = Table<DataTableFeatures, TData>
 
 ### QueryKeys
 
-Query keys for URL state management.
+Names of the URL query keys.
 
 ```tsx
 interface QueryKeys {
@@ -247,7 +252,7 @@ interface QueryKeys {
 
 ### ValueOf
 
-Utility type to get the literal values from constant objects.
+Gets the literal values of a constant object.
 
 ```tsx
 type ValueOf<T> = T[keyof T]
@@ -255,7 +260,7 @@ type ValueOf<T> = T[keyof T]
 
 ### JoinOperatorValues
 
-Convenience type for accessing JOIN_OPERATORS constant values.
+The values of the `JOIN_OPERATORS` constant.
 
 ```tsx
 type JoinOperatorValues = typeof JOIN_OPERATORS
@@ -263,7 +268,7 @@ type JoinOperatorValues = typeof JOIN_OPERATORS
 
 ### FilterOperatorValues
 
-Convenience type for accessing FILTER_OPERATORS constant values.
+The values of the `FILTER_OPERATORS` constant.
 
 ```tsx
 type FilterOperatorValues = typeof FILTER_OPERATORS
@@ -271,7 +276,7 @@ type FilterOperatorValues = typeof FILTER_OPERATORS
 
 ### FilterVariantValues
 
-Convenience type for accessing FILTER_VARIANTS constant values.
+The values of the `FILTER_VARIANTS` constant.
 
 ```tsx
 type FilterVariantValues = typeof FILTER_VARIANTS
@@ -279,9 +284,9 @@ type FilterVariantValues = typeof FILTER_VARIANTS
 
 ## TanStack Table Module Augmentation
 
-The types module augments TanStack Table's type definitions to add custom metadata:
+This module adds custom metadata to TanStack Table's types:
 
-- **ColumnMeta** - Adds label, placeholder, variant, options, `flex` (layout fill), and other filter-related metadata
-- **TableMeta** - Adds joinOperator, hasIndividualJoinOperators for filter logic, and `disableFlexFill` for layout
+- **ColumnMeta**: adds label, placeholder, variant, options, `flex` (layout fill), and other filter metadata
+- **TableMeta**: adds joinOperator and hasIndividualJoinOperators (filter logic), and `disableFlexFill` (layout)
 
-This allows TypeScript to provide proper type checking and autocomplete for column and table metadata throughout the data table components.
+TypeScript can then check and autocomplete column and table metadata.

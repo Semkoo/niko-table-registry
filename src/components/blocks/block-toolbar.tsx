@@ -1,8 +1,6 @@
 import { useEffect, useRef, useState } from "react"
 import {
-  CodeIcon,
   ExternalLinkIcon,
-  EyeIcon,
   MonitorIcon,
   SmartphoneIcon,
   TabletIcon,
@@ -34,15 +32,9 @@ export function BlockToolbar({ viewHref }: { viewHref: string }) {
     // Tabs, width toggles and the link all use the default 36px (h-9) height.
     <div ref={rootRef} className="flex flex-wrap items-center gap-2">
       <Tabs value={tab} onValueChange={value => setTab(value as Tab)}>
-        <TabsList>
-          <TabsTrigger value="preview" className="px-3">
-            <EyeIcon aria-hidden="true" />
-            Preview
-          </TabsTrigger>
-          <TabsTrigger value="code" className="px-3">
-            <CodeIcon aria-hidden="true" />
-            Code
-          </TabsTrigger>
+        <TabsList className="nt-switch">
+          <TabsTrigger value="preview">Preview</TabsTrigger>
+          <TabsTrigger value="code">Code</TabsTrigger>
         </TabsList>
       </Tabs>
       <div className="ml-auto flex items-center gap-2">

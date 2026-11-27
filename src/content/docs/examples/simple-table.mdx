@@ -1,18 +1,18 @@
 ---
 title: Simple Table
-description: A basic data table with no pagination - perfect for small datasets.
+description: A basic data table with no pagination, for small datasets.
 ---
 
 import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
 import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
 
-The smallest possible install: just `@niko-table/data-table`, no add-ons. Renders an accessible `<thead>`/`<tbody>` and stops there — no pagination, no sort, no filters. Reach for it when the dataset is short and static, and ceremony would just get in the way.
+The smallest install: only `@niko-table/data-table`, no add-ons. It renders an accessible `<thead>` and `<tbody>` and nothing more: no pagination, sort, or filters. Use it when the dataset is short and static.
 
 <CodePreview demo="niko-table/simple" />
 
 ## Introduction
 
-The Simple Table is the most basic implementation. It displays your data in a clean, accessible table format without pagination, filtering, or sorting. Perfect for small datasets (< 50 rows) or when you just need to display data.
+The Simple Table is the most basic setup. It shows your data in a clean, accessible table with no pagination, filtering, or sorting. Use it for small datasets (under 50 rows) or when you only need to display data.
 
 ## Installation
 
@@ -26,7 +26,7 @@ For optional add-ons (pagination, filters, virtualization, etc.) and manual copy
 
 ## Prerequisites
 
-We are going to build a table to show users. Here's what our data looks like:
+We are going to build a table of users. Here's what our data looks like:
 
 ```tsx showLineNumbers
 type User = {
@@ -50,11 +50,11 @@ const data: User[] = [
 
 ## Basic Table
 
-Let's start by building a basic table.
+Start with a basic table.
 
 ### Column Definitions
 
-First, we'll define our columns.
+First, define the columns.
 
 ```tsx showLineNumbers title="columns.tsx"
 "use client"
@@ -86,7 +86,7 @@ export const columns: DataTableColumnDef<User>[] = [
 
 ### `<DataTable />` component
 
-Next, we'll create a `<DataTable />` component to render our table.
+Next, create a `<DataTable />` component to render the table.
 
 ```tsx showLineNumbers title="simple-table.tsx"
 "use client"
@@ -140,7 +140,7 @@ export function SimpleTable({ data }: { data: User[] }) {
 
 ## Cell Formatting
 
-Let's format the status cell to display with colors.
+Now format the status cell to show colors.
 
 ```tsx showLineNumbers title="columns.tsx"
 export const columns: DataTableColumnDef<User>[] = [
@@ -161,7 +161,7 @@ export const columns: DataTableColumnDef<User>[] = [
 ]
 ```
 
-You can use the same approach to format other cells.
+Use the same approach to format other cells.
 
 ## Loading State
 
@@ -189,30 +189,30 @@ export function SimpleTable({
 }
 ```
 
-The `DataTableSkeleton` component will automatically show when `isLoading` is `true`.
+`DataTableSkeleton` shows automatically when `isLoading` is `true`.
 
 ## Empty State
 
-The `DataTableEmptyBody` component automatically shows when there's no data or when filters return no results.
+`DataTableEmptyBody` shows automatically when there is no data, or when filters return no results.
 
 ## When to Use
 
 **✅ Use Simple Table when:**
 
-- You have a small dataset (< 50 rows)
-- You don't need user interactions (sorting, filtering)
-- You want the fastest, simplest implementation
+- You have a small dataset (under 50 rows)
+- You don't need user interaction (sorting, filtering)
+- You want the fastest, simplest setup
 - You're building a prototype or MVP
 
 **❌ Don't use Simple Table when:**
 
 - You have more than 50 rows (use [Basic Table](/examples/basic-table/) with pagination)
-- Users need to search or filter data (use [Search Table](/examples/search-table/))
+- Users need to search or filter (use [Search Table](/examples/search-table/))
 - Users need to sort columns (use [Basic Table](/examples/basic-table/))
 
 ## Next Steps
 
-Once you're comfortable with the Simple Table, try adding more features:
+Once you're comfortable with the Simple Table, add more features:
 
-- [Basic Table](/examples/basic-table/) - Add pagination and sorting
-- [Search Table](/examples/search-table/) - Add search functionality
+- [Basic Table](/examples/basic-table/): add pagination and sorting
+- [Search Table](/examples/search-table/): add search

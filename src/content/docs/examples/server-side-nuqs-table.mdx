@@ -1,16 +1,16 @@
 ---
 title: Server-Side Nuqs Table
-description: Server-side pagination, sorting, and filtering with the full table state persisted in the URL via nuqs.
+description: Server-side pagination, sorting, and filtering, with the whole table state kept in the URL by nuqs.
 ---
 
 import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
 import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
 
-Combines TanStack Query (data fetching, caching, request dedup) with [nuqs](https://nuqs.dev/) URL state, so the URL itself becomes the cache key — share a link, and the recipient sees the exact same filtered, sorted, paginated view. Same database-agnostic wire contract as the [Server-Side Table](/examples/server-side-table/); read that page first, this one only covers the URL layer.
+Combines TanStack Query (fetching, caching, request dedup) with [nuqs](https://nuqs.dev/) URL state. The URL becomes the cache key: share a link and the other person sees the same filtered, sorted, paginated view. Use it when server-side table views must be shareable or bookmarkable. It uses the same database-agnostic wire contract as the [Server-Side Table](/examples/server-side-table/). Read that page first. This one covers only the URL layer.
 
 ## Live demo (mocked)
 
-The demo runs against a **mock server** — an in-memory array of 2,000 products plus simulated latency — so every filter works out of the box with no database; everything in its `MOCK SERVER` section is a stand-in for your backend. Try it: filter or sort, watch the "URL State" card update, and imagine pasting that URL to a teammate.
+The demo runs against a **mock server**: an in-memory array of 2,000 products with simulated delay. Every filter works without a database. Everything in its `MOCK SERVER` section stands in for your backend. Try it: filter or sort, watch the "URL State" card update, and imagine sending that URL to a teammate.
 
 <CodePreview demo="niko-table/server-side-nuqs-state" />
 
@@ -58,11 +58,11 @@ export default function RootLayout({ children }) {
 }
 ```
 
-The example bundles its own providers so it stays copy-paste runnable — remove that wrapper once your root provides them.
+The example includes its own providers so it runs as copied. Remove that wrapper once your root provides them.
 
 ## URL state parsers
 
-One parser per state slice; the keys double as the URL param names:
+Use one parser per state slice. The keys are also the URL param names:
 
 ```tsx showLineNumbers
 import { parseAsInteger, parseAsJson, parseAsString, useQueryStates } from "nuqs"
@@ -88,7 +88,7 @@ const [urlParams, setUrlParams] = useQueryStates(tableStateParsers, {
 })
 ```
 
-A filtered view produces a URL like:
+A filtered view makes a URL like this:
 
 ```text
 ?page=0&perPage=10&sort=[{"id":"price","desc":true}]&filters=[{"id":"category","value":["electronics"]}]&search=pro
@@ -96,7 +96,7 @@ A filtered view produces a URL like:
 
 ## URL → table state, table state → URL
 
-Derive TanStack state from the URL and write updates back in the handlers. Every filter/sort change also resets `page` to `0`:
+Build TanStack state from the URL, and write updates back in the handlers. Every filter or sort change also resets `page` to `0`:
 
 ```tsx showLineNumbers
 // URL → state
@@ -116,20 +116,20 @@ const handleSortingChange = (updater: Updater<SortingState>) => {
 }
 ```
 
-Passing `null` removes a param from the URL, keeping default states clean.
+Passing `null` removes a param from the URL, so default states stay clean.
 
 ## Serializing filters for the URL
 
-Two details keep the URLs short and stable:
+Two details keep URLs short and stable:
 
-- **`filterId` is stripped on write** (`serializeFiltersForUrl`) and **regenerated on read** (`normalizeFiltersFromUrl`) — both exported from `filters/table-filter-menu`. The ids are internal to the menu UI; regenerating them index-based keeps input focus stable.
-- **Widget values pass through untouched** — faceted `string[]`, slider `[min, max]` tuples, and booleans are already URL-friendly JSON.
+- **`filterId` is removed on write** (`serializeFiltersForUrl`) and **recreated on read** (`normalizeFiltersFromUrl`). Both are exported from `filters/table-filter-menu`. The ids are internal to the menu UI. Recreating them by index keeps input focus stable.
+- **Widget values pass through unchanged.** Faceted `string[]`, slider `[min, max]` tuples, and booleans are already URL-friendly JSON.
 
-The advanced filter menu is controlled from the URL exactly like the non-nuqs example routes it from `useState`: AND rules live in the `filters` param, OR/MIXED rules move to the `global` param. See `handleMenuFiltersChange` in the example.
+The advanced filter menu is controlled from the URL, just as the non-nuqs example controls it from `useState`. AND rules go in the `filters` param. OR and MIXED rules go in the `global` param. See `handleMenuFiltersChange` in the example.
 
 ## Fetching
 
-Identical to the [Server-Side Table](/examples/server-side-table/#fetching-with-tanstack-query): the URL-derived state feeds the query key, so a shared link resolves to the same cache entry.
+Same as the [Server-Side Table](/examples/server-side-table/#fetching-with-tanstack-query). The state from the URL feeds the query key, so a shared link hits the same cache entry.
 
 ```tsx showLineNumbers
 const { data } = useQuery({
@@ -139,20 +139,20 @@ const { data } = useQuery({
 })
 ```
 
-Because the request shape is already serialized in the URL, a server-rendered page can run the same query during SSR from the incoming search params — no client round trip for the first paint.
+The request shape is already in the URL, so a server-rendered page can run the same query during SSR from the incoming search params. The first paint needs no client round trip.
 
 ## When to Use
 
 **✅ Use Server-Side Nuqs Table when:**
 
 - Everything from the Server-Side Table applies, and
-- Table views must be shareable, bookmarkable, or survive refreshes
-- You want back/forward to step through filter states — switch the snippet to `history: "push"` for that
+- Table views must be shareable, bookmarkable, or survive a refresh
+- You want back and forward to step through filter states (switch the snippet to `history: "push"`)
 
 **❌ Consider other options when:**
 
-- URL noise matters more than shareability — use [Server-Side Table](/examples/server-side-table/)
-- Data fits client-side — use [Advanced Nuqs Table](/examples/advanced-nuqs-table/)
+- URL noise matters more than shareability: use [Server-Side Table](/examples/server-side-table/)
+- The data fits on the client: use [Advanced Nuqs Table](/examples/advanced-nuqs-table/)
 
 ## Next Steps
 

@@ -1,16 +1,16 @@
 ---
 title: Filter Components
-description: Core filter implementation components that accept a table prop directly.
+description: Core filter components that take a table prop. Use them to build custom filters.
 ---
 
 import { GITHUB_REPO_URL } from "@/data/env"
 import DocsLink from "@/components/markdown/docs-link.astro"
 
-Filter components are the core implementation that accept a `table` prop directly. They are used internally by the context-aware components in `components/` but can also be used standalone when building custom components.
+These filters take a `table` prop directly. The components in `components/` use them inside. You can also use them on their own in custom components.
 
 ### TableSearchFilter
 
-Core search filter implementation.
+The core search input.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-search-filter.tsx`} external>Source Code ↗</DocsLink>
@@ -35,7 +35,7 @@ import { TableSearchFilter } from "@/components/niko-table/filters/table-search-
 
 ### TablePagination
 
-Core pagination implementation.
+The core pagination controls.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-pagination.tsx`} external>Source Code ↗</DocsLink>
@@ -63,11 +63,11 @@ import { TablePagination } from "@/components/niko-table/filters/table-paginatio
 
 #### Props
 
-Same as `DataTablePagination` but requires `table` prop. See DataTablePagination section above.
+Same as `DataTablePagination`, plus a required `table` prop. See the DataTablePagination section above.
 
 ### TableFilterMenu
 
-Core filter menu implementation with command palette interface.
+The core filter menu, styled like a command palette.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-filter-menu.tsx`} external>Source Code ↗</DocsLink>
@@ -99,7 +99,7 @@ const [filters, setFilters] = useState<ExtendedColumnFilter<Product>[]>([])
 
 #### URL serialization helpers
 
-The module also exports two helpers for persisting menu filters (URL params, controlled state):
+The module also exports two helpers to save menu filters (URL params, controlled state):
 
 ```tsx showLineNumbers
 import {
@@ -114,11 +114,11 @@ const urlFilters = serializeFiltersForUrl(filters)
 const restored = normalizeFiltersFromUrl(urlFilters)
 ```
 
-`filterId` is internal to the menu UI — deterministic regeneration keeps input focus stable across re-renders. See the [Server-Side Nuqs Table](/examples/server-side-nuqs-table/) example for full wiring.
+`filterId` is internal to the menu UI. Regenerating it the same way each time keeps input focus steady across re-renders. See the [Server-Side Nuqs Table](/examples/server-side-nuqs-table/) example for full wiring.
 
 ### TableFacetedFilter
 
-Core faceted filter implementation.
+The core faceted filter.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-faceted-filter.tsx`} external>Source Code ↗</DocsLink>
@@ -159,7 +159,7 @@ import { TableFacetedFilter } from "@/components/niko-table/filters/table-facete
 
 ### TableSliderFilter
 
-Core slider filter implementation for numeric ranges.
+The core slider filter for numeric ranges.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-slider-filter.tsx`} external>Source Code ↗</DocsLink>
@@ -208,7 +208,7 @@ import { TableSliderFilter } from "@/components/niko-table/filters/table-slider-
 
 ### TableDateFilter
 
-Core date filter implementation.
+The core date filter.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-date-filter.tsx`} external>Source Code ↗</DocsLink>
@@ -241,7 +241,7 @@ import { TableDateFilter } from "@/components/niko-table/filters/table-date-filt
 
 ### TableSortMenu
 
-Core sort menu implementation.
+The core sort menu.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-sort-menu.tsx`} external>Source Code ↗</DocsLink>
@@ -281,7 +281,7 @@ import { TableSortMenu } from "@/components/niko-table/filters/table-sort-menu"
 
 ### TableViewMenu
 
-Core view menu implementation for column visibility. For drag-to-reorder, use [`TableViewDndMenu`](#tableviewdndmenu) — it lives in a separate file so consumers who don't need DnD don't pay the `@dnd-kit/*` bundle cost.
+The core menu for column visibility. For drag-to-reorder, use [`TableViewDndMenu`](#tableviewdndmenu). It lives in a separate file, so you only pay the `@dnd-kit/*` bundle cost if you use it.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-view-menu.tsx`} external>Source Code ↗</DocsLink>
@@ -314,18 +314,22 @@ import { TableViewMenu } from "@/components/niko-table/filters/table-view-menu"
 
 #### Props
 
-| Name                       | Type                                             | Description                                                                                                |
-| -------------------------- | ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------- |
-| `table`                    | `DataTableInstance<TData>`                       | TanStack Table instance (required).                                                                        |
-| `className`                | `string`                                         | Additional CSS classes.                                                                                    |
-| `onColumnVisibilityChange` | `(columnId: string, isVisible: boolean) => void` | Callback when visibility changes.                                                                          |
-| `lockedColumnIds`          | `string[]`                                       | Columns shown in the menu but rendered disabled. Useful for required columns marked `enableHiding: false`. |
-| `onReset`                  | `() => void`                                     | When provided, renders a Reset button below a separator at the bottom of the menu.                         |
-| `resetLabel`               | `string`                                         | Label for the reset button. Defaults to `"Reset to defaults"`.                                             |
+| Name                       | Type                                             | Description                                                                                     |
+| -------------------------- | ------------------------------------------------ | ----------------------------------------------------------------------------------------------- |
+| `table`                    | `DataTableInstance<TData>`                       | TanStack Table instance (required).                                                             |
+| `className`                | `string`                                         | Additional CSS classes.                                                                         |
+| `onColumnVisibilityChange` | `(columnId: string, isVisible: boolean) => void` | Callback when visibility changes.                                                               |
+| `lockedColumnIds`          | `string[]`                                       | Columns shown in the menu but disabled. Good for required columns marked `enableHiding: false`. |
+| `onReset`                  | `() => void`                                     | Shows a Reset button at the bottom of the menu when set.                                        |
+| `resetLabel`               | `string`                                         | Label for the reset button. Defaults to `"Reset to defaults"`.                                  |
 
 ### TableViewDndMenu
 
-Drag-to-reorder variant of `TableViewMenu`. Each row gets a `GripVertical` handle and the list becomes vertically sortable via `@dnd-kit`. The same `columnOrder` state the table consumes drives the menu's display order, so dropping a row updates both surfaces in lockstep. Combines cleanly with [`TableColumnDndProvider`](#tablecolumndndprovider) (header drag) — two reorder surfaces, one state.
+A drag-to-reorder version of `TableViewMenu`.
+
+- **Handles:** each row gets a `GripVertical` handle. The list sorts vertically via `@dnd-kit`.
+- **One state:** the table's `columnOrder` state drives the menu order. Dropping a row updates both.
+- **Works with header drag:** pair it with [`TableColumnDndProvider`](#tablecolumndndprovider). Two ways to reorder, one state.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-view-dnd-menu.tsx`} external>Source Code ↗</DocsLink>
@@ -358,12 +362,12 @@ const [columnOrder, setColumnOrder] = React.useState<string[]>([])
 | `className`                | `string`                                         | Additional CSS classes.                                        |
 | `onColumnVisibilityChange` | `(columnId: string, isVisible: boolean) => void` | Callback when visibility changes.                              |
 | `lockedColumnIds`          | `string[]`                                       | Columns shown in the menu but rendered disabled.               |
-| `onReset`                  | `() => void`                                     | When provided, renders a Reset button below a separator.       |
+| `onReset`                  | `() => void`                                     | Shows a Reset button below a separator when set.               |
 | `resetLabel`               | `string`                                         | Label for the reset button. Defaults to `"Reset to defaults"`. |
 
 ### TableInlineFilter
 
-Core inline filter implementation with advanced operators.
+The core inline filter, with advanced operators.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-inline-filter.tsx`} external>Source Code ↗</DocsLink>
@@ -395,7 +399,7 @@ const [filters, setFilters] = useState<ExtendedColumnFilter<Product>[]>([])
 
 ### TableClearFilter
 
-Core clear filter button implementation.
+The core button that clears filters.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-clear-filter.tsx`} external>Source Code ↗</DocsLink>
@@ -442,7 +446,7 @@ import { TableClearFilter } from "@/components/niko-table/filters/table-clear-fi
 
 ### TableExportButton
 
-Core export button implementation.
+The core CSV export button.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-export-button.tsx`} external>Source Code ↗</DocsLink>
@@ -499,7 +503,7 @@ import { TableExportButton, exportTableToCSV } from "@/components/niko-table/fil
 
 ### exportTableToCSV
 
-Standalone utility function to export a TanStack Table to CSV. Use this when you want full control over when and how the export happens.
+A function that exports a TanStack Table to CSV. Use it when you want to control when and how the export runs.
 
 ```tsx showLineNumbers
 import { exportTableToCSV } from "@/components/niko-table/filters/table-export-button"
@@ -529,7 +533,7 @@ exportTableToCSV(table, {
 
 ### TableRangeFilter
 
-Core range filter implementation for numeric inputs.
+The core range filter for numeric inputs.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-range-filter.tsx`} external>Source Code ↗</DocsLink>
@@ -572,11 +576,11 @@ const filter: ExtendedColumnFilter<Product> = {
 
 ## Column-Level Filter Components
 
-These components are the core implementations used by the composable `DataTableColumnHeader` sub-components. They accept `column` and/or `table` props directly and can be used standalone when building custom column headers.
+The `DataTableColumnHeader` sub-components use these inside. They take `column` and/or `table` props directly. Use them on their own to build custom column headers.
 
 ### TableColumnTitle
 
-Core column title implementation. Renders a clickable title that toggles sorting.
+The core column title. Click it to toggle sorting.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-column-title.tsx`} external>Source Code ↗</DocsLink>
@@ -598,7 +602,7 @@ import { TableColumnTitle } from "@/components/niko-table/filters/table-column-t
 
 ### TableColumnActions
 
-Core column actions container. Renders a dropdown menu trigger with active state indicator.
+The core container for column actions. It renders a dropdown trigger with an active indicator.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-column-actions.tsx`} external>Source Code ↗</DocsLink>
@@ -622,7 +626,10 @@ import { TableColumnActions } from "@/components/niko-table/filters/table-column
 
 ### TableColumnSortOptions / TableColumnSortMenu
 
-Core sorting implementations. `TableColumnSortOptions` renders sort items inside a dropdown menu. `TableColumnSortMenu` renders a standalone sort button.
+Core sorting pieces.
+
+- **`TableColumnSortOptions`:** sort items inside a dropdown menu.
+- **`TableColumnSortMenu`:** a standalone sort button.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-column-sort.tsx`} external>Source Code ↗</DocsLink>
@@ -651,7 +658,10 @@ import {
 
 ### TableColumnHideOptions / TableColumnHideMenu
 
-Core hide column implementations. `TableColumnHideOptions` renders a hide item inside a dropdown menu. `TableColumnHideMenu` renders a standalone button.
+Core hide-column pieces.
+
+- **`TableColumnHideOptions`:** a hide item inside a dropdown menu.
+- **`TableColumnHideMenu`:** a standalone button.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-column-hide.tsx`} external>Source Code ↗</DocsLink>
@@ -679,7 +689,10 @@ import {
 
 ### TableColumnPinOptions / TableColumnPinMenu
 
-Core column pinning implementations. `TableColumnPinOptions` renders pin left/right/unpin items inside a dropdown menu. `TableColumnPinMenu` renders a standalone button.
+Core column pinning pieces.
+
+- **`TableColumnPinOptions`:** pin left, pin right and unpin items inside a dropdown menu.
+- **`TableColumnPinMenu`:** a standalone button.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-column-pin.tsx`} external>Source Code ↗</DocsLink>
@@ -707,7 +720,10 @@ import {
 
 ### TableColumnFacetedFilterOptions / TableColumnFacetedFilterMenu
 
-Core faceted filter implementations for column headers. `TableColumnFacetedFilterOptions` renders inside a dropdown. `TableColumnFacetedFilterMenu` renders a standalone popover.
+Core faceted filters for column headers.
+
+- **`TableColumnFacetedFilterOptions`:** renders inside a dropdown.
+- **`TableColumnFacetedFilterMenu`:** a standalone popover.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-column-faceted-filter.tsx`} external>Source Code ↗</DocsLink>
@@ -738,7 +754,11 @@ import {
 
 ### TableColumnFilterTrigger
 
-Core trigger button for opening the column filter popover. Renders a filter icon (or filter-clear icon when the column is filtered). Often used with `TableColumnFacetedFilterOptions` or `TableColumnFacetedFilterMenu`; accepts standard Button props in addition to `column`.
+The button that opens the column filter popover.
+
+- **Icon:** a filter icon, or a filter-clear icon when the column is filtered.
+- **Pairs with:** `TableColumnFacetedFilterOptions` or `TableColumnFacetedFilterMenu`.
+- **Props:** `column`, plus any standard Button props.
 
 ```tsx showLineNumbers
 import { TableColumnFilterTrigger } from "@/components/niko-table/filters/table-column-faceted-filter"
@@ -757,7 +777,7 @@ All other props are passed through to the underlying `Button` component.
 
 ### TableColumnSliderFilterOptions
 
-Core slider filter implementation for column headers. Renders a range slider inside a dropdown menu.
+The core slider filter for column headers. It shows a range slider in a dropdown menu.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-column-slider-filter.tsx`} external>Source Code ↗</DocsLink>
@@ -781,7 +801,7 @@ import { TableColumnSliderFilterOptions } from "@/components/niko-table/filters/
 
 ### TableColumnDateFilterOptions
 
-Core date filter implementation for column headers. Renders a date picker inside a dropdown menu.
+The core date filter for column headers. It shows a date picker in a dropdown menu.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-column-date-filter.tsx`} external>Source Code ↗</DocsLink>
@@ -807,7 +827,7 @@ import { TableColumnDateFilterOptions } from "@/components/niko-table/filters/ta
 
 ### TableRowDndProvider
 
-Core row DnD provider that wraps the table with DnD context and sensors. Handles `arrayMove` internally and calls `onReorder` with the new data array.
+Wraps the table with row DnD context and sensors. It runs `arrayMove` for you and calls `onReorder` with the new data array.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-row-dnd.tsx`} external>Source Code ↗</DocsLink>
@@ -832,7 +852,7 @@ import { TableRowDndProvider, TableDraggableRow, TableRowDragHandle } from "@/co
 
 ### TableDraggableRow
 
-Makes a table row draggable via `@dnd-kit/sortable`.
+Makes a table row draggable (via `@dnd-kit/sortable`).
 
 #### Props
 
@@ -844,7 +864,7 @@ Makes a table row draggable via `@dnd-kit/sortable`.
 
 ### TableRowDragHandle
 
-A grip icon button cell for initiating row drags.
+A grip-icon cell that starts a row drag.
 
 #### Props
 
@@ -855,7 +875,7 @@ A grip icon button cell for initiating row drags.
 
 ### TableColumnDndProvider
 
-Core column DnD provider that wraps the table with horizontal DnD context. Handles `arrayMove` on column order.
+Wraps the table with horizontal column DnD context. It runs `arrayMove` on the column order.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/filters/table-column-dnd.tsx`} external>Source Code ↗</DocsLink>
@@ -880,7 +900,7 @@ import { TableColumnDndProvider, TableDraggableHeader, TableDragAlongCell } from
 
 ### TableDraggableHeader
 
-Makes a table header cell draggable for column reordering.
+Makes a header cell draggable to reorder columns.
 
 #### Props
 
@@ -893,7 +913,7 @@ Makes a table header cell draggable for column reordering.
 
 ### TableDragAlongCell
 
-Table cell that follows its column's drag position.
+A cell that follows its column while it is dragged.
 
 #### Props
 

@@ -1,13 +1,15 @@
 ---
 title: Column Pinning Table
-description: Pin columns to the left or right edge for easy reference while scrolling.
+description: Pin columns to the left or right edge so they stay visible while scrolling.
 ---
 
 import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
 import CollapsiblePreview from "@/components/markdown/collapsible-preview.astro"
 import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
 
-Pin one or more columns to the left or right edge so they stay anchored during horizontal scroll — handy for identifier columns (Order ID, Name) on the left and action columns (menu, edit) on the right. Sticky positioning and z-index layering are handled by the core; you just declare which columns pin and where.
+This example pins columns to the left or right edge so they stay in view during horizontal scroll. Use it for identifier columns (Order ID, Name) on the left and action columns (menu, edit) on the right.
+
+The core handles sticky positioning and z-index. You only say which columns pin and where.
 
 <CodePreview demo="niko-table/column-pinning" />
 
@@ -17,7 +19,7 @@ Pin one or more columns to the left or right edge so they stay anchored during h
 
 ## Introduction
 
-Column pinning keeps important columns visible while users scroll horizontally. Pin identifier columns (like Order ID) to the left and action columns to the right.
+Pinned columns stay visible while users scroll sideways. Pin identifier columns (like Order ID) to the left and action columns to the right.
 
 ## Installation
 
@@ -31,7 +33,7 @@ For other add-ons or manual copy-paste, see the [Installation Guide](/getting-st
 
 ## Prerequisites
 
-We'll build a table showing orders. Here's our data:
+You build an orders table. This is the data:
 
 ```tsx showLineNumbers
 type Order = {
@@ -60,7 +62,7 @@ const data: Order[] = [
 
 ## Basic Column Pinning
 
-Set `initialState.columnPinning` to pin columns on mount:
+Set `initialState.columnPinning` to pin columns when the table first renders:
 
 ```tsx showLineNumbers title="column-pinning.tsx"
 <DataTableRoot
@@ -82,7 +84,7 @@ Set `initialState.columnPinning` to pin columns on mount:
 
 ## Column Definitions
 
-Set explicit `size` for each column to enable horizontal scrolling:
+Set a `size` on each column so the table can scroll horizontally:
 
 ```tsx showLineNumbers title="columns.tsx"
 const columns: DataTableColumnDef<Order>[] = [
@@ -114,7 +116,7 @@ const columns: DataTableColumnDef<Order>[] = [
 
 ## Interactive Pinning
 
-Add pinning options to column actions for user-controlled pinning:
+Add pin options to the column actions so users can pin columns:
 
 ```tsx showLineNumbers
 {
@@ -134,7 +136,7 @@ Add pinning options to column actions for user-controlled pinning:
 
 ## Controlled State
 
-Manage pinning state externally:
+Hold the pinning state yourself and pass it in:
 
 ```tsx showLineNumbers title="column-pinning-state.tsx"
 import { useState } from "react"
@@ -163,16 +165,16 @@ export function ControlledPinningTable({ data }: { data: Order[] }) {
 
 **✅ Use Column Pinning when:**
 
-- Tables have many columns requiring horizontal scroll
+- The table has many columns and scrolls sideways
 - Key identifiers (ID, Name) must stay visible
-- Actions column should be always accessible
+- The actions column must always be reachable
 
 **❌ Consider other options when:**
 
-- All columns fit on screen (no scrolling needed)
-- Mobile-first design (pinning adds complexity)
+- All columns fit on screen
+- You design mobile-first (pinning adds complexity)
 
 ## Next Steps
 
-- [Virtualization Table](/examples/virtualization-table/) - Combine pinning with virtual scrolling
-- [Advanced Table](/examples/advanced-table/) - Persistent pinning state
+- [Virtualization Table](/examples/virtualization-table/): combine pinning with virtual scrolling
+- [Advanced Table](/examples/advanced-table/): persistent pinning state

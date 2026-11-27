@@ -501,12 +501,18 @@ function GridCellByType({
   }
 }
 
-export function GridAllFeatures() {
+export function GridAllFeatures({
+  showStatePanel = true,
+}: {
+  /** The live state card is for the docs; the home page hides it. */
+  showStatePanel?: boolean
+} = {}) {
   const [resetKey, setResetKey] = React.useState(0)
   return (
     <GridAllFeaturesInner
       key={resetKey}
       onReset={() => setResetKey(k => k + 1)}
+      showStatePanel={showStatePanel}
     />
   )
 }
@@ -661,7 +667,13 @@ function CurrentTableStatePanel({
   )
 }
 
-function GridAllFeaturesInner({ onReset }: { onReset: () => void }) {
+function GridAllFeaturesInner({
+  onReset,
+  showStatePanel,
+}: {
+  onReset: () => void
+  showStatePanel: boolean
+}) {
   const cols = useGridColumns({ initialColumns: INITIAL_COLUMN_SPECS })
   const columnById = React.useMemo(
     () => Object.fromEntries(cols.columns.map(c => [c.id, c])),
@@ -910,11 +922,13 @@ function GridAllFeaturesInner({ onReset }: { onReset: () => void }) {
             </div>
           </DataGridColumns>
         </DataGrid>
-        <CurrentTableStatePanel
-          grid={grid}
-          columnCount={cols.columns.length}
-          onReset={onReset}
-        />
+        {showStatePanel ? (
+          <CurrentTableStatePanel
+            grid={grid}
+            columnCount={cols.columns.length}
+            onReset={onReset}
+          />
+        ) : null}
       </DataTableRoot>
     </div>
   )

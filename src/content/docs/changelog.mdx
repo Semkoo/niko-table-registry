@@ -21,12 +21,14 @@ The short version of each release. For every technical detail, see the [full cha
 - **React Aria (new, experimental).** Niko Table now installs on shadcn React Aria projects, like Radix UI and Base UI.
   - The registry line changed to `https://niko-table.com/r/{style}/{name}.json`. The old line still works on Radix and Base UI. [Installation](/getting-started/installation/#radix-ui-base-ui-and-react-aria)
   - `shadcn search`, `list` and `view` work on React Aria too.
-  - Buttons, popovers, dialogs and tooltips are shadcn's own React Aria components.
+  - Buttons, popovers, dialogs, tooltips and search lists are shadcn's own React Aria components.
   - Known gaps:
     - Popovers, menus and the right-click menu are always modal: the page does not scroll while one is open.
     - Arrow keys do not move between menu items and a search box or other controls inside the same menu. Tab and the mouse do.
     - Right-click menus do not open with a long press on touch, and after one closes, focus goes to the page, not the row.
-    - The command list (search in filters and menus) uses cmdk and keeps the Radix look.
+    - Search in filters and menus matches text that contains what you type. It does not do fuzzy matches, and results keep their order.
+    - The first Escape in a search box clears it. The next one closes the popover.
+    - In the drag-to-reorder column menu, arrow keys do not move between rows. Tab, Enter and the mouse do.
     - A picked date cannot be cleared by clicking it again, and a date range only reports once both ends are picked.
     - Help icons with a tooltip are an extra Tab stop, and tooltips open on hover only after a first click on the page.
     - shadcn's own React Aria `components/ui/label.tsx` imports `React` without using it, which fails strict TypeScript (`noUnusedLocals`). Delete that import line. It is a shadcn issue, not Niko Table.
@@ -54,6 +56,7 @@ The short version of each release. For every technical detail, see the [full cha
 - **Undo after typing in a grid cell works in development.** With React StrictMode on, the first typed character was saved as its own undo step.
 - **Right-click menus work on draggable rows.** They never opened before, in regular and virtualized tables.
 - **Docs lists show bullets again.** Sub-points are indented.
+- **The page-size picker shows its full value.** "10" was cut off next to the arrow.
 - **Some installs were missing a component.**
   - Data Table, Data Table Core and the column slider filter now install everything they use.
 - **New Vite projects now build.** Installing into a fresh `shadcn init -t vite` app used to fail the type check.

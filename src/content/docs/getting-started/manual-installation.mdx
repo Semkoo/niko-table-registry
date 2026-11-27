@@ -1,6 +1,6 @@
 ---
 title: Manual Installation
-description: Copy and paste all DataTable components into your project manually.
+description: Copy the DataTable files into your project by hand.
 ---
 
 import { Steps } from "@astrojs/starlight/components"
@@ -9,67 +9,71 @@ import ManualInstallationCode from "@/components/markdown/manual-installation-co
 
 ## Prerequisites
 
-Before copying the components, make sure you have:
+You need:
 
 1. **A React project** (Next.js, Vite, etc.)
 2. **Shadcn UI** set up in your project ([Installation Guide](https://ui.shadcn.com/docs/installation))
 3. **TailwindCSS** configured
 4. **TypeScript** (recommended)
 
-> **Using the Base UI generation (`"style": "base-nova"`)?** Prefer the [CLI install](/getting-started/installation/) — the shadcn CLI adapts the source to Base UI idioms (`asChild` → `render`) at install time. The raw files copied on this page target the Radix (`new-york`) generation.
+> **Using Base UI (`"style": "base-nova"`)?** Use the [CLI install](/getting-started/installation/) instead.
+>
+> - The CLI changes the source to Base UI idioms (`asChild` becomes `render`) during install.
+> - The files on this page are for Radix (`new-york`).
 
 ## Architecture Note
 
-The DataTable components use a two-layer architecture for maximum flexibility:
+DataTable has two layers:
 
-- **Components** (`data-table-*.tsx` in `/components` folder) - Context-aware wrapper components that use `useDataTable()` hook to automatically get the table from `DataTableRoot` context. These eliminate prop drilling and are the recommended way to use components:
+- **Components** (`data-table-*.tsx` in `/components`): wrappers that get the table from `DataTableRoot` context through `useDataTable()`. You do not pass props down. This is the recommended layer:
   - `DataTableSearchFilter`, `DataTableFilterMenu`, `DataTableSortMenu`, `DataTablePagination`, etc.
-- **Filters** (`table-*.tsx` in `/filters` folder) - Core implementation components that accept a `table` prop directly and read from the TanStack Table instance (like `table.state`, `table.setGlobalFilter()`, etc.). These can be used standalone:
+- **Filters** (`table-*.tsx` in `/filters`): the core pieces. They take a `table` prop and read the TanStack Table instance (like `table.state` and `table.setGlobalFilter()`). You can use them on their own:
   - `TableSearchFilter`, `TableFilterMenu`, `TableSortMenu`, etc.
 
-**Why this architecture?**
+**Why two layers?**
 
-- Use `DataTable*` components from their direct paths (e.g. `@/components/niko-table/components/data-table-pagination`) when you want context-based, zero-config usage
-- Use `Table*` components from filters (e.g. `@/components/niko-table/filters/table-pagination`) when you want to build custom components or manage the table instance yourself
-- All filter components use TanStack Table hooks directly, giving you full control
+- **`DataTable*` components:** import from their direct paths (e.g. `@/components/niko-table/components/data-table-pagination`). They work with no setup.
+- **`Table*` filters:** import from filters (e.g. `@/components/niko-table/filters/table-pagination`). Use them to build your own components or manage the table instance yourself.
+- **Your control:** all filter components use TanStack Table hooks directly.
 
 ## Installation Steps
 
 <Steps>
   1. **Install the required dependencies**
 
-     This registry targets TanStack Table **v9**:
+     This registry uses TanStack Table **v9**:
 
      <CliCommandCode action="install" command="@tanstack/react-table@^9" />
 
-     You also need `lib/data-table-features.ts` from the files below — that is the `tableFeatures()` registration `DataTableRoot` passes to `useTable`. See [Table Features](/niko-table/introduction/#table-features-tanstack-table-v9).
+     You also need `lib/data-table-features.ts` from the files below. It is the `tableFeatures()` list that `DataTableRoot` passes to `useTable`. See [Table Features](/niko-table/introduction/#table-features-tanstack-table-v9).
 
 2.  **Install the required Shadcn UI components**
 
-    The registry handles most Shadcn dependencies automatically, but for manual installation you need:
+    The registry adds most Shadcn dependencies for you. For a manual install, you need:
 
       <CliCommandCode action="run" command="shadcn@latest add button input dropdown-menu"/>
 
 3.  **Copy the custom table component**
 
-    The DataTable requires a custom `components/ui/table.tsx` with a `TableComponent` export. Copy it from the [manual installation files below](#all-components), or install it via the registry CLI (see the [Installation Guide](/getting-started/installation/)).
+    DataTable needs a custom `components/ui/table.tsx` that exports `TableComponent`. Copy it from the [files below](#all-components), or install it with the registry CLI (see the [Installation Guide](/getting-started/installation/)).
 
 4.  **Copy all DataTable components**
 
-    Copy [all the files below](#all-components) into your project, maintaining the directory structure shown.
+    Copy [all the files below](#all-components) into your project. Keep the folder structure shown.
 
 5.  **Update import paths**
 
-    Update the import paths in the copied files to match your project structure. The components use:
+    Change the import paths in the copied files to match your project. The components use:
     - `@/components/ui/` for Shadcn UI components
     - `@/components/niko-table/` for DataTable components
     - `@/lib/` for utility functions
 
-    Ensure your project has the `@/` path alias pointing at your `src/` directory (or replace `@/` with your own alias in the copied code). **Use direct file imports only** (no barrel exports): import from the specific file (e.g. `@/components/niko-table/core/data-table-root`, `@/components/niko-table/lib/constants`) so bundlers can tree-shake. This matches the shadcn pattern of one entry point per component.
+    - Make sure the `@/` path alias points at your `src/` directory. Or replace `@/` with your own alias in the copied code.
+    - **Use direct file imports only** (no barrel exports). Import from the specific file, e.g. `@/components/niko-table/core/data-table-root` or `@/components/niko-table/lib/constants`. This lets bundlers tree-shake, and matches the shadcn pattern of one entry point per component.
 
 6.  **Verify installation**
 
-    Create a simple test to verify everything is working:
+    Render a small table to check that it works:
 
     ```tsx
     import { DataTableRoot } from "@/components/niko-table/core/data-table-root"
@@ -105,7 +109,7 @@ The DataTable components use a two-layer architecture for maximum flexibility:
 
 ## Project Structure
 
-After copying all files, your project structure should look like this:
+After copying all files, your project looks like this:
 
 ```
 your-project/
@@ -242,21 +246,22 @@ your-project/
 └── package.json
 ```
 
-Prefer the [CLI install](/getting-started/installation/) when you only need a subset — each registry item pulls its own dependencies. Manual copy is best when you want the full tree (including optional Niko Grid under `grid/`).
+- **Need only some pieces?** Use the [CLI install](/getting-started/installation/). Each registry item pulls in its own dependencies.
+- **Want the full tree?** Copy by hand. This includes the optional Niko Grid under `grid/`.
 
 ## All Components
 
-Browse and copy individual files below (includes `grid/` when present on disk):
+Browse and copy each file below (includes `grid/` when it exists on disk):
 
 <ManualInstallationCode />
 
 ## Additional Dependencies
 
-For advanced features, you may need additional dependencies:
+Some features need extra dependencies:
 
 ### URL State Management (nuqs)
 
-For URL state persistence in tables:
+To keep table state in the URL:
 
 <CliCommandCode action="install" command="nuqs" />
 
@@ -268,17 +273,17 @@ For virtualized tables (and Niko Grid):
 
 ### Sortable Rows / Column DnD
 
-For drag-and-drop row or column reordering, install `@dnd-kit/*` as used by the row-dnd / column-dnd registry items, or follow the [DiceUI Sortable installation guide](https://www.diceui.com/docs/components/sortable).
+For drag-and-drop row or column reordering, install `@dnd-kit/*` as the row-dnd and column-dnd registry items do. Or follow the [DiceUI Sortable installation guide](https://www.diceui.com/docs/components/sortable).
 
 ## Next Steps
 
-Now that you have all the components installed, check out the examples:
+The components are installed. Try the examples:
 
-- [Simple Table](/examples/simple-table/) - Basic table with no pagination
+- [Simple Table](/examples/simple-table/) - Basic table, no pagination
 - [Basic Table](/examples/basic-table/) - Add pagination and sorting
-- [Search Table](/examples/search-table/) - Add search functionality
-- [Faceted Filter Table](/examples/faceted-filter-table/) - Add advanced filtering
-- [Column Resize Table](/examples/column-resize-table/) - Drag / double-click column widths
-- [Niko Grid](/data-grid/introduction/) - Editable spreadsheet on top of the virtualized table
-- [Advanced Table](/examples/advanced-table/) - All features combined
+- [Search Table](/examples/search-table/) - Add search
+- [Faceted Filter Table](/examples/faceted-filter-table/) - Add column filters
+- [Column Resize Table](/examples/column-resize-table/) - Drag or double-click to set column widths
+- [Niko Grid](/data-grid/introduction/) - Editable spreadsheet on the virtualized table
+- [Advanced Table](/examples/advanced-table/) - All features together
 - [Components catalog](/getting-started/components/) - Every `@niko-table/*` registry item

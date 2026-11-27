@@ -1,15 +1,15 @@
 ---
 title: Documentation Guidelines
-description: How to structure docs, examples, and sidebar entries for Niko Table and Niko Grid.
+description: How to write docs, examples and sidebar entries for Niko Table and Niko Grid.
 ---
 
 import { Steps, Aside } from "@astrojs/starlight/components"
 
-Follow this when adding or restructuring docs. The site is Astro Starlight; demos come from registry example files under `src/registry/new-york/examples/`.
+Use this page when you add or move docs. The site is Astro Starlight. Demos come from example files under `src/registry/new-york/examples/`.
 
 ## Information architecture
 
-Split **API / overview** from **runnable examples**. Do not put the same topic in both sidebars.
+Keep **API and overview** pages apart from **runnable examples**. Do not put the same topic in both sidebars.
 
 | Section                | Purpose                                                | Path                           |
 | ---------------------- | ------------------------------------------------------ | ------------------------------ |
@@ -18,9 +18,9 @@ Split **API / overview** from **runnable examples**. Do not put the same topic i
 | **Niko Grid**          | Introduction + overview by layer + API Reference       | `src/content/docs/data-grid/`  |
 | **Niko Grid Examples** | Grid demos (Basic Grid, Cell Types, Validation, …)     | `src/content/docs/examples/`   |
 
-**Niko Grid** overview pages mirror the source tree (`grid/components`, `grid/core`, `grid/hooks`, …). Feature walkthroughs with a live demo belong under **Niko Grid Examples**, not under overview.
+**Niko Grid** overview pages mirror the source tree (`grid/components`, `grid/core`, `grid/hooks`, …). Put feature walkthroughs with a live demo under **Niko Grid Examples**, not overview.
 
-Reference: [Basic Grid](/examples/basic-grid/): minimal grid example that follows this guide.
+Reference: [Basic Grid](/examples/basic-grid/) is a small grid example that follows this guide.
 
 ## File layout
 
@@ -42,36 +42,47 @@ src/registry/new-york/examples/niko-table/
 
 - Table example slugs: `examples/<feature>-table` (or existing names like `simple-table`).
 - Grid example slugs: `examples/<feature>-grid`.
-- Overview never duplicates an example’s full tutorial; link across instead.
+- Overview never repeats an example’s full tutorial. Link to it instead.
 
 ## Adding a Niko Grid Example
 
 <Steps>
 
-1. **Registry demo**: add a self-contained example under `src/registry/new-york/examples/niko-table/` (e.g. `grid-foo.tsx`). Import only from `@/components/niko-table/...` direct paths and `@/components/ui`. Use deterministic mock data (no `Math.random()` / `Date.now()`).
+1. **Registry demo**: add a self-contained example under `src/registry/new-york/examples/niko-table/` (e.g. `grid-foo.tsx`).
 
-2. **Register the demo name**: add the string to the `Demo` union in `src/components/markdown/code-preview/_code-preview-internal.tsx`, and wire the lazy import map there.
+   - Import only from `@/components/niko-table/...` direct paths and `@/components/ui`.
+   - Use fixed mock data (no `Math.random()` or `Date.now()`).
+
+2. **Register the demo name**: add the string to the `Demo` union in `src/components/markdown/code-preview/_code-preview-internal.tsx`. Add it to the lazy import map there too.
 
 3. **Example MDX**: create `src/content/docs/examples/<name>-grid.mdx` with:
 
-   - Short pitch (1–2 sentences)
+   - Short pitch (1 to 2 sentences)
    - `<CodePreview demo="niko-table/…" />`
    - Optional `<CollapsiblePreview>` + state demo
    - Installation (`CliCommandCode`)
-   - Optional short “What’s included” / usage notes
-   - Next links to related overview or examples
+   - Optional short “What’s included” or usage notes
+   - Next links to related overview pages or examples
 
-4. **Sidebar**: add an entry under **Niko Grid Examples** in `astro.config.mts` (`slug: "examples/<name>-grid"`). The slug must match a file at `src/content/docs/<slug>.mdx` or `src/content/docs/<slug>/index.mdx`. A missing file throws Starlight’s `The slug "…" specified in the Starlight sidebar config does not exist` error (clear `.astro/` and restart `pnpm dev` if the file exists but the error persists).
+4. **Sidebar**: add an entry under **Niko Grid Examples** in `astro.config.mts` (`slug: "examples/<name>-grid"`).
 
-5. **Gallery**: add `{ slug, demo }` to the right group in `src/data/example-gallery.ts`, using the page's main `CodePreview` demo. It then shows as a live card on [Table Examples](/examples/) or [Grid Examples](/data-grid/examples/). A new group also needs a `## Heading` plus `<ExampleGallery group="…" />` on one of those two pages, so it appears in "On this page". `src/data/__tests__/example-gallery.test.ts` fails if an example page is missing from the gallery, or the gallery lists a page or demo that doesn't exist. This applies to table examples too, not only grids.
+   - The slug must match a file at `src/content/docs/<slug>.mdx` or `src/content/docs/<slug>/index.mdx`.
+   - A missing file throws Starlight’s `The slug "…" specified in the Starlight sidebar config does not exist` error.
+   - If the file exists and the error stays, clear `.astro/` and restart `pnpm dev`.
 
-6. **Cross-links**: from Introduction / overview pages, link to the example; don’t paste a second live demo of the same feature into overview.
+5. **Gallery**: add `{ slug, demo }` to the right group in `src/data/example-gallery.ts`. Use the page's main `CodePreview` demo. It then shows as a live card on [Table Examples](/examples/) or [Grid Examples](/data-grid/examples/).
+
+   - A new group also needs a `## Heading` and `<ExampleGallery group="…" />` on one of those two pages. This puts it in "On this page".
+   - `src/data/__tests__/example-gallery.test.ts` fails if an example page is missing from the gallery. It also fails if the gallery lists a page or demo that does not exist.
+   - This applies to table examples too, not only grids.
+
+6. **Cross-links**: from Introduction and overview pages, link to the example. Do not paste a second live demo of the same feature into overview.
 
 </Steps>
 
 ## Changelog
 
-The [Changelog](/changelog/) page is for readers, so keep it plain and short. Full technical detail goes in `CHANGELOG.md` at the repo root.
+The [Changelog](/changelog/) page is for readers. Keep it plain and short. Put full technical detail in `CHANGELOG.md` at the repo root.
 
 - Lead with what changed for the user.
 - One bold lead-in and one short sentence per bullet. Extra facts go in sub-bullets.
@@ -83,29 +94,29 @@ The [Changelog](/changelog/) page is for readers, so keep it plain and short. Fu
 
 ### Overview (API by layer)
 
-- Source Code / related DocsLink row at the top when useful
+- A Source Code or related DocsLink row at the top, when useful
 - Props tables and import paths by file
-- Point to examples for “see it running”
+- Links to examples for “see it running”
 
 ### Example (demo-first)
 
 - Demo first, prose after
 - Installation for that example’s registry items only
-- Keep deeper theory in overview; keep the example focused
+- Deeper theory goes in overview. Keep the example focused.
 
 ### Links
 
-Prefer trailing slashes in hardcoded `href`s and markdown links, e.g. `/examples/basic-grid/`. Dev can accept both with `trailingSlash: "ignore"`, but slashed links stay consistent with production directory URLs.
+Use trailing slashes in hardcoded `href`s and markdown links, e.g. `/examples/basic-grid/`. Dev accepts both with `trailingSlash: "ignore"`. Slashed links match production directory URLs.
 
 ### Punctuation
 
-Avoid em dashes (`—`). Prefer a colon after bold labels (`**Composable**: …`), or a period / comma in prose.
+Avoid em dashes (`—`). Use a colon after bold labels (`**Composable**: …`), or a period or comma in prose.
 
 ## Sidebar scroll
 
-Theme-black does not use Starlight’s `#starlight__sidebar` / `SidebarPersister`. **Do not** add that id: it freezes the main thread with this theme.
+Theme-black does not use Starlight’s `#starlight__sidebar` or `SidebarPersister`. **Do not** add that id. It freezes the main thread with this theme.
 
-Scroll restore for the theme sidebar lives in `src/components/overrides/head.astro` (`aside.aside .sidebar` + `sessionStorage`). Prefer extending that script over a custom Sidebar override.
+Scroll restore for the theme sidebar lives in `src/components/overrides/head.astro` (`aside.aside .sidebar` plus `sessionStorage`). Extend that script instead of writing a custom Sidebar override.
 
 ## Checklist before PR
 
@@ -113,11 +124,11 @@ Scroll restore for the theme sidebar lives in `src/components/overrides/head.ast
 - [ ] Demo is registered and renders in `CodePreview`
 - [ ] Mock data is deterministic
 - [ ] Sidebar entry added in `astro.config.mts` and `pnpm run check:sidebar` passes
-- [ ] Internal links point at the new paths (homepage / changelog / related Next Steps when relevant)
+- [ ] Internal links point at the new paths (homepage, changelog, related Next Steps when relevant)
 - [ ] `pnpm run build` (or at least `astro check`) passes
 
 ## Related
 
 - [Contributing Code](/contributing/contributing-code/): fork, branch, registry build
-- [Component Request](/contributing/component-request/) / [Feature Request](/contributing/feature-request/)
-- [CLAUDE.md](https://github.com/Semkoo/niko-table-registry/blob/main/CLAUDE.md): component layering and registry rules
+- [Component Request](/contributing/component-request/) and [Feature Request](/contributing/feature-request/)
+- [CLAUDE.md](https://github.com/Semkoo/niko-table-registry/blob/main/CLAUDE.md): component layers and registry rules

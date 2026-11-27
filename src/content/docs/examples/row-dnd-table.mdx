@@ -1,13 +1,13 @@
 ---
 title: Row DnD Table
-description: Drag-and-drop row reordering with composable primitives.
+description: Reorder rows by dragging, using composable pieces.
 ---
 
 import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
 import CollapsiblePreview from "@/components/markdown/collapsible-preview.astro"
 import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
 
-Reorder rows via drag-and-drop using `DataTableRowDndProvider` and a dedicated drag-handle column. **Important constraint**: do not combine row DnD with sorting or filtering — the user's manual order will fight whatever the table is computing, so disable those add-ons on a DnD table. Column resize is fine — drop in `<DataTableColumnResize />` (same as other tables); keep `enableResizing: false` on the drag-handle / `#` columns.
+Lets users reorder rows by drag and drop, using `DataTableRowDndProvider` and a drag-handle column. Use it for task lists, boards, and anything where order matters. **Important**: don't combine row DnD with sorting or filtering. The user's manual order fights the table's computed order, so leave those add-ons out. Column resize is fine: add `<DataTableColumnResize />` as in other tables, and keep `enableResizing: false` on the drag-handle and `#` columns.
 
 ## Overview
 
@@ -19,17 +19,17 @@ Reorder rows via drag-and-drop using `DataTableRowDndProvider` and a dedicated d
 
 ## Virtualized Row DnD
 
-For large datasets, use `DataTableVirtualizedFlexHeader` + `DataTableVirtualizedDndBody` which combine row virtualization with drag-and-drop. Only visible rows are rendered in the DOM for optimal performance. The same `<DataTableColumnResize />` marker works here — grips appear on the flex header.
+For large datasets, use `DataTableVirtualizedFlexHeader` with `DataTableVirtualizedDndBody`. They combine row virtualization with drag and drop, so only visible rows render. The same `<DataTableColumnResize />` marker works here. The grips appear on the flex header.
 
 <CodePreview demo="niko-table/virtualized-row-dnd" />
 
 ## Introduction
 
-Row DnD lets users reorder table rows by dragging. Built with `@dnd-kit` and composable primitives that follow the shadcn/ui open-code pattern — copy the code, modify freely.
+Row DnD lets users reorder table rows by dragging. It is built with `@dnd-kit` and composable pieces that follow the shadcn/ui open-code pattern: copy the code and change it freely.
 
 ## Installation
 
-Install the DataTable core and row DnD add-on:
+Install the DataTable core and the row DnD add-on:
 
 <CliCommandCode action="run" command="shadcn@latest add @niko-table/data-table @niko-table/data-table-row-dnd @niko-table/data-table-column-resize @niko-table/data-table-virtualized @niko-table/data-table-virtualized-row-dnd" />
 
@@ -54,9 +54,9 @@ type Task = {
 
 Three components work together:
 
-1. **`DataTableRowDndProvider`** — Wraps the table with DnD context and sensors
-2. **`DataTableDndBody`** — Renders rows as draggable items
-3. **`DataTableRowDragHandle`** — A grip icon button for dragging
+1. **`DataTableRowDndProvider`**: wraps the table with DnD context and sensors
+2. **`DataTableDndBody`**: renders rows as draggable items
+3. **`DataTableRowDragHandle`**: a grip icon button to drag with
 
 ```tsx showLineNumbers title="row-dnd.tsx"
 import { DataTableDndBody } from "@/components/niko-table/core/data-table-row-dnd-structure"
@@ -91,13 +91,13 @@ return (
 
 ## Key Points
 
-- **`getRowId`** is required — use stable, unique IDs (e.g., database IDs), not array indexes. Array indexes break DnD after reordering because the index no longer matches the original item
-- **`DataTableRowDndProvider`** must wrap outside `<DataTable>` — DnD context creates `<div>` elements that can't be inside `<table>`
-- **`onReorder`** receives the new data array after `arrayMove` — just pass `setData`
+- **`getRowId`** is required. Use stable, unique IDs (for example, database IDs), not array indexes. Indexes break DnD after a reorder, because the index no longer matches the original item.
+- **`DataTableRowDndProvider`** must wrap outside `<DataTable>`. DnD context creates `<div>` elements, which can't go inside `<table>`.
+- **`onReorder`** receives the new data array after `arrayMove`. Pass `setData` to it.
 
 ## Drag Handle Column
 
-The drag handle is a dedicated column with `DataTableRowDragHandle`:
+The drag handle is its own column with `DataTableRowDragHandle`:
 
 ```tsx showLineNumbers
 {
@@ -112,7 +112,7 @@ The drag handle is a dedicated column with `DataTableRowDragHandle`:
 
 ## Controlled State
 
-Track the data order externally:
+Track the data order outside the table:
 
 ```tsx showLineNumbers title="row-dnd-state.tsx"
 import { DataTableDndBody } from "@/components/niko-table/core/data-table-row-dnd-structure"
@@ -137,26 +137,26 @@ return (
 
 ## Best Practices
 
-**Don't combine sorting or filtering with row DnD.** Sorting and filtering override the manual row order — if a user drags row 3 to position 1, then a sort or filter resets it, the reorder is lost.
+**Don't combine sorting or filtering with row DnD.** They override the manual row order. If a user drags row 3 to position 1 and then a sort or filter runs, the reorder is lost.
 
 - Avoid `DataTableColumnSortMenu`, `DataTableSearchFilter`, and `DataTableFacetedFilter` in DnD tables
-- If you need search, consider filtering the source data _before_ passing it to the table
-- Column DnD is safe to combine with sorting/filtering since column order is independent of data order
+- If you need search, filter the source data _before_ you pass it to the table
+- Column DnD is safe with sorting and filtering, because column order is independent of data order
 
 ## When to Use
 
 **✅ Use Row DnD when:**
 
 - Users need to manually prioritize or reorder items
-- Building kanban boards, task lists, or playlist managers
-- Order matters and should be persisted
+- You are building kanban boards, task lists, or playlist managers
+- Order matters and should be saved
 
 **❌ Consider other options when:**
 
-- Data has a natural sort order (use sorting instead)
+- The data has a natural sort order (use sorting instead)
 - The table is read-only and order doesn't matter
 
 ## Next Steps
 
-- [Column DnD Table](/examples/column-dnd-table/) — Drag-and-drop column reordering
-- [Row Selection Table](/examples/row-selection-table/) — Combine with row selection
+- [Column DnD Table](/examples/column-dnd-table/): drag-and-drop column reordering
+- [Row Selection Table](/examples/row-selection-table/): combine with row selection

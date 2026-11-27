@@ -261,3 +261,80 @@
 .sl-markdown-content ul ul:not(:where(.not-content, .not-content *)) {
   list-style: circle;
 }
+
+/*
+ * Demo chrome shared by the home showcase, every CodePreview and every block
+ * page: a segmented switch and a rounded frame with the demo on the page
+ * background. Works for shadcn Tabs (data-state) and plain tab buttons
+ * (aria-selected).
+ */
+.nt-switch {
+  display: inline-flex;
+  height: auto;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  border: 1px solid var(--border);
+  border-radius: 0.625rem;
+  background: var(--muted);
+}
+.nt-switch > button {
+  height: auto;
+  flex: none;
+  padding: 0.375rem 1rem;
+  border: 0;
+  border-radius: 0.4rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--muted-foreground);
+  box-shadow: none;
+  transition:
+    background-color 150ms,
+    color 150ms;
+}
+.nt-switch > button:hover {
+  color: var(--foreground);
+}
+.nt-switch > button[aria-selected="true"],
+.nt-switch > button[data-state="active"] {
+  background: var(--background);
+  color: var(--foreground);
+  box-shadow: 0 0 0 1px var(--border);
+}
+.nt-switch > button:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+.nt-frame {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 0.875rem;
+  background: var(--card);
+}
+.nt-stage {
+  background: var(--background);
+}
+@media (prefers-reduced-motion: reduce) {
+  .nt-switch > button {
+    transition: none;
+  }
+}
+
+/*
+ * One column width on every page (wide enough for tables to show in full).
+ * starlight-theme-black caps the column at 40rem when "On this page" is
+ * shown and relies on that cap for side gaps, so lift both and keep the
+ * gutter.
+ */
+:root {
+  --sl-content-width: 68rem;
+}
+[data-has-sidebar][data-has-toc] .main-pane {
+  max-width: 68rem;
+  padding-inline: 1.5rem;
+}
+
+/* Docs tables: names in the first column (item, prop, type) never break mid-word. */
+.sl-markdown-content table td:first-child code,
+.sl-markdown-content table th:first-child code {
+  white-space: nowrap;
+}

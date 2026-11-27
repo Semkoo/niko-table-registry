@@ -394,13 +394,13 @@
         "@dnd-kit/sortable",
         "@dnd-kit/utilities",
         "react-aria",
-        "react-aria-components",
-        "cmdk"
+        "react-aria-components"
       ],
       "registryDependencies": [
         "https://niko-table.com/r-aria/data-table-core.json",
         "button",
         "badge",
+        "command",
         "popover",
         "tooltip",
         "select",
@@ -452,12 +452,12 @@
       "dependencies": [
         "lucide-react",
         "react-aria",
-        "react-aria-components",
-        "cmdk"
+        "react-aria-components"
       ],
       "registryDependencies": [
         "https://niko-table.com/r-aria/data-table-core.json",
         "button",
+        "command",
         "popover"
       ],
       "files": [
@@ -500,12 +500,12 @@
         "@dnd-kit/utilities",
         "lucide-react",
         "react-aria",
-        "react-aria-components",
-        "cmdk"
+        "react-aria-components"
       ],
       "registryDependencies": [
         "https://niko-table.com/r-aria/data-table-core.json",
         "button",
+        "command",
         "popover"
       ],
       "files": [
@@ -576,8 +576,7 @@
         "lucide-react",
         "react-aria",
         "react-aria-components",
-        "@internationalized/date",
-        "cmdk"
+        "@internationalized/date"
       ],
       "registryDependencies": [
         "https://niko-table.com/r-aria/data-table-core.json",
@@ -585,6 +584,7 @@
         "badge",
         "input",
         "popover",
+        "command",
         "select",
         "calendar",
         "separator"
@@ -640,13 +640,13 @@
       "dependencies": [
         "lucide-react",
         "react-aria",
-        "react-aria-components",
-        "cmdk"
+        "react-aria-components"
       ],
       "registryDependencies": [
         "https://niko-table.com/r-aria/data-table-core.json",
         "button",
         "badge",
+        "command",
         "popover",
         "separator"
       ],
@@ -693,14 +693,14 @@
         "react-day-picker",
         "react-aria",
         "react-aria-components",
-        "@internationalized/date",
-        "cmdk"
+        "@internationalized/date"
       ],
       "registryDependencies": [
         "https://niko-table.com/r-aria/data-table-core.json",
         "button",
         "input",
         "popover",
+        "command",
         "select",
         "calendar"
       ],
@@ -1442,8 +1442,7 @@
         "lucide-react",
         "react-aria",
         "react-aria-components",
-        "@internationalized/date",
-        "cmdk"
+        "@internationalized/date"
       ],
       "registryDependencies": [
         "https://niko-table.com/r-aria/data-table-core.json",
@@ -1454,6 +1453,7 @@
         "checkbox",
         "calendar",
         "popover",
+        "command",
         "dialog",
         "dropdown-menu",
         "separator",

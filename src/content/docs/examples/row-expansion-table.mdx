@@ -1,13 +1,13 @@
 ---
 title: Row Expansion Table
-description: Add expandable rows to show additional details inline.
+description: Add expandable rows that show more details inline.
 ---
 
 import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
 import CollapsiblePreview from "@/components/markdown/collapsible-preview.astro"
 import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
 
-Attach arbitrary React — a sub-table, charts, a key-value detail block — to each row and reveal it inline behind a chevron toggle. Cheaper than a side panel or modal when users frequently jump between row detail and the list view, because nothing leaves the page.
+Lets each row open an inline detail area behind a chevron toggle. It can hold any React: a sub-table, charts, key-value details. Use it when users jump often between row detail and the list. It is lighter than a side panel or modal, because nothing leaves the page.
 
 <CodePreview demo="niko-table/row-expansion" />
 
@@ -17,9 +17,9 @@ Attach arbitrary React — a sub-table, charts, a key-value detail block — to 
 
 ## Introduction
 
-The Row Expansion Table allows users to expand rows to view more details inline. This is useful for showing additional information without navigating away or opening a modal.
+The Row Expansion Table lets users expand a row to see more details inline. It shows extra information without leaving the page or opening a modal.
 
-Not a [Tree Table](/examples/tree-table/) (nested `getSubRows`) and not [Grouping](/examples/grouping-table/) (column buckets) — expansion here reveals an **inline detail panel** for one flat row.
+This is not a [Tree Table](/examples/tree-table/) (nested `getSubRows`) or [Grouping](/examples/grouping-table/) (column buckets). Expansion here opens an **inline detail panel** for one flat row.
 
 ## Installation
 
@@ -37,7 +37,7 @@ For other add-ons or manual copy-paste, see the [Installation Guide](/getting-st
 
 ## Prerequisites
 
-We are going to build a table to show orders with expandable items. Here's what our data looks like:
+We are going to build a table of orders with expandable items. Here's what our data looks like:
 
 ```tsx showLineNumbers
 type OrderItem = {
@@ -62,11 +62,11 @@ type Order = {
 
 ## Basic Table with Row Expansion
 
-Let's start by building a table with expandable rows.
+Start with a table that has expandable rows.
 
 ### Column Definitions
 
-First, we'll define our columns with an expand column.
+First, define the columns, including an expand column.
 
 ```tsx showLineNumbers title="columns.tsx"
 "use client"
@@ -179,7 +179,7 @@ export const columns: DataTableColumnDef<Order>[] = [
 
 ### `<DataTable />` component
 
-Next, we'll create the table with row expansion enabled.
+Next, create the table with row expansion on.
 
 ```tsx showLineNumbers title="row-expansion-table.tsx"
 "use client"
@@ -330,15 +330,15 @@ export function RowExpansionTable({ data }: { data: Order[] }) {
 
 ## How Row Expansion Works
 
-Row expansion is enabled by:
+Row expansion works like this:
 
-1. Adding a column with `id: "expand"` or setting `meta.expandedContent` on any column
-2. Setting `enableExpanding: true` in the config
-3. Providing `expandedContent` in the column's `meta` property
+1. Add a column with `id: "expand"`, or set `meta.expandedContent` on any column
+2. Set `enableExpanding: true` in the config
+3. Provide `expandedContent` in the column's `meta`
 
 ### Expanded Content
 
-The expanded content is defined in the column's `meta.expandedContent`:
+The expanded content comes from the column's `meta.expandedContent`:
 
 ```tsx showLineNumbers
 {
@@ -351,7 +351,7 @@ The expanded content is defined in the column's `meta.expandedContent`:
 
 ### Conditional Expansion
 
-Control which rows can be expanded:
+Choose which rows can expand:
 
 ```tsx showLineNumbers
 <DataTableRoot
@@ -368,7 +368,7 @@ Control which rows can be expanded:
 
 ## Controlled Expansion State
 
-Full control over which rows are expanded:
+Control which rows are expanded yourself:
 
 ```tsx showLineNumbers
 import { useState } from "react"
@@ -402,15 +402,15 @@ export function ControlledExpansionTable({ data }: { data: Order[] }) {
 
 ## Exporting Data
 
-You can export table data to CSV format. When exporting row expansion tables, keep in mind:
+You can export table data to CSV. For row expansion tables, keep these in mind:
 
-- **Expanded content is not exported** - Only the main row data is included in the CSV
-- **Exclude the expand column** - The expand column should be excluded from exports as it's just a UI control
-- **Export respects filters** - Only visible/filtered rows are exported
+- **Expanded content is not exported.** The CSV has only the main row data.
+- **Exclude the expand column.** It is just a UI control.
+- **Export respects filters.** Only visible, filtered rows are exported.
 
 ### Using DataTableExportButton
 
-The simplest way to add export functionality:
+The easiest way to add export:
 
 ```tsx showLineNumbers
 import { DataTableExportButton } from "@/components/niko-table/components/data-table-export-button"
@@ -449,7 +449,7 @@ export function RowExpansionTableWithExport({ data }: { data: Order[] }) {
 
 ### Using exportTableToCSV Directly
 
-For more control, use the `exportTableToCSV` function directly:
+For more control, call the `exportTableToCSV` function directly:
 
 ```tsx showLineNumbers
 import { useDataTable } from "@/components/niko-table/core/data-table-context"
@@ -506,7 +506,7 @@ export function RowExpansionTableWithCustomExport({ data }: { data: Order[] }) {
 
 ### Exporting Only Selected Rows
 
-If you have row selection enabled, you can export only the selected rows:
+If row selection is on, you can export only the selected rows:
 
 ```tsx showLineNumbers
 function ExportSelectedButton() {
@@ -535,33 +535,33 @@ function ExportSelectedButton() {
 
 ### Important Notes
 
-1. **Expanded content is not included**: The CSV export only includes the main row data. Expanded content (like order items) is not exported. If you need to export nested data, you'll need to flatten it into additional columns or create a custom export function.
+1. **Expanded content is not included.** The CSV has only the main row data. Expanded content (like order items) is not exported. To export nested data, flatten it into extra columns or write a custom export function.
 
-2. **Always exclude the expand column**: The expand column (`id: "expand"`) should be excluded from exports as it's purely a UI control:
+2. **Always exclude the expand column.** The expand column (`id: "expand"`) is only a UI control, so leave it out of exports:
 
 ```tsx
 excludeColumns={["expand"] as unknown as (keyof Order)[]}
 ```
 
-3. **Export respects current filters**: The export function respects all active filters, sorting, and pagination. Only the currently visible/filtered rows are exported.
+3. **Export respects current filters.** It follows all active filters, sorting, and pagination. Only the rows currently visible are exported.
 
 ## When to Use
 
 **✅ Use Row Expansion Table when:**
 
-- You need to show additional details for specific rows
+- You need to show extra details for some rows
 - You want to keep users in context (no navigation)
-- The expanded content is directly related to the row
+- The expanded content is directly tied to the row
 - You prefer inline expansion over sidebars
 
 **❌ Consider other options when:**
 
-- Data is hierarchical parent/child rows — use [Tree Table](/examples/tree-table/)
-- You want to bucket flat rows by column values — use [Grouping Table](/examples/grouping-table/)
-- Expanded content is very large or always visible — use [Aside Table](/examples/aside-table/)
+- The data is parent and child rows: use [Tree Table](/examples/tree-table/)
+- You want to bucket flat rows by column values: use [Grouping Table](/examples/grouping-table/)
+- The expanded content is very large or always visible: use [Aside Table](/examples/aside-table/)
 
 ## Next Steps
 
-- [Aside Table](/examples/aside-table/) — show details in sidebars
-- [Tree Table](/examples/tree-table/) — nested data with `getSubRows`
-- [Grouping Table](/examples/grouping-table/) — bucket flat rows by column values
+- [Aside Table](/examples/aside-table/): show details in a sidebar
+- [Tree Table](/examples/tree-table/): nested data with `getSubRows`
+- [Grouping Table](/examples/grouping-table/): bucket flat rows by column values

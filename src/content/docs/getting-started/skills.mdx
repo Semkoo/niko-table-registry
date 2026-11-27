@@ -1,6 +1,6 @@
 ---
 title: Skills
-description: Install the Niko Table agent skill so Cursor, Claude Code, and other AI assistants follow registry patterns for tables and Niko Grid.
+description: Install the agent skill so AI assistants build Niko Table and Niko Grid the right way.
 ---
 
 import { Steps, Aside } from "@astrojs/starlight/components"
@@ -21,15 +21,23 @@ import { GITHUB_REPO_URL } from "@/data/env"
   <DocsLink href="/contributing/documentation-guidelines/">Docs guidelines ↗</DocsLink>
 </div>
 
-An **agent skill** is a small, versionable package of instructions your AI assistant loads when you work on Niko Table. Installed once, it steers the model toward the right composition, direct imports (no barrels), and the examples on this site — for both **tables** and the **Niko Grid**.
+An **agent skill** is a small package of instructions that your AI assistant loads when you work on Niko Table. Install it once. It guides the model to:
+
+- Compose components the right way.
+- Use direct imports (no barrels).
+- Follow the examples on this site.
+
+It covers both **tables** and the **Niko Grid**.
 
 ## Install
 
 <CliCommandCode action="run" command="skills add Semkoo/niko-table-registry" />
 
-The CLI discovers `niko-table-best-practices` in this repo and installs it into your agent’s skills directory (Cursor, Claude Code, Windsurf, and others supported by [skills.sh](https://skills.sh)). After that, a new chat that mentions data tables / Niko Table / editable grids should pick it up automatically.
+The CLI finds `niko-table-best-practices` in this repo. It installs it into your agent’s skills directory (Cursor, Claude Code, Windsurf and others supported by [skills.sh](https://skills.sh)).
 
-Learn more about the skills format at [skills.sh](https://skills.sh).
+After that, a new chat that mentions data tables, Niko Table or editable grids picks it up on its own.
+
+Learn about the skills format at [skills.sh](https://skills.sh).
 
 ### Verify
 
@@ -45,17 +53,17 @@ Learn more about the skills format at [skills.sh](https://skills.sh).
 
 2. **Smoke-test in chat**
 
-   Open a new agent session in a React + shadcn project and ask something concrete, e.g. _“Add a Niko Table with search and pagination”_ or _“Scaffold a minimal Niko Grid with text cells.”_
+   Open a new agent session in a React and shadcn project. Ask for something specific, e.g. _“Add a Niko Table with search and pagination”_ or _“Scaffold a minimal Niko Grid with text cells.”_
 
-3. **Optional — manual install**
+3. **Optional: manual install**
 
-   Copy [`.cursor/skills/niko-table-best-practices`](https://github.com/Semkoo/niko-table-registry/tree/main/.cursor/skills/niko-table-best-practices) (or the matching copy under [`.agents/skills/`](https://github.com/Semkoo/niko-table-registry/tree/main/.agents/skills/niko-table-best-practices)) into your agent’s skills directory. The folder must include `SKILL.md`.
+   Copy [`.cursor/skills/niko-table-best-practices`](https://github.com/Semkoo/niko-table-registry/tree/main/.cursor/skills/niko-table-best-practices) (or the same copy under [`.agents/skills/`](https://github.com/Semkoo/niko-table-registry/tree/main/.agents/skills/niko-table-best-practices)) into your agent’s skills directory. The folder must include `SKILL.md`.
 
    | Agent              | Project path                          | Global (all projects) |
    | ------------------ | ------------------------------------- | --------------------- |
    | **Cursor**         | `.cursor/skills/`                     | `~/.cursor/skills/`   |
    | **Claude Code**    | `.claude/skills/`                     | `~/.claude/skills/`   |
-   | **Windsurf**       | `.windsurf/skills/`                   | —                     |
+   | **Windsurf**       | `.windsurf/skills/`                   | none                  |
    | **Other / agents** | `.agents/skills/` or `.agent/skills/` | per tool docs         |
 
 </Steps>
@@ -69,7 +77,7 @@ Learn more about the skills format at [skills.sh](https://skills.sh).
 - _“Add the advanced filter menu and sort menu.”_
 - _“Implement row drag-and-drop for reordering.”_
 - _“Wire up server-side pagination with `totalCount`.”_
-- _“Sync filters, sort, and pagination to the URL with nuqs.”_
+- _“Sync filters, sort and pagination to the URL with nuqs.”_
 
 ### Niko Grid
 
@@ -80,32 +88,32 @@ Learn more about the skills format at [skills.sh](https://skills.sh).
 
 ## What the skill teaches
 
-| Topic             | Guidance                                                                                                                     |
-| ----------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| **Composition**   | `DataTableRoot` → toolbar → `DataTable` → header/body → pagination; virtualized body for large lists                         |
-| **Imports**       | Direct file paths only (`@/components/niko-table/core/...`) — no barrel `index` exports                                      |
-| **Layers**        | `DataTable*` (context) vs `Table*` (direct `table` prop)                                                                     |
-| **Filters / DnD** | Toolbar + column menus; row DnD needs `getRowId` and must not mix with sort/filter                                           |
-| **Server / URL**  | `manualPagination` / `pageCount` / `totalCount`; nuqs for shareable state                                                    |
-| **Niko Grid**     | `useDataGrid` + `<DataGrid>` + typed cells; opt-in children; id-addressed edits; link to [Basic Grid](/examples/basic-grid/) |
+| Topic             | Guidance                                                                                                                           |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| **Composition**   | `DataTableRoot`, toolbar, `DataTable`, header and body, then pagination. Virtualized body for large lists.                         |
+| **Imports**       | Direct file paths only (`@/components/niko-table/core/...`). No barrel `index` exports.                                            |
+| **Layers**        | `DataTable*` (context) vs `Table*` (direct `table` prop)                                                                           |
+| **Filters / DnD** | Toolbar and column menus. Row DnD needs `getRowId` and must not mix with sort or filter.                                           |
+| **Server / URL**  | `manualPagination` / `pageCount` / `totalCount`; nuqs for shareable state                                                          |
+| **Niko Grid**     | `useDataGrid`, `<DataGrid>` and typed cells. Opt-in children. Edits addressed by id. Links to [Basic Grid](/examples/basic-grid/). |
 
-Most `DataTableRoot` config is **auto-detected** from the components you mount — pass `config` mainly to override or for manual/server-side modes.
+Most `DataTableRoot` config is **auto-detected** from the components you mount. Pass `config` only to override it, or for manual and server-side modes.
 
 <Aside type="tip">
-  For deep API and runnable demos, the skill should point at this site — not invent a parallel API. Prefer [Examples](/examples/) and [Niko Grid Examples](/data-grid/examples/).
+  For API details and runnable demos, the skill should point to this site. It should not invent its own API. See [Examples](/examples/) and [Niko Grid Examples](/data-grid/examples/).
 </Aside>
 
 ## How it works
 
-1. **Trigger** — Activates on talk of data tables, Niko Table, faceted/advanced filters, DnD, server-side paging, nuqs, selection/expansion/tree/grouping tables, or editable spreadsheet grids.
-2. **Enforce patterns** — Same structure and import rules as the docs and registry examples.
-3. **Right level of help** — Minimal scaffold vs filter deep-dive vs grid composition, depending on the ask.
-4. **Reference out** — Links to Installation, Examples, and overview pages for full props tables.
+1. **Trigger.** It turns on when you talk about data tables, Niko Table, faceted or advanced filters, DnD, server-side paging, nuqs, selection, expansion, tree or grouping tables, or editable spreadsheet grids.
+2. **Enforce patterns.** It uses the same structure and import rules as the docs and registry examples.
+3. **Right level of help.** A minimal scaffold, a filter deep-dive or grid composition, depending on your ask.
+4. **Point to docs.** It links to Installation, Examples and overview pages for full props tables.
 
 ## Next
 
-- [Installation](/getting-started/installation/) — Configure `@niko-table` and install core
-- [Components](/getting-started/components/) — Full registry catalog
-- [Simple Table](/examples/simple-table/) · [Basic Grid](/examples/basic-grid/) — Reference examples
-- [Documentation Guidelines](/contributing/documentation-guidelines/) — How we structure docs/examples
-- [skills.sh — niko-table-best-practices](https://skills.sh/Semkoo/niko-table-registry/niko-table-best-practices) — Skill listing
+- [Installation](/getting-started/installation/) - Set up `@niko-table` and install core
+- [Components](/getting-started/components/) - Full registry catalog
+- [Simple Table](/examples/simple-table/) and [Basic Grid](/examples/basic-grid/) - Reference examples
+- [Documentation Guidelines](/contributing/documentation-guidelines/) - How we write docs and examples
+- [skills.sh: niko-table-best-practices](https://skills.sh/Semkoo/niko-table-registry/niko-table-best-practices) - Skill listing

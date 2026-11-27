@@ -1,19 +1,19 @@
 ---
 title: Advanced Nuqs Table
-description: Rule-based filtering with URL state persistence for shareable and bookmarkable table views.
+description: Rule-based filtering with table state kept in the URL, so views can be shared and bookmarked.
 ---
 
 import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
 import CollapsiblePreview from "@/components/markdown/collapsible-preview.astro"
 import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
 
-A worked example of pushing every piece of filter, sort, and pagination state into the URL via [nuqs](https://nuqs.dev/), so a complex filtered view can be copy-pasted into a teammate's browser and look identical. Pairs the rule-builder filter UI with shareable, bookmarkable links — refresh-safe and back-button-friendly.
+This example stores filter, sort and pagination state in the URL with [nuqs](https://nuqs.dev/). Use it when users should be able to paste a filtered view into a teammate's browser and see the same table. It pairs the rule-builder filter UI with links that survive refresh and work with the back button.
 
 <CodePreview demo="niko-table/advanced-nuqs-state" />
 
 ## Introduction
 
-The Advanced Nuqs Table demonstrates rule-based filtering with URL state persistence using [nuqs](https://nuqs.dev/). This example shows how to sync table state (filters, pagination, sorting) with URL parameters for shareable and bookmarkable table views.
+This example combines rule-based filtering with URL state from [nuqs](https://nuqs.dev/). Filters, pagination and sorting sync with URL parameters.
 
 ## Installation
 
@@ -25,7 +25,7 @@ Install additional dependencies:
 
 <CliCommandCode action="install" command="nuqs" />
 
-**Note:** [nuqs](https://nuqs.dev/) is a type-safe search params state manager that syncs table state (filters, pagination, sorting) with the URL, making it shareable and bookmarkable.
+**Note:** [nuqs](https://nuqs.dev/) manages URL search params with types. It keeps table state in the URL so you can share and bookmark it.
 
 This example also uses `checkbox` from Shadcn UI:
 
@@ -37,20 +37,20 @@ For other add-ons or manual copy-paste, see the [Installation Guide](/getting-st
 
 ## Setup
 
-Before using the Advanced Nuqs Table, you need to wrap your app with `NuqsAdapter`. Follow the [official Nuqs adapters documentation](https://nuqs.dev/docs/adapters) for setup instructions based on your framework:
+Wrap your app in `NuqsAdapter` first. Where you do it depends on your framework (see the [official Nuqs adapters documentation](https://nuqs.dev/docs/adapters)):
 
-- **Next.js App Router** - Wrap `{children}` in `app/layout.tsx`
-- **Next.js Pages Router** - Wrap `<Component>` in `pages/_app.tsx`
-- **React SPA (Vite, CRA, etc.)** - Wrap `<App />` in `src/main.tsx`
-- **Remix** - Wrap `<Outlet />` in `app/root.tsx`
-- **React Router v6/v7** - See adapter-specific instructions
-- **TanStack Router** - Wrap `<Outlet />` in your root route
+- **Next.js App Router**: wrap `{children}` in `app/layout.tsx`
+- **Next.js Pages Router**: wrap `<Component>` in `pages/_app.tsx`
+- **React SPA (Vite, CRA, etc.)**: wrap `<App />` in `src/main.tsx`
+- **Remix**: wrap `<Outlet />` in `app/root.tsx`
+- **React Router v6/v7**: see the adapter instructions
+- **TanStack Router**: wrap `<Outlet />` in your root route
 
-See the [Nuqs adapters documentation](https://nuqs.dev/docs/adapters) for complete setup instructions and code examples for your specific framework.
+The [Nuqs adapters documentation](https://nuqs.dev/docs/adapters) has full code for each framework.
 
 ## Prerequisites
 
-We are going to build a table to show products with URL state persistence. Here's what our data looks like:
+You build a product table whose state lives in the URL. This is the data:
 
 ```tsx showLineNumbers
 type Product = {
@@ -68,11 +68,11 @@ type Product = {
 
 ## Basic Table with URL State
 
-Let's start by building a table with URL state persistence.
+Start with a table that keeps its state in the URL.
 
 ### Column Definitions
 
-First, we'll define our columns with filter metadata.
+Define the columns with filter metadata.
 
 ```tsx showLineNumbers title="columns.tsx"
 "use client"
@@ -145,7 +145,7 @@ export const columns: DataTableColumnDef<Product>[] = [
 
 ### URL State Parsers
 
-Define parsers for URL state using nuqs:
+Define the URL parsers with nuqs:
 
 ```tsx showLineNumbers
 import { parseAsInteger, parseAsJson, parseAsString } from "nuqs"
@@ -167,7 +167,7 @@ const tableStateParsers = {
 
 ### `<DataTable />` component
 
-Next, we'll connect the table state to URL parameters.
+Connect the table state to the URL parameters.
 
 ```tsx showLineNumbers title="advanced-nuqs-table.tsx"
 "use client"
@@ -391,7 +391,7 @@ export function AdvancedNuqsTable({ data }: { data: Product[] }) {
 
 ### useQueryStates
 
-Use `useQueryStates` to sync table state with URL parameters:
+Use `useQueryStates` to sync table state with the URL:
 
 ```tsx showLineNumbers
 import { useQueryStates } from "nuqs"
@@ -403,7 +403,7 @@ const [urlParams, setUrlParams] = useQueryStates(tableStateParsers, {
 
 ### State Parsers
 
-Define parsers for each piece of state:
+Define one parser per piece of state:
 
 ```tsx showLineNumbers
 import { parseAsInteger, parseAsJson, parseAsString } from "nuqs"
@@ -426,18 +426,18 @@ const tableStateParsers = {
 **✅ Use Advanced Nuqs Table when:**
 
 - You need shareable URLs with table state
-- Users should be able to bookmark filtered/sorted views
-- You want browser back/forward navigation support
-- Table state should persist across page refreshes
-- You need to sync state with server-side rendering
+- Users should be able to bookmark filtered or sorted views
+- You want the browser back and forward buttons to work
+- Table state should survive a page refresh
+- You need state to work with server-side rendering
 
 **❌ Consider other options when:**
 
-- URL state is not needed (use [Advanced Filter Table](/examples/advanced-table/))
-- You prefer simpler state management
-- You don't need shareable/bookmarkable views
+- You do not need URL state: use [Advanced Filter Table](/examples/advanced-table/)
+- You want simpler state management
+- You do not need shareable or bookmarkable views
 
 ## Next Steps
 
-- [Advanced Filter Table](/examples/advanced-table/) - Rule-based filtering without URL state
-- [Advanced Inline Filter Table](/examples/advanced-inline-table/) - Custom inline filter UIs
+- [Advanced Filter Table](/examples/advanced-table/): rule-based filtering without URL state
+- [Advanced Inline Filter Table](/examples/advanced-inline-table/): custom inline filter UIs

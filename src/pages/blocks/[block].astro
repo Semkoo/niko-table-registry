@@ -53,13 +53,13 @@ const sources = await Promise.all(
   <h2 id="preview">Preview</h2>
 
   <div
-    class="block-preview not-content mt-4 flex flex-col gap-2"
+    class="block-preview not-content mt-4 flex flex-col gap-3"
     data-block-preview
     data-state="preview"
     data-viewport="desktop"
   >
     <BlockToolbar viewHref={viewHref} client:load />
-    <div class="block-preview-panel overflow-hidden rounded-lg border bg-muted/30">
+    <div class="block-preview-panel nt-frame">
       <iframe
         class="block-preview-iframe mx-auto block w-full bg-background"
         src={viewHref}
@@ -95,19 +95,6 @@ const sources = await Promise.all(
 </StarlightPage>
 
 <style>
-  /*
-   * Blocks are full screens: give this page more room than a docs page.
-   * starlight-theme-black also caps the column at 40rem when "On this page"
-   * is shown, so lift that cap here too.
-   */
-  :global(:root) {
-    --sl-content-width: 72rem;
-  }
-  :global([data-has-sidebar][data-has-toc] .main-pane) {
-    max-width: 72rem;
-    /* The theme relies on the 40rem cap for side gaps; keep them when wider. */
-    padding-inline: 1.5rem;
-  }
   [data-block-preview][data-state="preview"] .block-code-panel,
   [data-block-preview][data-state="code"] .block-preview-panel {
     display: none;

@@ -1,13 +1,13 @@
 ---
 title: Advanced Inline Filter Table
-description: Build custom inline filter UIs directly in the table toolbar.
+description: Put filter inputs right in the table toolbar instead of behind a menu.
 ---
 
 import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
 import CollapsiblePreview from "@/components/markdown/collapsible-preview.astro"
 import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
 
-Build filter inputs — selects, sliders, date pickers — directly next to the search bar instead of hiding them behind a popover. Useful when filter discoverability matters more than a minimal toolbar, like internal dashboards where users live in the filters all day.
+This example puts filter inputs (selects, sliders, date pickers) next to the search bar instead of in a popover. Use it when users should see the filters at all times, like an internal dashboard.
 
 <CodePreview demo="niko-table/advanced-inline" />
 
@@ -17,7 +17,7 @@ Build filter inputs — selects, sliders, date pickers — directly next to the 
 
 ## Introduction
 
-The Advanced Inline Filter Table demonstrates inline filtering with `DataTableInlineFilter` for building custom filter UIs directly in the table. This approach gives you full control over the filter interface while leveraging the DataTable's filtering system.
+`DataTableInlineFilter` builds the filter inputs for you inside the table toolbar. You control the layout. The DataTable filtering system does the work.
 
 ## Installation
 
@@ -35,7 +35,7 @@ For other add-ons or manual copy-paste, see the [Installation Guide](/getting-st
 
 ## Prerequisites
 
-We are going to build a table to show products with inline filters. Here's what our data looks like:
+You build a product table with inline filters. This is the data:
 
 ```tsx showLineNumbers
 type Product = {
@@ -59,11 +59,11 @@ const categoryOptions = [
 
 ## Basic Table with Inline Filters
 
-Let's start by building a table with inline filter components.
+Start with a table that has inline filter components.
 
 ### Column Definitions
 
-First, we'll define our columns with filter metadata.
+Define the columns with filter metadata.
 
 ```tsx showLineNumbers title="columns.tsx"
 "use client"
@@ -138,7 +138,7 @@ export const columns: DataTableColumnDef<Product>[] = [
 
 ### `<DataTable />` component
 
-Next, we'll add the inline filter component.
+Add the inline filter component.
 
 ```tsx showLineNumbers title="advanced-inline-table.tsx"
 "use client"
@@ -259,7 +259,7 @@ export function AdvancedInlineTable({ data }: { data: Product[] }) {
 
 ### DataTableInlineFilter
 
-The inline filter component automatically generates filter inputs based on your column definitions' `meta` properties.
+This component creates filter inputs from each column's `meta`.
 
 **Props:**
 
@@ -269,16 +269,16 @@ The inline filter component automatically generates filter inputs based on your 
 <DataTableInlineFilter />
 ```
 
-The component reads filter configuration from column `meta`:
+It reads these `meta` fields:
 
-- `variant`: Filter type (`"text"`, `"select"`, `"number"`, `"boolean"`, `"date"`)
-- `label`: Display label for the filter
-- `options`: Array of options for `select` variant
-- `unit`: Unit display for `number` variant
+- `variant`: filter type (`"text"`, `"select"`, `"number"`, `"boolean"`, `"date"`)
+- `label`: label shown for the filter
+- `options`: list of options for the `select` variant
+- `unit`: unit shown for the `number` variant
 
 ## Column Meta for Inline Filters
 
-Define filter metadata in your column definitions:
+Set the filter fields in your column definitions:
 
 ```tsx showLineNumbers
 {
@@ -297,7 +297,7 @@ Define filter metadata in your column definitions:
 
 ## Controlled State
 
-Full control over table state with inline filters:
+Hold the table state yourself and pass it in:
 
 ```tsx showLineNumbers
 import { useState } from "react"
@@ -362,17 +362,17 @@ export function ControlledInlineTable({ data }: { data: Product[] }) {
 **✅ Use Advanced Inline Filter Table when:**
 
 - You want filters visible directly in the toolbar
-- You prefer a simpler, more direct filtering interface
-- You need custom filter layouts
-- Filters should be always visible (not in a menu)
+- You want a simple, direct filter UI
+- You need a custom filter layout
+- Filters should always be visible (not in a menu)
 
 **❌ Consider other options when:**
 
-- You need complex rule-based filtering (use [Advanced Filter Table](/examples/advanced-table/))
-- You want filter menus (use [Advanced Filter Table](/examples/advanced-table/))
-- You need URL state persistence (use [Advanced Nuqs Table](/examples/advanced-nuqs-table/))
+- You need rule-based filtering: use [Advanced Filter Table](/examples/advanced-table/)
+- You want filter menus: use [Advanced Filter Table](/examples/advanced-table/)
+- You need filters kept in the URL: use [Advanced Nuqs Table](/examples/advanced-nuqs-table/)
 
 ## Next Steps
 
-- [Advanced Filter Table](/examples/advanced-table/) - Add rule-based filter menus
-- [Advanced Nuqs Table](/examples/advanced-nuqs-table/) - Add URL state persistence
+- [Advanced Filter Table](/examples/advanced-table/): add rule-based filter menus
+- [Advanced Nuqs Table](/examples/advanced-nuqs-table/): keep filters in the URL

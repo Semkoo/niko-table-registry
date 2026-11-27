@@ -34,6 +34,7 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
+  CommandPanel,
 } from "@/components/niko-table/primitives/command"
 import { Input } from "@/components/ui/input"
 import {
@@ -908,12 +909,14 @@ function FilterValueSelector<TData extends RowData>({
     case FILTER_VARIANTS.DATE:
     case FILTER_VARIANTS.DATE_RANGE:
       return (
-        <Calendar
-          mode="single"
-          captionLayout="dropdown"
-          selected={value ? new Date(value) : undefined}
-          onSelect={date => onSelect(date?.getTime().toString() ?? "")}
-        />
+        <CommandPanel>
+          <Calendar
+            mode="single"
+            captionLayout="dropdown"
+            selected={value ? new Date(value) : undefined}
+            onSelect={date => onSelect(date?.getTime().toString() ?? "")}
+          />
+        </CommandPanel>
       )
 
     default: {

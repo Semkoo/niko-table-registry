@@ -1,13 +1,15 @@
 ---
 title: Advanced Filter Table
-description: Rule-based filtering for complex datasets where users can define custom rules for data visibility.
+description: Rule-based filtering where users stack their own filter and sort rules.
 ---
 
 import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
 import CollapsiblePreview from "@/components/markdown/collapsible-preview.astro"
 import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
 
-Composes `DataTableFilterMenu` and `DataTableSortMenu` into a query-builder UX: users stack multiple typed filter rules (text, number, date, faceted) and combine them with AND/OR. State stays local — pair it with the Advanced Nuqs Table if you also need URL persistence.
+This example combines `DataTableFilterMenu` and `DataTableSortMenu` into a query builder. Use it when users need to stack several typed filter rules (text, number, date, faceted) and join them with AND or OR.
+
+State stays local. Use the [Advanced Nuqs Table](/examples/advanced-nuqs-table/) if you also need the URL to hold it.
 
 <CodePreview demo="niko-table/advanced" />
 
@@ -17,7 +19,11 @@ Composes `DataTableFilterMenu` and `DataTableSortMenu` into a query-builder UX: 
 
 ## Introduction
 
-The Advanced Table demonstrates rule-based filtering with `DataTableFilterMenu` and `DataTableSortMenu` for complex filtering scenarios. Users can create multiple filter rules, combine them with AND/OR operators, and manage sorting with a visual interface.
+Users can:
+
+- Add several filter rules with `DataTableFilterMenu`.
+- Join the rules with AND or OR.
+- Manage sorting with `DataTableSortMenu`.
 
 ## Installation
 
@@ -35,7 +41,7 @@ For other add-ons or manual copy-paste, see the [Installation Guide](/getting-st
 
 ## Prerequisites
 
-We are going to build a table to show products with advanced filtering. Here's what our data looks like:
+You build a product table with advanced filtering. This is the data:
 
 ```tsx showLineNumbers
 type Product = {
@@ -61,11 +67,11 @@ const categoryOptions = [
 
 ## Basic Table with Advanced Filters
 
-Let's start by building a table with rule-based filtering.
+Start with a table that has rule-based filtering.
 
 ### Column Definitions
 
-First, we'll define our columns with filter metadata.
+Define the columns with filter metadata.
 
 ```tsx showLineNumbers title="columns.tsx"
 "use client"
@@ -169,7 +175,7 @@ export const columns: DataTableColumnDef<Product>[] = [
 
 ### `<DataTable />` component
 
-Next, we'll add the filter and sort menu components.
+Add the filter and sort menus.
 
 ```tsx showLineNumbers title="advanced-table.tsx"
 "use client"
@@ -299,29 +305,29 @@ export function AdvancedTable({ data }: { data: Product[] }) {
 
 ### DataTableFilterMenu
 
-The filter menu component allows users to create rule-based filters with multiple conditions.
+This menu lets users build filters from several rules.
 
 **Props:**
 
-| Name                  | Type                                                | Default      | Description                                                                    |
-| --------------------- | --------------------------------------------------- | ------------ | ------------------------------------------------------------------------------ |
-| `autoOptions`         | `boolean`                                           | `true`       | Auto-generate options for select/multiSelect columns                           |
-| `showCounts`          | `boolean`                                           | `true`       | Show counts beside each option                                                 |
-| `dynamicCounts`       | `boolean`                                           | `true`       | Counts recompute at the provider level automatically; prop kept for API parity |
-| `limitToFilteredRows` | `boolean`                                           | `true`       | Generate options from filtered rows only (vs all rows)                         |
-| `includeColumns`      | `string[]`                                          | -            | Only generate options for these column ids                                     |
-| `excludeColumns`      | `string[]`                                          | -            | Exclude these column ids from generation                                       |
-| `limitPerColumn`      | `number`                                            | -            | Limit number of generated options per column                                   |
-| `mergeStrategy`       | `"preserve" \| "augment" \| "replace"`              | `"preserve"` | How to handle existing static options                                          |
-| `filters?`            | `ExtendedColumnFilter[]`                            | -            | Array of filters (for controlled mode)                                         |
-| `onFiltersChange?`    | `(filters: ExtendedColumnFilter[] \| null) => void` | -            | Callback when filters change                                                   |
-| `className`           | `string`                                            | -            | Additional CSS classes                                                         |
+| Name                  | Type                                                | Default      | Description                                                               |
+| --------------------- | --------------------------------------------------- | ------------ | ------------------------------------------------------------------------- |
+| `autoOptions`         | `boolean`                                           | `true`       | Generate options for select and multiSelect columns                       |
+| `showCounts`          | `boolean`                                           | `true`       | Show counts beside each option                                            |
+| `dynamicCounts`       | `boolean`                                           | `true`       | Counts already recompute in the provider. The prop is kept for API parity |
+| `limitToFilteredRows` | `boolean`                                           | `true`       | Build options from filtered rows only (not all rows)                      |
+| `includeColumns`      | `string[]`                                          | -            | Only build options for these column ids                                   |
+| `excludeColumns`      | `string[]`                                          | -            | Skip these column ids                                                     |
+| `limitPerColumn`      | `number`                                            | -            | Max generated options per column                                          |
+| `mergeStrategy`       | `"preserve" \| "augment" \| "replace"`              | `"preserve"` | How to treat existing static options                                      |
+| `filters?`            | `ExtendedColumnFilter[]`                            | -            | Filters (controlled mode)                                                 |
+| `onFiltersChange?`    | `(filters: ExtendedColumnFilter[] \| null) => void` | -            | Called when filters change                                                |
+| `className`           | `string`                                            | -            | Additional CSS classes                                                    |
 
 **Merge Strategy:**
 
-- **`preserve`**: Keep user-defined options untouched (default)
-- **`augment`**: Add counts to matching values from static options
-- **`replace`**: Override static options with generated options
+- **`preserve`**: keep your options as they are (default)
+- **`augment`**: add counts to the values in your static options
+- **`replace`**: swap your static options for the generated ones
 
 ```tsx showLineNumbers
 <DataTableFilterMenu
@@ -335,7 +341,7 @@ The filter menu component allows users to create rule-based filters with multipl
 
 ### DataTableSortMenu
 
-The sort menu component provides a visual interface for managing column sorting.
+This menu lets users manage column sorting.
 
 **Props:**
 
@@ -349,7 +355,7 @@ The sort menu component provides a visual interface for managing column sorting.
 
 ## Column Meta for Filters
 
-Define filter metadata in your column definitions:
+Set the filter fields in your column definitions:
 
 ```tsx showLineNumbers
 {
@@ -368,27 +374,27 @@ Define filter metadata in your column definitions:
 
 **Supported variants:**
 
-- **`"text"`** - Text input filter
-- **`"select"`** - Dropdown select filter (requires `options`)
-- **`"multiSelect"`** - Multiple selection dropdown
-- **`"number"`** - Number input filter (optional `unit` for display)
-- **`"range"`** - Numeric range slider (auto-applied for `number` variant with `meta.range`)
-- **`"boolean"`** - Boolean checkbox filter
-- **`"date"`** - Single date picker filter
-- **`"dateRange"`** - Date range picker (auto-applied when `DataTableDateFilter` has `multiple={true}`)
+- **`"text"`**: text input
+- **`"select"`**: dropdown (needs `options`)
+- **`"multiSelect"`**: dropdown with several choices
+- **`"number"`**: number input (optional `unit` to show)
+- **`"range"`**: numeric range slider (applied automatically for `number` with `meta.range`)
+- **`"boolean"`**: checkbox
+- **`"date"`**: single date picker
+- **`"dateRange"`**: date range picker (applied automatically when `DataTableDateFilter` has `multiple={true}`)
 
 **Auto-applied filter functions:**
 
-When you specify `meta.variant` in your column definition, the appropriate `filterFn` is automatically applied:
+When you set `meta.variant`, the matching `filterFn` is applied for you:
 
-- **`variant: "range"`** → `numberRangeFilter` (for numeric ranges like price)
-- **`variant: "date"`** or **`variant: "dateRange"`** → `dateRangeFilter` (for date filtering)
+- **`variant: "range"`** gets `numberRangeFilter` (numeric ranges like price)
+- **`variant: "date"`** or **`variant: "dateRange"`** gets `dateRangeFilter` (dates)
 
-You can still provide a custom `filterFn` if needed - it will override the auto-applied function.
+A custom `filterFn` overrides the automatic one.
 
 ## Controlled State
 
-Full control over table state:
+Hold the table state yourself and pass it in:
 
 ```tsx showLineNumbers
 import { useState } from "react"
@@ -473,19 +479,19 @@ export function ControlledAdvancedTable({ data }: { data: Product[] }) {
 
 **✅ Use Advanced Table when:**
 
-- Users need complex, rule-based filtering
-- You want visual filter and sort management
-- Multiple filter conditions need to be combined
-- You need drag-and-drop sorting interface
-- Filter state needs to be managed externally
+- Users need rule-based filtering
+- You want a visual filter and sort UI
+- Several filter conditions must be combined
+- You want a drag-and-drop sort UI
+- You manage filter state outside the table
 
 **❌ Consider other options when:**
 
-- Simple filtering is sufficient (use [Faceted Filter Table](/examples/faceted-filter-table/))
-- You prefer inline filters (use [Advanced Inline Filter Table](/examples/advanced-inline-table/))
-- You need URL state persistence (use [Advanced Nuqs Table](/examples/advanced-nuqs-table/))
+- Simple filtering is enough: use [Faceted Filter Table](/examples/faceted-filter-table/)
+- You prefer inline filters: use [Advanced Inline Filter Table](/examples/advanced-inline-table/)
+- You need filters kept in the URL: use [Advanced Nuqs Table](/examples/advanced-nuqs-table/)
 
 ## Next Steps
 
-- [Advanced Inline Filter Table](/examples/advanced-inline-table/) - Build custom inline filter UIs
-- [Advanced Nuqs Table](/examples/advanced-nuqs-table/) - Add URL state persistence
+- [Advanced Inline Filter Table](/examples/advanced-inline-table/): build custom inline filter UIs
+- [Advanced Nuqs Table](/examples/advanced-nuqs-table/): keep filters in the URL

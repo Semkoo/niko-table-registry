@@ -1,13 +1,13 @@
 ---
 title: Aside Table
-description: Add sidebar panels to display additional content alongside your table.
+description: Add side panels next to your table for filters, details or stats.
 ---
 
 import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
 import CollapsiblePreview from "@/components/markdown/collapsible-preview.astro"
 import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
 
-Mounts left and/or right panels that share the layout with the table so contextual chrome — filter trees, row detail, summary stats — doesn't compete with the data view for horizontal space. The panels are regular slots: put whatever React you want inside.
+This example adds left and/or right panels beside the table. Use it for filter trees, row details or summary stats that should not crowd the data. Each panel is a slot, so you can put any React inside.
 
 <CodePreview demo="niko-table/aside" />
 
@@ -17,7 +17,7 @@ Mounts left and/or right panels that share the layout with the table so contextu
 
 ## Introduction
 
-The Aside Table adds sidebar panels (left and/or right) to display additional content alongside your table. This is useful for showing filters, details, or other contextual information without cluttering the main table view.
+Sidebars hold filters, details or other context without cluttering the table.
 
 ## Installation
 
@@ -35,7 +35,7 @@ For other add-ons or manual copy-paste, see the [Installation Guide](/getting-st
 
 ## Prerequisites
 
-We are going to build a table with sidebars to show customer details. Here's what our data looks like:
+You build a customer table with sidebars. This is the data:
 
 ```tsx showLineNumbers
 type Customer = {
@@ -60,11 +60,11 @@ const data: Customer[] = [
 
 ## Basic Table with Sidebars
 
-Let's start by building a table with left and right sidebars.
+Start with a table that has left and right sidebars.
 
 ### Column Definitions
 
-First, we'll define our columns.
+Define the columns.
 
 ```tsx showLineNumbers title="columns.tsx"
 "use client"
@@ -128,7 +128,7 @@ export const columns: DataTableColumnDef<Customer>[] = [
 
 ### `<DataTable />` component with Sidebars
 
-Next, we'll add the sidebar components.
+Add the sidebar components.
 
 ```tsx showLineNumbers title="aside-table.tsx"
 "use client"
@@ -371,18 +371,18 @@ export function AsideTable({ data }: { data: Customer[] }) {
 
 ### DataTableAside
 
-The main sidebar container component.
+The sidebar container.
 
 **Props:**
 
-- `side`: `"left" | "right"` - Which side to show the sidebar
-- `open`: `boolean` - Controlled open state
-- `onOpenChange`: `(open: boolean) => void` - Callback when open state changes
-- `children`: Sidebar content components
+- `side`: `"left" | "right"`. Which side the sidebar is on.
+- `open`: `boolean`. Controlled open state.
+- `onOpenChange`: `(open: boolean) => void`. Called when the open state changes.
+- `children`: the sidebar content.
 
 ### DataTableAsideTrigger
 
-Button to trigger opening the sidebar.
+The button that opens the sidebar.
 
 ```tsx
 <DataTableAside side="left" open={showFilters} onOpenChange={setShowFilters}>
@@ -397,16 +397,16 @@ Button to trigger opening the sidebar.
 
 ### DataTableAsideContent
 
-Container for sidebar content.
+Wraps the sidebar content.
 
 **Props:**
 
-- `width?`: Tailwind width class (e.g., `"w-80"`, `"w-96"`)
-- `children`: Sidebar content
+- `width?`: a Tailwind width class (for example `"w-80"` or `"w-96"`)
+- `children`: the sidebar content
 
 ### DataTableAsideHeader, DataTableAsideTitle, DataTableAsideClose
 
-Header components for the sidebar.
+Header pieces for the sidebar.
 
 ```tsx
 <DataTableAsideHeader>
@@ -434,7 +434,7 @@ Use `onRowClick` on `DataTableBody` to open the right sidebar:
 
 ## Controlled State
 
-Manage sidebar state externally for full control:
+Hold the sidebar state yourself and pass it in:
 
 ```tsx showLineNumbers
 import { useState } from "react"
@@ -524,17 +524,17 @@ export function ControlledAsideTable({ data }: { data: Customer[] }) {
 
 **✅ Use Aside Table when:**
 
-- You need to show additional details without cluttering the table
-- You want to display filters in a dedicated panel
-- You need contextual information that's not part of the main table
-- You want a clean, organized layout
+- You want to show details without cluttering the table
+- You want filters in their own panel
+- You need context that is not part of the table itself
+- You want a clean layout
 
 **❌ Consider other options when:**
 
-- You don't need additional panels (use [Basic Table](/examples/basic-table/))
-- You prefer inline expansion (use [Row Expansion Table](/examples/row-expansion-table/))
+- You do not need extra panels: use [Basic Table](/examples/basic-table/)
+- You prefer inline expansion: use [Row Expansion Table](/examples/row-expansion-table/)
 
 ## Next Steps
 
-- [Row Expansion Table](/examples/row-expansion-table/) - Expand rows inline
-- [Advanced Table](/examples/advanced-table/) - Combine all features
+- [Row Expansion Table](/examples/row-expansion-table/): expand rows inline
+- [Advanced Table](/examples/advanced-table/): combine all features
