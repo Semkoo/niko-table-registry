@@ -8,9 +8,9 @@
  *   registry-aria/niko-table/primitives/<x>.tsx;
  * - niko-table registryDependencies pointed at https://niko-table.com/r-aria/;
  * - shadcn registryDependencies matched to what the swapped files import
- *   (e.g. no `command`: the React Aria command primitive uses cmdk directly);
- * - npm dependencies the React Aria primitives import (cmdk,
- *   @internationalized/date, react-aria, react-aria-components).
+ *   (a primitive-covered component stays only if a swapped file imports it);
+ * - npm dependencies the React Aria primitives import
+ *   (@internationalized/date, react-aria, react-aria-components).
  *
  * public/_redirects serves it at /r/aria-<style>/<name>.json, so a registry
  * URL of https://niko-table.com/r/{style}/{name}.json picks the right build
@@ -98,8 +98,7 @@ function ariaItem(item) {
     .map(dep =>
       dep.startsWith(LIVE) ? LIVE_ARIA + dep.slice(LIVE.length) : dep,
     )
-    // A primitive-covered component none of the React Aria files import
-    // (e.g. `command`, which the React Aria primitive replaces with cmdk).
+    // Drop a primitive-covered component none of the React Aria files import.
     .filter(dep => !ARIA_PRIMITIVES.has(dep) || imported.has(dep))
   for (const name of primitiveImports)
     if (!registryDependencies.includes(name)) registryDependencies.push(name)

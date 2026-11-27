@@ -54,8 +54,10 @@ describe.each(registry.items.map(item => [item.name] as const))("%s", name => {
     })
     for (const dep of aria.registryDependencies ?? [])
       expect(dep).not.toMatch(/^https:\/\/niko-table\.com\/r\//)
-    // The React Aria command primitive is cmdk, not shadcn's aria command.
-    expect(aria.registryDependencies ?? []).not.toContain("command")
+    // The React Aria command primitive is shadcn's aria command, not cmdk.
+    if (aria.files.some(f => f.path.endsWith("/primitives/command.tsx")))
+      expect(aria.registryDependencies).toContain("command")
+    expect(aria.dependencies ?? []).not.toContain("cmdk")
     const packages = new Set(
       (aria.dependencies ?? []).map(dep => dep.replace(/(?!^)@.*$/, "")),
     )

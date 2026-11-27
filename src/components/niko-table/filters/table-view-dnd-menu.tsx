@@ -60,6 +60,7 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
+  CommandPanel,
 } from "@/components/niko-table/primitives/command"
 import {
   Popover,
@@ -328,36 +329,40 @@ export function TableViewDndMenu<TData extends RowData>({
               <CommandEmpty>No columns found.</CommandEmpty>
             ) : (
               <CommandGroup>
-                <DndContext
-                  id={dndContextId}
-                  collisionDetection={closestCenter}
-                  modifiers={[restrictToVerticalAxis]}
-                  sensors={sensors}
-                  onDragEnd={handleDragEnd}
-                >
-                  <SortableContext
-                    items={draggableIds}
-                    strategy={verticalListSortingStrategy}
+                <CommandPanel>
+                  <DndContext
+                    id={dndContextId}
+                    collisionDetection={closestCenter}
+                    modifiers={[restrictToVerticalAxis]}
+                    sensors={sensors}
+                    onDragEnd={handleDragEnd}
                   >
-                    {visibleColumns.map(column => {
-                      const item = (
-                        <MenuItem
-                          column={column}
-                          isLocked={lockedSet.has(column.id)}
-                          isVisible={column.getIsVisible()}
-                          onToggle={onToggle}
-                        />
-                      )
-                      return draggableIdSet.has(column.id) ? (
-                        <SortableMenuRow key={column.id} id={column.id}>
-                          {item}
-                        </SortableMenuRow>
-                      ) : (
-                        <React.Fragment key={column.id}>{item}</React.Fragment>
-                      )
-                    })}
-                  </SortableContext>
-                </DndContext>
+                    <SortableContext
+                      items={draggableIds}
+                      strategy={verticalListSortingStrategy}
+                    >
+                      {visibleColumns.map(column => {
+                        const item = (
+                          <MenuItem
+                            column={column}
+                            isLocked={lockedSet.has(column.id)}
+                            isVisible={column.getIsVisible()}
+                            onToggle={onToggle}
+                          />
+                        )
+                        return draggableIdSet.has(column.id) ? (
+                          <SortableMenuRow key={column.id} id={column.id}>
+                            {item}
+                          </SortableMenuRow>
+                        ) : (
+                          <React.Fragment key={column.id}>
+                            {item}
+                          </React.Fragment>
+                        )
+                      })}
+                    </SortableContext>
+                  </DndContext>
+                </CommandPanel>
               </CommandGroup>
             )}
           </CommandList>
