@@ -1,6 +1,7 @@
 ---
 import fs from "node:fs/promises"
 import { CopyPageButtonInternal } from "./_copy-page-button-internal"
+import { getBreadcrumbs } from "@/lib/breadcrumbs"
 
 const PAGE_TITLE_ID = "_top"
 
@@ -21,58 +22,16 @@ try {
 
 const pageUrl = Astro.url.href
 
-/*
- * Breadcrumb: Docs › <section> › <page>. The section is the top-level sidebar
- * group holding this page (renamed to match the top nav where it has its own
- * gallery page), or Blocks for /blocks/<name>/ pages, which aren't in the sidebar.
- */
-type SidebarEntry = (typeof starlightRoute.sidebar)[number]
-type Crumb = { label: string; href?: string }
-
-const sectionPages: Record<string, Crumb> = {
-  Examples: { label: "Table Examples", href: "/examples/" },
-  "Data Grid Examples": {
-    label: "Grid Examples",
-    href: "/data-grid/examples/",
-  },
-}
-
-function holdsCurrent(entry: SidebarEntry): boolean {
-  return entry.type === "link"
-    ? entry.isCurrent
-    : entry.entries.some(holdsCurrent)
-}
-
-const pathname = Astro.url.pathname
-const group = starlightRoute.sidebar.find(
-  entry => entry.type === "group" && holdsCurrent(entry),
-)
-const section: Crumb | undefined =
-  pathname.startsWith("/blocks/") && pathname !== "/blocks/"
-    ? { label: "Blocks", href: "/blocks/" }
-    : group
-      ? (sectionPages[group.label] ?? { label: group.label })
-      : undefined
-// Skip the section when it is this page (the gallery) or repeats the title.
-const crumbs: Crumb[] = [
-  { label: "Docs", href: "/getting-started/introduction/" },
-  ...(section && section.href !== pathname && section.label !== title
-    ? [section]
-    : []),
-]
+const crumbs = getBreadcrumbs(starlightRoute.sidebar, Astro.url.pathname, title)
 ---
 
 {template === "doc" && (
   <nav class="breadcrumb" aria-label="Breadcrumb">
     {crumbs.map(crumb => (
       <>
-        {crumb.href ? (
-          <a class="truncate crumb-link" href={crumb.href}>
-            {crumb.label}
-          </a>
-        ) : (
-          <span class="truncate">{crumb.label}</span>
-        )}
+        <a class="truncate crumb-link" href={crumb.href}>
+          {crumb.label}
+        </a>
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="24"
@@ -159,6 +118,8 @@ const crumbs: Crumb[] = [
     font-size: 0.875rem;
     align-items: center;
     display: flex;
+    flex-wrap: wrap;
+    row-gap: 0.375rem;
     margin-bottom: 1rem;
   }
 
