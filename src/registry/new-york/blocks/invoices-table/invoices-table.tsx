@@ -83,10 +83,10 @@ import {
 } from "./invoices-format"
 
 type Actions = {
-  markPaid: (ids: string[]) => void
+  markPaid: (list: Invoice[]) => void
   remind: (invoice: Invoice) => void
   copyLink: (invoice: Invoice) => void
-  voidInvoices: (ids: string[]) => void
+  voidInvoices: (list: Invoice[]) => void
 }
 
 /*
@@ -99,7 +99,7 @@ function MarkPaidItem({ markPaid }: Pick<Actions, "markPaid">) {
   return (
     <RowMenuItem
       disabled={!canMarkPaid(invoice)}
-      onClick={() => markPaid([invoice.id])}
+      onClick={() => markPaid([invoice])}
     >
       Mark as paid
     </RowMenuItem>
@@ -133,7 +133,7 @@ function VoidItem({ voidInvoices }: Pick<Actions, "voidInvoices">) {
     <RowMenuItem
       variant="destructive"
       disabled={!canVoid(invoice)}
-      onClick={() => voidInvoices([invoice.id])}
+      onClick={() => voidInvoices([invoice])}
     >
       Void invoice
     </RowMenuItem>
@@ -432,7 +432,7 @@ function InvoicesSummary() {
   )
 }
 
-/** Turns grouping by status on and off. The column menu's Group by does the same. */
+/** Turns grouping by status on and off. While ungrouped, the Status column menu can also turn it on. */
 function GroupToggle() {
   const { table } = useDataTable<Invoice>()
   const grouped = table.state.grouping.length > 0
@@ -464,7 +464,7 @@ function InvoicesSelectionBar({ markPaid }: Pick<Actions, "markPaid">) {
         variant="outline"
         disabled={payable.length === 0}
         onClick={() => {
-          markPaid(payable.map(row => row.original.id))
+          markPaid(payable.map(row => row.original))
           table.resetRowSelection()
         }}
       >
@@ -488,18 +488,19 @@ export default function InvoicesTable() {
   )
 
   const actions = React.useMemo<Actions>(() => {
-    const label = (ids: string[], list: Invoice[]) =>
-      ids.length === 1
-        ? (list.find(invoice => invoice.id === ids[0])?.number ?? "Invoice")
-        : `${ids.length} invoices`
+    const label = (list: Invoice[]) =>
+      list.length === 1 ? list[0]?.number : `${list.length} invoices`
     return {
-      markPaid: ids => {
-        update(ids, invoice => ({
-          ...invoice,
-          status: "paid",
-          paidAt: TODAY,
-        }))
-        setLastAction(`${label(ids, invoices)} marked as paid`)
+      markPaid: list => {
+        update(
+          list.map(invoice => invoice.id),
+          invoice => ({
+            ...invoice,
+            status: "paid",
+            paidAt: TODAY,
+          }),
+        )
+        setLastAction(`${label(list)} marked as paid`)
       },
       remind: invoice =>
         setLastAction(
@@ -514,12 +515,15 @@ export default function InvoicesTable() {
       },
       // Voiding keeps the record: the invoice moves to a "void" status (its own
       // group) instead of disappearing, so the invoice number is never reused.
-      voidInvoices: ids => {
-        update(ids, invoice => ({ ...invoice, status: "void" }))
-        setLastAction(`${label(ids, invoices)} voided`)
+      voidInvoices: list => {
+        update(
+          list.map(invoice => invoice.id),
+          invoice => ({ ...invoice, status: "void" }),
+        )
+        setLastAction(`${label(list)} voided`)
       },
     }
-  }, [update, invoices])
+  }, [update])
 
   // The row actions, composed ONCE and mounted in both the "⋯" dropdown and
   // the right-click menu.
@@ -544,7 +548,7 @@ export default function InvoicesTable() {
         columns={columns}
         getRowId={invoice => invoice.id}
         // One page holds every group; group rows count toward the page size.
-        // groupedColumnMode false keeps Status in place instead of moving it first.
+        // "remove" drops Status while grouped (the group row shows it); it comes back when ungrouped.
         config={{ initialPageSize: 50, groupedColumnMode: "remove" }}
         initialState={{
           // Grouped by status from the start; the toggle turns it off.
@@ -604,7 +608,7 @@ export default function InvoicesTable() {
                     No matching invoices
                   </DataTableEmptyTitle>
                   <DataTableEmptyDescription>
-                    Try a different search, or clear the filters.
+                    Try a different search or clear the filters.
                   </DataTableEmptyDescription>
                 </DataTableEmptyFilteredMessage>
               </DataTableEmptyBody>

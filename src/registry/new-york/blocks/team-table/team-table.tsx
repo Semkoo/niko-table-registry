@@ -287,7 +287,6 @@ function useMemberColumns(rowMenu: React.ReactNode) {
         meta: { label: "Last active" },
         header: sortableHeader,
         // Pending invites sort as the least recently active.
-        sortUndefined: "last",
         cell: ({ row }) => (
           <span
             className={cn(
@@ -353,9 +352,10 @@ function TeamHeader({ onInvite }: { onInvite: (member: NewMember) => void }) {
       <div className="flex flex-col gap-0.5">
         <h2 className="text-base font-semibold">Members</h2>
         <p className="text-sm text-muted-foreground">
-          {rows.length - pending} members ·{" "}
+          {rows.length - pending}{" "}
+          {rows.length - pending === 1 ? "member" : "members"} ·{" "}
           <span className={cn(pending > 0 && "text-warning")}>
-            {pending} pending invites
+            {pending} pending {pending === 1 ? "invite" : "invites"}
           </span>
         </p>
       </div>
@@ -390,6 +390,9 @@ function TeamSelectionBar({ remove }: Pick<Actions, "remove">) {
     </DataTableSelectionBar>
   )
 }
+
+// Counter instead of crypto.randomUUID, which is missing on non-secure origins.
+let nextId = 0
 
 export default function TeamTable() {
   const [members, setMembers] = React.useState(sampleMembers)
@@ -434,7 +437,7 @@ export default function TeamTable() {
     setMembers(rows => [
       {
         ...member,
-        id: `mem-${crypto.randomUUID().slice(0, 8)}`,
+        id: `mem-new-${++nextId}`,
         status: "invited",
         teams: [],
         lastActive: null,
@@ -509,7 +512,7 @@ export default function TeamTable() {
                   </DataTableEmptyIcon>
                   <DataTableEmptyTitle>No matching members</DataTableEmptyTitle>
                   <DataTableEmptyDescription>
-                    Try another search, or clear the filters.
+                    Try a different search or clear the filters.
                   </DataTableEmptyDescription>
                 </DataTableEmptyFilteredMessage>
               </DataTableEmptyBody>

@@ -76,6 +76,8 @@ const customers = [
 ]
 
 const DAY = 86_400_000
+// Positions that are always voided (indices from the date-sorted list).
+const voidAt = [3, 17]
 
 function generateInvoices(count: number, seed: number): Invoice[] {
   const random = seededRandom(seed)
@@ -108,6 +110,12 @@ function generateInvoices(count: number, seed: number): Invoice[] {
       paidAt = new Date(paidTime)
     } else {
       status = dueTime < todayDay ? "overdue" : "sent"
+    }
+
+    // Fixed positions so the void state is always in the sample (never a draft).
+    if (voidAt.includes(i)) {
+      status = "void"
+      paidAt = null
     }
 
     const slug = customer.toLowerCase().replace(/[^a-z]+/g, "-")

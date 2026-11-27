@@ -37,8 +37,13 @@ export function sampleResponse(log: RequestLog) {
     }
   }
   if (log.status === 204) return null
+  const last = log.path.split("/").pop() ?? ""
+  const isId = last.includes("_") || last === "me"
+  if (log.method === "GET" && !isId) {
+    return { object: "list", data: [], has_more: false }
+  }
   return {
-    id: log.path.split("/").pop(),
+    id: isId ? last : log.id.replace("req_", "obj_"),
     object: log.path.split("/")[2]?.replace(/s$/, ""),
     livemode: true,
     created: Math.floor(log.timestamp / 1000),

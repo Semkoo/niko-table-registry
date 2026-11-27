@@ -8,7 +8,10 @@ import { act, cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, describe, expect, it, vi } from "vitest"
 import { blocks } from "@/data/blocks"
 import registry from "../../../registry.json"
-import { invoices } from "../new-york/blocks/invoices-table/invoices-data"
+import {
+  invoices,
+  statusOptions as invoiceStatuses,
+} from "../new-york/blocks/invoices-table/invoices-data"
 
 const modules = import.meta.glob<{ default: React.ComponentType }>(
   "../new-york/blocks/*/*.tsx",
@@ -284,6 +287,12 @@ describe("invoices-table", () => {
     screen.getByRole("group", { name: "Overdue" }).lastElementChild!
       .textContent!
   const overdueCount = () => Number(overdueNote().match(/^(\d+)/)![1])
+
+  it("sample data includes every invoice status", () => {
+    expect(new Set(invoices.map(invoice => invoice.status))).toEqual(
+      new Set(invoiceStatuses.map(option => option.value)),
+    )
+  })
 
   it("groups by status with counts and totals, and ungroups", async () => {
     const container = await mount("invoices-table")
