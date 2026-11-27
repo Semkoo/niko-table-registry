@@ -44,7 +44,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/niko-table/primitives/dropdown-menu"
 import { ArrowRight, MoreHorizontal, PackageX, SearchX } from "lucide-react"
 import { cn } from "@/lib/utils"
 import {

@@ -43,7 +43,7 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover"
+} from "@/components/niko-table/primitives/popover"
 import {
   Select,
   SelectContent,

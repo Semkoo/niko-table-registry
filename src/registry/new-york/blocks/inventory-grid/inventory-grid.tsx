@@ -65,7 +65,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/niko-table/primitives/dropdown-menu"
 import { cn } from "@/lib/utils"
 import { categoryOptions, products } from "./inventory-data"
 import {

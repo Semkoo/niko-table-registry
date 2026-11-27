@@ -45,7 +45,7 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover"
+} from "@/components/niko-table/primitives/popover"
 import { cn } from "@/lib/utils"
 import { formatLabel } from "../lib/format"
 

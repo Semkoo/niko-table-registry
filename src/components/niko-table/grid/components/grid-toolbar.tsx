@@ -16,7 +16,7 @@ import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/ui/tooltip"
+} from "@/components/niko-table/primitives/tooltip"
 import { cn } from "@/lib/utils"
 import { Plus, Redo2, Undo2, X } from "lucide-react"
 

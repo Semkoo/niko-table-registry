@@ -82,8 +82,13 @@ describe("blocks", () => {
       const item = registry.items.find(entry => entry.name === name)
       expect(item, `${name} missing from registry.json`).toBeTruthy()
       const block = blocks.find(entry => entry.name === name)!
+      // A block also ships the Niko Table overlay primitives it imports
+      // (swapped per base); every other file must be the block's own.
       expect(
-        item!.files.map(file => file.path.split("/").pop()).sort(),
+        item!.files
+          .filter(file => !file.path.includes("/niko-table/primitives/"))
+          .map(file => file.path.split("/").pop())
+          .sort(),
       ).toEqual([...block.files].sort())
     },
   )

@@ -10,7 +10,7 @@ import {
   ContextMenuSub,
   ContextMenuSubContent,
   ContextMenuSubTrigger,
-} from "@/components/ui/context-menu"
+} from "@/components/niko-table/primitives/context-menu"
 import {
   DropdownMenuGroup,
   DropdownMenuItem,
@@ -19,7 +19,7 @@ import {
   DropdownMenuSub,
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/niko-table/primitives/dropdown-menu"
 
 /**
  * Composable row menu for niko-table — the shadcn-style, write-once way to give

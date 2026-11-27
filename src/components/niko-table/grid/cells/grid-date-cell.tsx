@@ -17,7 +17,7 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover"
+} from "@/components/niko-table/primitives/popover"
 
 import type { CellEditorProps } from "./cell-props"
 import { cellTriggerClass } from "./cell-styles"

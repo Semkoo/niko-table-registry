@@ -19,12 +19,12 @@ import { Button } from "@/components/ui/button"
 import {
   DropdownMenuSeparator,
   DropdownMenuLabel,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/niko-table/primitives/dropdown-menu"
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/ui/tooltip"
+} from "@/components/niko-table/primitives/tooltip"
 import { cn } from "@/lib/utils"
 import {
   TableFacetedFilter,

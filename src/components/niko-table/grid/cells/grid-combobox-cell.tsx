@@ -24,7 +24,7 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover"
+} from "@/components/niko-table/primitives/popover"
 import * as React from "react"
 
 import type { CellEditorProps, GridComboboxOption } from "./cell-props"

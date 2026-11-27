@@ -21,7 +21,12 @@
       "title": "Data Table Core",
       "description": "Shared floor for Niko Table: context, non-virtualized structure, types, config, and the lib/hooks bodies and controls need. Does not include DataTableRoot or components/ui/table.tsx \u2014 install @niko-table/data-table for the full owner (pulls table.tsx), @niko-table/data-table-ui for the table primitive alone, or bring your own compatible table.tsx with a TableComponent export.",
       "dependencies": ["@tanstack/react-table@^9", "lucide-react"],
-      "registryDependencies": ["skeleton", "button", "context-menu"],
+      "registryDependencies": [
+        "skeleton",
+        "button",
+        "context-menu",
+        "dropdown-menu"
+      ],
       "files": [
         {
           "path": "src/components/niko-table/core/data-table-context.tsx",
@@ -142,6 +147,16 @@
           "path": "src/components/niko-table/types.ts",
           "type": "registry:lib",
           "target": "components/niko-table/types.ts"
+        },
+        {
+          "path": "src/components/niko-table/primitives/dropdown-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/dropdown-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/context-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/context-menu.tsx"
         }
       ]
     },
@@ -156,7 +171,8 @@
         "https://niko-table.com/r/data-table-ui.json",
         "alert",
         "button",
-        "dropdown-menu"
+        "dropdown-menu",
+        "tooltip"
       ],
       "files": [
         {
@@ -238,6 +254,16 @@
           "path": "src/components/niko-table/hooks/use-data-table-flash.ts",
           "type": "registry:component",
           "target": "components/niko-table/hooks/use-data-table-flash.ts"
+        },
+        {
+          "path": "src/components/niko-table/primitives/tooltip.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/tooltip.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/dropdown-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/dropdown-menu.tsx"
         }
       ]
     },
@@ -342,6 +368,16 @@
           "path": "src/components/niko-table/filters/table-sort-menu.tsx",
           "type": "registry:component",
           "target": "components/niko-table/filters/table-sort-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/popover.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/popover.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/tooltip.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/tooltip.tsx"
         }
       ]
     },
@@ -367,6 +403,11 @@
           "path": "src/components/niko-table/filters/table-view-menu.tsx",
           "type": "registry:component",
           "target": "components/niko-table/filters/table-view-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/popover.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/popover.tsx"
         }
       ]
     },
@@ -398,6 +439,11 @@
           "path": "src/components/niko-table/filters/table-view-dnd-menu.tsx",
           "type": "registry:component",
           "target": "components/niko-table/filters/table-view-dnd-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/popover.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/popover.tsx"
         }
       ]
     },
@@ -456,6 +502,11 @@
           "path": "src/components/niko-table/filters/table-range-filter.tsx",
           "type": "registry:component",
           "target": "components/niko-table/filters/table-range-filter.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/popover.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/popover.tsx"
         }
       ]
     },
@@ -488,6 +539,11 @@
           "path": "src/components/niko-table/lib/build-faceted-options.ts",
           "type": "registry:lib",
           "target": "components/niko-table/lib/build-faceted-options.ts"
+        },
+        {
+          "path": "src/components/niko-table/primitives/popover.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/popover.tsx"
         }
       ]
     },
@@ -521,6 +577,11 @@
           "path": "src/components/niko-table/filters/table-range-filter.tsx",
           "type": "registry:component",
           "target": "components/niko-table/filters/table-range-filter.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/popover.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/popover.tsx"
         }
       ]
     },
@@ -549,6 +610,11 @@
           "path": "src/components/niko-table/filters/table-slider-filter.tsx",
           "type": "registry:component",
           "target": "components/niko-table/filters/table-slider-filter.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/popover.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/popover.tsx"
         }
       ]
     },
@@ -575,6 +641,11 @@
           "path": "src/components/niko-table/filters/table-date-filter.tsx",
           "type": "registry:component",
           "target": "components/niko-table/filters/table-date-filter.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/popover.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/popover.tsx"
         }
       ]
     },
@@ -657,6 +728,16 @@
           "path": "src/components/niko-table/filters/table-column-sort.tsx",
           "type": "registry:component",
           "target": "components/niko-table/filters/table-column-sort.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/tooltip.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/tooltip.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/dropdown-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/dropdown-menu.tsx"
         }
       ]
     },
@@ -682,6 +763,16 @@
           "path": "src/components/niko-table/filters/table-column-hide.tsx",
           "type": "registry:component",
           "target": "components/niko-table/filters/table-column-hide.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/tooltip.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/tooltip.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/dropdown-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/dropdown-menu.tsx"
         }
       ]
     },
@@ -707,6 +798,16 @@
           "path": "src/components/niko-table/filters/table-column-pin.tsx",
           "type": "registry:component",
           "target": "components/niko-table/filters/table-column-pin.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/tooltip.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/tooltip.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/dropdown-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/dropdown-menu.tsx"
         }
       ]
     },
@@ -732,6 +833,16 @@
           "path": "src/components/niko-table/filters/table-column-group.tsx",
           "type": "registry:component",
           "target": "components/niko-table/filters/table-column-group.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/tooltip.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/tooltip.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/dropdown-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/dropdown-menu.tsx"
         }
       ]
     },
@@ -765,6 +876,16 @@
           "path": "src/components/niko-table/components/data-table-column-filter-trigger.tsx",
           "type": "registry:component",
           "target": "components/niko-table/components/data-table-column-filter-trigger.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/tooltip.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/tooltip.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/dropdown-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/dropdown-menu.tsx"
         }
       ]
     },
@@ -781,7 +902,8 @@
         "tooltip",
         "input",
         "label",
-        "slider"
+        "slider",
+        "popover"
       ],
       "files": [
         {
@@ -793,6 +915,21 @@
           "path": "src/components/niko-table/filters/table-column-slider-filter.tsx",
           "type": "registry:component",
           "target": "components/niko-table/filters/table-column-slider-filter.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/popover.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/popover.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/tooltip.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/tooltip.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/dropdown-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/dropdown-menu.tsx"
         }
       ]
     },
@@ -820,6 +957,21 @@
           "path": "src/components/niko-table/filters/table-column-date-filter.tsx",
           "type": "registry:component",
           "target": "components/niko-table/filters/table-column-date-filter.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/popover.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/popover.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/tooltip.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/tooltip.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/dropdown-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/dropdown-menu.tsx"
         }
       ]
     },
@@ -1164,6 +1316,26 @@
           "path": "src/components/niko-table/grid/components/grid-shortcuts-dialog.tsx",
           "type": "registry:component",
           "target": "components/niko-table/grid/components/grid-shortcuts-dialog.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/popover.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/popover.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/tooltip.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/tooltip.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/dropdown-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/dropdown-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/dialog.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/dialog.tsx"
         }
       ]
     },
@@ -1247,6 +1419,11 @@
           "path": "src/registry/new-york/blocks/customers-table/add-customer-sheet.tsx",
           "type": "registry:component",
           "target": "components/customers-table/add-customer-sheet.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/dropdown-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/dropdown-menu.tsx"
         }
       ]
     },
@@ -1307,6 +1484,11 @@
           "path": "src/registry/new-york/blocks/orders-table/orders-data.ts",
           "type": "registry:component",
           "target": "components/orders-table/orders-data.ts"
+        },
+        {
+          "path": "src/components/niko-table/primitives/dropdown-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/dropdown-menu.tsx"
         }
       ]
     },
@@ -1366,6 +1548,11 @@
           "path": "src/registry/new-york/blocks/tickets-table/tickets-data.ts",
           "type": "registry:component",
           "target": "components/tickets-table/tickets-data.ts"
+        },
+        {
+          "path": "src/components/niko-table/primitives/dropdown-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/dropdown-menu.tsx"
         }
       ]
     },
@@ -1428,6 +1615,16 @@
           "path": "src/registry/new-york/blocks/team-table/team-data.ts",
           "type": "registry:component",
           "target": "components/team-table/team-data.ts"
+        },
+        {
+          "path": "src/components/niko-table/primitives/dropdown-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/dropdown-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/dialog.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/dialog.tsx"
         }
       ]
     },
@@ -1485,6 +1682,11 @@
           "path": "src/registry/new-york/blocks/request-logs-table/logs-data.ts",
           "type": "registry:component",
           "target": "components/request-logs-table/logs-data.ts"
+        },
+        {
+          "path": "src/components/niko-table/primitives/dropdown-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/dropdown-menu.tsx"
         }
       ]
     },
@@ -1539,6 +1741,11 @@
           "path": "src/registry/new-york/blocks/invoices-table/invoices-data.ts",
           "type": "registry:component",
           "target": "components/invoices-table/invoices-data.ts"
+        },
+        {
+          "path": "src/components/niko-table/primitives/dropdown-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/dropdown-menu.tsx"
         }
       ]
     },
@@ -1595,6 +1802,11 @@
           "path": "src/registry/new-york/blocks/backlog-table/backlog-data.ts",
           "type": "registry:component",
           "target": "components/backlog-table/backlog-data.ts"
+        },
+        {
+          "path": "src/components/niko-table/primitives/dropdown-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/dropdown-menu.tsx"
         }
       ]
     },
@@ -1654,6 +1866,11 @@
           "path": "src/registry/new-york/blocks/shipments-table/shipments-data.ts",
           "type": "registry:component",
           "target": "components/shipments-table/shipments-data.ts"
+        },
+        {
+          "path": "src/components/niko-table/primitives/dropdown-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/dropdown-menu.tsx"
         }
       ]
     },
@@ -1708,6 +1925,11 @@
           "path": "src/registry/new-york/blocks/transactions-table/transactions-data.ts",
           "type": "registry:component",
           "target": "components/transactions-table/transactions-data.ts"
+        },
+        {
+          "path": "src/components/niko-table/primitives/dropdown-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/dropdown-menu.tsx"
         }
       ]
     },
@@ -1758,6 +1980,11 @@
           "path": "src/registry/new-york/blocks/inventory-grid/inventory-data.ts",
           "type": "registry:component",
           "target": "components/inventory-grid/inventory-data.ts"
+        },
+        {
+          "path": "src/components/niko-table/primitives/dropdown-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/dropdown-menu.tsx"
         }
       ]
     }

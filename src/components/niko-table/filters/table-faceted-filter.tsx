@@ -34,7 +34,7 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover"
+} from "@/components/niko-table/primitives/popover"
 import { Separator } from "@/components/ui/separator"
 import { cn } from "@/lib/utils"
 import type { DataTableColumn, ExtendedColumnFilter, Option } from "../types"
