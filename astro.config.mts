@@ -175,6 +175,7 @@ export default defineConfig({
             { label: "Gallery", slug: "examples" },
             {
               label: "Getting Started",
+              collapsed: true,
               items: [
                 { label: "Simple Table", slug: "examples/simple-table" },
                 { label: "Basic Table", slug: "examples/basic-table" },
@@ -183,6 +184,7 @@ export default defineConfig({
             },
             {
               label: "Row & Column Features",
+              collapsed: true,
               items: [
                 {
                   label: "Row Selection",
@@ -211,6 +213,7 @@ export default defineConfig({
             },
             {
               label: "Drag & Drop",
+              collapsed: true,
               items: [
                 { label: "Row DnD", slug: "examples/row-dnd-table" },
                 { label: "Column DnD", slug: "examples/column-dnd-table" },
@@ -218,6 +221,7 @@ export default defineConfig({
             },
             {
               label: "Layout & Presentation",
+              collapsed: true,
               items: [
                 { label: "Aside", slug: "examples/aside-table" },
                 {
@@ -236,6 +240,7 @@ export default defineConfig({
             },
             {
               label: "Filtering",
+              collapsed: true,
               items: [
                 {
                   label: "Faceted Filter",
@@ -250,6 +255,7 @@ export default defineConfig({
             },
             {
               label: "Server-Side & URL State",
+              collapsed: true,
               items: [
                 {
                   label: "Advanced Filter + Nuqs",
@@ -293,16 +299,34 @@ export default defineConfig({
           label: "Data Grid Examples",
           items: [
             { label: "Gallery", slug: "data-grid/examples" },
-            { label: "Basic Grid", slug: "examples/basic-grid" },
-            { label: "Composed Grid", slug: "examples/composed-grid" },
-            { label: "Cell Types", slug: "examples/cell-types-grid" },
-            { label: "Validation", slug: "examples/validation-grid" },
             {
-              label: "Dynamic Columns",
-              slug: "examples/dynamic-columns-grid",
+              label: "Basics",
+              collapsed: true,
+              items: [
+                { label: "Basic Grid", slug: "examples/basic-grid" },
+                { label: "Composed Grid", slug: "examples/composed-grid" },
+                { label: "Cell Types", slug: "examples/cell-types-grid" },
+              ],
             },
-            { label: "Persistence", slug: "examples/persistence-grid" },
-            { label: "Server Side", slug: "examples/server-side-grid" },
+            {
+              label: "Editing & Validation",
+              collapsed: true,
+              items: [
+                { label: "Validation", slug: "examples/validation-grid" },
+                {
+                  label: "Dynamic Columns",
+                  slug: "examples/dynamic-columns-grid",
+                },
+              ],
+            },
+            {
+              label: "Saving",
+              collapsed: true,
+              items: [
+                { label: "Persistence", slug: "examples/persistence-grid" },
+                { label: "Server Side", slug: "examples/server-side-grid" },
+              ],
+            },
           ],
         },
         {
@@ -330,6 +354,8 @@ export default defineConfig({
       ],
       plugins: [
         starlightThemeBlack({
+          // Render sidebar groups as <details> so nested `collapsed` groups fold.
+          sidebar: { useDropdowns: true },
           navLinks: [
             {
               label: "Docs",

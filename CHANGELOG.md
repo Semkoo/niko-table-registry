@@ -58,6 +58,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+- **Docs: "Open in v0" button** on example previews. The Preview / Code switch is now a compact pill with icons instead of a full-width bar.
 - **`data-table-dnd-structure.tsx` / `data-table-virtualized-dnd-structure.tsx`** — no re-export shims. Import the axis files above instead.
 
 - Data Grid docs rewritten — shorter, shadcn-style install → anatomy → usage
