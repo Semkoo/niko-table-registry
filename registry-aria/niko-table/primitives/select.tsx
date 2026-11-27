@@ -37,8 +37,16 @@ function Select({
   name?: string
   children?: React.ReactNode
 }) {
+  // React Aria labels the select on its root; Radix call sites label the
+  // trigger, so lift the trigger's aria-label / aria-labelledby.
+  const trigger = React.Children.toArray(children).find(
+    (child): child is React.ReactElement<SelectTriggerProps> =>
+      React.isValidElement(child) && child.type === SelectTrigger,
+  )
   return (
     <SelectRoot
+      aria-label={trigger?.props["aria-label"]}
+      aria-labelledby={trigger?.props["aria-labelledby"]}
       value={value}
       defaultValue={defaultValue}
       onChange={key => {
@@ -55,33 +63,29 @@ function Select({
   )
 }
 
+interface SelectTriggerProps {
+  className?: string
+  size?: "sm" | "default"
+  id?: string
+  title?: string
+  children?: React.ReactNode
+  /** Read by `Select`, which labels the React Aria select with it. */
+  "aria-label"?: string
+  /** Read by `Select`, which labels the React Aria select with it. */
+  "aria-labelledby"?: string
+  /** Radix wiring; React Aria links the trigger to its list itself. */
+  "aria-controls"?: string
+}
+
 function SelectTrigger({
   className,
   size,
   id,
   title,
   children,
-  "aria-label": ariaLabel,
-  "aria-labelledby": ariaLabelledBy,
-}: {
-  className?: string
-  size?: "sm" | "default"
-  id?: string
-  title?: string
-  children?: React.ReactNode
-  "aria-label"?: string
-  "aria-labelledby"?: string
-  /** Radix wiring; React Aria links the trigger to its list itself. */
-  "aria-controls"?: string
-}) {
+}: SelectTriggerProps) {
   return (
-    <SelectButton
-      className={className}
-      size={size}
-      id={id}
-      aria-label={ariaLabel}
-      aria-labelledby={ariaLabelledBy}
-    >
+    <SelectButton className={className} size={size} id={id}>
       {/* React Aria's button takes no `title`; keep the hint on its content. */}
       <span title={title} className="contents">
         {children}

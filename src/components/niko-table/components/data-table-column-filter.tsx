@@ -13,6 +13,7 @@
  */
 import React from "react"
 
+import { DropdownMenuPanel } from "@/components/niko-table/primitives/dropdown-menu"
 import { cn } from "@/lib/utils"
 
 /**
@@ -26,7 +27,12 @@ export function DataTableColumnFilter({
   className?: string
 }) {
   if (children) {
-    return <div className={cn("flex items-center", className)}>{children}</div>
+    // A panel, not an item: it sits in DataTableColumnActions' menu.
+    return (
+      <DropdownMenuPanel>
+        <div className={cn("flex items-center", className)}>{children}</div>
+      </DropdownMenuPanel>
+    )
   }
   return null
 }

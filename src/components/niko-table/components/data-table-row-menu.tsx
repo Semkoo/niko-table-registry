@@ -138,12 +138,26 @@ export function RowMenuLabel(
   return <Label {...props} />
 }
 
-export function RowMenuSub(
-  props: React.ComponentProps<typeof DropdownMenuSub>,
-) {
-  const Sub =
-    useRowMenuSurface() === "context" ? ContextMenuSub : DropdownMenuSub
-  return <Sub {...props} />
+export function RowMenuSub({
+  children,
+  ...props
+}: React.ComponentProps<typeof DropdownMenuSub>) {
+  const surface = useRowMenuSurface()
+  const row = React.useContext(DataTableRowValueContext)
+  const Sub = surface === "context" ? ContextMenuSub : DropdownMenuSub
+  // Collection-based menus (React Aria) render the submenu content outside
+  // this subtree, so the row scope is handed to it again.
+  const [trigger, ...content] = React.Children.toArray(children).filter(
+    React.isValidElement,
+  )
+  return (
+    <Sub {...props}>
+      {trigger}
+      <DataTableRowMenuScope row={row} surface={surface}>
+        {content}
+      </DataTableRowMenuScope>
+    </Sub>
+  )
 }
 
 export function RowMenuSubTrigger(
