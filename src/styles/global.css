@@ -332,3 +332,9 @@
   max-width: 68rem;
   padding-inline: 1.5rem;
 }
+
+/* Docs tables: names in the first column (item, prop, type) never break mid-word. */
+.sl-markdown-content table td:first-child code,
+.sl-markdown-content table th:first-child code {
+  white-space: nowrap;
+}
