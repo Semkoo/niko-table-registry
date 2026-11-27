@@ -1,22 +1,22 @@
 ---
 title: Contributing Code
-description: Thanks for your interest in contributing to Niko Table.
+description: How to set up the repo and send a pull request.
 ---
 
 import { FileTree, Steps } from "@astrojs/starlight/components"
 
-Please take a moment to review this document before submitting your first pull request. We also strongly recommend that you check for open issues and pull requests to see if someone else is working on something similar.
+Read this page before your first pull request. Also check open issues and pull requests. Someone may already be working on the same thing.
 
 ## About this repository
 
 This repository is an Astro Starlight project.
 
 - We use `pnpm` for development (npm also works).
-- We use `prettier` for code formatting (which is automatically run on commit).
+- We use `prettier` for code formatting. It runs on commit.
 
 ## Structure
 
-This repository is structured as follows:
+The repo is laid out like this:
 
 <FileTree>
 
@@ -35,16 +35,16 @@ This repository is structured as follows:
 
 </FileTree>
 
-- `src/assets`: Logos/images for the documentation site.
+- `src/assets`: Logos and images for the docs site.
 - `src/components`: Site UI (markdown helpers, overrides, etc.).
 - `src/content/docs/getting-started`: Install and intro guides.
-- `src/content/docs/niko-table` / `data-grid`: Product overview + API by layer.
-- `src/content/docs/examples`: Runnable table and grid example pages.
-- `src/content/docs/contributing`: How to contribute (code, requests, **docs**).
-- `src/registry/new-york/examples`: Demo components mounted by `CodePreview`.
-- `src/components/niko-table`: Installable component sources, packaged by the root `registry.json`.
+- `src/content/docs/niko-table` and `data-grid`: Overview and API, by layer.
+- `src/content/docs/examples`: Table and grid example pages you can run.
+- `src/content/docs/contributing`: How to help (code, requests, **docs**).
+- `src/registry/new-york/examples`: Demo components that `CodePreview` shows.
+- `src/components/niko-table`: Component sources people install. The root `registry.json` packages them.
 
-For docs/example page shape, see [Documentation Guidelines](/contributing/documentation-guidelines/).
+For how to shape docs and example pages, see [Documentation Guidelines](/contributing/documentation-guidelines/).
 
 ## Development
 
@@ -95,7 +95,7 @@ For docs/example page shape, see [Documentation Guidelines](/contributing/docume
 
 ## Building the registry locally
 
-To test that your registry builds correctly, you can run the following command:
+To check that the registry builds, run:
 
 ```bash
 pnpm registry:build
@@ -103,7 +103,7 @@ pnpm registry:build
 npm run registry:build
 ```
 
-Then try installing any component from the registry in a new project using the `shadcn add` command:
+Then install any component from it in a new project with `shadcn add`:
 
 ```bash
 npx shadcn@latest add http://localhost:4321/r/<component-name>.json

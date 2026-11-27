@@ -6,7 +6,7 @@ description: DataGrid, DataGridCell, context, features, and dynamic columns prov
 import { GITHUB_REPO_URL } from "@/data/env"
 import DocsLink from "@/components/markdown/docs-link.astro"
 
-Essential building blocks under `grid/core/`. Place `<DataGrid>` inside `DataTableRoot`, wrapping `DataTable`.
+The core pieces live in `grid/core/`. Put `<DataGrid>` inside `DataTableRoot`, wrapping `DataTable`.
 
 <div className="not-content mb-6 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/tree/main/src/components/niko-table/grid/core`} external>Source Code ↗</DocsLink>
@@ -15,7 +15,7 @@ Essential building blocks under `grid/core/`. Place `<DataGrid>` inside `DataTab
 
 ### DataGrid
 
-Owns keyboard nav, selection rectangle, drag-select, and scroll-into-view. Pass `onRequestShortcuts` to open the `?` dialog.
+Handles keyboard nav, the selection rectangle, drag-select, and scroll-into-view. Pass `onRequestShortcuts` to open the `?` dialog.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/grid/core/data-grid.tsx`} external>Source Code ↗</DocsLink>
@@ -41,11 +41,11 @@ import { DataGrid } from "@/components/niko-table/grid/core/data-grid"
 | `className`          | `string`            | Wrapper classes                          |
 | `onRequestShortcuts` | `() => void`        | Called on `?` when focused (not editing) |
 
-Whole-row / whole-column select and `fillSelectionWith` live on **context**, not on the headless hook. See `useDataGridContext` below.
+Whole-row select, whole-column select, and `fillSelectionWith` live on the **context**, not on the headless hook. See `useDataGridContext` below.
 
 ### DataGridCell
 
-Wrap each column `cell`. Display index is resolved from row id (post sort/filter). Do **not** pass TanStack `row.index`.
+Wrap each column `cell`. It finds the display index from the row id, after sort and filter. Do **not** pass TanStack `row.index`.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/grid/core/data-grid-context.tsx`} external>Source Code ↗</DocsLink>
@@ -71,7 +71,7 @@ cell: (ctx) => (
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/grid/core/data-grid-context.tsx`} external>Source Code ↗</DocsLink>
 </div>
 
-Throws outside `<DataGrid>`. Context helpers include `selectRow`, `selectColumn`, `fillSelectionWith`, `displayIndexOf`, and the active selection bounds.
+Gives you the grid context. It throws outside `<DataGrid>`. Helpers include `selectRow`, `selectColumn`, `fillSelectionWith`, `displayIndexOf`, and the active selection bounds.
 
 ```tsx showLineNumbers
 import { useDataGridContext } from "@/components/niko-table/grid/core/data-grid-context"
@@ -81,7 +81,7 @@ const { selectRow, fillSelectionWith } = useDataGridContext()
 
 ### DataGridFeaturesProvider / useDataGridFeatures
 
-Opt-in children register clipboard / fill / move / reorder via `useRegisterGridFeature`. You rarely call this directly: feature components do.
+Opt-in children (clipboard, fill, move, reorder) register through `useRegisterGridFeature`. You rarely call this yourself. The feature components do.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/grid/core/data-grid-features.tsx`} external>Source Code ↗</DocsLink>
@@ -89,7 +89,7 @@ Opt-in children register clipboard / fill / move / reorder via `useRegisterGridF
 
 ### DataGridColumns
 
-Provider for runtime column specs from `useGridColumns`. Required for [Dynamic Columns](/examples/dynamic-columns-grid/).
+Provides runtime column specs from `useGridColumns`. You need it for [Dynamic Columns](/examples/dynamic-columns-grid/).
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/grid/core/data-grid-columns-context.tsx`} external>Source Code ↗</DocsLink>
@@ -103,7 +103,7 @@ const cols = useGridColumns({ initialColumns })
 </DataGridColumns>
 ```
 
-| Hook / component     | Role                                        |
-| -------------------- | ------------------------------------------- |
-| `DataGridColumns`    | Provides column API to descendants          |
-| `useDataGridColumns` | Read/write column specs (throws if missing) |
+| Hook / component     | Role                                            |
+| -------------------- | ----------------------------------------------- |
+| `DataGridColumns`    | Provides column API to descendants              |
+| `useDataGridColumns` | Read and write column specs (throws if missing) |

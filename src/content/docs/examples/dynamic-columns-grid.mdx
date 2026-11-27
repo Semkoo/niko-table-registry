@@ -1,13 +1,17 @@
 ---
 title: Dynamic Columns
-description: Add, rename, move, delete, reorder, and retype columns at runtime.
+description: Let users add, rename, move, delete, reorder and retype columns at runtime.
 ---
 
 import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
 import CollapsiblePreview from "@/components/markdown/collapsible-preview.astro"
 import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
 
-Columns become runtime state. `useGridColumns` owns the list; `<DataGridColumns>` wires the header menu and add button. New columns render empty cells: no engine changes required.
+Use this when users should change the columns themselves, like in a spreadsheet.
+
+- `useGridColumns` owns the column list.
+- `<DataGridColumns>` connects the header menu and the add button.
+- New columns show empty cells. You change nothing in the grid engine.
 
 <CodePreview demo="niko-table/grid-dynamic-columns" />
 
@@ -57,7 +61,7 @@ Provider + toolbar:
 </DataGrid>
 ```
 
-API: `columns`, `columnIds`, `addColumn`, `renameColumn`, `moveColumn`, `removeColumn`, `reorderColumns`, `setColumnType`.
+The hook returns: `columns`, `columnIds`, `addColumn`, `renameColumn`, `moveColumn`, `removeColumn`, `reorderColumns`, `setColumnType`.
 
 ## Retype
 
@@ -72,7 +76,7 @@ API: `columns`, `columnIds`, `addColumn`, `renameColumn`, `moveColumn`, `removeC
 >
 ```
 
-Existing cells re-resolve against the new type (unmatched values turn invalid).
+Existing cells are checked again against the new type. Values that do not match turn invalid.
 
 ## Next
 

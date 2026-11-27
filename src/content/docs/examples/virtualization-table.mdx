@@ -1,13 +1,13 @@
 ---
 title: Virtualization Table
-description: Virtual scrolling for 10,000+ React table rows with @tanstack/react-virtual—swap DataTableBody for DataTableVirtualizedBody in your shadcn data table.
+description: Virtual scrolling for 10,000+ React table rows with @tanstack/react-virtual. Swap DataTableBody for DataTableVirtualizedBody in your shadcn data table.
 ---
 
 import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
 import CollapsiblePreview from "@/components/markdown/collapsible-preview.astro"
 import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
 
-Uses `@tanstack/react-virtual` to keep only the rows in the viewport mounted in the DOM, so render cost stays flat past 10k rows. Drop-in swap: replace `DataTableBody` with `DataTableVirtualizedBody` and provide a row-height estimator — every other Niko Table add-on still works on top.
+Uses `@tanstack/react-virtual` to keep only the rows in the viewport in the DOM, so render cost stays flat past 10,000 rows. Use it for large datasets that are already loaded. It is a drop-in swap: replace `DataTableBody` with `DataTableVirtualizedBody` and give it a row-height estimate. Every other Niko Table add-on still works on top.
 
 <CodePreview demo="niko-table/virtualization-table" />
 
@@ -17,7 +17,7 @@ Uses `@tanstack/react-virtual` to keep only the rows in the viewport mounted in 
 
 ## Introduction
 
-The Virtualization Table uses virtual scrolling to efficiently render large datasets (1000+ rows) by only rendering visible rows. This provides smooth performance even with 10,000+ rows.
+The Virtualization Table uses virtual scrolling to render large datasets (1000+ rows) by drawing only the visible rows. It stays smooth even with 10,000+ rows.
 
 ## Installation
 
@@ -31,7 +31,7 @@ For other add-ons or manual copy-paste, see the [Installation Guide](/getting-st
 
 ## Prerequisites
 
-We are going to build a table to show products with virtualization. Here's what our data looks like:
+We are going to build a table of products with virtualization. Here's what our data looks like:
 
 ```tsx showLineNumbers
 type Product = {
@@ -56,11 +56,11 @@ const largeData: Product[] = Array.from({ length: 10000 }, (_, i) => ({
 
 ## Basic Table with Virtualization
 
-Let's start by building a virtualized table.
+Start with a virtualized table.
 
 ### Column Definitions
 
-First, we'll define our columns.
+First, define the columns.
 
 ```tsx showLineNumbers title="columns.tsx"
 "use client"
@@ -142,7 +142,7 @@ export const columns: DataTableColumnDef<Product>[] = [
 
 ### `<DataTable />` component
 
-Next, we'll create a virtualized table.
+Next, create the virtualized table.
 
 ```tsx showLineNumbers title="virtualization-table.tsx"
 "use client"
@@ -267,7 +267,7 @@ export function VirtualizationTable({ data }: { data: Product[] }) {
 
 ### DataTableVirtualizedHeader
 
-Virtualized version of the table header.
+The virtualized version of the table header.
 
 ```tsx
 <DataTableVirtualizedHeader />
@@ -275,7 +275,7 @@ Virtualized version of the table header.
 
 ### DataTableVirtualizedBody
 
-Virtualized version of the table body. Only renders visible rows.
+The virtualized version of the table body. It renders only visible rows.
 
 ```tsx
 <DataTableVirtualizedBody>
@@ -285,7 +285,7 @@ Virtualized version of the table body. Only renders visible rows.
 
 ### DataTableVirtualizedEmptyBody
 
-Empty state component for virtualized tables.
+The empty state for virtualized tables.
 
 ```tsx
 <DataTableVirtualizedEmptyBody />
@@ -293,7 +293,7 @@ Empty state component for virtualized tables.
 
 ### DataTableVirtualizedSkeleton
 
-Skeleton loading state for virtualized tables. Shows skeleton rows during data fetching.
+The skeleton loading state for virtualized tables. It shows skeleton rows while data loads.
 
 ```tsx
 <DataTableVirtualizedBody>
@@ -304,7 +304,7 @@ Skeleton loading state for virtualized tables. Shows skeleton rows during data f
 
 ### DataTableVirtualizedLoading
 
-Simple loading spinner for virtualized tables. Shows a centered loading indicator.
+A simple loading spinner for virtualized tables. It shows a centered loading indicator.
 
 ```tsx
 <DataTableVirtualizedBody>
@@ -313,11 +313,11 @@ Simple loading spinner for virtualized tables. Shows a centered loading indicato
 </DataTableVirtualizedBody>
 ```
 
-**Note:** Use `DataTableVirtualizedSkeleton` for a more detailed loading state that mimics the table structure, or `DataTableVirtualizedLoading` for a simple spinner.
+**Note:** Use `DataTableVirtualizedSkeleton` for a detailed loading state that mimics the table. Use `DataTableVirtualizedLoading` for a simple spinner.
 
 ## Required: Fixed Height
 
-Virtualization requires a fixed height on the `DataTable` component:
+Virtualization needs a fixed height on the `DataTable` component:
 
 ```tsx showLineNumbers
 <DataTable height={600} className="rounded-lg border">
@@ -331,7 +331,7 @@ Virtualization requires a fixed height on the `DataTable` component:
 
 ## Controlled State
 
-Manage table state externally for full control:
+Manage table state yourself:
 
 ```tsx showLineNumbers
 import { useState } from "react"
@@ -396,22 +396,22 @@ export function ControlledVirtualizationTable({ data }: { data: Product[] }) {
 - You have 1000+ rows
 - Performance is critical
 - Users need smooth scrolling
-- Dataset is too large for regular pagination
+- The dataset is too large for regular pagination
 
 **❌ Don't use Virtualization Table when:**
 
-- You have < 1000 rows (use [Basic Table](/examples/basic-table/))
+- You have under 1000 rows (use [Basic Table](/examples/basic-table/))
 - You need variable row heights (virtualization works best with fixed heights)
-- You need complex row interactions (virtualization has limitations)
+- You need complex row interactions (virtualization has limits)
 
 ## Performance Tips
 
-1. **Fixed height required**: Always set a fixed height on `DataTable`
-2. **Consistent row heights**: Virtualization works best with uniform row heights
-3. **Memoize columns**: Wrap column definitions in `useMemo`
-4. **Large page sizes**: Use larger page sizes (50-500) for better virtualization
+1. **Set a fixed height.** Always give `DataTable` a fixed height.
+2. **Use even row heights.** Virtualization works best with uniform rows.
+3. **Memoize columns.** Wrap column definitions in `useMemo`.
+4. **Use larger page sizes.** Page sizes of 50 to 500 work better with virtualization.
 
 ## Next Steps
 
-- [Basic Table](/examples/basic-table/) - For smaller datasets
-- [Advanced Table](/examples/advanced-table/) - Combine with other features
+- [Basic Table](/examples/basic-table/): for smaller datasets
+- [Advanced Table](/examples/advanced-table/): combine with other features

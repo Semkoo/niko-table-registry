@@ -6,7 +6,7 @@ description: Cell props, shared styles, clipboard helpers, and other grid utilit
 import { GITHUB_REPO_URL } from "@/data/env"
 import DocsLink from "@/components/markdown/docs-link.astro"
 
-Niko Grid has no `grid/lib/` folder. Shared utilities live next to cells and clipboard features. This page mirrors the DataTable [Library](/niko-table/overview/lib/) slot for those helpers.
+Niko Grid has no `grid/lib/` folder. Its shared helpers live next to the cells and clipboard code. This page lists them, like the Niko Table [Library](/niko-table/overview/lib/) page.
 
 <div className="not-content mb-6 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/tree/main/src/components/niko-table/grid/cells`} external>Cells ↗</DocsLink>
@@ -15,15 +15,14 @@ Niko Grid has no `grid/lib/` folder. Shared utilities live next to cells and cli
 
 ## Cell props
 
-Shared editor contract for every typed cell.
+The shared props contract for every typed cell.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/grid/cells/cell-props.ts`} external>Source Code ↗</DocsLink>
 </div>
 
-`CellEditorProps` is what `DataGridCell` passes into the render prop: focus/edit flags, commit helpers, and the current `CellState`.
-
-`GridComboboxOption` shapes searchable dropdown options (`label` / `value`).
+- `CellEditorProps` is what `DataGridCell` passes to its render prop: focus and edit flags, commit helpers, and the current `CellState`.
+- `GridComboboxOption` is the shape of searchable dropdown options (`label` / `value`).
 
 ## Cell styles
 
@@ -36,11 +35,11 @@ Shared editor contract for every typed cell.
 | `CELL_HEIGHT`      | Default row/cell height (`36`)                     |
 | `cellTriggerClass` | Classnames for the display trigger (status chrome) |
 
-Use these when building a custom editor so alignment matches stock cells.
+Use these in a custom editor so it lines up with the built-in cells.
 
 ## Clipboard helpers
 
-Exported from the clipboard module / hook (used by `DataGridClipboard`):
+Exported from the clipboard hook. `DataGridClipboard` uses them:
 
 | Helper               | Role                                  |
 | -------------------- | ------------------------------------- |
@@ -53,7 +52,7 @@ Exported from the clipboard module / hook (used by `DataGridClipboard`):
 
 ## Feature constants
 
-From `data-grid-features.tsx`: edge auto-scroll while dragging fill/move:
+From `data-grid-features.tsx`. They control edge auto-scroll while you drag fill or move:
 
 | Constant          | Default | Role                         |
 | ----------------- | ------- | ---------------------------- |
@@ -63,7 +62,7 @@ From `data-grid-features.tsx`: edge auto-scroll while dragging fill/move:
 
 ## Related table lib
 
-Shared table utilities (filter operators, formatting, etc.) remain under Niko Table:
+Shared table helpers (filter operators, formatting, and more) stay in Niko Table:
 
 - [Library overview](/niko-table/overview/lib/)
-- Install deps from `data-table-grid` also pull scroll/flash helpers used by the grid body
+- Installing `data-table-grid` also adds the scroll and flash helpers the grid body uses

@@ -1,13 +1,15 @@
 ---
 title: Column DnD Table
-description: Drag-and-drop column reordering with composable primitives.
+description: Let users drag column headers to reorder columns.
 ---
 
 import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
 import CollapsiblePreview from "@/components/markdown/collapsible-preview.astro"
 import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
 
-Drag column headers to reorder them, wired through `DataTableColumnDndProvider` on top of `@dnd-kit`. Unlike row DnD, column DnD is safe to combine with sorting, filtering, and virtualization — the user's column order is independent of the row model.
+Users drag column headers to reorder columns. `DataTableColumnDndProvider` does this on top of `@dnd-kit`. Use it when people want their own column layout.
+
+Unlike row DnD, column DnD works with sorting, filtering and virtualization. Column order does not depend on the rows.
 
 ## Overview
 
@@ -19,17 +21,21 @@ Drag column headers to reorder them, wired through `DataTableColumnDndProvider` 
 
 ## Virtualized Column DnD
 
-For large datasets, use `DataTableVirtualizedDndHeader` and `DataTableVirtualizedDndColumnBody` which combine row virtualization with column drag-and-drop. Same `<DataTableColumnResize />` marker — drag a header to reorder, drag the edge grip to resize (grip stops propagation so it won’t start a reorder).
+For large datasets, use `DataTableVirtualizedDndHeader` and `DataTableVirtualizedDndColumnBody`. They combine row virtualization with column drag-and-drop.
+
+- The `<DataTableColumnResize />` marker works the same way.
+- Drag a header to reorder.
+- Drag the edge grip to resize. The grip stops propagation, so it does not start a reorder.
 
 <CodePreview demo="niko-table/virtualized-column-dnd" />
 
 ## Introduction
 
-Column DnD lets users reorder table columns by dragging headers. Built with `@dnd-kit` and composable primitives following the shadcn/ui open-code pattern.
+Column DnD lets users reorder columns by dragging headers. It uses `@dnd-kit` and small composable pieces, in the shadcn/ui open-code style.
 
 ## Installation
 
-Install the DataTable core and column DnD add-ons. Add `data-table-view-dnd-menu` and `data-table-search-filter` for the toolbar shown in the example:
+Install the DataTable core and the column DnD add-ons. `data-table-view-dnd-menu` and `data-table-search-filter` give you the example toolbar:
 
 <CliCommandCode action="run" command="shadcn@latest add @niko-table/data-table @niko-table/data-table-column-dnd @niko-table/data-table-column-resize @niko-table/data-table-view-dnd-menu @niko-table/data-table-search-filter @niko-table/data-table-virtualized @niko-table/data-table-virtualized-column-dnd" />
 
@@ -39,11 +45,11 @@ For other add-ons or manual copy-paste, see the [Installation Guide](/getting-st
 
 ## Basic Column DnD
 
-Three components work together:
+Three pieces work together:
 
-1. **`DataTableColumnDndProvider`** — Wraps the table with horizontal DnD context
-2. **`DataTableDndHeader`** — Renders headers as draggable items
-3. **`DataTableDndColumnBody`** — Cells follow column drag position
+1. **`DataTableColumnDndProvider`**: wraps the table in a horizontal DnD context
+2. **`DataTableDndHeader`**: renders headers as draggable items
+3. **`DataTableDndColumnBody`**: cells follow the column being dragged
 
 ```tsx showLineNumbers title="column-dnd.tsx"
 import {
@@ -78,7 +84,7 @@ return (
 
 ## Two Reorder Surfaces, One State
 
-`DataTableViewDndMenu` is a drag-to-reorder variant of the View menu that shares the same `columnOrder` state as the column-header drag. Users get two ways to reorder, and visibility toggles + a Reset live in the same dropdown:
+`DataTableViewDndMenu` is the View menu with drag-to-reorder. It shares the same `columnOrder` state as the header drag. Users get two ways to reorder. Visibility toggles and a Reset button sit in the same dropdown:
 
 ```tsx showLineNumbers title="column-dnd.tsx"
 <DataTableToolbarSection className="justify-between">
@@ -91,31 +97,31 @@ return (
 </DataTableToolbarSection>
 ```
 
-Use [`DataTableViewMenu`](/niko-table/overview/components#datatableviewmenu) (no DnD) instead if you don't need drag-to-reorder — it skips the `@dnd-kit/*` bundle.
+Do not need drag-to-reorder in the menu? Use [`DataTableViewMenu`](/niko-table/overview/components#datatableviewmenu) instead. It skips the `@dnd-kit/*` bundle.
 
 ## Key Points
 
-- Every column needs an explicit **`id`** field for column order tracking
-- **`columnOrder`** state must be passed to both `DataTableRoot` and `DataTableColumnDndProvider` — and `DataTableViewDndMenu` if you use it
-- Headers are draggable by default — grab any header to reorder
-- **Safe to combine with sorting and filtering** — column order is independent of data order, unlike [Row DnD](/examples/row-dnd-table/)
-- `DataTableViewDndMenu` and the column-header drag share state, so both surfaces stay in lockstep
+- **Give every column an `id`.** The grid needs it to track column order.
+- **Pass `columnOrder` to both** `DataTableRoot` and `DataTableColumnDndProvider`. Also pass it to `DataTableViewDndMenu` if you use it.
+- **Headers are draggable by default.** Grab any header to reorder.
+- **Safe with sorting and filtering.** Column order does not depend on data order, unlike [Row DnD](/examples/row-dnd-table/).
+- **One shared state.** `DataTableViewDndMenu` and the header drag stay in sync.
 
 ## When to Use
 
 **✅ Use Column DnD when:**
 
-- Users want to customize their table layout
-- Different users prefer different column arrangements
-- Building configurable dashboards
+- Users want to customize the table layout
+- Different users want different column orders
+- You are building configurable dashboards
 
 **❌ Consider other options when:**
 
 - Column order is fixed by design
-- Tables have very few columns
+- The table has very few columns
 
 ## Next Steps
 
-- [Row DnD Table](/examples/row-dnd-table/) — Drag-and-drop row reordering
-- [Virtualization Table](/examples/virtualization-table/) — Virtual scrolling for large datasets
-- [Column Pinning Table](/examples/column-pinning-table/) — Pin columns to edges
+- [Row DnD Table](/examples/row-dnd-table/): drag-and-drop row reordering
+- [Virtualization Table](/examples/virtualization-table/): virtual scrolling for large datasets
+- [Column Pinning Table](/examples/column-pinning-table/): pin columns to the edges

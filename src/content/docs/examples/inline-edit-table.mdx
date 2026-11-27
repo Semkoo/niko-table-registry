@@ -1,13 +1,13 @@
 ---
 title: Inline Edit Table
-description: Edit rows in-place with React.memo-safe cell re-rendering via getRowMemoKey.
+description: Edit rows in place, and keep memoized rows re-rendering correctly with getRowMemoKey.
 ---
 
 import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
 import CollapsiblePreview from "@/components/markdown/collapsible-preview.astro"
 import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
 
-Demonstrates the `getRowMemoKey` escape hatch — Niko Table wraps every body row in `React.memo` for perf, but inline-edit drafts and validation errors live outside row props, so memo'd rows wouldn't otherwise re-render. Returning a string that encodes each row's draft + error state tells `React.memo` exactly when to allow the re-render, and exactly when to stay frozen.
+Lets users edit fields right in the table row, with draft and validation state kept outside the data. Use it when you want fast inline editing without a dialog. It shows the `getRowMemoKey` prop, which tells memoized rows when to re-render.
 
 <CodePreview demo="niko-table/inline-edit" />
 
@@ -17,23 +17,33 @@ Demonstrates the `getRowMemoKey` escape hatch — Niko Table wraps every body ro
 
 ## Introduction
 
-The Inline Edit Table lets users edit row fields directly in the table without opening a dialog or navigating away.
+The Inline Edit Table lets users edit row fields directly in the table, with no dialog and no page change.
 
-Niko Table wraps each body row in `React.memo` for performance — rows only re-render when their props change. This is great for large tables, but it creates a problem for inline editing: the edit draft and validation errors live outside the row's props, so memo'd rows won't pick up changes by default. The `getRowMemoKey` prop solves this — it lets you return a row-specific string that encodes whatever external state that row depends on. When the string changes, React.memo allows the re-render; when it doesn't, the row stays frozen.
+Niko Table wraps each body row in `React.memo` for speed. Rows only re-render when their props change. That is great for large tables, but it causes a problem here: the edit draft and validation errors live outside the row's props, so memoized rows don't see changes by default.
+
+`getRowMemoKey` fixes this:
+
+- You return a string for each row that encodes the outside state that row depends on.
+- When the string changes, the row re-renders.
+- When it stays the same, the row stays frozen.
 
 ## Design decisions
 
-A common approach to inline editing is to embed edit state directly in the data array — each row object carries an `isEditing: boolean` flag. Triggering an edit means calling `setData` to flip that flag, which replaces the entire array and causes every memoized row to re-render.
+A common approach is to put edit state in the data array. Each row object carries an `isEditing: boolean` flag. Starting an edit means calling `setData` to flip the flag. That replaces the whole array, so every memoized row re-renders.
 
-We approach it differently: edit state lives _outside_ the data. `editingId`, `draft`, and `errors` are separate `useState` variables. The data array is only updated once on `save()` — not on every keystroke. Callbacks are threaded into column `cell` closures (or optionally via `table.options.meta`) rather than through the data shape.
+We do it differently: edit state lives _outside_ the data.
 
-The result is that typing in an input field touches exactly one memoized row, and only because `getRowMemoKey` returns a new string for it. All other rows are completely skipped by React reconciliation.
+- `editingId`, `draft`, and `errors` are separate `useState` variables.
+- The data array changes once, on `save()`, not on every keystroke.
+- Callbacks are passed into column `cell` closures (or optionally through `table.options.meta`), not through the data shape.
+
+The result: typing in an input re-renders exactly one memoized row, because `getRowMemoKey` returns a new string for it. React skips all other rows.
 
 | Concern             | Embedded state                                          | Our approach                                                  |
 | ------------------- | ------------------------------------------------------- | ------------------------------------------------------------- |
 | Edit state location | Inside the data array (`isEditing` on each row)         | Outside data (`editingId` + `draft` state)                    |
 | Update on keystroke | `setData` replaces the whole array → all rows re-render | Only `draft` changes → one row re-renders via `getRowMemoKey` |
-| Draft & validation  | No concept — changes write directly to data             | Staged draft with error validation before committing          |
+| Draft & validation  | No concept, changes write directly to data              | Staged draft with error validation before committing          |
 | Data mutation       | On every interaction                                    | Once, on explicit `save()`                                    |
 
 ## Installation
@@ -66,7 +76,7 @@ type Product = {
 
 ## Building `useInlineEdit`
 
-Extract all edit logic into a reusable hook. The critical export is `getRowMemoKey`:
+Put all edit logic in a reusable hook. The key export is `getRowMemoKey`:
 
 ```tsx showLineNumbers title="use-inline-edit.ts"
 type EditDraft = { name: string; price: string }
@@ -137,7 +147,7 @@ function useInlineEdit(
 
 ## Column definitions
 
-Column cells close over `inlineEdit` state. They conditionally render the input or the read-only value:
+Column cells use the `inlineEdit` state. They show either the input or the read-only value:
 
 ```tsx showLineNumbers title="columns.tsx"
 const columns = useMemo<DataTableColumnDef<Product>[]>(
@@ -205,7 +215,7 @@ const columns = useMemo<DataTableColumnDef<Product>[]>(
 
 ## Wiring it together
 
-Pass `getRowMemoKey` directly to `DataTableBody`:
+Pass `getRowMemoKey` straight to `DataTableBody`:
 
 ```tsx showLineNumbers title="products-table.tsx"
 export function ProductsTable() {
@@ -233,7 +243,7 @@ export function ProductsTable() {
 
 ## Composing multiple state sources
 
-`getRowMemoKey` is generic — you can encode any per-row external state into the returned string. Combine sources by joining with a separator:
+`getRowMemoKey` works with any per-row outside state. To combine several sources, join them with a separator:
 
 ```tsx showLineNumbers title="composing-multiple-sources.tsx"
 const [savingIds, setSavingIds] = useState<Set<string>>(new Set())
@@ -268,7 +278,7 @@ return (
 
 ## Keyboard shortcuts
 
-The example wires up standard keyboard shortcuts inside the input's `onKeyDown`:
+The example handles these keys in the input's `onKeyDown`:
 
 | Key      | Action            |
 | -------- | ----------------- |

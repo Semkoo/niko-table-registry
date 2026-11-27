@@ -1,16 +1,16 @@
 ---
 title: User-Facing Components
-description: Context-aware components that automatically connect to the table via the useDataTable hook.
+description: Ready-to-use table components that find the table on their own. Start here.
 ---
 
 import { GITHUB_REPO_URL } from "@/data/env"
 import DocsLink from "@/components/markdown/docs-link.astro"
 
-User-facing components are context-aware and automatically connect to the table via the `useDataTable` hook. These are the recommended components for most use cases.
+These components find the table on their own through `useDataTable`. Use them for most tables.
 
 ### DataTableToolbarSection
 
-Container for organizing filters and actions in the toolbar.
+Holds your filters and actions in the toolbar.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-toolbar-section.tsx`} external>Source Code ↗</DocsLink>
@@ -34,7 +34,7 @@ import { DataTableToolbarSection } from "@/components/niko-table/components/data
 
 ### DataTablePagination
 
-Full-featured pagination controls with page size selection and navigation.
+Pagination controls with page size and page navigation.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-pagination.tsx`} external>Source Code ↗</DocsLink>
@@ -73,11 +73,11 @@ import { DataTablePagination } from "@/components/niko-table/components/data-tab
 | `onPageSizeChange`  | `(pageSize: number, pageIndex: number) => void` | Called when page size changes.           |
 | `onPaginationReady` | `() => void`                                    | Called when pagination is initialized.   |
 
-**Note:** Pagination buttons are automatically disabled when `isLoading` or `isFetching` is `true`.
+**Note:** Pagination buttons are disabled while `isLoading` or `isFetching` is `true`.
 
 ### DataTableSearchFilter
 
-Global search input with debouncing. Supports both controlled and uncontrolled modes.
+A global search input with debouncing. Works controlled or uncontrolled.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-search-filter.tsx`} external>Source Code ↗</DocsLink>
@@ -118,7 +118,7 @@ const [search, setSearch] = useQueryState('search')
 
 ### DataTableFilterMenu
 
-Command palette-style interface for adding filters with advanced operators and AND/OR logic.
+A command palette for adding filters, with advanced operators and AND/OR logic.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-filter-menu.tsx`} external>Source Code ↗</DocsLink>
@@ -160,7 +160,7 @@ import { DataTableFilterMenu } from "@/components/niko-table/components/data-tab
 
 ### DataTableFacetedFilter
 
-Faceted filter component for single or multiple selection with dynamic option generation.
+A faceted filter for single or multiple selection. Options are generated from your data.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-faceted-filter.tsx`} external>Source Code ↗</DocsLink>
@@ -202,14 +202,18 @@ import { DataTableFacetedFilter } from "@/components/niko-table/components/data-
 
 #### limitToFilteredRows
 
-Controls whether the filter shows options from all data or only from filtered rows.
+Sets whether the filter lists options from all rows or only the filtered rows.
 
-- **`true`:** Options are generated from rows that match other active filters. Useful for filters like "Brand" where you want to see only relevant options. This is the default for single-select filters (`multiple={false}`).
-- **`false`:** Options are generated from all rows, regardless of other filters. Useful for filters like "Category" where you want to see all available options. This is the default for multi-select filters (`multiple={true}`).
+- **`true`:** options come from rows that match the other active filters.
+  - Good for a "Brand" filter where you only want relevant options.
+  - Default for single-select (`multiple={false}`).
+- **`false`:** options come from all rows, whatever the other filters say.
+  - Good for a "Category" filter where you want every option.
+  - Default for multi-select (`multiple={true}`).
 
 ### DataTableSortMenu
 
-Menu for managing column sorting with drag-and-drop reordering.
+A menu for sorting columns. You can drag to reorder the sorts.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-sort-menu.tsx`} external>Source Code ↗</DocsLink>
@@ -234,7 +238,7 @@ import { DataTableSortMenu } from "@/components/niko-table/components/data-table
 
 ### DataTableViewMenu
 
-Column visibility toggle menu with search functionality. For drag-to-reorder, use [`DataTableViewDndMenu`](#datatableviewdndmenu) — it lives in a separate file so consumers who don't need DnD don't pay the `@dnd-kit/*` bundle cost.
+A menu to show or hide columns, with search. For drag-to-reorder, use [`DataTableViewDndMenu`](#datatableviewdndmenu). It lives in a separate file, so you only pay the `@dnd-kit/*` bundle cost if you use it.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-view-menu.tsx`} external>Source Code ↗</DocsLink>
@@ -259,17 +263,20 @@ import { DataTableViewMenu } from "@/components/niko-table/components/data-table
 
 #### Props
 
-| Name                       | Type                                             | Default               | Description                                                                                                |
-| -------------------------- | ------------------------------------------------ | --------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `className`                | `string`                                         | -                     | Additional CSS classes.                                                                                    |
-| `onColumnVisibilityChange` | `(columnId: string, isVisible: boolean) => void` | -                     | Callback when visibility changes.                                                                          |
-| `lockedColumnIds`          | `string[]`                                       | -                     | Columns shown in the menu but rendered disabled. Useful for required columns marked `enableHiding: false`. |
-| `onReset`                  | `() => void`                                     | -                     | When provided, renders a Reset button below a separator at the bottom of the menu.                         |
-| `resetLabel`               | `string`                                         | `"Reset to defaults"` | Label for the reset button.                                                                                |
+| Name                       | Type                                             | Default               | Description                                                                                     |
+| -------------------------- | ------------------------------------------------ | --------------------- | ----------------------------------------------------------------------------------------------- |
+| `className`                | `string`                                         | -                     | Additional CSS classes.                                                                         |
+| `onColumnVisibilityChange` | `(columnId: string, isVisible: boolean) => void` | -                     | Callback when visibility changes.                                                               |
+| `lockedColumnIds`          | `string[]`                                       | -                     | Columns shown in the menu but disabled. Good for required columns marked `enableHiding: false`. |
+| `onReset`                  | `() => void`                                     | -                     | Shows a Reset button at the bottom of the menu when set.                                        |
+| `resetLabel`               | `string`                                         | `"Reset to defaults"` | Label for the reset button.                                                                     |
 
 ### DataTableViewDndMenu
 
-Drag-to-reorder variant of `DataTableViewMenu`. Each row gets a `GripVertical` handle; the list becomes vertically sortable via `@dnd-kit`. The same `columnOrder` state the table consumes drives the menu's display order, so dropping a row updates both surfaces in lockstep.
+A drag-to-reorder version of `DataTableViewMenu`.
+
+- **Handles:** each row gets a `GripVertical` handle. The list sorts vertically via `@dnd-kit`.
+- **One state:** the table's `columnOrder` state drives the menu order. Dropping a row updates both.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-view-dnd-menu.tsx`} external>Source Code ↗</DocsLink>
@@ -301,12 +308,12 @@ const [columnOrder, setColumnOrder] = React.useState<string[]>([])
 | `className`                | `string`                                         | -                     | Additional CSS classes.                                      |
 | `onColumnVisibilityChange` | `(columnId: string, isVisible: boolean) => void` | -                     | Callback when visibility changes.                            |
 | `lockedColumnIds`          | `string[]`                                       | -                     | Columns shown in the menu but rendered disabled.             |
-| `onReset`                  | `() => void`                                     | -                     | When provided, renders a Reset button below a separator.     |
+| `onReset`                  | `() => void`                                     | -                     | Shows a Reset button below a separator when set.             |
 | `resetLabel`               | `string`                                         | `"Reset to defaults"` | Label for the reset button.                                  |
 
 ### DataTableInlineFilter
 
-Inline filter toolbar for managing filters with advanced operators and AND/OR logic.
+An inline filter toolbar, with advanced operators and AND/OR logic.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-inline-filter.tsx`} external>Source Code ↗</DocsLink>
@@ -326,11 +333,11 @@ import { DataTableInlineFilter } from "@/components/niko-table/components/data-t
 
 #### Props
 
-Same as `DataTableFilterMenu`. See DataTableFilterMenu section above for details.
+Same as `DataTableFilterMenu`. See that section above.
 
 ### DataTableSliderFilter
 
-Slider filter for numeric ranges with min/max inputs.
+A slider filter for numeric ranges, with min and max inputs.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-slider-filter.tsx`} external>Source Code ↗</DocsLink>
@@ -361,19 +368,19 @@ import { DataTableSliderFilter } from "@/components/niko-table/components/data-t
 
 #### Props
 
-| Name          | Type                   | Default | Description                                                                     |
-| ------------- | ---------------------- | ------- | ------------------------------------------------------------------------------- |
-| `accessorKey` | `keyof TData & string` | -       | Column accessor key (required).                                                 |
-| `title`       | `string`               | -       | Custom title.                                                                   |
-| `min`         | `number`               | -       | Minimum value (auto-detected from data if not provided).                        |
-| `max`         | `number`               | -       | Maximum value (auto-detected from data if not provided).                        |
-| `step`        | `number`               | auto    | Step increment; auto-calculated from the range size (`1` only for ranges ≤ 20). |
-| `range`       | `[number, number]`     | -       | Range array `[min, max]` (overrides min/max).                                   |
-| `unit`        | `string`               | -       | Unit label (e.g., "$", "kg").                                                   |
+| Name          | Type                   | Default | Description                                                      |
+| ------------- | ---------------------- | ------- | ---------------------------------------------------------------- |
+| `accessorKey` | `keyof TData & string` | -       | Column accessor key (required).                                  |
+| `title`       | `string`               | -       | Custom title.                                                    |
+| `min`         | `number`               | -       | Minimum value (read from your data if not set).                  |
+| `max`         | `number`               | -       | Maximum value (read from your data if not set).                  |
+| `step`        | `number`               | auto    | Step size. Calculated from the range (`1` only for ranges ≤ 20). |
+| `range`       | `[number, number]`     | -       | Range array `[min, max]` (overrides min/max).                    |
+| `unit`        | `string`               | -       | Unit label (e.g., "$", "kg").                                    |
 
 ### DataTableDateFilter
 
-Date filter component for single dates or date ranges.
+A date filter for single dates or date ranges.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-date-filter.tsx`} external>Source Code ↗</DocsLink>
@@ -403,7 +410,7 @@ import { DataTableDateFilter } from "@/components/niko-table/components/data-tab
 
 ### DataTableClearFilter
 
-Button to clear all active filters, sorting, and search.
+A button that clears all filters, sorting, and search.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-clear-filter.tsx`} external>Source Code ↗</DocsLink>
@@ -431,7 +438,7 @@ import { DataTableClearFilter } from "@/components/niko-table/components/data-ta
 
 ### DataTableExportButton
 
-Button to export table data to CSV.
+A button that exports table data to CSV.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-export-button.tsx`} external>Source Code ↗</DocsLink>
@@ -470,7 +477,7 @@ import { DataTableExportButton } from "@/components/niko-table/components/data-t
 
 ### DataTableColumnHeader
 
-Composable column header container. Provides layout for title, actions, and filters within each column header.
+The container for a column header. It lays out the title, actions, and filters.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-column-header.tsx`} external>Source Code ↗</DocsLink>
@@ -504,7 +511,7 @@ const columns: DataTableColumnDef<User>[] = [
 
 #### Composition
 
-The `DataTableColumnHeader` is composable. You can break it down into parts to customize the layout or add custom filters.
+Build the header from parts to change the layout or add custom filters.
 
 ```tsx showLineNumbers
 import { DataTableColumnHeader } from "@/components/niko-table/components/data-table-column-header"
@@ -543,7 +550,7 @@ const columns: DataTableColumnDef<User>[] = [
 ]
 ```
 
-**Standalone filter menus** can also be placed directly inside `DataTableColumnHeader` without needing `DataTableColumnActions`:
+**Standalone filter menus** can sit directly inside `DataTableColumnHeader`. You do not need `DataTableColumnActions`:
 
 ```tsx showLineNumbers
 import { DataTableColumnHeader } from "@/components/niko-table/components/data-table-column-header"
@@ -599,17 +606,17 @@ const columns: DataTableColumnDef<Product>[] = [
 
 #### How Context Works
 
-When you use `flexRender(...)` in the core structure (like `DataTableHeader` or `DataTableVirtualizedHeader`), it renders the JSX returned by your `header` function. That JSX is automatically wrapped by the `<DataTableColumnHeaderRoot column={...}>` provider in the core components.
+`DataTableHeader` and `DataTableVirtualizedHeader` call `flexRender(...)` to draw the JSX your `header` function returns. The core components wrap that JSX in the `<DataTableColumnHeaderRoot column={...}>` provider.
 
-This means any component inside your `header` function (like `DataTableColumnHeader`, `DataTableColumnTitle`, etc.) correctly receives the column context even if you are using manual composition in your `columns` definition.
+So every component inside your `header` function (`DataTableColumnHeader`, `DataTableColumnTitle`, etc.) gets the column context. This holds even if you compose by hand in your `columns` definition.
 
 #### Advanced: Context Provider and Hook
 
-For custom integrations, the column header context is available directly:
+For custom setups, you can use the column header context directly:
 
 ##### DataTableColumnHeaderRoot
 
-Provider component that supplies column context to all child header components. This is used internally by `DataTableHeader` and `DataTableVirtualizedHeader` -- you typically don't need this unless building a completely custom header renderer.
+The provider that gives column context to child header components. `DataTableHeader` and `DataTableVirtualizedHeader` use it inside. You only need it for a fully custom header renderer.
 
 ```tsx showLineNumbers
 import { DataTableColumnHeaderRoot } from "@/components/niko-table/components/data-table-column-header"
@@ -629,7 +636,7 @@ import { DataTableColumnHeaderRoot } from "@/components/niko-table/components/da
 
 ##### useColumnHeaderContext
 
-Hook to access the column header context. Returns the current `column` instance. Use this when building custom sub-components that need access to the column.
+Gives you the column header context (the current `column`). Use it in custom sub-components that need the column.
 
 ```tsx showLineNumbers
 import { useColumnHeaderContext } from "@/components/niko-table/components/data-table-column-header"
@@ -648,7 +655,7 @@ function CustomHeaderButton() {
 
 ##### DataTableColumnTitle
 
-Renders the column title (clickable to toggle sort). Uses column context automatically.
+Shows the column title. Click it to toggle sort. Reads the column from context.
 
 | Name        | Type     | Default | Description                                              |
 | ----------- | -------- | ------- | -------------------------------------------------------- |
@@ -657,7 +664,7 @@ Renders the column title (clickable to toggle sort). Uses column context automat
 
 ##### DataTableColumnActions
 
-Container for action icons and dropdown menu for column options. Automatically detects active state (sorted, pinned, filtered).
+Holds the action icons and the dropdown menu for column options. It detects the active state (sorted, pinned, filtered) itself.
 
 | Name        | Type              | Default | Description                                         |
 | ----------- | ----------------- | ------- | --------------------------------------------------- |
@@ -667,7 +674,7 @@ Container for action icons and dropdown menu for column options. Automatically d
 
 ##### DataTableColumnFilter
 
-Wrapper for grouping column filter components.
+Groups column filter components.
 
 | Name        | Type              | Description             |
 | ----------- | ----------------- | ----------------------- |
@@ -676,7 +683,7 @@ Wrapper for grouping column filter components.
 
 ##### DataTableColumnFilterTrigger
 
-Dedicated filter icon button that uses column context. Shows a funnel icon to open column filters.
+A funnel icon button that opens column filters. Reads the column from context.
 
 | Name        | Type     | Description             |
 | ----------- | -------- | ----------------------- |
@@ -684,17 +691,17 @@ Dedicated filter icon button that uses column context. Shows a funnel icon to op
 
 ##### DataTableColumnSortOptions
 
-Sorting options to compose inside `DataTableColumnActions`. Renders sort ascending/descending/clear options within a dropdown menu.
+Sort options to put inside `DataTableColumnActions`. Shows ascending, descending and clear in a dropdown.
 
 | Name            | Type              | Default  | Description                                                                                   |
 | --------------- | ----------------- | -------- | --------------------------------------------------------------------------------------------- |
 | `variant`       | `SortIconVariant` | `"text"` | Sort icon variant (`"text"`, `"number"`, `"date"`). Auto-detected from `column.meta.variant`. |
-| `withSeparator` | `boolean`         | `true`   | Whether to render a separator before the options.                                             |
+| `withSeparator` | `boolean`         | `true`   | Show a separator before the options.                                                          |
 | `className`     | `string`          | -        | Additional CSS classes.                                                                       |
 
 ##### DataTableColumnSortMenu
 
-Standalone sort button for inline use outside dropdown menus. Renders as a clickable button with a dropdown for sort options.
+A standalone sort button for use outside dropdown menus. It is a button with a dropdown of sort options.
 
 | Name        | Type              | Default  | Description                                                                                   |
 | ----------- | ----------------- | -------- | --------------------------------------------------------------------------------------------- |
@@ -703,7 +710,7 @@ Standalone sort button for inline use outside dropdown menus. Renders as a click
 
 ##### DataTableColumnPinOptions
 
-Pinning options to compose inside `DataTableColumnActions`. Renders pin left/right/unpin options.
+Pin options to put inside `DataTableColumnActions`. Shows pin left, pin right and unpin.
 
 | Name        | Type     | Description             |
 | ----------- | -------- | ----------------------- |
@@ -711,7 +718,7 @@ Pinning options to compose inside `DataTableColumnActions`. Renders pin left/rig
 
 ##### DataTableColumnPinMenu
 
-Standalone pinning menu for column header. Renders as a clickable button.
+A standalone pin menu for the column header. It is a button.
 
 | Name        | Type     | Description             |
 | ----------- | -------- | ----------------------- |
@@ -719,7 +726,7 @@ Standalone pinning menu for column header. Renders as a clickable button.
 
 ##### DataTableColumnGroupOptions
 
-Grouping options to compose inside `DataTableColumnActions`. Renders **Group by** / **Stop grouping by**. Feature detection turns on `getGroupedRowModel` + expand/collapse. For nested data hierarchies, use a [Tree Table](/examples/tree-table/) (`getSubRows`) instead — don’t combine the two.
+Group options to put inside `DataTableColumnActions`. Shows **Group by** and **Stop grouping by**. Feature detection turns on `getGroupedRowModel` and expand/collapse. For nested data, use a [Tree Table](/examples/tree-table/) (`getSubRows`) instead. Do not combine the two.
 
 | Name            | Type      | Default | Description                                       |
 | --------------- | --------- | ------- | ------------------------------------------------- |
@@ -727,7 +734,7 @@ Grouping options to compose inside `DataTableColumnActions`. Renders **Group by*
 
 ##### DataTableColumnGroupMenu
 
-Standalone grouping menu for column header. Renders as a clickable button.
+A standalone group menu for the column header. It is a button.
 
 | Name        | Type     | Description             |
 | ----------- | -------- | ----------------------- |
@@ -735,7 +742,7 @@ Standalone grouping menu for column header. Renders as a clickable button.
 
 ##### DataTableColumnHideOptions
 
-Hide column option to compose inside `DataTableColumnActions`.
+A hide-column option to put inside `DataTableColumnActions`.
 
 | Name        | Type     | Description             |
 | ----------- | -------- | ----------------------- |
@@ -743,7 +750,7 @@ Hide column option to compose inside `DataTableColumnActions`.
 
 ##### DataTableColumnHideMenu
 
-Standalone hide menu for column header. Renders as a clickable button.
+A standalone hide menu for the column header. It is a button.
 
 | Name        | Type     | Description             |
 | ----------- | -------- | ----------------------- |
@@ -751,7 +758,7 @@ Standalone hide menu for column header. Renders as a clickable button.
 
 ##### DataTableColumnFacetedFilterOptions
 
-Faceted filter options to compose inside `DataTableColumnActions`. Shows a multi-select filter list.
+Faceted filter options to put inside `DataTableColumnActions`. Shows a multi-select list.
 
 | Name        | Type                     | Description                                     |
 | ----------- | ------------------------ | ----------------------------------------------- |
@@ -762,7 +769,7 @@ Faceted filter options to compose inside `DataTableColumnActions`. Shows a multi
 
 ##### DataTableColumnFacetedFilterMenu
 
-Standalone faceted filter popover for column header. Renders as a clickable button with filter icon. Auto-generates options from row data when no explicit options are provided.
+A standalone faceted filter popover for the column header. It is a button with a filter icon. Without explicit options, it builds them from your row data.
 
 | Name                  | Type                     | Default     | Description                                                                                              |
 | --------------------- | ------------------------ | ----------- | -------------------------------------------------------------------------------------------------------- |
@@ -774,7 +781,7 @@ Standalone faceted filter popover for column header. Renders as a clickable butt
 
 ##### DataTableColumnSliderFilterOptions
 
-Slider filter options to compose inside `DataTableColumnActions`. Shows a range slider for numeric columns.
+Slider options to put inside `DataTableColumnActions`. Shows a range slider for numeric columns.
 
 | Name        | Type                     | Description                                     |
 | ----------- | ------------------------ | ----------------------------------------------- |
@@ -786,7 +793,7 @@ Slider filter options to compose inside `DataTableColumnActions`. Shows a range 
 
 ##### DataTableColumnSliderFilterMenu
 
-Standalone slider filter popover for column header. Renders as a clickable button with slider icon.
+A standalone slider filter popover for the column header. It is a button with a slider icon.
 
 | Name        | Type                     | Description                                     |
 | ----------- | ------------------------ | ----------------------------------------------- |
@@ -798,7 +805,7 @@ Standalone slider filter popover for column header. Renders as a clickable butto
 
 ##### DataTableColumnDateFilterOptions
 
-Date filter options to compose inside `DataTableColumnActions`. Shows a date picker for date columns.
+Date options to put inside `DataTableColumnActions`. Shows a date picker for date columns.
 
 | Name        | Type                     | Description                                     |
 | ----------- | ------------------------ | ----------------------------------------------- |
@@ -808,7 +815,7 @@ Date filter options to compose inside `DataTableColumnActions`. Shows a date pic
 
 ##### DataTableColumnDateFilterMenu
 
-Standalone date filter popover for column header. Renders as a clickable button with calendar icon.
+A standalone date filter popover for the column header. It is a button with a calendar icon.
 
 | Name        | Type                     | Description                                     |
 | ----------- | ------------------------ | ----------------------------------------------- |
@@ -818,7 +825,7 @@ Standalone date filter popover for column header. Renders as a clickable button 
 
 ### DataTableAside
 
-Sidebar component for displaying additional content (filters, details, etc.) alongside the table.
+A sidebar next to the table for extra content (filters, details, etc.).
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-aside.tsx`} external>Source Code ↗</DocsLink>
@@ -906,7 +913,7 @@ import { DataTableSelectionBar } from "@/components/niko-table/components/data-t
 
 ### DataTableEmptyState Components
 
-Composition components for building custom empty states.
+Pieces for building your own empty state.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-empty-state.tsx`} external>Source Code ↗</DocsLink>
@@ -950,7 +957,7 @@ import { PackageOpen } from "lucide-react"
 
 #### DataTableEmptyIcon
 
-Icon component for empty state.
+The icon for an empty state.
 
 | Name        | Type              | Description             |
 | ----------- | ----------------- | ----------------------- |
@@ -959,7 +966,7 @@ Icon component for empty state.
 
 #### DataTableEmptyMessage
 
-Message shown when table is empty (not filtered).
+Message shown when the table has no data (no filters applied).
 
 | Name        | Type              | Description             |
 | ----------- | ----------------- | ----------------------- |
@@ -968,7 +975,7 @@ Message shown when table is empty (not filtered).
 
 #### DataTableEmptyFilteredMessage
 
-Message shown when filters return no results.
+Message shown when filters match nothing.
 
 | Name        | Type              | Description             |
 | ----------- | ----------------- | ----------------------- |
@@ -977,7 +984,7 @@ Message shown when filters return no results.
 
 #### DataTableEmptyTitle
 
-Title component for empty state messages.
+The title of an empty state.
 
 | Name        | Type              | Description             |
 | ----------- | ----------------- | ----------------------- |
@@ -986,7 +993,7 @@ Title component for empty state messages.
 
 #### DataTableEmptyDescription
 
-Description component for empty state messages.
+The description of an empty state.
 
 | Name        | Type              | Description             |
 | ----------- | ----------------- | ----------------------- |
@@ -995,7 +1002,7 @@ Description component for empty state messages.
 
 #### DataTableEmptyActions
 
-Actions component for empty state (buttons, links, etc.).
+The actions of an empty state (buttons, links, etc.).
 
 | Name        | Type              | Description             |
 | ----------- | ----------------- | ----------------------- |
@@ -1010,7 +1017,15 @@ Actions component for empty state (buttons, links, etc.).
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-column-resize.tsx`} external>Source Code ↗</DocsLink>
 </div>
 
-Opt-in column resizing. Drop `<DataTableColumnResize />` inside `DataTableRoot` to enable drag grips (and keyboard nudge / double-click autosize) on every header that allows resize. Works with both regular and virtualized headers. Opt out per column with `enableResizing: false`. Resizing also switches on default **flex fill** (one column absorbs the leftover width so the table fills its container — dragging the fill column pins it at an explicit width and hands the fill to the next eligible column) and **header-fit** (un-resized columns are floored at their header label width so labels don't truncate). Drags preview via a guide line and apply the new width on release (`columnResizeMode: "onEnd"`). See the [Column Resize Table](/examples/column-resize-table/) example.
+Opt-in column resizing. Put `<DataTableColumnResize />` inside `DataTableRoot` to add drag grips (plus keyboard nudge and double-click autosize) to every header that allows resizing.
+
+- **Works with:** regular and virtualized headers.
+- **Opt out per column:** `enableResizing: false`.
+- **Flex fill (on by default):** one column takes the leftover width so the table fills its container. Dragging the fill column fixes its width and moves the fill to the next eligible column.
+- **Header-fit (on by default):** columns you have not resized are at least as wide as their header label, so labels are not cut off.
+- **Drag preview:** a guide line shows the drag. The new width applies on release (`columnResizeMode: "onEnd"`).
+
+See the [Column Resize Table](/examples/column-resize-table/) example.
 
 ```tsx showLineNumbers
 import { DataTableColumnResize } from "@/components/niko-table/components/data-table-column-resize"
@@ -1026,7 +1041,7 @@ import { DataTableColumnResize } from "@/components/niko-table/components/data-t
 
 | Name     | Type | Description                                       |
 | -------- | ---- | ------------------------------------------------- |
-| _(none)_ | —    | No props — presence enables resize for the table. |
+| _(none)_ | -    | No props. Adding it enables resize for the table. |
 
 ---
 
@@ -1036,7 +1051,14 @@ import { DataTableColumnResize } from "@/components/niko-table/components/data-t
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-column-auto-fit.tsx`} external>Source Code ↗</DocsLink>
 </div>
 
-Opt-in marker that replaces the default single-flex-column fill with an even split: on load, every **resizable** column grows by an equal share of the leftover width to fill the container. Pairs with `<DataTableColumnResize />` (no-ops unless resizing is enabled). Re-fits when the container grows and backs off once the user resizes a column or a saved `columnSizing` is restored, so manual and persisted widths win. See [Auto-fit](/examples/column-resize-table/#auto-fit).
+An opt-in marker that swaps the single flex column for an even split.
+
+- **What it does:** on load, every **resizable** column grows by an equal share of the leftover width.
+- **Needs:** `<DataTableColumnResize />`. It does nothing unless resizing is on.
+- **Re-fits:** when the container grows.
+- **Backs off:** once the user resizes a column or a saved `columnSizing` is restored. Manual and saved widths win.
+
+See [Auto-fit](/examples/column-resize-table/#auto-fit).
 
 ```tsx showLineNumbers
 import { DataTableColumnAutoFit } from "@/components/niko-table/components/data-table-column-auto-fit"
@@ -1053,13 +1075,13 @@ import { DataTableColumnAutoFit } from "@/components/niko-table/components/data-
 
 | Name     | Type | Description                                         |
 | -------- | ---- | --------------------------------------------------- |
-| _(none)_ | —    | No props — presence enables auto-fit for the table. |
+| _(none)_ | -    | No props. Adding it enables auto-fit for the table. |
 
 ---
 
 ### Drag-and-Drop Components
 
-Context-aware DnD wrappers that pair with the core `Table*DndProvider` components in `filters/`. Use these for the recommended composition pattern.
+DnD wrappers that read the table from context. They pair with the core `Table*DndProvider` components in `filters/`. Use these by default.
 
 #### DataTableRowDndProvider
 
@@ -1067,7 +1089,7 @@ Context-aware DnD wrappers that pair with the core `Table*DndProvider` component
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-row-dnd.tsx`} external>Source Code ↗</DocsLink>
 </div>
 
-Wraps the table with row DnD context. Automatically connects to `DataTableRoot` via `useDataTable`.
+Wraps the table with row DnD context. It finds `DataTableRoot` through `useDataTable`.
 
 ```tsx showLineNumbers
 import { DataTableRowDndProvider, DataTableRowDragHandle } from "@/components/niko-table/components/data-table-row-dnd"
@@ -1088,7 +1110,7 @@ import { DataTableRowDndProvider, DataTableRowDragHandle } from "@/components/ni
 
 #### DataTableDraggableRow
 
-Context-aware wrapper that makes a single table row draggable. Used internally by `DataTableDndBody` to render each row; you can also use it when building custom row layouts. Wraps the core `TableDraggableRow` from `filters/`.
+Makes one table row draggable. `DataTableDndBody` uses it for each row. You can also use it in custom row layouts. It wraps the core `TableDraggableRow` from `filters/`.
 
 ```tsx showLineNumbers
 import { DataTableDraggableRow } from "@/components/niko-table/components/data-table-row-dnd"
@@ -1110,7 +1132,7 @@ import { DataTableDraggableRow } from "@/components/niko-table/components/data-t
 
 #### DataTableRowDragHandle
 
-Grip icon button for initiating row drags. Uses `useSortable` internally.
+A grip-icon button that starts a row drag. It uses `useSortable` inside.
 
 | Name        | Type     | Default | Description                                    |
 | ----------- | -------- | ------- | ---------------------------------------------- |
@@ -1144,7 +1166,7 @@ import { DataTableColumnDndProvider } from "@/components/niko-table/components/d
 
 #### DataTableDraggableHeader
 
-Context-aware wrapper for `TableDraggableHeader`. Makes header cells draggable.
+Wraps `TableDraggableHeader` and makes header cells draggable.
 
 | Name        | Type                             | Default | Description                                |
 | ----------- | -------------------------------- | ------- | ------------------------------------------ |
@@ -1154,7 +1176,7 @@ Context-aware wrapper for `TableDraggableHeader`. Makes header cells draggable.
 
 #### DataTableDragAlongCell
 
-Context-aware wrapper for `TableDragAlongCell`. Cell follows column drag position.
+Wraps `TableDragAlongCell`. The cell follows its column while it is dragged.
 
 | Name        | Type                           | Default | Description                              |
 | ----------- | ------------------------------ | ------- | ---------------------------------------- |
@@ -1164,9 +1186,12 @@ Context-aware wrapper for `TableDragAlongCell`. Cell follows column drag positio
 
 ## Column Header Internal Helpers
 
-The column header system is split into a composable set of files. `DataTableColumnHeader` (documented above) is the user-facing entry point that consumers render in their column `header` callbacks. The pieces below are the building blocks it uses internally — they are exported so consumers building a fully custom header can drop in just the parts they need (e.g. only the sort menu, or only the pin/hide actions), but most consumers won't import them directly.
+The column header is split into small files.
 
-Each module is a thin wrapper around the corresponding `filters/table-column-*` filter (which holds the TanStack-Table-aware logic) and adds context wiring + UI chrome via `useColumnHeaderContext`.
+- **Entry point:** `DataTableColumnHeader` (above). You render it in your column `header` callbacks.
+- **Building blocks:** the pieces below. `DataTableColumnHeader` uses them inside.
+- **Why they are exported:** for a fully custom header, you can use only the parts you want (for example just the sort menu, or just pin and hide). Most people never import them.
+- **How they work:** each module is a thin wrapper around its `filters/table-column-*` filter, which holds the TanStack Table logic. The wrapper adds context and UI through `useColumnHeaderContext`.
 
 ### data-table-column-actions
 
@@ -1174,7 +1199,7 @@ Each module is a thin wrapper around the corresponding `filters/table-column-*` 
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-column-actions.tsx`} external>Source Code ↗</DocsLink>
 </div>
 
-Renders the trailing dropdown-menu trigger on a column header (the `⋮` button). Composed from the column-sort, column-hide, column-pin, and column-faceted-filter primitives — pulls in only the items relevant to the column's `meta` configuration. Used inside `DataTableColumnHeader`.
+The dropdown trigger at the end of a column header (the `⋮` button). It is built from the sort, hide, pin, and faceted-filter pieces. It shows only the items that fit the column's `meta`. Used inside `DataTableColumnHeader`.
 
 ### data-table-column-title
 
@@ -1182,7 +1207,7 @@ Renders the trailing dropdown-menu trigger on a column header (the `⋮` button)
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-column-title.tsx`} external>Source Code ↗</DocsLink>
 </div>
 
-Renders the column's title text (resolved from `column.columnDef.meta?.label` or the accessor key via `useDerivedColumnTitle`). Wraps the corresponding `TableColumnTitle` from `filters/`.
+The column's title text. It comes from `column.columnDef.meta?.label` or the accessor key (via `useDerivedColumnTitle`). Wraps `TableColumnTitle` from `filters/`.
 
 ### data-table-column-sort
 
@@ -1190,7 +1215,7 @@ Renders the column's title text (resolved from `column.columnDef.meta?.label` or
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-column-sort.tsx`} external>Source Code ↗</DocsLink>
 </div>
 
-Renders the per-column sort menu items (Asc / Desc / Clear) with the variant-aware icons from `SORT_ICONS` / `SORT_LABELS`. Honors `column.getCanSort()` — renders nothing when sorting is disabled. Wraps `TableColumnSort` from `filters/`.
+The per-column sort items (Asc, Desc, Clear), with icons for the column variant from `SORT_ICONS` / `SORT_LABELS`. Shows nothing when `column.getCanSort()` is false. Wraps `TableColumnSort` from `filters/`.
 
 ### data-table-column-hide
 
@@ -1198,7 +1223,7 @@ Renders the per-column sort menu items (Asc / Desc / Clear) with the variant-awa
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-column-hide.tsx`} external>Source Code ↗</DocsLink>
 </div>
 
-Renders the "Hide column" menu item. Honors `column.getCanHide()`. Wraps `TableColumnHide` from `filters/`.
+The "Hide column" item. Respects `column.getCanHide()`. Wraps `TableColumnHide` from `filters/`.
 
 ### data-table-column-pin
 
@@ -1206,7 +1231,7 @@ Renders the "Hide column" menu item. Honors `column.getCanHide()`. Wraps `TableC
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-column-pin.tsx`} external>Source Code ↗</DocsLink>
 </div>
 
-Renders the "Pin to left" / "Pin to right" / "Unpin" menu items. Honors `column.getCanPin()`. Wraps `TableColumnPin` from `filters/`.
+The "Pin to left", "Pin to right" and "Unpin" items. Respects `column.getCanPin()`. Wraps `TableColumnPin` from `filters/`.
 
 ### data-table-column-group
 
@@ -1214,7 +1239,7 @@ Renders the "Pin to left" / "Pin to right" / "Unpin" menu items. Honors `column.
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-column-group.tsx`} external>Source Code ↗</DocsLink>
 </div>
 
-Renders **Group by** / **Stop grouping by** menu items. Honors `column.getCanGroup()`. Wraps `TableColumnGroup` from `filters/`. See [Grouping Table](/examples/grouping-table/). Not the same as a [Tree Table](/examples/tree-table/) (`getSubRows`) — use one or the other per table.
+The **Group by** and **Stop grouping by** items. Respects `column.getCanGroup()`. Wraps `TableColumnGroup` from `filters/`. See [Grouping Table](/examples/grouping-table/). This is not a [Tree Table](/examples/tree-table/) (`getSubRows`). Use one or the other per table.
 
 ### data-table-column-filter
 
@@ -1222,7 +1247,7 @@ Renders **Group by** / **Stop grouping by** menu items. Honors `column.getCanGro
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-column-filter.tsx`} external>Source Code ↗</DocsLink>
 </div>
 
-Routes a column to the right per-column filter UI based on `column.columnDef.meta?.variant` (text / number / range / date / select / multiSelect / boolean). Lazy-mounts the variant-specific filter component (`data-table-column-faceted-filter`, `data-table-column-slider-filter-options`, `data-table-column-date-filter-options`) only when the user opens the filter panel.
+Picks the right per-column filter UI from `column.columnDef.meta?.variant` (text, number, range, date, select, multiSelect, boolean). It mounts the filter for that variant (`data-table-column-faceted-filter`, `data-table-column-slider-filter-options`, `data-table-column-date-filter-options`) only when the user opens the filter panel.
 
 ### data-table-column-filter-trigger
 
@@ -1230,7 +1255,7 @@ Routes a column to the right per-column filter UI based on `column.columnDef.met
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-column-filter-trigger.tsx`} external>Source Code ↗</DocsLink>
 </div>
 
-The `<button>` shown in the column header that opens the per-column filter popover. Switches its label / active state based on whether the column currently has a filter value.
+The `<button>` in the column header that opens the filter popover. Its label and active state change when the column has a filter value.
 
 ### data-table-column-faceted-filter
 
@@ -1238,7 +1263,7 @@ The `<button>` shown in the column header that opens the per-column filter popov
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-column-faceted-filter.tsx`} external>Source Code ↗</DocsLink>
 </div>
 
-The per-column variant of the faceted multi-select filter (used for `select` / `multiSelect` column variants). Generates options via `useGeneratedOptions` and forwards `dynamicCounts` / `limitToFilteredRows` props through to the option builder. Wraps `TableColumnFacetedFilter` from `filters/`.
+The per-column faceted multi-select filter (for `select` and `multiSelect` columns). It builds options with `useGeneratedOptions` and passes `dynamicCounts` and `limitToFilteredRows` on to the option builder. Wraps `TableColumnFacetedFilter` from `filters/`.
 
 ### data-table-column-date-filter-options
 
@@ -1246,7 +1271,7 @@ The per-column variant of the faceted multi-select filter (used for `select` / `
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-column-date-filter-options.tsx`} external>Source Code ↗</DocsLink>
 </div>
 
-The per-column date / date-range filter UI (date picker + operator selector). Backed by `TableColumnDateFilter` from `filters/`. Lazily mounted by `data-table-column-filter` when the column variant is `date` / `dateRange`.
+The per-column date and date-range filter (date picker plus operator selector). Backed by `TableColumnDateFilter` from `filters/`. `data-table-column-filter` mounts it when the column variant is `date` or `dateRange`.
 
 ### data-table-column-slider-filter-options
 
@@ -1254,4 +1279,4 @@ The per-column date / date-range filter UI (date picker + operator selector). Ba
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/components/data-table-column-slider-filter-options.tsx`} external>Source Code ↗</DocsLink>
 </div>
 
-The per-column numeric range slider UI. Resolves `min` / `max` from the column's faceted min/max values when not explicitly set. Backed by `TableColumnSliderFilter` from `filters/`. Lazily mounted by `data-table-column-filter` when the column variant is `range`.
+The per-column numeric range slider. Without explicit `min` and `max`, it uses the column's faceted min and max. Backed by `TableColumnSliderFilter` from `filters/`. `data-table-column-filter` mounts it when the column variant is `range`.

@@ -1,13 +1,13 @@
 ---
 title: Search Table
-description: Add global search functionality to quickly find data across all columns.
+description: Add one search box that finds data across all columns.
 ---
 
 import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
 import CollapsiblePreview from "@/components/markdown/collapsible-preview.astro"
 import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
 
-Wires `DataTableSearchFilter` to a single input that fuzzy-matches across every visible column at once, using TanStack Table's built-in `globalFilter`. A drop-in for any table where users mostly want a "just find this thing" affordance and don't need per-column filter controls.
+Connects `DataTableSearchFilter` to one input that matches across every visible column, using TanStack Table's built-in `globalFilter`. Use it when users mostly want to "just find this thing" and don't need per-column filters.
 
 <CodePreview demo="niko-table/search" />
 
@@ -17,7 +17,7 @@ Wires `DataTableSearchFilter` to a single input that fuzzy-matches across every 
 
 ## Introduction
 
-The Search Table adds a global search input that filters data across all columns. Users can quickly find what they're looking for without complex filters.
+The Search Table adds a global search input that filters data across all columns. Users find what they want without complex filters.
 
 ## Installation
 
@@ -31,7 +31,7 @@ For other add-ons or manual copy-paste, see the [Installation Guide](/getting-st
 
 ## Prerequisites
 
-We are going to build a table to show customers. Here's what our data looks like:
+We are going to build a table of customers. Here's what our data looks like:
 
 ```tsx showLineNumbers
 type Customer = {
@@ -56,11 +56,11 @@ const data: Customer[] = [
 
 ## Basic Table with Search
 
-Let's start by building a table with global search.
+Start with a table that has global search.
 
 ### Column Definitions
 
-First, we'll define our columns.
+First, define the columns.
 
 ```tsx showLineNumbers title="columns.tsx"
 "use client"
@@ -124,7 +124,7 @@ export const columns: DataTableColumnDef<Customer>[] = [
 
 ### `<DataTable />` component
 
-Next, we'll add the search filter component.
+Next, add the search filter component.
 
 ```tsx showLineNumbers title="search-table.tsx"
 "use client"
@@ -223,16 +223,16 @@ export function SearchTable({ data }: { data: Customer[] }) {
 
 ## How Search Works
 
-The global search filter works by:
+The global search filter works like this:
 
-1. Converting all searchable column values to strings
-2. Searching for the query across all columns
-3. Returning rows where ANY column matches
-4. Case-insensitive matching by default
+1. It turns all searchable column values into strings
+2. It searches for the query across all columns
+3. It returns rows where ANY column matches
+4. Matching ignores case by default
 
 ### Controlling Searchable Columns
 
-By default, all columns are searchable. To exclude columns:
+All columns are searchable by default. To leave some out:
 
 ```tsx showLineNumbers
 {
@@ -244,7 +244,7 @@ By default, all columns are searchable. To exclude columns:
 
 ## Controlled Search State
 
-Manage search state externally:
+Manage search state yourself:
 
 ```tsx showLineNumbers
 import { useState } from "react"
@@ -282,7 +282,7 @@ export function ControlledSearchTable({ data }: { data: Customer[] }) {
 
 ## Custom Search Input
 
-Build your own search UI using the context:
+Build your own search UI with the context:
 
 ```tsx showLineNumbers
 import { useDataTable } from "@/components/niko-table/core/data-table-context"
@@ -322,17 +322,17 @@ function CustomSearchInput() {
 
 **✅ Use Search Table when:**
 
-- Users need quick, simple searching
-- Data is text-heavy (names, descriptions, etc.)
+- Users need quick, simple search
+- The data is text-heavy (names, descriptions, and so on)
 - You want a clean, minimal UI
-- Dataset is < 1000 rows (client-side)
+- The dataset is under 1000 rows (client-side)
 
 **❌ Consider other options when:**
 
 - You need column-specific filters (use [Advanced Table](/examples/advanced-table/))
-- Dataset is > 1000 rows (implement server-side filtering)
-- Search is not the primary use case (use [Basic Table](/examples/basic-table/))
+- The dataset is over 1000 rows (use server-side filtering)
+- Search is not the main use (use [Basic Table](/examples/basic-table/))
 
 ## Next Steps
 
-- [Advanced Table](/examples/advanced-table/) - Add advanced filtering and sorting menus
+- [Advanced Table](/examples/advanced-table/): add advanced filter and sort menus

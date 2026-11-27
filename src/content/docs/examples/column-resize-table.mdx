@@ -1,19 +1,30 @@
 ---
 title: Column Resize Table
-description: Drag column edges to resize widths, or double-click a grip to autosize to content.
+description: Let users drag column edges to resize, or double-click to fit the content.
 ---
 
 import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
 import CollapsiblePreview from "@/components/markdown/collapsible-preview.astro"
 import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
 
-Drag any header's right edge to resize that column, or double-click the grip to autosize to the widest visible content. Drop `<DataTableColumnResize />` inside `DataTableRoot` to enable it: columns keep working with regular `DataTableHeader` / `DataTableBody` (no virtualization required). Opt out per column with `enableResizing: false`.
+Users drag a header's right edge to resize a column. Double-clicking the grip fits the column to its widest visible content. Use this when column content varies in length.
 
-Columns default to a **40px** drag floor (`minSize`) when resize is enabled: override per column with `minSize` / `maxSize`. Body cells use `truncate` so long text ellipsizes instead of spilling into the next column (same as the Niko Grid / virtualized bodies).
+Add `<DataTableColumnResize />` inside `DataTableRoot` to turn it on.
 
-**Fill is on by default.** With resize enabled the table stretches to its container and one **flex column** (the first non-pinned data column) absorbs the leftover width, so a trailing actions column pins to the right edge instead of leaving dead space. Un-resized columns are also floored at their **header width** so labels never truncate on load. See [Fill and header-fit](#fill-and-header-fit) for pointing the fill at another column, opting columns out, or turning filling off for the table.
+- It works with the regular `DataTableHeader` and `DataTableBody`. You do not need virtualization.
+- Turn it off for one column with `enableResizing: false`.
 
-Prefer to spread the surplus across every resizable column instead of one flex column? Add **`<DataTableColumnAutoFit />`** to scale them equally on load, backing off once you drag a column or restore a saved layout. See [Auto-fit](#auto-fit) and [Persist Widths](#persist-widths).
+- **Minimum width:** columns default to a **40px** drag floor (`minSize`). Override it per column with `minSize` and `maxSize`.
+- **Long text:** body cells use `truncate`, so long text ends in an ellipsis instead of spilling into the next column. The Niko Grid and virtualized bodies do the same.
+
+**Fill is on by default.** With resize on, the table stretches to its container.
+
+- One **flex column** (the first non-pinned data column) takes the leftover width. A trailing actions column then sits at the right edge with no dead space.
+- Columns you have not resized never get narrower than their **header width**, so labels do not truncate on load.
+
+See [Fill and header-fit](#fill-and-header-fit) to point the fill at another column, opt columns out, or turn filling off.
+
+Want to spread the extra width across every resizable column instead? Add **`<DataTableColumnAutoFit />`**. It scales them equally on load and stops once you drag a column or restore a saved layout. See [Auto-fit](#auto-fit) and [Persist Widths](#persist-widths).
 
 <CodePreview demo="niko-table/column-resize" />
 
@@ -23,7 +34,10 @@ Prefer to spread the surplus across every resizable column instead of one flex c
 
 ## Introduction
 
-Column resizing lets users tweak widths for dense, multi-column tables: especially when content length varies (emails, notes, product names). Explicit `size` values make the initial layout predictable; the resize addon handles drag and double-click autosize.
+Resizing helps with dense tables where content length varies (emails, notes, product names).
+
+- Set `size` on columns to make the first layout predictable.
+- The resize add-on handles drag and double-click autosize.
 
 ## Installation
 
@@ -37,7 +51,7 @@ For other add-ons or manual copy-paste, see the [Installation Guide](/getting-st
 
 ## Prerequisites
 
-We'll build a table showing orders. Here's our data:
+You build an orders table. This is the data:
 
 ```tsx showLineNumbers
 type Order = {
@@ -76,7 +90,7 @@ const data: Order[] = [
 
 ## Enable Column Resize
 
-Drop `<DataTableColumnResize />` early inside `DataTableRoot`. Its presence flips `enableColumnResizing` via feature detection: no config flag required.
+Put `<DataTableColumnResize />` near the top of `DataTableRoot`. Its presence turns on `enableColumnResizing`. You need no config flag.
 
 ```tsx showLineNumbers title="column-resize.tsx"
 <DataTableRoot data={data} columns={columns}>
@@ -88,11 +102,11 @@ Drop `<DataTableColumnResize />` early inside `DataTableRoot`. Its presence flip
 </DataTableRoot>
 ```
 
-While you drag, a guide line follows the cursor and the column applies its new width on release (`columnResizeMode: "onEnd"`). Widths aren't rewritten on every mousemove, which keeps large and virtualized tables smooth during a drag.
+While you drag, a guide line follows the cursor. The column takes its new width on release (`columnResizeMode: "onEnd"`). Widths are not rewritten on every mouse move, so large and virtualized tables stay smooth.
 
 ## Keyboard
 
-The grip is keyboard-operable with WAI-ARIA separator semantics: Tab to it, then resize without a mouse.
+You can resize with the keyboard. Tab to the grip (it follows WAI-ARIA separator rules), then use these keys:
 
 | Key                    | Action                  |
 | ---------------------- | ----------------------- |
@@ -102,7 +116,7 @@ The grip is keyboard-operable with WAI-ARIA separator semantics: Tab to it, then
 
 ## Column Definitions
 
-Set explicit `size` on columns so the initial layout is meaningful and horizontal scroll appears when needed. Opt out of resizing on fixed columns (e.g. actions):
+Set `size` on columns so the first layout makes sense and horizontal scroll appears when needed. Turn resizing off for fixed columns (for example actions):
 
 ```tsx showLineNumbers title="columns.tsx"
 const columns: DataTableColumnDef<Order>[] = [
@@ -146,7 +160,13 @@ const columns: DataTableColumnDef<Order>[] = [
 
 ## Fill and header-fit
 
-Fill and header-fit come with `<DataTableColumnResize />`: no extra install, no config. One flex column absorbs the leftover width (pure layout, never written to `columnSizing`), and it stays resizable — dragging its grip pins it at an explicit width and hands the fill to the next eligible column. By default the fill goes to the first non-pinned data column; steer it per column with `meta`:
+Fill and header-fit come with `<DataTableColumnResize />`. You need no extra install or config.
+
+- **Flex column:** one column takes the leftover width. This is layout only. It is never written to `columnSizing`.
+- **Still resizable:** dragging its grip pins it at a set width and passes the fill to the next eligible column.
+- **Default target:** the first non-pinned data column.
+
+Steer the fill per column with `meta`:
 
 ```tsx showLineNumbers title="columns.tsx"
 // Point the fill at a specific column (default: first non-pinned data column)
@@ -162,19 +182,29 @@ Fill and header-fit come with `<DataTableColumnResize />`: no extra install, no 
 }
 ```
 
-To turn filling off for the whole table (e.g. a wide table meant to scroll horizontally), pass `disableFlexFill` through the **table-level** `meta` option on `DataTableRoot` — it's a table option, not column `meta`:
+To turn filling off for the whole table (for example a wide table meant to scroll sideways), pass `disableFlexFill` in the **table-level** `meta` option on `DataTableRoot`. It is a table option, not column `meta`:
 
 ```tsx showLineNumbers title="wide-table.tsx"
 <DataTableRoot data={data} columns={columns} meta={{ disableFlexFill: true }}>
 ```
 
-`disableFlexFill` is read when the table options are built, so set it statically rather than toggling it at runtime.
+`disableFlexFill` is read when the table options are built. Set it as a fixed value. Do not toggle it at runtime.
 
-**Header-fit** keeps labels legible: un-resized columns are floored at their header label width so labels don't truncate on load, while a column the user has resized always keeps exactly its width. If a column's visible title comes from `<DataTableColumnTitle title="..." />` rather than `meta.label`, mirror it into `meta.label` so header-fit measures the right string.
+**Header-fit** keeps labels readable.
+
+- Columns you have not resized never go below their header label width.
+- A column the user has resized keeps exactly that width.
+- If the visible title comes from `<DataTableColumnTitle title="..." />` and not `meta.label`, copy it into `meta.label`. Header-fit then measures the right text.
 
 ## Auto-fit
 
-By default a single flex column absorbs the leftover width. When you'd rather distribute the surplus evenly across every resizable column, drop **`<DataTableColumnAutoFit />`** next to `<DataTableColumnResize />` and the **resizable** columns scale up to fill the container on load. It's a self-contained, opt-in feature: without the marker, the default single-flex-column fill applies (the first non-pinned data column absorbs the surplus, un-resized columns floored at their header width) and none of the auto-fit code ships. Fixed columns (`enableResizing: false`) keep their size; auto-fit re-fits when the container grows and backs off once the user drags a column or a saved `columnSizing` is restored, so manual and persisted widths win. Columns wider than the container scroll horizontally.
+By default one flex column takes the leftover width. To share it evenly across every resizable column, put **`<DataTableColumnAutoFit />`** next to `<DataTableColumnResize />`. The **resizable** columns then scale up to fill the container on load.
+
+- **Opt-in:** without the marker, the default single-flex-column fill applies, and none of the auto-fit code ships.
+- **Fixed columns** (`enableResizing: false`) keep their size.
+- **Re-fits** when the container grows.
+- **Backs off** once the user drags a column or a saved `columnSizing` is restored. Manual and saved widths win.
+- **Wide tables:** columns wider than the container scroll horizontally.
 
 Install it alongside resize:
 
@@ -191,13 +221,13 @@ Install it alongside resize:
 </DataTableRoot>
 ```
 
-These columns declare small `size` values yet fill the width:
+These columns have small `size` values but still fill the width:
 
 <CodePreview demo="niko-table/column-resize-autofit" />
 
 ## Controlled Sizing
 
-Manage `columnSizing` externally for persistence or live inspection. Provide `state={{ columnSizing }}` + `onColumnSizingChange`. Restored widths take precedence over automatic sizing (both the default fill and auto-fit), so a saved layout is never overwritten on reload:
+Hold `columnSizing` yourself to save it or inspect it live. Pass `state={{ columnSizing }}` and `onColumnSizingChange`. Restored widths beat automatic sizing (the default fill and auto-fit), so a saved layout is never overwritten on reload:
 
 ```tsx showLineNumbers title="column-resize-state.tsx"
 import { useState } from "react"
@@ -222,7 +252,14 @@ export function ControlledResizeTable({ data }: { data: Order[] }) {
 
 ## Persist Widths
 
-Want resized widths to survive a reload? Install the opt-in **`useColumnSizingPersistence`** hook and wire its `columnSizing` + `onColumnSizingChange` into `DataTableRoot`. It's `localStorage`-backed, writes immediately, syncs across tabs, and ignores corrupt storage. Resize a column below, then reload:
+To keep resized widths after a reload, install the opt-in **`useColumnSizingPersistence`** hook. Pass its `columnSizing` and `onColumnSizingChange` to `DataTableRoot`. The hook:
+
+- Uses `localStorage`.
+- Writes right away.
+- Syncs across tabs.
+- Ignores corrupt storage.
+
+Resize a column below, then reload:
 
 <CodePreview demo="niko-table/column-resize-persisted" />
 
@@ -254,19 +291,21 @@ export function OrdersTable({ rows, orgId }) {
 }
 ```
 
-The hook also returns `resetColumnSizing()` to clear the saved widths. Because widths are a per-user preference, they **sync across tabs**: resizing (or resetting) the same table in one tab updates the others via the native `storage` event. Idle tabs only re-render when a width actually changed.
+The hook also returns `resetColumnSizing()` to clear the saved widths.
 
-Prefer to own the storage yourself (e.g. sync widths through a per-user settings API instead of `localStorage`)? It's a thin wrapper — copy it and swap the store; all `DataTableRoot` needs is a controlled `columnSizing` + `onColumnSizingChange`.
+Widths are a per-user preference, so they **sync across tabs**. Resizing or resetting the table in one tab updates the others through the native `storage` event. Idle tabs only re-render when a width changed.
 
-When persistence and `<DataTableColumnAutoFit />` are combined, the fitted widths are saved and restored like any user resize — so auto-fit runs once per user, not on every visit (restored widths always win).
+Want to own the storage (for example a per-user settings API instead of `localStorage`)? The hook is a thin wrapper. Copy it and swap the store. `DataTableRoot` only needs a controlled `columnSizing` and `onColumnSizingChange`.
 
-> Persist column **width** like visibility and order: a per-user preference, not URL state. Restored widths take precedence over automatic sizing, so a saved layout is never overwritten.
+With persistence and `<DataTableColumnAutoFit />` together, the fitted widths are saved and restored like any user resize. Auto-fit runs once per user, not on every visit, because restored widths always win.
+
+> Persist column **width** like visibility and order. It is a per-user preference, not URL state. Restored widths beat automatic sizing, so a saved layout is never overwritten.
 
 ## When to Use
 
 **✅ Use Column Resize when:**
 
-- Tables have many columns and users need to adjust widths to content
+- The table has many columns and users need to fit widths to content
 - You want drag-to-resize and double-click autosize without a custom header
 - Some columns (row number, actions) should stay fixed-width via `enableResizing: false`
 
@@ -276,15 +315,15 @@ When persistence and `<DataTableColumnAutoFit />` are combined, the fitted width
 
 **❌ Consider other options when:**
 
-- All columns fit comfortably and widths never need tuning
-- You only need sticky identifier/action columns: see [Column Pinning](/examples/column-pinning-table/)
+- All columns fit and widths never need tuning
+- You only need sticky identifier or action columns: see [Column Pinning](/examples/column-pinning-table/)
 
 ## Virtualization
 
-You do **not** need a separate “virtualized column resize” example. Swap in `DataTableVirtualizedHeader` + `DataTableVirtualizedBody` (and give `DataTable` a fixed height): the same `<DataTableColumnResize />` marker applies. See [Virtualization Table](/examples/virtualization-table/) and [Composed Grid](/examples/composed-grid/).
+You do **not** need a separate “virtualized column resize” example. Swap in `DataTableVirtualizedHeader` and `DataTableVirtualizedBody`, and give `DataTable` a fixed height. The same `<DataTableColumnResize />` marker applies. See [Virtualization Table](/examples/virtualization-table/) and [Composed Grid](/examples/composed-grid/).
 
 ## Next Steps
 
-- [Column Pinning Table](/examples/column-pinning-table/) - Keep key columns visible while scrolling
-- [Virtualization Table](/examples/virtualization-table/) - Same resize marker with virtualized headers/bodies
-- [Composed Grid](/examples/composed-grid/) - Resize + editable grid cells
+- [Column Pinning Table](/examples/column-pinning-table/): keep key columns visible while scrolling
+- [Virtualization Table](/examples/virtualization-table/): same resize marker with virtualized headers and bodies
+- [Composed Grid](/examples/composed-grid/): resize plus editable grid cells

@@ -1,13 +1,13 @@
 ---
 title: Infinite Scroll Table
-description: Load more rows on demand as the user scrolls — perfect for API-backed tables with paginated endpoints.
+description: Load more rows as the user scrolls. Good for tables backed by a paginated API.
 ---
 
 import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
 import CollapsiblePreview from "@/components/markdown/collapsible-preview.astro"
 import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
 
-Loads more rows as the user reaches the bottom of the scroll container, calling your `loadMore` handler whenever an `IntersectionObserver` sentinel becomes visible. **Heads up**: every loaded row stays in the DOM — see the caution below for when to reach for the virtualized variant instead.
+Loads more rows when the user scrolls to the bottom, by calling your `loadMore` handler. Use it for cursor-paginated APIs and feeds with a small to medium number of rows. **Heads up**: every loaded row stays in the DOM. See the caution below for when to use the virtualized variant instead.
 
 <CodePreview demo="niko-table/infinite-scroll-table" />
 
@@ -16,18 +16,23 @@ Loads more rows as the user reaches the bottom of the scroll container, calling 
 </CollapsiblePreview>
 
 :::caution[Prefer the virtualized variant]
-For most infinite-scroll use cases, use the [Infinite Scroll Virtualized Table](/examples/infinite-scroll-virtualized-table/) instead. The non-virtualized version renders **every loaded row to the DOM** — after a few hundred pages, you'll have thousands of DOM nodes and the browser will start to struggle. The virtualized variant only renders visible rows regardless of how many are loaded, so performance stays constant.
+For most infinite-scroll tables, use the [Infinite Scroll Virtualized Table](/examples/infinite-scroll-virtualized-table/) instead. This version renders **every loaded row to the DOM**. After a few hundred pages you have thousands of DOM nodes and the browser slows down. The virtualized variant renders only visible rows, so performance stays flat.
 
-Use this non-virtualized version only when your total dataset is small (under ~200 rows) or you have a specific reason to avoid virtualization (e.g. variable row heights that don't work well with `estimateSize`).
+Use this version only when your total dataset is small (under ~200 rows), or you have a reason to avoid virtualization (for example, variable row heights that don't work well with `estimateSize`).
 :::
 
 ## Introduction
 
-The Infinite Scroll Table loads additional rows on demand as the user scrolls toward the bottom of the table — the standard UX for cursor-paginated APIs, activity feeds, and long product lists where loading everything upfront would be wasteful.
+The Infinite Scroll Table loads more rows as the user scrolls toward the bottom. It fits cursor-paginated APIs, activity feeds, and long product lists where loading everything upfront is wasteful.
 
-Niko Table ships the scroll trigger (`onScrolledBottom` on `DataTableBody`) and the composable "loading more" indicator (`DataTableLoadingMore`) as first-class primitives, so wiring infinite scroll is just: **drop one child into the body, wire one callback, done**.
+Niko Table gives you two pieces for this:
 
-This example uses a mocked in-memory API with artificial latency so you can see every state — initial skeleton, successive next-page spinner rows, and the end-of-results sentinel — without touching a real backend.
+- **`onScrolledBottom`** on `DataTableBody`: the scroll trigger.
+- **`DataTableLoadingMore`**: the "loading more" indicator.
+
+To set it up, add one child to the body and wire one callback.
+
+This example uses a mocked in-memory API with artificial delay. You can see every state: the first skeleton, the next-page spinner rows, and the end-of-results marker. No real backend needed.
 
 ## Installation
 
@@ -56,7 +61,7 @@ type Product = {
 
 ### Deterministic mock data generator
 
-One important constraint when building demos: **don't use `Math.random()` or `Date.now()` in your mock data**. If a consumer copies this file into a Next.js / Remix / RSC app, those non-deterministic calls produce different values on the server render vs the client hydration — and React will log a hydration mismatch on every row. Use index-based deterministic values instead:
+One rule for demos: **don't use `Math.random()` or `Date.now()` in mock data**. If someone copies this file into a Next.js, Remix, or RSC app, those calls give different values on the server and the client. React then logs a hydration mismatch on every row. Use index-based values instead:
 
 ```tsx showLineNumbers title="mock-data.ts"
 const CATEGORIES = [
@@ -101,15 +106,15 @@ function fetchNextPage(offset: number): Promise<Product[]> {
 }
 ```
 
-When you swap this out for a real API call (TanStack Query's `useInfiniteQuery`, SWR's `useSWRInfinite`, tRPC, a plain `fetch`, etc.) the hydration concern disappears — real API data is already stable.
+With a real API (TanStack Query's `useInfiniteQuery`, SWR's `useSWRInfinite`, tRPC, a plain `fetch`, and so on) this problem goes away, because real API data is already stable.
 
 ### Pagination state + `loadMore` handler
 
 The component tracks three pieces of state:
 
-- `loaded` — the accumulator of rows fetched so far.
-- `isLoading` — true during the very first fetch (drives `DataTableSkeleton`).
-- `isFetching` — true during any subsequent next-page fetch (drives `DataTableLoadingMore`).
+- `loaded`: the rows fetched so far.
+- `isLoading`: true during the first fetch (drives `DataTableSkeleton`).
+- `isFetching`: true during any later next-page fetch (drives `DataTableLoadingMore`).
 
 ```tsx showLineNumbers
 const [loaded, setLoaded] = React.useState<Product[]>([])
@@ -148,7 +153,7 @@ const loadMore = React.useCallback(async () => {
 
 ### `<DataTableBody />` with `onScrolledBottom` + `<DataTableLoadingMore />`
 
-The magic happens here. `DataTableBody` fires `onScrolledBottom` when the user scrolls within `scrollThreshold` pixels of the bottom. `DataTableLoadingMore` is a composable child that self-gates on its own `isFetching` prop — render it unconditionally, and it appears/disappears as fetches come and go.
+`DataTableBody` calls `onScrolledBottom` when the user scrolls within `scrollThreshold` pixels of the bottom. `DataTableLoadingMore` is a child that shows itself based on its own `isFetching` prop. Render it always, and it appears and disappears as fetches start and end.
 
 ```tsx showLineNumbers title="infinite-scroll-table.tsx"
 "use client"
@@ -204,7 +209,7 @@ export function InfiniteScrollTable() {
 
 ## Required: Fixed Height
 
-**Infinite scroll needs a scroll container.** Without a fixed `max-h-*` (or `height`) on `<DataTable>`, the table grows with its content and there's no overflow to scroll — which means `onScrolledBottom` will never fire and your `loadMore` handler will silently do nothing.
+**Infinite scroll needs a scroll container.** Without a fixed `max-h-*` (or `height`) on `<DataTable>`, the table grows with its content and has nothing to scroll. Then `onScrolledBottom` never fires and `loadMore` silently does nothing.
 
 ```tsx
 <DataTable className="max-h-[600px] rounded-lg border">
@@ -214,7 +219,7 @@ export function InfiniteScrollTable() {
 
 ## Guard Against Double-Fetches
 
-Always guard your `loadMore` handler against re-entry. Scroll events can fire in rapid bursts (especially on momentum scroll on mobile), so even a well-placed `onScrolledBottom` can be triggered multiple times before React has a chance to flip `isFetching` to `true`.
+Always guard `loadMore` against running twice at once. Scroll events can fire in quick bursts (especially momentum scroll on mobile). `onScrolledBottom` can then fire several times before React sets `isFetching` to `true`.
 
 ```tsx
 onScrolledBottom={() => {
@@ -232,20 +237,20 @@ const loadMore = React.useCallback(async () => {
 
 **✅ Use this non-virtualized variant when:**
 
-- Your total dataset is small (under ~200 rows) and virtualization is overkill
+- Your dataset is small (under ~200 rows) and virtualization is overkill
 - You need variable row heights that don't work well with `estimateSize`
-- You want the simplest possible setup with no `@tanstack/react-virtual` dependency
+- You want the simplest setup, with no `@tanstack/react-virtual` dependency
 
-**⚠️ For most infinite-scroll use cases, prefer the [Infinite Scroll Virtualized Table](/examples/infinite-scroll-virtualized-table/) instead.** It renders only visible rows regardless of how many are loaded, so performance stays constant even after accumulating thousands of rows.
+**⚠️ For most infinite-scroll tables, use the [Infinite Scroll Virtualized Table](/examples/infinite-scroll-virtualized-table/) instead.** It renders only visible rows, so performance stays flat even after thousands of rows load.
 
 **❌ Don't use Infinite Scroll Table when:**
 
-- You need client-side global sorting or filtering across the entire dataset (you can't sort what hasn't been fetched yet — prefer server-side sort/filter, or fetch all rows upfront)
-- Users need to bookmark or deep-link to a specific row (infinite scroll has no stable page URLs)
-- The dataset is small enough to fit in one round-trip (just use [Basic Table](/examples/basic-table/))
+- You need client-side sorting or filtering across the whole dataset (you can't sort rows you haven't fetched). Use server-side sort and filter, or fetch all rows upfront
+- Users need to bookmark or link to a specific row (infinite scroll has no stable page URLs)
+- The dataset fits in one request (use [Basic Table](/examples/basic-table/))
 
 ## Next Steps
 
-- [Virtualization Table](/examples/virtualization-table/) — for large datasets already fully loaded
-- [Infinite Scroll Virtualized Table](/examples/infinite-scroll-virtualized-table/) — combine both for massive paginated datasets
-- [Server-Side Table](/examples/server-side-table/) — when you need server-driven sort/filter with traditional pagination
+- [Virtualization Table](/examples/virtualization-table/): for large datasets already fully loaded
+- [Infinite Scroll Virtualized Table](/examples/infinite-scroll-virtualized-table/): combine both for massive paginated datasets
+- [Server-Side Table](/examples/server-side-table/): when you need server-driven sort/filter with traditional pagination

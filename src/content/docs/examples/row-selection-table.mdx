@@ -1,13 +1,13 @@
 ---
 title: Row Selection Table
-description: Add row selection with checkboxes for bulk actions.
+description: Add checkbox row selection for bulk actions.
 ---
 
 import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
 import CollapsiblePreview from "@/components/markdown/collapsible-preview.astro"
 import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
 
-Adds a checkbox column wired to the table's `rowSelection` state, with header-row "select all" plus the indeterminate state for partial selection. Pair it with `DataTableSelectionBar` to surface bulk actions — export, delete, update — only when at least one row is checked.
+Adds a checkbox column tied to the table's `rowSelection` state. It includes a header "select all" with an indeterminate state for partial selection. Add `DataTableSelectionBar` to show bulk actions (export, delete, update) only when at least one row is checked.
 
 <CodePreview demo="niko-table/row-selection" />
 
@@ -17,7 +17,7 @@ Adds a checkbox column wired to the table's `rowSelection` state, with header-ro
 
 ## Introduction
 
-The Row Selection Table adds checkboxes to each row, allowing users to select individual or multiple rows for bulk actions like delete, export, or update.
+The Row Selection Table adds a checkbox to each row. Users select one or many rows and run bulk actions like delete, export, or update.
 
 ## Installation
 
@@ -25,7 +25,7 @@ Install the DataTable core and add-ons for this example:
 
 <CliCommandCode action="run" command="shadcn@latest add @niko-table/data-table @niko-table/data-table-selection-bar @niko-table/data-table-pagination @niko-table/data-table-search-filter @niko-table/data-table-view-menu @niko-table/data-table-column-sort" />
 
-This example also uses `checkbox` from Shadcn UI for row selection:
+This example also uses `checkbox` from Shadcn UI:
 
 <CliCommandCode action="run" command="shadcn@latest add checkbox" />
 
@@ -35,7 +35,7 @@ For other add-ons or manual copy-paste, see the [Installation Guide](/getting-st
 
 ## Prerequisites
 
-We are going to build a table to show customers with row selection. Here's what our data looks like:
+We are going to build a table of customers with row selection. Here's what our data looks like:
 
 ```tsx showLineNumbers
 type Customer = {
@@ -60,11 +60,11 @@ const data: Customer[] = [
 
 ## Basic Table with Row Selection
 
-Let's start by building a table with row selection.
+Start with a table that has row selection.
 
 ### Column Definitions
 
-First, we'll add a select column to our definitions.
+First, add a select column to the definitions.
 
 ```tsx showLineNumbers title="columns.tsx"
 "use client"
@@ -151,7 +151,7 @@ export const columns: DataTableColumnDef<Customer>[] = [
 
 ### `<DataTable />` component
 
-Next, we'll create the table with row selection enabled.
+Next, create the table with row selection on.
 
 ```tsx showLineNumbers title="row-selection-table.tsx"
 "use client"
@@ -336,7 +336,7 @@ export function RowSelectionTable({ data }: { data: Customer[] }) {
 
 ## Row Selection Column
 
-The select column is automatically detected when you use `id: "select"`:
+The table detects the select column when you use `id: "select"`:
 
 ```tsx showLineNumbers
 {
@@ -365,7 +365,7 @@ The select column is automatically detected when you use `id: "select"`:
 
 ## Getting Selected Rows
 
-Access selected rows using the table instance:
+Get the selected rows from the table instance:
 
 ```tsx showLineNumbers
 import { useDataTable } from "@/components/niko-table/core/data-table-context"
@@ -389,7 +389,7 @@ function BulkActions() {
 
 ## Selection Bar
 
-Use `DataTableSelectionBar` to show a persistent selection bar:
+Use `DataTableSelectionBar` to show a selection bar:
 
 ```tsx showLineNumbers
 import { DataTableSelectionBar } from "@/components/niko-table/components/data-table-selection-bar"
@@ -407,7 +407,7 @@ import { DataTableSelectionBar } from "@/components/niko-table/components/data-t
 
 ## Controlled Selection State
 
-Full control over row selection:
+Control row selection yourself:
 
 ```tsx showLineNumbers
 import { useState } from "react"
@@ -435,17 +435,17 @@ export function ControlledSelectionTable({ data }: { data: Customer[] }) {
 
 **✅ Use Row Selection Table when:**
 
-- Users need to perform bulk actions (delete, export, update)
-- You want to show selection count
-- Multiple rows need to be selected at once
-- You need to track selected state
+- Users need bulk actions (delete, export, update)
+- You want to show a selection count
+- Several rows must be selected at once
+- You need to track which rows are selected
 
 **❌ Consider other options when:**
 
 - You don't need bulk actions (use [Basic Table](/examples/basic-table/))
-- Only single selection is needed (use row click handlers)
+- Only one row can be selected (use row click handlers)
 
 ## Next Steps
 
-- [Advanced Table](/examples/advanced-table/) - Combine selection with filters
-- [Tree Table](/examples/tree-table/) - Hierarchical selection
+- [Advanced Table](/examples/advanced-table/): combine selection with filters
+- [Tree Table](/examples/tree-table/): hierarchical selection
