@@ -19,6 +19,10 @@ The short version of each release. For every technical detail, see the [full cha
 
 ### Changed
 
+- **Installs add a primitives folder.**
+  - New files in `components/niko-table/primitives/` pass through to your shadcn components.
+  - The table works the same as before.
+  - They prepare for React Aria, which is experimental and not yet installable from the registry.
 - **Data Grid is now called Niko Grid.**
   - Only the name changed.
   - Install names (`data-table-grid`) and URLs (`/data-grid/`) are the same.
@@ -30,6 +34,8 @@ The short version of each release. For every technical detail, see the [full cha
 
 ### Fixed
 
+- **Some installs were missing a component.**
+  - Data Table, Data Table Core and the column slider filter now install everything they use.
 - **New Vite projects now build.** Installing into a fresh `shadcn init -t vite` app used to fail the type check.
 
 ## July 2026

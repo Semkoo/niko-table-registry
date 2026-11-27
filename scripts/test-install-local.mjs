@@ -21,6 +21,8 @@
  *   --items  comma-separated item names (default: every item in registry.json).
  *
  * Run `pnpm run registry:build` first so public/r is current.
+ *
+ * Use a throwaway app: `--overwrite` replaces its components/ui/* files.
  */
 
 import { spawn } from "node:child_process"
@@ -31,11 +33,12 @@ import {
   readdirSync,
   readFileSync,
   rmSync,
+  statSync,
   writeFileSync,
 } from "node:fs"
 import { createServer } from "node:http"
 import os from "node:os"
-import { dirname, join, resolve } from "node:path"
+import { dirname, join, resolve, sep } from "node:path"
 import { fileURLToPath } from "node:url"
 
 const repo = resolve(dirname(fileURLToPath(import.meta.url)), "..")
@@ -86,7 +89,11 @@ function serve(root) {
       root,
       decodeURIComponent(new URL(req.url, "http://x").pathname),
     )
-    if (!path.startsWith(root) || !existsSync(path)) {
+    if (
+      !path.startsWith(root + sep) ||
+      !existsSync(path) ||
+      !statSync(path).isFile()
+    ) {
       res.writeHead(404).end()
       return
     }
@@ -96,6 +103,15 @@ function serve(root) {
   return new Promise(resolvePromise =>
     server.listen(0, "127.0.0.1", () => resolvePromise(server)),
   )
+}
+
+/** The app's package manager, from its lockfile (npm when none). */
+function packageManager(app) {
+  if (existsSync(join(app, "pnpm-lock.yaml"))) return "pnpm"
+  if (existsSync(join(app, "yarn.lock"))) return "yarn"
+  if (existsSync(join(app, "bun.lock")) || existsSync(join(app, "bun.lockb")))
+    return "bun"
+  return "npm"
 }
 
 function findPrimitivesDir(app) {
@@ -120,6 +136,14 @@ async function main() {
   const style = JSON.parse(
     readFileSync(join(app, "components.json"), "utf8"),
   ).style
+  if (!["radix", "base", "aria"].includes(args.base)) {
+    console.error(`Unknown --base ${args.base} (radix | base | aria).`)
+    process.exit(2)
+  }
+  if (args.base === "aria" && !String(style).startsWith("aria-")) {
+    console.error(`--base aria needs an aria-* app; ${app} is ${style}.`)
+    process.exit(2)
+  }
   const registry = JSON.parse(readFileSync(join(repo, "registry.json"), "utf8"))
   const items = args.items
     ? args.items.split(",").map(s => s.trim())
@@ -167,6 +191,7 @@ async function main() {
       if (after !== before) {
         writeFileSync(path, after)
         console.log(`Patched upstream shadcn issue: ${fix.file} (${fix.why})`)
+        results.push([`patched upstream ${fix.file} (${fix.why})`, true])
       }
     }
 
@@ -194,7 +219,12 @@ async function main() {
       }
       if (missing.size) {
         console.log(`Installing ${[...missing].join(", ")}`)
-        const { code } = await run("npm", ["install", ...missing], app)
+        const pm = packageManager(app)
+        const { code } = await run(
+          pm,
+          [pm === "npm" ? "install" : "add", ...missing],
+          app,
+        )
         results.push(["install primitive deps", code === 0])
       }
     }
@@ -210,7 +240,7 @@ async function main() {
     results.push([`typecheck (${errors} errors)`, tsc.code === 0])
 
     if (!args.skipBuild) {
-      const build = await run("npm", ["run", "build"], app)
+      const build = await run(packageManager(app), ["run", "build"], app)
       results.push(["build", build.code === 0])
     }
   } catch (error) {

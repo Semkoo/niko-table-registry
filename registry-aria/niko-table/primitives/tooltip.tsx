@@ -7,6 +7,7 @@
  * React Aria shadcn `Tooltip` popup.
  */
 import * as React from "react"
+import { mergeProps } from "react-aria"
 import {
   Focusable,
   TooltipTrigger as TooltipTriggerPrimitive,
@@ -79,8 +80,13 @@ function TooltipTrigger({
   ...props
 }: React.ComponentProps<"button"> & { asChild?: boolean }) {
   const child =
-    asChild && React.isValidElement(children) ? (
-      children
+    asChild &&
+    React.isValidElement<React.HTMLAttributes<HTMLElement>>(children) ? (
+      // Slot: the trigger's own props (refs, handlers, classes) merge onto the child.
+      React.cloneElement(
+        children,
+        mergeProps(children.props, props) as React.HTMLAttributes<HTMLElement>,
+      )
     ) : (
       <button type="button" {...props}>
         {children}

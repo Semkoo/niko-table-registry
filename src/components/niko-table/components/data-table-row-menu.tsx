@@ -138,6 +138,7 @@ export function RowMenuLabel(
   return <Label {...props} />
 }
 
+/** Children: a `RowMenuSubTrigger` first, then the `RowMenuSubContent`. */
 export function RowMenuSub({
   children,
   ...props

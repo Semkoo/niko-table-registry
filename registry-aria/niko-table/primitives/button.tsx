@@ -8,6 +8,7 @@
  * Niko Table call site, and lets the overlay triggers wrap it in `Pressable`.
  */
 import * as React from "react"
+import { mergeProps } from "react-aria"
 import type { VariantProps } from "class-variance-authority"
 
 import { buttonVariants } from "@/components/ui/button"
@@ -26,11 +27,14 @@ function Button({
   }) {
   const classes = cn(buttonVariants({ variant, size }), className)
 
-  if (asChild && React.isValidElement<{ className?: string }>(children)) {
-    // Slot: the child element is the button (e.g. a link styled as one).
+  if (
+    asChild &&
+    React.isValidElement<React.HTMLAttributes<HTMLElement>>(children)
+  ) {
+    // Slot: the child element is the button (e.g. a link styled as one); its
+    // own handlers and refs compose with the button's.
     return React.cloneElement(children, {
-      "data-slot": "button",
-      ...props,
+      ...mergeProps(children.props, { "data-slot": "button" }, props),
       className: cn(classes, children.props.className),
     } as React.HTMLAttributes<HTMLElement>)
   }

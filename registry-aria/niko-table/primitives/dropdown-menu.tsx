@@ -12,6 +12,7 @@
  * `DropdownMenuPanel`, which renders it as a non-focusable menu node.
  */
 import * as React from "react"
+import { mergeProps } from "react-aria"
 import {
   Header,
   MenuTrigger,
@@ -84,8 +85,17 @@ function DropdownMenuTrigger({
   const isOpen = React.useContext(OverlayTriggerStateContext)?.isOpen ?? false
   const state = { "data-state": isOpen ? "open" : "closed" }
   const child =
-    asChild && React.isValidElement(children) ? (
-      React.cloneElement(children, state)
+    asChild &&
+    React.isValidElement<React.HTMLAttributes<HTMLElement>>(children) ? (
+      // Slot: the trigger's own props (refs, handlers, classes) merge onto the child.
+      React.cloneElement(
+        children,
+        mergeProps(
+          children.props,
+          props,
+          state,
+        ) as React.HTMLAttributes<HTMLElement>,
+      )
     ) : (
       <button type="button" {...props} {...state}>
         {children}
@@ -169,6 +179,8 @@ function DropdownMenuSubTrigger({
 }
 
 function DropdownMenuSubContent({
+  sideOffset,
+  alignOffset,
   className,
   children,
 }: {
@@ -177,7 +189,16 @@ function DropdownMenuSubContent({
   sideOffset?: number
   alignOffset?: number
 }) {
-  return <SubmenuPopover className={className}>{children}</SubmenuPopover>
+  return (
+    <SubmenuPopover
+      // Unset keeps the shadcn aria submenu defaults.
+      {...(sideOffset === undefined ? {} : { offset: sideOffset })}
+      {...(alignOffset === undefined ? {} : { crossOffset: alignOffset })}
+      className={className}
+    >
+      {children}
+    </SubmenuPopover>
+  )
 }
 
 function DropdownMenuRadioGroup({

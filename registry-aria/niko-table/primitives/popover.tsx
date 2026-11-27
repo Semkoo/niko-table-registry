@@ -8,6 +8,7 @@
  * trigger through `triggerRef`).
  */
 import * as React from "react"
+import { mergeProps } from "react-aria"
 import { Pressable, type Placement } from "react-aria-components"
 
 import { Popover as PopoverPrimitive } from "@/components/ui/popover"
@@ -80,8 +81,17 @@ function PopoverTrigger({
     "data-state": open ? "open" : "closed",
   }
   const child =
-    asChild && React.isValidElement(children) ? (
-      React.cloneElement(children, state)
+    asChild &&
+    React.isValidElement<React.HTMLAttributes<HTMLElement>>(children) ? (
+      // Slot: the trigger's own props (refs, handlers, classes) merge onto the child.
+      React.cloneElement(
+        children,
+        mergeProps(
+          children.props,
+          props,
+          state,
+        ) as React.HTMLAttributes<HTMLElement>,
+      )
     ) : (
       <button type="button" {...props} {...state}>
         {children}

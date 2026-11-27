@@ -16,6 +16,15 @@ import {
   SelectValue as SelectValuePrimitive,
 } from "@/components/ui/select"
 
+/** Plain text of a node tree, for React Aria's type-to-select. */
+function textOf(node: React.ReactNode): string {
+  if (typeof node === "string" || typeof node === "number") return String(node)
+  if (Array.isArray(node)) return node.map(textOf).join("")
+  if (React.isValidElement<{ children?: React.ReactNode }>(node))
+    return textOf(node.props.children)
+  return ""
+}
+
 function Select({
   value,
   defaultValue,
@@ -38,7 +47,8 @@ function Select({
   children?: React.ReactNode
 }) {
   // React Aria labels the select on its root; Radix call sites label the
-  // trigger, so lift the trigger's aria-label / aria-labelledby.
+  // trigger, so lift the trigger's aria-label / aria-labelledby. Only a
+  // direct-child SelectTrigger is found; a wrapped one leaves it unlabelled.
   const trigger = React.Children.toArray(children).find(
     (child): child is React.ReactElement<SelectTriggerProps> =>
       React.isValidElement(child) && child.type === SelectTrigger,
@@ -118,6 +128,7 @@ function SelectContent({
   children?: React.ReactNode
   /** Radix wiring; React Aria links the trigger to its list itself. */
   id?: string
+  /** Radix option; ignored, React Aria always positions as a popover. */
   position?: "popper" | "item-aligned"
 }) {
   return <SelectPopover className={className}>{children}</SelectPopover>
@@ -139,7 +150,7 @@ function SelectItem({
       id={value}
       isDisabled={disabled}
       className={className}
-      textValue={typeof children === "string" ? children : value}
+      textValue={textOf(children) || value}
     >
       {children}
     </SelectOption>

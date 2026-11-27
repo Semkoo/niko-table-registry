@@ -3,6 +3,7 @@
  * `console.error`, renders rows, and has a registry item; plus the Customers
  * Table's own interactions (search, row click, add customer).
  */
+import { readFileSync } from "node:fs"
 import * as React from "react"
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, describe, expect, it, vi } from "vitest"
@@ -82,14 +83,22 @@ describe("blocks", () => {
       const item = registry.items.find(entry => entry.name === name)
       expect(item, `${name} missing from registry.json`).toBeTruthy()
       const block = blocks.find(entry => entry.name === name)!
-      // A block also ships the Niko Table overlay primitives it imports
-      // (swapped per base); every other file must be the block's own.
-      expect(
+      // A block ships its own files plus exactly the Niko Table primitives
+      // those files import (primitives are swapped per base).
+      const imported = new Set(
         item!.files
           .filter(file => !file.path.includes("/niko-table/primitives/"))
-          .map(file => file.path.split("/").pop())
-          .sort(),
-      ).toEqual([...block.files].sort())
+          .flatMap(file =>
+            [
+              ...readFileSync(file.path, "utf8").matchAll(
+                /from "@\/components\/niko-table\/primitives\/([a-z-]+)"/g,
+              ),
+            ].map(([, name]) => `${name}.tsx`),
+          ),
+      )
+      expect(
+        item!.files.map(file => file.path.split("/").pop()).sort(),
+      ).toEqual([...block.files, ...imported].sort())
     },
   )
 })

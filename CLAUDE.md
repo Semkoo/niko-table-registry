@@ -38,6 +38,7 @@ src/
 - **No barrel exports**: Use direct file imports only (e.g. `@/components/niko-table/core/data-table-root`, `@/components/niko-table/lib/constants`) for tree-shaking and to follow the shadcn pattern. Do not add or use `index.ts` re-exports for core, components, filters, hooks, lib, or config. Types live in the single file `types.ts`.
 - Registry examples must be self-contained (import only from `@/components/niko-table/*` direct paths and `@/components/ui`)
 - Use semantic color tokens (`bg-success`, `text-destructive`) not hardcoded Tailwind colors
+- **Primitives**: import button, calendar, checkbox, command, context-menu, dialog, dropdown-menu, popover, select, sheet, slider and tooltip from `@/components/niko-table/primitives/<name>`, never `@/components/ui/<name>` (React Aria swaps those files; see `registry-aria/README.md`). Wrap free-form content inside a menu in `DropdownMenuPanel`. Guarded by `__tests__/primitives-guard.test.ts`.
 
 ## Row Menu & Hook Conventions
 

@@ -12,6 +12,7 @@
  * point at the pointer, portaled to `document.body`.
  */
 import * as React from "react"
+import { mergeProps } from "react-aria"
 import { createPortal } from "react-dom"
 import { MenuTrigger, Pressable, type PressEvent } from "react-aria-components"
 
@@ -87,19 +88,26 @@ function ContextMenuTrigger({
   const child =
     asChild &&
     React.isValidElement<React.HTMLAttributes<HTMLElement>>(children) ? (
-      children
+      // Slot: the trigger's own props (refs, handlers, classes) merge onto the child.
+      React.cloneElement(
+        children,
+        mergeProps(children.props, props) as React.HTMLAttributes<HTMLElement>,
+      )
     ) : (
       <span {...props}>{children}</span>
     )
-  return React.cloneElement(child, {
-    "data-state": point ? "open" : "closed",
-    onContextMenu: (event: React.MouseEvent<HTMLElement>) => {
-      child.props.onContextMenu?.(event)
-      if (event.defaultPrevented) return
-      event.preventDefault()
-      setPoint({ x: event.clientX, y: event.clientY })
-    },
-  } as React.HTMLAttributes<HTMLElement>)
+  return React.cloneElement(
+    child,
+    mergeProps(child.props, {
+      "data-state": point ? "open" : "closed",
+      // Runs after the child's own handler, which may preventDefault to opt out.
+      onContextMenu: (event: React.MouseEvent<HTMLElement>) => {
+        if (event.defaultPrevented) return
+        event.preventDefault()
+        setPoint({ x: event.clientX, y: event.clientY })
+      },
+    }) as React.HTMLAttributes<HTMLElement>,
+  )
 }
 
 /** Zero-size, out-of-tab-order element at the pointer the menu anchors to. */
@@ -203,6 +211,8 @@ function ContextMenuSubTrigger({
 }
 
 function ContextMenuSubContent({
+  sideOffset,
+  alignOffset,
   className,
   children,
 }: {
@@ -211,7 +221,16 @@ function ContextMenuSubContent({
   sideOffset?: number
   alignOffset?: number
 }) {
-  return <SubmenuPopover className={className}>{children}</SubmenuPopover>
+  return (
+    <SubmenuPopover
+      // Unset keeps the shadcn aria submenu defaults.
+      {...(sideOffset === undefined ? {} : { offset: sideOffset })}
+      {...(alignOffset === undefined ? {} : { crossOffset: alignOffset })}
+      className={className}
+    >
+      {children}
+    </SubmenuPopover>
+  )
 }
 
 export {
