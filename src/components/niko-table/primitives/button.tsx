@@ -4,6 +4,6 @@
  * here, never from `@/components/ui/button` directly, so a base whose
  * component has a different shape (React Aria) swaps only this file.
  */
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 
-export { Button }
+export { Button, buttonVariants }
