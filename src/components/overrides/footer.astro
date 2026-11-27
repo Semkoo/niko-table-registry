@@ -1,0 +1,70 @@
+---
+/**
+ * Starlight's footer plus a short "star us" note at the end of each docs page.
+ */
+import DefaultFooter from "@astrojs/starlight/components/Footer.astro"
+import { Icon } from "@astrojs/starlight/components"
+import { GITHUB_REPO_URL } from "@/data/env"
+import { formatStars, getGitHubStars } from "@/lib/github-stars"
+
+const stars = await getGitHubStars(GITHUB_REPO_URL)
+---
+
+<aside class="star-prompt not-content" aria-label="Support Niko Table">
+  <p>
+    <strong>Find Niko Table useful?</strong> A star on GitHub helps other people
+    find it.
+  </p>
+  <a href={GITHUB_REPO_URL} class="star-button">
+    <Icon name="star" size="1rem" />
+    Star on GitHub
+    {stars !== null && <span class="star-count">{formatStars(stars)}</span>}
+  </a>
+</aside>
+
+<DefaultFooter />
+
+<style>
+  .star-prompt {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem 1rem;
+    margin-top: 3rem;
+    padding: 1rem;
+    border: 1px solid var(--border);
+    border-radius: 0.75rem;
+    background: var(--card);
+    font-size: var(--sl-text-sm);
+    color: var(--muted-foreground);
+  }
+  .star-prompt p {
+    margin: 0;
+  }
+  .star-prompt strong {
+    color: var(--foreground);
+    font-weight: 500;
+  }
+  .star-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    color: var(--foreground);
+    text-decoration: none;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .star-button:hover {
+    background: var(--accent);
+  }
+  .star-count {
+    padding-inline-start: 0.5rem;
+    border-inline-start: 1px solid var(--border);
+    color: var(--muted-foreground);
+    font-variant-numeric: tabular-nums;
+  }
+</style>
