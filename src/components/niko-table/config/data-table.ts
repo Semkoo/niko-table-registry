@@ -24,7 +24,8 @@ import {
   ArrowDown01,
   ArrowDown10,
   ArrowUpDown,
-  Calendar,
+  CalendarArrowDown,
+  CalendarArrowUp,
   Check,
   X as XIcon,
 } from "lucide-react"
@@ -68,14 +69,14 @@ export const SORT_ICONS: Record<SortIconVariant, SortIcons> = {
     unsorted: ArrowUpDown,
   },
   [FILTER_VARIANTS.DATE]: {
-    asc: ArrowUpDown,
-    desc: ArrowUpDown,
-    unsorted: Calendar,
+    asc: CalendarArrowUp,
+    desc: CalendarArrowDown,
+    unsorted: ArrowUpDown,
   },
   [FILTER_VARIANTS.DATE_RANGE]: {
-    asc: ArrowUpDown,
-    desc: ArrowUpDown,
-    unsorted: Calendar,
+    asc: CalendarArrowUp,
+    desc: CalendarArrowDown,
+    unsorted: ArrowUpDown,
   },
   [FILTER_VARIANTS.BOOLEAN]: {
     asc: XIcon, // False First

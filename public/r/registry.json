@@ -856,12 +856,13 @@
       "name": "data-table-column-sort",
       "type": "registry:component",
       "title": "DataTable Column Sort",
-      "description": "Column header sort options with ascending/descending/clear controls.",
+      "description": "Column header sort options with ascending/descending/clear controls, plus a Shift + click multi-sort hint.",
       "dependencies": ["lucide-react"],
       "registryDependencies": [
         "https://niko-table.com/r/data-table-core.json",
         "button",
         "dropdown-menu",
+        "kbd",
         "tooltip"
       ],
       "files": [

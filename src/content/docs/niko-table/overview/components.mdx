@@ -708,6 +708,21 @@ A standalone sort button for use outside dropdown menus. It is a button with a d
 | `variant`   | `SortIconVariant` | `"text"` | Sort icon variant (`"text"`, `"number"`, `"date"`). Auto-detected from `column.meta.variant`. |
 | `className` | `string`          | -        | Additional CSS classes.                                                                       |
 
+##### DataTableSortHint
+
+A one-line hint for multi-sort: "Hold Shift and click a column's sort to sort by more than one column." Put it in a toolbar. It renders nothing when `enableMultiSort` is `false`. Ships with `data-table-column-sort`.
+
+```tsx
+<DataTableToolbarSection className="px-0">
+  <DataTableSortHint className="max-sm:hidden" />
+  <DataTableSortMenu className="ml-auto" />
+</DataTableToolbarSection>
+```
+
+| Name        | Type     | Description                                    |
+| ----------- | -------- | ---------------------------------------------- |
+| `className` | `string` | Additional CSS classes (any `<p>` prop works). |
+
 ##### DataTableColumnPinOptions
 
 Pin options to put inside `DataTableColumnActions`. Shows pin left, pin right and unpin.

@@ -20,6 +20,8 @@ import {
 } from "../filters/table-column-sort"
 import { useDataTable } from "../core/data-table-context"
 import { useColumnHeaderContext } from "./data-table-column-header"
+import { Kbd } from "@/components/ui/kbd"
+import { cn } from "@/lib/utils"
 
 /**
  * Sorting options for column header menu using context.
@@ -54,3 +56,24 @@ export function DataTableColumnSortMenu<TData extends RowData, TValue>(
 }
 
 DataTableColumnSortMenu.displayName = "DataTableColumnSortMenu"
+
+/**
+ * One-line hint that Shift + click on a column's sort adds it to the current
+ * sort. Place it in a toolbar; renders nothing when multi-sort is off
+ * (`enableMultiSort: false`).
+ */
+export function DataTableSortHint<TData extends RowData>({
+  className,
+  ...props
+}: React.ComponentProps<"p">) {
+  const { table } = useDataTable<TData>()
+  if (table.options.enableMultiSort === false) return null
+  return (
+    <p className={cn("text-sm text-muted-foreground", className)} {...props}>
+      Hold <Kbd>Shift</Kbd> and click a column&apos;s sort to sort by more than
+      one column.
+    </p>
+  )
+}
+
+DataTableSortHint.displayName = "DataTableSortHint"

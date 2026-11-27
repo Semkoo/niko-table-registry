@@ -344,6 +344,7 @@ export function DataTableFacetedFilterContent<
       selectedValues={selectedValues}
       onItemSelect={onItemSelect}
       onReset={onReset}
+      multiple={multiple}
     />
   )
 }

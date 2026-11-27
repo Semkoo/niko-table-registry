@@ -9,7 +9,10 @@ import {
 } from "@/components/niko-table/core/data-table-structure"
 import { DataTableColumnHeader } from "@/components/niko-table/components/data-table-column-header"
 import { DataTableColumnTitle } from "@/components/niko-table/components/data-table-column-title"
-import { DataTableColumnSortMenu } from "@/components/niko-table/components/data-table-column-sort"
+import {
+  DataTableColumnSortMenu,
+  DataTableSortHint,
+} from "@/components/niko-table/components/data-table-column-sort"
 import { DataTableColumnFacetedFilterMenu } from "@/components/niko-table/components/data-table-column-faceted-filter"
 import { DataTableColumnSliderFilterMenu } from "@/components/niko-table/components/data-table-column-slider-filter-options"
 import { DataTableColumnDateFilterMenu } from "@/components/niko-table/components/data-table-column-date-filter-options"
@@ -75,7 +78,7 @@ const columns: DataTableColumnDef<Product>[] = [
       <DataTableColumnHeader>
         <DataTableColumnTitle />
         <DataTableColumnSortMenu variant={FILTER_VARIANTS.TEXT} />
-        <DataTableColumnFacetedFilterMenu />
+        <DataTableColumnFacetedFilterMenu multiple />
       </DataTableColumnHeader>
     ),
     meta: {
@@ -100,7 +103,7 @@ const columns: DataTableColumnDef<Product>[] = [
       <DataTableColumnHeader>
         <DataTableColumnTitle />
         <DataTableColumnSortMenu variant={FILTER_VARIANTS.TEXT} />
-        <DataTableColumnFacetedFilterMenu />
+        <DataTableColumnFacetedFilterMenu multiple />
       </DataTableColumnHeader>
     ),
     meta: {
@@ -398,6 +401,7 @@ function FilterToolbar() {
         <DataTableViewMenu />
       </DataTableToolbarSection>
       <DataTableToolbarSection className="px-0">
+        <DataTableSortHint className="max-sm:hidden" />
         <DataTableSortMenu className="ml-auto" />
         <DataTableFilterMenu
           autoOptions

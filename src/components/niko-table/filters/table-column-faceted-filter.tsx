@@ -136,6 +136,7 @@ export function TableColumnFacetedFilterOptions<TData extends RowData, TValue>({
           selectedValues={selectedValues}
           onItemSelect={onItemSelect}
           onReset={onReset}
+          multiple={multiple}
         />
       </DropdownMenuPanel>
     </>

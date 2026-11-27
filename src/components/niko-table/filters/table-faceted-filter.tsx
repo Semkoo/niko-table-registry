@@ -256,6 +256,7 @@ export function TableFacetedFilter<TData extends RowData, TValue>({
           selectedValues={selectedValues}
           onItemSelect={handleItemSelect}
           onReset={onReset}
+          multiple={multiple}
         />
       </PopoverContent>
     </Popover>
@@ -268,63 +269,74 @@ export function TableFacetedFilterContent({
   selectedValues,
   onItemSelect,
   onReset,
+  multiple,
 }: {
   title?: string
   options: Option[]
   selectedValues: Set<string>
   onItemSelect: (option: Option, isSelected: boolean) => void
   onReset: (event?: React.MouseEvent) => void
+  /** Multi-select: shows a short "Select one or more" hint under the list. */
+  multiple?: boolean
 }) {
   return (
-    <Command>
-      <CommandInput placeholder={title} className="pl-2" />
-      <CommandList className="max-h-full">
-        <CommandEmpty>No results found.</CommandEmpty>
-        <CommandGroup className="max-h-75 overflow-x-hidden overflow-y-auto">
-          {options.map(option => {
-            const isSelected = selectedValues.has(option.value)
+    <>
+      <Command>
+        <CommandInput placeholder={title} className="pl-2" />
+        <CommandList className="max-h-full">
+          <CommandEmpty>No results found.</CommandEmpty>
+          <CommandGroup className="max-h-75 overflow-x-hidden overflow-y-auto">
+            {options.map(option => {
+              const isSelected = selectedValues.has(option.value)
 
-            return (
-              <CommandItem
-                key={option.value}
-                onSelect={() => onItemSelect(option, isSelected)}
-              >
-                <div
-                  className={cn(
-                    "mr-2 flex size-4 items-center justify-center rounded-sm border border-primary",
-                    isSelected
-                      ? "bg-primary text-primary-foreground"
-                      : "opacity-50 [&_svg]:invisible",
-                  )}
+              return (
+                <CommandItem
+                  key={option.value}
+                  onSelect={() => onItemSelect(option, isSelected)}
                 >
-                  <Check className="size-4" />
-                </div>
-                {option.icon && <option.icon className="mr-2 size-4" />}
-                <span className="truncate">{option.label}</span>
-                {option.count !== undefined && (
-                  <span className="ml-auto font-mono text-xs">
-                    {option.count}
-                  </span>
-                )}
-              </CommandItem>
-            )
-          })}
-        </CommandGroup>
-        {selectedValues.size > 0 && (
-          <>
-            <CommandSeparator />
-            <CommandGroup>
-              <CommandItem
-                onSelect={() => onReset()}
-                className="justify-center text-center"
-              >
-                Clear filters
-              </CommandItem>
-            </CommandGroup>
-          </>
-        )}
-      </CommandList>
-    </Command>
+                  <div
+                    className={cn(
+                      "mr-2 flex size-4 items-center justify-center rounded-sm border border-primary",
+                      isSelected
+                        ? "bg-primary text-primary-foreground"
+                        : "opacity-50 [&_svg]:invisible",
+                    )}
+                  >
+                    <Check className="size-4" />
+                  </div>
+                  {option.icon && <option.icon className="mr-2 size-4" />}
+                  <span className="truncate">{option.label}</span>
+                  {option.count !== undefined && (
+                    <span className="ml-auto font-mono text-xs">
+                      {option.count}
+                    </span>
+                  )}
+                </CommandItem>
+              )
+            })}
+          </CommandGroup>
+          {selectedValues.size > 0 && (
+            <>
+              <CommandSeparator />
+              <CommandGroup>
+                <CommandItem
+                  onSelect={() => onReset()}
+                  className="justify-center text-center"
+                >
+                  Clear filters
+                </CommandItem>
+              </CommandGroup>
+            </>
+          )}
+        </CommandList>
+      </Command>
+      {/* Outside Command so every base (incl. React Aria menus) keeps it. */}
+      {multiple ? (
+        <p className="border-t px-3 py-2 text-xs text-muted-foreground">
+          Select one or more.
+        </p>
+      ) : null}
+    </>
   )
 }
 
