@@ -24,7 +24,11 @@ const views = [
 ---
 
 <section class="home-showcase not-content" aria-label="Live demo">
-  <div class="showcase-switch" role="tablist" aria-label="Choose a demo">
+  <div
+    class="showcase-switch nt-switch"
+    role="tablist"
+    aria-label="Choose a demo"
+  >
     {views.map((view, i) => (
       <button
         type="button"
@@ -42,7 +46,7 @@ const views = [
 
   {views.map((view, i) => (
     <div
-      class="showcase-frame"
+      class="showcase-frame nt-frame"
       role="tabpanel"
       id={`showcase-panel-${view.id}`}
       aria-labelledby={`showcase-tab-${view.id}`}
@@ -63,7 +67,7 @@ const views = [
         </button>
       </div>
 
-      <div class="showcase-stage">
+      <div class="showcase-stage nt-stage">
         {view.id === "table" && (
           <CodePreviewDemo demo="niko-table/advanced" client:visible />
         )}
@@ -126,18 +130,6 @@ const views = [
 </script>
 
 <style>
-  /*
-   * Home page only (this component renders nowhere else): widen the column so
-   * the demos have room, and let everything share one left edge and width.
-   */
-  :global(:root) {
-    --sl-content-width: 68rem;
-  }
-  :global([data-has-sidebar][data-has-toc] .main-pane) {
-    max-width: 68rem;
-    padding-inline: 1.5rem;
-  }
-
   /* The theme centres the hero; line its title up with the demo frame. */
   /* [class] outranks the theme's scoped .hero[data-astro-cid] rule. */
   :global(main .hero[class]) {
@@ -149,44 +141,12 @@ const views = [
   }
 
   .showcase-switch {
-    display: inline-flex;
-    gap: 0.25rem;
-    padding: 0.25rem;
     margin-bottom: 0.75rem;
-    border: 1px solid var(--border);
-    border-radius: 0.625rem;
-    background: var(--muted);
   }
-  .showcase-switch button {
-    padding: 0.375rem 1rem;
-    border-radius: 0.4rem;
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: var(--muted-foreground);
-    transition:
-      background-color 150ms,
-      color 150ms;
-  }
-  .showcase-switch button:hover {
-    color: var(--foreground);
-  }
-  .showcase-switch button[aria-selected="true"] {
-    background: var(--background);
-    color: var(--foreground);
-    box-shadow: 0 0 0 1px var(--border);
-  }
-  .showcase-switch button:focus-visible,
   .showcase-copy:focus-visible,
   .showcase-foot a:focus-visible {
     outline: 2px solid var(--ring);
     outline-offset: 2px;
-  }
-
-  .showcase-frame {
-    overflow: hidden;
-    border: 1px solid var(--border);
-    border-radius: 0.875rem;
-    background: var(--card);
   }
 
   .showcase-bar {
@@ -226,7 +186,6 @@ const views = [
 
   .showcase-stage {
     padding: 1.25rem;
-    background: var(--background);
   }
 
   .showcase-foot {
@@ -252,11 +211,6 @@ const views = [
   @media (max-width: 40rem) {
     .showcase-stage {
       padding: 0.75rem;
-    }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .showcase-switch button {
-      transition: none;
     }
   }
 </style>
