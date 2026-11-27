@@ -234,13 +234,14 @@ export function useDataTable<
   return context as DataTableContextProps<TData>
 }
 
-export enum DataTableActions {
-  SET,
-  SET_IS_LOADING,
-}
+// A const object, not an enum: Vite's default tsconfig sets erasableSyntaxOnly, which rejects enums.
+export const DataTableActions = {
+  SET: 0,
+  SET_IS_LOADING: 1,
+} as const
 
 type DataTableAction = {
-  type: DataTableActions.SET_IS_LOADING
+  type: typeof DataTableActions.SET_IS_LOADING
   value: boolean
 }
 

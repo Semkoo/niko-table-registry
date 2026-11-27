@@ -85,6 +85,9 @@ import type {
   Option,
 } from "../types"
 
+// Lets this file type-check in projects without @types/node (e.g. a default Vite app); bundlers still inline NODE_ENV.
+declare const process: { env: { NODE_ENV?: string } }
+
 /* ---------- Precomputed options context (avoids per-column row walks) ---------- */
 const PrecomputedOptionsContext = React.createContext<
   Record<string, Option[]> | undefined
