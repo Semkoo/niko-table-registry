@@ -1,0 +1,35 @@
+---
+/**
+ * The Niko Table mark, drawn from the same SVG as the header logo and the
+ * favicons. It uses currentColor, so it follows the text colour and theme.
+ * Decorative by default; pass `label` when the mark stands alone.
+ */
+import source from "@/assets/logo/dark.svg?raw"
+
+type Props = {
+  class?: string
+  /** Accessible name. Leave empty when text next to the mark says the same. */
+  label?: string
+  /** Width and height (any CSS length). A class can override it. */
+  size?: string
+}
+
+const { class: className, label, size = "1em" } = Astro.props
+
+const escape = (value: string) =>
+  value.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;")
+
+const a11y = label
+  ? `role="img" aria-label="${escape(label)}"`
+  : `aria-hidden="true"`
+
+const svg = source
+  .replace(/<!--[\s\S]*?-->/g, "")
+  .replace(/stroke="white"/g, 'stroke="currentColor"')
+  .replace(
+    "<svg",
+    `<svg width="${escape(size)}" height="${escape(size)}" focusable="false" ${a11y}${className ? ` class="${escape(className)}"` : ""}`,
+  )
+---
+
+<Fragment set:html={svg} />

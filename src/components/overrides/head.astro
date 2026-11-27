@@ -1,10 +1,13 @@
 ---
 import { getBreadcrumbs } from "@/lib/breadcrumbs"
+import { ogImagePath } from "@/lib/og-image"
 const { head } = Astro.locals.starlightRoute
 const { title, description } = Astro.locals.starlightRoute.entry.data
 const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href
 const pathname = Astro.url.pathname
 const isHomePage = pathname === "/" || pathname === ""
+const ogImageUrl = new URL(ogImagePath(pathname), Astro.site).href
+const ogImageKeys = ["og:image", "og:image:secure_url", "twitter:image"]
 const isExamplePage = pathname.startsWith("/examples/")
 const isInstallationPage =
   pathname.includes("/getting-started/installation") ||
@@ -38,6 +41,9 @@ const processedHead = head
     if (h.tag !== "meta" || typeof h.attrs !== "object") return h
     if (h.attrs.property === "og:type" && isHomePage) {
       return { ...h, attrs: { ...h.attrs, content: "website" } }
+    }
+    if (ogImageKeys.includes(String(h.attrs.property ?? h.attrs.name))) {
+      return { ...h, attrs: { ...h.attrs, content: ogImageUrl } }
     }
     return h
   })

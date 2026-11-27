@@ -1,0 +1,47 @@
+---
+/**
+ * Top bar of a live demo frame: the logo, the install command and a copy
+ * button. Styles live in global.css (`.nt-bar`).
+ */
+import LogoMark from "@/components/brand/logo-mark.astro"
+
+type Props = {
+  command: string
+  /** What the command installs, for the copy button's accessible name. */
+  label: string
+}
+
+const { command, label } = Astro.props
+---
+
+<div class="nt-bar">
+  <LogoMark class="nt-bar-logo" />
+  <code class="nt-bar-text nt-bar-command">
+    <span aria-hidden="true">$ </span>
+    {command}
+  </code>
+  <button
+    type="button"
+    class="nt-bar-copy"
+    data-copy-command={command}
+    aria-label={`Copy install command for ${label}`}
+  >
+    Copy
+  </button>
+</div>
+
+<script>
+  for (const button of document.querySelectorAll<HTMLButtonElement>(
+    "[data-copy-command]",
+  )) {
+    button.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(button.dataset.copyCommand ?? "")
+        button.textContent = "Copied"
+      } catch {
+        button.textContent = "Press Ctrl+C"
+      }
+      setTimeout(() => (button.textContent = "Copy"), 2000)
+    })
+  }
+</script>
