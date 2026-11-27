@@ -173,104 +173,99 @@ export default defineConfig({
           label: "Examples",
           items: [
             { label: "Gallery", slug: "examples" },
-            // Getting Started
-            { label: "Simple Table", slug: "examples/simple-table" },
-            { label: "Basic Table", slug: "examples/basic-table" },
-            { label: "Search Table", slug: "examples/search-table" },
-
-            // Row & Column Features
             {
-              label: "Row Selection Table",
-              slug: "examples/row-selection-table",
+              label: "Getting Started",
+              items: [
+                { label: "Simple Table", slug: "examples/simple-table" },
+                { label: "Basic Table", slug: "examples/basic-table" },
+                { label: "Search Table", slug: "examples/search-table" },
+              ],
             },
             {
-              label: "Row Expansion Table",
-              slug: "examples/row-expansion-table",
+              label: "Row & Column Features",
+              items: [
+                {
+                  label: "Row Selection",
+                  slug: "examples/row-selection-table",
+                },
+                {
+                  label: "Row Expansion",
+                  slug: "examples/row-expansion-table",
+                },
+                {
+                  label: "Row Context Menu",
+                  slug: "examples/row-context-menu-table",
+                },
+                { label: "Inline Edit", slug: "examples/inline-edit-table" },
+                {
+                  label: "Column Pinning",
+                  slug: "examples/column-pinning-table",
+                },
+                { label: "Grouping", slug: "examples/grouping-table" },
+                {
+                  label: "Column Resize",
+                  slug: "examples/column-resize-table",
+                },
+                { label: "Tree Table", slug: "examples/tree-table" },
+              ],
             },
             {
-              label: "Row Context Menu Table",
-              slug: "examples/row-context-menu-table",
+              label: "Drag & Drop",
+              items: [
+                { label: "Row DnD", slug: "examples/row-dnd-table" },
+                { label: "Column DnD", slug: "examples/column-dnd-table" },
+              ],
             },
             {
-              label: "Inline Edit Table",
-              slug: "examples/inline-edit-table",
+              label: "Layout & Presentation",
+              items: [
+                { label: "Aside", slug: "examples/aside-table" },
+                {
+                  label: "Virtualization",
+                  slug: "examples/virtualization-table",
+                },
+                {
+                  label: "Infinite Scroll",
+                  slug: "examples/infinite-scroll-table",
+                },
+                {
+                  label: "Infinite Scroll (Virtualized)",
+                  slug: "examples/infinite-scroll-virtualized-table",
+                },
+              ],
             },
             {
-              label: "Column Pinning Table",
-              slug: "examples/column-pinning-table",
+              label: "Filtering",
+              items: [
+                {
+                  label: "Faceted Filter",
+                  slug: "examples/faceted-filter-table",
+                },
+                { label: "Advanced Filter", slug: "examples/advanced-table" },
+                {
+                  label: "Advanced Inline Filter",
+                  slug: "examples/advanced-inline-table",
+                },
+              ],
             },
             {
-              label: "Grouping Table",
-              slug: "examples/grouping-table",
-            },
-            {
-              label: "Column Resize Table",
-              slug: "examples/column-resize-table",
-            },
-            {
-              label: "Tree Table",
-              slug: "examples/tree-table",
-            },
-
-            // Drag & Drop
-            {
-              label: "Row DnD Table",
-              slug: "examples/row-dnd-table",
-            },
-            {
-              label: "Column DnD Table",
-              slug: "examples/column-dnd-table",
-            },
-
-            // Layout & Presentation
-            { label: "Aside Table", slug: "examples/aside-table" },
-            {
-              label: "Virtualization Table",
-              slug: "examples/virtualization-table",
-            },
-            {
-              label: "Infinite Scroll Table",
-              slug: "examples/infinite-scroll-table",
-            },
-            {
-              label: "Infinite Scroll Virtualized Table",
-              slug: "examples/infinite-scroll-virtualized-table",
-            },
-
-            // Filtering
-            {
-              label: "Faceted Filter Table",
-              slug: "examples/faceted-filter-table",
-            },
-            {
-              label: "Advanced Filter Table",
-              slug: "examples/advanced-table",
-            },
-            {
-              label: "Advanced Inline Filter Table",
-              slug: "examples/advanced-inline-table",
-            },
-
-            // Server-Side & URL State
-            {
-              label: "Advanced Nuqs Table",
-              slug: "examples/advanced-nuqs-table",
-            },
-            {
-              label: "Server-Side Table",
-              slug: "examples/server-side-table",
-            },
-            {
-              label: "Server-Side Nuqs Table",
-              slug: "examples/server-side-nuqs-table",
-            },
-            {
-              label: "Drizzle ORM",
-              slug: "examples/drizzle-orm",
-            },
-            {
-              label: "Drizzle ORM + Nuqs",
-              slug: "examples/drizzle-orm-nuqs",
+              label: "Server-Side & URL State",
+              items: [
+                {
+                  label: "Advanced Filter + Nuqs",
+                  slug: "examples/advanced-nuqs-table",
+                },
+                { label: "Server-Side", slug: "examples/server-side-table" },
+                {
+                  label: "Server-Side + Nuqs",
+                  slug: "examples/server-side-nuqs-table",
+                },
+                { label: "Drizzle ORM", slug: "examples/drizzle-orm" },
+                {
+                  label: "Drizzle ORM + Nuqs",
+                  slug: "examples/drizzle-orm-nuqs",
+                },
+              ],
             },
           ],
         },
