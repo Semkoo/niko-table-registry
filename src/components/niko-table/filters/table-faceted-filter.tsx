@@ -20,7 +20,7 @@ import { Check, PlusCircle, XCircle } from "lucide-react"
 import * as React from "react"
 
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/niko-table/primitives/button"
 import {
   Command,
   CommandEmpty,
@@ -29,7 +29,7 @@ import {
   CommandItem,
   CommandList,
   CommandSeparator,
-} from "@/components/ui/command"
+} from "@/components/niko-table/primitives/command"
 import {
   Popover,
   PopoverContent,

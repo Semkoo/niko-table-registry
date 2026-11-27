@@ -17,6 +17,7 @@ import { CircleHelp, SlidersHorizontal } from "lucide-react"
 import {
   DropdownMenuSeparator,
   DropdownMenuLabel,
+  DropdownMenuPanel,
 } from "@/components/niko-table/primitives/dropdown-menu"
 import {
   Popover,
@@ -30,8 +31,8 @@ import {
 } from "@/components/niko-table/primitives/tooltip"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
-import { Slider } from "@/components/ui/slider"
+import { Button } from "@/components/niko-table/primitives/button"
+import { Slider } from "@/components/niko-table/primitives/slider"
 import { cn } from "@/lib/utils"
 import { useDerivedColumnTitle } from "../hooks/use-derived-column-title"
 
@@ -250,89 +251,91 @@ export function TableColumnSliderFilterOptions<TData extends RowData, TValue>({
           </TooltipContent>
         </Tooltip>
       </DropdownMenuLabel>
-      <div className="px-2 py-2">
-        <div className="flex flex-col gap-3">
-          <div className="flex items-center gap-2">
-            <Label htmlFor={`${id}-from`} className="sr-only">
-              From
-            </Label>
-            <div className="relative flex-1">
-              <Input
-                key={`${id}-from-${range[0]}`}
-                id={`${id}-from`}
-                type="number"
-                aria-label={`${derivedTitle} minimum value`}
-                aria-valuemin={min}
-                aria-valuemax={max}
-                inputMode="numeric"
-                pattern="[0-9]*"
-                placeholder={min.toString()}
-                min={min}
-                max={max}
-                defaultValue={range[0]}
-                onChange={event =>
-                  onRangeValueChange(String(event.target.value), true)
-                }
-                className={cn("h-8 w-full", unit && "pr-8")}
-              />
-              {unit && (
-                <span className="absolute top-0 right-0 bottom-0 mt-0.5 mr-0.5 flex h-7 items-center rounded-r-md bg-accent px-2 text-sm text-muted-foreground">
-                  {unit}
-                </span>
-              )}
+      <DropdownMenuPanel>
+        <div className="px-2 py-2">
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center gap-2">
+              <Label htmlFor={`${id}-from`} className="sr-only">
+                From
+              </Label>
+              <div className="relative flex-1">
+                <Input
+                  key={`${id}-from-${range[0]}`}
+                  id={`${id}-from`}
+                  type="number"
+                  aria-label={`${derivedTitle} minimum value`}
+                  aria-valuemin={min}
+                  aria-valuemax={max}
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  placeholder={min.toString()}
+                  min={min}
+                  max={max}
+                  defaultValue={range[0]}
+                  onChange={event =>
+                    onRangeValueChange(String(event.target.value), true)
+                  }
+                  className={cn("h-8 w-full", unit && "pr-8")}
+                />
+                {unit && (
+                  <span className="absolute top-0 right-0 bottom-0 mt-0.5 mr-0.5 flex h-7 items-center rounded-r-md bg-accent px-2 text-sm text-muted-foreground">
+                    {unit}
+                  </span>
+                )}
+              </div>
+              <Label htmlFor={`${id}-to`} className="sr-only">
+                to
+              </Label>
+              <div className="relative flex-1">
+                <Input
+                  key={`${id}-to-${range[1]}`}
+                  id={`${id}-to`}
+                  type="number"
+                  aria-label={`${derivedTitle} maximum value`}
+                  aria-valuemin={min}
+                  aria-valuemax={max}
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  placeholder={max.toString()}
+                  min={min}
+                  max={max}
+                  defaultValue={range[1]}
+                  onChange={event =>
+                    onRangeValueChange(String(event.target.value))
+                  }
+                  className={cn("h-8 w-full", unit && "pr-8")}
+                />
+                {unit && (
+                  <span className="absolute top-0 right-0 bottom-0 mt-0.5 mr-0.5 flex h-7 items-center rounded-r-md bg-accent px-2 text-sm text-muted-foreground">
+                    {unit}
+                  </span>
+                )}
+              </div>
             </div>
-            <Label htmlFor={`${id}-to`} className="sr-only">
-              to
+            <Label htmlFor={`${id}-slider`} className="sr-only">
+              {derivedTitle} slider
             </Label>
-            <div className="relative flex-1">
-              <Input
-                key={`${id}-to-${range[1]}`}
-                id={`${id}-to`}
-                type="number"
-                aria-label={`${derivedTitle} maximum value`}
-                aria-valuemin={min}
-                aria-valuemax={max}
-                inputMode="numeric"
-                pattern="[0-9]*"
-                placeholder={max.toString()}
-                min={min}
-                max={max}
-                defaultValue={range[1]}
-                onChange={event =>
-                  onRangeValueChange(String(event.target.value))
-                }
-                className={cn("h-8 w-full", unit && "pr-8")}
-              />
-              {unit && (
-                <span className="absolute top-0 right-0 bottom-0 mt-0.5 mr-0.5 flex h-7 items-center rounded-r-md bg-accent px-2 text-sm text-muted-foreground">
-                  {unit}
-                </span>
-              )}
-            </div>
+            <Slider
+              id={`${id}-slider`}
+              min={min}
+              max={max}
+              step={step}
+              value={range}
+              onValueChange={onSliderValueChange}
+              className="w-full"
+            />
+            <Button
+              aria-label={`Clear ${derivedTitle} filter`}
+              variant="outline"
+              size="sm"
+              onClick={onReset}
+              className="w-full"
+            >
+              Clear
+            </Button>
           </div>
-          <Label htmlFor={`${id}-slider`} className="sr-only">
-            {derivedTitle} slider
-          </Label>
-          <Slider
-            id={`${id}-slider`}
-            min={min}
-            max={max}
-            step={step}
-            value={range}
-            onValueChange={onSliderValueChange}
-            className="w-full"
-          />
-          <Button
-            aria-label={`Clear ${derivedTitle} filter`}
-            variant="outline"
-            size="sm"
-            onClick={onReset}
-            className="w-full"
-          >
-            Clear
-          </Button>
         </div>
-      </div>
+      </DropdownMenuPanel>
     </>
   )
 }

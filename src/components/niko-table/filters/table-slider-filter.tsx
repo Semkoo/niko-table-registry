@@ -18,7 +18,7 @@
 
 import { PlusCircle, XCircle } from "lucide-react"
 import * as React from "react"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/niko-table/primitives/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
@@ -27,7 +27,7 @@ import {
   PopoverTrigger,
 } from "@/components/niko-table/primitives/popover"
 import { Separator } from "@/components/ui/separator"
-import { Slider } from "@/components/ui/slider"
+import { Slider } from "@/components/niko-table/primitives/slider"
 import { cn } from "@/lib/utils"
 
 import type { DataTableColumn } from "../types"

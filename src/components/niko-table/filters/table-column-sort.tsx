@@ -15,7 +15,7 @@ import React from "react"
 import type { RowData } from "@tanstack/react-table"
 import { Check, CircleHelp } from "lucide-react"
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/niko-table/primitives/button"
 import {
   DropdownMenu,
   DropdownMenuContent,

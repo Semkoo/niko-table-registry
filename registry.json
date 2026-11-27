@@ -157,6 +157,11 @@
           "path": "src/components/niko-table/primitives/context-menu.tsx",
           "type": "registry:component",
           "target": "components/niko-table/primitives/context-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/button.tsx"
         }
       ]
     },
@@ -264,6 +269,11 @@
           "path": "src/components/niko-table/primitives/dropdown-menu.tsx",
           "type": "registry:component",
           "target": "components/niko-table/primitives/dropdown-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/button.tsx"
         }
       ]
     },
@@ -310,6 +320,16 @@
           "path": "src/components/niko-table/filters/table-pagination.tsx",
           "type": "registry:component",
           "target": "components/niko-table/filters/table-pagination.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/button.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/select.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/select.tsx"
         }
       ]
     },
@@ -321,7 +341,8 @@
       "dependencies": ["lucide-react"],
       "registryDependencies": [
         "https://niko-table.com/r/data-table-core.json",
-        "input"
+        "input",
+        "button"
       ],
       "files": [
         {
@@ -333,6 +354,11 @@
           "path": "src/components/niko-table/filters/table-search-filter.tsx",
           "type": "registry:component",
           "target": "components/niko-table/filters/table-search-filter.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/button.tsx"
         }
       ]
     },
@@ -378,6 +404,21 @@
           "path": "src/components/niko-table/primitives/tooltip.tsx",
           "type": "registry:component",
           "target": "components/niko-table/primitives/tooltip.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/button.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/select.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/select.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/command.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/command.tsx"
         }
       ]
     },
@@ -408,6 +449,16 @@
           "path": "src/components/niko-table/primitives/popover.tsx",
           "type": "registry:component",
           "target": "components/niko-table/primitives/popover.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/button.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/command.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/command.tsx"
         }
       ]
     },
@@ -444,6 +495,16 @@
           "path": "src/components/niko-table/primitives/popover.tsx",
           "type": "registry:component",
           "target": "components/niko-table/primitives/popover.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/button.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/command.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/command.tsx"
         }
       ]
     },
@@ -467,6 +528,11 @@
           "path": "src/components/niko-table/filters/table-clear-filter.tsx",
           "type": "registry:component",
           "target": "components/niko-table/filters/table-clear-filter.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/button.tsx"
         }
       ]
     },
@@ -507,6 +573,26 @@
           "path": "src/components/niko-table/primitives/popover.tsx",
           "type": "registry:component",
           "target": "components/niko-table/primitives/popover.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/button.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/select.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/select.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/calendar.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/calendar.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/command.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/command.tsx"
         }
       ]
     },
@@ -544,6 +630,16 @@
           "path": "src/components/niko-table/primitives/popover.tsx",
           "type": "registry:component",
           "target": "components/niko-table/primitives/popover.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/button.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/command.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/command.tsx"
         }
       ]
     },
@@ -582,6 +678,26 @@
           "path": "src/components/niko-table/primitives/popover.tsx",
           "type": "registry:component",
           "target": "components/niko-table/primitives/popover.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/button.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/select.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/select.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/calendar.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/calendar.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/command.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/command.tsx"
         }
       ]
     },
@@ -615,6 +731,16 @@
           "path": "src/components/niko-table/primitives/popover.tsx",
           "type": "registry:component",
           "target": "components/niko-table/primitives/popover.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/button.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/slider.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/slider.tsx"
         }
       ]
     },
@@ -646,6 +772,16 @@
           "path": "src/components/niko-table/primitives/popover.tsx",
           "type": "registry:component",
           "target": "components/niko-table/primitives/popover.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/button.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/calendar.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/calendar.tsx"
         }
       ]
     },
@@ -669,6 +805,11 @@
           "path": "src/components/niko-table/filters/table-export-button.tsx",
           "type": "registry:component",
           "target": "components/niko-table/filters/table-export-button.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/button.tsx"
         }
       ]
     },
@@ -703,6 +844,11 @@
           "path": "src/components/niko-table/components/data-table-selection-bar.tsx",
           "type": "registry:component",
           "target": "components/niko-table/components/data-table-selection-bar.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/button.tsx"
         }
       ]
     },
@@ -738,6 +884,11 @@
           "path": "src/components/niko-table/primitives/dropdown-menu.tsx",
           "type": "registry:component",
           "target": "components/niko-table/primitives/dropdown-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/button.tsx"
         }
       ]
     },
@@ -773,6 +924,11 @@
           "path": "src/components/niko-table/primitives/dropdown-menu.tsx",
           "type": "registry:component",
           "target": "components/niko-table/primitives/dropdown-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/button.tsx"
         }
       ]
     },
@@ -808,6 +964,11 @@
           "path": "src/components/niko-table/primitives/dropdown-menu.tsx",
           "type": "registry:component",
           "target": "components/niko-table/primitives/dropdown-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/button.tsx"
         }
       ]
     },
@@ -843,6 +1004,11 @@
           "path": "src/components/niko-table/primitives/dropdown-menu.tsx",
           "type": "registry:component",
           "target": "components/niko-table/primitives/dropdown-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/button.tsx"
         }
       ]
     },
@@ -886,6 +1052,11 @@
           "path": "src/components/niko-table/primitives/dropdown-menu.tsx",
           "type": "registry:component",
           "target": "components/niko-table/primitives/dropdown-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/button.tsx"
         }
       ]
     },
@@ -930,6 +1101,16 @@
           "path": "src/components/niko-table/primitives/dropdown-menu.tsx",
           "type": "registry:component",
           "target": "components/niko-table/primitives/dropdown-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/button.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/slider.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/slider.tsx"
         }
       ]
     },
@@ -972,6 +1153,16 @@
           "path": "src/components/niko-table/primitives/dropdown-menu.tsx",
           "type": "registry:component",
           "target": "components/niko-table/primitives/dropdown-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/button.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/calendar.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/calendar.tsx"
         }
       ]
     },
@@ -1006,6 +1197,11 @@
           "path": "src/components/niko-table/core/data-table-row-dnd-structure.tsx",
           "type": "registry:component",
           "target": "components/niko-table/core/data-table-row-dnd-structure.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/button.tsx"
         }
       ]
     },
@@ -1336,6 +1532,26 @@
           "path": "src/components/niko-table/primitives/dialog.tsx",
           "type": "registry:component",
           "target": "components/niko-table/primitives/dialog.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/button.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/checkbox.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/checkbox.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/calendar.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/calendar.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/command.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/command.tsx"
         }
       ]
     },
@@ -1424,6 +1640,26 @@
           "path": "src/components/niko-table/primitives/dropdown-menu.tsx",
           "type": "registry:component",
           "target": "components/niko-table/primitives/dropdown-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/button.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/select.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/select.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/checkbox.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/checkbox.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/sheet.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/sheet.tsx"
         }
       ]
     },
@@ -1489,6 +1725,16 @@
           "path": "src/components/niko-table/primitives/dropdown-menu.tsx",
           "type": "registry:component",
           "target": "components/niko-table/primitives/dropdown-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/button.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/checkbox.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/checkbox.tsx"
         }
       ]
     },
@@ -1553,6 +1799,16 @@
           "path": "src/components/niko-table/primitives/dropdown-menu.tsx",
           "type": "registry:component",
           "target": "components/niko-table/primitives/dropdown-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/button.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/checkbox.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/checkbox.tsx"
         }
       ]
     },
@@ -1625,6 +1881,21 @@
           "path": "src/components/niko-table/primitives/dialog.tsx",
           "type": "registry:component",
           "target": "components/niko-table/primitives/dialog.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/button.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/select.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/select.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/checkbox.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/checkbox.tsx"
         }
       ]
     },
@@ -1687,6 +1958,16 @@
           "path": "src/components/niko-table/primitives/dropdown-menu.tsx",
           "type": "registry:component",
           "target": "components/niko-table/primitives/dropdown-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/button.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/sheet.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/sheet.tsx"
         }
       ]
     },
@@ -1746,6 +2027,16 @@
           "path": "src/components/niko-table/primitives/dropdown-menu.tsx",
           "type": "registry:component",
           "target": "components/niko-table/primitives/dropdown-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/button.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/checkbox.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/checkbox.tsx"
         }
       ]
     },
@@ -1807,6 +2098,11 @@
           "path": "src/components/niko-table/primitives/dropdown-menu.tsx",
           "type": "registry:component",
           "target": "components/niko-table/primitives/dropdown-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/button.tsx"
         }
       ]
     },
@@ -1871,6 +2167,11 @@
           "path": "src/components/niko-table/primitives/dropdown-menu.tsx",
           "type": "registry:component",
           "target": "components/niko-table/primitives/dropdown-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/button.tsx"
         }
       ]
     },
@@ -1930,6 +2231,16 @@
           "path": "src/components/niko-table/primitives/dropdown-menu.tsx",
           "type": "registry:component",
           "target": "components/niko-table/primitives/dropdown-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/button.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/sheet.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/sheet.tsx"
         }
       ]
     },
@@ -1985,6 +2296,11 @@
           "path": "src/components/niko-table/primitives/dropdown-menu.tsx",
           "type": "registry:component",
           "target": "components/niko-table/primitives/dropdown-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/button.tsx"
         }
       ]
     }

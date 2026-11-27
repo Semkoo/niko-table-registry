@@ -12,7 +12,7 @@
 import type { RowData } from "@tanstack/react-table"
 import { CircleHelp, Group, Ungroup } from "lucide-react"
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/niko-table/primitives/button"
 import {
   DropdownMenu,
   DropdownMenuContent,

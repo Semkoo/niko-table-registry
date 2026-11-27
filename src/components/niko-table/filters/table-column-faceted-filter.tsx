@@ -15,10 +15,11 @@ import React from "react"
 import type { RowData } from "@tanstack/react-table"
 import { CircleHelp, Filter, FilterX } from "lucide-react"
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/niko-table/primitives/button"
 import {
   DropdownMenuSeparator,
   DropdownMenuLabel,
+  DropdownMenuPanel,
 } from "@/components/niko-table/primitives/dropdown-menu"
 import {
   Tooltip,
@@ -128,13 +129,15 @@ export function TableColumnFacetedFilterOptions<TData extends RowData, TValue>({
           </TooltipContent>
         </Tooltip>
       </DropdownMenuLabel>
-      <TableFacetedFilterContent
-        title={derivedTitle}
-        options={options}
-        selectedValues={selectedValues}
-        onItemSelect={onItemSelect}
-        onReset={onReset}
-      />
+      <DropdownMenuPanel>
+        <TableFacetedFilterContent
+          title={derivedTitle}
+          options={options}
+          selectedValues={selectedValues}
+          onItemSelect={onItemSelect}
+          onReset={onReset}
+        />
+      </DropdownMenuPanel>
     </>
   )
 }

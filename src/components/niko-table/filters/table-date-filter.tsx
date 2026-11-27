@@ -22,8 +22,8 @@ import { CalendarIcon, XCircle } from "lucide-react"
 import * as React from "react"
 import type { DateRange } from "react-day-picker"
 
-import { Button } from "@/components/ui/button"
-import { Calendar } from "@/components/ui/calendar"
+import { Button } from "@/components/niko-table/primitives/button"
+import { Calendar } from "@/components/niko-table/primitives/calendar"
 import {
   Popover,
   PopoverContent,

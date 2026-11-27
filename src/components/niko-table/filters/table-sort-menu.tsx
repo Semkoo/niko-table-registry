@@ -21,7 +21,7 @@ import { ArrowDownUp, Trash2, CircleHelp } from "lucide-react"
 import * as React from "react"
 
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/niko-table/primitives/button"
 import {
   Command,
   CommandEmpty,
@@ -29,7 +29,7 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/components/ui/command"
+} from "@/components/niko-table/primitives/command"
 import {
   Popover,
   PopoverContent,
@@ -46,7 +46,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/components/niko-table/primitives/select"
 import {
   Sortable,
   SortableContent,

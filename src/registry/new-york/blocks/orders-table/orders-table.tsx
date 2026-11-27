@@ -39,8 +39,8 @@ import { DataTableRowContextMenuSlot } from "@/components/niko-table/components/
 import { SYSTEM_COLUMN_IDS } from "@/components/niko-table/lib/constants"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
+import { Button } from "@/components/niko-table/primitives/button"
+import { Checkbox } from "@/components/niko-table/primitives/checkbox"
 import {
   DropdownMenu,
   DropdownMenuContent,

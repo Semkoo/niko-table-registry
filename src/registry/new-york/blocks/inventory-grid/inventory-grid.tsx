@@ -60,7 +60,7 @@ import {
 import { useDataGrid } from "@/components/niko-table/grid/hooks/use-data-grid"
 import { useGridChanges } from "@/components/niko-table/grid/hooks/use-grid-changes"
 import type { GridRow } from "@/components/niko-table/grid/types/grid-cell"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/niko-table/primitives/button"
 import {
   DropdownMenu,
   DropdownMenuContent,

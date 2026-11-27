@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/niko-table/primitives/button"
 import {
   Dialog,
   DialogClose,
@@ -20,7 +20,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/components/niko-table/primitives/select"
 import { UserPlus } from "lucide-react"
 import { assignableRoles, type Member, type MemberRole } from "./team-data"
 

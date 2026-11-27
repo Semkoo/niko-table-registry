@@ -170,7 +170,7 @@ import { PackageOpen } from "lucide-react"
 ### With Actions
 
 ```tsx
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/niko-table/primitives/button"
 
 <DataTableBody>
   <DataTableEmptyBody>
@@ -204,7 +204,7 @@ import {
   DataTableEmptyDescription,
 } from "@/components/niko-table/components"
 import { PackageOpen, SearchX } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/niko-table/primitives/button"
 
 function ProductTable() {
   const handleAddProduct = () => {

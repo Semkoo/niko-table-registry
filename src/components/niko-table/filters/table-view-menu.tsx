@@ -32,7 +32,7 @@
 import type { RowData } from "@tanstack/react-table"
 import { Check, ChevronsUpDown, RotateCcw, Settings2 } from "lucide-react"
 import * as React from "react"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/niko-table/primitives/button"
 import {
   Command,
   CommandEmpty,
@@ -40,7 +40,7 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/components/ui/command"
+} from "@/components/niko-table/primitives/command"
 import {
   Popover,
   PopoverContent,

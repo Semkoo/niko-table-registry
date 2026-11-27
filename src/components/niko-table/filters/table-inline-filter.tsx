@@ -25,8 +25,8 @@ import {
 } from "lucide-react"
 import * as React from "react"
 
-import { Button } from "@/components/ui/button"
-import { Calendar } from "@/components/ui/calendar"
+import { Button } from "@/components/niko-table/primitives/button"
+import { Calendar } from "@/components/niko-table/primitives/calendar"
 import {
   Command,
   CommandEmpty,
@@ -34,7 +34,7 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/components/ui/command"
+} from "@/components/niko-table/primitives/command"
 import { Input } from "@/components/ui/input"
 import {
   Popover,
@@ -47,7 +47,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/components/niko-table/primitives/select"
 import {
   getDefaultFilterOperator,
   getFilterOperators,
