@@ -1,6 +1,6 @@
 # grid/types/
 
-Shared Data Grid TypeScript types (cell state, row shapes, addresses).
+Shared Niko Grid TypeScript types (cell state, row shapes, addresses).
 
 | File           | Role                                          |
 | -------------- | --------------------------------------------- |

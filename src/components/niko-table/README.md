@@ -13,7 +13,7 @@ This folder is the source that the registry ships. Prefer installing via the CLI
 | Area           | Role                                                                                 |
 | -------------- | ------------------------------------------------------------------------------------ |
 | **Data Table** | `DataTableRoot` + structure + filters / menus / pagination / virtualization / DnD    |
-| **Data Grid**  | Optional editable spreadsheet layer (`useDataGrid` + `<DataGrid>` + opt-in children) |
+| **Niko Grid**  | Optional editable spreadsheet layer (`useDataGrid` + `<DataGrid>` + opt-in children) |
 
 ## Directory structure
 
@@ -23,7 +23,7 @@ niko-table/
 │                   # (regular, virtualized, row/column DnD, virtualized DnD)
 ├── components/     # Context-aware wrappers (DataTable* prefix, useDataTable())
 ├── filters/        # Direct-prop primitives (Table* prefix, accept table)
-├── grid/           # Data Grid: core, components, cells, hooks, types, config
+├── grid/           # Niko Grid: core, components, cells, hooks, types, config
 ├── hooks/          # Table helpers (debounce, flash, scroll, options, …)
 ├── config/         # Feature detection
 ├── lib/            # Utilities, constants, filter fns, resize handle, …
@@ -88,7 +88,7 @@ Built on `@dnd-kit`. Import axis-specific structure files (no combined DnD struc
 
 **Constraint:** row DnD should not be combined with sorting/filtering (order conflicts). Column DnD is safe with other features.
 
-### Data Grid
+### Niko Grid
 
 Under `grid/`:
 
@@ -97,7 +97,7 @@ Under `grid/`:
 - **Cells**: display shell + typed editors (`GridTextCell`, …)
 - **Hooks / types / config**: persistence helpers, column APIs, shortcuts metadata
 
-Mount only the children you need under `<DataGrid>`. Unmounted features attach no listeners. See [Data Grid introduction](https://niko-table.com/data-grid/introduction/).
+Mount only the children you need under `<DataGrid>`. Unmounted features attach no listeners. See [Niko Grid introduction](https://niko-table.com/data-grid/introduction/).
 
 ## Minimal usage
 
@@ -169,7 +169,7 @@ Define row actions once as a declarative component using `useDataTableRow` + `Ro
 | Installation        | https://niko-table.com/getting-started/installation/ |
 | Components catalog  | https://niko-table.com/getting-started/components/   |
 | Table overview      | https://niko-table.com/niko-table/overview/core/     |
-| Data Grid           | https://niko-table.com/data-grid/introduction/       |
+| Niko Grid           | https://niko-table.com/data-grid/introduction/       |
 | Changelog (package) | [./CHANGELOG.md](./CHANGELOG.md)                     |
 | Site changelog      | https://niko-table.com/changelog/                    |
 

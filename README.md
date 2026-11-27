@@ -11,7 +11,7 @@ A shadcn-compatible React data table registry built on [TanStack Table](https://
 ## What you get
 
 - **Data Table**: composable `DataTable*` pieces for sorting, filtering, pagination, selection, expansion, pinning, virtualization, export, and more
-- **Data Grid**: optional editable spreadsheet layer (`useDataGrid` + `<DataGrid>`) with clipboard, fill, undo/redo, typed editors, and persistence helpers
+- **Niko Grid**: optional editable spreadsheet layer (`useDataGrid` + `<DataGrid>`) with clipboard, fill, undo/redo, typed editors, and persistence helpers
 - **Registry install**: add `@niko-table` once, then install only the blocks you need via the shadcn CLI
 - **Works with both shadcn generations**: classic Radix (`new-york`) and Base UI (`base-nova`)
 
@@ -40,7 +40,7 @@ A shadcn-compatible React data table registry built on [TanStack Table](https://
 - CSV export, aside panels, tree tables
 - Optional URL state with [nuqs](https://nuqs.dev)
 
-**Data Grid**
+**Niko Grid**
 
 - Editable cells with typed editors (text, number, checkbox, date, select)
 - Keyboard nav, selection, clipboard, fill handle, undo/redo
@@ -81,7 +81,7 @@ pnpm dlx shadcn@latest add https://niko-table.com/r/data-table.json
 
 The CLI does not support wildcards like `@niko-table/**`. List items explicitly or use [Install Everything](https://niko-table.com/getting-started/installation/#install-everything).
 
-See [Installation](https://niko-table.com/getting-started/installation/) and [Components](https://niko-table.com/getting-started/components/) for the full catalog (pagination, filters, virtualization, DnD, Data Grid, …).
+See [Installation](https://niko-table.com/getting-started/installation/) and [Components](https://niko-table.com/getting-started/components/) for the full catalog (pagination, filters, virtualization, DnD, Niko Grid, …).
 
 ### Manual installation
 
@@ -177,7 +177,7 @@ export function AdvancedTable({ data, columns }) {
 }
 ```
 
-Need an editable spreadsheet? Start with the [Data Grid introduction](https://niko-table.com/data-grid/introduction/).
+Need an editable spreadsheet? Start with the [Niko Grid introduction](https://niko-table.com/data-grid/introduction/).
 
 ## Architecture
 
@@ -200,7 +200,7 @@ niko-table/
 ├── core/          # DataTableRoot, DataTable, structure (incl. virtualized / DnD)
 ├── components/    # Context-aware DataTable* wrappers
 ├── filters/       # Direct-prop Table* primitives
-├── grid/          # Data Grid (useDataGrid, DataGrid, cells, features)
+├── grid/          # Niko Grid (useDataGrid, DataGrid, cells, features)
 ├── hooks/         # Table and grid hooks
 ├── config/        # Feature detection
 ├── lib/           # Utilities, constants, formatting
@@ -224,7 +224,7 @@ Interactive docs and examples: **[niko-table.com](https://niko-table.com)**
 - [Virtualization](https://niko-table.com/examples/virtualization-table/)
 - [Server-Side](https://niko-table.com/examples/server-side-table/)
 
-**Data Grid**
+**Niko Grid**
 
 - [Introduction](https://niko-table.com/data-grid/introduction/)
 - [Composed Grid](https://niko-table.com/examples/composed-grid/)

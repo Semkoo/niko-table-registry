@@ -1,6 +1,6 @@
 # hooks/
 
-Table-level React hooks (not the Data Grid hooks under `grid/hooks/`).
+Table-level React hooks (not the Niko Grid hooks under `grid/hooks/`).
 
 | Hook                          | Role                                |
 | ----------------------------- | ----------------------------------- |

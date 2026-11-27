@@ -169,7 +169,7 @@ your-project/
 │   │       │   ├── data-table-row-menu.tsx                         # Polymorphic RowMenuItem/Sub/… + DataTableRowMenuScope + useDataTableRow
 │   │       │   └── data-table-empty-state.tsx
 │   │       │
-│   │       ├── grid/                        # Data Grid (optional — editable spreadsheet layer)
+│   │       ├── grid/                        # Niko Grid (optional — editable spreadsheet layer)
 │   │       │   ├── core/                      # DataGrid, context, features, columns context
 │   │       │   ├── cells/                     # Text / number / select / date / checkbox editors
 │   │       │   ├── components/                # Clipboard, fill, move, toolbar, status bar, …
@@ -242,7 +242,7 @@ your-project/
 └── package.json
 ```
 
-Prefer the [CLI install](/getting-started/installation/) when you only need a subset — each registry item pulls its own dependencies. Manual copy is best when you want the full tree (including optional Data Grid under `grid/`).
+Prefer the [CLI install](/getting-started/installation/) when you only need a subset — each registry item pulls its own dependencies. Manual copy is best when you want the full tree (including optional Niko Grid under `grid/`).
 
 ## All Components
 
@@ -262,7 +262,7 @@ For URL state persistence in tables:
 
 ### Virtualization
 
-For virtualized tables (and Data Grid):
+For virtualized tables (and Niko Grid):
 
 <CliCommandCode action="install" command="@tanstack/react-virtual" />
 
@@ -279,6 +279,6 @@ Now that you have all the components installed, check out the examples:
 - [Search Table](/examples/search-table/) - Add search functionality
 - [Faceted Filter Table](/examples/faceted-filter-table/) - Add advanced filtering
 - [Column Resize Table](/examples/column-resize-table/) - Drag / double-click column widths
-- [Data Grid](/data-grid/introduction/) - Editable spreadsheet on top of the virtualized table
+- [Niko Grid](/data-grid/introduction/) - Editable spreadsheet on top of the virtualized table
 - [Advanced Table](/examples/advanced-table/) - All features combined
 - [Components catalog](/getting-started/components/) - Every `@niko-table/*` registry item

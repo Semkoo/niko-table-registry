@@ -22,4 +22,4 @@ import { DataGrid } from "@/components/niko-table/grid/core/data-grid"
 import { DataGridClipboard } from "@/components/niko-table/grid/components/grid-clipboard"
 ```
 
-Docs: [Data Grid introduction](https://niko-table.com/data-grid/introduction/) · [API](https://niko-table.com/data-grid/api/) · parent [README](../README.md)
+Docs: [Niko Grid introduction](https://niko-table.com/data-grid/introduction/) · [API](https://niko-table.com/data-grid/api/) · parent [README](../README.md)

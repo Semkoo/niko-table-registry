@@ -1,9 +1,9 @@
 "use client"
 
 /**
- * Server-Side Data Grid Example — infinite scroll + changeset saves
+ * Server-Side Niko Grid Example — infinite scroll + changeset saves
  *
- * An editable Data Grid backed by a server: rows stream in as the user
+ * A Niko Grid backed by a server: rows stream in as the user
  * scrolls (the virtualized body's `onNearEnd` fetches the next chunk before
  * the bottom is reached), get edited locally, and travel back as a
  * changeset (`created` / `updated` / `deleted`). The server validates the
