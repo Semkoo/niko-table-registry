@@ -8,7 +8,7 @@ export type Crumb = { label: string; href: string }
 /** Sidebar groups that have their own landing page, shown with the top-nav name. */
 const groupPages: Record<string, Crumb> = {
   Examples: { label: "Table Examples", href: "/examples/" },
-  "Data Grid Examples": {
+  "Niko Grid Examples": {
     label: "Grid Examples",
     href: "/data-grid/examples/",
   },

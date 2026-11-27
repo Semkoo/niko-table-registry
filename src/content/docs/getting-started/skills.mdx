@@ -1,6 +1,6 @@
 ---
 title: Skills
-description: Install the Niko Table agent skill so Cursor, Claude Code, and other AI assistants follow registry patterns for tables and Data Grid.
+description: Install the Niko Table agent skill so Cursor, Claude Code, and other AI assistants follow registry patterns for tables and Niko Grid.
 ---
 
 import { Steps, Aside } from "@astrojs/starlight/components"
@@ -21,7 +21,7 @@ import { GITHUB_REPO_URL } from "@/data/env"
   <DocsLink href="/contributing/documentation-guidelines/">Docs guidelines ↗</DocsLink>
 </div>
 
-An **agent skill** is a small, versionable package of instructions your AI assistant loads when you work on Niko Table. Installed once, it steers the model toward the right composition, direct imports (no barrels), and the examples on this site — for both **tables** and the **Data Grid**.
+An **agent skill** is a small, versionable package of instructions your AI assistant loads when you work on Niko Table. Installed once, it steers the model toward the right composition, direct imports (no barrels), and the examples on this site — for both **tables** and the **Niko Grid**.
 
 ## Install
 
@@ -45,7 +45,7 @@ Learn more about the skills format at [skills.sh](https://skills.sh).
 
 2. **Smoke-test in chat**
 
-   Open a new agent session in a React + shadcn project and ask something concrete, e.g. _“Add a Niko Table with search and pagination”_ or _“Scaffold a minimal Data Grid with text cells.”_
+   Open a new agent session in a React + shadcn project and ask something concrete, e.g. _“Add a Niko Table with search and pagination”_ or _“Scaffold a minimal Niko Grid with text cells.”_
 
 3. **Optional — manual install**
 
@@ -71,9 +71,9 @@ Learn more about the skills format at [skills.sh](https://skills.sh).
 - _“Wire up server-side pagination with `totalCount`.”_
 - _“Sync filters, sort, and pagination to the URL with nuqs.”_
 
-### Data Grid
+### Niko Grid
 
-- _“Turn this table into an editable Data Grid with text cells.”_
+- _“Turn this table into a Niko Grid with editable text cells.”_
 - _“Add clipboard and fill handle as opt-in children of `<DataGrid>`.”_
 - _“Use `useGridChanges` for a save-button CRUD change-set.”_
 - _“Add date and select cell editors with `resolve` validation.”_
@@ -87,12 +87,12 @@ Learn more about the skills format at [skills.sh](https://skills.sh).
 | **Layers**        | `DataTable*` (context) vs `Table*` (direct `table` prop)                                                                     |
 | **Filters / DnD** | Toolbar + column menus; row DnD needs `getRowId` and must not mix with sort/filter                                           |
 | **Server / URL**  | `manualPagination` / `pageCount` / `totalCount`; nuqs for shareable state                                                    |
-| **Data Grid**     | `useDataGrid` + `<DataGrid>` + typed cells; opt-in children; id-addressed edits; link to [Basic Grid](/examples/basic-grid/) |
+| **Niko Grid**     | `useDataGrid` + `<DataGrid>` + typed cells; opt-in children; id-addressed edits; link to [Basic Grid](/examples/basic-grid/) |
 
 Most `DataTableRoot` config is **auto-detected** from the components you mount — pass `config` mainly to override or for manual/server-side modes.
 
 <Aside type="tip">
-  For deep API and runnable demos, the skill should point at this site — not invent a parallel API. Prefer [Examples](/examples/) and [Data Grid Examples](/data-grid/examples/).
+  For deep API and runnable demos, the skill should point at this site — not invent a parallel API. Prefer [Examples](/examples/) and [Niko Grid Examples](/data-grid/examples/).
 </Aside>
 
 ## How it works

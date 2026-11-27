@@ -1,6 +1,6 @@
 # grid/core/
 
-Data Grid shell and context. Wrap `DataTable` with `<DataGrid grid={…}>` so keyboard, selection, and opt-in features share one provider.
+Niko Grid shell and context. Wrap `DataTable` with `<DataGrid grid={…}>` so keyboard, selection, and opt-in features share one provider.
 
 | File                            | Role                                                     |
 | ------------------------------- | -------------------------------------------------------- |

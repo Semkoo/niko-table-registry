@@ -1,6 +1,6 @@
 # grid/hooks/
 
-Headless Data Grid hooks. Import from the file path.
+Headless Niko Grid hooks. Import from the file path.
 
 | Hook                     | Role                                                                     |
 | ------------------------ | ------------------------------------------------------------------------ |

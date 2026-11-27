@@ -9,7 +9,7 @@ import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-c
 
 Drag any header's right edge to resize that column, or double-click the grip to autosize to the widest visible content. Drop `<DataTableColumnResize />` inside `DataTableRoot` to enable it: columns keep working with regular `DataTableHeader` / `DataTableBody` (no virtualization required). Opt out per column with `enableResizing: false`.
 
-Columns default to a **40px** drag floor (`minSize`) when resize is enabled: override per column with `minSize` / `maxSize`. Body cells use `truncate` so long text ellipsizes instead of spilling into the next column (same as the Data Grid / virtualized bodies).
+Columns default to a **40px** drag floor (`minSize`) when resize is enabled: override per column with `minSize` / `maxSize`. Body cells use `truncate` so long text ellipsizes instead of spilling into the next column (same as the Niko Grid / virtualized bodies).
 
 **Fill is on by default.** With resize enabled the table stretches to its container and one **flex column** (the first non-pinned data column) absorbs the leftover width, so a trailing actions column pins to the right edge instead of leaving dead space. Un-resized columns are also floored at their **header width** so labels never truncate on load. See [Fill and header-fit](#fill-and-header-fit) for pointing the fill at another column, opting columns out, or turning filling off for the table.
 

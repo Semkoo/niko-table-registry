@@ -278,7 +278,7 @@ export default defineConfig({
           ],
         },
         {
-          label: "Data Grid",
+          label: "Niko Grid",
           items: [
             { label: "Introduction", slug: "data-grid/introduction" },
             {
@@ -298,7 +298,7 @@ export default defineConfig({
           ],
         },
         {
-          label: "Data Grid Examples",
+          label: "Niko Grid Examples",
           items: [
             { label: "Gallery", slug: "data-grid/examples" },
             {
