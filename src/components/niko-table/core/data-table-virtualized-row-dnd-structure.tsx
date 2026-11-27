@@ -46,7 +46,10 @@ import type { RowData } from "@tanstack/react-table"
 // VirtualizedDraggableRow — internal row component for virtualized row DnD
 // ============================================================================
 
-interface VirtualizedDraggableRowProps {
+interface VirtualizedDraggableRowProps extends Omit<
+  React.ComponentProps<typeof TableRow>,
+  "children" | "ref"
+> {
   children: React.ReactNode
   /**
    * Stable row identity from `row.id`. Used by event delegation to
@@ -84,6 +87,8 @@ interface VirtualizedDraggableRowProps {
   measureRef?: (node: HTMLTableRowElement | null) => void
   columnLayoutSignature?: string
   rowMemoKey?: string
+  /** Merged with the sortable and measure refs (a context-menu trigger passes one). */
+  ref?: React.Ref<HTMLTableRowElement>
 }
 
 function VirtualizedDraggableRow({
@@ -96,6 +101,10 @@ function VirtualizedDraggableRow({
   measureRef,
   columnLayoutSignature,
   rowMemoKey,
+  ref,
+  // Props a `ContextMenuTrigger asChild` hands down (onContextMenu, style, ...).
+  style: styleProp,
+  ...rest
 }: VirtualizedDraggableRowProps) {
   const { transform, transition, setNodeRef, isDragging } = useSortable({
     id: rowId,
@@ -111,8 +120,10 @@ function VirtualizedDraggableRow({
       setNodeRef(node)
       elementRef.current = node
       if (measureRef) measureRef(node)
+      if (typeof ref === "function") ref(node)
+      else if (ref) ref.current = node
     },
-    [setNodeRef, measureRef],
+    [setNodeRef, measureRef, ref],
   )
 
   // Re-measure on expansion toggle — `measureRef` is idempotent and
@@ -134,8 +145,9 @@ function VirtualizedDraggableRow({
 
   return (
     <TableRow
+      {...rest}
       ref={setRefs}
-      style={style}
+      style={{ ...styleProp, ...style }}
       className={cn(
         "group flex w-full",
         isDragging && "bg-muted/50",

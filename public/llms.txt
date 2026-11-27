@@ -24,7 +24,7 @@
 
 - [Table Examples](https://niko-table.com/examples/): Gallery of every table example with live previews.
 - [Grid Examples](https://niko-table.com/data-grid/examples/): Gallery of every Niko Grid example with live previews.
-- [Blocks](https://niko-table.com/blocks/): Full, ready-to-copy screens built from Niko Table, e.g. [Customers Table](https://niko-table.com/blocks/customers-table/), [Orders Table](https://niko-table.com/blocks/orders-table/), [Support Tickets](https://niko-table.com/blocks/tickets-table/), [Team Members](https://niko-table.com/blocks/team-table/), [Invoices](https://niko-table.com/blocks/invoices-table/) and [API Request Logs](https://niko-table.com/blocks/request-logs-table/).
+- [Blocks](https://niko-table.com/blocks/): Full, ready-to-copy screens built from Niko Table, e.g. [Customers Table](https://niko-table.com/blocks/customers-table/), [Orders Table](https://niko-table.com/blocks/orders-table/), [Support Tickets](https://niko-table.com/blocks/tickets-table/), [Team Members](https://niko-table.com/blocks/team-table/), [Invoices](https://niko-table.com/blocks/invoices-table/), [API Request Logs](https://niko-table.com/blocks/request-logs-table/), [Inventory](https://niko-table.com/blocks/inventory-grid/), [Sprint Backlog](https://niko-table.com/blocks/backlog-table/), [Shipments](https://niko-table.com/blocks/shipments-table/) and [Transactions](https://niko-table.com/blocks/transactions-table/).
 
 ### Getting Started
 

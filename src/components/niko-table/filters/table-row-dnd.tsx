@@ -50,8 +50,14 @@ export interface TableRowDndProviderProps<TData extends RowData> {
   table: DataTableInstance<TData>
   /** The data array (needed for arrayMove reordering) */
   data: TData[]
-  /** Callback when rows are reordered. Receives the new data array. */
-  onReorder: (data: TData[]) => void
+  /**
+   * Callback when rows are reordered. Receives the new data array and which
+   * row id moved onto which.
+   */
+  onReorder: (
+    data: TData[],
+    move: { activeId: UniqueIdentifier; overId: UniqueIdentifier },
+  ) => void
   /** DnD modifiers. Defaults to [restrictToVerticalAxis]. */
   modifiers?: Modifier[]
 }
@@ -84,7 +90,10 @@ export function TableRowDndProvider<TData extends RowData>({
       if (active && over && active.id !== over.id) {
         const oldIndex = dataIds.indexOf(active.id)
         const newIndex = dataIds.indexOf(over.id)
-        onReorder(arrayMove(data, oldIndex, newIndex))
+        onReorder(arrayMove(data, oldIndex, newIndex), {
+          activeId: active.id,
+          overId: over.id,
+        })
       }
     },
     [dataIds, data, onReorder],
@@ -109,7 +118,10 @@ TableRowDndProvider.displayName = "TableRowDndProvider"
 // TableDraggableRow
 // ============================================================================
 
-export interface TableDraggableRowProps<TData extends RowData> {
+export interface TableDraggableRowProps<TData extends RowData> extends Omit<
+  React.ComponentProps<typeof TableRow>,
+  "children" | "ref"
+> {
   /** The row instance from TanStack Table */
   row: DataTableRow<TData>
   /**
@@ -120,6 +132,8 @@ export interface TableDraggableRowProps<TData extends RowData> {
   displayIndex?: number
   children: React.ReactNode
   className?: string
+  /** Merged with the sortable ref (a context-menu trigger passes one). */
+  ref?: React.Ref<HTMLTableRowElement>
 }
 
 export function TableDraggableRow<TData extends RowData>({
@@ -127,10 +141,23 @@ export function TableDraggableRow<TData extends RowData>({
   displayIndex = row.index,
   children,
   className,
+  ref,
+  // Props a `ContextMenuTrigger asChild` hands down (onContextMenu, style, ...).
+  style: styleProp,
+  ...rest
 }: TableDraggableRowProps<TData>) {
   const { transform, transition, setNodeRef, isDragging } = useSortable({
     id: row.id,
   })
+
+  const setRefs = React.useCallback(
+    (node: HTMLTableRowElement | null) => {
+      setNodeRef(node)
+      if (typeof ref === "function") ref(node)
+      else if (ref) ref.current = node
+    },
+    [setNodeRef, ref],
+  )
 
   const style: CSSProperties = {
     transform: CSS.Transform.toString(transform),
@@ -142,8 +169,9 @@ export function TableDraggableRow<TData extends RowData>({
 
   return (
     <TableRow
-      ref={setNodeRef}
-      style={style}
+      {...rest}
+      ref={setRefs}
+      style={{ ...styleProp, ...style }}
       data-row-index={displayIndex}
       data-row-id={row.id}
       data-state={row.getIsSelected() && "selected"}

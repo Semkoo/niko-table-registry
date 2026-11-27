@@ -1541,6 +1541,224 @@
           "target": "components/invoices-table/invoices-data.ts"
         }
       ]
+    },
+    {
+      "name": "backlog-table",
+      "type": "registry:block",
+      "title": "Sprint Backlog",
+      "description": "A sprint backlog you prioritize by dragging rows, with a capacity line that moves as you reorder, column order from a drag-and-drop view menu, handles that switch off while filtering, and move to top / bottom, status and remove actions.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": [
+        "https://niko-table.com/r/data-table.json",
+        "https://niko-table.com/r/data-table-search-filter.json",
+        "https://niko-table.com/r/data-table-faceted-filter.json",
+        "https://niko-table.com/r/data-table-clear-filter.json",
+        "https://niko-table.com/r/data-table-row-dnd.json",
+        "https://niko-table.com/r/data-table-view-dnd-menu.json",
+        "avatar",
+        "badge",
+        "button",
+        "dropdown-menu"
+      ],
+      "cssVars": {
+        "theme": {
+          "color-success": "var(--success)",
+          "color-warning": "var(--warning)"
+        },
+        "light": {
+          "success": "oklch(0.596 0.145 163.225)",
+          "warning": "oklch(0.666 0.179 58.318)"
+        },
+        "dark": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)"
+        }
+      },
+      "files": [
+        {
+          "path": "src/registry/new-york/blocks/backlog-table/backlog-table.tsx",
+          "type": "registry:component",
+          "target": "components/backlog-table/backlog-table.tsx"
+        },
+        {
+          "path": "src/registry/new-york/blocks/backlog-table/backlog-cells.tsx",
+          "type": "registry:component",
+          "target": "components/backlog-table/backlog-cells.tsx"
+        },
+        {
+          "path": "src/registry/new-york/blocks/backlog-table/backlog-format.ts",
+          "type": "registry:component",
+          "target": "components/backlog-table/backlog-format.ts"
+        },
+        {
+          "path": "src/registry/new-york/blocks/backlog-table/backlog-data.ts",
+          "type": "registry:component",
+          "target": "components/backlog-table/backlog-data.ts"
+        }
+      ]
+    },
+    {
+      "name": "shipments-table",
+      "type": "registry:block",
+      "title": "Shipments",
+      "description": "A wide logistics table you shape yourself: drag-resizable columns with saved widths, pin left / right / unpin and hide from each column menu, a Reset layout button, route and late ETA cells, and copy ID / mark delivered / flag exception actions.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": [
+        "https://niko-table.com/r/data-table.json",
+        "https://niko-table.com/r/data-table-search-filter.json",
+        "https://niko-table.com/r/data-table-faceted-filter.json",
+        "https://niko-table.com/r/data-table-clear-filter.json",
+        "https://niko-table.com/r/data-table-view-menu.json",
+        "https://niko-table.com/r/data-table-pagination.json",
+        "https://niko-table.com/r/data-table-column-sort.json",
+        "https://niko-table.com/r/data-table-column-pin.json",
+        "https://niko-table.com/r/data-table-column-hide.json",
+        "https://niko-table.com/r/data-table-column-resize.json",
+        "https://niko-table.com/r/data-table-column-sizing-persistence.json",
+        "badge",
+        "button",
+        "dropdown-menu"
+      ],
+      "cssVars": {
+        "theme": {
+          "color-success": "var(--success)",
+          "color-warning": "var(--warning)"
+        },
+        "light": {
+          "success": "oklch(0.596 0.145 163.225)",
+          "warning": "oklch(0.666 0.179 58.318)"
+        },
+        "dark": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)"
+        }
+      },
+      "files": [
+        {
+          "path": "src/registry/new-york/blocks/shipments-table/shipments-table.tsx",
+          "type": "registry:component",
+          "target": "components/shipments-table/shipments-table.tsx"
+        },
+        {
+          "path": "src/registry/new-york/blocks/shipments-table/shipments-layout.ts",
+          "type": "registry:component",
+          "target": "components/shipments-table/shipments-layout.ts"
+        },
+        {
+          "path": "src/registry/new-york/blocks/shipments-table/shipments-format.ts",
+          "type": "registry:component",
+          "target": "components/shipments-table/shipments-format.ts"
+        },
+        {
+          "path": "src/registry/new-york/blocks/shipments-table/shipments-data.ts",
+          "type": "registry:component",
+          "target": "components/shipments-table/shipments-data.ts"
+        }
+      ]
+    },
+    {
+      "name": "transactions-table",
+      "type": "registry:block",
+      "title": "Transactions Ledger",
+      "description": "A bank-style ledger that loads as you scroll: 20,000 transactions served 100 at a time by a fake server, a virtualized body, server-side search, category and type filters, money in and out totals, and a details panel with a copy ID button.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": [
+        "https://niko-table.com/r/data-table.json",
+        "https://niko-table.com/r/data-table-virtualized.json",
+        "https://niko-table.com/r/data-table-search-filter.json",
+        "https://niko-table.com/r/data-table-faceted-filter.json",
+        "https://niko-table.com/r/data-table-clear-filter.json",
+        "badge",
+        "button",
+        "dropdown-menu",
+        "sheet"
+      ],
+      "cssVars": {
+        "theme": {
+          "color-success": "var(--success)",
+          "color-warning": "var(--warning)"
+        },
+        "light": {
+          "success": "oklch(0.596 0.145 163.225)",
+          "warning": "oklch(0.666 0.179 58.318)"
+        },
+        "dark": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)"
+        }
+      },
+      "files": [
+        {
+          "path": "src/registry/new-york/blocks/transactions-table/transactions-table.tsx",
+          "type": "registry:component",
+          "target": "components/transactions-table/transactions-table.tsx"
+        },
+        {
+          "path": "src/registry/new-york/blocks/transactions-table/transaction-sheet.tsx",
+          "type": "registry:component",
+          "target": "components/transactions-table/transaction-sheet.tsx"
+        },
+        {
+          "path": "src/registry/new-york/blocks/transactions-table/transactions-format.ts",
+          "type": "registry:component",
+          "target": "components/transactions-table/transactions-format.ts"
+        },
+        {
+          "path": "src/registry/new-york/blocks/transactions-table/transactions-data.ts",
+          "type": "registry:component",
+          "target": "components/transactions-table/transactions-data.ts"
+        }
+      ]
+    },
+    {
+      "name": "inventory-grid",
+      "type": "registry:block",
+      "title": "Inventory Grid",
+      "description": "An editable product inventory on Niko Grid: typed cells (text, number, select, checkbox, date), inline validation, low-stock markers, live totals, an unsaved changes bar with Save and Discard, add, duplicate and delete product, undo and redo, copy and paste, and a virtualized body.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": [
+        "https://niko-table.com/r/data-table.json",
+        "https://niko-table.com/r/data-table-virtualized.json",
+        "https://niko-table.com/r/data-table-grid.json",
+        "https://niko-table.com/r/data-table-grid-changes.json",
+        "https://niko-table.com/r/data-table-column-resize.json",
+        "https://niko-table.com/r/data-table-search-filter.json",
+        "https://niko-table.com/r/data-table-faceted-filter.json",
+        "https://niko-table.com/r/data-table-clear-filter.json",
+        "button",
+        "dropdown-menu"
+      ],
+      "cssVars": {
+        "theme": {
+          "color-success": "var(--success)",
+          "color-warning": "var(--warning)"
+        },
+        "light": {
+          "success": "oklch(0.596 0.145 163.225)",
+          "warning": "oklch(0.666 0.179 58.318)"
+        },
+        "dark": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)"
+        }
+      },
+      "files": [
+        {
+          "path": "src/registry/new-york/blocks/inventory-grid/inventory-grid.tsx",
+          "type": "registry:component",
+          "target": "components/inventory-grid/inventory-grid.tsx"
+        },
+        {
+          "path": "src/registry/new-york/blocks/inventory-grid/inventory-format.ts",
+          "type": "registry:component",
+          "target": "components/inventory-grid/inventory-format.ts"
+        },
+        {
+          "path": "src/registry/new-york/blocks/inventory-grid/inventory-data.ts",
+          "type": "registry:component",
+          "target": "components/inventory-grid/inventory-data.ts"
+        }
+      ]
     }
   ]
 }
