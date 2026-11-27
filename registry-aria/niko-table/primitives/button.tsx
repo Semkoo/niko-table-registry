@@ -1,18 +1,33 @@
 "use client"
 
 /**
- * Niko Table's button primitive, React Aria build. Same API as the shadcn
- * Radix `Button` (native `<button>` props, `variant`, `size`, `asChild`), styled
- * with the React Aria shadcn `buttonVariants`. A native button (not the React
- * Aria `Button`) keeps `onClick` / `disabled` / `type` / `ref` working at every
- * Niko Table call site, and lets the overlay triggers wrap it in `Pressable`.
+ * Niko Table's button primitive, React Aria build: shadcn's React Aria
+ * `Button` behind the Radix `Button` API Niko Table calls it with (native
+ * `<button>` props, `variant`, `size`, `asChild`).
+ *
+ * - `onClick` goes to React Aria's `onClick`, its alias of `onPress`: a real
+ *   MouseEvent on click and a synthesized click for keyboard and screen-reader
+ *   presses, so `stopPropagation()` / `shiftKey` keep working.
+ * - `disabled` becomes `isDisabled`.
+ * - Everything else (title, tabIndex, role, aria-*, key and mouse handlers) goes
+ *   on the `<button>` through React Aria's `render`, as on a native button.
+ *   React Aria's Button would drop those attributes and stop key events.
+ *
+ * Overlay triggers (`PopoverTrigger asChild` and the rest) hand their press to
+ * this button, so an `asChild` trigger's child must be this Button (or
+ * shadcn's), as with shadcn's own React Aria triggers.
  */
 import * as React from "react"
 import { mergeProps } from "react-aria"
 import type { VariantProps } from "class-variance-authority"
 
-import { buttonVariants } from "@/components/ui/button"
+import {
+  Button as ButtonPrimitive,
+  buttonVariants,
+} from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+
+type OnPressClick = React.ComponentProps<typeof ButtonPrimitive>["onClick"]
 
 function Button({
   className,
@@ -25,8 +40,6 @@ function Button({
   VariantProps<typeof buttonVariants> & {
     asChild?: boolean
   }) {
-  const classes = cn(buttonVariants({ variant, size }), className)
-
   if (
     asChild &&
     React.isValidElement<React.HTMLAttributes<HTMLElement>>(children)
@@ -35,20 +48,43 @@ function Button({
     // own handlers and refs compose with the button's.
     return React.cloneElement(children, {
       ...mergeProps(children.props, { "data-slot": "button" }, props),
-      className: cn(classes, children.props.className),
+      className: cn(
+        buttonVariants({ variant, size }),
+        className,
+        children.props.className,
+      ),
     } as React.HTMLAttributes<HTMLElement>)
   }
 
+  const { ref, id, type, slot, disabled, onClick, onMouseDown, ...native } =
+    props
   return (
-    <button
-      data-slot="button"
-      data-variant={variant}
-      data-size={size}
-      className={classes}
-      {...props}
+    <ButtonPrimitive
+      ref={ref}
+      id={id}
+      type={type}
+      slot={slot}
+      variant={variant}
+      size={size}
+      className={className}
+      isDisabled={disabled}
+      onClick={onClick as OnPressClick}
+      render={domProps => (
+        <button
+          {...mergeProps(domProps, native)}
+          onMouseDown={event => {
+            // React Aria's press handler stops every left mousedown; a native
+            // button lets it bubble (the grid selects cells on mousedown).
+            event.stopPropagation = () => {}
+            domProps.onMouseDown?.(event)
+            delete (event as Partial<typeof event>).stopPropagation
+            onMouseDown?.(event)
+          }}
+        />
+      )}
     >
       {children}
-    </button>
+    </ButtonPrimitive>
   )
 }
 

@@ -81,27 +81,27 @@ function DropdownMenuTrigger({
   children,
   ...props
 }: React.ComponentProps<"button"> & { asChild?: boolean }) {
-  // MenuTrigger hands its press, keyboard and aria props to the Pressable.
   const isOpen = React.useContext(OverlayTriggerStateContext)?.isOpen ?? false
   const state = { "data-state": isOpen ? "open" : "closed" }
+  // Slot: MenuTrigger hands its press, keyboard and aria props to the child;
+  // the trigger's own props merge onto it.
   const child =
-    asChild &&
-    React.isValidElement<React.HTMLAttributes<HTMLElement>>(children) ? (
-      // Slot: the trigger's own props (refs, handlers, classes) merge onto the child.
-      React.cloneElement(
-        children,
-        mergeProps(
-          children.props,
-          props,
-          state,
-        ) as React.HTMLAttributes<HTMLElement>,
-      )
+    asChild && React.isValidElement<object>(children) ? (
+      React.cloneElement(children, mergeProps(children.props, props, state))
     ) : (
       <button type="button" {...props} {...state}>
         {children}
       </button>
     )
-  return <Pressable>{child as PressableChild}</Pressable>
+  // A host element (a plain <button>, <a>) cannot take React Aria's press
+  // itself, so Pressable gives it one. A component child (the Button
+  // primitive, shadcn's Button) takes it directly; wrapping it too would
+  // register the press twice.
+  return typeof child.type === "string" ? (
+    <Pressable>{child as PressableChild}</Pressable>
+  ) : (
+    child
+  )
 }
 
 function DropdownMenuContent({

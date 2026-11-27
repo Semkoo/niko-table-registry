@@ -3,15 +3,24 @@
 /**
  * Niko Table's popover primitive, React Aria build. Radix-shaped API
  * (`Popover open onOpenChange`, `PopoverTrigger asChild`, `PopoverContent
- * align side sideOffset`) on top of `react-aria-components` `Pressable` and the
- * React Aria shadcn `Popover` (a modal React Aria popover anchored to the
- * trigger through `triggerRef`).
+ * align side sideOffset`) on shadcn's React Aria `PopoverTrigger` (React Aria
+ * `DialogTrigger`, which owns the open state) and `Popover`.
+ *
+ * `PopoverTrigger asChild` hands the press to its child: the Button primitive
+ * (or shadcn's Button) takes it directly, a plain element through `Pressable`.
  */
 import * as React from "react"
 import { mergeProps } from "react-aria"
-import { Pressable, type Placement } from "react-aria-components"
+import {
+  OverlayTriggerStateContext,
+  Pressable,
+  type Placement,
+} from "react-aria-components"
 
-import { Popover as PopoverPrimitive } from "@/components/ui/popover"
+import {
+  Popover as PopoverPrimitive,
+  PopoverTrigger as PopoverRoot,
+} from "@/components/ui/popover"
 
 type Side = "top" | "right" | "bottom" | "left"
 type Align = "start" | "center" | "end"
@@ -23,23 +32,14 @@ function toPlacement(side: Side, align: Align): Placement {
   return `${side} ${align === "start" ? "top" : "bottom"}`
 }
 
-interface PopoverContextValue {
-  open: boolean
-  setOpen: (open: boolean) => void
-  triggerRef: React.RefObject<HTMLElement | null>
-}
-
-const PopoverContext = React.createContext<PopoverContextValue | null>(null)
-
-function usePopover(part: string) {
-  const context = React.useContext(PopoverContext)
-  if (!context) throw new Error(`${part} must be used within <Popover>`)
-  return context
+function useDataState() {
+  const isOpen = React.useContext(OverlayTriggerStateContext)?.isOpen ?? false
+  return isOpen ? "open" : "closed"
 }
 
 function Popover({
-  open: openProp,
-  defaultOpen = false,
+  open,
+  defaultOpen,
   onOpenChange,
   children,
 }: {
@@ -50,22 +50,14 @@ function Popover({
   modal?: boolean
   children?: React.ReactNode
 }) {
-  const [uncontrolledOpen, setUncontrolledOpen] = React.useState(defaultOpen)
-  const open = openProp ?? uncontrolledOpen
-  const triggerRef = React.useRef<HTMLElement>(null)
-  const setOpen = React.useCallback(
-    (next: boolean) => {
-      if (openProp === undefined) setUncontrolledOpen(next)
-      onOpenChange?.(next)
-    },
-    [openProp, onOpenChange],
-  )
-  const value = React.useMemo(
-    () => ({ open, setOpen, triggerRef }),
-    [open, setOpen],
-  )
   return (
-    <PopoverContext.Provider value={value}>{children}</PopoverContext.Provider>
+    <PopoverRoot
+      isOpen={open}
+      defaultOpen={defaultOpen}
+      onOpenChange={onOpenChange}
+    >
+      {children}
+    </PopoverRoot>
   )
 }
 
@@ -74,34 +66,24 @@ function PopoverTrigger({
   children,
   ...props
 }: React.ComponentProps<"button"> & { asChild?: boolean }) {
-  const { open, setOpen, triggerRef } = usePopover("PopoverTrigger")
-  const state = {
-    "aria-expanded": open,
-    "aria-haspopup": "dialog" as const,
-    "data-state": open ? "open" : "closed",
-  }
+  const state = { "data-state": useDataState() }
+  // Slot: the trigger's own props (refs, handlers, classes) merge onto the child.
   const child =
-    asChild &&
-    React.isValidElement<React.HTMLAttributes<HTMLElement>>(children) ? (
-      // Slot: the trigger's own props (refs, handlers, classes) merge onto the child.
-      React.cloneElement(
-        children,
-        mergeProps(
-          children.props,
-          props,
-          state,
-        ) as React.HTMLAttributes<HTMLElement>,
-      )
+    asChild && React.isValidElement<object>(children) ? (
+      React.cloneElement(children, mergeProps(children.props, props, state))
     ) : (
       <button type="button" {...props} {...state}>
         {children}
       </button>
     )
-  return (
-    <Pressable ref={triggerRef} onPress={() => setOpen(!open)}>
-      {/* Pressable types its child as a host element; ours forward ref + props. */}
-      {child as PressableChild}
-    </Pressable>
+  // A host element (a plain <button>, <a>) cannot take React Aria's press
+  // itself, so Pressable gives it one. A component child (the Button
+  // primitive, shadcn's Button) takes it directly; wrapping it too would
+  // register the press twice.
+  return typeof child.type === "string" ? (
+    <Pressable>{child as PressableChild}</Pressable>
+  ) : (
+    child
   )
 }
 
@@ -134,18 +116,14 @@ function PopoverContent({
   className?: string
   children?: React.ReactNode
 }) {
-  const { open, setOpen, triggerRef } = usePopover("PopoverContent")
   return (
     <PopoverPrimitive
       {...props}
-      triggerRef={triggerRef}
-      isOpen={open}
-      onOpenChange={setOpen}
       placement={toPlacement(side, align)}
       offset={sideOffset}
       crossOffset={alignOffset}
       className={className}
-      data-state={open ? "open" : "closed"}
+      data-state={useDataState()}
     >
       {id ? (
         <div id={id} className="contents">

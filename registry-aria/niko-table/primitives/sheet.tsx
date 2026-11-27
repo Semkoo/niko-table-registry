@@ -2,13 +2,17 @@
 
 /**
  * Niko Table's sheet primitive, React Aria build. Radix-shaped API
- * (`Sheet open onOpenChange`, `SheetClose asChild`,
- * `SheetContent`) on top of `react-aria-components` `Pressable` and the React
- * Aria shadcn `Sheet` (a React Aria modal), which owns focus and dismissal.
+ * (`Sheet open onOpenChange`, `SheetClose asChild`, `SheetContent`) on
+ * shadcn's React Aria `Sheet` (a React Aria modal, which owns focus and
+ * dismissal) in its controlled form. Niko Table opens sheets only through
+ * `open`, so there is no `SheetTrigger` and no React Aria `DialogTrigger`.
+ *
+ * `SheetClose asChild`: the Button primitive (or shadcn's Button) closes
+ * through React Aria's `slot="close"`, a plain element through `Pressable`.
  */
 import * as React from "react"
 import { mergeProps } from "react-aria"
-import { Pressable } from "react-aria-components"
+import { OverlayTriggerStateContext, Pressable } from "react-aria-components"
 
 import {
   Sheet as SheetModal,
@@ -19,80 +23,55 @@ import {
 } from "@/components/ui/sheet"
 
 type PressableChild = React.ComponentProps<typeof Pressable>["children"]
-
-interface SheetContextValue {
-  open: boolean
-  setOpen: (open: boolean) => void
-}
-
-const SheetContext = React.createContext<SheetContextValue | null>(null)
-
-function useSheet(part: string) {
-  const context = React.useContext(SheetContext)
-  if (!context) throw new Error(`${part} must be used within <Sheet>`)
-  return context
-}
-
-function Sheet({
-  open: openProp,
-  defaultOpen = false,
-  onOpenChange,
-  children,
-}: {
+type OpenProps = {
   open?: boolean
   defaultOpen?: boolean
   onOpenChange?: (open: boolean) => void
-  children?: React.ReactNode
-}) {
-  const [uncontrolledOpen, setUncontrolledOpen] = React.useState(defaultOpen)
-  const open = openProp ?? uncontrolledOpen
-  const setOpen = React.useCallback(
-    (next: boolean) => {
-      if (openProp === undefined) setUncontrolledOpen(next)
-      onOpenChange?.(next)
-    },
-    [openProp, onOpenChange],
-  )
-  const value = React.useMemo(() => ({ open, setOpen }), [open, setOpen])
-  return <SheetContext.Provider value={value}>{children}</SheetContext.Provider>
 }
 
-/** Pressable wrapper shared by the trigger and the close button. */
-function SheetAction({
-  asChild,
+/** Root props, read by `SheetContent`. */
+const SheetContext = React.createContext<OpenProps>({})
+
+function Sheet({
+  open,
+  defaultOpen,
+  onOpenChange,
   children,
-  onPress,
+}: OpenProps & { children?: React.ReactNode }) {
+  return (
+    <SheetContext.Provider value={{ open, defaultOpen, onOpenChange }}>
+      {children}
+    </SheetContext.Provider>
+  )
+}
+
+/** Slot for a close button: React Aria's Dialog closes on `slot="close"`. */
+function SheetClose({
+  asChild = false,
+  children,
   ...props
-}: React.ComponentProps<"button"> & {
-  asChild?: boolean
-  onPress: () => void
-}) {
+}: React.ComponentProps<"button"> & { asChild?: boolean }) {
+  const state = React.useContext(OverlayTriggerStateContext)
   const child =
-    asChild &&
-    React.isValidElement<React.HTMLAttributes<HTMLElement>>(children) ? (
-      // Slot: the trigger's own props (refs, handlers, classes) merge onto the child.
+    asChild && React.isValidElement<object>(children) ? (
       React.cloneElement(
         children,
-        mergeProps(children.props, props) as React.HTMLAttributes<HTMLElement>,
+        mergeProps(children.props, props, { slot: "close" }),
       )
     ) : (
       <button type="button" {...props}>
         {children}
       </button>
     )
-  return (
-    <Pressable onPress={onPress}>
-      {/* Pressable types its child as a host element; ours forward ref + props. */}
+  // A host element cannot take React Aria's press itself; Pressable gives it
+  // one. A component child closes through `slot="close"`.
+  return typeof child.type === "string" ? (
+    <Pressable onPress={() => state?.close()}>
       {child as PressableChild}
     </Pressable>
+  ) : (
+    child
   )
-}
-
-function SheetClose(
-  props: React.ComponentProps<"button"> & { asChild?: boolean },
-) {
-  const { setOpen } = useSheet("SheetClose")
-  return <SheetAction {...props} onPress={() => setOpen(false)} />
 }
 
 function SheetContent({
@@ -106,11 +85,12 @@ function SheetContent({
   showCloseButton?: boolean
   side?: "top" | "right" | "bottom" | "left"
 }) {
-  const { open, setOpen } = useSheet("SheetContent")
+  const { open, defaultOpen, onOpenChange } = React.useContext(SheetContext)
   return (
     <SheetModal
       isOpen={open}
-      onOpenChange={setOpen}
+      defaultOpen={defaultOpen}
+      onOpenChange={onOpenChange}
       side={side}
       className={className}
       showCloseButton={showCloseButton}
