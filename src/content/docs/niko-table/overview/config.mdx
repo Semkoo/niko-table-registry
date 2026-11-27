@@ -1,16 +1,16 @@
 ---
 title: Configuration
-description: Configuration settings and feature detection for the data table.
+description: Filter operators, sort icons, and automatic feature detection.
 ---
 
 import { GITHUB_REPO_URL } from "@/data/env"
 import DocsLink from "@/components/markdown/docs-link.astro"
 
-The `config/` directory contains configuration settings and feature detection utilities for the data table.
+The `config/` folder holds table settings and the code that detects which features you use.
 
 ## Data Table Configuration
 
-Runtime configuration values for filter operators, sort icons, and other constants.
+Constants for filter operators, sort icons, and labels.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/config/data-table.ts`} external>Source Code ↗</DocsLink>
@@ -18,7 +18,7 @@ Runtime configuration values for filter operators, sort icons, and other constan
 
 ### Filter Operators Configuration
 
-The configuration defines which operators are available for each filter variant:
+Each filter variant allows these operators:
 
 - **Text Operators**: `ilike`, `not.ilike`, `eq`, `neq`, `empty`, `not.empty`
 - **Numeric Operators**: `eq`, `neq`, `lt`, `lte`, `gt`, `gte`, `between`, `empty`, `not.empty`
@@ -29,23 +29,23 @@ The configuration defines which operators are available for each filter variant:
 
 ### Sort Icons Configuration
 
-Sort icons are configured per data type variant:
+Each data type has its own sort icons:
 
 - **Text**: `ArrowDownAZ` (asc), `ArrowDownZA` (desc), `ArrowUpDown` (unsorted)
 - **Number**: `ArrowDown01` (asc), `ArrowDown10` (desc), `ArrowUpDown` (unsorted)
 - **Date**: `ArrowUpDown` (asc), `ArrowUpDown` (desc), `Calendar` (unsorted)
-- **Boolean**: `XIcon` (asc — false first), `Check` (desc — true first), `ArrowUpDown` (unsorted)
+- **Boolean**: `XIcon` (asc, false first), `Check` (desc, true first), `ArrowUpDown` (unsorted)
 
 ### Sort Labels
 
-Human-readable labels for sort directions:
+Labels shown for each sort direction:
 
 - **Ascending**: "Asc" (text), "Low to High" (number), "Oldest First" (date), "False First" (boolean)
 - **Descending**: "Desc" (text), "High to Low" (number), "Newest First" (date), "True First" (boolean)
 
 ## Feature Detection
 
-Automatic feature detection from component tree to enable/disable table features.
+The table reads your components and turns on the features they need.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/config/feature-detection.ts`} external>Source Code ↗</DocsLink>
@@ -53,7 +53,7 @@ Automatic feature detection from component tree to enable/disable table features
 
 ### detectFeaturesFromChildren
 
-Recursively searches for components and aggregates feature requirements. Automatically detects which features should be enabled based on the components used in the table.
+Walks your component tree and collects the features it needs. For example, a pagination component turns pagination on.
 
 ```tsx showLineNumbers
 import { detectFeaturesFromChildren } from "@/components/niko-table/config/feature-detection"
@@ -92,17 +92,17 @@ interface FeatureRequirements {
 
 #### Performance
 
-The function uses Map caching to improve performance:
+Results are cached in a Map:
 
 - **First detection**: 50-150ms (full tree walk)
 - **Cached detection**: ~0ms (instant lookup)
 - **Cache size**: Maximum 50 entries with LRU-style eviction
 
-Caching is only enabled on the client-side to prevent SSR/CSR hydration mismatches.
+Caching runs only on the client. This avoids server/client hydration mismatches.
 
 ### registerComponentFeatures
 
-Register a component's feature requirements. Allows third-party components to declare their needs.
+Declares which features a component needs. Use it for your own components.
 
 ```tsx showLineNumbers
 import { registerComponentFeatures } from "@/components/niko-table/config/feature-detection"
@@ -121,7 +121,7 @@ registerComponentFeatures("MyCustomFilter", {
 
 ### getRegisteredComponents
 
-Get all registered components and their features (for debugging).
+Lists every registered component and its features. Useful for debugging.
 
 ```tsx showLineNumbers
 import { getRegisteredComponents } from "@/components/niko-table/config/feature-detection"
@@ -136,7 +136,7 @@ const registered = getRegisteredComponents()
 
 ## Registered Components
 
-The following components are automatically registered with their feature requirements:
+These components are registered for you:
 
 ### Pagination Components
 

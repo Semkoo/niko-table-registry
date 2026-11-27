@@ -6,11 +6,11 @@ description: Server-side pagination, sorting, and filtering behind a database-ag
 import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
 import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
 
-Hands pagination, sorting, and filtering off to your API and uses [TanStack Query](https://tanstack.com/query/latest) for caching, background revalidation, and request dedup. The table only ever talks to one function with a serializable request shape — so it works with **any database or backend**: SQL, Prisma, Drizzle, Supabase, REST, GraphQL. State lives in `useState` only; a refresh resets filters — use the [Server-Side Nuqs Table](/examples/server-side-nuqs-table/) if you also need URL persistence.
+Hands pagination, sorting, and filtering to your API, and uses [TanStack Query](https://tanstack.com/query/latest) for caching, background refresh, and request dedup. Use it for large datasets that live behind an API. The table calls one function with a serializable request, so it works with **any database or backend**: SQL, Prisma, Drizzle, Supabase, REST, GraphQL. State lives in `useState` only, so a refresh resets filters. If you need the URL to keep state, use the [Server-Side Nuqs Table](/examples/server-side-nuqs-table/).
 
 ## Live demo (mocked)
 
-The demo runs against a **mock server** — an in-memory array of 2,000 products plus simulated latency — so every filter, sort, and page works out of the box with no database. Everything in its clearly-marked `MOCK SERVER` section is a stand-in for your backend.
+The demo runs against a **mock server**: an in-memory array of 2,000 products with simulated delay. Every filter, sort, and page works without a database. Everything in its clearly marked `MOCK SERVER` section stands in for your backend.
 
 <CodePreview demo="niko-table/server-side-state" />
 
@@ -59,11 +59,11 @@ export default function RootLayout({ children }) {
 }
 ```
 
-The example bundles its own provider so it stays copy-paste runnable — remove that wrapper once your root provides one.
+The example includes its own provider so it runs as copied. Remove that wrapper once your root provides one.
 
 ## The wire contract
 
-This is the heart of the example. The table never talks to a database — it sends ONE serializable object to your API on every change:
+This is the core of the example. The table never talks to a database. On every change it sends ONE serializable object to your API:
 
 ```tsx showLineNumbers title="the request your backend receives"
 type ProductQuery = {
@@ -85,7 +85,7 @@ type ProductQueryResult = {
 }
 ```
 
-Swapping the demo's mock for a real backend is one function:
+To use a real backend, replace one function:
 
 ```tsx showLineNumbers title="api.ts"
 async function fetchProducts(query: ProductQuery): Promise<ProductQueryResult> {
@@ -100,7 +100,7 @@ async function fetchProducts(query: ProductQuery): Promise<ProductQueryResult> {
 
 ### What arrives in `columnFilters`
 
-Each entry is `{ id, value }`. Two value shapes travel in the same array — dispatch on shape server-side:
+Each entry is `{ id, value }`. Two kinds of value travel in the same array, so check the shape on the server:
 
 | Source                                  | Value shape                                                       |
 | --------------------------------------- | ----------------------------------------------------------------- |
@@ -109,9 +109,9 @@ Each entry is `{ id, value }`. Two value shapes travel in the same array — dis
 | Single date filter                      | bare ms timestamp (number)                                        |
 | Boolean filter                          | `boolean`                                                         |
 | Text filter                             | `string`                                                          |
-| Advanced filter menu (AND-joined rules) | `ExtendedColumnFilter` — `{ id, operator, value, joinOperator }`  |
+| Advanced filter menu (AND-joined rules) | `ExtendedColumnFilter`, `{ id, operator, value, joinOperator }`   |
 
-Translate operators to your query builder:
+Map the operators to your query builder:
 
 ```text
 ILIKE / NOT_ILIKE   → WHERE name ILIKE '%' || $1 || '%'
@@ -125,7 +125,7 @@ search (string)     → ILIKE across columns, or full-text search
 
 ### OR / MIXED logic rides in `search`
 
-TanStack combines `columnFilters` with AND only. When the advanced filter menu's rules use OR (or mixed) join logic, Niko Table routes them through the `globalFilter` slot instead — so `query.search` is either a plain search string or `{ filters: ExtendedColumnFilter[], joinOperator: "or" | "mixed" }`. The mock server in the example shows the exact dispatch.
+TanStack combines `columnFilters` with AND only. When the advanced filter menu uses OR (or mixed) join logic, Niko Table sends those rules through the `globalFilter` slot instead. So `query.search` is either a plain search string or `{ filters: ExtendedColumnFilter[], joinOperator: "or" | "mixed" }`. The example's mock server shows the exact handling.
 
 ## Manual modes
 
@@ -151,7 +151,7 @@ Tell the table the server owns pagination, sorting, and filtering:
 >
 ```
 
-Pass `totalCount` to `<DataTablePagination totalCount={totalCount} />` so the row count reflects the server, not the current page. Reset `pageIndex` to `0` in every filter/sort handler — the old page may not exist in the new result set.
+Pass `totalCount` to `<DataTablePagination totalCount={totalCount} />` so the row count comes from the server, not the current page. Reset `pageIndex` to `0` in every filter and sort handler, because the old page may not exist in the new results.
 
 ## Fetching with TanStack Query
 
@@ -180,13 +180,13 @@ const { data: queryData, isLoading, isFetching, error } = useQuery({
 })
 ```
 
-- **`keepPreviousData`** prevents UI jumps during pagination.
-- **Debouncing `columnFilters`** batches rapid faceted-filter clicks into a single request.
-- `isLoading` (initial load, show skeleton) vs `isFetching` (any request in flight, show a subtle spinner).
+- **`keepPreviousData`** stops the UI jumping during pagination.
+- **Debouncing `columnFilters`** batches quick faceted-filter clicks into one request.
+- `isLoading` is the first load (show a skeleton). `isFetching` is any request in flight (show a small spinner).
 
 ## Cross-filter facets
 
-The killer feature for server-side filtering: the server reports, per facetable column, which values still exist under every **other** active filter — each column's own filter excluded, so its unselected options stay visible. Selecting a brand narrows the category counts, like a shopping-site sidebar.
+The server reports, for each facetable column, which values still exist under every **other** active filter. Each column's own filter is left out, so its unselected options stay visible. Picking a brand narrows the category counts, like a shopping-site sidebar.
 
 ```sql
 -- per facet column, with that column's own filter excluded:
@@ -203,11 +203,11 @@ const columns = useMemo(() => buildColumns(queryData?.facets), [queryData?.facet
 <DataTableColumnSliderFilterMenu range={facets?.range.price} />
 ```
 
-Set `autoOptions: false` in the meta of faceted columns — the table only holds one page of rows, so client-side option generation would be wrong.
+Set `autoOptions: false` in the meta of faceted columns. The table holds only one page of rows, so building options on the client would be wrong.
 
 ## The advanced filter menu, controlled
 
-The `DataTableFilterMenu` is controlled so its rules can be routed to the right state slot (AND rules → `columnFilters`, OR/MIXED rules → `globalFilter`) while preserving the column-widget filters:
+`DataTableFilterMenu` is controlled, so its rules can go to the right state slot (AND rules to `columnFilters`, OR and MIXED rules to `globalFilter`) while the column-widget filters stay intact:
 
 ```tsx showLineNumbers
 const menuFilters = useMemo(() => {
@@ -226,7 +226,7 @@ See `handleMenuFiltersChange` in the example for the ~30-line router built on `p
 
 ## Error handling
 
-TanStack Query surfaces errors with retry logic; render an error card with a manual `refetch()` button. The mock server fails every 20th page so you can see it in the demo.
+TanStack Query reports errors and retries. Show an error card with a manual `refetch()` button. The mock server fails every 20th page so you can see it in the demo.
 
 ```tsx showLineNumbers
 const { error, refetch } = useQuery({ ..., retry: 1 })
@@ -236,21 +236,21 @@ const { error, refetch } = useQuery({ ..., retry: 1 })
 
 **✅ Use Server-Side Table when:**
 
-- Working with large datasets (thousands+ rows)
-- Data lives behind an API / database
+- You work with large datasets (thousands of rows or more)
+- The data lives behind an API or database
 - You want automatic caching and background updates
-- You don't need URL state persistence
+- You don't need state kept in the URL
 
 **❌ Consider other options when:**
 
-- Working with small datasets (< 1000 rows) — client-side filtering is simpler
-- You need shareable/bookmarkable views — use [Server-Side Nuqs Table](/examples/server-side-nuqs-table/)
+- You have a small dataset (under 1000 rows): client-side filtering is simpler
+- You need shareable or bookmarkable views: use [Server-Side Nuqs Table](/examples/server-side-nuqs-table/)
 
 ## Next Steps
 
 - [Drizzle ORM](/examples/drizzle-orm/): implement this wire contract with Drizzle + Postgres
 - [Drizzle ORM + Nuqs](/examples/drizzle-orm-nuqs/): Drizzle SQL layer with URL state
 - [Server-Side Nuqs Table](/examples/server-side-nuqs-table/): same contract, state persisted in the URL
-- [Server-Side Grid](/examples/server-side-grid/) — Niko Grid editing against a server
-- [Advanced Table](/examples/advanced-table/) — the filter menu in depth
+- [Server-Side Grid](/examples/server-side-grid/): Niko Grid editing against a server
+- [Advanced Table](/examples/advanced-table/): the filter menu in depth
 - [TanStack Query Docs](https://tanstack.com/query/latest)

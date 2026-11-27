@@ -1,18 +1,24 @@
 ---
 title: Drizzle ORM + Nuqs
-description: "The Drizzle ORM server-side table with the full table state persisted in the URL via nuqs: shareable, bookmarkable, refresh-proof."
+description: "The Drizzle ORM server-side table with its state kept in the URL via nuqs, so views can be shared and bookmarked."
 ---
 
 import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
 import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
 
-The [Drizzle ORM](/examples/drizzle-orm/) guide turns every filter, sort, and page into real SQL. This variant keeps that exact backend and moves the table state into the URL with [nuqs](https://nuqs.dev/), so any filtered/sorted/paginated view is shareable, bookmarkable, and survives reload. The Drizzle query-building code (`buildWhere` / `buildOrderBy` / `computeFacets`) is unchanged: only the state source flips from local `useState` to `useQueryStates`.
+This is the [Drizzle ORM](/examples/drizzle-orm/) table with its state stored in the URL via [nuqs](https://nuqs.dev/). Use it when users should be able to share, bookmark or reload a filtered, sorted or paginated view.
 
-Read the [Drizzle ORM](/examples/drizzle-orm/) guide for the SQL layer and the [Server-Side Nuqs Table](/examples/server-side-nuqs-table/) for the URL layer in depth; this page only shows how they combine.
+- **Same backend.** The query code (`buildWhere`, `buildOrderBy`, `computeFacets`) does not change.
+- **Different state source.** Local `useState` becomes `useQueryStates`.
+
+For the details, read the [Drizzle ORM](/examples/drizzle-orm/) guide (SQL layer) and the [Server-Side Nuqs Table](/examples/server-side-nuqs-table/) (URL layer). This page only shows how they combine.
 
 ## Live demo (mocked)
 
-The demo runs this guide's Drizzle code against a mocked query builder in your browser and shows the **Generated SQL** for the current view. Filter or sort, then reload the page: the view is restored from the URL. The toolbar **Category** and **Brand** facets read server-computed counts and narrow to the values still present in the results.
+The demo runs this guide's Drizzle code against a mocked query builder in your browser. It shows the **Generated SQL** for the current view.
+
+- Filter or sort, then reload. The URL restores the view.
+- The **Category** and **Brand** facets use server-computed counts. They narrow to values still in the results.
 
 <CodePreview demo="niko-table/drizzle-nuqs-state" />
 
@@ -30,15 +36,18 @@ Install additional dependencies:
 
 ## What changes vs the Drizzle guide
 
-Only the state layer. The data fetch, `buildWhere` / `buildOrderBy` / `computeFacets`, and the API route are identical.
+Only the state layer changes. The data fetch, `buildWhere`, `buildOrderBy`, `computeFacets` and the API route stay the same.
 
-- **State lives in the URL.** `useQueryStates` replaces the `useState` slices for page, sorting, filters, search, and column visibility: same parsers as the [Server-Side Nuqs Table](/examples/server-side-nuqs-table/#url-state-parsers).
-- **The query key is the URL.** TanStack Query keys off the URL-derived state, so a shared link resolves to the same cache entry, and an SSR page can run the same query from the incoming search params.
-- **`filterId` is stripped on write** (`serializeFiltersForUrl`) and **regenerated on read** (`normalizeFiltersFromUrl`) to keep URLs short. The advanced menu's AND rules live in the `filters` param; OR/MIXED rules move to the `global` param.
+- **State lives in the URL.** `useQueryStates` replaces the `useState` slices for page, sorting, filters, search and column visibility. It uses the same parsers as the [Server-Side Nuqs Table](/examples/server-side-nuqs-table/#url-state-parsers).
+- **The query key is the URL.** TanStack Query keys off the URL state.
+  - A shared link hits the same cache entry.
+  - An SSR page can run the same query from the incoming search params.
+- **`filterId` is stripped on write** (`serializeFiltersForUrl`) and **regenerated on read** (`normalizeFiltersFromUrl`). This keeps URLs short.
+- **Filter rules split by type.** The advanced menu's AND rules live in the `filters` param. OR and MIXED rules move to the `global` param.
 
 ## Toolbar facets on a server-side table
 
-The Category and Brand toolbar facets get their options from the server (`computeFacets`), so they need server counts, not client-derived ones:
+The Category and Brand facets get their options from the server (`computeFacets`). They need server counts, not counts from the client:
 
 ```tsx showLineNumbers
 <DataTableFacetedFilter
@@ -51,20 +60,23 @@ The Category and Brand toolbar facets get their options from the server (`comput
 />
 ```
 
-The client only holds the current page, so counting and narrowing must come from the server. `dynamicCounts={false}` and `limitToFilteredRows={false}` turn off the client-side passes; the example narrows the list itself: dropping `count === 0` options while keeping any currently-selected value so it stays removable.
+The client only holds the current page, so the server must count and narrow.
+
+- `dynamicCounts={false}` and `limitToFilteredRows={false}` turn off the client-side passes.
+- The example narrows the list itself. It drops `count === 0` options but keeps any selected value so you can still remove it.
 
 ## When to Use
 
 **✅ Use Drizzle ORM + Nuqs when:**
 
-- You're building the [Drizzle ORM](/examples/drizzle-orm/) server-side table, and
-- Views must be shareable, bookmarkable, or survive refreshes
-- You want SSR to render the first paint from the URL's search params
+- You use the [Drizzle ORM](/examples/drizzle-orm/) server-side table
+- Views must be shareable, bookmarkable, or survive a refresh
+- You want SSR to render the first paint from the URL search params
 
 **❌ Consider other options when:**
 
-- URL noise matters more than shareability: use the [Drizzle ORM](/examples/drizzle-orm/) guide as-is
-- You're not on Drizzle: the [Server-Side Nuqs Table](/examples/server-side-nuqs-table/) shows the same URL layer over the database-agnostic wire contract
+- A clean URL matters more than shareability: use the [Drizzle ORM](/examples/drizzle-orm/) guide as is
+- You do not use Drizzle: the [Server-Side Nuqs Table](/examples/server-side-nuqs-table/) shows the same URL layer over a database-agnostic API
 
 ## Next Steps
 

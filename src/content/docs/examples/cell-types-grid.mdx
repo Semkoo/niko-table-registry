@@ -1,13 +1,17 @@
 ---
 title: Cell Types
-description: "Built-in editors (text, number, currency, checkbox, date, select) and how to write your own."
+description: "The built-in cell editors (text, number, currency, checkbox, date, select) and how to write your own."
 ---
 
 import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
 import CollapsiblePreview from "@/components/markdown/collapsible-preview.astro"
 import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
 
-Cheap **display** shell for every visible cell. Heavy **editor** mounts only while editing. Validity comes from your `resolve`. The grid stays type-agnostic.
+This example shows the built-in cell editors. Use it to pick an editor per column or to write your own.
+
+- **Display shell:** every visible cell renders a light display.
+- **Editor:** the heavier editor mounts only while you edit.
+- **Validity:** your `resolve` function decides it. The grid does not know about types.
 
 <CodePreview demo="niko-table/grid-cell-types" />
 
@@ -19,7 +23,7 @@ Cheap **display** shell for every visible cell. Heavy **editor** mounts only whi
 
 <CliCommandCode action="run" command="shadcn@latest add @niko-table/data-table-grid" />
 
-Date / select also need:
+Date and select also need:
 
 <CliCommandCode action="run" command="shadcn@latest add calendar popover command button" />
 
@@ -98,11 +102,11 @@ function resolveCell(columnId: string, raw: string): CellState<string> {
 }
 ```
 
-Pass the same `resolve` to `<DataGridClipboard resolveCell={…} />` so bad pastes stay visible (red) instead of dropping.
+Pass the same `resolve` to `<DataGridClipboard resolveCell={…} />`. Bad pastes then stay visible (in red) instead of being dropped.
 
 ## Custom cells
 
-Satisfy `CellEditorProps`. Render `GridCellDisplay` when idle; mount your editor only when `isEditing`.
+Accept `CellEditorProps`. Render `GridCellDisplay` when idle. Mount your editor only when `isEditing`.
 
 ```tsx showLineNumbers
 export function MyCell(props: CellEditorProps) {
@@ -120,7 +124,7 @@ export function MyCell(props: CellEditorProps) {
 
 ### Portaled editors
 
-If the interactive surface lives in a portal (`Popover`, calendar, combobox list), tag it with `data-grid-cell-editor` so mousedown inside it does not clear `editingCell` before commit:
+If the editor renders in a portal (`Popover`, calendar, combobox list), add `data-grid-cell-editor` to it. Otherwise a click inside it clears `editingCell` before the edit is saved:
 
 ```tsx
 <PopoverContent data-grid-cell-editor="">
@@ -128,7 +132,7 @@ If the interactive surface lives in a portal (`Popover`, calendar, combobox list
 </PopoverContent>
 ```
 
-Built-in date/combobox cells already do this. Full example:
+The built-in date and combobox cells already do this. Full example:
 
 <CodePreview demo="niko-table/grid-portaled-cell" />
 

@@ -1,16 +1,16 @@
 ---
 title: Library Utilities
-description: Utility functions, constants, and helper functions for the data table.
+description: Constants, filter and format helpers, filter functions, and layout helpers.
 ---
 
 import { GITHUB_REPO_URL } from "@/data/env"
 import DocsLink from "@/components/markdown/docs-link.astro"
 
-The `lib/` directory contains utility functions, constants, and helper functions used throughout the data table components.
+The `lib/` folder holds the constants and helper functions the data table uses.
 
 ## Constants
 
-Centralized constants for join operators, filter operators, filter variants, and UI configuration.
+Shared constants for join operators, filter operators, filter variants, and UI settings.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/lib/constants.ts`} external>Source Code ↗</DocsLink>
@@ -18,7 +18,7 @@ Centralized constants for join operators, filter operators, filter variants, and
 
 ### JOIN_OPERATORS
 
-Join operators for combining multiple filters.
+How several filters combine.
 
 | Constant | Value     | Description                          |
 | -------- | --------- | ------------------------------------ |
@@ -28,7 +28,7 @@ Join operators for combining multiple filters.
 
 ### FILTER_OPERATORS
 
-Filter operator constants defining the comparison logic. Naming follows SQL/PostgREST standards.
+How a filter compares values. Names follow SQL and PostgREST.
 
 | Constant    | Value         | Description                               |
 | ----------- | ------------- | ----------------------------------------- |
@@ -49,7 +49,7 @@ Filter operator constants defining the comparison logic. Naming follows SQL/Post
 
 ### FILTER_VARIANTS
 
-Filter variant constants defining the UI control type.
+Which UI control a filter uses.
 
 | Constant       | Value           | Description            |
 | -------------- | --------------- | ---------------------- |
@@ -74,7 +74,7 @@ Global default values.
 
 ### UI_CONSTANTS
 
-UI-related constraints and settings.
+UI limits and settings.
 
 | Property                    | Value | Description                                              |
 | --------------------------- | ----- | -------------------------------------------------------- |
@@ -84,7 +84,7 @@ UI-related constraints and settings.
 
 ### KEYBOARD_SHORTCUTS
 
-Default keyboard shortcut key mappings.
+Default shortcut keys.
 
 | Property        | Value         | Description                       |
 | --------------- | ------------- | --------------------------------- |
@@ -97,7 +97,7 @@ Default keyboard shortcut key mappings.
 
 ## Data Table Utilities
 
-Helper functions for filter operations and validation.
+Helpers for filter operators and validation.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/lib/data-table.ts`} external>Source Code ↗</DocsLink>
@@ -105,7 +105,7 @@ Helper functions for filter operations and validation.
 
 ### getFilterOperators
 
-Get available filter operators for a given filter variant.
+Returns the operators a filter variant allows.
 
 ```tsx showLineNumbers
 import { getFilterOperators } from "@/components/niko-table/lib/data-table"
@@ -129,7 +129,7 @@ Array of operator objects with `label` and `value` properties.
 
 ### getDefaultFilterOperator
 
-Get the default filter operator for a given filter variant.
+Returns the default operator for a filter variant.
 
 ```tsx showLineNumbers
 import { getDefaultFilterOperator } from "@/components/niko-table/lib/data-table"
@@ -151,7 +151,7 @@ const defaultOp = getDefaultFilterOperator(FILTER_VARIANTS.TEXT)
 
 ### getValidFilters
 
-Filter out invalid filters from an array.
+Removes invalid filters from an array.
 
 ```tsx showLineNumbers
 import { getValidFilters } from "@/components/niko-table/lib/data-table"
@@ -172,7 +172,7 @@ const validFilters = getValidFilters(filters)
 
 ## Format Utilities
 
-Formatting functions for dates, labels, and query strings.
+Functions that format dates, labels, and query strings.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/lib/format.ts`} external>Source Code ↗</DocsLink>
@@ -180,7 +180,7 @@ Formatting functions for dates, labels, and query strings.
 
 ### formatDate
 
-Format a date value into a human-readable string.
+Turns a date into readable text.
 
 ```tsx showLineNumbers
 import { formatDate } from "@/components/niko-table/lib/format"
@@ -205,7 +205,7 @@ formatDate(new Date(), { month: "short", day: "numeric" })
 
 ### formatLabel
 
-Format a value into a human-readable label. Capitalizes first letter of each word and replaces hyphens/underscores with spaces.
+Turns a value into a readable label. It capitalizes each word and swaps hyphens and underscores for spaces.
 
 ```tsx showLineNumbers
 import { formatLabel } from "@/components/niko-table/lib/format"
@@ -229,7 +229,7 @@ formatLabel("false") // "No"
 
 ### daysAgo
 
-Create a date relative to the current date by subtracting days.
+Returns the date N days before today.
 
 ```tsx showLineNumbers
 import { daysAgo } from "@/components/niko-table/lib/format"
@@ -251,7 +251,7 @@ daysAgo(365) // 365 days ago (1 year)
 
 ### formatQueryString
 
-Format URL query parameters into a human-readable query string for display.
+Turns URL query parameters into a readable query string for display.
 
 ```tsx showLineNumbers
 import { formatQueryString } from "@/components/niko-table/lib/format"
@@ -275,13 +275,20 @@ formatQueryString(urlParams, urlKeys)
 
 ## Table Features
 
-In Table v8, every behavior was bundled into `useReactTable`. In Table v9 you import only what you need — the same idea as this registry's **Composable** principle: mix and match `DataTable*` components, install only the registry pieces you need. Registry items are that idea at the UI layer; this file is that idea at the table-engine layer.
+In Table v8, `useReactTable` bundled every feature. In Table v9 you import only what you need.
+
+- **Same idea as the registry:** mix and match `DataTable*` components and install only the pieces you use.
+- **Two layers:** registry items do this for the UI. This file does it for the table engine.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/lib/data-table-features.ts`} external>Source Code ↗</DocsLink>
 </div>
 
-A feature's API only exists on the table instance once it is registered. `DataTableRoot` passes this object to `useTable` for you. Feature detection / `enable*` flags still decide _when_ behavior runs; registration decides _whether the API exists at all_.
+A feature's API exists on the table instance only once you register it.
+
+- **Passed for you:** `DataTableRoot` hands this object to `useTable`.
+- **Registration:** decides _whether the API exists_.
+- **Feature detection and `enable*` flags:** decide _when_ the behavior runs.
 
 ### features
 
@@ -292,11 +299,15 @@ import { features } from "@/components/niko-table/lib/data-table-features"
 const table = useTable({ features, data, columns })
 ```
 
-`DataTableFeatures` is the type of that object, and every `DataTable*` type alias is pre-bound to it (`DataTableInstance<TData>` is `Table<DataTableFeatures, TData>`, and so on), so you rarely name it directly.
+`DataTableFeatures` is the type of that object. Every `DataTable*` type alias is bound to it (`DataTableInstance<TData>` is `Table<DataTableFeatures, TData>`, and so on), so you rarely name it yourself.
 
 ### createDataTableColumnHelper
 
-Pre-bound TanStack Table v9 column helper. TanStack's docs recommend `createColumnHelper()` first for static columns (typed `getValue()` in cells); the raw v9 helper needs the features generic hand-threaded (`createColumnHelper<DataTableFeatures, TData>()`). This wraps it the same way `DataTableColumnDef<TData>` pre-binds features.
+A TanStack Table v9 column helper with features already bound.
+
+- **Why:** TanStack recommends `createColumnHelper()` for static columns (typed `getValue()` in cells).
+- **Problem:** the raw v9 helper needs the features generic passed by hand (`createColumnHelper<DataTableFeatures, TData>()`).
+- **Fix:** this wraps it, the same way `DataTableColumnDef<TData>` binds features.
 
 ```tsx showLineNumbers
 import { createDataTableColumnHelper } from "@/components/niko-table/lib/data-table-features"
@@ -316,11 +327,20 @@ const columns = [
 ]
 ```
 
-Use the helper when you want typed `getValue()` in cells. Helper results belong in a `DataTableColumns<TData>` array (what `DataTableRoot` accepts). Use a plain `DataTableColumnDef<TData>[]` for dynamic columns and maximum copy-paste-ability — that is still the default in examples.
+- **Use the helper** for typed `getValue()` in cells. Put the results in a `DataTableColumns<TData>` array (what `DataTableRoot` accepts).
+- **Use a plain `DataTableColumnDef<TData>[]`** for dynamic columns and easy copy-paste. Examples still use this by default.
 
 #### Trimming it down
 
-The shipped file registers everything the component library can use — sorting, filtering, faceting, grouping, aggregation, pagination, expanding, selection, column visibility/ordering/pinning/sizing/resizing — plus the row models they need. After install you own the file: delete the features and the built-in `sortFns` / `aggregationFns` your tables never reference, the same way you omit registry items you never mount. Removing a feature removes its API: calling `table.setGrouping()` without `columnGroupingFeature` fails at runtime, not at build time.
+The shipped file registers every feature the library can use, plus the row models they need:
+
+- sorting, filtering, faceting, grouping, aggregation
+- pagination, expanding, selection
+- column visibility, ordering, pinning, sizing, resizing
+
+You own the file after install. Delete the features and the built-in `sortFns` / `aggregationFns` your tables never use.
+
+**Watch out:** removing a feature removes its API. Calling `table.setGrouping()` without `columnGroupingFeature` fails at runtime, not at build time.
 
 #### Adding your own filter function
 
@@ -345,30 +365,30 @@ const columns: DataTableColumnDef<Item>[] = [
 
 ## Filter Functions
 
-Custom filter functions for TanStack Table with performance optimizations.
+Fast custom filter functions for TanStack Table.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/lib/filter-functions.ts`} external>Source Code ↗</DocsLink>
 </div>
 
-The filter functions module provides optimized filter implementations for TanStack Table. It includes:
+This module has optimized filter functions for TanStack Table:
 
-- **Regex caching** - Caches compiled regex patterns for 70-90% faster filter execution
-- **Operator support** - Implements all filter operators (ilike, eq, neq, in, between, etc.)
-- **Performance optimizations** - LRU-style cache eviction to prevent memory leaks
+- **Regex caching**: caches compiled regex patterns for 70-90% faster filtering
+- **Operator support**: all filter operators (ilike, eq, neq, in, between, etc.)
+- **Performance**: LRU-style cache eviction prevents memory leaks
 
 ### Performance Notes
 
-The filter functions use regex caching to improve performance:
+Regex caching speeds up filtering:
 
 - **Without caching**: 1,000 rows × 10 columns = 10,000 regex creations per search keystroke (~100-500ms)
 - **With caching**: First search creates regex once, subsequent searches reuse cached regex (~5-20ms)
 
-The cache has a maximum size of 100 entries and uses LRU-like eviction to prevent memory leaks.
+The cache holds at most 100 entries and evicts the oldest (LRU-like) to prevent memory leaks.
 
 ### extendedFilter
 
-Custom filter function for TanStack Table that supports all filter operators (ilike, eq, neq, in, not_in, between, lt, gt, lte, gte, empty, not_empty). Used as the default `filterFn` for columns with advanced filtering.
+A filter function that supports every operator (ilike, eq, neq, in, not_in, between, lt, gt, lte, gte, empty, not_empty). It is the default `filterFn` for columns with advanced filtering.
 
 ```tsx showLineNumbers
 import { extendedFilter } from "@/components/niko-table/lib/filter-functions"
@@ -383,7 +403,7 @@ const columns = [
 
 ### globalFilter
 
-Custom global filter function that searches across all visible columns. Supports debounced search input.
+A global filter that searches all visible columns. Works with debounced search input.
 
 ```tsx showLineNumbers
 import { useTable } from "@tanstack/react-table"
@@ -399,7 +419,7 @@ const table = useTable({
 
 ### numberRangeFilter
 
-Filter function for numeric range columns. Filters rows where the value is between a `[min, max]` range.
+Filter for numeric range columns. Keeps rows whose value is between `[min, max]`.
 
 ```tsx showLineNumbers
 import { numberRangeFilter } from "@/components/niko-table/lib/filter-functions"
@@ -414,7 +434,7 @@ const columns = [
 
 ### dateRangeFilter
 
-Filter function for date range columns. Filters rows where the date falls between a start and end date.
+Filter for date range columns. Keeps rows whose date is between a start and end date.
 
 ```tsx showLineNumbers
 import { dateRangeFilter } from "@/components/niko-table/lib/filter-functions"
@@ -429,7 +449,7 @@ const columns = [
 
 ### createFilterValue
 
-Utility to create a properly typed filter value object from an `ExtendedColumnFilter`. Used internally by the filter menu and inline filter components.
+Builds a typed filter value from an `ExtendedColumnFilter`. The filter menu and inline filter use it inside.
 
 ```tsx showLineNumbers
 import { createFilterValue } from "@/components/niko-table/lib/filter-functions"
@@ -439,7 +459,10 @@ const filterValue = createFilterValue(filter)
 
 ### processFiltersForLogic
 
-Processes an array of `ExtendedColumnFilter` objects and decides how they should be routed: pure-AND rule sets go to TanStack's `columnFilters`; anything with OR (or mixed) join logic must ride in `globalFilter` instead, since TanStack combines column filters with AND only.
+Decides where an array of `ExtendedColumnFilter` objects goes:
+
+- **Pure AND:** goes to TanStack's `columnFilters`.
+- **Any OR or mixed logic:** goes in `globalFilter`, because TanStack combines column filters with AND only.
 
 ```tsx showLineNumbers
 import { processFiltersForLogic } from "@/components/niko-table/lib/data-table"
@@ -455,7 +478,7 @@ const {
 
 ## Style Utilities
 
-Helper functions for styling table components, particularly for column pinning.
+Helpers for styling table parts, mainly column pinning.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/lib/styles.ts`} external>Source Code ↗</DocsLink>
@@ -463,7 +486,7 @@ Helper functions for styling table components, particularly for column pinning.
 
 ### getCommonPinningStyles
 
-Returns CSS styles for pinned columns (sticky positioning, z-index, shadows). Used internally by DataTable components, but available for custom implementations.
+Returns CSS styles for pinned columns (sticky position, z-index, shadows). DataTable components use it inside. You can use it in custom code.
 
 ```tsx showLineNumbers
 import { getCommonPinningStyles } from "@/components/niko-table/lib/styles"
@@ -488,16 +511,16 @@ const pinningStyles = getCommonPinningStyles(column, false)
 
 **Style Properties Applied:**
 
-- `position: sticky` - Keeps column fixed during horizontal scroll
-- `top` - Set to `0` for header cells so they stick when the table scrolls vertically (sticky header)
-- `left` or `right` - Calculated position based on pinning side
-- `zIndex` - 20 for headers, 10 for body cells
-- `backgroundColor` - Uses `var(--background)` for opaque overlay
-- `boxShadow` - Visual separator using `var(--border)` for pinned column edges
+- `position: sticky`: keeps the column fixed during horizontal scroll
+- `top`: `0` for header cells, so they stick when the table scrolls vertically
+- `left` or `right`: position based on the pinning side
+- `zIndex`: 20 for headers, 10 for body cells
+- `backgroundColor`: `var(--background)`, so the cell is opaque
+- `boxShadow`: a divider using `var(--border)` on pinned column edges
 
 ## Scroll Handler Factory
 
-Shared scroll-listener body used by every data-table body component (`DataTableBody`, `DataTableVirtualizedBody`, `DataTableVirtualizedDndBody`, `DataTableVirtualizedDndColumnBody`). Extracted so scroll math changes propagate to all four bodies and so consumers writing custom bodies can reuse the canonical implementation.
+The scroll listener shared by every body component (`DataTableBody`, `DataTableVirtualizedBody`, `DataTableVirtualizedDndBody`, `DataTableVirtualizedDndColumnBody`). One copy means a scroll fix reaches all four bodies, and custom bodies can reuse it.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/lib/create-scroll-handler.ts`} external>Source Code ↗</DocsLink>
@@ -505,13 +528,13 @@ Shared scroll-listener body used by every data-table body component (`DataTableB
 
 ### createScrollHandler
 
-Builds a passive-listener-friendly scroll handler that reads container metrics on each `scroll` event and dispatches:
+Builds a scroll handler that reads container metrics on each `scroll` event and calls:
 
 - `onScroll` with a `ScrollEvent` snapshot (`scrollTop`, `scrollHeight`, `clientHeight`, `isTop`, `isBottom`, `percentage`)
 - `onScrolledTop` when `scrollTop === 0`
 - `onScrolledBottom` when within `scrollThreshold` pixels of the end
 
-Returned listener is intended to be attached with `addEventListener("scroll", handler, { passive: true })` so the browser can keep scroll on its compositor thread (smoother on mobile and during virtual scroll).
+Attach the returned listener with `addEventListener("scroll", handler, { passive: true })`. The browser can then keep scrolling on its compositor thread (smoother on mobile and with virtual scroll).
 
 ```tsx showLineNumbers
 import { createScrollHandler } from "@/components/niko-table/lib/create-scroll-handler"
@@ -545,16 +568,19 @@ Single options object:
 
 #### Returns
 
-`(event: Event) => void` — the listener to attach. Closure deps are stable across renders (the consumer-supplied callbacks are passed once at construction time), so wrap the construction in a `useEffect` keyed on the same callbacks.
+`(event: Event) => void`: the listener to attach. Your callbacks are passed once when you build it, so build it in a `useEffect` keyed on the same callbacks.
 
 #### Notes
 
-- For _virtualized_ infinite scroll, prefer `DataTableVirtualizedBody`'s `onNearEnd` + `prefetchThreshold` props over `onScrolledBottom` — `onNearEnd` is virtualizer-index-driven (catches fast scrolls, scrollbar drag, programmatic `scrollToIndex()` jumps, and initial renders where the dataset doesn't fill the viewport).
-- The handler reads `event.currentTarget`, so it must be attached directly to the scroll container — not to a parent.
+- For _virtualized_ infinite scroll, use `DataTableVirtualizedBody`'s `onNearEnd` and `prefetchThreshold` instead of `onScrolledBottom`. `onNearEnd` follows the virtualizer index, so it also catches:
+  - fast scrolls and scrollbar drags
+  - `scrollToIndex()` jumps
+  - first renders where the data does not fill the viewport
+- The handler reads `event.currentTarget`. Attach it directly to the scroll container, not a parent.
 
 ## Row Click Guard
 
-Shared row-click guard used by every body component (`DataTableBody`, `DataTableDndBody`, `DataTableDndColumnBody`, `DataTableVirtualizedBody`, `DataTableVirtualizedDndBody`, `DataTableVirtualizedDndColumnBody`). Centralized so the interactive-element list (action buttons, checkboxes, links, radix collection items, etc.) stays in sync — adding a new `data-slot` to ignore means editing one file instead of six.
+The row-click guard shared by every body component (`DataTableBody`, `DataTableDndBody`, `DataTableDndColumnBody`, `DataTableVirtualizedBody`, `DataTableVirtualizedDndBody`, `DataTableVirtualizedDndColumnBody`). The list of interactive elements (action buttons, checkboxes, links, radix collection items, etc.) lives in one place. To ignore a new `data-slot`, edit one file instead of six.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/lib/row-click.ts`} external>Source Code ↗</DocsLink>
@@ -562,7 +588,7 @@ Shared row-click guard used by every body component (`DataTableBody`, `DataTable
 
 ### isInteractiveClickTarget
 
-Returns `true` when the click landed on (or inside) an interactive element that should suppress the row-level `onRowClick`. Used by the per-row variants (`DataTableBody`, `DataTableVirtualizedBody`) which already know which row was clicked from `event.currentTarget.dataset.rowId`.
+Returns `true` when the click hit (or is inside) an interactive element, so `onRowClick` should not run. The per-row bodies (`DataTableBody`, `DataTableVirtualizedBody`) use it. They already know the row from `event.currentTarget.dataset.rowId`.
 
 ```tsx showLineNumbers
 import { isInteractiveClickTarget } from "@/components/niko-table/lib/row-click"
@@ -579,7 +605,7 @@ const handleRowClick = (event: React.MouseEvent<HTMLElement>) => {
 
 ### resolveRowFromClick
 
-For delegated `<tbody>` handlers (used by the DnD bodies). Returns the matched row, or `null` if the click should be ignored — either it landed on an interactive descendant or no row could be resolved from the closest `tr[data-row-id]`.
+For delegated `<tbody>` handlers (the DnD bodies use it). Returns the matched row, or `null` if the click should be ignored. That happens when the click hit an interactive child, or when no row could be found from the closest `tr[data-row-id]`.
 
 ```tsx showLineNumbers
 import { resolveRowFromClick } from "@/components/niko-table/lib/row-click"
@@ -593,14 +619,14 @@ const handleRowClick = (event: React.MouseEvent<HTMLElement>) => {
 
 #### Notes
 
-- The interactive-element list lives in `isInteractiveClickTarget` — extend it there to add new ignored elements.
-- Rows must carry `data-row-id={row.id}` for delegated resolution to work. All built-in bodies do this; custom bodies should follow suit.
+- The interactive-element list lives in `isInteractiveClickTarget`. Add new ignored elements there.
+- Rows need `data-row-id={row.id}` for delegated lookup. All built-in bodies set it. Custom bodies should too.
 
 ## Additional Constants
 
 ### SYSTEM_COLUMN_IDS
 
-System column IDs used for smart pinning and feature detection. These are the IDs for special columns like row selection and row expansion.
+IDs of system columns (such as row selection and row expansion). Used for smart pinning and feature detection.
 
 ```tsx showLineNumbers
 import { SYSTEM_COLUMN_IDS } from "@/components/niko-table/lib/constants"
@@ -613,7 +639,7 @@ SYSTEM_COLUMN_IDS.ACTIONS // "actions" - Row actions (kebab menu) column
 
 ### SYSTEM_COLUMN_ID_LIST
 
-Array version of `SYSTEM_COLUMN_IDS` values. Useful for filtering or checking if a column ID is a system column.
+The `SYSTEM_COLUMN_IDS` values as an array. Use it to check whether a column ID is a system column.
 
 ```tsx showLineNumbers
 import { SYSTEM_COLUMN_ID_LIST } from "@/components/niko-table/lib/constants"
@@ -624,7 +650,7 @@ const isSystemColumn = SYSTEM_COLUMN_ID_LIST.includes(columnId)
 
 ### ERROR_MESSAGES
 
-Standard error messages used throughout the library for consistent error reporting.
+Standard error messages used across the library.
 
 ```tsx showLineNumbers
 import { ERROR_MESSAGES } from "@/components/niko-table/lib/constants"
@@ -635,7 +661,7 @@ ERROR_MESSAGES.DEPRECATED_GLOBAL_JOIN_OPERATOR
 
 ## Faceted Options Builder
 
-Used internally by faceted-filter components to translate a raw column dataset into the `{ label, value, count }` shape the filter UI consumes. Documented for completeness — most consumers won't import it directly.
+Faceted-filter components use it inside to turn raw column data into the `{ label, value, count }` shape the filter UI needs. Most people never import it.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/lib/build-faceted-options.ts`} external>Source Code ↗</DocsLink>
@@ -643,7 +669,7 @@ Used internally by faceted-filter components to translate a raw column dataset i
 
 ### buildFacetedOptions
 
-Walks a TanStack Table column / row set and produces deduplicated `{ label, value, count }` entries for the faceted-filter dropdown. Honors the `dynamicCounts` flag so counts update reactively when other filters change. Used internally by `DataTableFacetedFilter` and `TableColumnFacetedFilter`.
+Builds unique `{ label, value, count }` entries for the faceted-filter dropdown from a TanStack Table column and rows. With `dynamicCounts`, counts update when other filters change. `DataTableFacetedFilter` and `TableColumnFacetedFilter` use it inside.
 
 ```tsx showLineNumbers
 import { buildFacetedOptions } from "@/components/niko-table/lib/build-faceted-options"
@@ -666,12 +692,12 @@ const options = buildFacetedOptions(
 
 #### Notes
 
-- This module is consumed by the faceted-filter wrappers; if you're building a custom faceted UI, `useGeneratedOptions` (in `hooks/`) is the consumer-facing surface that wraps this helper with React state.
-- Runs in O(n) over the column's cell values; safe to call per render for typical column counts.
+- The faceted-filter wrappers use this module. For a custom faceted UI, use `useGeneratedOptions` (in `hooks/`). It wraps this helper with React state.
+- It runs in O(n) over the column's cell values. Calling it on each render is fine for typical column counts.
 
 ## Row Filtering Helpers
 
-Internal helpers that resolve `globalFilter` / column-filter combinations to a final visible row set. Used by `DataTableRoot` on top of the filtered row model registered in `lib/data-table-features.ts`.
+Internal helpers that turn `globalFilter` and column filters into the final visible rows. `DataTableRoot` uses them on top of the filtered row model registered in `lib/data-table-features.ts`.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/lib/filter-rows.ts`} external>Source Code ↗</DocsLink>
@@ -679,19 +705,27 @@ Internal helpers that resolve `globalFilter` / column-filter combinations to a f
 
 ### filter-rows.ts
 
-Provides the row-filtering logic that backs the table's filtered row model — combines per-column filters with the global filter, applies the right `extendedFilter` / `globalFilter` / `numberRangeFilter` / `dateRangeFilter` based on column meta, and returns the visible row set.
+The row-filtering logic behind the table's filtered row model. It combines column filters with the global filter, picks the right `extendedFilter` / `globalFilter` / `numberRangeFilter` / `dateRangeFilter` from column meta, and returns the visible rows.
 
-This module is internal to the table's filter pipeline. Consumers normally interact with it indirectly through the `filterFns` registered in `tableFeatures()` (see `lib/data-table-features.ts`), which `DataTableRoot` passes to the table automatically. If you're building a fully custom filter pipeline you can import the named helpers from this file directly — see the source for the current export surface.
+This module is internal to the filter pipeline. You normally reach it through the `filterFns` registered in `tableFeatures()` (see `lib/data-table-features.ts`). `DataTableRoot` passes them to the table for you. For a fully custom filter pipeline, import the named helpers from this file. See the source for the current exports.
 
 ## Column Sizing Layout
 
-Helpers that keep a resizable table filling its container and its header labels legible. Flex fill and header-fit are on automatically once column resizing is enabled; the auto-fit and persistence helpers are opt-in.
+Helpers that make a resizable table fill its container and keep header labels readable. Flex fill and header-fit turn on automatically with column resizing. Auto-fit and persistence are opt-in.
 
 ### resolveFlexColumnIds
 
-Resolves which column(s) render widthless so they absorb the leftover row width (flex fill). Flex fill is **on by default** for resizable tables: the first non-pinned, resizable data column soaks up the surplus so the table fills its container instead of leaving dead space on the right. Pure layout — it never writes `columnSizing`, so there are no persistence side effects.
+Picks which column(s) render widthless so they take the leftover row width (flex fill).
 
-Overrides via column / table `meta`: `meta.flex === true` flexes that specific column, `meta.flex === false` opts a column out, and `TableMeta.disableFlexFill === true` turns fill off for the whole table. A column the user has explicitly resized is fixed at their width and hands the fill to the next eligible column.
+- **On by default** for resizable tables. The first non-pinned, resizable data column takes the extra space, so the table fills its container with no gap on the right.
+- **Pure layout:** it never writes `columnSizing`, so nothing gets saved.
+
+Overrides via column or table `meta`:
+
+- `meta.flex === true`: that column flexes.
+- `meta.flex === false`: that column is skipped.
+- `TableMeta.disableFlexFill === true`: fill is off for the whole table.
+- A column the user resized keeps their width. The fill moves to the next eligible column.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/lib/flex-columns.ts`} external>Source Code ↗</DocsLink>
@@ -712,11 +746,17 @@ const flexIds = resolveFlexColumnIds(table)
 
 #### Returns
 
-`ReadonlySet<string>` - Column ids to render widthless. Empty when fill is off (`disableFlexFill`, resizing disabled) or no eligible column exists.
+`ReadonlySet<string>` - Column ids to render widthless. Empty when fill is off (`disableFlexFill`, resizing disabled) or no column is eligible.
 
 ### resolveColumnWidth
 
-The width to render for a single column. Centralizes the flex + header-fit rules so the header, body cells, and the min-width lock all agree. Returns the declared `size` when resizing is off, `undefined` for the flex column, exactly `getSize()` for a user-resized column, and otherwise floors the width at the header's natural width so the label never truncates on load. Pure layout — `headerMinWidths` is measured, never written back into `columnSizing`.
+The width to render for one column. It keeps the flex and header-fit rules in one place, so the header, body cells, and min-width lock agree.
+
+- **Resizing off:** the declared `size`.
+- **Flex column:** `undefined`.
+- **User-resized column:** exactly `getSize()`.
+- **Otherwise:** at least the header's natural width, so the label is never cut off on load.
+- **Pure layout:** `headerMinWidths` is measured and never written to `columnSizing`.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/lib/flex-columns.ts`} external>Source Code ↗</DocsLink>
@@ -749,7 +789,12 @@ const width = resolveColumnWidth(column, {
 
 ### useHeaderMinWidths
 
-Measures each column header's natural width off-DOM (a reusable canvas, so no reflow) and floors un-resized columns at their header width — header-fit — so labels don't truncate on load. Returns a `columnId → minWidth` map; a column the user has explicitly resized is left alone. Pure measurement, nothing is written to `columnSizing`. Recomputes only when the visible columns, their labels, or the header font change.
+Measures each header's natural width off-DOM (a reusable canvas, so no reflow). Columns the user has not resized get at least that width (header-fit), so labels are not cut off on load.
+
+- **Returns:** a `columnId → minWidth` map.
+- **Resized columns:** left alone.
+- **Pure measurement:** nothing is written to `columnSizing`.
+- **Recomputes:** only when visible columns, their labels, or the header font change.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/lib/use-header-min-widths.ts`} external>Source Code ↗</DocsLink>
@@ -775,7 +820,11 @@ const headerMinWidths = useHeaderMinWidths(table, scrollElement, resizingEnabled
 
 ### useColumnAutoFit
 
-The even-split alternative to single-column flex fill. On load (and when the container grows or columns toggle) it grows the resizable columns by an equal share of the leftover space so they fill the available width, seeding `columnSizing`. Backs off permanently once the user resizes a column or a saved `columnSizing` is restored. Consumed by the opt-in [`<DataTableColumnAutoFit />`](/niko-table/overview/components/#datatablecolumnautofit) marker — most consumers drop that component rather than call this hook directly.
+An even-split alternative to single-column flex fill.
+
+- **What it does:** on load (and when the container grows or columns toggle), it gives each resizable column an equal share of the leftover space. It seeds `columnSizing`.
+- **When it stops:** for good once the user resizes a column or a saved `columnSizing` is restored.
+- **How to use it:** most people add the opt-in [`<DataTableColumnAutoFit />`](/niko-table/overview/components/#datatablecolumnautofit) component instead of calling this hook.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/lib/use-column-auto-fit.ts`} external>Source Code ↗</DocsLink>
@@ -797,11 +846,15 @@ useColumnAutoFit(table, scrollElement, resizingEnabled)
 
 #### Returns
 
-`void` - Side-effecting hook; seeds `columnSizing` via `table.setColumnSizing`.
+`void` - Seeds `columnSizing` via `table.setColumnSizing`.
 
 ### useColumnSizingPersistence
 
-Opt-in `localStorage` persistence for resized column widths. Column sizing is controlled state on `<DataTableRoot>`, so this hook owns it for you: wire the returned `columnSizing` + `onColumnSizingChange` into the table and widths survive reloads. Writes immediately (resizing runs in `onEnd` mode, so once per drag), syncs across tabs via the native `storage` event (an unchanged read keeps state identity, so idle tabs don't re-render), and sanitizes corrupt / hand-edited storage so a bad value never reaches `column.getSize()`.
+Opt-in `localStorage` saving for resized column widths. Column sizing is controlled state on `<DataTableRoot>`, so this hook owns it. Pass the returned `columnSizing` and `onColumnSizingChange` to the table, and widths survive reloads.
+
+- **Writes at once:** resizing runs in `onEnd` mode, so it saves once per drag.
+- **Syncs across tabs:** via the native `storage` event. An unchanged read keeps the same state object, so idle tabs do not re-render.
+- **Cleans bad data:** corrupt or hand-edited storage never reaches `column.getSize()`.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/lib/use-column-sizing-persistence.ts`} external>Source Code ↗</DocsLink>
@@ -835,7 +888,7 @@ const { columnSizing, onColumnSizingChange, resetColumnSizing } =
 
 #### Returns
 
-`ColumnSizingPersistence` — an object with:
+`ColumnSizingPersistence`: an object with:
 
 | Property               | Type                            | Description                                                       |
 | ---------------------- | ------------------------------- | ----------------------------------------------------------------- |

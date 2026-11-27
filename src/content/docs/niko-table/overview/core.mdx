@@ -1,16 +1,19 @@
 ---
 title: Core Components
-description: Essential building blocks of the data table including DataTableRoot, DataTable, and structure components.
+description: "The core pieces of every table: DataTableRoot, DataTable, header, body, and loading and empty states."
 ---
 
 import { GITHUB_REPO_URL } from "@/data/env"
 import DocsLink from "@/components/markdown/docs-link.astro"
 
-Core components are the essential building blocks of the data table. They handle table initialization, context management, and basic structure.
+Core components are the base of every table. They set up the table, share context, and draw the structure.
 
 ### DataTableRoot
 
-The `DataTableRoot` component provides the table context to all child components. You should always wrap your table in a `DataTableRoot`. It initializes the TanStack Table instance with `useTable` and the shared `features` object from `lib/data-table-features.ts` (TanStack Table v9), and manages table state.
+`DataTableRoot` gives every child component the table context. Always wrap your table in it.
+
+- **Creates the table:** it calls `useTable` with the shared `features` object from `lib/data-table-features.ts` (TanStack Table v9).
+- **Holds the state:** it manages table state.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/core/data-table-root.tsx`} external>Source Code ↗</DocsLink>
@@ -60,30 +63,30 @@ export function MyTable({ data }: { data: User[] }) {
 
 #### Config Object
 
-The `config` prop accepts a `DataTableConfig` object with the following properties:
+The `config` prop takes a `DataTableConfig` object:
 
-| Name                   | Type      | Default | Description                                                                                                   |
-| ---------------------- | --------- | ------- | ------------------------------------------------------------------------------------------------------------- |
-| `enablePagination`     | `boolean` | `false` | Enable pagination. Auto-enabled when `DataTablePagination` is detected.                                       |
-| `enableFilters`        | `boolean` | `false` | Enable filtering. Auto-enabled when filter components are detected.                                           |
-| `enableSorting`        | `boolean` | `false` | Enable sorting. Auto-enabled when sort components are detected.                                               |
-| `enableRowSelection`   | `boolean` | `false` | Enable row selection.                                                                                         |
-| `enableMultiSort`      | `boolean` | `true`  | Enable multi-column sorting.                                                                                  |
-| `enableGrouping`       | `boolean` | `false` | Enable column grouping. Auto-enabled when column group UI is detected. Do not combine with tree `getSubRows`. |
-| `enableExpanding`      | `boolean` | `false` | Enable row expansion.                                                                                         |
-| `manualSorting`        | `boolean` | `false` | Enable server-side sorting.                                                                                   |
-| `manualPagination`     | `boolean` | `false` | Enable server-side pagination.                                                                                |
-| `manualFiltering`      | `boolean` | `false` | Enable server-side filtering.                                                                                 |
-| `pageCount`            | `number`  | -       | Total pages (required for server-side pagination).                                                            |
-| `initialPageSize`      | `number`  | `10`    | Initial page size.                                                                                            |
-| `initialPageIndex`     | `number`  | `0`     | Initial page index.                                                                                           |
-| `autoResetPageIndex`   | `boolean` | `false` | Auto-reset page on filter/sort change. Off by default (prevents flushSync warnings); opt in explicitly.       |
-| `autoResetExpanded`    | `boolean` | `false` | Auto-reset expanded rows on filter/sort change.                                                               |
-| `enableColumnResizing` | `boolean` | `false` | Enable column resizing. Auto-enabled when `DataTableColumnResize` is detected.                                |
+| Name                   | Type      | Default | Description                                                                                                     |
+| ---------------------- | --------- | ------- | --------------------------------------------------------------------------------------------------------------- |
+| `enablePagination`     | `boolean` | `false` | Turns on pagination. On automatically when `DataTablePagination` is used.                                       |
+| `enableFilters`        | `boolean` | `false` | Turns on filtering. On automatically when filter components are used.                                           |
+| `enableSorting`        | `boolean` | `false` | Turns on sorting. On automatically when sort components are used.                                               |
+| `enableRowSelection`   | `boolean` | `false` | Enable row selection.                                                                                           |
+| `enableMultiSort`      | `boolean` | `true`  | Enable multi-column sorting.                                                                                    |
+| `enableGrouping`       | `boolean` | `false` | Turns on column grouping. On automatically when column group UI is used. Do not combine with tree `getSubRows`. |
+| `enableExpanding`      | `boolean` | `false` | Enable row expansion.                                                                                           |
+| `manualSorting`        | `boolean` | `false` | Enable server-side sorting.                                                                                     |
+| `manualPagination`     | `boolean` | `false` | Enable server-side pagination.                                                                                  |
+| `manualFiltering`      | `boolean` | `false` | Enable server-side filtering.                                                                                   |
+| `pageCount`            | `number`  | -       | Total pages (required for server-side pagination).                                                              |
+| `initialPageSize`      | `number`  | `10`    | Initial page size.                                                                                              |
+| `initialPageIndex`     | `number`  | `0`     | Initial page index.                                                                                             |
+| `autoResetPageIndex`   | `boolean` | `false` | Resets the page when filters or sorting change. Off by default (avoids flushSync warnings).                     |
+| `autoResetExpanded`    | `boolean` | `false` | Auto-reset expanded rows on filter/sort change.                                                                 |
+| `enableColumnResizing` | `boolean` | `false` | Turns on column resizing. On automatically when `DataTableColumnResize` is used.                                |
 
 ### DataTableProvider
 
-Low-level context provider used internally by `DataTableRoot`. Use this directly when you need to provide a pre-configured TanStack Table instance to the context (e.g., when using `useTable` yourself).
+The context provider `DataTableRoot` uses inside. Use it directly when you call `useTable` yourself and want to pass in your own table instance.
 
 ```tsx showLineNumbers
 import { DataTableProvider } from "@/components/niko-table/core/data-table-context"
@@ -108,7 +111,7 @@ const table = useTable({ features, data, columns })
 
 ### DataTableContext
 
-The raw React context object. Useful for advanced scenarios where you need direct access to the context (e.g., conditional rendering based on context availability).
+The raw React context object. Use it when you need to check whether a context exists (for example, to render conditionally).
 
 ```tsx showLineNumbers
 import { DataTableContext } from "@/components/niko-table/core/data-table-context"
@@ -119,7 +122,7 @@ const context = useContext(DataTableContext)
 
 ### DataTable
 
-The main table container component that wraps the table structure and provides scrolling behavior.
+The table container. It wraps the table and handles scrolling.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/core/data-table.tsx`} external>Source Code ↗</DocsLink>
@@ -136,16 +139,16 @@ import { DataTable } from "@/components/niko-table/core/data-table"
 
 #### Props
 
-| Name        | Type               | Default | Description                                                                                           |
-| ----------- | ------------------ | ------- | ----------------------------------------------------------------------------------------------------- |
-| `className` | `string`           | -       | Additional CSS classes. Height utilities (e.g., `h-[600px]`) are automatically extracted and applied. |
-| `children`  | `React.ReactNode`  | -       | Child components (Header, Body).                                                                      |
-| `height`    | `number \| string` | -       | Sets the height of the table container. Enables vertical scrolling and scroll event callbacks.        |
-| `maxHeight` | `number \| string` | -       | Sets the maximum height of the table container. Defaults to the height value if not specified.        |
+| Name        | Type               | Default | Description                                                                                 |
+| ----------- | ------------------ | ------- | ------------------------------------------------------------------------------------------- |
+| `className` | `string`           | -       | Extra CSS classes. Height classes (such as `h-[600px]`) are picked out and applied for you. |
+| `children`  | `React.ReactNode`  | -       | Child components (Header, Body).                                                            |
+| `height`    | `number \| string` | -       | Container height. Turns on vertical scrolling and scroll callbacks.                         |
+| `maxHeight` | `number \| string` | -       | Container max height. Defaults to `height`.                                                 |
 
 ### DataTableHeader
 
-Renders the table header with sortable columns.
+Draws the header, with sortable columns.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/core/data-table-structure.tsx`} external>Source Code ↗</DocsLink>
@@ -166,7 +169,7 @@ import { DataTableHeader } from "@/components/niko-table/core/data-table-structu
 
 ### DataTableBody
 
-Renders the table body with rows. Supports scroll events and row expansion.
+Draws the rows. Supports scroll events and row expansion.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/core/data-table-structure.tsx`} external>Source Code ↗</DocsLink>
@@ -190,18 +193,21 @@ import {
 
 #### Props
 
-| Name               | Type                                                         | Default | Description                                                                                                                                                                              |
-| ------------------ | ------------------------------------------------------------ | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `className`        | `string`                                                     | -       | Additional CSS classes.                                                                                                                                                                  |
-| `children`         | `React.ReactNode`                                            | -       | Child components (Skeleton, EmptyBody).                                                                                                                                                  |
-| `onScroll`         | `(event: ScrollEvent) => void`                               | -       | Scroll event handler.                                                                                                                                                                    |
-| `onScrolledTop`    | `() => void`                                                 | -       | Called when scrolled to top.                                                                                                                                                             |
-| `onScrolledBottom` | `() => void`                                                 | -       | Called when scrolled to bottom.                                                                                                                                                          |
-| `scrollThreshold`  | `number`                                                     | `50`    | Threshold for scroll events.                                                                                                                                                             |
-| `onRowClick`       | `(row: TData, event: React.MouseEvent<HTMLElement>) => void` | -       | Called when a row is clicked.                                                                                                                                                            |
-| `getRowMemoKey`    | `(row: TData) => string`                                     | -       | Per-row key encoding external row state (inline edits, optimistic overlays). When it changes for a row, only that row re-renders. See [Inline Edit Table](/examples/inline-edit-table/). |
+| Name               | Type                                                         | Default | Description                                                                                                                                                                          |
+| ------------------ | ------------------------------------------------------------ | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `className`        | `string`                                                     | -       | Additional CSS classes.                                                                                                                                                              |
+| `children`         | `React.ReactNode`                                            | -       | Child components (Skeleton, EmptyBody).                                                                                                                                              |
+| `onScroll`         | `(event: ScrollEvent) => void`                               | -       | Scroll event handler.                                                                                                                                                                |
+| `onScrolledTop`    | `() => void`                                                 | -       | Called when scrolled to top.                                                                                                                                                         |
+| `onScrolledBottom` | `() => void`                                                 | -       | Called when scrolled to bottom.                                                                                                                                                      |
+| `scrollThreshold`  | `number`                                                     | `50`    | Threshold for scroll events.                                                                                                                                                         |
+| `onRowClick`       | `(row: TData, event: React.MouseEvent<HTMLElement>) => void` | -       | Called when a row is clicked.                                                                                                                                                        |
+| `getRowMemoKey`    | `(row: TData) => string`                                     | -       | A per-row key for state kept outside the table (inline edits, optimistic updates). When it changes, only that row re-renders. See [Inline Edit Table](/examples/inline-edit-table/). |
 
-> **Row memo invalidation:** all six body components are wrapped in `React.memo` for performance. Column toggle / reorder / pin already invalidate rows (the `columnLayoutSignature` prop encodes them). If your column `cell` functions read **external state** (inline edit drafts, optimistic overlays) wire `getRowMemoKey` so that state change forces only the affected row to re-render.
+> **Row memo invalidation:** all six body components use `React.memo` for speed.
+>
+> - Column toggle, reorder and pin already refresh rows (the `columnLayoutSignature` prop covers them).
+> - If a column `cell` reads **external state** (inline edit drafts, optimistic updates), set `getRowMemoKey`. Then only the changed row re-renders.
 
 #### ScrollEvent Type
 
@@ -218,7 +224,7 @@ The `ScrollEvent` object passed to `onScroll` contains:
 
 ### DataTableSkeleton
 
-Shows a loading skeleton when `isLoading` is `true`. Automatically matches the table structure.
+Shows a loading skeleton while `isLoading` is `true`. It matches your table's shape.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/core/data-table-structure.tsx`} external>Source Code ↗</DocsLink>
@@ -243,7 +249,7 @@ Shows a loading skeleton when `isLoading` is `true`. Automatically matches the t
 
 ### DataTableEmptyBody
 
-Shows an empty state when there's no data. Uses composition pattern with `DataTableEmpty*` components.
+Shows an empty state when there is no data. Build it from `DataTableEmpty*` components.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/core/data-table-structure.tsx`} external>Source Code ↗</DocsLink>
@@ -281,7 +287,7 @@ Shows an empty state when there's no data. Uses composition pattern with `DataTa
 
 ### DataTableLoading
 
-Shows a loading indicator when `isLoading` is `true`.
+Shows a loading indicator while `isLoading` is `true`.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/core/data-table-structure.tsx`} external>Source Code ↗</DocsLink>
@@ -305,7 +311,11 @@ Shows a loading indicator when `isLoading` is `true`.
 
 ### DataTableLoadingMore
 
-Composable "loading more" row for infinite-scroll tables. Renders at the end of the body when `isFetching` is `true`, and nothing when `false`. Designed to be dropped as a child of `DataTableBody` alongside `DataTableSkeleton` and `DataTableEmptyBody`, combined with `onScrolledBottom` on the body to trigger next-page fetches.
+A "loading more" row for infinite-scroll tables.
+
+- **Shows:** at the end of the body while `isFetching` is `true`. Renders nothing when `false`.
+- **Where:** a child of `DataTableBody`, next to `DataTableSkeleton` and `DataTableEmptyBody`.
+- **Next page:** use `onScrolledBottom` on the body to fetch it.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/core/data-table-structure.tsx`} external>Source Code ↗</DocsLink>
@@ -338,7 +348,7 @@ See [Infinite Scroll Table](/examples/infinite-scroll-table/) for a complete wor
 
 ### DataTableErrorBoundary
 
-Error boundary component that catches errors in the data table component tree and displays a fallback UI.
+Catches errors in the table tree and shows a fallback UI.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/core/data-table-error-boundary.tsx`} external>Source Code ↗</DocsLink>
@@ -361,21 +371,21 @@ import { DataTableErrorBoundary } from "@/components/niko-table/core/data-table-
 
 #### Props
 
-| Name              | Type                                                 | Default       | Description                                      |
-| ----------------- | ---------------------------------------------------- | ------------- | ------------------------------------------------ |
-| `children`        | `React.ReactNode`                                    | -             | The content to render when there's no error.     |
-| `fallback`        | `React.ReactNode`                                    | -             | Custom fallback UI to show when an error occurs. |
-| `onError`         | `(error: Error, errorInfo: React.ErrorInfo) => void` | -             | Callback fired when an error is caught.          |
-| `showResetButton` | `boolean`                                            | `true`        | Whether to show a reset button.                  |
-| `resetButtonText` | `string`                                             | `"Try Again"` | Custom reset button text.                        |
+| Name              | Type                                                 | Default       | Description                             |
+| ----------------- | ---------------------------------------------------- | ------------- | --------------------------------------- |
+| `children`        | `React.ReactNode`                                    | -             | Content to show when there is no error. |
+| `fallback`        | `React.ReactNode`                                    | -             | Fallback UI shown on error.             |
+| `onError`         | `(error: Error, errorInfo: React.ErrorInfo) => void` | -             | Called when an error is caught.         |
+| `showResetButton` | `boolean`                                            | `true`        | Show a reset button.                    |
+| `resetButtonText` | `string`                                             | `"Try Again"` | Custom reset button text.               |
 
 ### Virtualized Components
 
-For large datasets (1000+ rows), use the virtualized variants for optimal performance.
+For large datasets (1000+ rows), use the virtualized versions. They only render the visible rows.
 
 #### DataTableVirtualizedHeader
 
-Virtualized table header component.
+Header for virtualized tables.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/core/data-table-virtualized-structure.tsx`} external>Source Code ↗</DocsLink>
@@ -404,28 +414,28 @@ import {
 
 #### DataTableVirtualizedBody
 
-Virtualized table body for rendering thousands of rows efficiently.
+Body for virtualized tables. Handles thousands of rows.
 
 #### Props
 
-| Name                | Type                                            | Default | Description                                                                                                                                                                     |
-| ------------------- | ----------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `children`          | `React.ReactNode`                               | -       | Child components (VirtualizedSkeleton, VirtualizedEmptyBody).                                                                                                                   |
-| `estimateSize`      | `number`                                        | `34`    | Estimated row height in pixels.                                                                                                                                                 |
-| `overscan`          | `number`                                        | `20`    | Number of items to render outside visible area.                                                                                                                                 |
-| `className`         | `string`                                        | -       | Additional CSS classes.                                                                                                                                                         |
-| `onScroll`          | `(event: ScrollEvent) => void`                  | -       | Scroll event handler.                                                                                                                                                           |
-| `onScrolledTop`     | `() => void`                                    | -       | Called when scrolled to top.                                                                                                                                                    |
-| `onScrolledBottom`  | `() => void`                                    | -       | Called when scrolled to bottom (scroll-event-driven).                                                                                                                           |
-| `scrollThreshold`   | `number`                                        | `50`    | Pixel threshold for scroll events.                                                                                                                                              |
-| `onNearEnd`         | `() => void`                                    | -       | Fires when the last rendered virtual row is within `prefetchThreshold` rows of the end. Virtualizer-index-driven — strictly better than `onScrolledBottom` for infinite scroll. |
-| `prefetchThreshold` | `number`                                        | `10`    | How many rows from the end to trigger `onNearEnd`.                                                                                                                              |
-| `onRowClick`        | `(row: TData, event: React.MouseEvent) => void` | -       | Called when a row is clicked.                                                                                                                                                   |
-| `getRowMemoKey`     | `(row: TData) => string`                        | -       | Per-row key encoding external row state. When it changes for a row, only that row (and its size measurement) re-renders.                                                        |
+| Name                | Type                                            | Default | Description                                                                                                                                                                  |
+| ------------------- | ----------------------------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `children`          | `React.ReactNode`                               | -       | Child components (VirtualizedSkeleton, VirtualizedEmptyBody).                                                                                                                |
+| `estimateSize`      | `number`                                        | `34`    | Estimated row height in pixels.                                                                                                                                              |
+| `overscan`          | `number`                                        | `20`    | Number of items to render outside visible area.                                                                                                                              |
+| `className`         | `string`                                        | -       | Additional CSS classes.                                                                                                                                                      |
+| `onScroll`          | `(event: ScrollEvent) => void`                  | -       | Scroll event handler.                                                                                                                                                        |
+| `onScrolledTop`     | `() => void`                                    | -       | Called when scrolled to top.                                                                                                                                                 |
+| `onScrolledBottom`  | `() => void`                                    | -       | Called when scrolled to bottom (scroll-event-driven).                                                                                                                        |
+| `scrollThreshold`   | `number`                                        | `50`    | Pixel threshold for scroll events.                                                                                                                                           |
+| `onNearEnd`         | `() => void`                                    | -       | Fires when the last rendered virtual row is within `prefetchThreshold` rows of the end. Driven by the virtualizer index, so it beats `onScrolledBottom` for infinite scroll. |
+| `prefetchThreshold` | `number`                                        | `10`    | How many rows from the end to trigger `onNearEnd`.                                                                                                                           |
+| `onRowClick`        | `(row: TData, event: React.MouseEvent) => void` | -       | Called when a row is clicked.                                                                                                                                                |
+| `getRowMemoKey`     | `(row: TData) => string`                        | -       | A per-row key for state kept outside the table. When it changes, only that row (and its size measurement) re-renders.                                                        |
 
 #### DataTableVirtualizedEmptyBody
 
-Empty state component for virtualized tables.
+Empty state for virtualized tables.
 
 ```tsx showLineNumbers
 import {
@@ -520,7 +530,10 @@ import { Loader2 } from "lucide-react"
 
 #### DataTableVirtualizedLoadingMore
 
-Virtualized variant of `DataTableLoadingMore`. Composable "loading more" row for infinite-scroll virtualized tables. Sits **outside** the virtualizer's row count (it's a plain child of `TableBody`, not a virtual row), so it does not affect `estimateSize` math.
+The virtualized version of `DataTableLoadingMore`, for infinite-scroll virtualized tables.
+
+- **Outside the row count:** it is a plain child of `TableBody`, not a virtual row.
+- **No size impact:** it does not affect the `estimateSize` math.
 
 ```tsx showLineNumbers
 import {
@@ -557,7 +570,7 @@ See [Infinite Scroll Virtualized Table](/examples/infinite-scroll-virtualized-ta
 
 ### DnD Components
 
-Choose the right DnD components based on your use case:
+Pick the DnD components for your case:
 
 | Use Case                     | Components                                                            |
 | ---------------------------- | --------------------------------------------------------------------- |
@@ -566,11 +579,14 @@ Choose the right DnD components based on your use case:
 | Row reorder (virtualized)    | `DataTableVirtualizedDndBody`                                         |
 | Column reorder (virtualized) | `DataTableVirtualizedDndHeader` + `DataTableVirtualizedDndColumnBody` |
 
-Row and column DnD ship as **separate modules** so installing one axis does not pull the other. Drop-in replacements for `DataTableHeader` / `DataTableBody`.
+Row and column DnD are **separate modules**. Installing one does not install the other. They replace `DataTableHeader` and `DataTableBody` directly.
 
 #### DataTableDndBody
 
-DnD-aware table body that renders rows as draggable items. Drop-in replacement for `DataTableBody` when using row drag-and-drop. Must be wrapped in a `DataTableRowDndProvider`. Registry: `data-table-row-dnd`.
+Table body with draggable rows. Use it in place of `DataTableBody` for row drag-and-drop.
+
+- **Needs:** a `DataTableRowDndProvider` around it.
+- **Registry:** `data-table-row-dnd`.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/core/data-table-row-dnd-structure.tsx`} external>Source Code ↗</DocsLink>
@@ -599,7 +615,10 @@ import { DataTableRowDndProvider } from "@/components/niko-table/components/data
 
 #### DataTableDndHeader
 
-DnD-aware table header that renders column headers as draggable items. Drop-in replacement for `DataTableHeader` when using column drag-and-drop. Must be wrapped in a `DataTableColumnDndProvider`. Registry: `data-table-column-dnd`.
+Table header with draggable columns. Use it in place of `DataTableHeader` for column drag-and-drop.
+
+- **Needs:** a `DataTableColumnDndProvider` around it.
+- **Registry:** `data-table-column-dnd`.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/core/data-table-column-dnd-structure.tsx`} external>Source Code ↗</DocsLink>
@@ -626,7 +645,7 @@ import { DataTableColumnDndProvider } from "@/components/niko-table/components/d
 
 #### DataTableDndColumnBody
 
-DnD-aware table body for column drag-and-drop. Each cell follows its column's drag position using `useSortable`. Must be wrapped in a `DataTableColumnDndProvider`.
+Table body for column drag-and-drop. Each cell follows its column's drag position (via `useSortable`). Needs a `DataTableColumnDndProvider` around it.
 
 #### Props
 
@@ -639,11 +658,11 @@ DnD-aware table body for column drag-and-drop. Each cell follows its column's dr
 
 ### Virtualized DnD Components
 
-Virtualized DnD is axis-split the same way. Registry: `data-table-virtualized-row-dnd` / `data-table-virtualized-column-dnd` (plus `data-table-virtualized` and the matching non-virt axis package).
+Virtualized DnD is split by axis the same way. Registry: `data-table-virtualized-row-dnd` / `data-table-virtualized-column-dnd` (plus `data-table-virtualized` and the matching non-virtualized axis package).
 
 #### DataTableVirtualizedDndBody
 
-Virtualized DnD-aware table body for **row** drag-and-drop. Combines `@tanstack/react-virtual` for windowing with `@dnd-kit/sortable` for drag interactions. Must be wrapped in a `DataTableRowDndProvider`.
+Virtualized body for **row** drag-and-drop. It pairs `@tanstack/react-virtual` (windowing) with `@dnd-kit/sortable` (dragging). Needs a `DataTableRowDndProvider` around it.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/core/data-table-virtualized-row-dnd-structure.tsx`} external>Source Code ↗</DocsLink>
@@ -681,7 +700,7 @@ import { DataTableRowDndProvider } from "@/components/niko-table/components/data
 
 #### DataTableVirtualizedDndHeader
 
-Virtualized DnD-aware table header for **column** drag-and-drop. Must be wrapped in a `DataTableColumnDndProvider`.
+Virtualized header for **column** drag-and-drop. Needs a `DataTableColumnDndProvider` around it.
 
 ```tsx showLineNumbers
 import {
@@ -707,7 +726,7 @@ import { DataTableColumnDndProvider } from "@/components/niko-table/components/d
 
 #### DataTableVirtualizedDndColumnBody
 
-Virtualized DnD-aware table body for **column** drag-and-drop. Each cell follows column drag position using `useSortable`. Must be wrapped in a `DataTableColumnDndProvider`.
+Virtualized body for **column** drag-and-drop. Each cell follows its column's drag position (via `useSortable`). Needs a `DataTableColumnDndProvider` around it.
 
 #### Props
 

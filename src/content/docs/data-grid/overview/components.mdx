@@ -1,12 +1,12 @@
 ---
 title: Niko Grid Components
-description: Opt-in Niko Grid feature components, toolbar, menus, and cell editors.
+description: Opt-in Niko Grid features, toolbar, menus, and cell editors.
 ---
 
 import { GITHUB_REPO_URL } from "@/data/env"
 import DocsLink from "@/components/markdown/docs-link.astro"
 
-Context-aware pieces under `grid/components/` and typed editors under `grid/cells/`. Mount only what you need as children of `<DataGrid>`: unmounted features attach no listeners and tree-shake out.
+Use this page to find the grid piece you need. Pieces live in `grid/components/`, and typed editors live in `grid/cells/`. Mount only what you need as children of `<DataGrid>`. Unmounted features add no listeners and are tree-shaken.
 
 <div className="not-content mb-6 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/tree/main/src/components/niko-table/grid/components`} external>Source Code ↗</DocsLink>
@@ -24,16 +24,16 @@ Context-aware pieces under `grid/components/` and typed editors under `grid/cell
 
 ## Feature children
 
-Children of `<DataGrid>`. Unmounted = tree-shaken.
+Add these as children of `<DataGrid>`. Anything you do not mount is tree-shaken.
 
-| Component                | Capability                                                                                    |
-| ------------------------ | --------------------------------------------------------------------------------------------- |
-| `DataGridClipboard`      | Copy / cut / paste (`resolveCell` optional — needed only for paste; copy/cut work without it) |
-| `DataGridFillHandle`     | Corner fill; double-click auto-fill                                                           |
-| `DataGridMove`           | Drag block to move (Ctrl/Cmd = copy)                                                          |
-| `DataGridRowReorder`     | Row drag: prefer without active sort                                                          |
-| `DataGridCrossHighlight` | Selection chrome on header / gutter                                                           |
-| `DataGridStatusBar`      | Aggregate the selection                                                                       |
+| Component                | Capability                                                  |
+| ------------------------ | ----------------------------------------------------------- |
+| `DataGridClipboard`      | Copy / cut / paste (`resolveCell` is only needed for paste) |
+| `DataGridFillHandle`     | Corner fill; double-click auto-fill                         |
+| `DataGridMove`           | Drag block to move (Ctrl/Cmd = copy)                        |
+| `DataGridRowReorder`     | Row drag: prefer without active sort                        |
+| `DataGridCrossHighlight` | Selection chrome on header / gutter                         |
+| `DataGridStatusBar`      | Aggregate the selection                                     |
 
 ### DataGridClipboard
 
@@ -48,9 +48,9 @@ Children of `<DataGrid>`. Unmounted = tree-shaken.
 </DataGrid>
 ```
 
-| Prop           | Type                                                   | Description                                                                    |
-| -------------- | ------------------------------------------------------ | ------------------------------------------------------------------------------ |
-| `resolveCell?` | `(columnId: string, raw: string) => CellState<string>` | Map pasted text into cell state (required for paste; copy/cut work without it) |
+| Prop           | Type                                                   | Description                                           |
+| -------------- | ------------------------------------------------------ | ----------------------------------------------------- |
+| `resolveCell?` | `(columnId: string, raw: string) => CellState<string>` | Maps pasted text to cell state. Needed only for paste |
 
 ### DataGridFillHandle / DataGridMove / DataGridRowReorder
 
@@ -60,7 +60,7 @@ Children of `<DataGrid>`. Unmounted = tree-shaken.
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/grid/components/grid-row-reorder.tsx`} external>Reorder ↗</DocsLink>
 </div>
 
-No required props. Mount inside `<DataGrid>` next to the table.
+No required props. Mount them inside `<DataGrid>`, next to the table.
 
 ### DataGridCrossHighlight / DataGridStatusBar
 
@@ -69,7 +69,8 @@ No required props. Mount inside `<DataGrid>` next to the table.
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/grid/components/grid-status-bar.tsx`} external>Status bar ↗</DocsLink>
 </div>
 
-Cross-highlight paints header/gutter for the selection. Status bar aggregates the current range.
+- **Cross highlight** marks the header and gutter for the selection.
+- **Status bar** shows totals for the selected range.
 
 ## Toolbar
 
@@ -106,7 +107,7 @@ See [Dynamic Columns](/examples/dynamic-columns-grid/).
 
 ## Row menu
 
-`<GridRowMenu />` inside `<DataTableRowContextMenuSlot>`. Copy / Cut / Clear / Delete / Insert. Clipboard items appear only when `DataGridClipboard` is mounted.
+Put `<GridRowMenu />` inside `<DataTableRowContextMenuSlot>`. It offers Copy, Cut, Clear, Delete, and Insert. Clipboard items show only when `DataGridClipboard` is mounted.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/grid/components/grid-row-menu.tsx`} external>Source Code ↗</DocsLink>
@@ -114,7 +115,7 @@ See [Dynamic Columns](/examples/dynamic-columns-grid/).
 
 ## Cell editors
 
-Display shell for every visible cell; heavy editor mounts only while editing. Walkthrough: [Cell Types](/examples/cell-types-grid/).
+Every visible cell shows a light display shell. The heavy editor mounts only while you edit. See [Cell Types](/examples/cell-types-grid/) for a walkthrough.
 
 | Component          | Use                                             |
 | ------------------ | ----------------------------------------------- |
@@ -140,4 +141,4 @@ cell: (ctx) => (
 - [Cell Types](/examples/cell-types-grid/): editors in depth
 - [Validation](/examples/validation-grid/): `status` / `error` and settle
 - [Persistence](/examples/persistence-grid/): `useGridChanges`
-- [API Reference](/data-grid/api/): consolidated dump
+- [API Reference](/data-grid/api/): everything on one page

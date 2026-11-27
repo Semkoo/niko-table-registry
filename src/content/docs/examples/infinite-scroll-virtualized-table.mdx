@@ -1,13 +1,13 @@
 ---
 title: Infinite Scroll Virtualized Table
-description: Combine virtual scrolling with infinite loading — render huge paginated datasets smoothly without blowing up the DOM.
+description: Combine virtual scrolling with infinite loading to handle large paginated datasets without a heavy DOM.
 ---
 
 import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
 import CollapsiblePreview from "@/components/markdown/collapsible-preview.astro"
 import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
 
-Pairs `@tanstack/react-virtual` with an `IntersectionObserver` sentinel: only on-screen rows render to the DOM, and a new page is fetched as you approach the end. Memory and frame time stay constant regardless of how many pages you've loaded — the right pick for any paginated API that can grow past a few hundred rows.
+Renders only the on-screen rows (with `@tanstack/react-virtual`) and fetches the next page as the user nears the end. Use it for any paginated API that can grow past a few hundred rows. Memory and frame time stay flat no matter how many pages load.
 
 <CodePreview demo="niko-table/infinite-scroll-virtualized-table" />
 
@@ -17,14 +17,17 @@ Pairs `@tanstack/react-virtual` with an `IntersectionObserver` sentinel: only on
 
 ## Introduction
 
-The Infinite Scroll Virtualized Table combines two orthogonal performance strategies:
+The Infinite Scroll Virtualized Table combines two separate performance tricks:
 
-- **Virtualization** — only the rows visible in the viewport are actually rendered to the DOM, regardless of how many are loaded. Critical for datasets in the thousands.
-- **Infinite loading** — rows are fetched lazily as the user scrolls, so you don't need to know (or transfer) the full dataset upfront.
+- **Virtualization**: only rows in the viewport are rendered to the DOM, however many are loaded. Needed for thousands of rows.
+- **Infinite loading**: rows are fetched as the user scrolls, so you never load the full dataset upfront.
 
-You get both by composing `DataTableVirtualizedBody` (which provides the virtualized scroll container and fires `onScrolledBottom`) with `DataTableVirtualizedLoadingMore` (the composable "loading more" child that self-gates on its own `isFetching` prop).
+You get both by combining two pieces:
 
-This example paginates through a mocked 5,000-row pool with artificial latency so you can see the virtualizer and infinite loader working together.
+- **`DataTableVirtualizedBody`**: the virtualized scroll container. It fires `onScrolledBottom`.
+- **`DataTableVirtualizedLoadingMore`**: the "loading more" child. It shows itself based on its own `isFetching` prop.
+
+This example pages through a mocked 5,000-row pool with artificial delay, so you can see the virtualizer and the infinite loader work together.
 
 ## Installation
 
@@ -53,7 +56,7 @@ type Product = {
 
 ### Deterministic mock data generator
 
-Like the non-virtualized [Infinite Scroll Table](/examples/infinite-scroll-table/), the mock generator is fully deterministic — index-based values, no `Math.random()`, no `Date.now()`. This keeps the example safe to copy-paste into a Next.js / RSC app without triggering SSR/CSR hydration mismatches.
+Like the non-virtualized [Infinite Scroll Table](/examples/infinite-scroll-table/), the mock generator is fully deterministic: index-based values, no `Math.random()`, no `Date.now()`. That keeps the example safe to copy into a Next.js or RSC app without server/client hydration mismatches.
 
 ```tsx showLineNumbers title="mock-data.ts"
 const CATEGORIES = [
@@ -100,7 +103,7 @@ function fetchNextPage(offset: number): Promise<Product[]> {
 
 ### Pagination state + `loadMore` handler
 
-Identical to the non-virtualized example — three pieces of state (`loaded`, `isLoading`, `isFetching`), one `loadMore` handler guarded against re-entry, one derived `hasMore` boolean.
+Same as the non-virtualized example: three pieces of state (`loaded`, `isLoading`, `isFetching`), one `loadMore` handler guarded against running twice, and one derived `hasMore` boolean.
 
 ```tsx showLineNumbers
 const [loaded, setLoaded] = React.useState<Product[]>([])
@@ -135,18 +138,18 @@ const loadMore = React.useCallback(async () => {
 
 ### `<DataTableVirtualizedBody />` with `onNearEnd` + `<DataTableVirtualizedLoadingMore />`
 
-The virtualized body offers a strictly better prefetch primitive for infinite scroll: **`onNearEnd`** — virtualizer-index-driven, not scroll-event-driven. It fires when the last rendered virtual row is within `prefetchThreshold` rows of the end of the loaded dataset.
+For infinite scroll, the virtualized body gives you a better trigger: **`onNearEnd`**. It is driven by the virtualizer's row index, not by scroll events. It fires when the last rendered virtual row is within `prefetchThreshold` rows of the end of the loaded data.
 
-Why is this better than `onScrolledBottom`?
+How it compares to `onScrolledBottom`:
 
-| Scenario                          | `onScrolledBottom`             | `onNearEnd`                             |
-| --------------------------------- | ------------------------------ | --------------------------------------- |
-| Slow scroll reaches bottom        | fires                          | fires (earlier)                         |
-| Fast wheel scroll past bottom     | fires once, gap before resolve | fires early, no gap                     |
-| Scrollbar drag to 90%             | may miss                       | fires as soon as virtualizer re-renders |
-| Initial load — data &lt; viewport | never fires (no scroll)        | fires immediately                       |
-| `scrollToIndex()` jump            | no scroll event                | fires on re-render                      |
-| Row height changes dynamically    | pixel math drifts              | index math is exact                     |
+| Scenario                         | `onScrolledBottom`             | `onNearEnd`                             |
+| -------------------------------- | ------------------------------ | --------------------------------------- |
+| Slow scroll reaches bottom       | fires                          | fires (earlier)                         |
+| Fast wheel scroll past bottom    | fires once, gap before resolve | fires early, no gap                     |
+| Scrollbar drag to 90%            | may miss                       | fires as soon as virtualizer re-renders |
+| Initial load, data &lt; viewport | never fires (no scroll)        | fires immediately                       |
+| `scrollToIndex()` jump           | no scroll event                | fires on re-render                      |
+| Row height changes dynamically   | pixel math drifts              | index math is exact                     |
 
 ```tsx showLineNumbers title="infinite-scroll-virtualized-table.tsx"
 "use client"
@@ -202,7 +205,7 @@ export function InfiniteScrollVirtualizedTable() {
 
 ## Required: Fixed Height
 
-Virtualized tables **always** require a fixed height on `<DataTable>` — the virtualizer needs a scroll container with a known viewport size to compute which rows to render.
+Virtualized tables **always** need a fixed height on `<DataTable>`. The virtualizer needs a scroll container with a known size to decide which rows to render.
 
 ```tsx
 <DataTable height={600} className="rounded-lg border">
@@ -212,22 +215,26 @@ Virtualized tables **always** require a fixed height on `<DataTable>` — the vi
 
 ## How `DataTableVirtualizedLoadingMore` works with the virtualizer
 
-`DataTableVirtualizedLoadingMore` is a **plain child of `TableBody`** — it sits outside the virtualizer's row count, not inside it. This matters because:
+`DataTableVirtualizedLoadingMore` is a **plain child of `TableBody`**. It sits outside the virtualizer's row count. This matters because:
 
-1. **It doesn't affect `estimateSize` math.** The virtualizer computes total scroll height from `rows.length × estimateSize`. If the loading-more row were a virtual row, appending it would shift every subsequent row's position.
-2. **It renders at the visual bottom of the viewport** regardless of how far the user has scrolled.
-3. **It self-gates on `isFetching`** — render it unconditionally in JSX, it only actually appears when a fetch is in flight.
+1. **It doesn't affect `estimateSize` math.** The virtualizer computes total scroll height from `rows.length × estimateSize`. If the loading row were a virtual row, adding it would shift every row after it.
+2. **It renders at the bottom of the viewport**, however far the user has scrolled.
+3. **It shows itself based on `isFetching`.** Render it always. It appears only while a fetch is in flight.
 
 ## `onNearEnd` vs `onScrolledBottom`
 
-Both coexist on `DataTableVirtualizedBody` — you can use either. For infinite scroll, prefer `onNearEnd`:
+Both work on `DataTableVirtualizedBody`. For infinite scroll, use `onNearEnd`:
 
-- **`onNearEnd`** — virtualizer-index-driven. Fires when the last rendered virtual row is within `prefetchThreshold` rows of the end. Catches fast scrolls, scrollbar drag, `scrollToIndex()` jumps, and initial renders where data doesn't fill the viewport. Fires once per false→true transition (no double-fires).
-- **`onScrolledBottom`** — scroll-event-driven. Fires when the user scrolls within `scrollThreshold` pixels of the bottom. Simpler mental model, works for non-infinite-scroll use cases (e.g. analytics "user reached bottom"), but misses edge cases listed above.
+- **`onNearEnd`**: driven by the virtualizer's row index. Fires when the last rendered virtual row is within `prefetchThreshold` rows of the end.
+  - Catches fast scrolls, scrollbar drags, `scrollToIndex()` jumps, and first renders where data doesn't fill the viewport.
+  - Fires once per false-to-true change (no double fires).
+- **`onScrolledBottom`**: driven by scroll events. Fires when the user scrolls within `scrollThreshold` pixels of the bottom.
+  - Easier to reason about, and fine for non-infinite uses (for example, analytics "user reached bottom").
+  - Misses the edge cases above.
 
 ## Pattern: wiring TanStack Query's `useInfiniteQuery`
 
-When you swap the mock data for a real API, this pattern maps cleanly onto TanStack Query's `useInfiniteQuery`:
+When you swap the mock data for a real API, this maps directly onto TanStack Query's `useInfiniteQuery`:
 
 ```tsx showLineNumbers
 const query = api.products.list.useInfiniteQuery(
@@ -258,25 +265,25 @@ const loaded = query.data?.pages.flatMap(p => p.rows) ?? []
 </DataTableRoot>
 ```
 
-Zero per-consumer boilerplate — `isFetching` comes straight off the query, `onNearEnd` calls `fetchNextPage`, and you're done.
+No extra boilerplate: `isFetching` comes straight from the query, and `onNearEnd` calls `fetchNextPage`.
 
 ## When to Use
 
 **✅ Use Infinite Scroll Virtualized Table when:**
 
-- Your paginated API can return thousands of rows over the full session
-- Rendering every loaded row would bloat the DOM (>1000 rows accumulated)
+- Your paginated API can return thousands of rows in one session
+- Rendering every loaded row would bloat the DOM (over 1000 rows loaded)
 - Users expect smooth scrolling through a growing list
-- You already use virtualization for performance reasons
+- You already use virtualization for performance
 
 **❌ Don't use it when:**
 
-- Your pool is small (< 1000 rows total) — plain [Infinite Scroll Table](/examples/infinite-scroll-table/) is simpler
-- You need row DnD — virtualized row DnD + infinite scroll mixes two sources of row-order truth
-- You need variable row heights — the virtualizer works best with consistent row heights
+- Your pool is small (under 1000 rows total): the plain [Infinite Scroll Table](/examples/infinite-scroll-table/) is simpler
+- You need row DnD: virtualized row DnD plus infinite scroll gives two sources of row order
+- You need variable row heights: the virtualizer works best with even row heights
 
 ## Next Steps
 
-- [Infinite Scroll Table](/examples/infinite-scroll-table/) — non-virtualized variant for smaller pools
-- [Virtualization Table](/examples/virtualization-table/) — virtualization without infinite scroll
-- [Server-Side Table](/examples/server-side-table/) — traditional pagination with server-driven sort/filter
+- [Infinite Scroll Table](/examples/infinite-scroll-table/): non-virtualized variant for smaller pools
+- [Virtualization Table](/examples/virtualization-table/): virtualization without infinite scroll
+- [Server-Side Table](/examples/server-side-table/): traditional pagination with server-driven sort/filter

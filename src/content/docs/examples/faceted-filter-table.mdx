@@ -1,13 +1,13 @@
 ---
 title: Faceted Filter Table
-description: Add inline faceted filters that show available options and counts.
+description: Inline filter chips that show each option and how many rows match.
 ---
 
 import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
 import CollapsiblePreview from "@/components/markdown/collapsible-preview.astro"
 import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
 
-Renders inline filter chips with live counts (e.g. "Status: Active 12") next to the search bar, so users see at a glance which values exist before they filter. Built on `DataTableFacetedFilter`, which reads option counts directly from the current row model.
+This example puts filter chips with live counts (for example "Status: Active 12") next to the search bar. Use it when users should see which values exist before they filter. `DataTableFacetedFilter` reads the counts from the current row model.
 
 <CodePreview demo="niko-table/faceted" />
 
@@ -17,7 +17,7 @@ Renders inline filter chips with live counts (e.g. "Status: Active 12") next to 
 
 ## Introduction
 
-The Faceted Filter Table adds inline filter components that show available options with counts. Users can quickly see what filters are available and how many items match each option.
+Each filter shows its options with counts. Users see what they can filter by and how many items match each option.
 
 ## Installation
 
@@ -31,7 +31,7 @@ For other add-ons or manual copy-paste, see the [Installation Guide](/getting-st
 
 ## Prerequisites
 
-We are going to build a table to show products with faceted filters. Here's what our data looks like:
+You build a product table with faceted filters. This is the data:
 
 ```tsx showLineNumbers
 type Product = {
@@ -55,11 +55,11 @@ const categoryOptions = [
 
 ## Basic Table with Faceted Filters
 
-Let's start by building a table with faceted filters.
+Start with a table that has faceted filters.
 
 ### Column Definitions
 
-First, we'll define our columns with filter functions.
+Define the columns with filter functions.
 
 ```tsx showLineNumbers title="columns.tsx"
 "use client"
@@ -170,7 +170,7 @@ export const columns: DataTableColumnDef<Product>[] = [
 
 ### `<DataTable />` component
 
-Next, we'll add faceted filter components.
+Add the faceted filter components.
 
 ```tsx showLineNumbers title="faceted-filter-table.tsx"
 "use client"
@@ -339,35 +339,35 @@ export function FacetedFilterTable({ data }: { data: Product[] }) {
 
 ### DataTableFacetedFilter
 
-The faceted filter component shows available options with counts.
+This component shows the available options with counts.
 
 **Props:**
 
-| Name                  | Type                   | Default     | Description                                                                                              |
-| --------------------- | ---------------------- | ----------- | -------------------------------------------------------------------------------------------------------- |
-| `accessorKey`         | `keyof TData & string` | -           | The column key to filter (required)                                                                      |
-| `title`               | `string`               | -           | Optional override (defaults to column meta.label or accessor name)                                       |
-| `options`             | `Option[]`             | -           | Static options; if omitted and column meta allows, options are auto-generated                            |
-| `multiple`            | `boolean`              | -           | Allow multiple selections (defaults based on column variant)                                             |
-| `showCounts`          | `boolean`              | `true`      | Show counts next to options                                                                              |
-| `dynamicCounts`       | `boolean`              | `true`      | Counts reflect filtered rows                                                                             |
-| `limitToFilteredRows` | `boolean`              | `!multiple` | Show only options from filtered rows (vs all rows) — defaults on for single-select, off for multi-select |
+| Name                  | Type                   | Default     | Description                                                                                     |
+| --------------------- | ---------------------- | ----------- | ----------------------------------------------------------------------------------------------- |
+| `accessorKey`         | `keyof TData & string` | -           | The column key to filter (required)                                                             |
+| `title`               | `string`               | -           | Optional label. Defaults to the column `meta.label` or the accessor name                        |
+| `options`             | `Option[]`             | -           | Static options. If omitted and column meta allows it, options are generated                     |
+| `multiple`            | `boolean`              | -           | Allow several selections (default depends on the column variant)                                |
+| `showCounts`          | `boolean`              | `true`      | Show counts next to options                                                                     |
+| `dynamicCounts`       | `boolean`              | `true`      | Counts follow the filtered rows                                                                 |
+| `limitToFilteredRows` | `boolean`              | `!multiple` | Show only options from filtered rows (not all rows). On for single-select, off for multi-select |
 
 ### limitToFilteredRows
 
-The `limitToFilteredRows` prop controls whether the filter shows options from all data or only from the currently filtered rows.
+`limitToFilteredRows` decides whether the filter shows options from all data or only from the filtered rows.
 
 **When `limitToFilteredRows={true}` (the default for single-select):**
 
-- Options are generated from rows that match other active filters
-- Useful for filters like "Brand" or "Rating" where you want to see only relevant options
-- Example: If you filter by "Category: Electronics", the Brand filter will only show brands that exist in Electronics
+- Options come from rows that match the other active filters.
+- Good for filters like "Brand" or "Rating", where you only want relevant options.
+- Example: filter by "Category: Electronics" and the Brand filter only shows brands in Electronics.
 
 **When `limitToFilteredRows={false}`:**
 
-- Options are generated from all rows, regardless of other filters
-- Useful for filters like "Category" where you want to see all available categories
-- Example: Category filter always shows all categories, even when other filters are active
+- Options come from all rows, whatever the other filters say.
+- Good for filters like "Category", where you want to see every category.
+- Example: the Category filter always shows all categories, even when other filters are active.
 
 ```tsx showLineNumbers
 // Category: Show all options (not limited by other filters)
@@ -395,7 +395,7 @@ The `limitToFilteredRows` prop controls whether the filter shows options from al
 
 ### DataTableClearFilter
 
-Button to clear all active filters.
+A button that clears all active filters.
 
 ```tsx
 <DataTableClearFilter />
@@ -403,9 +403,9 @@ Button to clear all active filters.
 
 ## Filter Functions
 
-**Note:** For most use cases, you don't need to define custom `filterFn`. The default `extendedFilter` handles the `ExtendedColumnFilter` format automatically. Only define a custom `filterFn` if you need special filtering logic.
+**Note:** Most tables do not need a custom `filterFn`. The default `extendedFilter` already handles the `ExtendedColumnFilter` format. Add your own only for special filter logic.
 
-If you do define a custom `filterFn`, it will work as you define it:
+A custom `filterFn` works as you write it:
 
 ```tsx showLineNumbers
 {
@@ -422,10 +422,10 @@ If you do define a custom `filterFn`, it will work as you define it:
 
 **Auto-applied filter functions:**
 
-When you specify `meta.variant` in your column definition, the appropriate `filterFn` is automatically applied:
+When you set `meta.variant`, the matching `filterFn` is applied for you:
 
-- **`variant: "range"`** → `numberRangeFilter` (for numeric ranges like price)
-- **`variant: "date"`** or **`variant: "dateRange"`** → `dateRangeFilter` (for date filtering)
+- **`variant: "range"`** gets `numberRangeFilter` (numeric ranges like price)
+- **`variant: "date"`** or **`variant: "dateRange"`** gets `dateRangeFilter` (dates)
 
 ```tsx showLineNumbers
 {
@@ -441,7 +441,7 @@ When you specify `meta.variant` in your column definition, the appropriate `filt
 
 ## Multiple Selection
 
-Enable multiple selections with the `multiple` prop:
+Allow several selections with the `multiple` prop:
 
 ```tsx showLineNumbers
 <DataTableFacetedFilter
@@ -454,7 +454,7 @@ Enable multiple selections with the `multiple` prop:
 
 ## Controlled State
 
-Manage filter state externally for full control:
+Hold the filter state yourself and pass it in:
 
 ```tsx showLineNumbers
 import { useState } from "react"
@@ -534,17 +534,17 @@ export function ControlledFacetedFilterTable({ data }: { data: Product[] }) {
 **✅ Use Faceted Filter Table when:**
 
 - You have categorical data (categories, tags, statuses)
-- Users need to see available options and counts
+- Users need to see the options and counts
 - You want inline, visible filters
-- Multiple filter options are common
+- Users often pick several options
 
 **❌ Consider other options when:**
 
-- You need complex rule-based filtering (use [Advanced Table](/examples/advanced-table/))
-- You prefer dropdown filters (use [Advanced Table](/examples/advanced-table/))
-- You only need search (use [Search Table](/examples/search-table/))
+- You need rule-based filtering: use [Advanced Table](/examples/advanced-table/)
+- You prefer dropdown filters: use [Advanced Table](/examples/advanced-table/)
+- You only need search: use [Search Table](/examples/search-table/)
 
 ## Next Steps
 
-- [Advanced Table](/examples/advanced-table/) - Add advanced filtering menus
-- [Search Table](/examples/search-table/) - Add global search
+- [Advanced Table](/examples/advanced-table/): add advanced filter menus
+- [Search Table](/examples/search-table/): add global search

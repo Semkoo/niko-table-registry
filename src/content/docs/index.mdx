@@ -1,8 +1,8 @@
 ---
 title: Shadcn-Compatible React Data Table
-description: Copy-paste TanStack Table components for React and shadcn/ui. Install sorting, filters, virtualization, and server-side patterns via the Niko Table registry.
+description: Copy-paste data table components for React and shadcn/ui, built on TanStack Table.
 hero:
-  tagline: Build production-ready data tables with sorting, filtering, pagination, virtualization, and more.
+  tagline: Build data tables with sorting, filters, pagination, virtualization and more.
   actions:
     - text: Get Started
       link: /getting-started/installation/
@@ -22,7 +22,7 @@ import { GITHUB_REPO_URL } from "@/data/env"
 
 **Nobody's table, everyone's solution.**
 
-This registry is not an opaque npm package. You copy `DataTable` source into your project and own it. Built with TanStack Table and shadcn/ui.
+This is not an npm package. The CLI copies the `DataTable` source into your project, so you own it. It is built with TanStack Table and shadcn/ui.
 
 Add the registry once under `registries` in `components.json`, then install:
 
@@ -38,15 +38,15 @@ Add the registry once under `registries` in `components.json`, then install:
 
 Works with Radix UI, Base UI and React Aria. Like shadcn/ui, the CLI installs the version that matches your project.
 
-See [Installation](/getting-started/installation/) for merging into an existing `components.json`.
+See [Installation](/getting-started/installation/) to add it to an existing `components.json`.
 
 ## Quick Links
 
 ### Getting Started
 
-- **[Introduction](/getting-started/introduction/)** - Learn about the architecture and philosophy
+- **[Introduction](/getting-started/introduction/)** - How it is built and why
 - **[Installation](/getting-started/installation/)** - Set up your project
-- **[Manual Installation](/getting-started/manual-installation/)** - Copy components manually
+- **[Manual Installation](/getting-started/manual-installation/)** - Copy the files by hand
 
 ### Examples
 
@@ -56,43 +56,43 @@ See [Installation](/getting-started/installation/) for merging into an existing 
 - **[Faceted Filter Table](/examples/faceted-filter-table/)** - Column-specific filters
 - **[Virtualization Table](/examples/virtualization-table/)** - 10,000+ rows with virtual scrolling
 - **[Row Context Menu Table](/examples/row-context-menu-table/)** - Shared kebab and right-click actions
-- **[Advanced Table](/examples/advanced-table/)** - All features combined
-- **[Advanced Nuqs Table](/examples/advanced-nuqs-table/)** - URL state persistence
-- **[Server-Side Table](/examples/server-side-table/)** - Pagination, sorting, and filters on the server
-- **[Server-Side Nuqs Table](/examples/server-side-nuqs-table/)** - Server-side table with URL state
-- **[Drizzle ORM](/examples/drizzle-orm/)** - Server-side wire contract with Drizzle + Postgres
+- **[Advanced Table](/examples/advanced-table/)** - All features together
+- **[Advanced Nuqs Table](/examples/advanced-nuqs-table/)** - Table state saved in the URL
+- **[Server-Side Table](/examples/server-side-table/)** - Pagination, sorting and filters on the server
+- **[Server-Side Nuqs Table](/examples/server-side-nuqs-table/)** - Server-side table with state in the URL
+- **[Drizzle ORM](/examples/drizzle-orm/)** - Server-side data contract with Drizzle and Postgres
 - **[Drizzle ORM + Nuqs](/examples/drizzle-orm-nuqs/)** - Drizzle backend with shareable URL state
 
 ### Niko Grid
 
-- **[Introduction](/data-grid/introduction/)** - The composable, editable spreadsheet grid
-- **[Cell Types](/examples/cell-types-grid/)** - Text, number, currency, checkbox, date, and select editors
-- **[Validation](/examples/validation-grid/)** - Inline per-cell errors with Zod (or any `resolve`)
-- **[Dynamic Columns](/examples/dynamic-columns-grid/)** - Add, rename, move, delete, and retype at runtime
-- **[Persistence](/examples/persistence-grid/)** - Create / update / delete change-sets with `useGridChanges`
-- **[API Reference](/data-grid/api/)** - Every hook, component, and type
+- **[Introduction](/data-grid/introduction/)** - The editable spreadsheet grid
+- **[Cell Types](/examples/cell-types-grid/)** - Text, number, currency, checkbox, date and select editors
+- **[Validation](/examples/validation-grid/)** - Per-cell errors with Zod (or any `resolve`)
+- **[Dynamic Columns](/examples/dynamic-columns-grid/)** - Add, rename, move, delete and retype columns at runtime
+- **[Persistence](/examples/persistence-grid/)** - Track creates, updates and deletes with `useGridChanges`
+- **[API Reference](/data-grid/api/)** - Every hook, component and type
 
 ## Key Features
 
 - **Type-safe** - Full TypeScript support
-- **Accessible** - shadcn/ui primitives (Radix or Base UI), ARIA labels in filters/menus, keyboard shortcuts; linted with jsx-a11y
-- **Responsive** - Full-width scroll container (`overflow-auto`); touch-friendly controls; stack toolbars as needed on small screens
-- **Customizable** - Full source code access
-- **Composable** - Mix and match `DataTable*` components (install only the registry pieces you need). TanStack Table v9 mirrors that at the engine: register only the features you use in `lib/data-table-features.ts`
-- **Performance** - Virtual scrolling for 10,000+ client-side rows (fixed-height scroll container)
-- **State Management** - Context-based `useDataTable()` with controlled state and optional URL sync (nuqs)
+- **Accessible** - Built on shadcn/ui primitives (Radix or Base UI). Filters and menus have ARIA labels and keyboard shortcuts. Code is linted with jsx-a11y.
+- **Responsive** - Full-width scroll container (`overflow-auto`) and touch-friendly controls. Stack toolbars on small screens as needed.
+- **Customizable** - You own the source code
+- **Composable** - Mix and match `DataTable*` components. Install only the pieces you need. TanStack Table v9 works the same way: register only the features you use in `lib/data-table-features.ts`.
+- **Performance** - Virtual scrolling for 10,000+ client-side rows (in a fixed-height scroll container)
+- **State Management** - `useDataTable()` reads state from context. State can be controlled, and can sync to the URL with nuqs.
 
 ## Built With
 
-- [TanStack Table](https://tanstack.com/table/latest) - Headless table utilities
-- [Shadcn UI](https://ui.shadcn.com) - Beautiful UI components
-- [Tailwind CSS](https://tailwindcss.com) - Utility-first CSS
-- [Radix UI](https://www.radix-ui.com) / [Base UI](https://base-ui.com) - Accessible primitives (per your shadcn generation)
-- [DiceUI Sortable](https://www.diceui.com/docs/components/sortable) - Drag and drop sortable
+- [TanStack Table](https://tanstack.com/table/latest) - Headless table logic
+- [Shadcn UI](https://ui.shadcn.com) - UI components
+- [Tailwind CSS](https://tailwindcss.com) - Utility CSS
+- [Radix UI](https://www.radix-ui.com) / [Base UI](https://base-ui.com) - Accessible primitives (the one your shadcn style uses)
+- [DiceUI Sortable](https://www.diceui.com/docs/components/sortable) - Drag and drop sorting
 
 ## Community
 
-Have questions or want to contribute?
+Questions or want to help?
 
 - <a href={GITHUB_REPO_URL}>GitHub Repository</a>
 - [Contributing Guide](/contributing/)
@@ -101,4 +101,4 @@ Have questions or want to contribute?
 
 ## License
 
-MIT License - feel free to use this in your projects!
+MIT License. Use it in your projects.
