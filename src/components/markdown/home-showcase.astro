@@ -15,17 +15,10 @@ const views = [
   {
     id: "grid",
     label: "Grid",
-    command: "npx shadcn@latest add @niko-table/inventory-grid",
+    command: "npx shadcn@latest add @niko-table/data-table-grid",
     caption:
-      "Niko Grid in a full inventory screen. Click a cell to edit, then save or discard your changes.",
+      "Click a cell to edit. Move with the keyboard, paste from a spreadsheet, undo and redo.",
     link: { href: "/data-grid/examples/", text: "All grid examples" },
-  },
-  {
-    id: "blocks",
-    label: "Blocks",
-    command: "npx shadcn@latest add @niko-table/customers-table",
-    caption: "A full customers screen, ready to copy and make your own.",
-    link: { href: "/blocks/", text: "All blocks" },
   },
 ] as const
 ---
@@ -74,20 +67,8 @@ const views = [
         {view.id === "table" && (
           <CodePreviewDemo demo="niko-table/advanced" client:visible />
         )}
-        {/* The grid demos are tiny or carry a debug panel, so show the block. */}
         {view.id === "grid" && (
-          <iframe
-            src="/view/inventory-grid/?thumb"
-            title="Inventory Grid block"
-            loading="lazy"
-          />
-        )}
-        {view.id === "blocks" && (
-          <iframe
-            src="/view/customers-table/?thumb"
-            title="Customers Table block"
-            loading="lazy"
-          />
+          <CodePreviewDemo demo="niko-table/grid-showcase" client:visible />
         )}
       </div>
 
@@ -147,7 +128,7 @@ const views = [
 <style>
   /*
    * Home page only (this component renders nowhere else): widen the column so
-   * the demos have room, but keep prose at a readable measure.
+   * the demos have room, and let everything share one left edge and width.
    */
   :global(:root) {
     --sl-content-width: 68rem;
@@ -155,9 +136,6 @@ const views = [
   :global([data-has-sidebar][data-has-toc] .main-pane) {
     max-width: 68rem;
     padding-inline: 1.5rem;
-  }
-  :global(.sl-markdown-content > :not(.home-showcase)) {
-    max-width: 42rem;
   }
 
   /* The theme centres the hero; line its title up with the demo frame. */
@@ -250,14 +228,6 @@ const views = [
     padding: 1.25rem;
     background: var(--background);
   }
-  .showcase-stage iframe {
-    display: block;
-    width: 100%;
-    height: 40rem;
-    border: 0;
-    margin: -1.25rem;
-    width: calc(100% + 2.5rem);
-  }
 
   .showcase-foot {
     display: flex;
@@ -282,10 +252,6 @@ const views = [
   @media (max-width: 40rem) {
     .showcase-stage {
       padding: 0.75rem;
-    }
-    .showcase-stage iframe {
-      margin: -0.75rem;
-      width: calc(100% + 1.5rem);
     }
   }
   @media (prefers-reduced-motion: reduce) {

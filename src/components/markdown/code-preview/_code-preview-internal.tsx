@@ -48,6 +48,7 @@ export type Demo =
   | "niko-table/inline-edit"
   | "niko-table/inline-edit-state"
   | "niko-table/grid-all-features"
+  | "niko-table/grid-showcase"
   | "niko-table/grid-basic"
   | "niko-table/grid-basic-state"
   | "niko-table/grid-cell-types"
