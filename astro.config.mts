@@ -51,6 +51,8 @@ export default defineConfig({
       components: {
         Head: "./src/components/overrides/head.astro",
         PageTitle: "./src/components/overrides/page-title.astro",
+        SocialIcons: "./src/components/overrides/social-icons.astro",
+        Footer: "./src/components/overrides/footer.astro",
       },
       head: [
         // Add ICO favicon fallback for Safari.

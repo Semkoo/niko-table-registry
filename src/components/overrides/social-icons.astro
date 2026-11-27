@@ -1,0 +1,56 @@
+---
+/**
+ * Replaces Starlight's SocialIcons: the GitHub link also shows the repo's
+ * star count (fetched at build time; just the icon if the fetch fails).
+ * shortcut: renders only the GitHub link (the site's one social link); render
+ * the others too if `social` in astro.config.mts ever grows.
+ */
+import { Icon } from "@astrojs/starlight/components"
+import { GITHUB_REPO_URL } from "@/data/env"
+import { formatStars, getGitHubStars } from "@/lib/github-stars"
+
+const stars = await getGitHubStars(GITHUB_REPO_URL)
+---
+
+<a
+  href={GITHUB_REPO_URL}
+  rel="me"
+  class="github-link sl-flex"
+  aria-label={
+    stars === null
+      ? "Niko Table on GitHub"
+      : `Star Niko Table on GitHub (${stars} stars)`
+  }
+>
+  <Icon name="github" />
+  {stars !== null && (
+    <span class="count" aria-hidden="true">
+      <Icon name="star" size="0.875rem" />
+      {formatStars(stars)}
+    </span>
+  )}
+</a>
+
+<style>
+  .github-link {
+    align-items: center;
+    gap: 0.375rem;
+    color: var(--sl-color-text-accent);
+    padding: 0.5em;
+    margin: -0.5em;
+  }
+  .github-link:hover {
+    color: var(--sl-color-white);
+  }
+  .count {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: var(--sl-text-sm);
+    font-variant-numeric: tabular-nums;
+    color: var(--muted-foreground);
+  }
+  .github-link:hover .count {
+    color: var(--foreground);
+  }
+</style>
