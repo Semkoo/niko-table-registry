@@ -24,20 +24,14 @@ Add the registry once under `registries` in `components.json`, then install:
 ```json title="components.json"
 {
   "registries": {
-    "@niko-table": "https://niko-table.com/r/{name}.json"
+    "@niko-table": "https://niko-table.com/r/{style}/{name}.json"
   }
 }
 ```
 
 <CliCommandCode action="run" command="shadcn@latest add @niko-table/data-table" />
 
-Like shadcn/ui, Niko Table follows the component library you picked:
-
-| Component library                                          | shadcn styles         | Status                                                                                                  |
-| ---------------------------------------------------------- | --------------------- | ------------------------------------------------------------------------------------------------------- |
-| [Radix UI](https://www.radix-ui.com)                       | `new-york`, `radix-*` | Supported                                                                                               |
-| [Base UI](https://base-ui.com)                             | `base-*`              | Supported                                                                                               |
-| [React Aria](https://react-spectrum.adobe.com/react-aria/) | `aria-*`              | Experimental. Use the [`{style}` registry URL](/getting-started/installation/#react-aria-experimental). |
+Works with Radix UI, Base UI and React Aria. Like shadcn/ui, the CLI installs the version that matches your project.
 
 See [Installation](/getting-started/installation/) for merging into an existing `components.json`.
 
