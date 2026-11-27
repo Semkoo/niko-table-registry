@@ -24,13 +24,14 @@ function toPlacement(side: Side, align: Align): Placement {
   return `${side} ${align === "start" ? "top" : "bottom"}`
 }
 
-/**
- * Pass-through. React Aria has no tooltip provider; it is kept because the
- * shared Niko Table source wraps tables in one for Radix and Base UI. Its delay
- * is ignored: tooltips use shadcn's per-tooltip `delay` (`delayDuration` on
- * `Tooltip`).
- */
+// React Aria has no provider: the provider's delay feeds each shadcn
+// TooltipTrigger's own `delay` prop.
+const TooltipDelayContext = React.createContext<number | undefined>(undefined)
+
+/** Radix-shaped provider; it only carries the delay (Radix or Base UI name). */
 function TooltipProvider({
+  delayDuration,
+  delay,
   children,
 }: {
   /** Radix name. */
@@ -39,7 +40,11 @@ function TooltipProvider({
   delay?: number
   children?: React.ReactNode
 }) {
-  return children
+  return (
+    <TooltipDelayContext.Provider value={delayDuration ?? delay}>
+      {children}
+    </TooltipDelayContext.Provider>
+  )
 }
 
 function Tooltip({
@@ -55,9 +60,10 @@ function Tooltip({
   delayDuration?: number
   children?: React.ReactNode
 }) {
+  const providerDelay = React.useContext(TooltipDelayContext)
   return (
     <TooltipRoot
-      delay={delayDuration}
+      delay={delayDuration ?? providerDelay}
       closeDelay={0}
       isOpen={open}
       defaultOpen={defaultOpen}
