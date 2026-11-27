@@ -1180,6 +1180,75 @@
           "target": "components/niko-table/grid/hooks/use-grid-changes.ts"
         }
       ]
+    },
+    {
+      "name": "customers-table",
+      "type": "registry:block",
+      "title": "Customers Table",
+      "description": "A complete customers screen: search, status and plan filters, sortable columns, bulk selection, CSV export, a details panel on row click, an add-customer form, and a row menu that also opens on right-click.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": [
+        "https://niko-table.com/r/data-table.json",
+        "https://niko-table.com/r/data-table-search-filter.json",
+        "https://niko-table.com/r/data-table-faceted-filter.json",
+        "https://niko-table.com/r/data-table-clear-filter.json",
+        "https://niko-table.com/r/data-table-view-menu.json",
+        "https://niko-table.com/r/data-table-export-button.json",
+        "https://niko-table.com/r/data-table-selection-bar.json",
+        "https://niko-table.com/r/data-table-pagination.json",
+        "https://niko-table.com/r/data-table-column-sort.json",
+        "avatar",
+        "badge",
+        "button",
+        "checkbox",
+        "dropdown-menu",
+        "field",
+        "input",
+        "progress",
+        "select",
+        "sheet"
+      ],
+      "cssVars": {
+        "theme": {
+          "color-success": "var(--success)",
+          "color-warning": "var(--warning)"
+        },
+        "light": {
+          "success": "oklch(0.596 0.145 163.225)",
+          "warning": "oklch(0.666 0.179 58.318)"
+        },
+        "dark": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)"
+        }
+      },
+      "files": [
+        {
+          "path": "src/registry/new-york/blocks/customers-table/customers-table.tsx",
+          "type": "registry:component",
+          "target": "components/customers-table/customers-table.tsx"
+        },
+        {
+          "path": "src/registry/new-york/blocks/customers-table/customers-data.ts",
+          "type": "registry:component",
+          "target": "components/customers-table/customers-data.ts"
+        },
+        {
+          "path": "src/registry/new-york/blocks/customers-table/customers-format.ts",
+          "type": "registry:component",
+          "target": "components/customers-table/customers-format.ts"
+        },
+        {
+          "path": "src/registry/new-york/blocks/customers-table/customer-sheet.tsx",
+          "type": "registry:component",
+          "target": "components/customers-table/customer-sheet.tsx"
+        },
+        {
+          "path": "src/registry/new-york/blocks/customers-table/add-customer-sheet.tsx",
+          "type": "registry:component",
+          "target": "components/customers-table/add-customer-sheet.tsx"
+        }
+      ]
     }
   ]
 }

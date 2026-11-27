@@ -24,6 +24,7 @@
 
 - [Table Examples](https://niko-table.com/examples/): Gallery of every table example with live previews.
 - [Grid Examples](https://niko-table.com/data-grid/examples/): Gallery of every Data Grid example with live previews.
+- [Blocks](https://niko-table.com/blocks/): Full, ready-to-copy screens built from Niko Table, e.g. [Customers Table](https://niko-table.com/blocks/customers-table/).
 
 ### Getting Started
 
