@@ -1,13 +1,13 @@
 ---
 title: Persistence
-description: Turn grid edits into create / update / delete change-sets with useGridChanges.
+description: Turn grid edits into create, update, and delete change sets with useGridChanges.
 ---
 
 import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
 import CollapsiblePreview from "@/components/markdown/collapsible-preview.astro"
 import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
 
-The engine is uncontrolled. Opt into `useGridChanges` to watch edits and get a precise CRUD delta: plain React, separate install.
+Niko Grid does not track saves on its own. Add `useGridChanges` to watch edits and get an exact list of creates, updates, and deletes to send to your server. It is plain React and installs separately.
 
 <CodePreview demo="niko-table/grid-save" />
 
@@ -19,7 +19,7 @@ The engine is uncontrolled. Opt into `useGridChanges` to watch edits and get a p
 
 <CliCommandCode action="run" command="shadcn@latest add @niko-table/data-table-grid @niko-table/data-table-grid-changes" />
 
-Pass the **same** `initialRows` you seeded the grid with. Those ids are "existing"; everything else is a create. For a blank import, pass `[]`.
+Pass the **same** `initialRows` you gave the grid. Those ids count as "existing". Any other id is a create. For a blank import, pass `[]`.
 
 ## Usage
 
@@ -40,7 +40,7 @@ changes.reconcile(result)
 | `failedRowIds`                           | Rows that failed last reconcile |
 | `reset(rows?)`                           | Re-baseline                     |
 
-Dirtiness is O(1) per keystroke. `getChangeSet()` is the precise pass (optionally via `isEqual` so revert-to-original drops from `updated`).
+Dirty checks cost O(1) per keystroke. `getChangeSet()` does the exact pass. You can pass `isEqual` so a cell changed back to its original value drops out of `updated`.
 
 ## Staging save
 
@@ -57,7 +57,7 @@ async function onSave() {
 
 ## Autosave
 
-Debounce the network off `dirtyRowIds` (identity changes only when dirtiness changes):
+Debounce the network call off `dirtyRowIds`. Its identity changes only when dirtiness changes:
 
 ```tsx showLineNumbers
 React.useEffect(() => {
@@ -73,7 +73,7 @@ React.useEffect(() => {
 
 ## Signal
 
-Driven by `grid.lastCommit`: `{ kind, ids?, seq }`. `seq` advances only on real commits. You can observe it directly for badges or analytics.
+Driven by `grid.lastCommit`: `{ kind, ids?, seq }`. `seq` goes up only on real commits. You can read it directly for badges or analytics.
 
 ## Next
 

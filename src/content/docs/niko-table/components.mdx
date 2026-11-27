@@ -1,6 +1,6 @@
 ---
 title: DataTable Components
-description: Overview of all DataTable components organized by directory structure.
+description: A map of every DataTable component, grouped by folder.
 ---
 
 import { GITHUB_REPO_URL } from "@/data/env"
@@ -11,29 +11,29 @@ import DocsLink from "@/components/markdown/docs-link.astro"
   <DocsLink href="https://tanstack.com/table/latest/docs/framework/react/guide/migrating" external>Migrating to v9 ↗</DocsLink>
 </div>
 
-The components in `data-table` are built to be composable. You build your table by putting the provided components together. They also compose well with other shadcn/ui components.
+Build your table by nesting small components. They also mix with other shadcn/ui components.
 
-**If you need to change the code, you are encouraged to do so. The code is yours.**
+**The code is yours. Change it whenever you need to.**
 
 ## Directory Structure
 
-`DataTable*` components are organized into logical directories under `src/components/niko-table` (the folder the registry copies into your project):
+`DataTable*` components live in folders under `src/components/niko-table` (the folder the registry copies into your project):
 
-- **`core/`** - Essential table components (DataTableRoot, DataTable, context, structure components)
-- **`components/`** - User-facing context-aware components (automatically connect to table context via `useDataTable` hook)
-- **`filters/`** - Core filter implementation components (accept `table` prop directly, used by components/)
-- **`hooks/`** - Custom React hooks for table functionality
-- **`lib/`** - Utility functions and constants
-- **`types.ts`** - TypeScript type definitions
-- **`config/`** - Configuration and feature detection
+- **`core/`**: the essentials (DataTableRoot, DataTable, context, structure components)
+- **`components/`**: user-facing components that read the table from context via `useDataTable`
+- **`filters/`**: core filter components that take a `table` prop (used by `components/`)
+- **`hooks/`**: custom React hooks
+- **`lib/`**: helper functions and constants
+- **`types.ts`**: TypeScript types
+- **`config/`**: settings and feature detection
 
-This documentation follows this structure for easy navigation. Each component section includes links to source code and relevant documentation.
+These docs follow the same folders. Each section links to its source code.
 
 ## Documentation Sections
 
 ### [Core Components](/niko-table/overview/core/)
 
-Essential building blocks of the data table. They handle table initialization, context management, and basic structure.
+The building blocks. They set up the table, share context, and draw the basic structure.
 
 **Components:**
 
@@ -51,7 +51,7 @@ Essential building blocks of the data table. They handle table initialization, c
 
 ### [User-Facing Components](/niko-table/overview/components/)
 
-Context-aware components that automatically connect to the table via the `useDataTable` hook. These are the recommended components for most use cases.
+Components that find the table on their own through `useDataTable`. Start here for most tables.
 
 **Components:**
 
@@ -83,7 +83,7 @@ Context-aware components that automatically connect to the table via the `useDat
 
 ### [Filter Components](/niko-table/overview/filters/)
 
-Core filter implementation components that accept a `table` prop directly. They are used internally by the context-aware components but can also be used standalone when building custom components.
+Filter components that take a `table` prop directly. The user-facing components use them inside. You can also use them on their own in custom components.
 
 **Components:**
 
@@ -109,7 +109,7 @@ Core filter implementation components that accept a `table` prop directly. They 
 
 ### [Hooks](/niko-table/overview/hooks/)
 
-Custom React hooks for table functionality.
+React hooks for your table.
 
 **Hooks:**
 
@@ -123,34 +123,34 @@ Custom React hooks for table functionality.
 
 ## Credits and Inspirations
 
-Niko Table is built on top of excellent open-source projects and inspired by the work of talented developers in the community.
+Niko Table builds on open-source projects and ideas from other developers.
 
 ### Core Dependencies
 
-- **[TanStack Table](https://tanstack.com/table)** by Tanner Linsley - The headless table library that powers everything. Provides the foundation for all table functionality including sorting, filtering, pagination, and more.
+- **[TanStack Table](https://tanstack.com/table)** by Tanner Linsley - The headless table library under everything. It handles sorting, filtering, pagination, and more.
 
-- **[Shadcn UI](https://ui.shadcn.com)** by Shadcn - Beautiful, accessible component primitives built on Radix UI. All UI components in Niko Table are built using Shadcn UI components.
+- **[Shadcn UI](https://ui.shadcn.com)** by Shadcn - Accessible component primitives built on Radix UI. All Niko Table UI uses them.
 
 ### Major Inspirations
 
-- **[sadmann7's work](https://github.com/sadmann7)** - Major inspiration for filter components and table patterns:
-  - **[TableCN](https://github.com/sadmann7/tablecn)** - Inspired our filter menu, inline filter, faceted filter, and slider filter implementations. The composition pattern and filter architecture drew heavily from this excellent project.
-  - **[DiceUI Sortable](https://www.diceui.com/docs/components/sortable)** - Drag and drop sortable for row reordering, which inspired the sort menu implementation.
+- **[sadmann7's work](https://github.com/sadmann7)** - Main inspiration for the filter components and table patterns:
+  - **[TableCN](https://github.com/sadmann7/tablecn)** - Inspired the filter menu, inline filter, faceted filter, and slider filter. The composition pattern and filter design come from here.
+  - **[DiceUI Sortable](https://www.diceui.com/docs/components/sortable)** - Drag-and-drop sorting. Inspired the sort menu.
 
-- **[nuqs](https://nuqs.dev/)** by François Best - Type-safe search params state manager for URL state management. Used in server-side examples for managing table state in URLs.
+- **[nuqs](https://nuqs.dev/)** by François Best - Type-safe URL state. Used in the server-side examples to keep table state in the URL.
 
-- **[Web Dev Simplified Registry](https://github.com/WebDevSimplified/wds-shadcn-registry)** by Kyle Cook - Registry implementation pattern that inspired the structure and organization of this project.
+- **[Web Dev Simplified Registry](https://github.com/WebDevSimplified/wds-shadcn-registry)** by Kyle Cook - Its registry pattern shaped how this project is organized.
 
 ### Philosophy
 
 Following the Shadcn philosophy: **"Nobody's table, everyone's solution."**
 
 - Copy and paste the code into your project
-- Own the code - modify it as needed
-- No dependencies on external packages (except TanStack Table and Shadcn UI)
+- Own the code: change it as needed
+- No extra packages (only TanStack Table and Shadcn UI)
 - Fully customizable and themeable
-- Built with TypeScript for type safety
+- Written in TypeScript
 
 ## License
 
-MIT License - use it freely in your projects!
+MIT License. Use it freely in your projects.

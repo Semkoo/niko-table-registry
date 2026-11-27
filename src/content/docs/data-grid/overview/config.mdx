@@ -1,12 +1,12 @@
 ---
 title: Niko Grid Config
-description: Keyboard shortcut metadata and helpers for the Niko Grid help UI.
+description: Keyboard shortcut data and helpers for the Niko Grid help dialog.
 ---
 
 import { GITHUB_REPO_URL } from "@/data/env"
 import DocsLink from "@/components/markdown/docs-link.astro"
 
-The `grid/config/` directory holds discoverable shortcut metadata: the human-readable mirror of `<DataGrid>`’s keydown handler. Wire it to `DataGridShortcutsButton` / `GridShortcutsList` via `onRequestShortcuts`.
+Use this to show users the grid's keyboard shortcuts. The `grid/config/` folder holds a readable list that mirrors the `<DataGrid>` keydown handler. Connect it to `DataGridShortcutsButton` or `GridShortcutsList` with `onRequestShortcuts`.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/grid/config/grid-shortcuts.ts`} external>Source Code ↗</DocsLink>
@@ -29,7 +29,7 @@ interface GridShortcutGroup {
 
 ## GRID_SHORTCUTS
 
-Grouped reference list (Navigation, Selection, Editing, Clipboard, …). Keep it in sync when the container’s handler changes.
+A grouped list (Navigation, Selection, Editing, Clipboard, and more). Update it when the `<DataGrid>` handler changes.
 
 ```tsx showLineNumbers
 import { GRID_SHORTCUTS } from "@/components/niko-table/grid/config/grid-shortcuts"
@@ -59,10 +59,10 @@ const [open, setOpen] = React.useState(false)
 <DataGridShortcutsButton /> {/* or open your own dialog on `open` */}
 ```
 
-When `onRequestShortcuts` is unset, `?` types normally into the cell.
+If you do not set `onRequestShortcuts`, `?` types into the cell as normal.
 
 ## Related table config
 
-Filter operators, sort icons, and feature detection live on the table side:
+Filter operators, sort icons, and feature detection live in Niko Table:
 
 - [Niko Table Config](/niko-table/overview/config/)

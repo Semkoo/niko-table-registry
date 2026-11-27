@@ -1,13 +1,13 @@
 ---
 title: Tree Table
-description: Display hierarchical data with expandable parent and child rows.
+description: Show hierarchical data with expandable parent and child rows.
 ---
 
 import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
 import CollapsiblePreview from "@/components/markdown/collapsible-preview.astro"
 import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
 
-Renders nested row models (`subRows`) with collapsible parents and optional cascading selection — checking a parent flips every descendant, and partial child selection bubbles up as indeterminate. Backed by TanStack Table's expanded-row model, so there's no recursive code in your column defs.
+Shows nested rows (`subRows`) with collapsible parents and optional cascading selection. Checking a parent selects all its children, and a partly selected parent shows as indeterminate. Use it for parent and child data. It uses TanStack Table's expanded-row model, so your column definitions need no recursive code.
 
 <CodePreview demo="niko-table/tree-table" />
 
@@ -17,11 +17,11 @@ Renders nested row models (`subRows`) with collapsible parents and optional casc
 
 ## Introduction
 
-The Tree Table displays hierarchical data with parent and child relationships. Rows can be expanded to show nested data, and selection can cascade to children.
+The Tree Table shows hierarchical data with parent and child rows. Users expand rows to see nested data, and selection can cascade to children.
 
 ## Tree vs Grouping
 
-Both expand/collapse, but they are different features — use **one per table**:
+Both expand and collapse, but they are different features. Use **one per table**:
 
 |                       | Tree                         | [Grouping Table](/examples/grouping-table/)   |
 | --------------------- | ---------------------------- | --------------------------------------------- |
@@ -30,7 +30,7 @@ Both expand/collapse, but they are different features — use **one per table**:
 | Aggregations          | Not the main model           | `aggregationFn` / `aggregatedCell`            |
 | Typical UI            | Indent + chevron per level   | **Group by** in the column menu + `(n)` count |
 
-[Row Expansion](/examples/row-expansion-table/) is a third pattern: one flat row opens an inline detail panel — not nested rows and not column buckets.
+[Row Expansion](/examples/row-expansion-table/) is a third pattern: one flat row opens an inline detail panel. It has no nested rows and no column buckets.
 
 ## Installation
 
@@ -48,7 +48,7 @@ For other add-ons or manual copy-paste, see the [Installation Guide](/getting-st
 
 ## Prerequisites
 
-We are going to build a table to show projects with sub-projects. Here's what our data looks like:
+We are going to build a table of projects with sub-projects. Here's what our data looks like:
 
 ```tsx showLineNumbers
 type Project = {
@@ -86,11 +86,11 @@ const data: Project[] = [
 
 ## Basic Tree Table
 
-Let's start by building a tree table.
+Start with a tree table.
 
 ### Column Definitions
 
-First, we'll define our columns with tree visualization.
+First, define the columns with a tree layout.
 
 ```tsx showLineNumbers title="columns.tsx"
 "use client"
@@ -184,7 +184,7 @@ export const columns: DataTableColumnDef<Project>[] = [
 
 ### `<DataTable />` component
 
-Next, we'll create the tree table with `getSubRows`.
+Next, create the tree table with `getSubRows`.
 
 ```tsx showLineNumbers title="tree-table.tsx"
 "use client"
@@ -351,7 +351,7 @@ export function TreeTable({ data }: { data: Project[] }) {
 
 ### getSubRows
 
-Tell TanStack Table how to access child rows:
+Tell TanStack Table how to find child rows:
 
 ```tsx showLineNumbers
 <DataTableRoot
@@ -367,7 +367,7 @@ Tell TanStack Table how to access child rows:
 
 ### Row Depth
 
-Access row depth in cell renderers:
+Read the row depth in cell renderers:
 
 ```tsx showLineNumbers
 cell: ({ row }) => {
@@ -405,7 +405,7 @@ const collapseAll = () => {
 
 ## Controlled State
 
-Manage all table state externally for full control:
+Manage all table state yourself:
 
 ```tsx showLineNumbers
 import { useState } from "react"
@@ -491,25 +491,25 @@ export function ControlledTreeTable({ data }: { data: Project[] }) {
 
 ## Tree Selection
 
-For hierarchical selection (selecting a parent selects all children), you'll need custom selection logic — the live demo at the top of this page implements it; open its **Code** tab for the cascading-selection column.
+For hierarchical selection (selecting a parent selects all children), you need custom selection logic. The live demo at the top of this page has it. Open its **Code** tab to see the cascading-selection column.
 
 ## When to Use
 
 **✅ Use Tree Table when:**
 
-- You have hierarchical data (parent-child relationships)
+- You have hierarchical data (parent and child relationships)
 - You need to show nested structures
-- Users need to expand/collapse sections
-- Data has multiple levels of nesting
+- Users need to expand and collapse sections
+- The data has several levels of nesting
 
 **❌ Don't use Tree Table when:**
 
-- Data is flat and you want to bucket by column values — use [Grouping Table](/examples/grouping-table/)
-- You need per-row detail panels — use [Row Expansion](/examples/row-expansion-table/)
-- You prefer sidebars for details — use [Aside Table](/examples/aside-table/)
+- The data is flat and you want to bucket by column values: use [Grouping Table](/examples/grouping-table/)
+- You need per-row detail panels: use [Row Expansion](/examples/row-expansion-table/)
+- You prefer sidebars for details: use [Aside Table](/examples/aside-table/)
 
 ## Next Steps
 
-- [Grouping Table](/examples/grouping-table/) — bucket flat rows by column values
-- [Row Expansion Table](/examples/row-expansion-table/) — inline detail panels
-- [Advanced Table](/examples/advanced-table/) — combine with other features
+- [Grouping Table](/examples/grouping-table/): bucket flat rows by column values
+- [Row Expansion Table](/examples/row-expansion-table/): inline detail panels
+- [Advanced Table](/examples/advanced-table/): combine with other features

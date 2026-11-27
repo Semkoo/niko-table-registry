@@ -1,12 +1,12 @@
 ---
 title: Niko Grid Hooks
-description: useDataGrid, useGridColumns, useGridChanges, and internal grid hooks.
+description: useDataGrid, useGridColumns, useGridChanges, and the internal grid hooks.
 ---
 
 import { GITHUB_REPO_URL } from "@/data/env"
 import DocsLink from "@/components/markdown/docs-link.astro"
 
-Hooks under `grid/hooks/`. The public engine is `useDataGrid`; persistence is a separate install via `useGridChanges`.
+Use `useDataGrid` for the grid engine. Use `useGridChanges` to track edits for saving. It is a separate install. All hooks live in `grid/hooks/`.
 
 <div className="not-content mb-6 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/tree/main/src/components/niko-table/grid/hooks`} external>Source Code ↗</DocsLink>
@@ -15,7 +15,7 @@ Hooks under `grid/hooks/`. The public engine is `useDataGrid`; persistence is a 
 
 ### useDataGrid
 
-Headless engine: rows, focus, selection, edit lifecycle, undo/redo. Domain-free.
+The headless engine. It holds rows, focus, selection, editing, and undo/redo. It has no domain logic.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/grid/hooks/use-data-grid.ts`} external>Source Code ↗</DocsLink>
@@ -35,7 +35,8 @@ const grid = useDataGrid<TRow extends GridRow>({
 })
 ```
 
-Blank seeds from `initialRowCount` use deterministic `row-0`… ids (SSR-safe). Runtime `addRows` / `insertRows` / `clearAll` use `makeId`.
+- Blank seeds from `initialRowCount` get fixed ids like `row-0` (safe for SSR).
+- Runtime `addRows`, `insertRows`, and `clearAll` use `makeId`.
 
 #### Config
 
@@ -50,22 +51,22 @@ Blank seeds from `initialRowCount` use deterministic `row-0`… ids (SSR-safe). 
 
 #### Return values (high level)
 
-| Field                                                                             | Purpose                                                              |
-| --------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
-| `rows`                                                                            | Pass to `DataTableRoot data`                                         |
-| `lastCommit`                                                                      | Last mutation signal: see [Persistence](/examples/persistence-grid/) |
-| `focusedCell` / `editingCell` / `selectionAnchor`                                 | Cursor + range by `{ rowId, columnId }`                              |
-| `selectCell` / `deselect` / `extendSelectionTo`                                   | Move / clear / extend selection (all leave edit mode)                |
-| `startEditing` / `stopEditing`                                                    | Open / close the editor                                              |
-| `setCell(rowId, colId, next)`                                                     | O(1) commit: one row identity changes                                |
-| `updateRows` / `addRows` / `insertRows` / `removeRow` / `removeRows` / `clearAll` | Row mutations (undoable)                                             |
-| `undo` / `redo` / `canUndo` / `canRedo`                                           | History                                                              |
+| Field                                                                             | Purpose                                                            |
+| --------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| `rows`                                                                            | Pass to `DataTableRoot data`                                       |
+| `lastCommit`                                                                      | Last change signal. See [Persistence](/examples/persistence-grid/) |
+| `focusedCell` / `editingCell` / `selectionAnchor`                                 | Cursor + range by `{ rowId, columnId }`                            |
+| `selectCell` / `deselect` / `extendSelectionTo`                                   | Move, clear, or extend selection (all leave edit mode)             |
+| `startEditing` / `stopEditing`                                                    | Open / close the editor                                            |
+| `setCell(rowId, colId, next)`                                                     | O(1) commit: one row identity changes                              |
+| `updateRows` / `addRows` / `insertRows` / `removeRow` / `removeRows` / `clearAll` | Row mutations (undoable)                                           |
+| `undo` / `redo` / `canUndo` / `canRedo`                                           | History                                                            |
 
-`updateRows(fn, { history: false })` settles derived state (e.g. cross-field validation) without pushing undo. See [Validation](/examples/validation-grid/).
+`updateRows(fn, { history: false })` updates derived state (like cross-field validation) without adding an undo step. See [Validation](/examples/validation-grid/).
 
 ### useGridColumns
 
-Runtime column specs for [Dynamic Columns](/examples/dynamic-columns-grid/).
+Manages column specs at runtime for [Dynamic Columns](/examples/dynamic-columns-grid/).
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/grid/hooks/use-grid-columns.ts`} external>Source Code ↗</DocsLink>
@@ -79,7 +80,7 @@ const cols = useGridColumns({ initialColumns })
 
 ### useGridChanges
 
-Separate install: `@niko-table/data-table-grid-changes`. Driven by `grid.lastCommit`.
+Separate install: `@niko-table/data-table-grid-changes`. It reads `grid.lastCommit`.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/grid/hooks/use-grid-changes.ts`} external>Source Code ↗</DocsLink>
@@ -95,11 +96,11 @@ changes.reconcile({ succeededIds, failedIds })
 
 ### Internal hooks
 
-Used by core / feature components: rarely imported from app code.
+Core and feature components use these. You rarely import them in app code.
 
 | Hook                              | Role                                                                     |
 | --------------------------------- | ------------------------------------------------------------------------ |
 | `useGridKeyboard`                 | Scoped keydown state machine                                             |
 | `useGridNavigation`               | Arrow / Tab / Home / End movement                                        |
 | `parseTsv` / `serializeSelection` | TSV parse / serialize helpers (plain functions, `use-grid-clipboard.ts`) |
-| `useDataGridContext`              | Context (lives in core): throws outside provider                         |
+| `useDataGridContext`              | Context (lives in core). Throws outside the provider                     |

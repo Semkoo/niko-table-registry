@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { CodeIcon, EyeIcon, Loader2Icon } from "lucide-react"
+import { Loader2Icon } from "lucide-react"
 
 export type Demo =
   | "niko-table/simple"
@@ -48,6 +48,7 @@ export type Demo =
   | "niko-table/inline-edit"
   | "niko-table/inline-edit-state"
   | "niko-table/grid-all-features"
+  | "niko-table/grid-showcase"
   | "niko-table/grid-basic"
   | "niko-table/grid-basic-state"
   | "niko-table/grid-cell-types"
@@ -89,15 +90,9 @@ export function CodePreviewTabBar() {
         onValueChange={value => setTab(value as Tab)}
         className="gap-0"
       >
-        <TabsList>
-          <TabsTrigger value="preview" className="px-3">
-            <EyeIcon aria-hidden="true" />
-            Preview
-          </TabsTrigger>
-          <TabsTrigger value="code" className="px-3">
-            <CodeIcon aria-hidden="true" />
-            Code
-          </TabsTrigger>
+        <TabsList className="nt-switch">
+          <TabsTrigger value="preview">Preview</TabsTrigger>
+          <TabsTrigger value="code">Code</TabsTrigger>
         </TabsList>
       </Tabs>
     </div>

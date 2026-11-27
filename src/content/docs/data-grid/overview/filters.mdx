@@ -6,7 +6,7 @@ description: "Niko Grid reuses Niko Table filters. There is no separate grid/fil
 import { GITHUB_REPO_URL } from "@/data/env"
 import DocsLink from "@/components/markdown/docs-link.astro"
 
-Niko Grid does **not** ship its own `grid/filters/` directory. Sort, filter, and faceted UIs come from Niko Table and stay correct because focus/edits are **id-addressed** (not display index).
+Niko Grid has no filters of its own. Sort, filter, and faceted UIs come from Niko Table. They stay correct because focus and edits use the **row id**, not the display index.
 
 <div className="not-content mb-6 flex items-center gap-2">
   <DocsLink href="/niko-table/overview/filters/">Table Filters ↗</DocsLink>
@@ -15,10 +15,10 @@ Niko Grid does **not** ship its own `grid/filters/` directory. Sort, filter, and
 
 ## How filtering works with the grid
 
-1. Build columns and toolbar filters as you would for any Niko Table.
+1. Build columns and toolbar filters like any Niko Table.
 2. Pass `grid.rows` into `DataTableRoot` as `data`.
-3. Wrap the table in `<DataGrid>`: keyboard nav and selection read **display order** after filter/sort.
-4. Cell editors keep using `{ rowId, columnId }`, so filtered-out rows retain state.
+3. Wrap the table in `<DataGrid>`. Keyboard nav and selection follow the **display order** after filter and sort.
+4. Cell editors use `{ rowId, columnId }`, so filtered-out rows keep their state.
 
 ```tsx showLineNumbers
 <DataTableRoot data={grid.rows} columns={columns} getRowId={(r) => r.id}>

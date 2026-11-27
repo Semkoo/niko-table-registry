@@ -1,16 +1,16 @@
 ---
 title: DataTable Hooks
-description: Custom React hooks for table functionality including useDataTable, useDebounce, and more.
+description: React hooks for reading the table, debouncing input, building filter options, and keyboard shortcuts.
 ---
 
 import { GITHUB_REPO_URL } from "@/data/env"
 import DocsLink from "@/components/markdown/docs-link.astro"
 
-Custom React hooks for table functionality.
+Hooks you can use inside your table components.
 
 ### useDataTable
 
-Hook to access the table instance and context from any child component.
+Gives any child component the table instance and context.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/core/data-table-context.tsx`} external>Source Code ↗</DocsLink>
@@ -43,11 +43,11 @@ export function CustomComponent() {
 | `table`        | `DataTableInstance<TData>`     | The TanStack Table instance.             |
 | `columns`      | `DataTableColumnDef<TData>[]`  | Column definitions array.                |
 | `isLoading`    | `boolean`                      | Whether the table is in a loading state. |
-| `setIsLoading` | `(isLoading: boolean) => void` | Function to update loading state.        |
+| `setIsLoading` | `(isLoading: boolean) => void` | Updates the loading state.               |
 
 ### useDebounce
 
-Hook to debounce a value, useful for search inputs and filters.
+Delays a value until the user stops changing it. Good for search inputs and filters.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/hooks/use-debounce.ts`} external>Source Code ↗</DocsLink>
@@ -77,10 +77,10 @@ function SearchFilter() {
 
 #### Parameters
 
-| Name    | Type     | Default | Description                                |
-| ------- | -------- | ------- | ------------------------------------------ |
-| `value` | `T`      | -       | The value to debounce (required).          |
-| `delay` | `number` | `300`   | The delay in milliseconds before updating. |
+| Name    | Type     | Default | Description                                     |
+| ------- | -------- | ------- | ----------------------------------------------- |
+| `value` | `T`      | -       | The value to debounce (required).               |
+| `delay` | `number` | `300`   | Delay in milliseconds before the value updates. |
 
 #### Returns
 
@@ -88,7 +88,7 @@ The debounced value of type `T`.
 
 ### useDerivedColumnTitle
 
-Hook that derives the title for a column filter component.
+Works out the title for a column filter.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/hooks/use-derived-column-title.ts`} external>Source Code ↗</DocsLink>
@@ -126,7 +126,7 @@ The derived title string (priority: title prop → column.meta.label → formatt
 
 ### useGeneratedOptions
 
-Hook to generate options for select/multiSelect columns from table data.
+Builds options for select and multiSelect columns from your table data.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/hooks/use-generated-options.ts`} external>Source Code ↗</DocsLink>
@@ -175,7 +175,7 @@ A record mapping column IDs to arrays of `Option` objects.
 
 ### useKeyboardShortcut
 
-Hook for managing keyboard shortcuts with fine-grained control.
+Adds one keyboard shortcut, with control over modifier keys.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/hooks/use-keyboard-shortcut.ts`} external>Source Code ↗</DocsLink>
@@ -199,21 +199,21 @@ useKeyboardShortcut({
 
 #### Parameters
 
-| Name              | Type            | Default | Description                                                 |
-| ----------------- | --------------- | ------- | ----------------------------------------------------------- |
-| `key`             | `string`        | -       | The key to listen for (required).                           |
-| `onTrigger`       | `() => void`    | -       | Function to call when shortcut is triggered.                |
-| `enabled`         | `boolean`       | `true`  | Whether the shortcut is enabled.                            |
-| `requireShift`    | `boolean`       | `false` | Whether to require Shift key.                               |
-| `requireCtrl`     | `boolean`       | `false` | Whether to require Ctrl/Cmd key.                            |
-| `requireAlt`      | `boolean`       | `false` | Whether to require Alt key.                                 |
-| `preventDefault`  | `boolean`       | `true`  | Whether to prevent default browser behavior.                |
-| `stopPropagation` | `boolean`       | `false` | Whether to stop event propagation.                          |
-| `condition`       | `() => boolean` | -       | Condition function to determine if shortcut should trigger. |
+| Name              | Type            | Default | Description                          |
+| ----------------- | --------------- | ------- | ------------------------------------ |
+| `key`             | `string`        | -       | The key to listen for (required).    |
+| `onTrigger`       | `() => void`    | -       | Runs when the shortcut fires.        |
+| `enabled`         | `boolean`       | `true`  | Whether the shortcut is enabled.     |
+| `requireShift`    | `boolean`       | `false` | Whether to require Shift key.        |
+| `requireCtrl`     | `boolean`       | `false` | Whether to require Ctrl/Cmd key.     |
+| `requireAlt`      | `boolean`       | `false` | Whether to require Alt key.          |
+| `preventDefault`  | `boolean`       | `true`  | Block the browser's default action.  |
+| `stopPropagation` | `boolean`       | `false` | Stop the event from bubbling.        |
+| `condition`       | `() => boolean` | -       | Return `false` to skip the shortcut. |
 
 ### useKeyboardShortcuts
 
-Batch version of `useKeyboardShortcut` for managing multiple keyboard shortcuts at once with a single event listener.
+Adds many shortcuts at once with one event listener. Same options as `useKeyboardShortcut`.
 
 ```tsx showLineNumbers
 import { useKeyboardShortcuts } from "@/components/niko-table/hooks/use-keyboard-shortcut"
@@ -227,13 +227,13 @@ useKeyboardShortcuts([
 
 #### Parameters
 
-| Name        | Type                           | Description                                              |
-| ----------- | ------------------------------ | -------------------------------------------------------- |
-| `shortcuts` | `UseKeyboardShortcutOptions[]` | Array of shortcut configs (same as useKeyboardShortcut). |
+| Name        | Type                           | Description                                                |
+| ----------- | ------------------------------ | ---------------------------------------------------------- |
+| `shortcuts` | `UseKeyboardShortcutOptions[]` | Array of shortcut options (same as `useKeyboardShortcut`). |
 
 ### useGeneratedOptionsForColumn
 
-Convenience wrapper around `useGeneratedOptions` that generates options for a single column.
+A shortcut around `useGeneratedOptions` for one column.
 
 ```tsx showLineNumbers
 import { useGeneratedOptionsForColumn } from "@/components/niko-table/hooks/use-generated-options"
@@ -262,4 +262,6 @@ An array of `Option` objects for the specified column.
 
 #### useGeneratedOptions
 
-- **Fix: Column definitions reactivity** — The hook now properly tracks changes to column definitions passed to the table. Previously, the internal columns memo only depended on the `table` reference, which is stable across renders in TanStack Table. This caused the hook to return stale options when column definitions were dynamically updated (e.g., server-side facets updating `meta.options`). The fix adds `table.options.columns` as a memo dependency so the hook recomputes whenever column definitions change.
+- **Fix: column definitions now update the options.**
+  - Before: the hook only watched the `table` reference, which stays the same across renders. It returned stale options when column definitions changed (for example, server-side facets updating `meta.options`).
+  - Now: `table.options.columns` is a memo dependency, so the hook recomputes when column definitions change.

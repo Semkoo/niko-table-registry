@@ -6,7 +6,7 @@ description: CellState, CellPosition, GridRow, and related TypeScript types.
 import { GITHUB_REPO_URL } from "@/data/env"
 import DocsLink from "@/components/markdown/docs-link.astro"
 
-Types under `grid/types/`. Domain-free: safe to copy with the registry item.
+These types live in `grid/types/`. They have no domain logic, so they are safe to copy with the registry item.
 
 <div className="not-content mb-4 flex items-center gap-2">
   <DocsLink href={`${GITHUB_REPO_URL}/blob/main/src/components/niko-table/grid/types/grid-cell.ts`} external>Source Code ↗</DocsLink>
@@ -20,7 +20,7 @@ type CellStatus = "valid" | "invalid" | "empty"
 
 ## CellState
 
-Each editable cell keeps `raw`, resolved `value`, and `status` separate so a pasted-but-unmatched value stays visible (and correctable).
+Each editable cell keeps `raw`, the resolved `value`, and `status` apart. A pasted value that does not match stays visible, so the user can fix it.
 
 ```ts
 interface CellState<T> {
@@ -34,7 +34,7 @@ interface CellState<T> {
 
 ## CellPosition
 
-Address by **row id** and **column id**: not display index: so focus/selection survive filter/sort/reorder.
+A cell is addressed by **row id** and **column id**, not display index. Focus and selection then survive filter, sort, and reorder.
 
 ```ts
 interface CellPosition {
@@ -45,7 +45,7 @@ interface CellPosition {
 
 ## CopiedRange
 
-Marching-ants copy outline, captured by identity (`Set` membership + edge ids).
+The copy outline (marching ants). It is stored by id: `Set` membership plus the edge ids.
 
 ```ts
 interface CopiedRange {
@@ -60,7 +60,7 @@ interface CopiedRange {
 
 ## SelectionBounds
 
-Inclusive selection rectangle in **display** space (post filter/sort indices).
+The selection rectangle, edges included, in **display** space (indices after filter and sort).
 
 ```ts
 interface SelectionBounds {
@@ -97,4 +97,4 @@ interface GridRow {
 | `data-grid-columns-context.tsx` | `GridColumnTypeOption`                                |
 | `cell-props.ts`                 | `CellEditorProps`, `GridComboboxOption`               |
 
-See also [Niko Table Types](/niko-table/overview/types/) for table-level defs.
+For table-level types, see [Niko Table Types](/niko-table/overview/types/).
