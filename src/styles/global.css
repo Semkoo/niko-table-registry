@@ -313,6 +313,57 @@
 .nt-stage {
   background: var(--background);
 }
+/* Top bar of a demo frame: logo, then a command or file name. */
+.nt-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 2.75rem;
+  padding: 0.5rem 0.75rem 0.5rem 1rem;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.8125rem;
+  color: var(--muted-foreground);
+}
+.nt-bar-logo {
+  flex: none;
+  width: 1rem;
+  height: 1rem;
+  color: var(--foreground);
+}
+.nt-bar-text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--sl-font-mono, ui-monospace, monospace);
+  font-size: 0.8125rem;
+  background: none;
+  padding: 0;
+}
+.nt-bar-command {
+  color: var(--foreground);
+}
+.nt-bar-command span {
+  color: var(--muted-foreground);
+}
+.nt-bar-copy {
+  flex: none;
+  padding: 0.25rem 0.625rem;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--muted-foreground);
+}
+.nt-bar-copy:hover {
+  color: var(--foreground);
+  background: var(--muted);
+}
+.nt-bar-copy:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
 @media (prefers-reduced-motion: reduce) {
   .nt-switch > button {
     transition: none;

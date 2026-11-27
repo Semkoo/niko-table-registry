@@ -7,6 +7,7 @@
 import "@/styles/global.css"
 import { BlockView } from "@/components/blocks/block-view"
 import { blocks } from "@/data/blocks"
+import LogoMark from "@/components/brand/logo-mark.astro"
 
 export function getStaticPaths() {
   return blocks.map(block => ({ params: { block: block.name }, props: block }))
@@ -42,6 +43,21 @@ const { name, title } = Astro.props
     <div class="p-4 md:p-8">
       <BlockView name={name} client:only="react" />
     </div>
+    {/* Only on the full page: hidden until the script below sees no parent frame. */}
+    <a
+      id="built-with"
+      href={`https://niko-table.com/blocks/${name}/`}
+      hidden
+      class="fixed right-4 bottom-4 z-40 inline-flex items-center gap-2 rounded-full border border-border bg-background/90 px-3 py-1.5 text-xs font-medium text-muted-foreground shadow-sm backdrop-blur transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring motion-reduce:transition-none"
+    >
+      <LogoMark size="0.875rem" />
+      Built with Niko Table
+    </a>
+    <script is:inline>
+      if (window.self === window.top) {
+        document.getElementById("built-with").hidden = false
+      }
+    </script>
     <script is:inline>
       // When embedded on the block page, size the iframe to the block so it
       // never scrolls inside the frame (same origin, so frameElement is readable).

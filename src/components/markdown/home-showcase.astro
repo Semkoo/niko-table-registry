@@ -1,4 +1,5 @@
 ---
+import InstallBar from "@/components/markdown/install-bar.astro"
 import { CodePreviewDemo } from "@/components/markdown/code-preview/_code-preview-internal"
 
 // One view per kind of thing you can install. The frame header shows the exact
@@ -52,20 +53,7 @@ const views = [
       aria-labelledby={`showcase-tab-${view.id}`}
       hidden={i !== 0}
     >
-      <div class="showcase-bar">
-        <code class="showcase-command">
-          <span aria-hidden="true">$ </span>
-          {view.command}
-        </code>
-        <button
-          type="button"
-          class="showcase-copy"
-          data-command={view.command}
-          aria-label={`Copy install command for ${view.label}`}
-        >
-          Copy
-        </button>
-      </div>
+      <InstallBar command={view.command} label={view.label} />
 
       <div class="showcase-stage nt-stage">
         {view.id === "table" && (
@@ -112,20 +100,6 @@ const views = [
         next.focus()
       })
     })
-
-    for (const button of root.querySelectorAll<HTMLButtonElement>(
-      ".showcase-copy",
-    )) {
-      button.addEventListener("click", async () => {
-        try {
-          await navigator.clipboard.writeText(button.dataset.command ?? "")
-          button.textContent = "Copied"
-        } catch {
-          button.textContent = "Press Ctrl+C"
-        }
-        setTimeout(() => (button.textContent = "Copy"), 2000)
-      })
-    }
   }
 </script>
 
@@ -143,45 +117,9 @@ const views = [
   .showcase-switch {
     margin-bottom: 0.75rem;
   }
-  .showcase-copy:focus-visible,
   .showcase-foot a:focus-visible {
     outline: 2px solid var(--ring);
     outline-offset: 2px;
-  }
-
-  .showcase-bar {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.625rem 0.75rem 0.625rem 1rem;
-    border-bottom: 1px solid var(--border);
-  }
-  .showcase-command {
-    flex: 1;
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    font-size: 0.8125rem;
-    color: var(--foreground);
-    background: none;
-    padding: 0;
-  }
-  .showcase-command span {
-    color: var(--muted-foreground);
-  }
-  .showcase-copy {
-    flex: none;
-    padding: 0.25rem 0.625rem;
-    border: 1px solid var(--border);
-    border-radius: 0.375rem;
-    font-size: 0.75rem;
-    font-weight: 500;
-    color: var(--muted-foreground);
-  }
-  .showcase-copy:hover {
-    color: var(--foreground);
-    background: var(--muted);
   }
 
   .showcase-stage {

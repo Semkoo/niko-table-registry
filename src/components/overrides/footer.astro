@@ -4,6 +4,7 @@
  */
 import DefaultFooter from "@astrojs/starlight/components/Footer.astro"
 import { Icon } from "@astrojs/starlight/components"
+import LogoMark from "@/components/brand/logo-mark.astro"
 import { GITHUB_REPO_URL } from "@/data/env"
 import { formatStars, getGitHubStars } from "@/lib/github-stars"
 
@@ -23,6 +24,11 @@ const stars = await getGitHubStars(GITHUB_REPO_URL)
 </aside>
 
 <DefaultFooter />
+
+<a href="/" class="footer-brand not-content">
+  <LogoMark size="1rem" />
+  Niko Table
+</a>
 
 <style>
   .star-prompt {
@@ -60,6 +66,24 @@ const stars = await getGitHubStars(GITHUB_REPO_URL)
   }
   .star-button:hover {
     background: var(--accent);
+  }
+  .footer-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+    font-size: var(--sl-text-sm);
+    font-weight: 500;
+    color: var(--muted-foreground);
+    text-decoration: none;
+  }
+  .footer-brand:hover {
+    color: var(--foreground);
+  }
+  .footer-brand:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+    border-radius: 0.25rem;
   }
   .star-count {
     padding-inline-start: 0.5rem;

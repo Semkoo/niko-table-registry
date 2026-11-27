@@ -1,6 +1,7 @@
 ---
 import { Code } from "@astrojs/starlight/components"
 import fs from "node:fs/promises"
+import LogoMark from "@/components/brand/logo-mark.astro"
 import {
   type Demo,
   CodePreviewTabBar,
@@ -11,6 +12,7 @@ type Props = { demo: Demo }
 
 const { demo } = Astro.props
 const componentName = demo?.split("/")[0] ?? ""
+const fileName = `${demo?.split("/")[1] ?? ""}.tsx`
 const fileContents = (
   await fs.readFile(`./src/registry/new-york/examples/${demo}.tsx`, "utf-8")
 ).replace(
@@ -34,6 +36,10 @@ const fileContents = (
 >
   <CodePreviewTabBar client:load />
   <div class="nt-frame no-scrollbar min-h-[450px] overflow-y-auto text-card-foreground">
+    <div class="nt-bar">
+      <LogoMark class="nt-bar-logo" />
+      <span class="nt-bar-text">{fileName}</span>
+    </div>
     <div
       data-code-preview-panel="preview"
       class="nt-stage flex min-h-[450px] items-center justify-center p-5 max-sm:p-3 [[data-code-preview][data-state=code]_&]:hidden"
