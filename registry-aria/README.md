@@ -1,6 +1,6 @@
 # React Aria build of Niko Table (experimental)
 
-Experimental and not yet installable from the registry.
+Experimental. Installable from the registry through the `{style}` URL (see How it ships).
 
 shadcn/ui ships three bases: Radix, Base UI and React Aria. Niko Table's source
 (`src/components/niko-table`) is Radix-shaped. The shadcn CLI rewrites it for
@@ -16,30 +16,51 @@ Each file in `niko-table/primitives/` replaces the file of the same name in
 `components/niko-table/primitives/`, with the same exports and the same props
 Niko Table uses.
 
-| File                      | Built on (React Aria)                                  | Notes                                                                                                                                                              |
-| ------------------------- | ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `popover.tsx`             | `Pressable` + shadcn aria `Popover`                    | `align` / `side` / `sideOffset` map to `placement` / `offset`. Always modal.                                                                                       |
-| `tooltip.tsx`             | `TooltipTrigger`, `Focusable` + shadcn aria `Tooltip`  | `TooltipProvider` only carries the delay.                                                                                                                          |
-| `dropdown-menu.tsx`       | `MenuTrigger`, `Pressable` + shadcn aria dropdown-menu | Items take `onClick(pressEvent)` / `disabled`. Radio groups are single-select sections. `DropdownMenuPanel` renders free-form content inside the menu.             |
-| `context-menu.tsx`        | `MenuTrigger` + shadcn aria context-menu               | Opens on `contextmenu` at the pointer; the row is not made pressable.                                                                                              |
-| `dialog.tsx`, `sheet.tsx` | `Pressable` + shadcn aria `Dialog` / `Sheet`           | Radix-style `open` / `onOpenChange`, `Trigger` / `Close` with `asChild`.                                                                                           |
-| `select.tsx`              | shadcn aria `Select`                                   | `value` / `onValueChange`; the trigger's `aria-label` labels the select (direct-child `SelectTrigger` only).                                                       |
-| `checkbox.tsx`            | shadcn aria `Checkbox`                                 | `checked` (incl. `"indeterminate"`) / `onCheckedChange`; `tabIndex={-1}` leaves the tab order.                                                                     |
-| `slider.tsx`              | shadcn aria `Slider`                                   | Array `value` / `onValueChange`, `min` / `max`.                                                                                                                    |
-| `calendar.tsx`            | shadcn aria `Calendar` / `RangeCalendar`               | react-day-picker style `mode` / `selected` / `onSelect` with JS `Date`s. Needs `@internationalized/date`.                                                          |
-| `command.tsx`             | `cmdk`                                                 | Kept on cmdk: Niko Table relies on its free-form children and controlled search. Needs `cmdk`. Styled with the Radix new-york classes, not the aria-nova look yet. |
-| `button.tsx`              | native `<button>` + shadcn aria `buttonVariants`       | Keeps `onClick` / `disabled` / `asChild` at every call site.                                                                                                       |
+| File                      | Built on (React Aria)                            | Notes                                                                                                                                                                                                                                                                                                                  |
+| ------------------------- | ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `popover.tsx`             | shadcn aria `PopoverTrigger` + `Popover`         | `open` / `onOpenChange` map to the trigger's `isOpen` / `onOpenChange`; `align` / `side` / `sideOffset` to `placement` / `offset`. Always modal.                                                                                                                                                                       |
+| `tooltip.tsx`             | shadcn aria `TooltipTrigger` + `Tooltip`         | `TooltipProvider`'s `delayDuration` (or `delay`), or a `Tooltip`'s own `delayDuration`, goes to shadcn's `delay` prop. React Aria has no provider; ours only carries the delay.                                                                                                                                        |
+| `dropdown-menu.tsx`       | `MenuTrigger` + shadcn aria dropdown-menu        | Items take `onClick(pressEvent)` / `disabled`. Radio groups are single-select sections. `DropdownMenuPanel` renders free-form content inside the menu.                                                                                                                                                                 |
+| `context-menu.tsx`        | `MenuTrigger` + shadcn aria context-menu         | Opens on `contextmenu` at the pointer; the row is not made pressable.                                                                                                                                                                                                                                                  |
+| `dialog.tsx`, `sheet.tsx` | shadcn aria `DialogTrigger` + `Dialog` / `Sheet` | `open` / `onOpenChange` map to `isOpen` / `onOpenChange`. A controlled dialog with no `DialogTrigger` written inside it, and every sheet (no trigger part), uses shadcn's `Dialog` / `Sheet` in its controlled form. `Close asChild` gives a component child `slot="close"`.                                           |
+| `select.tsx`              | shadcn aria `Select`                             | `value` / `onValueChange`; the trigger's `aria-label` labels the select (direct-child `SelectTrigger` only).                                                                                                                                                                                                           |
+| `checkbox.tsx`            | shadcn aria `Checkbox`                           | `checked` (incl. `"indeterminate"`) / `onCheckedChange`; `tabIndex={-1}` leaves the tab order.                                                                                                                                                                                                                         |
+| `slider.tsx`              | shadcn aria `Slider`                             | Array `value` / `onValueChange`, `min` / `max`.                                                                                                                                                                                                                                                                        |
+| `calendar.tsx`            | shadcn aria `Calendar` / `RangeCalendar`         | react-day-picker style `mode` / `selected` / `onSelect` with JS `Date`s. Needs `@internationalized/date`.                                                                                                                                                                                                              |
+| `command.tsx`             | `cmdk`                                           | Kept on cmdk: Niko Table relies on its free-form children and controlled search. Needs `cmdk`. Styled with the Radix new-york classes, not the aria-nova look yet.                                                                                                                                                     |
+| `button.tsx`              | shadcn aria `Button`                             | `onClick` -> React Aria's press alias (a real MouseEvent on click, a synthesized one for keyboard), `disabled` -> `isDisabled`. Other attributes and key / mousedown handlers go on the `<button>` through `render`, so they behave as on a native button (mousedown bubbles; the grid needs it). `asChild` is a Slot. |
 
 ## Rules for Niko Table source
 
 - Import these components from `@/components/niko-table/primitives/<name>`,
   never from `@/components/ui/<name>`.
 - `asChild` triggers merge their own props (className, aria-_, data-_, handlers, ref) onto the child, as Radix Slot does.
+- An `asChild` overlay trigger or close (popover, dialog, sheet, dropdown
+  menu) hands React Aria's press to its child. A plain HTML element gets it
+  through `Pressable`; a component must call `usePress` itself (the Button
+  primitive, shadcn's Button). A custom component that renders a plain
+  `<button>` does not open the overlay.
+- React 19 is required: refs reach the Slots as a prop, as in shadcn's own
+  React Aria components.
 - Inside a menu, wrap anything that is not an item, label, separator, group or
   submenu in `DropdownMenuPanel` (a passthrough on Radix and Base UI).
 - Menu content is rendered by React Aria outside the JSX tree it was written in.
   Context provided inside a menu reaches the items' own code but not the
   submenu popover; `RowMenuSub` passes the row scope on for that reason.
+
+## Still different from shadcn's React Aria components
+
+- `command.tsx` stays on cmdk (free-form list children, `CommandEmpty`,
+  controlled search, value-based `onSelect`, `shouldFilter={false}`).
+- `context-menu.tsx` opens a `MenuTrigger` at the pointer instead of
+  `ContextMenuTrigger`, which needs a pressable child (a pressable row breaks
+  text selection and adds a Tab stop per row).
+- `DropdownMenuPanel` has no shadcn counterpart: React Aria menus drop
+  anything that is not a menu node.
+- Prop adapters only (shadcn's components underneath): select, checkbox,
+  slider, calendar, and the Radix-shaped button / trigger / tooltip calls above.
+- React Aria behaviour that differs from Radix: a Button press does not bubble
+  `click` to its parent, and Enter / Space key events stop at the button.
 
 ## Testing
 

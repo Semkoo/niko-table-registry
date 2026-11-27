@@ -1,0 +1,2453 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry.json",
+  "name": "niko-table",
+  "homepage": "https://niko-table.com",
+  "items": [
+    {
+      "name": "data-table-ui",
+      "type": "registry:ui",
+      "title": "Data Table UI (table.tsx)",
+      "description": "Shadcn table primitive extended with TableComponent and a keyboard-focusable scroll container (tabIndex={0}, WCAG 2.1.1). Optional when you already ship a compatible components/ui/table.tsx — install explicitly or via @niko-table/data-table. À-la-carte controls that only pull data-table-core do not install this file, so customized tables are not overwritten.",
+      "files": [
+        {
+          "path": "src/components/ui/table.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "data-table-core",
+      "type": "registry:block",
+      "title": "Data Table Core",
+      "description": "Shared floor for Niko Table: context, non-virtualized structure, types, config, and the lib/hooks bodies and controls need. Does not include DataTableRoot or components/ui/table.tsx — install @niko-table/data-table for the full owner (pulls table.tsx), @niko-table/data-table-ui for the table primitive alone, or bring your own compatible table.tsx with a TableComponent export.",
+      "dependencies": [
+        "@tanstack/react-table@^9",
+        "lucide-react",
+        "react-aria",
+        "react-aria-components"
+      ],
+      "registryDependencies": [
+        "skeleton",
+        "button",
+        "context-menu",
+        "dropdown-menu"
+      ],
+      "files": [
+        {
+          "path": "src/components/niko-table/core/data-table-context.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/core/data-table-context.tsx"
+        },
+        {
+          "path": "src/components/niko-table/core/data-table-structure.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/core/data-table-structure.tsx"
+        },
+        {
+          "path": "src/components/niko-table/lib/column-resize-handle.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/lib/column-resize-handle.tsx"
+        },
+        {
+          "path": "src/components/niko-table/lib/flex-columns.ts",
+          "type": "registry:lib",
+          "target": "components/niko-table/lib/flex-columns.ts"
+        },
+        {
+          "path": "src/components/niko-table/lib/use-header-min-widths.ts",
+          "type": "registry:lib",
+          "target": "components/niko-table/lib/use-header-min-widths.ts"
+        },
+        {
+          "path": "src/components/niko-table/components/data-table-row-context-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-row-context-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/components/data-table-row-context-menu-slot.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-row-context-menu-slot.tsx"
+        },
+        {
+          "path": "src/components/niko-table/components/data-table-grouped-rows.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-grouped-rows.tsx"
+        },
+        {
+          "path": "src/components/niko-table/core/data-table-grouped-row.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/core/data-table-grouped-row.tsx"
+        },
+        {
+          "path": "src/components/niko-table/components/data-table-row-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-row-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/components/data-table-column-header.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-column-header.tsx"
+        },
+        {
+          "path": "src/components/niko-table/components/data-table-empty-state.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-empty-state.tsx"
+        },
+        {
+          "path": "src/components/niko-table/hooks/use-generated-options.ts",
+          "type": "registry:hook",
+          "target": "components/niko-table/hooks/use-generated-options.ts"
+        },
+        {
+          "path": "src/components/niko-table/lib/constants.ts",
+          "type": "registry:lib",
+          "target": "components/niko-table/lib/constants.ts"
+        },
+        {
+          "path": "src/components/niko-table/lib/filter-rows.ts",
+          "type": "registry:lib",
+          "target": "components/niko-table/lib/filter-rows.ts"
+        },
+        {
+          "path": "src/components/niko-table/lib/create-scroll-handler.ts",
+          "type": "registry:lib",
+          "target": "components/niko-table/lib/create-scroll-handler.ts"
+        },
+        {
+          "path": "src/components/niko-table/lib/row-click.ts",
+          "type": "registry:lib",
+          "target": "components/niko-table/lib/row-click.ts"
+        },
+        {
+          "path": "src/components/niko-table/lib/render-cell-content.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/lib/render-cell-content.tsx"
+        },
+        {
+          "path": "src/components/niko-table/lib/format.ts",
+          "type": "registry:lib",
+          "target": "components/niko-table/lib/format.ts"
+        },
+        {
+          "path": "src/components/niko-table/lib/styles.ts",
+          "type": "registry:lib",
+          "target": "components/niko-table/lib/styles.ts"
+        },
+        {
+          "path": "src/components/niko-table/config/data-table.ts",
+          "type": "registry:lib",
+          "target": "components/niko-table/config/data-table.ts"
+        },
+        {
+          "path": "src/components/niko-table/lib/filter-functions.ts",
+          "type": "registry:lib",
+          "target": "components/niko-table/lib/filter-functions.ts"
+        },
+        {
+          "path": "src/components/niko-table/lib/data-table-features.ts",
+          "type": "registry:lib",
+          "target": "components/niko-table/lib/data-table-features.ts"
+        },
+        {
+          "path": "src/components/niko-table/types.ts",
+          "type": "registry:lib",
+          "target": "components/niko-table/types.ts"
+        },
+        {
+          "path": "src/components/niko-table/primitives/dropdown-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/dropdown-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/context-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/context-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/button.tsx"
+        }
+      ]
+    },
+    {
+      "name": "data-table",
+      "type": "registry:block",
+      "title": "Data Table",
+      "description": "Full DataTable owner (DataTableRoot, DataTable chrome, feature detection) on top of data-table-core, plus the Table UI primitive via data-table-ui. Prefer this for typical installs; à-la-carte controls depend on data-table-core instead and will not overwrite a customized components/ui/table.tsx.",
+      "dependencies": [
+        "@tanstack/react-table@^9",
+        "lucide-react",
+        "react-aria",
+        "react-aria-components"
+      ],
+      "registryDependencies": [
+        "https://niko-table.com/r-aria/data-table-core.json",
+        "https://niko-table.com/r-aria/data-table-ui.json",
+        "alert",
+        "button",
+        "dropdown-menu",
+        "tooltip"
+      ],
+      "files": [
+        {
+          "path": "src/components/niko-table/core/data-table.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/core/data-table.tsx"
+        },
+        {
+          "path": "src/components/niko-table/core/data-table-root.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/core/data-table-root.tsx"
+        },
+        {
+          "path": "src/components/niko-table/core/data-table-error-boundary.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/core/data-table-error-boundary.tsx"
+        },
+        {
+          "path": "src/components/niko-table/components/data-table-column-title.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-column-title.tsx"
+        },
+        {
+          "path": "src/components/niko-table/components/data-table-column-actions.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-column-actions.tsx"
+        },
+        {
+          "path": "src/components/niko-table/components/data-table-column-filter.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-column-filter.tsx"
+        },
+        {
+          "path": "src/components/niko-table/components/data-table-toolbar-section.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-toolbar-section.tsx"
+        },
+        {
+          "path": "src/components/niko-table/filters/table-column-actions.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/table-column-actions.tsx"
+        },
+        {
+          "path": "src/components/niko-table/filters/table-column-title.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/table-column-title.tsx"
+        },
+        {
+          "path": "src/components/niko-table/hooks/use-debounce.ts",
+          "type": "registry:hook",
+          "target": "components/niko-table/hooks/use-debounce.ts"
+        },
+        {
+          "path": "src/components/niko-table/hooks/use-derived-column-title.ts",
+          "type": "registry:hook",
+          "target": "components/niko-table/hooks/use-derived-column-title.ts"
+        },
+        {
+          "path": "src/components/niko-table/hooks/use-keyboard-shortcut.ts",
+          "type": "registry:hook",
+          "target": "components/niko-table/hooks/use-keyboard-shortcut.ts"
+        },
+        {
+          "path": "src/components/niko-table/lib/data-table.ts",
+          "type": "registry:lib",
+          "target": "components/niko-table/lib/data-table.ts"
+        },
+        {
+          "path": "src/components/niko-table/config/feature-detection.ts",
+          "type": "registry:lib",
+          "target": "components/niko-table/config/feature-detection.ts"
+        },
+        {
+          "path": "src/components/niko-table/hooks/use-data-table-scroll.ts",
+          "type": "registry:component",
+          "target": "components/niko-table/hooks/use-data-table-scroll.ts"
+        },
+        {
+          "path": "src/components/niko-table/hooks/use-data-table-flash.ts",
+          "type": "registry:component",
+          "target": "components/niko-table/hooks/use-data-table-flash.ts"
+        },
+        {
+          "path": "src/components/niko-table/primitives/tooltip.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/tooltip.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/dropdown-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/dropdown-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/button.tsx"
+        }
+      ]
+    },
+    {
+      "name": "data-table-virtualized",
+      "type": "registry:component",
+      "title": "DataTable Virtualized Structure",
+      "description": "Virtualized table structure for rendering large datasets efficiently using TanStack Virtual.",
+      "dependencies": [
+        "@tanstack/react-virtual"
+      ],
+      "registryDependencies": [
+        "https://niko-table.com/r-aria/data-table-core.json"
+      ],
+      "files": [
+        {
+          "path": "src/components/niko-table/core/data-table-virtualized-structure.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/core/data-table-virtualized-structure.tsx"
+        },
+        {
+          "path": "src/components/niko-table/lib/measure-row-with-expansion.ts",
+          "type": "registry:lib",
+          "target": "components/niko-table/lib/measure-row-with-expansion.ts"
+        }
+      ]
+    },
+    {
+      "name": "data-table-pagination",
+      "type": "registry:component",
+      "title": "DataTable Pagination",
+      "description": "Full-featured pagination controls with page size selector, page navigation, and row count display.",
+      "dependencies": [
+        "lucide-react",
+        "react-aria"
+      ],
+      "registryDependencies": [
+        "https://niko-table.com/r-aria/data-table-core.json",
+        "button",
+        "select",
+        "input",
+        "skeleton"
+      ],
+      "files": [
+        {
+          "path": "src/components/niko-table/components/data-table-pagination.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-pagination.tsx"
+        },
+        {
+          "path": "src/components/niko-table/filters/table-pagination.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/table-pagination.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/button.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/select.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/select.tsx"
+        }
+      ]
+    },
+    {
+      "name": "data-table-search-filter",
+      "type": "registry:component",
+      "title": "DataTable Search Filter",
+      "description": "Global search input with debouncing for filtering table data.",
+      "dependencies": [
+        "lucide-react",
+        "react-aria"
+      ],
+      "registryDependencies": [
+        "https://niko-table.com/r-aria/data-table-core.json",
+        "input",
+        "button"
+      ],
+      "files": [
+        {
+          "path": "src/components/niko-table/components/data-table-search-filter.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-search-filter.tsx"
+        },
+        {
+          "path": "src/components/niko-table/filters/table-search-filter.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/table-search-filter.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/button.tsx"
+        }
+      ]
+    },
+    {
+      "name": "data-table-sort-menu",
+      "type": "registry:component",
+      "title": "DataTable Sort Menu",
+      "description": "Sort management menu with multi-column sorting and drag-and-drop reordering.",
+      "dependencies": [
+        "lucide-react",
+        "@dnd-kit/core",
+        "@dnd-kit/modifiers",
+        "@dnd-kit/sortable",
+        "@dnd-kit/utilities",
+        "react-aria",
+        "react-aria-components",
+        "cmdk"
+      ],
+      "registryDependencies": [
+        "https://niko-table.com/r-aria/data-table-core.json",
+        "button",
+        "badge",
+        "popover",
+        "tooltip",
+        "select",
+        "https://diceui.com/r/sortable.json"
+      ],
+      "files": [
+        {
+          "path": "src/components/niko-table/components/data-table-sort-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-sort-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/filters/table-sort-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/table-sort-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/popover.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/popover.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/tooltip.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/tooltip.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/button.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/select.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/select.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/command.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/command.tsx"
+        }
+      ]
+    },
+    {
+      "name": "data-table-view-menu",
+      "type": "registry:component",
+      "title": "DataTable View Menu",
+      "description": "Column visibility toggle menu for showing/hiding table columns.",
+      "dependencies": [
+        "lucide-react",
+        "react-aria",
+        "react-aria-components",
+        "cmdk"
+      ],
+      "registryDependencies": [
+        "https://niko-table.com/r-aria/data-table-core.json",
+        "button",
+        "popover"
+      ],
+      "files": [
+        {
+          "path": "src/components/niko-table/components/data-table-view-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-view-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/filters/table-view-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/table-view-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/popover.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/popover.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/button.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/command.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/command.tsx"
+        }
+      ]
+    },
+    {
+      "name": "data-table-view-dnd-menu",
+      "type": "registry:component",
+      "title": "DataTable View DnD Menu",
+      "description": "Column visibility toggle menu with drag-to-reorder support. Use instead of data-table-view-menu when you need users to reorder columns from the menu.",
+      "dependencies": [
+        "@dnd-kit/core",
+        "@dnd-kit/modifiers",
+        "@dnd-kit/sortable",
+        "@dnd-kit/utilities",
+        "lucide-react",
+        "react-aria",
+        "react-aria-components",
+        "cmdk"
+      ],
+      "registryDependencies": [
+        "https://niko-table.com/r-aria/data-table-core.json",
+        "button",
+        "popover"
+      ],
+      "files": [
+        {
+          "path": "src/components/niko-table/components/data-table-view-dnd-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-view-dnd-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/filters/table-view-dnd-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/table-view-dnd-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/popover.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/popover.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/button.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/command.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/command.tsx"
+        }
+      ]
+    },
+    {
+      "name": "data-table-clear-filter",
+      "type": "registry:component",
+      "title": "DataTable Clear Filter",
+      "description": "Button to clear all active table filters at once.",
+      "dependencies": [
+        "lucide-react",
+        "react-aria"
+      ],
+      "registryDependencies": [
+        "https://niko-table.com/r-aria/data-table-core.json",
+        "button"
+      ],
+      "files": [
+        {
+          "path": "src/components/niko-table/components/data-table-clear-filter.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-clear-filter.tsx"
+        },
+        {
+          "path": "src/components/niko-table/filters/table-clear-filter.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/table-clear-filter.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/button.tsx"
+        }
+      ]
+    },
+    {
+      "name": "data-table-filter-menu",
+      "type": "registry:component",
+      "title": "DataTable Filter Menu",
+      "description": "Command palette-style filter interface for adding and managing column filters.",
+      "dependencies": [
+        "lucide-react",
+        "react-aria",
+        "react-aria-components",
+        "@internationalized/date",
+        "cmdk"
+      ],
+      "registryDependencies": [
+        "https://niko-table.com/r-aria/data-table-core.json",
+        "button",
+        "badge",
+        "input",
+        "popover",
+        "select",
+        "calendar",
+        "separator"
+      ],
+      "files": [
+        {
+          "path": "src/components/niko-table/components/data-table-filter-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-filter-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/filters/table-filter-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/table-filter-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/filters/table-range-filter.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/table-range-filter.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/popover.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/popover.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/button.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/select.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/select.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/calendar.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/calendar.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/command.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/command.tsx"
+        }
+      ]
+    },
+    {
+      "name": "data-table-faceted-filter",
+      "type": "registry:component",
+      "title": "DataTable Faceted Filter",
+      "description": "Faceted filter for single/multiple selection with option counts and search.",
+      "dependencies": [
+        "lucide-react",
+        "react-aria",
+        "react-aria-components",
+        "cmdk"
+      ],
+      "registryDependencies": [
+        "https://niko-table.com/r-aria/data-table-core.json",
+        "button",
+        "badge",
+        "popover",
+        "separator"
+      ],
+      "files": [
+        {
+          "path": "src/components/niko-table/components/data-table-faceted-filter.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-faceted-filter.tsx"
+        },
+        {
+          "path": "src/components/niko-table/filters/table-faceted-filter.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/table-faceted-filter.tsx"
+        },
+        {
+          "path": "src/components/niko-table/lib/build-faceted-options.ts",
+          "type": "registry:lib",
+          "target": "components/niko-table/lib/build-faceted-options.ts"
+        },
+        {
+          "path": "src/components/niko-table/primitives/popover.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/popover.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/button.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/command.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/command.tsx"
+        }
+      ]
+    },
+    {
+      "name": "data-table-inline-filter",
+      "type": "registry:component",
+      "title": "DataTable Inline Filter",
+      "description": "Inline filter toolbar that displays active filters as editable chips.",
+      "dependencies": [
+        "lucide-react",
+        "react-day-picker",
+        "react-aria",
+        "react-aria-components",
+        "@internationalized/date",
+        "cmdk"
+      ],
+      "registryDependencies": [
+        "https://niko-table.com/r-aria/data-table-core.json",
+        "button",
+        "input",
+        "popover",
+        "select",
+        "calendar"
+      ],
+      "files": [
+        {
+          "path": "src/components/niko-table/components/data-table-inline-filter.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-inline-filter.tsx"
+        },
+        {
+          "path": "src/components/niko-table/filters/table-inline-filter.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/table-inline-filter.tsx"
+        },
+        {
+          "path": "src/components/niko-table/filters/table-range-filter.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/table-range-filter.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/popover.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/popover.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/button.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/select.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/select.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/calendar.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/calendar.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/command.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/command.tsx"
+        }
+      ]
+    },
+    {
+      "name": "data-table-slider-filter",
+      "type": "registry:component",
+      "title": "DataTable Slider Filter",
+      "description": "Slider-based filter for numeric range filtering.",
+      "dependencies": [
+        "lucide-react",
+        "react-aria",
+        "react-aria-components"
+      ],
+      "registryDependencies": [
+        "https://niko-table.com/r-aria/data-table-core.json",
+        "button",
+        "input",
+        "label",
+        "popover",
+        "separator",
+        "slider"
+      ],
+      "files": [
+        {
+          "path": "src/components/niko-table/components/data-table-slider-filter.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-slider-filter.tsx"
+        },
+        {
+          "path": "src/components/niko-table/filters/table-slider-filter.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/table-slider-filter.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/popover.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/popover.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/button.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/slider.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/slider.tsx"
+        }
+      ]
+    },
+    {
+      "name": "data-table-date-filter",
+      "type": "registry:component",
+      "title": "DataTable Date Filter",
+      "description": "Date picker filter supporting single date and date range selection.",
+      "dependencies": [
+        "lucide-react",
+        "react-day-picker",
+        "react-aria",
+        "react-aria-components",
+        "@internationalized/date"
+      ],
+      "registryDependencies": [
+        "https://niko-table.com/r-aria/data-table-core.json",
+        "button",
+        "calendar",
+        "popover",
+        "separator"
+      ],
+      "files": [
+        {
+          "path": "src/components/niko-table/components/data-table-date-filter.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-date-filter.tsx"
+        },
+        {
+          "path": "src/components/niko-table/filters/table-date-filter.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/table-date-filter.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/popover.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/popover.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/button.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/calendar.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/calendar.tsx"
+        }
+      ]
+    },
+    {
+      "name": "data-table-export-button",
+      "type": "registry:component",
+      "title": "DataTable Export Button",
+      "description": "Export table data to CSV with configurable options.",
+      "dependencies": [
+        "lucide-react",
+        "react-aria"
+      ],
+      "registryDependencies": [
+        "https://niko-table.com/r-aria/data-table-core.json",
+        "button"
+      ],
+      "files": [
+        {
+          "path": "src/components/niko-table/components/data-table-export-button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-export-button.tsx"
+        },
+        {
+          "path": "src/components/niko-table/filters/table-export-button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/table-export-button.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/button.tsx"
+        }
+      ]
+    },
+    {
+      "name": "data-table-aside",
+      "type": "registry:component",
+      "title": "DataTable Aside",
+      "description": "Sidebar panel component for displaying row details or additional content alongside the table.",
+      "dependencies": [
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "https://niko-table.com/r-aria/data-table-core.json"
+      ],
+      "files": [
+        {
+          "path": "src/components/niko-table/components/data-table-aside.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-aside.tsx"
+        }
+      ]
+    },
+    {
+      "name": "data-table-selection-bar",
+      "type": "registry:component",
+      "title": "DataTable Selection Bar",
+      "description": "Bulk actions bar that appears when rows are selected.",
+      "dependencies": [
+        "react-aria"
+      ],
+      "registryDependencies": [
+        "https://niko-table.com/r-aria/data-table-core.json",
+        "button",
+        "badge"
+      ],
+      "files": [
+        {
+          "path": "src/components/niko-table/components/data-table-selection-bar.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-selection-bar.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/button.tsx"
+        }
+      ]
+    },
+    {
+      "name": "data-table-column-sort",
+      "type": "registry:component",
+      "title": "DataTable Column Sort",
+      "description": "Column header sort options with ascending/descending/clear controls.",
+      "dependencies": [
+        "lucide-react",
+        "react-aria",
+        "react-aria-components"
+      ],
+      "registryDependencies": [
+        "https://niko-table.com/r-aria/data-table-core.json",
+        "button",
+        "dropdown-menu",
+        "tooltip"
+      ],
+      "files": [
+        {
+          "path": "src/components/niko-table/components/data-table-column-sort.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-column-sort.tsx"
+        },
+        {
+          "path": "src/components/niko-table/filters/table-column-sort.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/table-column-sort.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/tooltip.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/tooltip.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/dropdown-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/dropdown-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/button.tsx"
+        }
+      ]
+    },
+    {
+      "name": "data-table-column-hide",
+      "type": "registry:component",
+      "title": "DataTable Column Hide",
+      "description": "Column header option to hide/show individual columns.",
+      "dependencies": [
+        "lucide-react",
+        "react-aria",
+        "react-aria-components"
+      ],
+      "registryDependencies": [
+        "https://niko-table.com/r-aria/data-table-core.json",
+        "button",
+        "dropdown-menu",
+        "tooltip"
+      ],
+      "files": [
+        {
+          "path": "src/components/niko-table/components/data-table-column-hide.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-column-hide.tsx"
+        },
+        {
+          "path": "src/components/niko-table/filters/table-column-hide.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/table-column-hide.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/tooltip.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/tooltip.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/dropdown-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/dropdown-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/button.tsx"
+        }
+      ]
+    },
+    {
+      "name": "data-table-column-pin",
+      "type": "registry:component",
+      "title": "DataTable Column Pin",
+      "description": "Column header option to pin columns to left or right.",
+      "dependencies": [
+        "lucide-react",
+        "react-aria",
+        "react-aria-components"
+      ],
+      "registryDependencies": [
+        "https://niko-table.com/r-aria/data-table-core.json",
+        "button",
+        "dropdown-menu",
+        "tooltip"
+      ],
+      "files": [
+        {
+          "path": "src/components/niko-table/components/data-table-column-pin.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-column-pin.tsx"
+        },
+        {
+          "path": "src/components/niko-table/filters/table-column-pin.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/table-column-pin.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/tooltip.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/tooltip.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/dropdown-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/dropdown-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/button.tsx"
+        }
+      ]
+    },
+    {
+      "name": "data-table-column-group",
+      "type": "registry:component",
+      "title": "DataTable Column Group",
+      "description": "Column header option to group rows by column values with TanStack aggregation support.",
+      "dependencies": [
+        "lucide-react",
+        "react-aria",
+        "react-aria-components"
+      ],
+      "registryDependencies": [
+        "https://niko-table.com/r-aria/data-table-core.json",
+        "button",
+        "dropdown-menu",
+        "tooltip"
+      ],
+      "files": [
+        {
+          "path": "src/components/niko-table/components/data-table-column-group.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-column-group.tsx"
+        },
+        {
+          "path": "src/components/niko-table/filters/table-column-group.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/table-column-group.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/tooltip.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/tooltip.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/dropdown-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/dropdown-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/button.tsx"
+        }
+      ]
+    },
+    {
+      "name": "data-table-column-faceted-filter",
+      "type": "registry:component",
+      "title": "DataTable Column Faceted Filter",
+      "description": "Column header faceted filter with multi-select options in a dropdown.",
+      "dependencies": [
+        "lucide-react",
+        "react-aria",
+        "react-aria-components"
+      ],
+      "registryDependencies": [
+        "https://niko-table.com/r-aria/data-table-core.json",
+        "https://niko-table.com/r-aria/data-table-faceted-filter.json",
+        "button",
+        "dropdown-menu",
+        "tooltip"
+      ],
+      "files": [
+        {
+          "path": "src/components/niko-table/components/data-table-column-faceted-filter.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-column-faceted-filter.tsx"
+        },
+        {
+          "path": "src/components/niko-table/filters/table-column-faceted-filter.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/table-column-faceted-filter.tsx"
+        },
+        {
+          "path": "src/components/niko-table/components/data-table-column-filter-trigger.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-column-filter-trigger.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/tooltip.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/tooltip.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/dropdown-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/dropdown-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/button.tsx"
+        }
+      ]
+    },
+    {
+      "name": "data-table-column-slider-filter",
+      "type": "registry:component",
+      "title": "DataTable Column Slider Filter",
+      "description": "Column header slider filter for numeric range filtering in a dropdown.",
+      "dependencies": [
+        "lucide-react",
+        "react-aria",
+        "react-aria-components"
+      ],
+      "registryDependencies": [
+        "https://niko-table.com/r-aria/data-table-core.json",
+        "button",
+        "dropdown-menu",
+        "tooltip",
+        "input",
+        "label",
+        "slider",
+        "popover"
+      ],
+      "files": [
+        {
+          "path": "src/components/niko-table/components/data-table-column-slider-filter-options.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-column-slider-filter-options.tsx"
+        },
+        {
+          "path": "src/components/niko-table/filters/table-column-slider-filter.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/table-column-slider-filter.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/popover.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/popover.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/tooltip.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/tooltip.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/dropdown-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/dropdown-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/button.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/slider.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/slider.tsx"
+        }
+      ]
+    },
+    {
+      "name": "data-table-column-date-filter",
+      "type": "registry:component",
+      "title": "DataTable Column Date Filter",
+      "description": "Column header date filter with calendar picker in a dropdown.",
+      "dependencies": [
+        "lucide-react",
+        "react-day-picker",
+        "react-aria",
+        "react-aria-components",
+        "@internationalized/date"
+      ],
+      "registryDependencies": [
+        "https://niko-table.com/r-aria/data-table-core.json",
+        "button",
+        "dropdown-menu",
+        "tooltip",
+        "popover",
+        "calendar"
+      ],
+      "files": [
+        {
+          "path": "src/components/niko-table/components/data-table-column-date-filter-options.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-column-date-filter-options.tsx"
+        },
+        {
+          "path": "src/components/niko-table/filters/table-column-date-filter.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/table-column-date-filter.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/popover.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/popover.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/tooltip.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/tooltip.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/dropdown-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/dropdown-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/button.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/calendar.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/calendar.tsx"
+        }
+      ]
+    },
+    {
+      "name": "data-table-row-dnd",
+      "type": "registry:component",
+      "title": "DataTable Row DnD",
+      "description": "Drag-and-drop row reordering with composable primitives. Includes DnD provider, draggable row, drag handle, and row DnD table body. Does not ship column DnD.",
+      "dependencies": [
+        "@dnd-kit/core",
+        "@dnd-kit/modifiers",
+        "@dnd-kit/sortable",
+        "@dnd-kit/utilities",
+        "lucide-react",
+        "react-aria"
+      ],
+      "registryDependencies": [
+        "https://niko-table.com/r-aria/data-table-core.json",
+        "button"
+      ],
+      "files": [
+        {
+          "path": "src/components/niko-table/filters/table-row-dnd.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/table-row-dnd.tsx"
+        },
+        {
+          "path": "src/components/niko-table/components/data-table-row-dnd.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-row-dnd.tsx"
+        },
+        {
+          "path": "src/components/niko-table/core/data-table-row-dnd-structure.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/core/data-table-row-dnd-structure.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/button.tsx"
+        }
+      ]
+    },
+    {
+      "name": "data-table-column-dnd",
+      "type": "registry:component",
+      "title": "DataTable Column DnD",
+      "description": "Drag-and-drop column reordering with composable primitives. Includes DnD provider, draggable header, drag-along cell, and column DnD header/body. Does not ship row DnD.",
+      "dependencies": [
+        "@dnd-kit/core",
+        "@dnd-kit/modifiers",
+        "@dnd-kit/sortable",
+        "@dnd-kit/utilities"
+      ],
+      "registryDependencies": [
+        "https://niko-table.com/r-aria/data-table-core.json"
+      ],
+      "files": [
+        {
+          "path": "src/components/niko-table/filters/table-column-dnd.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/filters/table-column-dnd.tsx"
+        },
+        {
+          "path": "src/components/niko-table/components/data-table-column-dnd.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-column-dnd.tsx"
+        },
+        {
+          "path": "src/components/niko-table/core/data-table-column-dnd-structure.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/core/data-table-column-dnd-structure.tsx"
+        }
+      ]
+    },
+    {
+      "name": "data-table-virtualized-row-dnd",
+      "type": "registry:component",
+      "title": "DataTable Virtualized Row DnD",
+      "description": "Virtualized row drag-and-drop body (`DataTableVirtualizedDndBody`). Requires data-table-virtualized + data-table-row-dnd. Does not ship column DnD.",
+      "dependencies": [
+        "@tanstack/react-virtual",
+        "@dnd-kit/sortable",
+        "@dnd-kit/utilities"
+      ],
+      "registryDependencies": [
+        "https://niko-table.com/r-aria/data-table-virtualized.json",
+        "https://niko-table.com/r-aria/data-table-row-dnd.json"
+      ],
+      "files": [
+        {
+          "path": "src/components/niko-table/core/data-table-virtualized-row-dnd-structure.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/core/data-table-virtualized-row-dnd-structure.tsx"
+        }
+      ]
+    },
+    {
+      "name": "data-table-virtualized-column-dnd",
+      "type": "registry:component",
+      "title": "DataTable Virtualized Column DnD",
+      "description": "Virtualized column drag-and-drop header/body (`DataTableVirtualizedDndHeader`, `DataTableVirtualizedDndColumnBody`). Requires data-table-virtualized + data-table-column-dnd. Does not ship row DnD.",
+      "dependencies": [
+        "@tanstack/react-virtual",
+        "@dnd-kit/sortable",
+        "@dnd-kit/utilities"
+      ],
+      "registryDependencies": [
+        "https://niko-table.com/r-aria/data-table-virtualized.json",
+        "https://niko-table.com/r-aria/data-table-column-dnd.json"
+      ],
+      "files": [
+        {
+          "path": "src/components/niko-table/core/data-table-virtualized-column-dnd-structure.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/core/data-table-virtualized-column-dnd-structure.tsx"
+        }
+      ]
+    },
+    {
+      "name": "data-table-column-resize",
+      "type": "registry:component",
+      "title": "DataTable Column Resize",
+      "description": "Opt-in column resizing with drag handles and double-click autosize (measures natural text width). Keyboard-operable handle. Drop <DataTableColumnResize/> into the table to enable — works with DataTableHeader/Body and the virtualized variants.",
+      "dependencies": [],
+      "registryDependencies": [
+        "https://niko-table.com/r-aria/data-table-core.json"
+      ],
+      "files": [
+        {
+          "path": "src/components/niko-table/components/data-table-column-resize.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-column-resize.tsx"
+        }
+      ]
+    },
+    {
+      "name": "data-table-column-auto-fit",
+      "type": "registry:component",
+      "title": "DataTable Column Auto-fit",
+      "description": "Opt-in even-split fill for resizable columns. Drop <DataTableColumnAutoFit/> next to <DataTableColumnResize/> and the resizable columns grow by an equal share of the leftover space on load (the alternative to the default single-flex-column fill). Self-contained — the body ships no auto-fit code unless you install this.",
+      "dependencies": [],
+      "registryDependencies": [
+        "https://niko-table.com/r-aria/data-table-core.json",
+        "https://niko-table.com/r-aria/data-table-column-resize.json"
+      ],
+      "files": [
+        {
+          "path": "src/components/niko-table/components/data-table-column-auto-fit.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/components/data-table-column-auto-fit.tsx"
+        },
+        {
+          "path": "src/components/niko-table/lib/use-column-auto-fit.ts",
+          "type": "registry:lib",
+          "target": "components/niko-table/lib/use-column-auto-fit.ts"
+        }
+      ]
+    },
+    {
+      "name": "data-table-column-sizing-persistence",
+      "type": "registry:lib",
+      "title": "DataTable Column Sizing Persistence",
+      "description": "Opt-in localStorage persistence for column widths. Call useColumnSizingPersistence(storageKey) and wire the returned columnSizing + onColumnSizingChange into <DataTableRoot> so resized widths survive reloads. Writes immediately, SSR-safe, and sanitizes corrupt storage.",
+      "dependencies": [],
+      "registryDependencies": [
+        "https://niko-table.com/r-aria/data-table-core.json",
+        "https://niko-table.com/r-aria/data-table-column-resize.json"
+      ],
+      "files": [
+        {
+          "path": "src/components/niko-table/lib/use-column-sizing-persistence.ts",
+          "type": "registry:lib",
+          "target": "components/niko-table/lib/use-column-sizing-persistence.ts"
+        }
+      ]
+    },
+    {
+      "name": "data-table-grid",
+      "type": "registry:block",
+      "title": "Data Grid (editable)",
+      "description": "Composable editable spreadsheet grid: a headless engine (focus, selection, edit lifecycle, undo/redo, clipboard — all rowId-addressed so sort/filter work while editing) + a skin composed with DataTableRoot and the virtualized body. Keyboard cell nav, drag range-select with edge auto-scroll, quote-aware TSV copy/cut/paste with one-to-many tiling, fill handle, drag-move, dynamic columns, row drag-to-reorder, selection status bar, cross-highlight, and text/number/checkbox/date/select/combobox cells. Virtualized to 100k+ rows.",
+      "dependencies": [
+        "lucide-react",
+        "react-aria",
+        "react-aria-components",
+        "@internationalized/date",
+        "cmdk"
+      ],
+      "registryDependencies": [
+        "https://niko-table.com/r-aria/data-table-core.json",
+        "https://niko-table.com/r-aria/data-table-virtualized.json",
+        "https://niko-table.com/r-aria/data-table-column-resize.json",
+        "button",
+        "input",
+        "checkbox",
+        "calendar",
+        "popover",
+        "dialog",
+        "dropdown-menu",
+        "separator",
+        "kbd",
+        "tooltip"
+      ],
+      "files": [
+        {
+          "path": "src/components/niko-table/grid/types/grid-cell.ts",
+          "type": "registry:component",
+          "target": "components/niko-table/grid/types/grid-cell.ts"
+        },
+        {
+          "path": "src/components/niko-table/grid/config/grid-shortcuts.ts",
+          "type": "registry:component",
+          "target": "components/niko-table/grid/config/grid-shortcuts.ts"
+        },
+        {
+          "path": "src/components/niko-table/grid/hooks/use-data-grid.ts",
+          "type": "registry:component",
+          "target": "components/niko-table/grid/hooks/use-data-grid.ts"
+        },
+        {
+          "path": "src/components/niko-table/grid/hooks/use-grid-clipboard.ts",
+          "type": "registry:component",
+          "target": "components/niko-table/grid/hooks/use-grid-clipboard.ts"
+        },
+        {
+          "path": "src/components/niko-table/grid/hooks/use-grid-columns.ts",
+          "type": "registry:component",
+          "target": "components/niko-table/grid/hooks/use-grid-columns.ts"
+        },
+        {
+          "path": "src/components/niko-table/grid/hooks/use-grid-navigation.ts",
+          "type": "registry:component",
+          "target": "components/niko-table/grid/hooks/use-grid-navigation.ts"
+        },
+        {
+          "path": "src/components/niko-table/grid/hooks/use-grid-keyboard.ts",
+          "type": "registry:component",
+          "target": "components/niko-table/grid/hooks/use-grid-keyboard.ts"
+        },
+        {
+          "path": "src/components/niko-table/grid/core/data-grid.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/grid/core/data-grid.tsx"
+        },
+        {
+          "path": "src/components/niko-table/grid/core/data-grid-context.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/grid/core/data-grid-context.tsx"
+        },
+        {
+          "path": "src/components/niko-table/grid/core/data-grid-features.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/grid/core/data-grid-features.tsx"
+        },
+        {
+          "path": "src/components/niko-table/grid/core/data-grid-columns-context.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/grid/core/data-grid-columns-context.tsx"
+        },
+        {
+          "path": "src/components/niko-table/grid/cells/cell-props.ts",
+          "type": "registry:component",
+          "target": "components/niko-table/grid/cells/cell-props.ts"
+        },
+        {
+          "path": "src/components/niko-table/grid/cells/cell-styles.ts",
+          "type": "registry:component",
+          "target": "components/niko-table/grid/cells/cell-styles.ts"
+        },
+        {
+          "path": "src/components/niko-table/grid/cells/grid-cell-display.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/grid/cells/grid-cell-display.tsx"
+        },
+        {
+          "path": "src/components/niko-table/grid/cells/grid-marching-ants.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/grid/cells/grid-marching-ants.tsx"
+        },
+        {
+          "path": "src/components/niko-table/grid/cells/grid-text-cell.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/grid/cells/grid-text-cell.tsx"
+        },
+        {
+          "path": "src/components/niko-table/grid/cells/grid-checkbox-cell.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/grid/cells/grid-checkbox-cell.tsx"
+        },
+        {
+          "path": "src/components/niko-table/grid/cells/grid-date-cell.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/grid/cells/grid-date-cell.tsx"
+        },
+        {
+          "path": "src/components/niko-table/grid/cells/grid-combobox-cell.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/grid/cells/grid-combobox-cell.tsx"
+        },
+        {
+          "path": "src/components/niko-table/grid/cells/grid-select-cell.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/grid/cells/grid-select-cell.tsx"
+        },
+        {
+          "path": "src/components/niko-table/grid/components/grid-clipboard.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/grid/components/grid-clipboard.tsx"
+        },
+        {
+          "path": "src/components/niko-table/grid/components/grid-fill-handle.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/grid/components/grid-fill-handle.tsx"
+        },
+        {
+          "path": "src/components/niko-table/grid/components/grid-move.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/grid/components/grid-move.tsx"
+        },
+        {
+          "path": "src/components/niko-table/grid/components/grid-row-reorder.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/grid/components/grid-row-reorder.tsx"
+        },
+        {
+          "path": "src/components/niko-table/grid/components/grid-cross-highlight.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/grid/components/grid-cross-highlight.tsx"
+        },
+        {
+          "path": "src/components/niko-table/grid/components/grid-status-bar.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/grid/components/grid-status-bar.tsx"
+        },
+        {
+          "path": "src/components/niko-table/grid/components/grid-column-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/grid/components/grid-column-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/grid/components/grid-add-column.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/grid/components/grid-add-column.tsx"
+        },
+        {
+          "path": "src/components/niko-table/grid/components/grid-row-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/grid/components/grid-row-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/grid/components/grid-toolbar.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/grid/components/grid-toolbar.tsx"
+        },
+        {
+          "path": "src/components/niko-table/grid/components/grid-shortcuts-dialog.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/grid/components/grid-shortcuts-dialog.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/popover.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/popover.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/tooltip.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/tooltip.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/dropdown-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/dropdown-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/dialog.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/dialog.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/button.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/checkbox.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/checkbox.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/calendar.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/calendar.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/command.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/command.tsx"
+        }
+      ]
+    },
+    {
+      "name": "data-table-grid-changes",
+      "type": "registry:component",
+      "title": "Data Grid — change tracking & persistence",
+      "description": "Opt-in useGridChanges hook that observes the uncontrolled grid engine and turns edits into a create/update/delete change-set — for staging saves, autosave, and full CRUD with per-row reconcile. Plain React, no dependency. Requires data-table-grid.",
+      "registryDependencies": [
+        "https://niko-table.com/r-aria/data-table-grid.json"
+      ],
+      "files": [
+        {
+          "path": "src/components/niko-table/grid/hooks/use-grid-changes.ts",
+          "type": "registry:component",
+          "target": "components/niko-table/grid/hooks/use-grid-changes.ts"
+        }
+      ]
+    },
+    {
+      "name": "customers-table",
+      "type": "registry:block",
+      "title": "Customers Table",
+      "description": "A complete customers screen: search, status and plan filters, sortable columns, bulk selection, CSV export, a details panel on row click, an add-customer form, and a row menu that also opens on right-click.",
+      "dependencies": [
+        "lucide-react",
+        "react-aria",
+        "react-aria-components"
+      ],
+      "registryDependencies": [
+        "https://niko-table.com/r-aria/data-table.json",
+        "https://niko-table.com/r-aria/data-table-search-filter.json",
+        "https://niko-table.com/r-aria/data-table-faceted-filter.json",
+        "https://niko-table.com/r-aria/data-table-clear-filter.json",
+        "https://niko-table.com/r-aria/data-table-view-menu.json",
+        "https://niko-table.com/r-aria/data-table-export-button.json",
+        "https://niko-table.com/r-aria/data-table-selection-bar.json",
+        "https://niko-table.com/r-aria/data-table-pagination.json",
+        "https://niko-table.com/r-aria/data-table-column-sort.json",
+        "avatar",
+        "badge",
+        "button",
+        "checkbox",
+        "dropdown-menu",
+        "field",
+        "input",
+        "progress",
+        "select",
+        "sheet"
+      ],
+      "cssVars": {
+        "theme": {
+          "color-success": "var(--success)",
+          "color-warning": "var(--warning)"
+        },
+        "light": {
+          "success": "oklch(0.596 0.145 163.225)",
+          "warning": "oklch(0.666 0.179 58.318)"
+        },
+        "dark": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)"
+        }
+      },
+      "files": [
+        {
+          "path": "src/registry/new-york/blocks/customers-table/customers-table.tsx",
+          "type": "registry:component",
+          "target": "components/customers-table/customers-table.tsx"
+        },
+        {
+          "path": "src/registry/new-york/blocks/customers-table/customers-data.ts",
+          "type": "registry:component",
+          "target": "components/customers-table/customers-data.ts"
+        },
+        {
+          "path": "src/registry/new-york/blocks/customers-table/customers-format.ts",
+          "type": "registry:component",
+          "target": "components/customers-table/customers-format.ts"
+        },
+        {
+          "path": "src/registry/new-york/blocks/customers-table/customer-sheet.tsx",
+          "type": "registry:component",
+          "target": "components/customers-table/customer-sheet.tsx"
+        },
+        {
+          "path": "src/registry/new-york/blocks/customers-table/add-customer-sheet.tsx",
+          "type": "registry:component",
+          "target": "components/customers-table/add-customer-sheet.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/dropdown-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/dropdown-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/button.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/select.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/select.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/checkbox.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/checkbox.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/sheet.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/sheet.tsx"
+        }
+      ]
+    },
+    {
+      "name": "orders-table",
+      "type": "registry:block",
+      "title": "Orders Table",
+      "description": "An orders screen with live totals, payment and fulfillment filters, a price slider, a date range, expandable rows with line items, and ship and refund actions shared by the row menu and right-click.",
+      "dependencies": [
+        "lucide-react",
+        "react-aria",
+        "react-aria-components"
+      ],
+      "registryDependencies": [
+        "https://niko-table.com/r-aria/data-table.json",
+        "https://niko-table.com/r-aria/data-table-search-filter.json",
+        "https://niko-table.com/r-aria/data-table-faceted-filter.json",
+        "https://niko-table.com/r-aria/data-table-slider-filter.json",
+        "https://niko-table.com/r-aria/data-table-date-filter.json",
+        "https://niko-table.com/r-aria/data-table-clear-filter.json",
+        "https://niko-table.com/r-aria/data-table-view-menu.json",
+        "https://niko-table.com/r-aria/data-table-export-button.json",
+        "https://niko-table.com/r-aria/data-table-selection-bar.json",
+        "https://niko-table.com/r-aria/data-table-pagination.json",
+        "https://niko-table.com/r-aria/data-table-column-sort.json",
+        "badge",
+        "button",
+        "checkbox",
+        "dropdown-menu"
+      ],
+      "cssVars": {
+        "theme": {
+          "color-success": "var(--success)",
+          "color-warning": "var(--warning)"
+        },
+        "light": {
+          "success": "oklch(0.596 0.145 163.225)",
+          "warning": "oklch(0.666 0.179 58.318)"
+        },
+        "dark": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)"
+        }
+      },
+      "files": [
+        {
+          "path": "src/registry/new-york/blocks/orders-table/orders-table.tsx",
+          "type": "registry:component",
+          "target": "components/orders-table/orders-table.tsx"
+        },
+        {
+          "path": "src/registry/new-york/blocks/orders-table/order-details.tsx",
+          "type": "registry:component",
+          "target": "components/orders-table/order-details.tsx"
+        },
+        {
+          "path": "src/registry/new-york/blocks/orders-table/orders-format.ts",
+          "type": "registry:component",
+          "target": "components/orders-table/orders-format.ts"
+        },
+        {
+          "path": "src/registry/new-york/blocks/orders-table/orders-data.ts",
+          "type": "registry:component",
+          "target": "components/orders-table/orders-data.ts"
+        },
+        {
+          "path": "src/components/niko-table/primitives/dropdown-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/dropdown-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/button.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/checkbox.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/checkbox.tsx"
+        }
+      ]
+    },
+    {
+      "name": "tickets-table",
+      "type": "registry:block",
+      "title": "Support Tickets",
+      "description": "A support inbox with quick views (Mine, Unassigned, At risk, Solved), SLA timers, priority/status/assignee filters, a priority submenu in the row menu, and assign / solve actions per ticket or in bulk.",
+      "dependencies": [
+        "lucide-react",
+        "react-aria",
+        "react-aria-components"
+      ],
+      "registryDependencies": [
+        "https://niko-table.com/r-aria/data-table.json",
+        "https://niko-table.com/r-aria/data-table-search-filter.json",
+        "https://niko-table.com/r-aria/data-table-faceted-filter.json",
+        "https://niko-table.com/r-aria/data-table-clear-filter.json",
+        "https://niko-table.com/r-aria/data-table-view-menu.json",
+        "https://niko-table.com/r-aria/data-table-selection-bar.json",
+        "https://niko-table.com/r-aria/data-table-pagination.json",
+        "https://niko-table.com/r-aria/data-table-column-sort.json",
+        "avatar",
+        "badge",
+        "button",
+        "checkbox",
+        "dropdown-menu",
+        "button-group"
+      ],
+      "cssVars": {
+        "theme": {
+          "color-success": "var(--success)",
+          "color-warning": "var(--warning)"
+        },
+        "light": {
+          "success": "oklch(0.596 0.145 163.225)",
+          "warning": "oklch(0.666 0.179 58.318)"
+        },
+        "dark": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)"
+        }
+      },
+      "files": [
+        {
+          "path": "src/registry/new-york/blocks/tickets-table/tickets-table.tsx",
+          "type": "registry:component",
+          "target": "components/tickets-table/tickets-table.tsx"
+        },
+        {
+          "path": "src/registry/new-york/blocks/tickets-table/ticket-views.tsx",
+          "type": "registry:component",
+          "target": "components/tickets-table/ticket-views.tsx"
+        },
+        {
+          "path": "src/registry/new-york/blocks/tickets-table/tickets-format.ts",
+          "type": "registry:component",
+          "target": "components/tickets-table/tickets-format.ts"
+        },
+        {
+          "path": "src/registry/new-york/blocks/tickets-table/tickets-data.ts",
+          "type": "registry:component",
+          "target": "components/tickets-table/tickets-data.ts"
+        },
+        {
+          "path": "src/components/niko-table/primitives/dropdown-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/dropdown-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/button.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/checkbox.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/checkbox.tsx"
+        }
+      ]
+    },
+    {
+      "name": "team-table",
+      "type": "registry:block",
+      "title": "Team Members",
+      "description": "A workspace members screen: pinned member and actions columns that stay put while the table scrolls sideways, a Role submenu in the row menu, suspend and remove actions, bulk remove, and an invite dialog.",
+      "dependencies": [
+        "lucide-react",
+        "react-aria",
+        "react-aria-components"
+      ],
+      "registryDependencies": [
+        "https://niko-table.com/r-aria/data-table.json",
+        "https://niko-table.com/r-aria/data-table-search-filter.json",
+        "https://niko-table.com/r-aria/data-table-faceted-filter.json",
+        "https://niko-table.com/r-aria/data-table-clear-filter.json",
+        "https://niko-table.com/r-aria/data-table-view-menu.json",
+        "https://niko-table.com/r-aria/data-table-selection-bar.json",
+        "https://niko-table.com/r-aria/data-table-pagination.json",
+        "https://niko-table.com/r-aria/data-table-column-sort.json",
+        "avatar",
+        "badge",
+        "button",
+        "checkbox",
+        "dropdown-menu",
+        "dialog",
+        "field",
+        "input",
+        "select"
+      ],
+      "cssVars": {
+        "theme": {
+          "color-success": "var(--success)",
+          "color-warning": "var(--warning)"
+        },
+        "light": {
+          "success": "oklch(0.596 0.145 163.225)",
+          "warning": "oklch(0.666 0.179 58.318)"
+        },
+        "dark": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)"
+        }
+      },
+      "files": [
+        {
+          "path": "src/registry/new-york/blocks/team-table/team-table.tsx",
+          "type": "registry:component",
+          "target": "components/team-table/team-table.tsx"
+        },
+        {
+          "path": "src/registry/new-york/blocks/team-table/invite-member-dialog.tsx",
+          "type": "registry:component",
+          "target": "components/team-table/invite-member-dialog.tsx"
+        },
+        {
+          "path": "src/registry/new-york/blocks/team-table/team-format.ts",
+          "type": "registry:component",
+          "target": "components/team-table/team-format.ts"
+        },
+        {
+          "path": "src/registry/new-york/blocks/team-table/team-data.ts",
+          "type": "registry:component",
+          "target": "components/team-table/team-data.ts"
+        },
+        {
+          "path": "src/components/niko-table/primitives/dropdown-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/dropdown-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/dialog.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/dialog.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/button.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/select.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/select.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/checkbox.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/checkbox.tsx"
+        }
+      ]
+    },
+    {
+      "name": "request-logs-table",
+      "type": "registry:block",
+      "title": "API Request Logs",
+      "description": "A developer request log with 5,000 virtualized rows, live error rate and p95 latency, method / status class / region filters, a latency slider, and a details panel with a response preview.",
+      "dependencies": [
+        "lucide-react",
+        "react-aria",
+        "react-aria-components"
+      ],
+      "registryDependencies": [
+        "https://niko-table.com/r-aria/data-table.json",
+        "https://niko-table.com/r-aria/data-table-virtualized.json",
+        "https://niko-table.com/r-aria/data-table-search-filter.json",
+        "https://niko-table.com/r-aria/data-table-faceted-filter.json",
+        "https://niko-table.com/r-aria/data-table-slider-filter.json",
+        "https://niko-table.com/r-aria/data-table-clear-filter.json",
+        "https://niko-table.com/r-aria/data-table-view-menu.json",
+        "https://niko-table.com/r-aria/data-table-column-sort.json",
+        "badge",
+        "button",
+        "dropdown-menu",
+        "sheet"
+      ],
+      "cssVars": {
+        "theme": {
+          "color-success": "var(--success)",
+          "color-warning": "var(--warning)"
+        },
+        "light": {
+          "success": "oklch(0.596 0.145 163.225)",
+          "warning": "oklch(0.666 0.179 58.318)"
+        },
+        "dark": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)"
+        }
+      },
+      "files": [
+        {
+          "path": "src/registry/new-york/blocks/request-logs-table/request-logs-table.tsx",
+          "type": "registry:component",
+          "target": "components/request-logs-table/request-logs-table.tsx"
+        },
+        {
+          "path": "src/registry/new-york/blocks/request-logs-table/log-sheet.tsx",
+          "type": "registry:component",
+          "target": "components/request-logs-table/log-sheet.tsx"
+        },
+        {
+          "path": "src/registry/new-york/blocks/request-logs-table/logs-format.ts",
+          "type": "registry:component",
+          "target": "components/request-logs-table/logs-format.ts"
+        },
+        {
+          "path": "src/registry/new-york/blocks/request-logs-table/logs-data.ts",
+          "type": "registry:component",
+          "target": "components/request-logs-table/logs-data.ts"
+        },
+        {
+          "path": "src/components/niko-table/primitives/dropdown-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/dropdown-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/button.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/sheet.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/sheet.tsx"
+        }
+      ]
+    },
+    {
+      "name": "invoices-table",
+      "type": "registry:block",
+      "title": "Invoices",
+      "description": "A billing screen with invoices grouped by status (count and summed amount per group, switchable off), due-date tracking, KPIs, a due date range filter, and mark paid / send reminder / copy link / void actions per invoice, plus bulk mark paid.",
+      "dependencies": [
+        "lucide-react",
+        "react-aria",
+        "react-aria-components"
+      ],
+      "registryDependencies": [
+        "https://niko-table.com/r-aria/data-table.json",
+        "https://niko-table.com/r-aria/data-table-search-filter.json",
+        "https://niko-table.com/r-aria/data-table-faceted-filter.json",
+        "https://niko-table.com/r-aria/data-table-date-filter.json",
+        "https://niko-table.com/r-aria/data-table-clear-filter.json",
+        "https://niko-table.com/r-aria/data-table-view-menu.json",
+        "https://niko-table.com/r-aria/data-table-selection-bar.json",
+        "https://niko-table.com/r-aria/data-table-pagination.json",
+        "https://niko-table.com/r-aria/data-table-column-sort.json",
+        "https://niko-table.com/r-aria/data-table-column-group.json",
+        "badge",
+        "button",
+        "checkbox",
+        "dropdown-menu"
+      ],
+      "cssVars": {
+        "theme": {
+          "color-success": "var(--success)",
+          "color-warning": "var(--warning)"
+        },
+        "light": {
+          "success": "oklch(0.596 0.145 163.225)",
+          "warning": "oklch(0.666 0.179 58.318)"
+        },
+        "dark": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)"
+        }
+      },
+      "files": [
+        {
+          "path": "src/registry/new-york/blocks/invoices-table/invoices-table.tsx",
+          "type": "registry:component",
+          "target": "components/invoices-table/invoices-table.tsx"
+        },
+        {
+          "path": "src/registry/new-york/blocks/invoices-table/invoices-format.ts",
+          "type": "registry:component",
+          "target": "components/invoices-table/invoices-format.ts"
+        },
+        {
+          "path": "src/registry/new-york/blocks/invoices-table/invoices-data.ts",
+          "type": "registry:component",
+          "target": "components/invoices-table/invoices-data.ts"
+        },
+        {
+          "path": "src/components/niko-table/primitives/dropdown-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/dropdown-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/button.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/checkbox.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/checkbox.tsx"
+        }
+      ]
+    },
+    {
+      "name": "backlog-table",
+      "type": "registry:block",
+      "title": "Sprint Backlog",
+      "description": "A sprint backlog you prioritize by dragging rows, with a capacity line that moves as you reorder, column order from a drag-and-drop view menu, handles that switch off while filtering, and move to top / bottom, status and remove actions.",
+      "dependencies": [
+        "lucide-react",
+        "react-aria",
+        "react-aria-components"
+      ],
+      "registryDependencies": [
+        "https://niko-table.com/r-aria/data-table.json",
+        "https://niko-table.com/r-aria/data-table-search-filter.json",
+        "https://niko-table.com/r-aria/data-table-faceted-filter.json",
+        "https://niko-table.com/r-aria/data-table-clear-filter.json",
+        "https://niko-table.com/r-aria/data-table-row-dnd.json",
+        "https://niko-table.com/r-aria/data-table-view-dnd-menu.json",
+        "avatar",
+        "badge",
+        "button",
+        "dropdown-menu",
+        "progress"
+      ],
+      "cssVars": {
+        "theme": {
+          "color-success": "var(--success)",
+          "color-warning": "var(--warning)"
+        },
+        "light": {
+          "success": "oklch(0.596 0.145 163.225)",
+          "warning": "oklch(0.666 0.179 58.318)"
+        },
+        "dark": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)"
+        }
+      },
+      "files": [
+        {
+          "path": "src/registry/new-york/blocks/backlog-table/backlog-table.tsx",
+          "type": "registry:component",
+          "target": "components/backlog-table/backlog-table.tsx"
+        },
+        {
+          "path": "src/registry/new-york/blocks/backlog-table/backlog-cells.tsx",
+          "type": "registry:component",
+          "target": "components/backlog-table/backlog-cells.tsx"
+        },
+        {
+          "path": "src/registry/new-york/blocks/backlog-table/backlog-format.ts",
+          "type": "registry:component",
+          "target": "components/backlog-table/backlog-format.ts"
+        },
+        {
+          "path": "src/registry/new-york/blocks/backlog-table/backlog-data.ts",
+          "type": "registry:component",
+          "target": "components/backlog-table/backlog-data.ts"
+        },
+        {
+          "path": "src/components/niko-table/primitives/dropdown-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/dropdown-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/button.tsx"
+        }
+      ]
+    },
+    {
+      "name": "shipments-table",
+      "type": "registry:block",
+      "title": "Shipments",
+      "description": "A wide logistics table you shape yourself: drag-resizable columns with saved widths, pin left / right / unpin and hide from each column menu, a Reset layout button, route and late ETA cells, and copy ID / mark delivered / flag exception actions.",
+      "dependencies": [
+        "lucide-react",
+        "react-aria",
+        "react-aria-components"
+      ],
+      "registryDependencies": [
+        "https://niko-table.com/r-aria/data-table.json",
+        "https://niko-table.com/r-aria/data-table-search-filter.json",
+        "https://niko-table.com/r-aria/data-table-faceted-filter.json",
+        "https://niko-table.com/r-aria/data-table-clear-filter.json",
+        "https://niko-table.com/r-aria/data-table-view-menu.json",
+        "https://niko-table.com/r-aria/data-table-pagination.json",
+        "https://niko-table.com/r-aria/data-table-column-sort.json",
+        "https://niko-table.com/r-aria/data-table-column-pin.json",
+        "https://niko-table.com/r-aria/data-table-column-hide.json",
+        "https://niko-table.com/r-aria/data-table-column-resize.json",
+        "https://niko-table.com/r-aria/data-table-column-sizing-persistence.json",
+        "badge",
+        "button",
+        "dropdown-menu"
+      ],
+      "cssVars": {
+        "theme": {
+          "color-success": "var(--success)",
+          "color-warning": "var(--warning)"
+        },
+        "light": {
+          "success": "oklch(0.596 0.145 163.225)",
+          "warning": "oklch(0.666 0.179 58.318)"
+        },
+        "dark": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)"
+        }
+      },
+      "files": [
+        {
+          "path": "src/registry/new-york/blocks/shipments-table/shipments-table.tsx",
+          "type": "registry:component",
+          "target": "components/shipments-table/shipments-table.tsx"
+        },
+        {
+          "path": "src/registry/new-york/blocks/shipments-table/shipments-layout.ts",
+          "type": "registry:component",
+          "target": "components/shipments-table/shipments-layout.ts"
+        },
+        {
+          "path": "src/registry/new-york/blocks/shipments-table/shipments-format.ts",
+          "type": "registry:component",
+          "target": "components/shipments-table/shipments-format.ts"
+        },
+        {
+          "path": "src/registry/new-york/blocks/shipments-table/shipments-data.ts",
+          "type": "registry:component",
+          "target": "components/shipments-table/shipments-data.ts"
+        },
+        {
+          "path": "src/components/niko-table/primitives/dropdown-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/dropdown-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/button.tsx"
+        }
+      ]
+    },
+    {
+      "name": "transactions-table",
+      "type": "registry:block",
+      "title": "Transactions Ledger",
+      "description": "A bank-style ledger that loads as you scroll: 20,000 transactions served 100 at a time by a fake server, a virtualized body, server-side search, category and type filters, money in and out totals, and a details panel with a copy ID button.",
+      "dependencies": [
+        "lucide-react",
+        "react-aria",
+        "react-aria-components"
+      ],
+      "registryDependencies": [
+        "https://niko-table.com/r-aria/data-table.json",
+        "https://niko-table.com/r-aria/data-table-virtualized.json",
+        "https://niko-table.com/r-aria/data-table-search-filter.json",
+        "https://niko-table.com/r-aria/data-table-faceted-filter.json",
+        "https://niko-table.com/r-aria/data-table-clear-filter.json",
+        "badge",
+        "button",
+        "dropdown-menu",
+        "sheet"
+      ],
+      "cssVars": {
+        "theme": {
+          "color-success": "var(--success)",
+          "color-warning": "var(--warning)"
+        },
+        "light": {
+          "success": "oklch(0.596 0.145 163.225)",
+          "warning": "oklch(0.666 0.179 58.318)"
+        },
+        "dark": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)"
+        }
+      },
+      "files": [
+        {
+          "path": "src/registry/new-york/blocks/transactions-table/transactions-table.tsx",
+          "type": "registry:component",
+          "target": "components/transactions-table/transactions-table.tsx"
+        },
+        {
+          "path": "src/registry/new-york/blocks/transactions-table/transaction-sheet.tsx",
+          "type": "registry:component",
+          "target": "components/transactions-table/transaction-sheet.tsx"
+        },
+        {
+          "path": "src/registry/new-york/blocks/transactions-table/transactions-format.ts",
+          "type": "registry:component",
+          "target": "components/transactions-table/transactions-format.ts"
+        },
+        {
+          "path": "src/registry/new-york/blocks/transactions-table/transactions-data.ts",
+          "type": "registry:component",
+          "target": "components/transactions-table/transactions-data.ts"
+        },
+        {
+          "path": "src/components/niko-table/primitives/dropdown-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/dropdown-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/button.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/sheet.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/sheet.tsx"
+        }
+      ]
+    },
+    {
+      "name": "inventory-grid",
+      "type": "registry:block",
+      "title": "Inventory Grid",
+      "description": "An editable product inventory on Niko Grid: typed cells (text, number, select, checkbox, date), inline validation, low-stock markers, live totals, an unsaved changes bar with Save and Discard, add, duplicate and delete product, undo and redo, copy and paste, and a virtualized body.",
+      "dependencies": [
+        "lucide-react",
+        "react-aria",
+        "react-aria-components"
+      ],
+      "registryDependencies": [
+        "https://niko-table.com/r-aria/data-table.json",
+        "https://niko-table.com/r-aria/data-table-virtualized.json",
+        "https://niko-table.com/r-aria/data-table-grid.json",
+        "https://niko-table.com/r-aria/data-table-grid-changes.json",
+        "https://niko-table.com/r-aria/data-table-column-resize.json",
+        "https://niko-table.com/r-aria/data-table-search-filter.json",
+        "https://niko-table.com/r-aria/data-table-faceted-filter.json",
+        "https://niko-table.com/r-aria/data-table-clear-filter.json",
+        "button",
+        "dropdown-menu"
+      ],
+      "cssVars": {
+        "theme": {
+          "color-success": "var(--success)",
+          "color-warning": "var(--warning)"
+        },
+        "light": {
+          "success": "oklch(0.596 0.145 163.225)",
+          "warning": "oklch(0.666 0.179 58.318)"
+        },
+        "dark": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)"
+        }
+      },
+      "files": [
+        {
+          "path": "src/registry/new-york/blocks/inventory-grid/inventory-grid.tsx",
+          "type": "registry:component",
+          "target": "components/inventory-grid/inventory-grid.tsx"
+        },
+        {
+          "path": "src/registry/new-york/blocks/inventory-grid/inventory-format.ts",
+          "type": "registry:component",
+          "target": "components/inventory-grid/inventory-format.ts"
+        },
+        {
+          "path": "src/registry/new-york/blocks/inventory-grid/inventory-data.ts",
+          "type": "registry:component",
+          "target": "components/inventory-grid/inventory-data.ts"
+        },
+        {
+          "path": "src/components/niko-table/primitives/dropdown-menu.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/dropdown-menu.tsx"
+        },
+        {
+          "path": "src/components/niko-table/primitives/button.tsx",
+          "type": "registry:component",
+          "target": "components/niko-table/primitives/button.tsx"
+        }
+      ]
+    }
+  ]
+}

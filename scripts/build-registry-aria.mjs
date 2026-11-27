@@ -37,14 +37,30 @@ const PRIMITIVE_PATH =
   /^src\/components\/niko-table\/primitives\/([a-z-]+\.tsx)$/
 // Peers every React app already has.
 const PEERS = new Set(["react", "react-dom"])
+// shadcn components with a React Aria primitive (one file per name).
+const ARIA_PRIMITIVES = new Set(
+  readdirSync(PRIMITIVES_DIR)
+    .filter(file => file.endsWith(".tsx"))
+    .map(file => file.replace(/\.tsx$/, "")),
+)
 
-/** Bare npm packages a source imports at runtime (type-only imports skipped). */
-function npmImports(source) {
+/**
+ * Bare npm packages a source imports or re-exports at runtime. One statement
+ * per match: multi-line imports end on their `} from "x"` line. Type-only
+ * statements are skipped.
+ */
+export function npmImports(source) {
   const packages = new Set()
-  for (const [, spec] of source.matchAll(
-    /^import (?!type )[^;]*?from "([^"./@][^"]*|@[^"/]+\/[^"/]+)"/gms,
-  )) {
-    const pkg = spec.startsWith("@") ? spec : spec.split("/")[0]
+  const statements = source.matchAll(
+    /^(import|export)\b(?! type )(?:[^\n]*\n(?!import\b|export\b))*?[^\n]*?\bfrom "([^"]+)"|^import "([^"]+)"/gm,
+  )
+  for (const [, , from, bare] of statements) {
+    const spec = from ?? bare
+    if (spec.startsWith(".") || spec.startsWith("@/")) continue
+    const pkg = spec
+      .split("/")
+      .slice(0, spec.startsWith("@") ? 2 : 1)
+      .join("/")
     if (!PEERS.has(pkg)) packages.add(pkg)
   }
   return packages
@@ -60,14 +76,12 @@ function uiImports(source) {
 const packageName = dep => dep.replace(/(?!^)@.*$/, "")
 
 function ariaItem(item) {
-  const primitives = new Set()
   const files = item.files.map(file => {
     const match = PRIMITIVE_PATH.exec(file.path)
     if (!match) return file
     const source = join(PRIMITIVES_DIR, match[1])
     if (!existsSync(source))
       throw new Error(`${item.name}: no React Aria build of ${file.path}`)
-    primitives.add(match[1].replace(/\.tsx$/, ""))
     return { ...file, content: readFileSync(source, "utf8") }
   })
 
@@ -84,8 +98,9 @@ function ariaItem(item) {
     .map(dep =>
       dep.startsWith(LIVE) ? LIVE_ARIA + dep.slice(LIVE.length) : dep,
     )
-    // A primitive-covered component the React Aria files no longer import.
-    .filter(dep => !primitives.has(dep) || imported.has(dep))
+    // A primitive-covered component none of the React Aria files import
+    // (e.g. `command`, which the React Aria primitive replaces with cmdk).
+    .filter(dep => !ARIA_PRIMITIVES.has(dep) || imported.has(dep))
   for (const name of primitiveImports)
     if (!registryDependencies.includes(name)) registryDependencies.push(name)
 
@@ -108,16 +123,43 @@ function ariaItem(item) {
   }
 }
 
-rmSync(ARIA_DIR, { recursive: true, force: true })
-mkdirSync(ARIA_DIR, { recursive: true })
-let count = 0
-for (const name of readdirSync(DEFAULT_DIR).sort()) {
-  if (!name.endsWith(".json") || name === "registry.json") continue
-  const item = JSON.parse(readFileSync(join(DEFAULT_DIR, name), "utf8"))
-  writeFileSync(
-    join(ARIA_DIR, name),
-    JSON.stringify(ariaItem(item), null, 2) + "\n",
+function main() {
+  const index = JSON.parse(
+    readFileSync(join(DEFAULT_DIR, "registry.json"), "utf8"),
   )
-  count++
+  rmSync(ARIA_DIR, { recursive: true, force: true })
+  mkdirSync(ARIA_DIR, { recursive: true })
+  // Driven by the index (not the folder), so a stale public/r file is never
+  // republished as a React Aria item.
+  const items = index.items.map(({ name }) => {
+    const path = join(DEFAULT_DIR, `${name}.json`)
+    if (!existsSync(path)) throw new Error(`public/r/${name}.json is missing`)
+    const aria = ariaItem(JSON.parse(readFileSync(path, "utf8")))
+    writeFileSync(
+      join(ARIA_DIR, `${name}.json`),
+      JSON.stringify(aria, null, 2) + "\n",
+    )
+    return aria
+  })
+  // Namespace index for `shadcn search / list / view` on aria-* styles: the
+  // same entries, with each item's React Aria dependencies.
+  const ariaIndex = {
+    ...index,
+    items: index.items.map((entry, i) => ({
+      ...entry,
+      ...(items[i].dependencies ? { dependencies: items[i].dependencies } : {}),
+      ...(items[i].registryDependencies
+        ? { registryDependencies: items[i].registryDependencies }
+        : {}),
+    })),
+  }
+  writeFileSync(
+    join(ARIA_DIR, "registry.json"),
+    JSON.stringify(ariaIndex, null, 2) + "\n",
+  )
+  console.log(
+    `✔ Built ${items.length} React Aria items and registry.json in public/r-aria.`,
+  )
 }
-console.log(`✔ Built ${count} React Aria items in public/r-aria.`)
+
+if (process.argv[1] === fileURLToPath(import.meta.url)) main()

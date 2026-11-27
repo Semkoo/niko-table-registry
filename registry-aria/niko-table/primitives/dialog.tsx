@@ -3,12 +3,17 @@
 /**
  * Niko Table's dialog primitive, React Aria build. Radix-shaped API
  * (`Dialog open onOpenChange`, `DialogTrigger asChild`, `DialogClose asChild`,
- * `DialogContent`) on top of `react-aria-components` `Pressable` and the React
- * Aria shadcn `Dialog` (a React Aria modal), which owns focus and dismissal.
+ * `DialogContent`) on shadcn's React Aria `DialogTrigger` (React Aria
+ * `DialogTrigger`, which owns the open state) and `Dialog` (a React Aria
+ * modal, which owns focus and dismissal). A dialog with no `DialogTrigger`
+ * (opened only through `open`) uses shadcn's `Dialog` in its controlled form.
+ *
+ * `asChild` hands the press to the child: the Button primitive (or shadcn's
+ * Button) takes it directly, a plain element through `Pressable`.
  */
 import * as React from "react"
 import { mergeProps } from "react-aria"
-import { Pressable } from "react-aria-components"
+import { OverlayTriggerStateContext, Pressable } from "react-aria-components"
 
 import {
   Dialog as DialogModal,
@@ -16,92 +21,112 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogTrigger as DialogRoot,
 } from "@/components/ui/dialog"
 
+type TriggerProps = React.ComponentProps<"button"> & { asChild?: boolean }
 type PressableChild = React.ComponentProps<typeof Pressable>["children"]
-
-interface DialogContextValue {
-  open: boolean
-  setOpen: (open: boolean) => void
-}
-
-const DialogContext = React.createContext<DialogContextValue | null>(null)
-
-function useDialog(part: string) {
-  const context = React.useContext(DialogContext)
-  if (!context) throw new Error(`${part} must be used within <Dialog>`)
-  return context
-}
-
-function Dialog({
-  open: openProp,
-  defaultOpen = false,
-  onOpenChange,
-  children,
-}: {
+type OpenProps = {
   open?: boolean
   defaultOpen?: boolean
   onOpenChange?: (open: boolean) => void
-  children?: React.ReactNode
-}) {
-  const [uncontrolledOpen, setUncontrolledOpen] = React.useState(defaultOpen)
-  const open = openProp ?? uncontrolledOpen
-  const setOpen = React.useCallback(
-    (next: boolean) => {
-      if (openProp === undefined) setUncontrolledOpen(next)
-      onOpenChange?.(next)
-    },
-    [openProp, onOpenChange],
-  )
-  const value = React.useMemo(() => ({ open, setOpen }), [open, setOpen])
-  return (
-    <DialogContext.Provider value={value}>{children}</DialogContext.Provider>
+}
+
+/** Root props for a dialog with no trigger; read by `DialogContent`. */
+const StandaloneContext = React.createContext<OpenProps | null>(null)
+
+/** Whether a `DialogTrigger` element is written anywhere in `node`. */
+function hasTrigger(node: React.ReactNode): boolean {
+  return React.Children.toArray(node).some(
+    child =>
+      React.isValidElement<{ children?: React.ReactNode }>(child) &&
+      (child.type === DialogTrigger || hasTrigger(child.props.children)),
   )
 }
 
-/** Pressable wrapper shared by the trigger and the close button. */
-function DialogAction({
-  asChild,
+function Dialog({
+  open,
+  defaultOpen,
+  onOpenChange,
   children,
-  onPress,
-  ...props
-}: React.ComponentProps<"button"> & {
-  asChild?: boolean
-  onPress: () => void
-}) {
-  const child =
-    asChild &&
-    React.isValidElement<React.HTMLAttributes<HTMLElement>>(children) ? (
-      // Slot: the trigger's own props (refs, handlers, classes) merge onto the child.
+}: OpenProps & { children?: React.ReactNode }) {
+  // React Aria's DialogTrigger warns when it has nothing to press, so a
+  // controlled dialog with no trigger written inside it skips it. An
+  // uncontrolled one keeps it: its trigger may be inside another component.
+  if (open !== undefined && !hasTrigger(children))
+    return (
+      <StandaloneContext.Provider value={{ open, defaultOpen, onOpenChange }}>
+        {children}
+      </StandaloneContext.Provider>
+    )
+  return (
+    <DialogRoot
+      isOpen={open}
+      defaultOpen={defaultOpen}
+      onOpenChange={onOpenChange}
+    >
+      {children}
+    </DialogRoot>
+  )
+}
+
+/**
+ * `child` with React Aria's press: a host element through `Pressable`, a
+ * component (the Button primitive, shadcn's Button) directly. Wrapping a
+ * component too would register the press twice.
+ */
+function withPress(child: React.ReactElement, onPress?: () => void) {
+  return typeof child.type === "string" ? (
+    <Pressable onPress={onPress}>{child as PressableChild}</Pressable>
+  ) : (
+    child
+  )
+}
+
+/** Slot for the trigger: React Aria's DialogTrigger presses the child. */
+function DialogTrigger({ asChild = false, children, ...props }: TriggerProps) {
+  const standalone = React.useContext(StandaloneContext)
+  // A trigger the root could not see (rendered by another component inside a
+  // controlled dialog) toggles through the root's own `onOpenChange`.
+  const toggle = standalone
+    ? () => standalone.onOpenChange?.(!standalone.open)
+    : undefined
+  const own = toggle ? mergeProps(props, { onClick: toggle }) : props
+  return withPress(
+    asChild && React.isValidElement<object>(children) ? (
       React.cloneElement(
         children,
-        mergeProps(children.props, props) as React.HTMLAttributes<HTMLElement>,
+        // A host child gets the toggle through Pressable instead.
+        mergeProps(
+          children.props,
+          typeof children.type === "string" ? props : own,
+        ),
       )
     ) : (
       <button type="button" {...props}>
         {children}
       </button>
-    )
-  return (
-    <Pressable onPress={onPress}>
-      {/* Pressable types its child as a host element; ours forward ref + props. */}
-      {child as PressableChild}
-    </Pressable>
+    ),
+    toggle,
   )
 }
 
-function DialogTrigger(
-  props: React.ComponentProps<"button"> & { asChild?: boolean },
-) {
-  const { setOpen } = useDialog("DialogTrigger")
-  return <DialogAction {...props} onPress={() => setOpen(true)} />
-}
-
-function DialogClose(
-  props: React.ComponentProps<"button"> & { asChild?: boolean },
-) {
-  const { setOpen } = useDialog("DialogClose")
-  return <DialogAction {...props} onPress={() => setOpen(false)} />
+/** Slot for a close button: React Aria's Dialog closes on `slot="close"`. */
+function DialogClose({ asChild = false, children, ...props }: TriggerProps) {
+  const state = React.useContext(OverlayTriggerStateContext)
+  return withPress(
+    asChild && React.isValidElement<object>(children) ? (
+      React.cloneElement(
+        children,
+        mergeProps(children.props, props, { slot: "close" }),
+      )
+    ) : (
+      <button type="button" {...props}>
+        {children}
+      </button>
+    ),
+    () => state?.close(),
+  )
 }
 
 function DialogContent({
@@ -113,13 +138,16 @@ function DialogContent({
   children?: React.ReactNode
   showCloseButton?: boolean
 }) {
-  const { open, setOpen } = useDialog("DialogContent")
+  const standalone = React.useContext(StandaloneContext)
   return (
     <DialogModal
-      isOpen={open}
-      onOpenChange={setOpen}
       className={className}
       showCloseButton={showCloseButton}
+      {...(standalone && {
+        isOpen: standalone.open,
+        defaultOpen: standalone.defaultOpen,
+        onOpenChange: standalone.onOpenChange,
+      })}
     >
       {children}
     </DialogModal>

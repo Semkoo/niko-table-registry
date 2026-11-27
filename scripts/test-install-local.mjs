@@ -243,6 +243,18 @@ async function main() {
         )
         results.push(["install", code === 0])
         if (code !== 0) throw new Error("shadcn add failed")
+        // `shadcn search` reads the namespace index (registry.json) through
+        // the same {style} URL.
+        const search = await run(
+          "npx",
+          ["shadcn", "search", "@niko-table", "--query", "data-table-core"],
+          app,
+          { capture: true },
+        )
+        results.push([
+          "shadcn search @niko-table",
+          search.code === 0 && search.output.includes("data-table-core"),
+        ])
       } finally {
         writeFileSync(configPath, configText)
       }

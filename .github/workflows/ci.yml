@@ -43,3 +43,9 @@ jobs:
 
       - name: Build (astro check · shadcn build · astro build)
         run: pnpm build
+
+      - name: Committed registry output matches a fresh build
+        # pnpm build ran registry:build; fail if public/r or public/r-aria drifted.
+        run: |
+          git status --porcelain -- public/r public/r-aria
+          test -z "$(git status --porcelain -- public/r public/r-aria)"
