@@ -320,16 +320,15 @@
 }
 
 /*
- * Pages with a live demo (home showcase, CodePreview, block preview) get a
- * wider column so tables show in full. starlight-theme-black caps the column
- * at 40rem when "On this page" is shown and relies on that cap for side gaps,
- * so lift both and keep the gutter.
+ * One column width on every page (wide enough for tables to show in full).
+ * starlight-theme-black caps the column at 40rem when "On this page" is
+ * shown and relies on that cap for side gaps, so lift both and keep the
+ * gutter.
  */
-:root:has(.home-showcase, [data-code-preview], [data-block-preview]) {
+:root {
   --sl-content-width: 68rem;
 }
-[data-has-sidebar][data-has-toc]
-  .main-pane:has(.home-showcase, [data-code-preview], [data-block-preview]) {
+[data-has-sidebar][data-has-toc] .main-pane {
   max-width: 68rem;
   padding-inline: 1.5rem;
 }
