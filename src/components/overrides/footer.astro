@@ -1,7 +1,7 @@
 ---
 /**
- * Starlight's footer (prev / next), a short "star us" note, and the site
- * footer: brand, link groups and license.
+ * Starlight's footer (prev / next), then the site footer: brand with a
+ * "Star on GitHub" button, link groups and license.
  */
 import DefaultFooter from "@astrojs/starlight/components/Footer.astro"
 import { Icon } from "@astrojs/starlight/components"
@@ -46,18 +46,6 @@ const groups = [
 const year = new Date().getFullYear()
 ---
 
-<aside class="star-prompt not-content" aria-label="Support Niko Table">
-  <p>
-    <strong>Find Niko Table useful?</strong> A star on GitHub helps other people
-    find it.
-  </p>
-  <a href={GITHUB_REPO_URL} class="star-button">
-    <Icon name="star" size="1rem" />
-    Star on GitHub
-    {stars !== null && <span class="star-count">{formatStars(stars)}</span>}
-  </a>
-</aside>
-
 <DefaultFooter />
 
 <footer class="site-footer not-content">
@@ -69,6 +57,11 @@ const year = new Date().getFullYear()
       </a>
       <p>Composable data tables and an editable grid for shadcn/ui.</p>
       <p>Built on TanStack Table. You own the code.</p>
+      <a href={GITHUB_REPO_URL} class="star-button">
+        <Icon name="star" size="1rem" />
+        Star on GitHub
+        {stars !== null && <span class="star-count">{formatStars(stars)}</span>}
+      </a>
     </div>
     <nav class="site-footer-groups" aria-label="Footer">
       {groups.map(group => (
@@ -92,28 +85,8 @@ const year = new Date().getFullYear()
 </footer>
 
 <style>
-  .star-prompt {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.75rem 1rem;
-    margin-top: 3rem;
-    padding: 1rem;
-    border: 1px solid var(--border);
-    border-radius: 0.75rem;
-    background: var(--card);
-    font-size: var(--sl-text-sm);
-    color: var(--muted-foreground);
-  }
-  .star-prompt p {
-    margin: 0;
-  }
-  .star-prompt strong {
-    color: var(--foreground);
-    font-weight: 500;
-  }
-  .star-button {
+  .site-footer .star-button {
+    margin-top: 1rem;
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
@@ -125,7 +98,7 @@ const year = new Date().getFullYear()
     font-weight: 500;
     white-space: nowrap;
   }
-  .star-button:hover {
+  .site-footer .star-button:hover {
     background: var(--accent);
   }
   .site-footer {
