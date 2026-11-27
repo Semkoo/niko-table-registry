@@ -1,6 +1,6 @@
 # React Aria build of Niko Table (experimental)
 
-Experimental and not yet installable from the registry.
+Experimental. Installable from the registry through the `{style}` URL (see How it ships).
 
 shadcn/ui ships three bases: Radix, Base UI and React Aria. Niko Table's source
 (`src/components/niko-table`) is Radix-shaped. The shadcn CLI rewrites it for

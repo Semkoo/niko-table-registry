@@ -124,7 +124,7 @@ function getFileLocationFromType(type: RegistryFileType) {
         Requires the <code>@niko-table</code> registry in your{" "}
         <code>components.json</code>. See the{" "}
         <a
-          href="/getting-started/installation/#configure-the-niko-table-registry"
+          href="/getting-started/installation/#configure-the-registry"
           class="underline underline-offset-3"
         >
           Installation Guide
@@ -135,6 +135,11 @@ function getFileLocationFromType(type: RegistryFileType) {
         action="run"
         command={`shadcn@latest add "https://niko-table.com/r/${registryItem}.json"`}
       />
+      <p class="text-sm text-muted-foreground">
+        On React Aria, put your style in the URL:{" "}
+        <code>https://niko-table.com/r/aria-nova/{registryItem}.json</code> (use
+        the <code>style</code> from your <code>components.json</code>).
+      </p>
     </div>
     <div class="flex flex-col gap-8">
       {registryDependencies != null && registryDependencies.length > 0 && (
