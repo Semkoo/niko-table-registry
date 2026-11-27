@@ -8,6 +8,7 @@ export const blocks = [
   {
     name: "customers-table",
     title: "Customers Table",
+    category: "Base",
     description:
       "A complete customers screen: search, status and plan filters, sortable columns, bulk selection, CSV export, a details panel on row click and an add-customer form.",
     files: [
@@ -21,6 +22,7 @@ export const blocks = [
   {
     name: "orders-table",
     title: "Orders Table",
+    category: "Expansion",
     description:
       "An orders screen with live totals, payment and fulfillment filters, a price slider, a date range, expandable rows with line items, and ship and refund actions.",
     files: [
@@ -33,6 +35,7 @@ export const blocks = [
   {
     name: "tickets-table",
     title: "Support Tickets",
+    category: "Filtering",
     description:
       "A support inbox with quick views (Mine, Unassigned, At risk), SLA timers, priority and assignee filters, a priority submenu, and assign / solve actions in bulk or per ticket.",
     files: [
@@ -45,6 +48,7 @@ export const blocks = [
   {
     name: "team-table",
     title: "Team Members",
+    category: "Columns",
     description:
       "A workspace members screen: pinned member and actions columns that stay put while the table scrolls sideways, a Role submenu in the row menu, suspend and remove actions, bulk remove, and an invite dialog.",
     files: [
@@ -57,6 +61,7 @@ export const blocks = [
   {
     name: "request-logs-table",
     title: "API Request Logs",
+    category: "Virtualization",
     description:
       "A developer request log with 5,000 virtualized rows, live error rate and p95 latency, method, status class and region filters, a latency slider, and a details panel with a response preview.",
     files: [
@@ -69,6 +74,7 @@ export const blocks = [
   {
     name: "invoices-table",
     title: "Invoices",
+    category: "Grouping",
     description:
       "A billing screen with invoices grouped by status (count and summed amount per group, switchable off), due-date tracking, KPIs, a due date range filter, and mark paid / remind / copy link / void actions.",
     files: ["invoices-table.tsx", "invoices-format.ts", "invoices-data.ts"],
@@ -120,6 +126,18 @@ export const blocks = [
       "An editable product inventory on Niko Grid: typed cells, inline validation, low-stock markers, live totals, an unsaved changes bar with Save and Discard, add, duplicate and delete product, undo and redo, and a virtualized body.",
     files: ["inventory-grid.tsx", "inventory-format.ts", "inventory-data.ts"],
   },
+] as const
+
+/** Categories in the order the /blocks/ page shows them. */
+export const blockCategories = [
+  "Base",
+  "Filtering",
+  "Columns",
+  "Expansion",
+  "Grouping",
+  "Editing",
+  "Drag & Drop",
+  "Virtualization",
 ] as const
 
 export type BlockName = (typeof blocks)[number]["name"]

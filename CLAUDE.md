@@ -68,6 +68,19 @@ Built on `@dnd-kit`. Three tiers of components:
 - Source code buttons link to GitHub using `GITHUB_REPO_URL` env variable
 - Doc page pattern: frontmatter → overview with CodePreview → installation → code examples → props tables → key points → when to use → next steps
 
+## Changelog Rules
+
+There are two changelogs. Update both when a change is user-facing.
+
+- **`src/content/docs/changelog.mdx`** is the public page (niko-table.com/changelog). Write it for a busy reader:
+  - Plain English. Lead with what changed for the user, not how it was built.
+  - Point form: one bold lead-in per bullet, one short sentence. Put extra facts in sub-bullets, not in the sentence.
+  - Group by month (`## November 2026`), then `### New`, `### Changed`, `### Removed`, `### Fixed`, `### Faster`.
+  - Say "This is a breaking change" in the bullet when it is one, and list what to rename.
+  - Link to the page that shows the feature. Every link must point to a real page.
+  - No em dashes, no paragraphs, no internal detail (file names, memo keys, refactors).
+- **`CHANGELOG.md`** (repo root) is the full technical record: file names, API names, root causes, issue links. Detail belongs here.
+
 ## Adding New Components
 
 1. Create component in appropriate directory (`core/`, `components/`, or `filters/`)

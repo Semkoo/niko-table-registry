@@ -12,6 +12,8 @@ The short version of each release. For every technical detail, see the [full cha
 - **Blocks.** Full screens you install with one command and then own. [Browse blocks](/blocks/)
   - Customers, Orders, Support Tickets
   - Team Members, Invoices, API Request Logs
+  - Inventory Grid, Sprint Backlog, Shipments, Transactions Ledger
+  - The Blocks page shows a live preview of each, grouped by category.
 - **Example galleries.** Every example as a card with a live preview.
   - [Table Examples](/examples/)
   - [Grid Examples](/data-grid/examples/)
@@ -26,6 +28,7 @@ The short version of each release. For every technical detail, see the [full cha
 - **Data Grid is now called Niko Grid.**
   - Only the name changed.
   - Install names (`data-table-grid`) and URLs (`/data-grid/`) are the same.
+- **`onReorder` tells you which row moved.** It gets an optional second argument, `{ activeId, overId }`. Existing code keeps working.
 - **Easier navigation.**
   - Breadcrumbs show where a page sits, and every step is a link.
   - Sidebar examples are grouped and fold away.
@@ -34,6 +37,8 @@ The short version of each release. For every technical detail, see the [full cha
 
 ### Fixed
 
+- **Right-click menus work on draggable rows.** They never opened before, in regular and virtualized tables.
+- **Docs lists show bullets again.** Sub-points are indented.
 - **Some installs were missing a component.**
   - Data Table, Data Table Core and the column slider filter now install everything they use.
 - **New Vite projects now build.** Installing into a fresh `shadcn init -t vite` app used to fail the type check.
