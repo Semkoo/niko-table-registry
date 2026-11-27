@@ -35,7 +35,6 @@ import {
 
 type Side = "top" | "right" | "bottom" | "left"
 type Align = "start" | "center" | "end"
-type PressableChild = React.ComponentProps<typeof Pressable>["children"]
 
 function toPlacement(side: Side, align: Align): Placement {
   if (align === "center") return side
@@ -81,27 +80,23 @@ function DropdownMenuTrigger({
   children,
   ...props
 }: React.ComponentProps<"button"> & { asChild?: boolean }) {
-  // MenuTrigger hands its press, keyboard and aria props to the Pressable.
   const isOpen = React.useContext(OverlayTriggerStateContext)?.isOpen ?? false
   const state = { "data-state": isOpen ? "open" : "closed" }
-  const child =
-    asChild &&
-    React.isValidElement<React.HTMLAttributes<HTMLElement>>(children) ? (
-      // Slot: the trigger's own props (refs, handlers, classes) merge onto the child.
-      React.cloneElement(
-        children,
-        mergeProps(
-          children.props,
-          props,
-          state,
-        ) as React.HTMLAttributes<HTMLElement>,
-      )
-    ) : (
+  // Slot: MenuTrigger hands its press, keyboard and aria props to the child,
+  // which must be the Button primitive (or shadcn's Button), as with shadcn's
+  // own trigger. The trigger's own props merge onto it.
+  if (asChild && React.isValidElement<object>(children))
+    return React.cloneElement(
+      children,
+      mergeProps(children.props, props, state),
+    )
+  return (
+    <Pressable>
       <button type="button" {...props} {...state}>
         {children}
       </button>
-    )
-  return <Pressable>{child as PressableChild}</Pressable>
+    </Pressable>
+  )
 }
 
 function DropdownMenuContent({
