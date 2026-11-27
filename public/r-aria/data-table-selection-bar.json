@@ -1,0 +1,29 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "data-table-selection-bar",
+  "title": "DataTable Selection Bar",
+  "description": "Bulk actions bar that appears when rows are selected.",
+  "dependencies": [
+    "react-aria"
+  ],
+  "registryDependencies": [
+    "https://niko-table.com/r-aria/data-table-core.json",
+    "button",
+    "badge"
+  ],
+  "files": [
+    {
+      "path": "src/components/niko-table/components/data-table-selection-bar.tsx",
+      "content": "/**\n * niko-table — created by Semir N. (Semkoo, https://github.com/Semkoo) with AI assistance.\n *\n * Before reporting anything: please check the changelog first.\n *  - In-repo: ./CHANGELOG.md\n *  - Docs site: https://niko-table.com/changelog\n *\n * Found a bug or have a fix? Open an issue or PR on GitHub so other\n * users (and future LLMs reading this code) benefit:\n * https://github.com/Semkoo/niko-table-registry\n */\n\nimport * as React from \"react\"\nimport { Button } from \"@/components/niko-table/primitives/button\"\nimport { Badge } from \"@/components/ui/badge\"\n\ninterface DataTableSelectionBarProps {\n  selectedCount: number\n  onClear?: () => void\n  children?: React.ReactNode\n  className?: string\n}\n\n/**\n * Reusable selection bar. Memoized so table-state changes don't re-render\n * unchanged selection state. Pass children to add custom action buttons.\n */\nexport const DataTableSelectionBar = React.memo(function DataTableSelectionBar({\n  selectedCount,\n  onClear,\n  children,\n  className,\n}: DataTableSelectionBarProps) {\n  if (selectedCount === 0) return null\n\n  return (\n    <div className={className}>\n      <div className=\"flex items-center justify-between rounded-lg border border-border bg-muted/50 px-4 py-3\">\n        <div className=\"flex items-center gap-2\">\n          <Badge variant=\"secondary\">{selectedCount}</Badge>\n          <span className=\"text-sm text-muted-foreground\">\n            {selectedCount === 1 ? \"row selected\" : \"rows selected\"}\n          </span>\n          {onClear && (\n            <Button\n              variant=\"ghost\"\n              size=\"sm\"\n              onClick={onClear}\n              className=\"h-7 px-2 text-xs\"\n            >\n              Clear\n            </Button>\n          )}\n        </div>\n        {children && <div className=\"flex items-center gap-2\">{children}</div>}\n      </div>\n    </div>\n  )\n})\n",
+      "type": "registry:component",
+      "target": "components/niko-table/components/data-table-selection-bar.tsx"
+    },
+    {
+      "path": "src/components/niko-table/primitives/button.tsx",
+      "content": "\"use client\"\n\n/**\n * Niko Table's button primitive, React Aria build. Same API as the shadcn\n * Radix `Button` (native `<button>` props, `variant`, `size`, `asChild`), styled\n * with the React Aria shadcn `buttonVariants`. A native button (not the React\n * Aria `Button`) keeps `onClick` / `disabled` / `type` / `ref` working at every\n * Niko Table call site, and lets the overlay triggers wrap it in `Pressable`.\n */\nimport * as React from \"react\"\nimport { mergeProps } from \"react-aria\"\nimport type { VariantProps } from \"class-variance-authority\"\n\nimport { buttonVariants } from \"@/components/ui/button\"\nimport { cn } from \"@/lib/utils\"\n\nfunction Button({\n  className,\n  variant = \"default\",\n  size = \"default\",\n  asChild = false,\n  children,\n  ...props\n}: React.ComponentProps<\"button\"> &\n  VariantProps<typeof buttonVariants> & {\n    asChild?: boolean\n  }) {\n  const classes = cn(buttonVariants({ variant, size }), className)\n\n  if (\n    asChild &&\n    React.isValidElement<React.HTMLAttributes<HTMLElement>>(children)\n  ) {\n    // Slot: the child element is the button (e.g. a link styled as one); its\n    // own handlers and refs compose with the button's.\n    return React.cloneElement(children, {\n      ...mergeProps(children.props, { \"data-slot\": \"button\" }, props),\n      className: cn(classes, children.props.className),\n    } as React.HTMLAttributes<HTMLElement>)\n  }\n\n  return (\n    <button\n      data-slot=\"button\"\n      data-variant={variant}\n      data-size={size}\n      className={classes}\n      {...props}\n    >\n      {children}\n    </button>\n  )\n}\n\nexport { Button }\n",
+      "type": "registry:component",
+      "target": "components/niko-table/primitives/button.tsx"
+    }
+  ],
+  "type": "registry:component"
+}

@@ -80,3 +80,18 @@
 /niko-tables/components/ /niko-table/components/ 301
 /niko-tables/overview/* /niko-table/overview/:splat 301
 /niko-tables/* /examples/:splat 301
+
+# Registry per shadcn style: https://niko-table.com/r/{style}/{name}.json.
+# React Aria styles (aria-*) get the React Aria build in /r-aria/; every other
+# style (new-york-v4, radix-*, base-*, …) gets the default /r/<name>.json.
+# shortcut: one line per aria-* style shadcn ships today; add a line when
+# shadcn adds one (tested in src/registry/__tests__/registry-aria.test.ts).
+/r/aria-vega/:name /r-aria/:name 200
+/r/aria-nova/:name /r-aria/:name 200
+/r/aria-maia/:name /r-aria/:name 200
+/r/aria-lyra/:name /r-aria/:name 200
+/r/aria-mira/:name /r-aria/:name 200
+/r/aria-luma/:name /r-aria/:name 200
+/r/aria-rhea/:name /r-aria/:name 200
+/r/aria-sera/:name /r-aria/:name 200
+/r/:style/:name /r/:name 200
