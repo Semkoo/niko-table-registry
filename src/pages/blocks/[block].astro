@@ -12,6 +12,13 @@ export function getStaticPaths() {
 
 const { name, title, description, files } = Astro.props
 const viewHref = `/view/${name}/`
+const componentName = title.replace(/\s+/g, "")
+const dataFile = files.find(file => file.endsWith("-data.ts")) ?? files[0]
+const usage = `import ${componentName} from "@/components/${name}/${name}"
+
+export default function Page() {
+  return <${componentName} />
+}`
 const sources = await Promise.all(
   files.map(async file => ({
     file,
@@ -24,21 +31,29 @@ const sources = await Promise.all(
 ---
 
 <StarlightPage
-  frontmatter={{ title, description, tableOfContents: false }}
-  headings={[]}
+  frontmatter={{ title, description }}
+  headings={[
+    { depth: 2, slug: "installation", text: "Installation" },
+    { depth: 2, slug: "preview", text: "Preview" },
+    { depth: 2, slug: "usage", text: "Usage" },
+  ]}
 >
   <p>
     Built only from Niko Table pieces and shadcn/ui components. Install it, then
     swap the sample data for your own.
   </p>
 
+  <h2 id="installation">Installation</h2>
+
   <CliCommandCode
     action="run"
     command={`shadcn@latest add @niko-table/${name}`}
   />
 
+  <h2 id="preview">Preview</h2>
+
   <div
-    class="block-preview not-content mt-6 flex flex-col gap-2"
+    class="block-preview not-content mt-4 flex flex-col gap-2"
     data-block-preview
     data-state="preview"
     data-viewport="desktop"
@@ -63,12 +78,35 @@ const sources = await Promise.all(
       ))}
     </div>
   </div>
+
+  <h2 id="usage">Usage</h2>
+
+  <p>
+    The files land in <code>components/{name}/</code>. Render the block
+    anywhere:
+  </p>
+
+  <Code code={usage} lang="tsx" />
+
+  <p>
+    Then replace the generated rows in <code>{dataFile}</code> with your own
+    data, or load it from your API and pass it in.
+  </p>
 </StarlightPage>
 
 <style>
-  /* Blocks are full screens: give this page more room than a docs page. */
+  /*
+   * Blocks are full screens: give this page more room than a docs page.
+   * starlight-theme-black also caps the column at 40rem when "On this page"
+   * is shown, so lift that cap here too.
+   */
   :global(:root) {
     --sl-content-width: 72rem;
+  }
+  :global([data-has-sidebar][data-has-toc] .main-pane) {
+    max-width: 72rem;
+    /* The theme relies on the 40rem cap for side gaps; keep them when wider. */
+    padding-inline: 1.5rem;
   }
   [data-block-preview][data-state="preview"] .block-code-panel,
   [data-block-preview][data-state="code"] .block-preview-panel {

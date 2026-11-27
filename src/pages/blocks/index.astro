@@ -8,15 +8,15 @@ import { blocks } from "@/data/blocks"
     title: "Blocks",
     description:
       "Full, ready-to-copy screens built from Niko Table. Free and open source.",
-    tableOfContents: false,
   }}
-  headings={[]}
+  headings={[{ depth: 2, slug: "tables", text: "Tables" }]}
 >
   <p>
     Each block is a complete screen you install with one command and own the
     code, like everything else in Niko Table.
   </p>
-  <ul class="not-content m-0 mt-6 grid list-none grid-cols-1 gap-4 p-0 md:grid-cols-2">
+  <h2 id="tables">Tables</h2>
+  <ul class="not-content m-0 mt-4 grid list-none grid-cols-1 gap-4 p-0 md:grid-cols-2">
     {blocks.map(block => (
       <li class="m-0 flex">
         <a

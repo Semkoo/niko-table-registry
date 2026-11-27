@@ -31,6 +31,7 @@ export function BlockToolbar({ viewHref }: { viewHref: string }) {
   }, [tab, viewport])
 
   return (
+    // Tabs, width toggles and the link all use the default 36px (h-9) height.
     <div ref={rootRef} className="flex flex-wrap items-center gap-2">
       <Tabs value={tab} onValueChange={value => setTab(value as Tab)}>
         <TabsList>
@@ -49,7 +50,6 @@ export function BlockToolbar({ viewHref }: { viewHref: string }) {
           <ToggleGroup
             type="single"
             variant="outline"
-            size="sm"
             value={viewport}
             onValueChange={value => value && setViewport(value as Viewport)}
             aria-label="Preview width"
@@ -65,7 +65,8 @@ export function BlockToolbar({ viewHref }: { viewHref: string }) {
             </ToggleGroupItem>
           </ToggleGroup>
         )}
-        <Button variant="outline" size="sm" asChild>
+        {/* mt-0!: Starlight's article spacing adds margin-top to a following sibling. */}
+        <Button variant="outline" className="mt-0!" asChild>
           <a href={viewHref} target="_blank" rel="noreferrer">
             <ExternalLinkIcon aria-hidden="true" />
             Open in new tab
