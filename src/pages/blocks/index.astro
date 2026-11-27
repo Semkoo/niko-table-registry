@@ -1,6 +1,20 @@
 ---
 import StarlightPage from "@astrojs/starlight/components/StarlightPage.astro"
-import { blocks } from "@/data/blocks"
+import { blockCategories, blocks } from "@/data/blocks"
+
+const slug = (category: string) =>
+  category
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")
+
+const groups = blockCategories
+  .map(category => ({
+    category,
+    id: slug(category),
+    items: blocks.filter(block => block.category === category),
+  }))
+  .filter(group => group.items.length > 0)
 ---
 
 <StarlightPage
@@ -9,24 +23,64 @@ import { blocks } from "@/data/blocks"
     description:
       "Full, ready-to-copy screens built from Niko Table. Free and open source.",
   }}
-  headings={[{ depth: 2, slug: "tables", text: "Tables" }]}
+  headings={groups.map(group => ({
+    depth: 2,
+    slug: group.id,
+    text: group.category,
+  }))}
 >
   <p>
     Each block is a complete screen you install with one command and own the
-    code, like everything else in Niko Table.
+    code, like everything else in Niko Table. The previews below are the real
+    blocks running live.
   </p>
-  <h2 id="tables">Tables</h2>
-  <ul class="not-content m-0 mt-4 grid list-none grid-cols-1 gap-4 p-0 md:grid-cols-2">
-    {blocks.map(block => (
-      <li class="m-0 flex">
-        <a
-          href={`/blocks/${block.name}/`}
-          class="flex w-full flex-col gap-1 rounded-lg border bg-card p-4 text-card-foreground no-underline shadow-sm transition-colors hover:border-foreground/30"
-        >
-          <span class="font-medium text-foreground">{block.title}</span>
-          <span class="text-sm text-muted-foreground">{block.description}</span>
-        </a>
-      </li>
-    ))}
-  </ul>
+  {groups.map(group => (
+    <>
+      <h2 id={group.id}>{group.category}</h2>
+      <ul class="not-content m-0 mt-4 grid list-none grid-cols-1 gap-6 p-0 md:grid-cols-2">
+        {group.items.map(block => (
+          <li class="m-0 flex">
+            <a
+              href={`/blocks/${block.name}/`}
+              class="group flex w-full flex-col overflow-hidden rounded-lg border bg-card text-card-foreground no-underline shadow-sm transition-colors hover:border-foreground/30"
+            >
+              {/* Live block at half size. Inert so the whole card is one link. */}
+              <div
+                class="relative h-56 overflow-hidden border-b bg-background"
+                inert
+                aria-hidden="true"
+              >
+                <iframe
+                  class="block-thumb pointer-events-none border-0"
+                  src={`/view/${block.name}/?thumb`}
+                  title={`${block.title} preview`}
+                  loading="lazy"
+                  tabindex="-1"
+                />
+                <div class="pointer-events-none absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-background to-transparent" />
+              </div>
+              <div class="flex flex-col gap-1 p-4">
+                <span class="font-medium text-foreground group-hover:underline">
+                  {block.title}
+                </span>
+                <span class="text-sm text-muted-foreground">
+                  {block.description}
+                </span>
+              </div>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </>
+  ))}
 </StarlightPage>
+
+<style>
+  /* Render the block at 200% and scale it to 50%, so it reads as a thumbnail. */
+  .block-thumb {
+    width: 200%;
+    height: 28rem;
+    transform: scale(0.5);
+    transform-origin: top left;
+  }
+</style>

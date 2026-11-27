@@ -45,7 +45,8 @@ const { name, title } = Astro.props
     <script is:inline>
       // When embedded on the block page, size the iframe to the block so it
       // never scrolls inside the frame (same origin, so frameElement is readable).
-      if (window.frameElement) {
+      // `?thumb` = a fixed-size thumbnail on /blocks/: keep the frame's own height.
+      if (window.frameElement && !location.search.includes("thumb")) {
         new ResizeObserver(([entry]) => {
           window.frameElement.style.height = `${Math.ceil(entry.borderBoxSize[0].blockSize)}px`
         }).observe(document.body)
