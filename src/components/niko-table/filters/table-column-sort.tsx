@@ -101,7 +101,8 @@ export function TableColumnSortOptions<TData extends RowData, TValue>({
 
   const handleSort = (
     direction: "asc" | "desc" | false,
-    e: React.MouseEvent,
+    // Only `shiftKey` is read: a click event, or a React Aria press event.
+    e: { shiftKey: boolean },
   ) => {
     // Keyboard activation synthesizes a click whose `shiftKey` is false, so the
     // window-level ref is what carries Shift for Enter/Space; the event's own
