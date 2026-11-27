@@ -246,3 +246,18 @@
   padding-inline-start: calc(var(--spacing) * 1);
   border-inline-start: 1px solid var(--border);
 }
+
+/* Docs lists: Tailwind's reset removes bullets and indentation, so nested
+   points looked the same as top-level ones. Restore them for page content. */
+.sl-markdown-content :is(ul, ol):not(:where(.not-content *)) {
+  padding-inline-start: 1.25rem;
+}
+.sl-markdown-content ul:not(:where(.not-content *)) {
+  list-style: disc;
+}
+.sl-markdown-content ol:not(:where(.not-content *)) {
+  list-style: decimal;
+}
+.sl-markdown-content ul ul:not(:where(.not-content *)) {
+  list-style: circle;
+}
