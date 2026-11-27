@@ -10,6 +10,8 @@ All notable changes to the data-table component.
 
 #### Core
 
+- **Row-DnD bodies forward the row context menu** — `DataTableDndBody` and `DataTableVirtualizedDndBody` rows now pass the trigger props and ref through, so `renderRowContextMenu` / `<DataTableRowContextMenuSlot>` opens on right-click in all four DnD bodies.
+
 - **`trigger` on both view menus** (`filters/table-view-menu`, `filters/table-view-dnd-menu`) — replaces the default toolbar button with any element, matching the `trigger` contract `TableColumnActions`, `TableDateFilter` and `TableFacetedFilter` already expose. Lets a consumer mount the menu as a header-sized bare icon beside a column title, or any other shape, without the component growing a boolean per shape. Defaults to the existing button, so nothing changes for callers that omit it.
 
 - **Column fill on by default** (`lib/flex-columns.ts` → `resolveFlexColumnIds` / `resolveColumnWidth`) — a table fills its container automatically: the first non-pinned, resizable data column absorbs the leftover row width (renders width-less under `table-layout: fixed`), so a trailing actions column pins right with no per-table setup. `meta.flex` overrides which column fills; `meta.flex: false` opts a column out; `TableMeta.disableFlexFill` turns fill off for a whole table. Pure layout — never written to `columnSizing`, so nothing persists or goes stale.

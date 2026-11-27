@@ -73,6 +73,53 @@ export const blocks = [
       "A billing screen with invoices grouped by status (count and summed amount per group, switchable off), due-date tracking, KPIs, a due date range filter, and mark paid / remind / copy link / void actions.",
     files: ["invoices-table.tsx", "invoices-format.ts", "invoices-data.ts"],
   },
+  {
+    name: "backlog-table",
+    title: "Sprint Backlog",
+    category: "Drag & Drop",
+    description:
+      "A sprint backlog you prioritize by dragging rows, with a capacity line that moves as you reorder, column order from a drag-and-drop view menu, handles that switch off while filtering, and move to top / bottom, status and remove actions.",
+    files: [
+      "backlog-table.tsx",
+      "backlog-cells.tsx",
+      "backlog-format.ts",
+      "backlog-data.ts",
+    ],
+  },
+  {
+    name: "shipments-table",
+    title: "Shipments",
+    category: "Columns",
+    description:
+      "A wide logistics table you shape yourself: drag-resizable columns with saved widths, pin left / right / unpin and hide from each column menu, a Reset layout button, route and late ETA cells, and copy ID / mark delivered / flag exception actions.",
+    files: [
+      "shipments-table.tsx",
+      "shipments-layout.ts",
+      "shipments-format.ts",
+      "shipments-data.ts",
+    ],
+  },
+  {
+    name: "transactions-table",
+    title: "Transactions Ledger",
+    category: "Virtualization",
+    description:
+      "A bank-style ledger that loads as you scroll: 20,000 transactions served 100 at a time by a fake server, a virtualized body, server-side search, category and type filters, money in and out totals, and a details panel with a copy ID button.",
+    files: [
+      "transactions-table.tsx",
+      "transaction-sheet.tsx",
+      "transactions-format.ts",
+      "transactions-data.ts",
+    ],
+  },
+  {
+    name: "inventory-grid",
+    title: "Inventory Grid",
+    category: "Editing",
+    description:
+      "An editable product inventory on Niko Grid: typed cells, inline validation, low-stock markers, live totals, an unsaved changes bar with Save and Discard, add, duplicate and delete product, undo and redo, and a virtualized body.",
+    files: ["inventory-grid.tsx", "inventory-format.ts", "inventory-data.ts"],
+  },
 ] as const
 
 export type BlockName = (typeof blocks)[number]["name"]

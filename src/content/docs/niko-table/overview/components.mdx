@@ -1080,11 +1080,11 @@ import { DataTableRowDndProvider, DataTableRowDragHandle } from "@/components/ni
 </DataTableRowDndProvider>
 ```
 
-| Name        | Type                      | Default | Description                                        |
-| ----------- | ------------------------- | ------- | -------------------------------------------------- |
-| `data`      | `TData[]`                 | -       | The current data array (required).                 |
-| `onReorder` | `(data: TData[]) => void` | -       | Callback with the reordered data array (required). |
-| `children`  | `React.ReactNode`         | -       | Table components to wrap.                          |
+| Name        | Type                                                                                      | Default | Description                                                                                                |
+| ----------- | ----------------------------------------------------------------------------------------- | ------- | ---------------------------------------------------------------------------------------------------------- |
+| `data`      | `TData[]`                                                                                 | -       | The current data array (required).                                                                         |
+| `onReorder` | `(data: TData[], move: { activeId: UniqueIdentifier; overId: UniqueIdentifier }) => void` | -       | Callback with the reordered data array (required). The second argument says which row id moved onto which. |
+| `children`  | `React.ReactNode`                                                                         | -       | Table components to wrap.                                                                                  |
 
 #### DataTableDraggableRow
 
