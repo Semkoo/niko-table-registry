@@ -86,7 +86,17 @@ const views = [
         )
         if (panel) panel.hidden = !on
       }
+      // Keep the choice in the URL (?demo=grid) so a refresh stays on it.
+      const url = new URL(location.href)
+      if (tab === tabs[0]) url.searchParams.delete("demo")
+      else url.searchParams.set("demo", tab.dataset.view ?? "")
+      history.replaceState(history.state, "", url)
     }
+
+    const saved = tabs.find(
+      t => t.dataset.view === new URLSearchParams(location.search).get("demo"),
+    )
+    if (saved) select(saved)
 
     tabs.forEach((tab, i) => {
       tab.addEventListener("click", () => select(tab))
