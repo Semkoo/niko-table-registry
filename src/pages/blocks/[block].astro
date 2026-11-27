@@ -1,0 +1,125 @@
+---
+import fs from "node:fs/promises"
+import StarlightPage from "@astrojs/starlight/components/StarlightPage.astro"
+import { Code } from "@astrojs/starlight/components"
+import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
+import { BlockToolbar } from "@/components/blocks/block-toolbar"
+import { blocks } from "@/data/blocks"
+
+export function getStaticPaths() {
+  return blocks.map(block => ({ params: { block: block.name }, props: block }))
+}
+
+const { name, title, description, files } = Astro.props
+const viewHref = `/view/${name}/`
+const componentName = title.replace(/\s+/g, "")
+const dataFile = files.find(file => file.endsWith("-data.ts")) ?? files[0]
+const usage = `import ${componentName} from "@/components/${name}/${name}"
+
+export default function Page() {
+  return <${componentName} />
+}`
+const sources = await Promise.all(
+  files.map(async file => ({
+    file,
+    code: await fs.readFile(
+      `./src/registry/new-york/blocks/${name}/${file}`,
+      "utf-8",
+    ),
+  })),
+)
+---
+
+<StarlightPage
+  frontmatter={{ title, description }}
+  headings={[
+    { depth: 2, slug: "installation", text: "Installation" },
+    { depth: 2, slug: "preview", text: "Preview" },
+    { depth: 2, slug: "usage", text: "Usage" },
+  ]}
+>
+  <p>
+    Built only from Niko Table pieces and shadcn/ui components. Install it, then
+    swap the sample data for your own.
+  </p>
+
+  <h2 id="installation">Installation</h2>
+
+  <CliCommandCode
+    action="run"
+    command={`shadcn@latest add @niko-table/${name}`}
+  />
+
+  <h2 id="preview">Preview</h2>
+
+  <div
+    class="block-preview not-content mt-4 flex flex-col gap-2"
+    data-block-preview
+    data-state="preview"
+    data-viewport="desktop"
+  >
+    <BlockToolbar viewHref={viewHref} client:load />
+    <div class="block-preview-panel overflow-hidden rounded-lg border bg-muted/30">
+      <iframe
+        class="block-preview-iframe mx-auto block w-full bg-background"
+        src={viewHref}
+        title={`${title} preview`}
+        loading="lazy"
+        style="height: 640px"
+      ></iframe>
+    </div>
+    <div class="block-code-panel flex flex-col gap-4">
+      {sources.map(({ file, code }) => (
+        <Code
+          code={code}
+          lang={file.endsWith(".ts") ? "ts" : "tsx"}
+          title={file}
+        />
+      ))}
+    </div>
+  </div>
+
+  <h2 id="usage">Usage</h2>
+
+  <p>
+    The files land in <code>components/{name}/</code>. Render the block
+    anywhere:
+  </p>
+
+  <Code code={usage} lang="tsx" />
+
+  <p>
+    Then replace the generated rows in <code>{dataFile}</code> with your own
+    data, or load it from your API and pass it in.
+  </p>
+</StarlightPage>
+
+<style>
+  /*
+   * Blocks are full screens: give this page more room than a docs page.
+   * starlight-theme-black also caps the column at 40rem when "On this page"
+   * is shown, so lift that cap here too.
+   */
+  :global(:root) {
+    --sl-content-width: 72rem;
+  }
+  :global([data-has-sidebar][data-has-toc] .main-pane) {
+    max-width: 72rem;
+    /* The theme relies on the 40rem cap for side gaps; keep them when wider. */
+    padding-inline: 1.5rem;
+  }
+  [data-block-preview][data-state="preview"] .block-code-panel,
+  [data-block-preview][data-state="code"] .block-preview-panel {
+    display: none;
+  }
+  [data-viewport="tablet"] .block-preview-iframe {
+    width: 768px;
+    max-width: 100%;
+    border-inline: 1px solid var(--border);
+  }
+  [data-viewport="mobile"] .block-preview-iframe {
+    width: 390px;
+    max-width: 100%;
+    border-inline: 1px solid var(--border);
+  }
+</style>

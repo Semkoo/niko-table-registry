@@ -1,0 +1,55 @@
+---
+/**
+ * Bare, full-screen render of one block. The block page embeds this in an
+ * iframe (so the desktop / tablet / mobile widths are real viewport widths),
+ * and "Open in new tab" links here.
+ */
+import "@/styles/global.css"
+import { BlockView } from "@/components/blocks/block-view"
+import { blocks } from "@/data/blocks"
+
+export function getStaticPaths() {
+  return blocks.map(block => ({ params: { block: block.name }, props: block }))
+}
+
+const { name, title } = Astro.props
+---
+
+<!doctype html>
+<html lang="en" class="bg-background">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>{title} · Niko Table</title>
+    <script is:inline>
+      // Match the docs theme (same key Starlight's ThemeProvider uses).
+      const stored = localStorage.getItem("starlight-theme")
+      const theme =
+        stored === "light" || stored === "dark"
+          ? stored
+          : matchMedia("(prefers-color-scheme: light)").matches
+            ? "light"
+            : "dark"
+      document.documentElement.dataset.theme = theme
+    </script>
+  </head>
+  <body class="bg-background text-foreground antialiased">
+    {/*
+      Padding lives on a wrapper, not <body>: Radix menus lock scroll by
+      overriding body padding, which made the layout jump and misplaced the menu.
+    */}
+    <div class="p-4 md:p-8">
+      <BlockView name={name} client:only="react" />
+    </div>
+    <script is:inline>
+      // When embedded on the block page, size the iframe to the block so it
+      // never scrolls inside the frame (same origin, so frameElement is readable).
+      if (window.frameElement) {
+        new ResizeObserver(([entry]) => {
+          window.frameElement.style.height = `${Math.ceil(entry.borderBoxSize[0].blockSize)}px`
+        }).observe(document.body)
+      }
+    </script>
+  </body>
+</html>

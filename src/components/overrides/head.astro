@@ -1,4 +1,5 @@
 ---
+import { getBreadcrumbs } from "@/lib/breadcrumbs"
 const { head } = Astro.locals.starlightRoute
 const { title, description } = Astro.locals.starlightRoute.entry.data
 const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href
@@ -85,15 +86,18 @@ const webPageSchema = {
   url: canonicalUrl,
 }
 
-const breadcrumbItems = pathname
-  .split("/")
-  .filter(Boolean)
-  .map((segment, index, arr) => ({
-    "@type": "ListItem" as const,
-    position: index + 1,
-    name: segment.replace(/-/g, " ").replace(/\b\w/g, c => c.toUpperCase()),
-    item: new URL(arr.slice(0, index + 1).join("/") + "/", Astro.site).href,
-  }))
+// Same trail as the visible breadcrumb (src/lib/breadcrumbs.ts), plus this page.
+const breadcrumbItems = isHomePage
+  ? []
+  : [
+      ...getBreadcrumbs(Astro.locals.starlightRoute.sidebar, pathname, title),
+      { label: title, href: pathname },
+    ].map((crumb, index) => ({
+      "@type": "ListItem" as const,
+      position: index + 1,
+      name: crumb.label,
+      item: new URL(crumb.href, Astro.site).href,
+    }))
 
 const breadcrumbSchema = {
   "@context": "https://schema.org",

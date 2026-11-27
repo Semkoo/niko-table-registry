@@ -1,0 +1,32 @@
+---
+import StarlightPage from "@astrojs/starlight/components/StarlightPage.astro"
+import { blocks } from "@/data/blocks"
+---
+
+<StarlightPage
+  frontmatter={{
+    title: "Blocks",
+    description:
+      "Full, ready-to-copy screens built from Niko Table. Free and open source.",
+  }}
+  headings={[{ depth: 2, slug: "tables", text: "Tables" }]}
+>
+  <p>
+    Each block is a complete screen you install with one command and own the
+    code, like everything else in Niko Table.
+  </p>
+  <h2 id="tables">Tables</h2>
+  <ul class="not-content m-0 mt-4 grid list-none grid-cols-1 gap-4 p-0 md:grid-cols-2">
+    {blocks.map(block => (
+      <li class="m-0 flex">
+        <a
+          href={`/blocks/${block.name}/`}
+          class="flex w-full flex-col gap-1 rounded-lg border bg-card p-4 text-card-foreground no-underline shadow-sm transition-colors hover:border-foreground/30"
+        >
+          <span class="font-medium text-foreground">{block.title}</span>
+          <span class="text-sm text-muted-foreground">{block.description}</span>
+        </a>
+      </li>
+    ))}
+  </ul>
+</StarlightPage>

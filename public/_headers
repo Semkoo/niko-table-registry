@@ -6,6 +6,14 @@
   Content-Security-Policy: frame-ancestors 'none'
   Strict-Transport-Security: max-age=31536000; includeSubDomains
 
+# Block previews: /blocks/<name>/ shows /view/<name>/ in an iframe, so these
+# bare views may be framed by this site only (other origins stay blocked).
+/view/*
+  ! X-Frame-Options
+  ! Content-Security-Policy
+  X-Frame-Options: SAMEORIGIN
+  Content-Security-Policy: frame-ancestors 'self'
+
 # Sitemap: short cache so new pages are discovered quickly
 /sitemap-index.xml
   Cache-Control: public, max-age=3600

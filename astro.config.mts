@@ -370,6 +370,10 @@ export default defineConfig({
               link: "/data-grid/examples/",
             },
             {
+              label: "Blocks",
+              link: "/blocks/",
+            },
+            {
               label: "Contributing",
               link: "/contributing/",
             },
