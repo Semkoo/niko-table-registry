@@ -171,6 +171,7 @@ export default defineConfig({
         {
           label: "Examples",
           items: [
+            { label: "Gallery", slug: "examples" },
             // Getting Started
             { label: "Simple Table", slug: "examples/simple-table" },
             { label: "Basic Table", slug: "examples/basic-table" },
@@ -295,6 +296,7 @@ export default defineConfig({
         {
           label: "Data Grid Examples",
           items: [
+            { label: "Gallery", slug: "data-grid/examples" },
             { label: "Basic Grid", slug: "examples/basic-grid" },
             { label: "Composed Grid", slug: "examples/composed-grid" },
             { label: "Cell Types", slug: "examples/cell-types-grid" },
@@ -343,11 +345,11 @@ export default defineConfig({
             },
             {
               label: "Table Examples",
-              link: "/examples/simple-table/",
+              link: "/examples/",
             },
             {
               label: "Grid Examples",
-              link: "/examples/composed-grid/",
+              link: "/data-grid/examples/",
             },
             {
               label: "Contributing",

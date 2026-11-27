@@ -62,6 +62,10 @@ export type Demo =
   | "niko-table/grid-validation"
   | "niko-table/grid-validation-state"
   | "niko-table/grid-portaled-cell"
+  | "niko-table/infinite-scroll-table"
+  | "niko-table/infinite-scroll-table-state"
+  | "niko-table/infinite-scroll-virtualized-table"
+  | "niko-table/infinite-scroll-virtualized-table-state"
 
 type Tab = "preview" | "code"
 

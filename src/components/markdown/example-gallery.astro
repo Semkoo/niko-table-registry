@@ -1,0 +1,54 @@
+---
+import { getCollection } from "astro:content"
+import { CodePreviewDemo } from "@/components/markdown/code-preview/_code-preview-internal"
+import {
+  exampleGallery,
+  type ExampleGalleryGroup,
+} from "@/data/example-gallery"
+
+type Props = { group: ExampleGalleryGroup }
+
+const pages = new Map(
+  (await getCollection("docs", entry => entry.id.startsWith("examples/"))).map(
+    entry => [entry.id.replace(/^examples\//, ""), entry.data],
+  ),
+)
+// Gallery and pages are kept in sync by src/data/__tests__/example-gallery.test.ts.
+---
+
+<ul class="not-content m-0 mb-12 grid list-none grid-cols-1 gap-6 p-0 md:grid-cols-2">
+  {exampleGallery[Astro.props.group].map(({ slug, demo }) => {
+    const page = pages.get(slug)
+    if (!page) return null
+    return (
+      <li class="m-0 flex">
+        <a
+          href={`/examples/${slug}/`}
+          class="group flex w-full flex-col overflow-hidden rounded-lg border bg-card text-card-foreground no-underline shadow-sm transition-colors hover:border-foreground/30"
+        >
+          {/* Live demo shown at half size as a thumbnail; inert so the whole card is one link. */}
+          <div
+            class="relative h-56 overflow-hidden border-b bg-background"
+            inert
+            aria-hidden="true"
+          >
+            <div class="pointer-events-none w-[200%] p-4 [zoom:0.5]">
+              <CodePreviewDemo demo={demo} client:visible />
+            </div>
+            <div class="pointer-events-none absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-background to-transparent" />
+          </div>
+          <div class="flex flex-col gap-1 p-4">
+            <span class="font-medium text-foreground group-hover:underline">
+              {page.title}
+            </span>
+            {page.description && (
+              <span class="text-sm text-muted-foreground">
+                {page.description}
+              </span>
+            )}
+          </div>
+        </a>
+      </li>
+    )
+  })}
+</ul>
