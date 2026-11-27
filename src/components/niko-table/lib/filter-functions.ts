@@ -14,6 +14,9 @@ import type { FilterFn, RowData, TableFeatures } from "@tanstack/react-table"
 import type { ExtendedColumnFilter, FilterOperator } from "../types"
 import { JOIN_OPERATORS, FILTER_OPERATORS, FILTER_VARIANTS } from "./constants"
 
+// Lets this file type-check in projects without @types/node (e.g. a default Vite app); bundlers still inline NODE_ENV.
+declare const process: { env: { NODE_ENV?: string } }
+
 /**
  * Feature-agnostic filter fn typing for shared Niko filter helpers: these only
  * read the row, so they stay assignable whatever feature set a table registers.

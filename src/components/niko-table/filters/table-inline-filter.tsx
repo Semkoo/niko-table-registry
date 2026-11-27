@@ -73,6 +73,9 @@ import type {
 } from "../types"
 import { TableRangeFilter } from "./table-range-filter"
 
+// Lets this file type-check in projects without @types/node (e.g. a default Vite app); bundlers still inline NODE_ENV.
+declare const process: { env: { NODE_ENV?: string } }
+
 /* --------------------------------- Utilities -------------------------------- */
 
 /**
