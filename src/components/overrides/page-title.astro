@@ -20,26 +20,79 @@ try {
 }
 
 const pageUrl = Astro.url.href
+
+/*
+ * Breadcrumb: Docs › <section> › <page>. The section is the top-level sidebar
+ * group holding this page (renamed to match the top nav where it has its own
+ * gallery page), or Blocks for /blocks/<name>/ pages, which aren't in the sidebar.
+ */
+type SidebarEntry = (typeof starlightRoute.sidebar)[number]
+type Crumb = { label: string; href?: string }
+
+const sectionPages: Record<string, Crumb> = {
+  Examples: { label: "Table Examples", href: "/examples/" },
+  "Data Grid Examples": {
+    label: "Grid Examples",
+    href: "/data-grid/examples/",
+  },
+}
+
+function holdsCurrent(entry: SidebarEntry): boolean {
+  return entry.type === "link"
+    ? entry.isCurrent
+    : entry.entries.some(holdsCurrent)
+}
+
+const pathname = Astro.url.pathname
+const group = starlightRoute.sidebar.find(
+  entry => entry.type === "group" && holdsCurrent(entry),
+)
+const section: Crumb | undefined =
+  pathname.startsWith("/blocks/") && pathname !== "/blocks/"
+    ? { label: "Blocks", href: "/blocks/" }
+    : group
+      ? (sectionPages[group.label] ?? { label: group.label })
+      : undefined
+// Skip the section when it is this page (the gallery) or repeats the title.
+const crumbs: Crumb[] = [
+  { label: "Docs", href: "/getting-started/introduction/" },
+  ...(section && section.href !== pathname && section.label !== title
+    ? [section]
+    : []),
+]
 ---
 
 {template === "doc" && (
-  <div class="breadcrumb">
-    <div class="truncate">Docs</div>
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      stroke-width="2"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-    >
-      <path d="m9 18 6-6-6-6" />
-    </svg>
-    <div class="text-foreground">{title}</div>
-  </div>
+  <nav class="breadcrumb" aria-label="Breadcrumb">
+    {crumbs.map(crumb => (
+      <>
+        {crumb.href ? (
+          <a class="truncate crumb-link" href={crumb.href}>
+            {crumb.label}
+          </a>
+        ) : (
+          <span class="truncate">{crumb.label}</span>
+        )}
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="m9 18 6-6-6-6" />
+        </svg>
+      </>
+    ))}
+    <span class="text-foreground" aria-current="page">
+      {title}
+    </span>
+  </nav>
 )}
 
 <div class="page-title-wrapper">
@@ -118,12 +171,21 @@ const pageUrl = Astro.url.href
   .breadcrumb svg {
     width: 0.875rem;
     height: 0.875rem;
-    margin-left: 0.5rem;
+    margin-inline: 0.5rem;
+    flex-shrink: 0;
+  }
+
+  .crumb-link {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .crumb-link:hover {
+    color: var(--foreground);
   }
 
   .text-foreground {
     color: var(--foreground);
-    margin-left: 0.5rem;
   }
 
   .page-title-wrapper {
