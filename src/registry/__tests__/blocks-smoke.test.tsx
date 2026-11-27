@@ -48,13 +48,19 @@ const modules = import.meta.glob<{
 
 afterEach(cleanup)
 
-async function mount(name: string, props: Record<string, unknown> = {}) {
+async function mount(
+  name: string,
+  props: Record<string, unknown> = {},
+  { strict = false } = {},
+) {
   const load = modules[`../new-york/blocks/${name}/${name}.tsx`]
   expect(load, `no block file for ${name}`).toBeTruthy()
   const { default: Block } = await load!()
   let container: HTMLElement | undefined
   await act(async () => {
-    container = render(<Block {...props} />).container
+    container = render(<Block {...props} />, {
+      reactStrictMode: strict,
+    }).container
   })
   await act(async () => {
     await new Promise(resolve => setTimeout(resolve, 0))
@@ -1076,6 +1082,93 @@ describe("inventory-grid", () => {
     expect(stat("Inventory value")).toBe(
       valueOf([{ ...first, price: 12.5 }, ...products.slice(1)]),
     )
+  })
+
+  describe("under StrictMode", () => {
+    const strict = () => mount("inventory-grid", {}, { strict: true })
+    const price = () => cellOf(first.sku, "price")
+    const input = () => price().querySelector("input") as HTMLInputElement
+    // Click a cell: mouseup ends the drag-select loop (jsdom has no layout).
+    const pick = (el: HTMLElement) =>
+      act(async () => {
+        fireEvent.mouseDown(el)
+        fireEvent.mouseUp(el)
+      })
+    // Select the cell, then type a key on it (type-to-edit seeds the editor).
+    async function typeToEdit(key: string) {
+      await pick(price())
+      await act(async () => {
+        fireEvent.keyDown(price(), { key })
+      })
+    }
+
+    it("undoes a type-to-edit as one step", async () => {
+      await strict()
+      await typeToEdit("3")
+      await act(async () => {
+        fireEvent.change(input(), { target: { value: "31" } })
+        fireEvent.keyDown(input(), { key: "Enter" })
+      })
+      expect(price().textContent).toBe(usd.format(31))
+      await press("Undo")
+      expect(price().textContent).toBe(usd.format(first.price))
+    })
+
+    it("commits the draft when another cell is clicked mid-edit", async () => {
+      await strict()
+      await typeToEdit("3")
+      await act(async () => {
+        fireEvent.change(input(), { target: { value: "31" } })
+      })
+      await pick(cellOf(first.sku, "stock"))
+      expect(input()).toBeNull()
+      expect(price().textContent).toBe(usd.format(31))
+      await press("Undo")
+      expect(price().textContent).toBe(usd.format(first.price))
+    })
+
+    it("commits a type-to-edit seed on click-away with no more typing", async () => {
+      await strict()
+      await typeToEdit("3")
+      await pick(cellOf(first.sku, "stock"))
+      expect(price().textContent).toBe(usd.format(3))
+      expect(screen.getByText("1 unsaved change")).toBeTruthy()
+    })
+
+    it("commits nothing for a double-click open with no typing", async () => {
+      await strict()
+      await act(async () => {
+        fireEvent.doubleClick(price())
+      })
+      expect(input()).toBeTruthy()
+      await pick(cellOf(first.sku, "stock"))
+      expect(price().textContent).toBe(usd.format(first.price))
+      expect(screen.queryByText(/^\d+ unsaved change/)).toBeNull()
+    })
+
+    it("discards the draft on Escape", async () => {
+      await strict()
+      await typeToEdit("3")
+      await act(async () => {
+        fireEvent.change(input(), { target: { value: "31" } })
+        fireEvent.keyDown(input(), { key: "Escape" })
+      })
+      expect(price().textContent).toBe(usd.format(first.price))
+      expect(screen.queryByText(/^\d+ unsaved change/)).toBeNull()
+    })
+
+    it("toggles a checkbox once on Space", async () => {
+      await strict()
+      const active = cellOf(first.sku, "active")
+      const box = () => active.querySelector("[role=checkbox]")
+      const before = box()?.getAttribute("aria-checked")
+      await pick(active)
+      await act(async () => {
+        fireEvent.keyDown(active, { key: " " })
+      })
+      expect(box()?.getAttribute("aria-checked")).not.toBe(before)
+      expect(screen.getByText("1 unsaved change")).toBeTruthy()
+    })
   })
 
   it("shows an edit undone during the save as an unsaved change", async () => {

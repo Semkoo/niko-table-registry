@@ -14,6 +14,7 @@
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 import * as React from "react"
+import { flushSync } from "react-dom"
 
 import type { CellState } from "../types/grid-cell"
 import type { CellEditorProps } from "./cell-props"
@@ -123,12 +124,22 @@ function GridTextEditor({
   // useLayoutEffect cleanup, NOT useEffect: it runs before the browser paints,
   // so the commit's re-render lands in the same frame. A passive effect would
   // let the teardown frame paint the OLD value first — a stale-data flash.
-  React.useLayoutEffect(
-    () => () => {
-      if (draftRef.current != null) commitRef.current(draftRef.current)
-    },
-    [],
-  )
+  // The commit waits one microtask because StrictMode (dev) runs this cleanup
+  // on mount and re-runs the setup synchronously after it: the re-run sets
+  // `mountedRef` again, so the simulated unmount commits nothing, while a real
+  // teardown commits via `flushSync`, still before the browser paints.
+  const mountedRef = React.useRef(false)
+  React.useLayoutEffect(() => {
+    mountedRef.current = true
+    return () => {
+      mountedRef.current = false
+      queueMicrotask(() => {
+        if (mountedRef.current || draftRef.current == null) return
+        const draft = draftRef.current
+        flushSync(() => commitRef.current(draft))
+      })
+    }
+  }, [])
 
   return (
     <Input
