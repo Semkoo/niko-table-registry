@@ -18,6 +18,18 @@ export const blocks = [
       "customers-data.ts",
     ],
   },
+  {
+    name: "orders-table",
+    title: "Orders Table",
+    description:
+      "An orders screen with live totals, payment and fulfillment filters, a price slider, a date range, expandable rows with line items, and ship and refund actions.",
+    files: [
+      "orders-table.tsx",
+      "order-details.tsx",
+      "orders-format.ts",
+      "orders-data.ts",
+    ],
+  },
 ] as const
 
 export type BlockName = (typeof blocks)[number]["name"]

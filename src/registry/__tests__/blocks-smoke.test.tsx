@@ -100,3 +100,35 @@ describe("customers-table", () => {
     expect(screen.getByText("Robin Example")).toBeTruthy()
   })
 })
+
+describe("orders-table", () => {
+  it("expands a row to show its line items", async () => {
+    await mount("orders-table")
+    expect(screen.queryByText("Subtotal")).toBeNull()
+    const [expand] = screen.getAllByRole("button", { name: /show items/i })
+    await act(async () => {
+      fireEvent.click(expand!)
+    })
+    expect(screen.getByText("Subtotal")).toBeTruthy()
+    expect(screen.getByRole("button", { name: /hide items/i })).toBeTruthy()
+  })
+
+  it("marks selected paid orders as shipped", async () => {
+    const container = await mount("orders-table")
+    const toShip = () =>
+      Number(screen.getByText("To ship").nextElementSibling!.textContent ?? "0")
+    const before = toShip()
+    expect(before).toBeGreaterThan(0)
+    await act(async () => {
+      fireEvent.click(
+        screen.getByRole("checkbox", { name: /select all orders/i }),
+      )
+    })
+    const ship = await screen.findByRole("button", { name: /as shipped/i })
+    await act(async () => {
+      fireEvent.click(ship)
+    })
+    expect(toShip()).toBeLessThan(before)
+    expect(container.textContent).toMatch(/marked as shipped/)
+  })
+})
