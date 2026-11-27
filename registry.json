@@ -1249,6 +1249,66 @@
           "target": "components/customers-table/add-customer-sheet.tsx"
         }
       ]
+    },
+    {
+      "name": "orders-table",
+      "type": "registry:block",
+      "title": "Orders Table",
+      "description": "An orders screen with live totals, payment and fulfillment filters, a price slider, a date range, expandable rows with line items, and ship and refund actions shared by the row menu and right-click.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": [
+        "https://niko-table.com/r/data-table.json",
+        "https://niko-table.com/r/data-table-search-filter.json",
+        "https://niko-table.com/r/data-table-faceted-filter.json",
+        "https://niko-table.com/r/data-table-slider-filter.json",
+        "https://niko-table.com/r/data-table-date-filter.json",
+        "https://niko-table.com/r/data-table-clear-filter.json",
+        "https://niko-table.com/r/data-table-view-menu.json",
+        "https://niko-table.com/r/data-table-export-button.json",
+        "https://niko-table.com/r/data-table-selection-bar.json",
+        "https://niko-table.com/r/data-table-pagination.json",
+        "https://niko-table.com/r/data-table-column-sort.json",
+        "badge",
+        "button",
+        "checkbox",
+        "dropdown-menu"
+      ],
+      "cssVars": {
+        "theme": {
+          "color-success": "var(--success)",
+          "color-warning": "var(--warning)"
+        },
+        "light": {
+          "success": "oklch(0.596 0.145 163.225)",
+          "warning": "oklch(0.666 0.179 58.318)"
+        },
+        "dark": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)"
+        }
+      },
+      "files": [
+        {
+          "path": "src/registry/new-york/blocks/orders-table/orders-table.tsx",
+          "type": "registry:component",
+          "target": "components/orders-table/orders-table.tsx"
+        },
+        {
+          "path": "src/registry/new-york/blocks/orders-table/order-details.tsx",
+          "type": "registry:component",
+          "target": "components/orders-table/order-details.tsx"
+        },
+        {
+          "path": "src/registry/new-york/blocks/orders-table/orders-format.ts",
+          "type": "registry:component",
+          "target": "components/orders-table/orders-format.ts"
+        },
+        {
+          "path": "src/registry/new-york/blocks/orders-table/orders-data.ts",
+          "type": "registry:component",
+          "target": "components/orders-table/orders-data.ts"
+        }
+      ]
     }
   ]
 }
