@@ -165,7 +165,7 @@ function useTransactionColumns(rowMenu: React.ReactNode) {
               <span
                 className={cn(
                   "text-sm",
-                  first ? "font-medium" : "text-muted-foreground/60",
+                  first ? "font-medium" : "text-muted-foreground",
                 )}
               >
                 {formatDay(row.original.date)}
@@ -370,6 +370,14 @@ export default function TransactionsTable() {
   )
   const shownKey = React.useRef(JSON.stringify(firstQuery))
 
+  // A rejected request must not leave "Loading more…" stuck.
+  const fail = React.useCallback((id: number) => {
+    if (id !== requestId.current) return
+    busy.current = false
+    setFetching(null)
+    setLastAction("Could not load transactions")
+  }, [])
+
   // Filters changed: start over from the first page.
   React.useEffect(() => {
     if (shownKey.current === queryKey) {
@@ -382,20 +390,23 @@ export default function TransactionsTable() {
     const id = ++requestId.current
     busy.current = true
     setFetching("filters")
-    void fetchTransactions({ ...query, cursor: 0 }).then(page => {
-      if (id !== requestId.current) return
-      shownKey.current = queryKey
-      busy.current = false
-      pendingMore.current = false
-      setLoaded({ ...page, query })
-      setFetching(null)
-      // New list: start at the top so the old offset cannot trigger a page.
-      const scroller = bodyRef.current?.querySelector<HTMLElement>(
-        '[data-slot="table-container"]',
-      )
-      if (scroller) scroller.scrollTop = 0
-    })
-  }, [queryKey, query])
+    void fetchTransactions({ ...query, cursor: 0 }).then(
+      page => {
+        if (id !== requestId.current) return
+        shownKey.current = queryKey
+        busy.current = false
+        pendingMore.current = false
+        setLoaded({ ...page, query })
+        setFetching(null)
+        // New list: start at the top so the old offset cannot trigger a page.
+        const scroller = bodyRef.current?.querySelector<HTMLElement>(
+          '[data-slot="table-container"]',
+        )
+        if (scroller) scroller.scrollTop = 0
+      },
+      () => fail(id),
+    )
+  }, [queryKey, query, fail])
 
   // Scrolling near the end calls this. The footer button calls it too.
   const loadMore = React.useCallback(() => {
@@ -419,8 +430,9 @@ export default function TransactionsTable() {
         }))
         setFetching(null)
       },
+      () => fail(id),
     )
-  }, [loaded.nextCursor, loaded.query])
+  }, [loaded.nextCursor, loaded.query, fail])
 
   React.useEffect(() => {
     if (fetching === null && pendingMore.current) {
@@ -433,7 +445,7 @@ export default function TransactionsTable() {
     () => ({
       view: transaction => setViewing(transaction),
       copyId: transaction => {
-        void navigator.clipboard?.writeText(transaction.id)
+        void navigator.clipboard?.writeText(transaction.id).catch(() => {})
         setLastAction(`Copied ${transaction.id}`)
       },
       onlyCategory: transaction => {
@@ -460,16 +472,6 @@ export default function TransactionsTable() {
     [actions],
   )
   const columns = useTransactionColumns(rowMenu)
-
-  const { moneyIn, moneyOut } = React.useMemo(() => {
-    let moneyIn = 0
-    let moneyOut = 0
-    for (const row of loaded.rows) {
-      if (row.amount > 0) moneyIn += row.amount
-      else moneyOut += row.amount
-    }
-    return { moneyIn, moneyOut }
-  }, [loaded.rows])
 
   const done = loaded.nextCursor === null
   const footer =
@@ -498,7 +500,7 @@ export default function TransactionsTable() {
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-0.5">
             <h2 className="text-base font-semibold">Transactions</h2>
-            <p className="text-sm text-muted-foreground" aria-live="polite">
+            <p className="text-sm text-muted-foreground">
               Loaded {loaded.rows.length.toLocaleString("en-US")} of{" "}
               {loaded.total.toLocaleString("en-US")}. More load as you scroll.
             </p>
@@ -506,10 +508,10 @@ export default function TransactionsTable() {
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
             <Stat
               label="Money in"
-              value={formatSigned(moneyIn)}
+              value={formatSigned(loaded.moneyIn)}
               tone="text-success"
             />
-            <Stat label="Money out" value={formatSigned(moneyOut)} />
+            <Stat label="Money out" value={formatSigned(loaded.moneyOut)} />
             <Stat label="Current balance" value={formatMoney(loaded.balance)} />
           </div>
           <DataTableToolbarSection className="flex-wrap px-0">

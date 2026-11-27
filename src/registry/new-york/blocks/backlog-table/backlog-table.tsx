@@ -36,6 +36,7 @@ import {
 import { DataTableRowContextMenuSlot } from "@/components/niko-table/components/data-table-row-context-menu-slot"
 import type { DataTableColumnDef } from "@/components/niko-table/types"
 import { Button } from "@/components/ui/button"
+import { Progress } from "@/components/ui/progress"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -255,13 +256,14 @@ function BacklogHeader() {
   const committed = rows
     .filter(issue => !keys.has(issue.key))
     .reduce((sum, issue) => sum + issue.estimate, 0)
-  const below = rows.length - rows.filter(i => !keys.has(i.key)).length
+  const below = keys.size
   return (
     <div className="flex flex-col gap-3">
       <div className="flex flex-col gap-0.5">
         <h2 className="text-base font-semibold">Sprint backlog</h2>
         <p className="text-sm text-muted-foreground">
-          {rows.length} issues · {total} points · {done} points done
+          {rows.length} {rows.length === 1 ? "issue" : "issues"} · {total}{" "}
+          points · {done} points done
         </p>
       </div>
       <div className="flex flex-col gap-1.5">
@@ -276,15 +278,15 @@ function BacklogHeader() {
             {below} below the line
           </span>
         </div>
-        <div
-          className="h-1.5 overflow-hidden rounded-full bg-muted"
-          role="presentation"
-        >
-          <div
-            className="h-full rounded-full bg-primary"
-            style={{ width: `${Math.min(100, (committed / CAPACITY) * 100)}%` }}
-          />
-        </div>
+        <Progress
+          value={Math.min(100, (committed / CAPACITY) * 100)}
+          aria-label={`${committed} of ${CAPACITY} points fit this sprint`}
+          // The indicator is the only direct child, so no slot name is needed.
+          className={cn(
+            "h-1.5 bg-muted",
+            committed > CAPACITY && "[&>*]:bg-warning",
+          )}
+        />
       </div>
     </div>
   )

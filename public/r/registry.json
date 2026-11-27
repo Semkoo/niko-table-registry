@@ -1558,7 +1558,8 @@
         "avatar",
         "badge",
         "button",
-        "dropdown-menu"
+        "dropdown-menu",
+        "progress"
       ],
       "cssVars": {
         "theme": {

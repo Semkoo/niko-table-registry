@@ -42,6 +42,10 @@ export type TransactionPage = {
   total: number
   /** The account's current balance in cents. Not affected by filters. */
   balance: number
+  /** Sum of incoming amounts (cents) for the current filters, across all pages. */
+  moneyIn: number
+  /** Sum of outgoing amounts (cents, negative) for the current filters. */
+  moneyOut: number
 }
 
 /** Fixed "now" for the sample data, so the ledger never drifts. */
@@ -263,8 +267,14 @@ function matches(index: number, query: TransactionQuery) {
 /** The server's work, without the delay. Also used for the first page. */
 export function queryTransactions(query: TransactionQuery): TransactionPage {
   const hits: number[] = []
+  let moneyIn = 0
+  let moneyOut = 0
   for (let i = 0; i < TRANSACTION_COUNT; i++) {
-    if (matches(i, query)) hits.push(i)
+    if (!matches(i, query)) continue
+    hits.push(i)
+    const amount = skeleton(i).amount
+    if (amount > 0) moneyIn += amount
+    else moneyOut += amount
   }
   const start = Math.max(0, query.cursor)
   const slice = hits.slice(start, start + query.limit)
@@ -274,6 +284,8 @@ export function queryTransactions(query: TransactionQuery): TransactionPage {
     nextCursor: end < hits.length ? end : null,
     total: hits.length,
     balance: balanceAt(0),
+    moneyIn,
+    moneyOut,
   }
 }
 

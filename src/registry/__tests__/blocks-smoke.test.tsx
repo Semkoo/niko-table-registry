@@ -35,6 +35,7 @@ vi.mock("@dnd-kit/core", async importOriginal => {
     },
   }
 })
+import { formatSigned } from "../new-york/blocks/transactions-table/transactions-format"
 import {
   invoices,
   statusOptions as invoiceStatuses,
@@ -726,10 +727,21 @@ describe("transactions-table", () => {
     await wait(400)
     await wait(500)
     let rent = 0
+    let rentIn = 0
+    let rentOut = 0
     for (let i = 0; i < TRANSACTION_COUNT; i++) {
-      if (transactionAt(i).category === "Rent") rent++
+      const t = transactionAt(i)
+      if (t.category !== "Rent") continue
+      rent++
+      if (t.amount > 0) rentIn += t.amount
+      else rentOut += t.amount
     }
     expect(rent).toBe(780)
+    // The stats follow the filter and cover all 780, not the 100 loaded.
+    const stat = (label: string) =>
+      screen.getByText(label).nextElementSibling?.textContent
+    expect(stat("Money in")).toBe(formatSigned(rentIn))
+    expect(stat("Money out")).toBe(formatSigned(rentOut))
     expect(loadedText()).toContain(
       `Loaded ${Math.min(rent, PAGE_SIZE)} of ${rent.toLocaleString("en-US")}`,
     )
@@ -760,20 +772,22 @@ describe("transactions-table", () => {
     }
   })
 
-  it("shows money in, money out and the balance for the loaded rows", async () => {
+  it("shows account-wide money in and out from the server, with the balance", async () => {
     await mount("transactions-table")
-    const first = Array.from({ length: PAGE_SIZE }, (_, i) => transactionAt(i))
-    const moneyIn = first
-      .filter(t => t.amount > 0)
-      .reduce((a, t) => a + t.amount, 0)
-    const moneyOut = first
-      .filter(t => t.amount < 0)
-      .reduce((a, t) => a + t.amount, 0)
-    expect([moneyIn, moneyOut]).toEqual([730_300, -1_527_000])
+    // Computed independently from every row, not from the 100 loaded.
+    let moneyIn = 0
+    let moneyOut = 0
+    for (let i = 0; i < TRANSACTION_COUNT; i++) {
+      const amount = transactionAt(i).amount
+      if (amount > 0) moneyIn += amount
+      else moneyOut += amount
+    }
+    const page = queryTransactions({ cursor: 0, limit: 1 })
+    expect([page.moneyIn, page.moneyOut]).toEqual([moneyIn, moneyOut])
     const stat = (label: string) =>
       screen.getByText(label).nextElementSibling?.textContent
-    expect(stat("Money in")).toBe("+$7,303.00")
-    expect(stat("Money out")).toBe("-$15,270.00")
+    expect(stat("Money in")).toBe(formatSigned(moneyIn))
+    expect(stat("Money out")).toBe(formatSigned(moneyOut))
     expect(stat("Current balance")).toBe("$74,686.00")
   })
 

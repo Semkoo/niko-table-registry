@@ -62,9 +62,13 @@ export function ReorderHandle({ row }: { row: DataTableRow<Issue> }) {
 }
 
 export function RankCell({ row }: { row: DataTableRow<Issue> }) {
+  const { keys } = React.useContext(LineContext)
   return (
     <Dim issue={row.original} className="text-muted-foreground tabular-nums">
       {row.index + 1}
+      {keys.has(row.original.key) && (
+        <span className="sr-only">, below the line</span>
+      )}
     </Dim>
   )
 }

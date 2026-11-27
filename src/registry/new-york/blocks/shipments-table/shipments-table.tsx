@@ -335,7 +335,7 @@ function ShipmentsHeader() {
       <p className="text-sm text-muted-foreground">
         {inTransit} in transit · {deliveredToday} delivered today ·{" "}
         <span className={cn(exceptions > 0 && "text-destructive")}>
-          {exceptions} exceptions
+          {exceptions} {exceptions === 1 ? "exception" : "exceptions"}
         </span>
       </p>
     </div>
@@ -413,7 +413,7 @@ export default function ShipmentsTable() {
           <ShipmentsHeader />
           <DataTableToolbarSection className="flex-wrap px-0">
             <DataTableSearchFilter
-              placeholder="Search tracking ID, recipient, reference..."
+              placeholder="Search shipments..."
               className="min-w-48 flex-none sm:w-72"
             />
             <DataTableFacetedFilter accessorKey="status" multiple />
