@@ -209,3 +209,34 @@
 :root:not([data-theme]) .light-only {
   display: none;
 }
+
+/*
+ * Nested sidebar groups (e.g. Examples › Filtering). starlight-theme-black
+ * styles every group title as a small grey section heading with wide padding;
+ * nested ones should read like the links around them, with an arrow to open.
+ */
+.accordion-content details.container-sidebar-entry {
+  padding: 0;
+}
+.accordion-content details.container-sidebar-entry > summary.entry-title {
+  height: 30px;
+  padding-inline: calc(var(--spacing) * 2);
+  font-size: 0.8rem;
+  line-height: 1;
+  color: var(--foreground);
+  width: 100%;
+}
+.accordion-content
+  details.container-sidebar-entry
+  > summary.entry-title
+  > .caret {
+  color: var(--muted-foreground);
+}
+.accordion-content details.container-sidebar-entry > summary.entry-title:hover {
+  background-color: var(--accent);
+}
+.accordion-content details.container-sidebar-entry > .accordion-content {
+  margin-inline-start: calc(var(--spacing) * 3);
+  padding-inline-start: calc(var(--spacing) * 1);
+  border-inline-start: 1px solid var(--border);
+}
