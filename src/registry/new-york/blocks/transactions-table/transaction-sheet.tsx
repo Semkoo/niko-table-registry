@@ -2,14 +2,14 @@
 
 import * as React from "react"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/niko-table/primitives/button"
 import {
   Sheet,
   SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
-} from "@/components/ui/sheet"
+} from "@/components/niko-table/primitives/sheet"
 import { Check, Copy } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { Transaction } from "./transactions-data"

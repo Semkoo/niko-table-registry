@@ -31,7 +31,7 @@ import {
   type TableOptions,
   type Updater,
 } from "@tanstack/react-table"
-import { TooltipProvider } from "@/components/ui/tooltip"
+import { TooltipProvider } from "@/components/niko-table/primitives/tooltip"
 import { cn } from "@/lib/utils"
 import React from "react"
 import { detectFeaturesFromChildren } from "../config/feature-detection"

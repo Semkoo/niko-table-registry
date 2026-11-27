@@ -14,13 +14,13 @@
 import React from "react"
 import { MoreVertical } from "lucide-react"
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/niko-table/primitives/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuLabel,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/niko-table/primitives/dropdown-menu"
 import { cn } from "@/lib/utils"
 
 export interface TableColumnActionsProps {

@@ -20,8 +20,12 @@ export default defineConfig([
     "**/.vscode/",
     "**/dist/",
     "**/public/r/",
+    "**/public/r-aria/",
     "**/package-lock.json",
     "**/scripts/fixtures/",
+    // React Aria primitives import React Aria-shaped modules; checked by
+    // `pnpm test:install:aria` in a React Aria app, not by this repo.
+    "registry-aria/",
   ]),
   {
     files: ["**/*.{md}"], // ,mdx

@@ -1,4 +1,4 @@
 npx lint-staged
 npx astro check
 npm run registry:build
-git add ./public/r
+git add ./public/r ./public/r-aria

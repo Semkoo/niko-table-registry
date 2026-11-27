@@ -3,7 +3,7 @@
 import * as React from "react"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/niko-table/primitives/button"
 import { Progress } from "@/components/ui/progress"
 import {
   Sheet,
@@ -12,7 +12,7 @@ import {
   SheetFooter,
   SheetHeader,
   SheetTitle,
-} from "@/components/ui/sheet"
+} from "@/components/niko-table/primitives/sheet"
 import { Check, Copy, Mail } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { Customer } from "./customers-data"

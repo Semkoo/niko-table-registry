@@ -13,7 +13,7 @@ A shadcn-compatible React data table registry built on [TanStack Table](https://
 - **Data Table**: composable `DataTable*` pieces for sorting, filtering, pagination, selection, expansion, pinning, virtualization, export, and more
 - **Niko Grid**: optional editable spreadsheet layer (`useDataGrid` + `<DataGrid>`) with clipboard, fill, undo/redo, typed editors, and persistence helpers
 - **Registry install**: add `@niko-table` once, then install only the blocks you need via the shadcn CLI
-- **Works with both shadcn generations**: classic Radix (`new-york`) and Base UI (`base-nova`)
+- **Works with Radix UI, Base UI and React Aria**: like shadcn/ui, the CLI installs the version that matches your project's style
 
 ## Principles
 
@@ -62,7 +62,7 @@ Merge into your project's `components.json`:
 ```json
 {
   "registries": {
-    "@niko-table": "https://niko-table.com/r/{name}.json"
+    "@niko-table": "https://niko-table.com/r/{style}/{name}.json"
   }
 }
 ```

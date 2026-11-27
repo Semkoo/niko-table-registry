@@ -6,7 +6,7 @@ import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuTrigger,
-} from "@/components/ui/context-menu"
+} from "@/components/niko-table/primitives/context-menu"
 
 import { DataTableRowMenuScope } from "./data-table-row-menu"
 
