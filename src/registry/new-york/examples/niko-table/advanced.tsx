@@ -78,7 +78,7 @@ const columns: DataTableColumnDef<Product>[] = [
       <DataTableColumnHeader>
         <DataTableColumnTitle />
         <DataTableColumnSortMenu variant={FILTER_VARIANTS.TEXT} />
-        <DataTableColumnFacetedFilterMenu />
+        <DataTableColumnFacetedFilterMenu multiple />
       </DataTableColumnHeader>
     ),
     meta: {
@@ -103,7 +103,7 @@ const columns: DataTableColumnDef<Product>[] = [
       <DataTableColumnHeader>
         <DataTableColumnTitle />
         <DataTableColumnSortMenu variant={FILTER_VARIANTS.TEXT} />
-        <DataTableColumnFacetedFilterMenu />
+        <DataTableColumnFacetedFilterMenu multiple />
       </DataTableColumnHeader>
     ),
     meta: {
