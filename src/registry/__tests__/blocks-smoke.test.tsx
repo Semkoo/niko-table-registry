@@ -132,3 +132,50 @@ describe("orders-table", () => {
     expect(container.textContent).toMatch(/marked as shipped/)
   })
 })
+
+describe("tickets-table", () => {
+  const rowCount = () =>
+    Number(
+      screen
+        .getByRole("status", { name: "" })
+        .textContent?.match(/of (\d+) items/)?.[1],
+    )
+
+  it("filters with a quick view and keeps the toolbar filter in sync", async () => {
+    await mount("tickets-table")
+    const all = rowCount()
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "Unassigned" }))
+    })
+    expect(rowCount()).toBeLessThan(all)
+    for (const row of document.querySelectorAll("tbody tr")) {
+      expect(row.textContent).toContain("Unassigned")
+    }
+    // The toolbar's Assignee filter shows the view's selection.
+    expect(
+      screen
+        .getAllByRole("button", { name: /assignee/i })
+        .some(button => /^Assignee.*Unassigned/.test(button.textContent ?? "")),
+    ).toBe(true)
+  })
+
+  it("marks selected tickets as solved", async () => {
+    await mount("tickets-table")
+    const solvedBefore = () =>
+      [...document.querySelectorAll("tbody tr")].filter(row =>
+        /Met/.test(row.textContent ?? ""),
+      ).length
+    expect(solvedBefore()).toBe(0)
+    await act(async () => {
+      fireEvent.click(
+        screen.getByRole("checkbox", { name: /select all tickets/i }),
+      )
+    })
+    await act(async () => {
+      fireEvent.click(
+        await screen.findByRole("button", { name: /mark solved/i }),
+      )
+    })
+    expect(document.body.textContent).toMatch(/Solved \d+ tickets/)
+  })
+})
