@@ -34,8 +34,14 @@ const { name, title } = Astro.props
       document.documentElement.dataset.theme = theme
     </script>
   </head>
-  <body class="bg-background p-4 text-foreground antialiased md:p-8">
-    <BlockView name={name} client:only="react" />
+  <body class="bg-background text-foreground antialiased">
+    {/*
+      Padding lives on a wrapper, not <body>: Radix menus lock scroll by
+      overriding body padding, which made the layout jump and misplaced the menu.
+    */}
+    <div class="p-4 md:p-8">
+      <BlockView name={name} client:only="react" />
+    </div>
     <script is:inline>
       // When embedded on the block page, size the iframe to the block so it
       // never scrolls inside the frame (same origin, so frameElement is readable).
