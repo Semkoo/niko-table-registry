@@ -79,7 +79,10 @@ const year = new Date().getFullYear()
     </nav>
   </div>
   <div class="site-footer-bottom">
-    <p>MIT License. Copyright {year} Semir N.</p>
+    <p>
+      MIT License. Copyright {year}{" "}
+      <a href="https://github.com/Semkoo">Semkoo</a>.
+    </p>
     <p>Not affiliated with shadcn/ui or TanStack.</p>
   </div>
 </footer>
@@ -168,6 +171,11 @@ const year = new Date().getFullYear()
   }
   .site-footer-bottom p {
     margin: 0;
+  }
+  .site-footer-bottom a {
+    color: var(--foreground);
+    text-decoration: underline;
+    text-underline-offset: 3px;
   }
   @media (max-width: 50rem) {
     .site-footer-top {
