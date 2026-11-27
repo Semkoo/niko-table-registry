@@ -147,6 +147,7 @@ export default defineConfig({
             },
             { label: "Components", slug: "getting-started/components" },
             { label: "Skills", slug: "getting-started/skills" },
+            { label: "Changelog", slug: "changelog" },
           ],
         },
         {
@@ -171,104 +172,106 @@ export default defineConfig({
         {
           label: "Examples",
           items: [
-            // Getting Started
-            { label: "Simple Table", slug: "examples/simple-table" },
-            { label: "Basic Table", slug: "examples/basic-table" },
-            { label: "Search Table", slug: "examples/search-table" },
-
-            // Row & Column Features
+            { label: "Gallery", slug: "examples" },
             {
-              label: "Row Selection Table",
-              slug: "examples/row-selection-table",
+              label: "Getting Started",
+              collapsed: true,
+              items: [
+                { label: "Simple Table", slug: "examples/simple-table" },
+                { label: "Basic Table", slug: "examples/basic-table" },
+                { label: "Search Table", slug: "examples/search-table" },
+              ],
             },
             {
-              label: "Row Expansion Table",
-              slug: "examples/row-expansion-table",
+              label: "Row & Column Features",
+              collapsed: true,
+              items: [
+                {
+                  label: "Row Selection",
+                  slug: "examples/row-selection-table",
+                },
+                {
+                  label: "Row Expansion",
+                  slug: "examples/row-expansion-table",
+                },
+                {
+                  label: "Row Context Menu",
+                  slug: "examples/row-context-menu-table",
+                },
+                { label: "Inline Edit", slug: "examples/inline-edit-table" },
+                {
+                  label: "Column Pinning",
+                  slug: "examples/column-pinning-table",
+                },
+                { label: "Grouping", slug: "examples/grouping-table" },
+                {
+                  label: "Column Resize",
+                  slug: "examples/column-resize-table",
+                },
+                { label: "Tree Table", slug: "examples/tree-table" },
+              ],
             },
             {
-              label: "Row Context Menu Table",
-              slug: "examples/row-context-menu-table",
+              label: "Drag & Drop",
+              collapsed: true,
+              items: [
+                { label: "Row DnD", slug: "examples/row-dnd-table" },
+                { label: "Column DnD", slug: "examples/column-dnd-table" },
+              ],
             },
             {
-              label: "Inline Edit Table",
-              slug: "examples/inline-edit-table",
+              label: "Layout & Presentation",
+              collapsed: true,
+              items: [
+                { label: "Aside", slug: "examples/aside-table" },
+                {
+                  label: "Virtualization",
+                  slug: "examples/virtualization-table",
+                },
+                {
+                  label: "Infinite Scroll",
+                  slug: "examples/infinite-scroll-table",
+                },
+                {
+                  label: "Infinite Scroll (Virtualized)",
+                  slug: "examples/infinite-scroll-virtualized-table",
+                },
+              ],
             },
             {
-              label: "Column Pinning Table",
-              slug: "examples/column-pinning-table",
+              label: "Filtering",
+              collapsed: true,
+              items: [
+                {
+                  label: "Faceted Filter",
+                  slug: "examples/faceted-filter-table",
+                },
+                { label: "Advanced Filter", slug: "examples/advanced-table" },
+                {
+                  label: "Advanced Inline Filter",
+                  slug: "examples/advanced-inline-table",
+                },
+              ],
             },
             {
-              label: "Grouping Table",
-              slug: "examples/grouping-table",
-            },
-            {
-              label: "Column Resize Table",
-              slug: "examples/column-resize-table",
-            },
-            {
-              label: "Tree Table",
-              slug: "examples/tree-table",
-            },
-
-            // Drag & Drop
-            {
-              label: "Row DnD Table",
-              slug: "examples/row-dnd-table",
-            },
-            {
-              label: "Column DnD Table",
-              slug: "examples/column-dnd-table",
-            },
-
-            // Layout & Presentation
-            { label: "Aside Table", slug: "examples/aside-table" },
-            {
-              label: "Virtualization Table",
-              slug: "examples/virtualization-table",
-            },
-            {
-              label: "Infinite Scroll Table",
-              slug: "examples/infinite-scroll-table",
-            },
-            {
-              label: "Infinite Scroll Virtualized Table",
-              slug: "examples/infinite-scroll-virtualized-table",
-            },
-
-            // Filtering
-            {
-              label: "Faceted Filter Table",
-              slug: "examples/faceted-filter-table",
-            },
-            {
-              label: "Advanced Filter Table",
-              slug: "examples/advanced-table",
-            },
-            {
-              label: "Advanced Inline Filter Table",
-              slug: "examples/advanced-inline-table",
-            },
-
-            // Server-Side & URL State
-            {
-              label: "Advanced Nuqs Table",
-              slug: "examples/advanced-nuqs-table",
-            },
-            {
-              label: "Server-Side Table",
-              slug: "examples/server-side-table",
-            },
-            {
-              label: "Server-Side Nuqs Table",
-              slug: "examples/server-side-nuqs-table",
-            },
-            {
-              label: "Drizzle ORM",
-              slug: "examples/drizzle-orm",
-            },
-            {
-              label: "Drizzle ORM + Nuqs",
-              slug: "examples/drizzle-orm-nuqs",
+              label: "Server-Side & URL State",
+              collapsed: true,
+              items: [
+                {
+                  label: "Advanced Filter + Nuqs",
+                  slug: "examples/advanced-nuqs-table",
+                },
+                { label: "Server-Side", slug: "examples/server-side-table" },
+                {
+                  label: "Server-Side + Nuqs",
+                  slug: "examples/server-side-nuqs-table",
+                },
+                { label: "Drizzle ORM", slug: "examples/drizzle-orm" },
+                {
+                  label: "Drizzle ORM + Nuqs",
+                  slug: "examples/drizzle-orm-nuqs",
+                },
+              ],
             },
           ],
         },
@@ -295,21 +298,36 @@ export default defineConfig({
         {
           label: "Data Grid Examples",
           items: [
-            { label: "Basic Grid", slug: "examples/basic-grid" },
-            { label: "Composed Grid", slug: "examples/composed-grid" },
-            { label: "Cell Types", slug: "examples/cell-types-grid" },
-            { label: "Validation", slug: "examples/validation-grid" },
+            { label: "Gallery", slug: "data-grid/examples" },
             {
-              label: "Dynamic Columns",
-              slug: "examples/dynamic-columns-grid",
+              label: "Basics",
+              collapsed: true,
+              items: [
+                { label: "Basic Grid", slug: "examples/basic-grid" },
+                { label: "Composed Grid", slug: "examples/composed-grid" },
+                { label: "Cell Types", slug: "examples/cell-types-grid" },
+              ],
             },
-            { label: "Persistence", slug: "examples/persistence-grid" },
-            { label: "Server Side", slug: "examples/server-side-grid" },
+            {
+              label: "Editing & Validation",
+              collapsed: true,
+              items: [
+                { label: "Validation", slug: "examples/validation-grid" },
+                {
+                  label: "Dynamic Columns",
+                  slug: "examples/dynamic-columns-grid",
+                },
+              ],
+            },
+            {
+              label: "Saving",
+              collapsed: true,
+              items: [
+                { label: "Persistence", slug: "examples/persistence-grid" },
+                { label: "Server Side", slug: "examples/server-side-grid" },
+              ],
+            },
           ],
-        },
-        {
-          label: "Changelog",
-          slug: "changelog",
         },
         {
           label: "Contributing",
@@ -336,6 +354,8 @@ export default defineConfig({
       ],
       plugins: [
         starlightThemeBlack({
+          // Render sidebar groups as <details> so nested `collapsed` groups fold.
+          sidebar: { useDropdowns: true },
           navLinks: [
             {
               label: "Docs",
@@ -343,11 +363,11 @@ export default defineConfig({
             },
             {
               label: "Table Examples",
-              link: "/examples/simple-table/",
+              link: "/examples/",
             },
             {
               label: "Grid Examples",
-              link: "/examples/composed-grid/",
+              link: "/data-grid/examples/",
             },
             {
               label: "Contributing",

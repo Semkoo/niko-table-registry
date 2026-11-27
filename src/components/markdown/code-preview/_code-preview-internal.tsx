@@ -1,8 +1,6 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Loader2Icon } from "lucide-react"
-import { OpenInV0Button } from "@/components/open-in-v0-button"
-import { SERVER_URL } from "@/data/env"
+import { CodeIcon, EyeIcon, Loader2Icon } from "lucide-react"
 
 export type Demo =
   | "niko-table/simple"
@@ -62,6 +60,10 @@ export type Demo =
   | "niko-table/grid-validation"
   | "niko-table/grid-validation-state"
   | "niko-table/grid-portaled-cell"
+  | "niko-table/infinite-scroll-table"
+  | "niko-table/infinite-scroll-table-state"
+  | "niko-table/infinite-scroll-virtualized-table"
+  | "niko-table/infinite-scroll-virtualized-table-state"
 
 type Tab = "preview" | "code"
 
@@ -70,12 +72,9 @@ type Tab = "preview" | "code"
  * `code-preview.astro` (outside this island) so Expressive Code’s stylesheet
  * is emitted onto the page — client-island slots strip that CSS link.
  */
-export function CodePreviewTabBar({ demo }: { demo: Demo }) {
+export function CodePreviewTabBar() {
   const [tab, setTab] = useState<Tab>("preview")
   const rootRef = useRef<HTMLDivElement>(null)
-  const [componentName] = demo.split("/")
-  const registryBlock =
-    componentName === "niko-table" ? "data-table" : componentName
 
   useEffect(() => {
     rootRef.current
@@ -90,17 +89,15 @@ export function CodePreviewTabBar({ demo }: { demo: Demo }) {
         onValueChange={value => setTab(value as Tab)}
         className="gap-0"
       >
-        <TabsList className="w-full">
-          <TabsTrigger value="preview" className="grow-0">
+        <TabsList>
+          <TabsTrigger value="preview" className="px-3">
+            <EyeIcon aria-hidden="true" />
             Preview
           </TabsTrigger>
-          <TabsTrigger value="code" className="grow-0">
+          <TabsTrigger value="code" className="px-3">
+            <CodeIcon aria-hidden="true" />
             Code
           </TabsTrigger>
-          <OpenInV0Button
-            url={`${SERVER_URL}/r/${registryBlock}.json`}
-            className="ml-auto"
-          />
         </TabsList>
       </Tabs>
     </div>

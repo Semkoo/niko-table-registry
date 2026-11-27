@@ -50,8 +50,7 @@
 /examples/all-features-grid/ /examples/composed-grid/ 301
 
 # Section roots have no index page; Google probes them by trimming URLs
-/examples /examples/simple-table/ 301
-/examples/ /examples/simple-table/ 301
+# (/examples/ is the Table Examples gallery, so it is not redirected)
 /getting-started /getting-started/introduction/ 301
 /getting-started/ /getting-started/introduction/ 301
 /niko-table /niko-table/introduction/ 301
