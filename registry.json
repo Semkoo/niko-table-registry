@@ -1368,6 +1368,179 @@
           "target": "components/tickets-table/tickets-data.ts"
         }
       ]
+    },
+    {
+      "name": "team-table",
+      "type": "registry:block",
+      "title": "Team Members",
+      "description": "A workspace members screen: pinned member and actions columns that stay put while the table scrolls sideways, a Role submenu in the row menu, suspend and remove actions, bulk remove, and an invite dialog.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": [
+        "https://niko-table.com/r/data-table.json",
+        "https://niko-table.com/r/data-table-search-filter.json",
+        "https://niko-table.com/r/data-table-faceted-filter.json",
+        "https://niko-table.com/r/data-table-clear-filter.json",
+        "https://niko-table.com/r/data-table-view-menu.json",
+        "https://niko-table.com/r/data-table-selection-bar.json",
+        "https://niko-table.com/r/data-table-pagination.json",
+        "https://niko-table.com/r/data-table-column-sort.json",
+        "avatar",
+        "badge",
+        "button",
+        "checkbox",
+        "dropdown-menu",
+        "dialog",
+        "field",
+        "input",
+        "select"
+      ],
+      "cssVars": {
+        "theme": {
+          "color-success": "var(--success)",
+          "color-warning": "var(--warning)"
+        },
+        "light": {
+          "success": "oklch(0.596 0.145 163.225)",
+          "warning": "oklch(0.666 0.179 58.318)"
+        },
+        "dark": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)"
+        }
+      },
+      "files": [
+        {
+          "path": "src/registry/new-york/blocks/team-table/team-table.tsx",
+          "type": "registry:component",
+          "target": "components/team-table/team-table.tsx"
+        },
+        {
+          "path": "src/registry/new-york/blocks/team-table/invite-member-dialog.tsx",
+          "type": "registry:component",
+          "target": "components/team-table/invite-member-dialog.tsx"
+        },
+        {
+          "path": "src/registry/new-york/blocks/team-table/team-format.ts",
+          "type": "registry:component",
+          "target": "components/team-table/team-format.ts"
+        },
+        {
+          "path": "src/registry/new-york/blocks/team-table/team-data.ts",
+          "type": "registry:component",
+          "target": "components/team-table/team-data.ts"
+        }
+      ]
+    },
+    {
+      "name": "request-logs-table",
+      "type": "registry:block",
+      "title": "API Request Logs",
+      "description": "A developer request log with 5,000 virtualized rows, live error rate and p95 latency, method / status class / region filters, a latency slider, and a details panel with a response preview.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": [
+        "https://niko-table.com/r/data-table.json",
+        "https://niko-table.com/r/data-table-virtualized.json",
+        "https://niko-table.com/r/data-table-search-filter.json",
+        "https://niko-table.com/r/data-table-faceted-filter.json",
+        "https://niko-table.com/r/data-table-slider-filter.json",
+        "https://niko-table.com/r/data-table-clear-filter.json",
+        "https://niko-table.com/r/data-table-view-menu.json",
+        "https://niko-table.com/r/data-table-column-sort.json",
+        "badge",
+        "button",
+        "dropdown-menu",
+        "sheet"
+      ],
+      "cssVars": {
+        "theme": {
+          "color-success": "var(--success)",
+          "color-warning": "var(--warning)"
+        },
+        "light": {
+          "success": "oklch(0.596 0.145 163.225)",
+          "warning": "oklch(0.666 0.179 58.318)"
+        },
+        "dark": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)"
+        }
+      },
+      "files": [
+        {
+          "path": "src/registry/new-york/blocks/request-logs-table/request-logs-table.tsx",
+          "type": "registry:component",
+          "target": "components/request-logs-table/request-logs-table.tsx"
+        },
+        {
+          "path": "src/registry/new-york/blocks/request-logs-table/log-sheet.tsx",
+          "type": "registry:component",
+          "target": "components/request-logs-table/log-sheet.tsx"
+        },
+        {
+          "path": "src/registry/new-york/blocks/request-logs-table/logs-format.ts",
+          "type": "registry:component",
+          "target": "components/request-logs-table/logs-format.ts"
+        },
+        {
+          "path": "src/registry/new-york/blocks/request-logs-table/logs-data.ts",
+          "type": "registry:component",
+          "target": "components/request-logs-table/logs-data.ts"
+        }
+      ]
+    },
+    {
+      "name": "invoices-table",
+      "type": "registry:block",
+      "title": "Invoices",
+      "description": "A billing screen with invoices grouped by status (count and summed amount per group, switchable off), due-date tracking, KPIs, a due date range filter, and mark paid / send reminder / copy link / void actions per invoice, plus bulk mark paid.",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": [
+        "https://niko-table.com/r/data-table.json",
+        "https://niko-table.com/r/data-table-search-filter.json",
+        "https://niko-table.com/r/data-table-faceted-filter.json",
+        "https://niko-table.com/r/data-table-date-filter.json",
+        "https://niko-table.com/r/data-table-clear-filter.json",
+        "https://niko-table.com/r/data-table-view-menu.json",
+        "https://niko-table.com/r/data-table-selection-bar.json",
+        "https://niko-table.com/r/data-table-pagination.json",
+        "https://niko-table.com/r/data-table-column-sort.json",
+        "https://niko-table.com/r/data-table-column-group.json",
+        "badge",
+        "button",
+        "checkbox",
+        "dropdown-menu"
+      ],
+      "cssVars": {
+        "theme": {
+          "color-success": "var(--success)",
+          "color-warning": "var(--warning)"
+        },
+        "light": {
+          "success": "oklch(0.596 0.145 163.225)",
+          "warning": "oklch(0.666 0.179 58.318)"
+        },
+        "dark": {
+          "success": "oklch(0.696 0.17 162.48)",
+          "warning": "oklch(0.769 0.188 70.08)"
+        }
+      },
+      "files": [
+        {
+          "path": "src/registry/new-york/blocks/invoices-table/invoices-table.tsx",
+          "type": "registry:component",
+          "target": "components/invoices-table/invoices-table.tsx"
+        },
+        {
+          "path": "src/registry/new-york/blocks/invoices-table/invoices-format.ts",
+          "type": "registry:component",
+          "target": "components/invoices-table/invoices-format.ts"
+        },
+        {
+          "path": "src/registry/new-york/blocks/invoices-table/invoices-data.ts",
+          "type": "registry:component",
+          "target": "components/invoices-table/invoices-data.ts"
+        }
+      ]
     }
   ]
 }
