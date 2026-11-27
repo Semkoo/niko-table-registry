@@ -41,6 +41,16 @@ import { fileURLToPath } from "node:url"
 const repo = resolve(dirname(fileURLToPath(import.meta.url)), "..")
 const LIVE = "https://niko-table.com/r/"
 
+const UPSTREAM_FIXES = [
+  {
+    // aria-nova label.tsx imports React but never uses it (TS6133 under
+    // noUnusedLocals, which Vite's template enables).
+    file: "src/components/ui/label.tsx",
+    find: /^import \* as React from "react"\n(?![\s\S]*\bReact\.)/m,
+    why: "unused React import",
+  },
+]
+
 function parseArgs(argv) {
   const args = { base: "radix" }
   for (let i = 0; i < argv.length; i++) {
@@ -146,6 +156,20 @@ async function main() {
       if (code !== 0) throw new Error("shadcn add failed")
     }
 
+    // shadcn's own files that fail a strict app before any Niko Table code is
+    // involved. Patched (and logged) so the typecheck measures Niko Table.
+    // shortcut: drop an entry once the upstream registry ships the fix.
+    for (const fix of UPSTREAM_FIXES) {
+      const path = join(app, fix.file)
+      if (!existsSync(path)) continue
+      const before = readFileSync(path, "utf8")
+      const after = before.replace(fix.find, "")
+      if (after !== before) {
+        writeFileSync(path, after)
+        console.log(`Patched upstream shadcn issue: ${fix.file} (${fix.why})`)
+      }
+    }
+
     if (args.base === "aria") {
       const target = findPrimitivesDir(app)
       const source = join(repo, "registry-aria", "niko-table", "primitives")
@@ -156,6 +180,23 @@ async function main() {
       )
       for (const file of swapped) cpSync(join(source, file), join(target, file))
       console.log(`Swapped React Aria primitives: ${swapped.join(", ")}`)
+
+      // npm packages the swapped files import that the app lacks (e.g. cmdk).
+      const missing = new Set()
+      for (const file of swapped) {
+        const source = readFileSync(join(target, file), "utf8")
+        for (const [, spec] of source.matchAll(
+          /from "([^"./@][^"]*|@[^"/]+\/[^"/]+)/g,
+        )) {
+          const pkg = spec.startsWith("@") ? spec : spec.split("/")[0]
+          if (!existsSync(join(app, "node_modules", pkg))) missing.add(pkg)
+        }
+      }
+      if (missing.size) {
+        console.log(`Installing ${[...missing].join(", ")}`)
+        const { code } = await run("npm", ["install", ...missing], app)
+        results.push(["install primitive deps", code === 0])
+      }
     }
 
     const tsconfig = existsSync(join(app, "tsconfig.app.json"))
