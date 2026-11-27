@@ -1,7 +1,7 @@
 {
   "name": "Niko Table",
   "short_name": "Niko Table",
-  "description": "Shadcn-compatible React data table registry built with TanStack Table.",
+  "description": "Composable, accessible shadcn-compatible React data tables built on TanStack Table.",
   "start_url": "/",
   "display": "browser",
   "theme_color": "#000000",
