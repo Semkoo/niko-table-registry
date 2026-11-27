@@ -11,36 +11,12 @@ hero:
       variant: minimal
 ---
 
-import { Tabs, TabItem } from "@astrojs/starlight/components"
+import HomeShowcase from "@/components/markdown/home-showcase.astro"
 import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
 import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
 import { GITHUB_REPO_URL } from "@/data/env"
 
-<Tabs syncKey="home-demo">
-  <TabItem label="Table" icon="list-format">
-    <CodePreview demo="niko-table/all-features-table" />
-
-    Selection, expansion, filters, sort, pagination, column visibility, export and asides, composed from registry pieces. [All table examples](/examples/)
-
-  </TabItem>
-  <TabItem label="Grid" icon="pencil">
-    <CodePreview demo="niko-table/grid-all-features" />
-
-    Niko Grid: click a cell to edit, move with the keyboard, copy and paste, undo and redo. [All grid examples](/data-grid/examples/)
-
-  </TabItem>
-  <TabItem label="Blocks" icon="laptop">
-    <iframe
-      class="not-content block h-[640px] w-full rounded-lg border bg-background"
-      src="/view/customers-table/?thumb"
-      title="Customers Table block preview"
-      loading="lazy"
-    />
-
-    Full screens you install with one command. [All blocks](/blocks/)
-
-  </TabItem>
-</Tabs>
+<HomeShowcase />
 
 ## Install
 

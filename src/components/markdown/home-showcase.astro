@@ -1,0 +1,296 @@
+---
+import { CodePreviewDemo } from "@/components/markdown/code-preview/_code-preview-internal"
+
+// One view per kind of thing you can install. The frame header shows the exact
+// command for what is on screen, so the demo and the install line never drift.
+const views = [
+  {
+    id: "table",
+    label: "Table",
+    command: "npx shadcn@latest add @niko-table/data-table",
+    caption:
+      "Search, column filters, sorting, a column view menu and pagination, composed from small pieces.",
+    link: { href: "/examples/", text: "All table examples" },
+  },
+  {
+    id: "grid",
+    label: "Grid",
+    command: "npx shadcn@latest add @niko-table/inventory-grid",
+    caption:
+      "Niko Grid in a full inventory screen. Click a cell to edit, then save or discard your changes.",
+    link: { href: "/data-grid/examples/", text: "All grid examples" },
+  },
+  {
+    id: "blocks",
+    label: "Blocks",
+    command: "npx shadcn@latest add @niko-table/customers-table",
+    caption: "A full customers screen, ready to copy and make your own.",
+    link: { href: "/blocks/", text: "All blocks" },
+  },
+] as const
+---
+
+<section class="home-showcase not-content" aria-label="Live demo">
+  <div class="showcase-switch" role="tablist" aria-label="Choose a demo">
+    {views.map((view, i) => (
+      <button
+        type="button"
+        role="tab"
+        id={`showcase-tab-${view.id}`}
+        aria-controls={`showcase-panel-${view.id}`}
+        aria-selected={i === 0 ? "true" : "false"}
+        tabindex={i === 0 ? 0 : -1}
+        data-view={view.id}
+      >
+        {view.label}
+      </button>
+    ))}
+  </div>
+
+  {views.map((view, i) => (
+    <div
+      class="showcase-frame"
+      role="tabpanel"
+      id={`showcase-panel-${view.id}`}
+      aria-labelledby={`showcase-tab-${view.id}`}
+      hidden={i !== 0}
+    >
+      <div class="showcase-bar">
+        <code class="showcase-command">
+          <span aria-hidden="true">$ </span>
+          {view.command}
+        </code>
+        <button
+          type="button"
+          class="showcase-copy"
+          data-command={view.command}
+          aria-label={`Copy install command for ${view.label}`}
+        >
+          Copy
+        </button>
+      </div>
+
+      <div class="showcase-stage">
+        {view.id === "table" && (
+          <CodePreviewDemo demo="niko-table/advanced" client:visible />
+        )}
+        {/* The grid demos are tiny or carry a debug panel, so show the block. */}
+        {view.id === "grid" && (
+          <iframe
+            src="/view/inventory-grid/?thumb"
+            title="Inventory Grid block"
+            loading="lazy"
+          />
+        )}
+        {view.id === "blocks" && (
+          <iframe
+            src="/view/customers-table/?thumb"
+            title="Customers Table block"
+            loading="lazy"
+          />
+        )}
+      </div>
+
+      <div class="showcase-foot">
+        <p>{view.caption}</p>
+        <a href={view.link.href}>{view.link.text}</a>
+      </div>
+    </div>
+  ))}
+</section>
+
+<script>
+  for (const root of document.querySelectorAll<HTMLElement>(".home-showcase")) {
+    const tabs = [...root.querySelectorAll<HTMLButtonElement>("[role=tab]")]
+
+    const select = (tab: HTMLButtonElement) => {
+      for (const t of tabs) {
+        const on = t === tab
+        t.setAttribute("aria-selected", String(on))
+        t.tabIndex = on ? 0 : -1
+        const panel = root.querySelector<HTMLElement>(
+          `#${t.getAttribute("aria-controls")}`,
+        )
+        if (panel) panel.hidden = !on
+      }
+    }
+
+    tabs.forEach((tab, i) => {
+      tab.addEventListener("click", () => select(tab))
+      tab.addEventListener("keydown", event => {
+        const step =
+          event.key === "ArrowRight" ? 1 : event.key === "ArrowLeft" ? -1 : 0
+        if (!step) return
+        event.preventDefault()
+        const next = tabs[(i + step + tabs.length) % tabs.length]
+        select(next)
+        next.focus()
+      })
+    })
+
+    for (const button of root.querySelectorAll<HTMLButtonElement>(
+      ".showcase-copy",
+    )) {
+      button.addEventListener("click", async () => {
+        try {
+          await navigator.clipboard.writeText(button.dataset.command ?? "")
+          button.textContent = "Copied"
+        } catch {
+          button.textContent = "Press Ctrl+C"
+        }
+        setTimeout(() => (button.textContent = "Copy"), 2000)
+      })
+    }
+  }
+</script>
+
+<style>
+  /*
+   * Home page only (this component renders nowhere else): widen the column so
+   * the demos have room, but keep prose at a readable measure.
+   */
+  :global(:root) {
+    --sl-content-width: 68rem;
+  }
+  :global([data-has-sidebar][data-has-toc] .main-pane) {
+    max-width: 68rem;
+    padding-inline: 1.5rem;
+  }
+  :global(.sl-markdown-content > :not(.home-showcase)) {
+    max-width: 42rem;
+  }
+
+  /* The theme centres the hero; line its title up with the demo frame. */
+  /* [class] outranks the theme's scoped .hero[data-astro-cid] rule. */
+  :global(main .hero[class]) {
+    align-items: flex-start;
+    justify-content: flex-start;
+  }
+  .home-showcase {
+    margin-block: 0.5rem 3rem;
+  }
+
+  .showcase-switch {
+    display: inline-flex;
+    gap: 0.25rem;
+    padding: 0.25rem;
+    margin-bottom: 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 0.625rem;
+    background: var(--muted);
+  }
+  .showcase-switch button {
+    padding: 0.375rem 1rem;
+    border-radius: 0.4rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--muted-foreground);
+    transition:
+      background-color 150ms,
+      color 150ms;
+  }
+  .showcase-switch button:hover {
+    color: var(--foreground);
+  }
+  .showcase-switch button[aria-selected="true"] {
+    background: var(--background);
+    color: var(--foreground);
+    box-shadow: 0 0 0 1px var(--border);
+  }
+  .showcase-switch button:focus-visible,
+  .showcase-copy:focus-visible,
+  .showcase-foot a:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+
+  .showcase-frame {
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: 0.875rem;
+    background: var(--card);
+  }
+
+  .showcase-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.625rem 0.75rem 0.625rem 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .showcase-command {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.8125rem;
+    color: var(--foreground);
+    background: none;
+    padding: 0;
+  }
+  .showcase-command span {
+    color: var(--muted-foreground);
+  }
+  .showcase-copy {
+    flex: none;
+    padding: 0.25rem 0.625rem;
+    border: 1px solid var(--border);
+    border-radius: 0.375rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--muted-foreground);
+  }
+  .showcase-copy:hover {
+    color: var(--foreground);
+    background: var(--muted);
+  }
+
+  .showcase-stage {
+    padding: 1.25rem;
+    background: var(--background);
+  }
+  .showcase-stage iframe {
+    display: block;
+    width: 100%;
+    height: 40rem;
+    border: 0;
+    margin: -1.25rem;
+    width: calc(100% + 2.5rem);
+  }
+
+  .showcase-foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem 1.5rem;
+    padding: 0.875rem 1rem;
+    border-top: 1px solid var(--border);
+    font-size: 0.875rem;
+  }
+  .showcase-foot p {
+    margin: 0;
+    color: var(--muted-foreground);
+  }
+  .showcase-foot a {
+    color: var(--foreground);
+    font-weight: 500;
+    text-underline-offset: 3px;
+  }
+
+  @media (max-width: 40rem) {
+    .showcase-stage {
+      padding: 0.75rem;
+    }
+    .showcase-stage iframe {
+      margin: -0.75rem;
+      width: calc(100% + 1.5rem);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .showcase-switch button {
+      transition: none;
+    }
+  }
+</style>
