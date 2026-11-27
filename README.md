@@ -50,7 +50,7 @@ A shadcn-compatible React data table registry built on [TanStack Table](https://
 **Quality**
 
 - Full TypeScript
-- Accessible patterns via shadcn primitives (Radix or Base UI), ARIA in filters/menus, keyboard shortcuts; jsx-a11y in this repo (verify complex tables in your app)
+- Accessible patterns via shadcn primitives (Radix UI, Base UI or React Aria), ARIA in filters/menus, keyboard shortcuts; jsx-a11y in this repo (verify complex tables in your app)
 - Responsive scroll container with touch-friendly controls
 
 ## Quick Start

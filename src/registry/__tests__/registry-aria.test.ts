@@ -12,6 +12,7 @@ import {
   readRewrites,
   resolveRequest,
 } from "../../../scripts/test-install-local.mjs"
+import { npmImports } from "../../../scripts/build-registry-aria.mjs"
 
 const REPO = join(__dirname, "../../..")
 const PRIMITIVE = /^src\/components\/niko-table\/primitives\/([a-z-]+\.tsx)$/
@@ -53,13 +54,54 @@ describe.each(registry.items.map(item => [item.name] as const))("%s", name => {
     })
     for (const dep of aria.registryDependencies ?? [])
       expect(dep).not.toMatch(/^https:\/\/niko-table\.com\/r\//)
-    const usesCommand = aria.files.some(f =>
-      f.path.endsWith("primitives/command.tsx"),
+    // The React Aria command primitive is cmdk, not shadcn's aria command.
+    expect(aria.registryDependencies ?? []).not.toContain("command")
+    const packages = new Set(
+      (aria.dependencies ?? []).map(dep => dep.replace(/(?!^)@.*$/, "")),
     )
-    if (usesCommand) {
-      expect(aria.dependencies).toContain("cmdk")
-      expect(aria.registryDependencies).not.toContain("command")
+    for (const file of aria.files)
+      if (PRIMITIVE.test(file.path))
+        for (const pkg of npmImports(file.content))
+          expect(packages, `${file.path} imports ${pkg}`).toContain(pkg)
+  })
+})
+
+describe("React Aria namespace index", () => {
+  it("is served at /r/aria-*/registry.json with the aria dependencies", () => {
+    const rewrites = readRewrites(read("public/_redirects"))
+    const target = resolveRequest(rewrites, "/r/aria-nova/registry.json")
+    expect(target).toBe("/r-aria/registry.json")
+    const index: { items: (BuiltItem & { name: string })[] } = JSON.parse(
+      read(`public${target}`),
+    )
+    expect(index.items.map(item => item.name)).toEqual(
+      registry.items.map(item => item.name),
+    )
+    for (const item of index.items) {
+      expect(item.registryDependencies ?? []).toEqual(
+        built("r-aria", item.name).registryDependencies ?? [],
+      )
     }
+  })
+})
+
+describe("npmImports", () => {
+  it("finds runtime imports and re-exports, one statement at a time", () => {
+    const source = [
+      'import * as React from "react"',
+      'import type { VariantProps } from "class-variance-authority"',
+      "import {",
+      "  fromDate,",
+      "  type CalendarDate,",
+      '} from "@internationalized/date/extra"',
+      'import { cn } from "@/lib/utils"',
+      'export { Command } from "cmdk"',
+      "export { Button }",
+    ].join("\n")
+    expect([...npmImports(source)].sort()).toEqual([
+      "@internationalized/date",
+      "cmdk",
+    ])
   })
 })
 

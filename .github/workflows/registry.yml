@@ -5,6 +5,9 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  # Weekly, so a new shadcn aria-* style is flagged even without a push.
+  schedule:
+    - cron: "0 6 * * 1"
 
 jobs:
   test-registry:
@@ -23,6 +26,9 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Every shadcn aria-* style is routed to the React Aria build
+        run: node scripts/check-aria-styles.mjs
 
       - name: Test registry URLs
         run: pnpm test:registry

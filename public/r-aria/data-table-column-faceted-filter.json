@@ -13,9 +13,7 @@
     "https://niko-table.com/r-aria/data-table-faceted-filter.json",
     "button",
     "dropdown-menu",
-    "tooltip",
-    "popover",
-    "command"
+    "tooltip"
   ],
   "files": [
     {
