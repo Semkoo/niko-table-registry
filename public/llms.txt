@@ -1,6 +1,6 @@
 # Niko Table
 
-> Niko Table is a composable, shadcn-compatible data table component registry built with TanStack Table, React, and Tailwind CSS. It follows an open-code philosophy — install components into your project and own the code. Features include sorting, filtering, pagination, row selection, row expansion, row context menus, column pinning, drag-and-drop (row and column), virtualization, infinite scroll, server-side data, and URL state management (nuqs).
+> Niko Table is a composable, shadcn-compatible data table component registry built with TanStack Table, React, and Tailwind CSS. Every component reuses the project's own shadcn/ui components (Button, Popover, Command, Dropdown Menu, Dialog, Select and more) rather than shipping its own, so tables inherit the app's theme. It follows an open-code philosophy — install components into your project and own the code. Features include sorting, filtering, pagination, row selection, row expansion, row context menus, column pinning, drag-and-drop (row and column), virtualization, infinite scroll, server-side data, and URL state management (nuqs).
 
 ## Getting Started
 
