@@ -49,7 +49,7 @@
 ### Layout & Presentation
 
 - [Aside Table](https://niko-table.com/examples/aside-table): Table with a collapsible sidebar panel.
-- [Virtualization Table](https://niko-table.com/examples/virtualization-table): Virtual scrolling for 10,000+ rows using @tanstack/react-virtual.
+- [Virtualization Table](https://niko-table.com/examples/virtualization-table): Virtual scrolling for 100,000+ rows using @tanstack/react-virtual (the Niko Grid stress test loads 500,000).
 - [Infinite Scroll Table](https://niko-table.com/examples/infinite-scroll-table): Load more rows as the user scrolls.
 - [Infinite Scroll Virtualized Table](https://niko-table.com/examples/infinite-scroll-virtualized-table): Virtual scrolling plus paginated infinite loading.
 

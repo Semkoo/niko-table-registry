@@ -1,6 +1,6 @@
 ---
 title: Shadcn-Compatible React Data Table
-description: Composable, accessible React data tables for shadcn/ui, built on TanStack Table. Sorting, filters, virtualization and more, in code you own.
+description: Composable, accessible React data tables for shadcn/ui, built on TanStack Table. Sorting, filters, and virtualization for 500,000+ rows, in code you own.
 hero:
   tagline: Composable, accessible data tables with thoughtful defaults. Sorting, filters, virtualization and more, in code you copy, customize and own.
   actions:
@@ -54,7 +54,7 @@ See [Installation](/getting-started/installation/) to add it to an existing `com
 - **[Basic Table](/examples/basic-table/)** - Pagination and sorting
 - **[Search Table](/examples/search-table/)** - Add global search
 - **[Faceted Filter Table](/examples/faceted-filter-table/)** - Column-specific filters
-- **[Virtualization Table](/examples/virtualization-table/)** - 10,000+ rows with virtual scrolling
+- **[Virtualization Table](/examples/virtualization-table/)** - 100,000+ rows with virtual scrolling
 - **[Row Context Menu Table](/examples/row-context-menu-table/)** - Shared kebab and right-click actions
 - **[Advanced Table](/examples/advanced-table/)** - All features together
 - **[Advanced Nuqs Table](/examples/advanced-nuqs-table/)** - Table state saved in the URL
@@ -79,7 +79,7 @@ See [Installation](/getting-started/installation/) to add it to an existing `com
 - **Responsive** - Full-width scroll container (`overflow-auto`) and touch-friendly controls. Stack toolbars on small screens as needed.
 - **Customizable** - You own the source code
 - **Composable** - Mix and match `DataTable*` components. Install only the pieces you need. TanStack Table v9 works the same way: register only the features you use in `lib/data-table-features.ts`.
-- **Performance** - Virtual scrolling for 10,000+ client-side rows (in a fixed-height scroll container)
+- **Performance** - Virtual scrolling keeps hundreds of thousands of client-side rows smooth. The [Niko Grid stress test](/data-grid/introduction/) loads 500,000 rows in the browser.
 - **State Management** - `useDataTable()` reads state from context. State can be controlled, and can sync to the URL with nuqs.
 
 ## Built With
