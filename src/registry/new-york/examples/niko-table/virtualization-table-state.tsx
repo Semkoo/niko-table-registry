@@ -109,7 +109,7 @@ const generateLargeData = (count: number): Product[] => {
   })
 }
 
-const largeData = generateLargeData(10000) // 10,000 items
+const largeData = generateLargeData(100_000) // 100,000 items
 
 // Expanded content component for product details
 function ProductDetails({ product }: { product: Product }) {

@@ -1,13 +1,13 @@
 ---
 title: Virtualization Table
-description: Virtual scrolling for 10,000+ React table rows with @tanstack/react-virtual. Swap DataTableBody for DataTableVirtualizedBody in your shadcn data table.
+description: Virtual scrolling for 100,000+ React table rows with @tanstack/react-virtual. Swap DataTableBody for DataTableVirtualizedBody in your shadcn data table.
 ---
 
 import CodePreview from "@/components/markdown/code-preview/code-preview.astro"
 import CollapsiblePreview from "@/components/markdown/collapsible-preview.astro"
 import CliCommandCode from "@/components/markdown/cli-command-code/cli-command-code.astro"
 
-Uses `@tanstack/react-virtual` to keep only the rows in the viewport in the DOM, so render cost stays flat past 10,000 rows. Use it for large datasets that are already loaded. It is a drop-in swap: replace `DataTableBody` with `DataTableVirtualizedBody` and give it a row-height estimate. Every other Niko Table add-on still works on top.
+Uses `@tanstack/react-virtual` to keep only the rows in the viewport in the DOM, so render cost stays flat at 100,000 rows and beyond. Use it for large datasets that are already loaded. It is a drop-in swap: replace `DataTableBody` with `DataTableVirtualizedBody` and give it a row-height estimate. Every other Niko Table add-on still works on top.
 
 <CodePreview demo="niko-table/virtualization-table" />
 
@@ -17,7 +17,7 @@ Uses `@tanstack/react-virtual` to keep only the rows in the viewport in the DOM,
 
 ## Introduction
 
-The Virtualization Table uses virtual scrolling to render large datasets (1000+ rows) by drawing only the visible rows. It stays smooth even with 10,000+ rows.
+The Virtualization Table uses virtual scrolling to render large datasets (1000+ rows) by drawing only the visible rows. It stays smooth with 100,000+ rows. The [Niko Grid stress test](/data-grid/introduction/) pushes the same approach to 500,000.
 
 ## Installation
 
@@ -44,7 +44,7 @@ type Product = {
 }
 
 // Generate large dataset
-const largeData: Product[] = Array.from({ length: 10000 }, (_, i) => ({
+const largeData: Product[] = Array.from({ length: 100_000 }, (_, i) => ({
   id: `product-${i + 1}`,
   name: `Product ${i + 1}`,
   category: "Electronics",
